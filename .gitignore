@@ -1,0 +1,6 @@
+*.class
+*.war
+*.jar
+*.pyc
+server/target
+
