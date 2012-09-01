@@ -42,6 +42,7 @@ enum JobState {
 * Frame State Enum
 **/
 enum FrameState {
+    INITIALIZE,
     WAITING,
     RUNNING,
     DEAD,
