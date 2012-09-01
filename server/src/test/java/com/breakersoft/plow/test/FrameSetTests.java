@@ -3,13 +3,10 @@ package com.breakersoft.plow.test;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.slf4j.Logger;
 
 import com.breakersoft.plow.FrameSet;
 
 public class FrameSetTests {
-
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(FrameSetTests.class);
 
     @Test
     public void testContiguousRange() {
@@ -37,10 +34,26 @@ public class FrameSetTests {
     }
 
     @Test
-    public void testChunked() {
+    public void testChunkedX() {
         FrameSet fs = new FrameSet("1-10x2");
         assertEquals(5, fs.size());
         assertEquals(1, fs.get(0));
         assertEquals(9, fs.get(4));
+    }
+
+    @Test
+    public void testChunkedY() {
+        FrameSet fs = new FrameSet("1-10y2");
+        assertEquals(5, fs.size());
+        assertEquals(2, fs.get(0));
+        assertEquals(10, fs.get(4));
+    }
+
+    @Test
+    public void testChunkedStaggered() {
+        FrameSet fs = new FrameSet("1-20:5");
+        assertEquals(20, fs.size());
+        assertEquals(1, fs.get(0));
+        assertEquals(20, fs.get(19));
     }
 }
