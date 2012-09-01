@@ -11,19 +11,13 @@ import com.breakersoft.plow.dao.ProjectDao;
 import com.breakersoft.plow.test.AbstractTest;
 
 public class ProjectDaoTests extends AbstractTest {
-	
-	@Resource
-	ProjectDao projectDao;
-	
-	@Test
-	public void testCreate() {
-		projectDao.create("test", "Test");
-	}
 
-	@Test
-	public void testGet() {
-		Project projectA = projectDao.create("test", "Test");
-		Project projectB = projectDao.get("test");
-		assertEquals(projectA, projectB);
-	}
+    @Resource
+    ProjectDao projectDao;
+
+    @Test
+    public void testGet() {
+        Project project = projectDao.get("test");
+        assertEquals(testProject, project);
+    }
 }
