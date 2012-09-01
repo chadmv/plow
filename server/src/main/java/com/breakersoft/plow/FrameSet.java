@@ -55,6 +55,10 @@ public final class FrameSet implements Iterable<Integer> {
         return list.get(0);
     }
 
+    public String toString() {
+        return range;
+    }
+
     private void parseFrameRange() {
 
         for (String part: range.split(",")) {
@@ -127,8 +131,9 @@ public final class FrameSet implements Iterable<Integer> {
     }
 
     private List<Integer> range(int start, int end, int chunk) {
-        List<Integer> result =
-                Lists.newArrayListWithExpectedSize(1 + ((end - start) / chunk));
+        final int alloc = (Math.abs(end - start)) / Math.abs(chunk);
+        final List<Integer> result =
+                Lists.newArrayListWithExpectedSize(alloc);
 
         if (chunk < 0) {
             for (int i=start; i>end; i=i+chunk) {
