@@ -19,41 +19,42 @@ import com.breakersoft.plow.json.BlueprintLayer;
 @Transactional
 public class JobLauncherServiceImpl implements JobLauncherService {
 
-	@Autowired
-	ProjectDao projectDao;
+    @Autowired
+    ProjectDao projectDao;
 
-	@Autowired
-	JobDao jobDao;
-	
-	@Autowired
-	LayerDao layerDao;
+    @Autowired
+    JobDao jobDao;
 
-	@Autowired
-	FrameDao frameDao;
-	
-	public Job launch(Blueprint blueprint) {
-		
-		Project project = projectDao.get(blueprint.getProject());
-		Job job = jobDao.create(project, blueprint);
-		
-		int layerOrder = 0;
-		for (BlueprintLayer blayer: blueprint.getLayers()) {
-			Layer layer = layerDao.create(job, blayer, layerOrder);
-			
-			int frameOrder = 0;
-			FrameSet frameSet = new FrameSet(blayer.getRange());
-			for (int frameNum: frameSet) {
-				frameDao.create(layer, frameNum, frameOrder);
-				frameOrder++;
-			}
-			layerOrder++;
-		}
-		return job;
-	}
+    @Autowired
+    LayerDao layerDao;
 
-	public void shutdown(Job job) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Autowired
+    FrameDao frameDao;
+
+    public Job launch(Blueprint blueprint) {
+
+        Project project = projectDao.get(blueprint.getProject());
+        Job job = jobDao.create(project, blueprint);
+
+        int layerOrder = 0;
+        for (BlueprintLayer blayer: blueprint.getLayers()) {
+            Layer layer = layerDao.create(job, blayer, layerOrder);
+
+            int frameOrder = 0;
+            FrameSet frameSet = new FrameSet(blayer.getRange());
+            for (int frameNum: frameSet) {
+                frameDao.create(layer, frameNum, frameOrder);
+                frameOrder++;
+            }
+            layerOrder++;
+        }
+
+        return job;
+    }
+
+    public void shutdown(Job job) {
+        // TODO Auto-generated method stub
+
+    }
 
 }
