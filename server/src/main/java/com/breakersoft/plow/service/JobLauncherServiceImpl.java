@@ -33,6 +33,18 @@ public class JobLauncherServiceImpl implements JobLauncherService {
 
     public Job launch(Blueprint blueprint) {
 
+        Job job = createJobTopology(blueprint);
+
+        return job;
+    }
+
+    public void shutdown(Job job) {
+        // TODO Auto-generated method stub
+
+    }
+
+    private Job createJobTopology(Blueprint blueprint) {
+
         Project project = projectDao.get(blueprint.getProject());
         Job job = jobDao.create(project, blueprint);
 
@@ -50,11 +62,6 @@ public class JobLauncherServiceImpl implements JobLauncherService {
         }
 
         return job;
-    }
-
-    public void shutdown(Job job) {
-        // TODO Auto-generated method stub
-
     }
 
 }
