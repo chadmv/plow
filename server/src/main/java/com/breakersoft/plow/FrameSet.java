@@ -92,7 +92,7 @@ public final class FrameSet implements Iterable<Integer> {
                         addFrames(range(start, end+1, chunk));
                     }
                     else if(mod.equals("y")) {
-                        Set<Integer> bad = ImmutableSet.copyOf(
+                        final Set<Integer> bad = ImmutableSet.copyOf(
                                 range(start, end+1, chunk));
                         for (int i: range(start, end+1, 1)) {
                             if (!bad.contains(i)) {
@@ -130,8 +130,13 @@ public final class FrameSet implements Iterable<Integer> {
         }
     }
 
-    private List<Integer> range(int start, int end, int chunk) {
-        final int alloc = (Math.abs(end - start)) / Math.abs(chunk);
+    private static final List<Integer> range(int start, int end, int chunk) {
+
+        if (chunk == 0) {
+            throw new IllegalArgumentException("Chunk size cannot be 0.");
+        }
+
+        final int alloc = Math.abs((end - start) / chunk);
         final List<Integer> result =
                 Lists.newArrayListWithExpectedSize(alloc);
 
@@ -143,9 +148,6 @@ public final class FrameSet implements Iterable<Integer> {
             for (int i=start; i<end; i=i+chunk) {
                 result.add(i);
             }
-        }
-        else {
-            throw new IllegalArgumentException("Chunk size cannot be 0.");
         }
         return result;
     }
