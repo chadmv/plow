@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
+import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +18,11 @@ import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
 public class LayerDaoImpl extends AbstractDao implements LayerDao {
+
+
+    @SuppressWarnings("unused")
+    private static final Logger logger =
+        org.slf4j.LoggerFactory.getLogger(LayerDaoImpl.class);
 
     public static final RowMapper<Layer> MAPPER = new RowMapper<Layer>() {
 

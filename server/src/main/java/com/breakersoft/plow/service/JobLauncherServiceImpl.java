@@ -1,5 +1,6 @@
 package com.breakersoft.plow.service;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,10 @@ import com.breakersoft.plow.json.BlueprintLayer;
 @Transactional
 public class JobLauncherServiceImpl implements JobLauncherService {
 
+    @SuppressWarnings("unused")
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(JobLauncherServiceImpl.class);
+
     @Autowired
     ProjectDao projectDao;
 
@@ -34,6 +39,10 @@ public class JobLauncherServiceImpl implements JobLauncherService {
     public Job launch(Blueprint blueprint) {
 
         Job job = createJobTopology(blueprint);
+        // TODO: setup dependencies.
+
+        jobDao.updateFrameStatesForLaunch(job);
+        jobDao.updateFrameCountsForLaunch(job);
 
         return job;
     }

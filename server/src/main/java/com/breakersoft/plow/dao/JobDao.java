@@ -9,10 +9,14 @@ import com.breakersoft.plow.thrift.JobState;
 
 public interface JobDao {
 
-	Job create(Project project, Blueprint blueprint);
+    Job create(Project project, Blueprint blueprint);
 
-	Job get(String name, JobState state);
+    Job get(String name, JobState state);
 
-	Job get(UUID id);
+    Job get(UUID id);
+
+    void updateFrameStatesForLaunch(Job job);
+
+    void updateFrameCountsForLaunch(Job job);
 
 }
