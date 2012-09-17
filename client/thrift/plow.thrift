@@ -1,30 +1,11 @@
 /**
 * Plow Thrift RPC Interface Definition
 **/
+include "common.thrift"
 
 namespace java com.breakersoft.plow.thrift
 namespace py rpc
-
-/**
-* API version.
-*
-*  - Major: Incremented for backward incompatible changes.
-*  - Minor: Incremented for backard compatible changes.
-*  - Patch: Incremented for bug fixes.
-* See the Semantic Versioning Specification (SemVer) http://semver.org
-**/
-const string VERSION = "0.1.0"
-
-/**
-* A GUID type. Every object has a unique GUI in the format
-* [a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$
-**/
-typedef string Guid
-
-/**
-* Epoch time in milliseconds.
-**/
-typedef i64 Timestamp
+namespace cpp rpc
 
 /**
 * Job State Enum
@@ -39,9 +20,9 @@ enum JobState {
 }
 
 /**
-* Frame State Enum
+* Task State Enum
 **/
-enum FrameState {
+enum TaskState {
     INITIALIZE,
     WAITING,
     RUNNING,
@@ -50,3 +31,6 @@ enum FrameState {
     DEPEND,
     SUCCEEDED
 }
+
+
+
