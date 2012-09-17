@@ -9,7 +9,7 @@ import com.breakersoft.plow.FrameSet;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Project;
-import com.breakersoft.plow.dao.FrameDao;
+import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.ProjectDao;
@@ -34,7 +34,7 @@ public class JobLauncherServiceImpl implements JobLauncherService {
     LayerDao layerDao;
 
     @Autowired
-    FrameDao frameDao;
+    TaskDao frameDao;
 
     public Job launch(Blueprint blueprint) {
 
@@ -43,6 +43,8 @@ public class JobLauncherServiceImpl implements JobLauncherService {
 
         jobDao.updateFrameStatesForLaunch(job);
         jobDao.updateFrameCountsForLaunch(job);
+
+        //
 
         return job;
     }
@@ -64,7 +66,7 @@ public class JobLauncherServiceImpl implements JobLauncherService {
             int frameOrder = 0;
             FrameSet frameSet = new FrameSet(blayer.getRange());
             for (int frameNum: frameSet) {
-                frameDao.create(layer, frameNum, frameOrder);
+                frameDao.create(layer, frameNum, frameOrder, layerOrder);
                 frameOrder++;
             }
             layerOrder++;

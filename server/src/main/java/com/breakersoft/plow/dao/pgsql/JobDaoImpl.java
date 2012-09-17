@@ -16,7 +16,7 @@ import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.json.Blueprint;
-import com.breakersoft.plow.thrift.FrameState;
+import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.google.common.collect.Lists;
@@ -35,8 +35,8 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         public Job mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
             JobE job = new JobE();
-            job.setJobId(UUID.fromString(rs.getString(1)));
-            job.setProjectId(UUID.fromString(rs.getString(2)));
+            job.setJobId((UUID) rs.getObject(1));
+            job.setProjectId((UUID) rs.getObject(2));
             return job;
         }
     };
@@ -94,26 +94,26 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
 
     @Override
     public void updateFrameStatesForLaunch(Job job) {
-        jdbc.update("UPDATE plow.frame SET int_state=? WHERE pk_layer " +
+        jdbc.update("UPDATE plow.task SET int_state=? WHERE pk_layer " +
                 "IN (SELECT pk_layer FROM plow.layer WHERE pk_job=?)",
-                FrameState.WAITING.ordinal(), job.getJobId());
+                TaskState.WAITING.ordinal(), job.getJobId());
     }
 
     private static final String GET_FRAME_STATUS_COUNTS =
             "SELECT " +
                 "COUNT(1) AS c, " +
-                "frame.int_state, " +
-                "frame.pk_layer  " +
+                "task.int_state, " +
+                "task.pk_layer  " +
             "FROM " +
-                "plow.frame," +
+                "plow.task," +
                 "plow.layer " +
             "WHERE " +
-                "frame.pk_layer = layer.pk_layer " +
+                "task.pk_layer = layer.pk_layer " +
             "AND "+
                 "layer.pk_job=? " +
             "GROUP BY " +
-                "frame.int_state,"+
-                "frame.pk_layer";
+                "task.int_state,"+
+                "task.pk_layer";
 
     @Override
     public void updateFrameCountsForLaunch(Job job) {
@@ -160,7 +160,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
             sb.append("UPDATE plow.layer_count SET");
             for (int i=0; i < entry.getValue().size(); i=i+2) {
                 sb.append(" int_");
-                sb.append(FrameState.findByValue(d.get(i)).toString().toLowerCase());
+                sb.append(TaskState.findByValue(d.get(i)).toString().toLowerCase());
                 sb.append("=?,");
                 values.add(d.get(i+1));
             }
@@ -175,7 +175,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         sb.append("UPDATE plow.job_count SET ");
         for (Map.Entry<Integer,Integer> entry: jobRollup.entrySet()) {
             sb.append("int_");
-            sb.append(FrameState.findByValue(entry.getKey()).toString().toLowerCase());
+            sb.append(TaskState.findByValue(entry.getKey()).toString().toLowerCase());
             sb.append("=?,");
             values.add(entry.getValue());
         }

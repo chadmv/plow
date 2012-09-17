@@ -14,6 +14,9 @@ import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.ProjectDao;
 import com.breakersoft.plow.json.Blueprint;
 import com.breakersoft.plow.json.BlueprintLayer;
+import com.breakersoft.plow.rnd.thrift.Hardware;
+import com.breakersoft.plow.rnd.thrift.Ping;
+import com.google.common.collect.Lists;
 
 @Transactional
 @ContextConfiguration(locations={
@@ -31,6 +34,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
     public void initTestProject() {
         testProject = projectDao.create("test", "Test");
     }
+
     public Blueprint getTestBlueprint() {
 
         Blueprint bp = new Blueprint();
@@ -56,12 +60,37 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         return bp;
     }
 
-    public void assertFrameCount(Job job, int count) {
-        assertEquals(count, simpleJdbcTemplate.queryForInt(
-                "SELECT COUNT(1) FROM plow.frame, plow.layer " +
-                "WHERE frame.pk_layer = layer.pk_layer AND layer.pk_job=?", job.getJobId()));
+    public  Ping getTestNodePing() {
+
+        Hardware hw = new Hardware();
+        hw.freeMemory = 4096;
+        hw.freeSwap = 1024;
+        hw.htFactor = 1;
+        hw.osName = "OSX 10.8.1";
+        hw.procModel = "Intel i7";
+        hw.totalCores = 4;
+        hw.totalMemory = 4096;
+        hw.totalSwap = 1024;
+
+        Ping ping = new Ping();
+        ping.bootTime = System.currentTimeMillis() - 1000;
+        ping.hostname = "test";
+        ping.ipAddr = "127.0.0.1";
+        ping.isReboot = true;
+        ping.processes = Lists.newArrayList();
+        ping.hw = hw;
+
+        return ping;
     }
 
+    @SuppressWarnings("deprecation")
+    public void assertFrameCount(Job job, int count) {
+        assertEquals(count, simpleJdbcTemplate.queryForInt(
+                "SELECT COUNT(1) FROM plow.task, plow.layer " +
+                "WHERE task.pk_layer = layer.pk_layer AND layer.pk_job=?", job.getJobId()));
+    }
+
+    @SuppressWarnings("deprecation")
     public void assertLayerCount(Job job, int count) {
         assertEquals(count, simpleJdbcTemplate.queryForInt(
                 "SELECT COUNT(1) FROM plow.layer " +

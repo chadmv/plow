@@ -43,7 +43,8 @@ CREATE table plow.layer (
   pk_job UUID NOT NULL,
   str_name VARCHAR(200) NOT NULL,
   str_range TEXT NOT NULL,
-  str_command TEXT NOT NULL,
+  str_command TEXT[] NOT NULL,
+  str_tags TEXT[] NOT NULL,
   int_chunk_size INTEGER NOT NULL,
   int_order INTEGER NOT NULL,
   int_min_cores SMALLINT NOT NULL,
@@ -51,17 +52,22 @@ CREATE table plow.layer (
   int_min_mem INTEGER NOT NULL
 ) WITHOUT OIDS;
 
+
+CREATE INDEX layer_str_tags_gin_idx ON plow.layer USING gin(str_tags);
+
 /**
- * Frames
+ * Tasks
  */
-CREATE TABLE plow.frame (
-  pk_frame UUID NOT NULL PRIMARY KEY,
+CREATE TABLE plow.task (
+  pk_task UUID NOT NULL PRIMARY KEY,
   pk_layer UUID NOT NULL,
-  str_alias VARCHAR(255),
+  str_name VARCHAR(255),
   int_number INTEGER NOT NULL,
-  int_order INTEGER NOT NULL,
   int_state SMALLINT NOT NULL,
-  int_depend_count INTEGER NOT NULL DEFAULT 0
+  int_depend_count INTEGER NOT NULL DEFAULT 0,
+  int_layer_order INTEGER NOT NULL,
+  int_task_order INTEGER NOT NULL,
+  b_reserved BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
 
@@ -97,51 +103,79 @@ CREATE TABLE plow.layer_count (
 
 CREATE TABLE plow.cluster (
   pk_cluster UUID NOT NULL PRIMARY KEY,
-  str_name VARCHAR(128) NOT NULL
+  str_name VARCHAR(128) NOT NULL,
+  str_tag VARCHAR(32) NOT NULL,
+  str_more_tags TEXT[] NOT NULL
 ) WITHOUT OIDS;
+
+/** Tag and name are unique **/
 
 CREATE TABLE plow.node (
   pk_node UUID NOT NULL PRIMARY KEY,
   pk_cluster UUID NOT NULL,
-  str_name VARCHAR(160) NOT NULL,
-
+  str_name VARCHAR(128) NOT NULL,
+  str_ipaddr VARCHAR(15) NOT NULL,
+  int_state SMALLINT NOT NULL DEFAULT 0,
+  int_lock_state SMALLINT NOT NULL DEFAULT 0,
+  int_boot_time BIGINT NOT NULL,
+  int_created_time BIGINT NOT NULL,
+  int_ping_time BIGINT NOT NULL
 ) WITHOUT OIDS;
 
 /**
- *
+ * Contains actual hardware status.
  */
-CREATE TABLE plow.node_dsp (
-  pk_node_dsp UUID NOT NULL PRIMARY KEY,
-  pk_node UUID NOT NULL,
-  int_total_cores SMALLINT NOT NULL,
-  int_total_mem INTEGER NOT NULL,
-  int_idle_cores SMALLINT NOT NULL,
-  int_idle_mem INTEGER NOT NULL
+CREATE TABLE plow.node_status (
+  pk_node UUID NOT NULL PRIMARY KEY,
+  int_cores SMALLINT NOT NULL,
+  int_memory INTEGER NOT NULL,
+  int_free_memory INTEGER NOT NULL,
+  int_swap INTEGER NOT NULL,
+  int_free_swap INTEGER NOT NULL,
+  int_ht_factor SMALLINT NOT NULL,
+  str_proc VARCHAR(128) NOT NULL,
+  str_os VARCHAR(128) NOT NULL
 ) WITHOUT OIDS;
 
+CREATE TABLE plow.node_dsp (
+  pk_node UUID NOT NULL PRIMARY KEY,
+  int_cores SMALLINT NOT NULL,
+  int_memory INTEGER NOT NULL,
+  int_free_cores SMALLINT NOT NULL,
+  int_free_memory INTEGER NOT NULL
+) WITHOUT OIDS;
 
-
-CREATE TABLE plow.sub (
-  pk_sub UUID NOT NULL PRIMARY KEY,
+CREATE TABLE plow.quota (
+  pk_quota UUID NOT NULL PRIMARY KEY,
   pk_cluster UUID NOT NULL,
   pk_project UUID NOT NULL,
-  int_cores SMALLINT NOT NULL DEFAULT 0,
-  int_burst INTEGER NOT NULL DEFAULT 0
+  int_size INTEGER NOT NULL,
+  int_burst INTEGER NOT NULL,
+  bool_locked BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
-/*-----------------------------------------------------*/
+CREATE TABLE plow.quota_dsp (
+  pk_quota UUID NOT NULL PRIMARY KEY,
+  int_cores INTEGER DEFAULT 0 NOT NULL
+) WITHOUT OIDS;
 
 CREATE TABLE plow.proc (
   pk_proc UUID NOT NULL PRIMARY KEY,
+  pk_quota UUID NOT NULL,
   pk_host UUID NOT NULL,
-  pk_frame NOT NULL,
+  pk_task UUID NOT NULL,
   int_cores SMALLINT NOT NULL,
-  int_cores_used SMALLINT NOT NULL,
   int_mem INTEGER NOT NULL,
-  int_mem_used INTEGER NOT NULL,
-  int_mem_high INTEGER NOT NULL,
-  bool_unbooked NOT NULL BOOLEAN DEFAULT 'f'
+  int_mem_used INTEGER DEFAULT 0 NOT NULL,
+  int_mem_high INTEGER DEFAULT 0 NOT NULL,
+  bool_unbooked BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
+
+
+
+
+/*-----------------------------------------------------*/
+
 
 
 /*-----------------------------------------------------*/
@@ -149,26 +183,98 @@ CREATE TABLE plow.proc (
 /**
  *
  */
-CREATE OR REPLACE FUNCTION plow.before_frame_depend_check() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION plow.before_task_depend_check() RETURNS TRIGGER AS $$
 BEGIN
   NEW.int_state := 5;
 END
 $$
 LANGUAGE plpgsql;
 
-CREATE TRIGGER trig_before_frame_depend_check BEFORE UPDATE ON plow.frame
+CREATE TRIGGER trig_before_task_depend_check BEFORE UPDATE ON plow.task
     FOR EACH ROW WHEN (NEW.int_depend_count > 0 AND NEW.int_state=1)
-    EXECUTE PROCEDURE plow.before_frame_depend_check();
+    EXECUTE PROCEDURE plow.before_task_depend_check();
+
 
 /**
- * plow.after_frame_state_change()
+ * plow.after_proc_created()
+ *
+ *
+ */
+CREATE OR REPLACE FUNCTION plow.after_proc_created() RETURNS TRIGGER AS $$
+BEGIN
+
+  /**
+   * Update node_dsp
+   **/
+  UPDATE plow.node_dsp SET
+    int_cores = int_cores + new.int_cores,
+    int_memory = int_memory + new.int_memory,
+    int_free_cores = int_free_cores - new.int_cores,
+    int_free_memory = int_free_memory - new.int_memory
+  WHERE
+    pk_node = new.pk_node;
+
+  /**
+   * Update quota dsp
+   **/
+  UPDATE plow.quota_dsp SET
+    int_cores = int_cores + new.int_cores
+  WHERE
+    pk_quota = new.pk_quota;
+
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_after_proc_created AFTER INSERT ON plow.proc
+    FOR EACH ROW EXECUTE PROCEDURE plow.after_proc_created();
+
+/**
+ * plow.after_proc_destroyed()
+ *
+ *
+ */
+CREATE OR REPLACE FUNCTION plow.after_proc_destroyed() RETURNS TRIGGER AS $$
+BEGIN
+
+  /**
+   * Update node_dsp
+   **/
+  UPDATE plow.node_dsp SET
+    int_cores = int_cores - new.int_cores,
+    int_memory = int_memory - new.int_memory,
+    int_free_cores = int_free_cores + new.int_cores,
+    int_free_memory = int_free_memory + new.int_memory
+  WHERE
+    pk_node = new.pk_node;
+
+  /**
+   * Update quota dsp
+   **/
+  UPDATE plow.quota_dsp SET
+    int_cores = int_cores - new.int_cores
+  WHERE
+    pk_quota = new.pk_quota;
+
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_after_proc_destroyed AFTER DELETE ON plow.proc
+    FOR EACH ROW EXECUTE PROCEDURE plow.after_proc_destroyed();
+
+
+/**
+ * plow.after_task_state_change()
  *
  * Handle incrementing and decrementing the frame state counters
  * when a frame changes its state. Does not execute during job
  * initialization, so its up to the application server to set
  * the initial counts.
  */
-CREATE OR REPLACE FUNCTION plow.after_frame_state_change() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION plow.after_task_state_change() RETURNS TRIGGER AS $$
 DECLARE
     old_state_col VARCHAR;
     new_state_col VARCHAR;
@@ -191,9 +297,9 @@ END
 $$
 LANGUAGE plpgsql;
 
-CREATE TRIGGER trig_after_frame_state_change AFTER UPDATE ON plow.frame
+CREATE TRIGGER trig_after_task_state_change AFTER UPDATE ON plow.task
     FOR EACH ROW WHEN (OLD.int_state != 0 AND OLD.int_state != NEW.int_state)
-    EXECUTE PROCEDURE plow.after_frame_state_change();
+    EXECUTE PROCEDURE plow.after_task_state_change();
 
 
 
