@@ -2,13 +2,14 @@
 
 # Python
 ########################################################################
-# Client side tools
 rm -rf plow/rpc
-thrift --gen py:new_style:utf8strings -out ../python/plow plow.thrift
-
-#Render Node Daemon
 rm -rf rndlib/rpc
+
+thrift --gen py:new_style:utf8strings -out ../python/plow plow.thrift
 thrift --gen py:new_style:utf8strings -out ../python/rndlib rnd.thrift
+
+thrift --gen py:new_style:utf8strings -out ../python/plow/rpc common.thrift
+thrift --gen py:new_style:utf8strings -out ../python/rndlib/rpc common.thrift
 
 # Java
 ########################################################################
