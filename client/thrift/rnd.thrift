@@ -44,7 +44,7 @@ struct Hardware {
     5:i32 totalSwapMb,
     6:i32 freeSwapMb,
     7:string cpuModel,
-    8:string platformn
+    8:string platform
 }
 
 struct Ping {
