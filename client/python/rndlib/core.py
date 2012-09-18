@@ -16,9 +16,8 @@ logger = logging.getLogger("librnd.core")
 
 class ResourceManager(object):
 
-    def __init__(self, profiler):
-        self.__profiler = profiler
-        self.__slots = dict([(i, 0) for i in range(0, profiler.physicalCpus)])
+    def __init__(self):
+        self.__slots = dict([(i, 0) for i in range(0, Profiler.physicalCpus)])
         self.__lock = threading.Lock()
 
     def checkout(self, numCores):
@@ -52,22 +51,21 @@ class ResourceManager(object):
 
 class ProcessManager(object):
 
-    def __init__(self, rsmgr, profile):
-        self.__rsmgr = rsmgr
-        self.__profile = profile
+    def __init__(self):
         self.__threads = { }
         self.__lock = threading.Lock()
         self.sendPing(True)
 
-    def launch(self, processCmd):
-        cpus = self.__rsmgr.checkout(processCmd.cores)
-        pthread = ProcessThread(processCmd, self)
+    def runProcess(self, processCmd):
+        cpus = ResourceMgr.checkout(processCmd.cores)
+        pthread = ProcessThread(processCmd)
         with self.__lock:
             self.__threads[processCmd.procId] = (processCmd, pthread, cpus)
         pthread.run()
+        return pthread.getProcess()
 
-    def finished(self, processCmd):
-        self.__rsmgr.checkin(self.__threads[processCmd.procId][2])
+    def processFinished(self, processCmd):
+        ResourceMgr.checkin(self.__threads[processCmd.procId][2])
         with self.__lock:
             try:
                 del self.__threads[processCmd.procId]
@@ -76,7 +74,7 @@ class ProcessManager(object):
 
     def sendPing(self, isReboot=False):
         processes = [p[1].getProcess() for p in self.__threads]
-        self.__profile.sendPing(processes, isReboot)
+        Profiler.sendPing(processes, isReboot)
 
         self.__timer = threading.Timer(60.0, self.sendPing)
         self.__timer.daemon = True
@@ -85,12 +83,11 @@ class ProcessManager(object):
 
 class ProcessThread(threading.Thread):
 
-    def __init__(self, processCmd, mgr):
+    def __init__(self, processCmd):
         threading.Thread.__init__(self)
         self.daemon = True
 
         self.processCmd = processCmd
-        self.__mgr = mgr
         self.__pptr = None
         self.__logfp = None
 
@@ -147,7 +144,7 @@ class ProcessThread(threading.Thread):
                     logger.info("Plow server is down, sleeping for 30 seconds")
                     time.sleep(30)
 
-        self.__mgr.finished(self.processCmd)
+        ProcessMgr.processFinished(self.processCmd)
         self.__writeLogFooter(result)
         self.__logfp.close()
 
@@ -166,19 +163,14 @@ class ProcessThread(threading.Thread):
         self.__logfp.write("MaxRSS: %d\n" % self.__process.maxRss)
         self.__logfp.write("=====================================\n\n")
 
-class LibRndApi(object):
 
-    def __init__(self):
-        self.__profiler = SystemProfiler()
-        self.__resMgr = ResourceManager(self.__profiler)
-        self.__procMgr = ProcessManager(self.__resMgr, self.__profiler)
+Profiler = SystemProfiler()
+ResourceMgr = ResourceManager()
+ProcessMgr = ProcessManager()
 
-    def launch(self, processCmd):
-        self.__procMgr.launch(processCmd)
+def runProcess(command):
+    return ProcessMgr.runProcess(command)
 
-
-if __name__ == "__main__":
-    pass
 
 
 
