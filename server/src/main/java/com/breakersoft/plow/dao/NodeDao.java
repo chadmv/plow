@@ -8,4 +8,6 @@ public interface NodeDao {
 
     Node create(Cluster cluster, Ping ping);
 
+    Node get(String hostname);
+
 }

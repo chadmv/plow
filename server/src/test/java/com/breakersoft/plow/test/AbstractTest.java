@@ -63,14 +63,13 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
     public  Ping getTestNodePing() {
 
         Hardware hw = new Hardware();
-        hw.freeMemory = 4096;
-        hw.freeSwap = 1024;
-        hw.htFactor = 1;
-        hw.osName = "OSX 10.8.1";
-        hw.procModel = "Intel i7";
-        hw.totalCores = 4;
-        hw.totalMemory = 4096;
-        hw.totalSwap = 1024;
+        hw.cpuModel = "Intel i7";
+        hw.platform = "OSX 10.8.1 x86_64";
+        hw.freeRamMb = 4096;
+        hw.freeSwapMb = 1024;
+        hw.physicalCpus = 4;
+        hw.totalRamMb = 4096;
+        hw.totalSwapMb = 1024;
 
         Ping ping = new Ping();
         ping.bootTime = System.currentTimeMillis() - 1000;

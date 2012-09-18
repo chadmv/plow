@@ -18,19 +18,19 @@ public class ClusterDaoTests extends AbstractTest {
 
     @Test
     public void create() {
-        clusterDao.create("default", "default", Lists.newArrayList("foo"));
+        clusterDao.create("default", "default");
     }
 
     @Test
     public void getByUUID() {
-        Cluster c1 = clusterDao.create("default", "default", Lists.newArrayList("foo"));
+        Cluster c1 = clusterDao.create("default", "default");
         Cluster c2 = clusterDao.getCluster(c1.getClusterId());
         assertEquals(c1, c2);
     }
 
     @Test
     public void getByStringId() {
-        Cluster c1 = clusterDao.create("default", "default", Lists.newArrayList("foo"));
+        Cluster c1 = clusterDao.create("default", "default");
         Cluster c2 = clusterDao.getCluster(c1.getClusterId().toString());
         assertEquals(c1, c2);
     }

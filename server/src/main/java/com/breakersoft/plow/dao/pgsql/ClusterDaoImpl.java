@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -57,14 +56,11 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
             JdbcUtils.Insert("plow.cluster",
                     "pk_cluster",
                     "str_name",
-                    "str_tag",
-                    "str_more_tags");
+                    "str_tag");
 
     @Override
-    public Cluster create(final String name, final String tag, final List<String> tags) {
-
+    public Cluster create(final String name, final String tag) {
         final UUID id = UUID.randomUUID();
-
         jdbc.update(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
@@ -72,12 +68,6 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
                 ret.setObject(1, id);
                 ret.setString(2, name);
                 ret.setString(3, tag);
-                if (tags == null) {
-                    ret.setArray(4, conn.createArrayOf("text", new String[] {}));
-                }
-                else {
-                    ret.setArray(4, conn.createArrayOf("text", tags.toArray()));
-                }
                 return ret;
             }
         });

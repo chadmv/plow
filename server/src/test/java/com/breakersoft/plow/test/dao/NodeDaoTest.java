@@ -22,8 +22,7 @@ public class NodeDaoTest extends AbstractTest {
     @Test
     public void create() {
 
-        Cluster cluster = clusterDao.create("test", "test",
-                Lists.newArrayList("test2"));
+        Cluster cluster = clusterDao.create("test", "test");
         Node node = nodeDao.create(cluster, getTestNodePing());
 
 

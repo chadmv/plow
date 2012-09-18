@@ -104,9 +104,10 @@ CREATE TABLE plow.layer_count (
 CREATE TABLE plow.cluster (
   pk_cluster UUID NOT NULL PRIMARY KEY,
   str_name VARCHAR(128) NOT NULL,
-  str_tag VARCHAR(32) NOT NULL,
-  str_more_tags TEXT[] NOT NULL
+  str_tag VARCHAR(32) NOT NULL
 ) WITHOUT OIDS;
+
+INSERT INTO plow.cluster ('00000000-0000-0000-0000-000000000000', 'unassigned');
 
 /** Tag and name are unique **/
 
@@ -127,12 +128,12 @@ CREATE TABLE plow.node (
  */
 CREATE TABLE plow.node_status (
   pk_node UUID NOT NULL PRIMARY KEY,
-  int_cores SMALLINT NOT NULL,
+  int_phys_cores SMALLINT NOT NULL,
+  int_log_cores SMALLINT NOT NULL,
   int_memory INTEGER NOT NULL,
   int_free_memory INTEGER NOT NULL,
   int_swap INTEGER NOT NULL,
   int_free_swap INTEGER NOT NULL,
-  int_ht_factor SMALLINT NOT NULL,
   str_proc VARCHAR(128) NOT NULL,
   str_os VARCHAR(128) NOT NULL
 ) WITHOUT OIDS;

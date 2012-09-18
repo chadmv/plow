@@ -22,7 +22,7 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void testCreate() {
-        Cluster c = clusterDao.create("test", "test", null);
+        Cluster c = clusterDao.create("test", "test");
         Quota q1 = quotaDao.create(testProject, c, 10, 100);
         Quota q2 = quotaDao.get(q1.getQuotaId());
         assertEquals(q1, q2);
@@ -30,7 +30,7 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void testGet() {
-        Cluster c = clusterDao.create("test", "test", null);
+        Cluster c = clusterDao.create("test", "test");
         Quota q1 = quotaDao.create(testProject, c, 10, 100);
         Quota q2 = quotaDao.get(q1.getQuotaId());
         Quota q3 = quotaDao.get(q1.getQuotaId());

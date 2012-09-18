@@ -1,7 +1,10 @@
 package com.breakersoft.plow.dao.pgsql;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
 
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Cluster;
@@ -28,12 +31,12 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
 
         JdbcUtils.Insert("plow.node_status",
                 "pk_node",
-                "int_cores",
+                "int_phys_cores",
+                "int_log_cores",
                 "int_memory",
                 "int_free_memory",
                 "int_swap",
                 "int_free_swap",
-                "int_ht_factor",
                 "str_proc",
                 "str_os"),
 
@@ -59,20 +62,20 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 time);
 
         jdbc.update(INSERT[1], id,
-                ping.hw.totalCores,
-                ping.hw.totalMemory,
-                ping.hw.freeMemory,
-                ping.hw.totalSwap,
-                ping.hw.freeSwap,
-                ping.hw.htFactor,
-                ping.hw.procModel,
-                ping.hw.osName);
+                ping.hw.physicalCpus,
+                ping.hw.logicalCpus,
+                ping.hw.totalRamMb,
+                ping.hw.freeRamMb,
+                ping.hw.totalSwapMb,
+                ping.hw.freeSwapMb,
+                ping.hw.cpuModel,
+                ping.hw.platform);
 
         final int memMb =
-                getBookableMemory(ping.hw.totalMemory);
+                getBookableMemory(ping.hw.totalRamMb);
         jdbc.update(INSERT[2], id,
-                ping.hw.totalCores,
-                ping.hw.totalCores,
+                ping.hw.physicalCpus,
+                ping.hw.physicalCpus,
                 memMb,
                 memMb);
 
@@ -80,6 +83,31 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
         node.setNodeId(id);
         node.setName(ping.hostname);
         return node;
+    }
+
+    public static final RowMapper<Node> MAPPER = new RowMapper<Node>() {
+        @Override
+        public Node mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+            NodeE node = new NodeE();
+            node.setNodeId((UUID) rs.getObject(1));
+            node.setName(rs.getString(2));
+            return node;
+        }
+    };
+
+    private static final String GET_BY_NAME =
+            "SELECT " +
+                "pk_node, " +
+                "str_name " +
+            "FROM " +
+                "plow.node " +
+            "WHERE " +
+                "str_name = ?";
+
+    @Override
+    public Node get(String hostname) {
+        return jdbc.queryForObject(GET_BY_NAME, MAPPER, hostname);
     }
 
     private int getBookableMemory(int memory) {
