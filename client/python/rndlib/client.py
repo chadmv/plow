@@ -8,7 +8,7 @@ from thrift.server import TServer
 from rpc import RndServiceApi, RndProcessApi
 
 def getPlowConnection():
-    host, port = conf.PLOW_HOSTS[0]
+    host, port = conf.PLOW_HOSTS[0].split(":")
     socket = TSocket.TSocket(host, int(port))
     transport = TTransport.TFramedTransport(socket)
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
