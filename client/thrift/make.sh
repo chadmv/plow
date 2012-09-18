@@ -15,5 +15,6 @@ thrift --gen py:new_style:utf8strings -out ../python/rndlib/rpc common.thrift
 ########################################################################
 rm -rf ../java/src/main/java/
 mkdir -p ../java/src/main/java
+thrift -gen java:java5 --out ../java/src/main/java common.thrift
 thrift -gen java:java5 -out ../java/src/main/java plow.thrift
 thrift -gen java:java5 -out ../java/src/main/java rnd.thrift
