@@ -4,28 +4,29 @@ import subprocess
 import logging
 import time
 
-import netcode
 import conf
+import client
 import rpc.ttypes as ttypes
 
 from datetime import datetime
 
 from profile.macosx import SystemProfiler
 
-logger = logging.getLogger("librnd.core")
+logger = logging.getLogger(__name__)
 
 class ResourceManager(object):
 
     def __init__(self):
         self.__slots = dict([(i, 0) for i in range(0, Profiler.physicalCpus)])
         self.__lock = threading.Lock()
+        logger.info("Intializing resource manager with %d physical cores." % Profiler.physicalCpus)
 
     def checkout(self, numCores):
         self.__lock.acquire(True)
         try:
             open_slots = self.getOpenSlots()
             if numCores > len(open_slots):
-                raise Exception("No more open slots")
+                raise ttypes.RndException(1, "No more open slots")
             result = open_slots[0:numCores]
             for i in result:
                 self.__slots[i] = 1
@@ -38,7 +39,10 @@ class ResourceManager(object):
         self.__lock.acquire(True)
         try:
             for core in cores:
-                self.__slots[core] = 0
+                if self.__slots[core] == 1:
+                    self.__slots[core] = 0
+                else:
+                    logger.warn("Failed to check in core: %d" + core)
         finally:
             self.__lock.release()
         logger.info("Checked in CPUS: %s" % cores)
@@ -103,14 +107,13 @@ class ProcessThread(threading.Thread):
     def run(self):
         retcode = 1
         try:
-            
             logger.info("Opening log file: %s" % self.processCmd.logFile)
             self.__logfp = open(self.processCmd.logFile, "w")
             self.__writeLogHeader()
             self.__logfp.flush()
 
             logger.info("Running command: %s" % self.processCmd.command)
-            self.__pptr = subprocess.Popen(self.processCmd.command, 
+            self.__pptr = subprocess.Popen(self.processCmd.command,
                 shell=False, stdout=self.__logfp, stderr=self.__logfp)
             
             self.__process.pid = self.__pptr.pid
@@ -141,7 +144,7 @@ class ProcessThread(threading.Thread):
                     conn.processCompleted(result)
                     break
                 except Exception, e:
-                    logger.info("Plow server is down, sleeping for 30 seconds")
+                    logger.warn("Plow server is down, sleeping for 30 seconds")
                     time.sleep(30)
 
         ProcessMgr.processFinished(self.processCmd)
@@ -162,7 +165,6 @@ class ProcessThread(threading.Thread):
         self.__logfp.write("Signal: %d\n" % result.signal)
         self.__logfp.write("MaxRSS: %d\n" % self.__process.maxRss)
         self.__logfp.write("=====================================\n\n")
-
 
 Profiler = SystemProfiler()
 ResourceMgr = ResourceManager()

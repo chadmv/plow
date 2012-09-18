@@ -3,12 +3,12 @@ import platform
 import socket
 import logging
 
-import rndlib.netcode as netcode
 import rndlib.conf as conf
+import rndlib.client as client
 
 from rndlib.rpc import ttypes
 
-logger = logging.getLogger("profile.base")
+logger = logging.getLogger("rndlib.profile.base")
 
 class AbstractProfiler(object):
     def __init__(self):
@@ -42,9 +42,10 @@ class AbstractProfiler(object):
 
         if conf.NETWORK_DISABLED:
             return
-        # Send ping
+
+        logger.info("Sending ping: %s" % ping)
         try:
-            conn = netcode.getPlowConnection()
+            conn = client.getPlowConnection()
             conn.sendPing(ping)
         except Exception, e:
             logger.warn("Unable to send ping to plow server, %s" % e)
