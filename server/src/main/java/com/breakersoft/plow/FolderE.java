@@ -17,6 +17,14 @@ public class FolderE implements Folder {
         return projectId;
     }
 
+    public void setFolderId(UUID folderId) {
+        this.folderId = folderId;
+    }
+
+    public void setProjectId(UUID projectId) {
+        this.projectId = projectId;
+    }
+
     public int hashCode() {
         return folderId.hashCode();
     }
