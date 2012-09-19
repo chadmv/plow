@@ -8,12 +8,15 @@ import rndlib.client as client
 
 from rndlib.rpc import ttypes
 
-logger = logging.getLogger("rndlib.profile.base")
+logger = logging.getLogger(__name__)
 
 class AbstractProfiler(object):
     def __init__(self):
         self.data = { "platform": platform.platform() }
         self.update()
+
+        for key, value in self.data.iteritems():
+            logger.info("%s = %s" % (key, value))
 
     def sendPing(self, processes, isReboot=False):
         
