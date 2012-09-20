@@ -6,4 +6,6 @@ public interface Dispatcher {
 
     void dispatch(DispatchJob job, DispatchNode node);
 
+    void dispatch(DispatchNode node);
+
 }
