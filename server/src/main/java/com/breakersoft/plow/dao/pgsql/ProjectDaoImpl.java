@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.ProjectE;
 import com.breakersoft.plow.dao.AbstractDao;
@@ -50,5 +51,11 @@ public final class ProjectDaoImpl extends AbstractDao implements ProjectDao {
         return jdbc.queryForObject(
                 "SELECT pk_project FROM plow.project WHERE str_name=?",
                 MAPPER, name);
+    }
+
+    @Override
+    public void setDefaultFolder(Project project, Folder folder) {
+        jdbc.update("UPDATE plow.project SET pk_folder_default=? WHERE pk_project=?",
+                folder.getFolderId(), project.getProjectId());
     }
 }

@@ -4,6 +4,7 @@
  */
 CREATE TABLE plow.project (
   pk_project UUID NOT NULL PRIMARY KEY,
+  pk_folder_default UUID,
   str_name VARCHAR(8) NOT NULL,
   str_title VARCHAR(255) NOT NULL
 ) WITHOUT OIDS;
