@@ -18,6 +18,13 @@ CREATE TABLE plow.folder (
   str_name VARCHAR(96) NOT NULL
 ) WITHOUT OIDS;
 
+CREATE TABLE plow.folder_dsp (
+  pk_folder UUID NOT NULL PRIMARY KEY,
+  int_max_cores INTEGER NOT NULL DEFAULT -1,
+  int_min_cores INTEGER NOT NULL DEFAULT 0,
+  int_run_cores INTEGER NOT NULL DEFAULT 0
+);
+
 /**
  * Jobs
  */

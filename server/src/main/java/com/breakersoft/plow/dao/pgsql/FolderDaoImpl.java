@@ -53,7 +53,7 @@ public class FolderDaoImpl extends AbstractDao implements FolderDao {
     public Folder createFolder(Project project, String name) {
         UUID id = UUID.randomUUID();
         jdbc.update(INSERT, id, null, project.getProjectId(), name);
-
+        jdbc.update("INSERT INTO plow.folder_dsp (pk_folder) VALUES (?)", id);
         FolderE folder = new FolderE();
         folder.setFolderId(id);
         folder.setProjectId(project.getProjectId());
