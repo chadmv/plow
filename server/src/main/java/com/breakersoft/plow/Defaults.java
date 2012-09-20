@@ -12,4 +12,6 @@ public final class Defaults {
 
     public static String[] LAYER_TAG_DEFAULT = new String[] { "render" };
 
+    public static String FOLDER_DEFAULT_NAME = "jobs";
+
 }
