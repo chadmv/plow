@@ -11,4 +11,6 @@ public interface FolderDao {
 
     Folder get(UUID id);
 
+    Folder getDefaultFolder(Project project);
+
 }

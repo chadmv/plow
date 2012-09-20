@@ -42,6 +42,23 @@ public class FolderDaoImpl extends AbstractDao implements FolderDao {
         return jdbc.queryForObject(GET, MAPPER, id);
     }
 
+    private static final String GET_DEFAULT =
+            "SELECT " +
+                "folder.pk_folder, "+
+                "folder.pk_project " +
+            "FROM " +
+                "plow.folder, " +
+                "plow.project " +
+            "WHERE " +
+                "folder.pk_folder = project.pk_folder_default " +
+            "AND " +
+                "project.pk_project = ?";
+
+    @Override
+    public Folder getDefaultFolder(Project project) {
+        return jdbc.queryForObject(GET_DEFAULT, MAPPER, project.getProjectId());
+    }
+
     private static final String INSERT =
             JdbcUtils.Insert("plow.folder",
                 "pk_folder",
