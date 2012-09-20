@@ -10,12 +10,15 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
     private int maxCores;
     private int minMemory;
     private int cores;
+    private float tier = 0.0f;
 
     private DispatchJob job;
     private DispatchFolder folder;
     private boolean isDispatchable;
 
     private ImmutableSet<String> tags;
+
+    public DispatchLayer() { }
 
     public boolean canDispatch(DispatchNode node) {
 
@@ -44,15 +47,6 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
         }
 
         return true;
-    }
-
-    @Override
-    public int compareTo(DispatchLayer other) {
-        return ComparisonChain.start()
-                .compare(this.folder.getTier(), other.getFolder().getTier())
-                .compare(this.job.getTier(), other.getJob().getTier())
-                .compare(this.tier, other.getTier())
-                .result();
     }
 
     public DispatchFolder getFolder() {
@@ -120,8 +114,6 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
         this.tags = tags;
     }
 
-    private float tier = 0.0f;
-
     public int getMinMemory() {
         return minMemory;
     }
@@ -152,6 +144,15 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
 
      public void setDispatchable(boolean isDispatchable) {
          this.isDispatchable = isDispatchable;
+     }
+
+     @Override
+     public int compareTo(DispatchLayer other) {
+         return ComparisonChain.start()
+                 .compare(this.folder.getTier(), other.getFolder().getTier())
+                 .compare(this.job.getTier(), other.getJob().getTier())
+                 .compare(this.tier, other.getTier())
+                 .result();
      }
 
 }
