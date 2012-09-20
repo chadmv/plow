@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.breakersoft.plow.Defaults;
-import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.FolderDao;
 import com.breakersoft.plow.dao.ProjectDao;
