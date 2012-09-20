@@ -123,11 +123,11 @@ public class DispatcherThread implements Runnable {
     }
 
     private void update() {
-        __removeLayers();
-        __addLayers();
+        removeLayers();
+        addLayers();
     }
 
-    private void __removeLayers() {
+    private void removeLayers() {
         for (DispatchLayer layer: oldLayers) {
             UUID project = layer.getFolder().getProjectId();
             currentLayers.get(project).remove(layer);
@@ -135,7 +135,7 @@ public class DispatcherThread implements Runnable {
         System.gc();
     }
 
-    private void __addLayers() {
+    private void addLayers() {
         for (DispatchLayer layer: newLayers) {
             currentLayers.get(layer.getFolder().getProjectId()).add(layer);
 
