@@ -11,4 +11,6 @@ public interface Dispatchable {
     public void decrementCores(int cores);
 
     public void recalculate();
+
+
 }
