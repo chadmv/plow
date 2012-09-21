@@ -10,6 +10,8 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Job;
+import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.DispatchDao;
@@ -20,6 +22,43 @@ import com.breakersoft.plow.thrift.TaskState;
 
 @Repository
 public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
+
+    public static final RowMapper<DispatchJob>DJOB_MAPPER =
+            new RowMapper<DispatchJob>() {
+        @Override
+        public DispatchJob mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+
+            DispatchJob job = new DispatchJob();
+            job.setJobId((UUID) rs.getObject("pk_job"));
+            job.setFolderId((UUID) rs.getObject("pk_folder"));
+            job.setProjectId((UUID) rs.getObject("pk_project"));
+            job.setMaxCores(rs.getInt("int_max_cores"));
+            job.setMinCores(rs.getInt("int_min_cores"));
+            job.incrementCores(rs.getInt("int_run_cores"));
+            return job;
+        }
+    };
+
+    private static final String GET_DJOB =
+            "SELECT " +
+                "job.pk_job,"+
+                "job.pk_folder, " +
+                "job_dsp.int_min_cores,"+
+                "job_dsp.int_max_cores,"+
+                "job_dsp.int_run_cores "+
+            "FROM " +
+                "job,"+
+                "job_dsp " +
+            "WHERE " +
+                "job.pk_job = job_dsp.pk_job " +
+            "AND " +
+                "job.pk_job = ?";
+
+    @Override
+    public DispatchJob getDispatchJob(Job job) {
+        return jdbc.queryForObject(GET_DJOB, DJOB_MAPPER, job.getJobId());
+    }
 
     @Override
     public boolean reserveFrame(Task frame) {

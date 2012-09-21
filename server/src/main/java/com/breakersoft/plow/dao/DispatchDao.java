@@ -2,6 +2,7 @@ package com.breakersoft.plow.dao;
 
 import java.util.List;
 
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.DispatchTask;
 import com.breakersoft.plow.dispatcher.DispatchJob;
@@ -14,4 +15,6 @@ public interface DispatchDao {
     boolean unReserveFrame(Task frame);
 
     List<DispatchTask> getFrames(DispatchJob job, DispatchNode node);
+
+    DispatchJob getDispatchJob(Job job);
 }
