@@ -6,7 +6,7 @@ public final class DispatchJob extends JobE implements Dispatchable {
 
     private int minCores;
     private int maxCores;
-    private int cores;
+    private int runCores;
     private float tier;
     private boolean dispatchable;
 
@@ -21,29 +21,40 @@ public final class DispatchJob extends JobE implements Dispatchable {
     @Override
     public boolean isDispatchable() {
         // TODO Auto-generated method stub
-        if (cores >= maxCores) {
+        if (runCores >= maxCores) {
             return false;
         }
         return dispatchable;
     }
 
+    public void setMinCores(int cores) {
+        this.minCores = cores;
+        recalculate();
+    }
+
+    public void setMaxCores(int cores) {
+        this.minCores = cores;
+    }
+
     @Override
     public void incrementCores(int inc) {
-        cores = cores + inc;
+        runCores = runCores + inc;
+        recalculate();
     }
 
     @Override
     public void decrementCores(int dec) {
-        cores = cores - dec;
+        runCores = runCores - dec;
+        recalculate();
     }
 
     @Override
     public void recalculate() {
         if (minCores <= 0) {
-            tier = cores;
+            tier = runCores;
         }
         else {
-            tier = cores / minCores;
+            tier = runCores / minCores;
         }
     }
 }

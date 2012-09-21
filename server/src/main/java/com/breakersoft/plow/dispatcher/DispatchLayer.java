@@ -1,5 +1,6 @@
 package com.breakersoft.plow.dispatcher;
 
+import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.LayerE;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableSet;
@@ -8,8 +9,8 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
 
     private int minCores;
     private int maxCores;
+    private int runCores;
     private int minMemory;
-    private int cores;
     private float tier = 0.0f;
 
     private DispatchJob job;
@@ -19,6 +20,11 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
     private ImmutableSet<String> tags;
 
     public DispatchLayer() { }
+
+    public DispatchLayer(Layer layer) {
+        this.setJobId(layer.getJobId());
+        this.setLayerId(this.getLayerId());
+    }
 
     public boolean canDispatch(DispatchNode node) {
 
@@ -63,7 +69,7 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
 
     @Override
     public boolean isDispatchable() {
-        if (cores >= maxCores) {
+        if (runCores >= maxCores) {
             return false;
         }
         return isDispatchable;
@@ -71,23 +77,14 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
 
     @Override
     public void incrementCores(int cores) {
-        this.cores = this.cores + cores;
+        this.runCores = this.runCores + cores;
+        this.recalculate();
     }
 
     @Override
     public void decrementCores(int cores) {
-        this.cores = this.cores - cores;
-        // Fucking log if this goes below 0.
-    }
-
-    @Override
-    public void recalculate() {
-        if (minCores <= 0) {
-            tier = cores;
-        }
-        else {
-            tier = cores / minCores;
-        }
+        this.runCores = this.runCores - cores;
+        this.recalculate();
     }
 
     public int getMinCores() {
@@ -96,6 +93,7 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
 
     public void setMinCores(int minCores) {
         this.minCores = minCores;
+        this.recalculate();
     }
 
     public int getMaxCores() {
@@ -122,18 +120,6 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
         this.minMemory = minMemory;
     }
 
-    public void setTier(float tier) {
-        this.tier = tier;
-    }
-
-    public int getCores() {
-         return cores;
-     }
-
-     public void setCores(int cores) {
-         this.cores = cores;
-     }
-
      public void setJob(DispatchJob job) {
          this.job = job;
      }
@@ -144,6 +130,15 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
 
      public void setDispatchable(boolean isDispatchable) {
          this.isDispatchable = isDispatchable;
+     }
+
+     public void recalculate() {
+         if (minCores <= 0) {
+             tier = runCores;
+         }
+         else {
+             tier = runCores / (float) minCores;
+         }
      }
 
      @Override
