@@ -10,11 +10,12 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
-import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.DispatchDao;
+import com.breakersoft.plow.dispatcher.DispatchFolder;
 import com.breakersoft.plow.dispatcher.DispatchTask;
 import com.breakersoft.plow.dispatcher.DispatchJob;
 import com.breakersoft.plow.dispatcher.DispatchNode;
@@ -22,6 +23,40 @@ import com.breakersoft.plow.thrift.TaskState;
 
 @Repository
 public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
+
+    public static final RowMapper<DispatchFolder> DFOLDER_MAPPER = new RowMapper<DispatchFolder>() {
+        @Override
+        public DispatchFolder mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+            DispatchFolder folder = new DispatchFolder();
+            folder.setFolderId((UUID)rs.getObject("pk_folder"));
+            folder.setProjectId((UUID)rs.getObject("pk_project"));
+            folder.setMinCores(rs.getInt("int_min_cores"));
+            folder.setMaxCores(rs.getInt("int_max_cores"));
+            folder.incrementCores(rs.getInt("int_run_cores"));
+            return folder;
+        }
+    };
+
+    private static final String GET_DFOLDER =
+            "SELECT " +
+                "folder.pk_folder,"+
+                "folder.pk_project, " +
+                "folder_dsp.int_min_cores,"+
+                "folder_dsp.int_max_cores,"+
+                "folder_dsp.int_run_cores "+
+            "FROM " +
+                "plow.folder,"+
+                "plow.folder_dsp " +
+            "WHERE " +
+                "folder.pk_folder = folder_dsp.pk_folder " +
+            "AND " +
+                "folder.pk_folder = ?";
+
+    @Override
+    public DispatchFolder getDispatchFolder(Folder folder) {
+        return jdbc.queryForObject(GET_DFOLDER, DFOLDER_MAPPER, folder.getFolderId());
+    }
 
     public static final RowMapper<DispatchJob>DJOB_MAPPER =
             new RowMapper<DispatchJob>() {
