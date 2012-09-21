@@ -3,6 +3,8 @@ package com.breakersoft.plow.dao.pgsql;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,17 +14,70 @@ import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.DispatchFolder;
+import com.breakersoft.plow.dispatcher.DispatchProject;
 import com.breakersoft.plow.dispatcher.DispatchTask;
 import com.breakersoft.plow.dispatcher.DispatchJob;
 import com.breakersoft.plow.dispatcher.DispatchNode;
 import com.breakersoft.plow.thrift.TaskState;
+import com.google.common.primitives.Floats;
 
 @Repository
 public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
+
+    public static final RowMapper<DispatchProject> DPROJECT_MAPPER = new RowMapper<DispatchProject>() {
+        @Override
+        public DispatchProject mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+            DispatchProject project = new DispatchProject();
+            project.setProjectId((UUID) rs.getObject("pk_project"));
+            project.setTier(rs.getFloat("int_run_cores") / rs.getFloat("int_size"));
+            return project;
+        }
+    };
+
+    private static final String GET_SORTED_PROJECTS =
+            "SELECT " +
+                "pk_project " +
+            "FROM " +
+                "plow.quota,"+
+                "pkow.cluster " +
+            "WHERE " +
+                "quota.pk_cluster = cluster.pk_cluster " +
+            "AND " +
+                "quota.int_run_cores < quota.int_burst " +
+            "AND " +
+                "cluster.pk_cluster = ? " +
+            "AND " +
+                "cluster.str_tag &> ? ";
+
+    public List<DispatchProject> getSortedProjectList(final DispatchNode node) {
+
+        List<DispatchProject> result = jdbc.query(GET_SORTED_PROJECTS,
+                    new PreparedStatementSetter() {
+                        @Override
+                        public void setValues(PreparedStatement ps)
+                                throws SQLException {
+                            ps.setObject(1, node.getClusterId());
+                            ps.setArray(4, ps.getConnection().createArrayOf(
+                                            "text", node.getTags().toArray()));
+                        }
+                }, DPROJECT_MAPPER);
+
+        Collections.sort(result, new Comparator<DispatchProject>() {
+            @Override
+            public int compare(DispatchProject o1, DispatchProject o2) {
+                return Floats.compare(o1.getTier(), o2.getTier());
+            }
+        });
+
+        return result;
+    }
+
 
     public static final RowMapper<DispatchFolder> DFOLDER_MAPPER = new RowMapper<DispatchFolder>() {
         @Override
