@@ -1,5 +1,5 @@
 package com.breakersoft.plow.event;
 
-public class JobShutdownEvent {
+public class JobFinishedEvent {
 
 }
