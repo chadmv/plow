@@ -19,4 +19,5 @@ public interface JobDao {
 
     void updateFrameCountsForLaunch(Job job);
 
+    boolean setJobState(Job job, JobState state);
 }
