@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
-import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.DispatchDao;
@@ -51,22 +50,11 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "AND " +
                 "quota.int_run_cores < quota.int_burst " +
             "AND " +
-                "cluster.pk_cluster = ? " +
-            "AND " +
-                "cluster.str_tag &> ? ";
+                "cluster.pk_cluster = ? ";
 
     public List<DispatchProject> getSortedProjectList(final DispatchNode node) {
-
-        List<DispatchProject> result = jdbc.query(GET_SORTED_PROJECTS,
-                    new PreparedStatementSetter() {
-                        @Override
-                        public void setValues(PreparedStatement ps)
-                                throws SQLException {
-                            ps.setObject(1, node.getClusterId());
-                            ps.setArray(4, ps.getConnection().createArrayOf(
-                                            "text", node.getTags().toArray()));
-                        }
-                }, DPROJECT_MAPPER);
+        List<DispatchProject> result =
+                jdbc.query(GET_SORTED_PROJECTS, DPROJECT_MAPPER, node.getClusterId());
 
         Collections.sort(result, new Comparator<DispatchProject>() {
             @Override
