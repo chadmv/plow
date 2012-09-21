@@ -76,5 +76,4 @@ public class FolderDaoImpl extends AbstractDao implements FolderDao {
         folder.setProjectId(project.getProjectId());
         return folder;
     }
-
 }
