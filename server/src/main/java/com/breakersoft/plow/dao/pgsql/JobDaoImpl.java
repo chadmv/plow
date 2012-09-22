@@ -84,6 +84,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 blueprint.isPaused());
 
         jdbc.update("INSERT INTO plow.job_count (pk_job) VALUES (?)", jobId);
+        jdbc.update("INSERT INTO plow.job_dsp (pk_job) VALUES (?)", jobId);
 
         final JobE job = new JobE();
         job.setJobId(jobId);
