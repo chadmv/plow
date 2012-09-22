@@ -2,7 +2,7 @@ package com.breakersoft.plow;
 
 import java.util.UUID;
 
-public class NodeE implements Node, Cluster {
+public class NodeE implements Node {
 
     private UUID nodeId;
     private UUID clusterId;
