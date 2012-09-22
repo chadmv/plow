@@ -121,12 +121,13 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "SELECT " +
                 "job.pk_job,"+
                 "job.pk_folder, " +
+                "job.pk_project, " +
                 "job_dsp.int_min_cores,"+
                 "job_dsp.int_max_cores,"+
                 "job_dsp.int_run_cores "+
             "FROM " +
-                "job,"+
-                "job_dsp " +
+                "plow.job,"+
+                "plow.job_dsp " +
             "WHERE " +
                 "job.pk_job = job_dsp.pk_job " +
             "AND " +
