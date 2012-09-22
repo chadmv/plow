@@ -12,7 +12,7 @@ import com.breakersoft.plow.dao.FolderDao;
 import com.breakersoft.plow.dao.ProjectDao;
 import com.breakersoft.plow.test.AbstractTest;
 
-public class FolderDaoTests  extends AbstractTest {
+public class FolderDaoTests extends AbstractTest {
 
     @Resource
     FolderDao folderDao;
