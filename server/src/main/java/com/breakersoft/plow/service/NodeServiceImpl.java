@@ -1,5 +1,7 @@
 package com.breakersoft.plow.service;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +30,8 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public Node createNode(Ping ping) {
-        Cluster cluster = clusterDao.getCluster("00000000-0000-0000-0000-000000000000");
+        Cluster cluster = clusterDao.getCluster(
+                UUID.fromString("00000000-0000-0000-0000-000000000000"));
         return nodeDao.create(cluster, ping);
     }
 
