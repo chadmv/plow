@@ -16,6 +16,7 @@ import com.breakersoft.plow.json.Blueprint;
 import com.breakersoft.plow.json.BlueprintLayer;
 import com.breakersoft.plow.rnd.thrift.Hardware;
 import com.breakersoft.plow.rnd.thrift.Ping;
+import com.breakersoft.plow.service.ProjectService;
 import com.google.common.collect.Lists;
 
 @Transactional
@@ -24,15 +25,14 @@ import com.google.common.collect.Lists;
     })
 public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringContextTests {
 
-
     @Resource
-    ProjectDao projectDao;
+    ProjectService projectService;
 
     protected Project testProject;
 
     @Before
     public void initTestProject() {
-        testProject = projectDao.create("test", "Test");
+        testProject = projectService.createProject("unittest", "Unit Test Project");
     }
 
     public Blueprint getTestBlueprint() {
@@ -40,7 +40,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         Blueprint bp = new Blueprint();
         bp.setName("test");
         bp.setPaused(false);
-        bp.setProject("test");
+        bp.setProject("unittest");
         bp.setScene("seq");
         bp.setShot("shot");
         bp.setUid(100);
