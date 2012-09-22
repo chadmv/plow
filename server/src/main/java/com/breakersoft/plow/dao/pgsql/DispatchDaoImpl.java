@@ -66,7 +66,6 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         return result;
     }
 
-
     public static final RowMapper<DispatchFolder> DFOLDER_MAPPER = new RowMapper<DispatchFolder>() {
         @Override
         public DispatchFolder mapRow(ResultSet rs, int rowNum)
