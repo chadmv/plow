@@ -3,17 +3,14 @@ package com.breakersoft.plow.dispatcher;
 import java.util.Set;
 
 import com.breakersoft.plow.NodeE;
-import com.google.common.collect.ImmutableSet;
 
 public class DispatchNode extends NodeE {
 
     private int idleCores;
     private int idleMemory;
-    private ImmutableSet<String> tags;
+    private Set<String> tags;
 
-    public DispatchNode() {
-
-    }
+    public DispatchNode() { }
 
     public int getIdleCores() {
         return idleCores;
@@ -35,7 +32,7 @@ public class DispatchNode extends NodeE {
         return tags;
     }
 
-    public void setTags(ImmutableSet<String> tags) {
+    public void setTags(Set<String> tags) {
         this.tags = tags;
     }
 }
