@@ -81,6 +81,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
 
         NodeE node = new NodeE();
         node.setNodeId(id);
+        node.setClusterId(cluster.getClusterId());
         node.setName(ping.hostname);
         return node;
     }
