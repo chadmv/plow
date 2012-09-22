@@ -91,7 +91,8 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 throws SQLException {
             NodeE node = new NodeE();
             node.setNodeId((UUID) rs.getObject(1));
-            node.setName(rs.getString(2));
+            node.setClusterId((UUID) rs.getObject(2));
+            node.setName(rs.getString(3));
             return node;
         }
     };
@@ -99,6 +100,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     private static final String GET_BY_NAME =
             "SELECT " +
                 "pk_node, " +
+                "pk_cluster, "+
                 "str_name " +
             "FROM " +
                 "plow.node " +

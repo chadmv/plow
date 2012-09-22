@@ -2,9 +2,10 @@ package com.breakersoft.plow;
 
 import java.util.UUID;
 
-public class NodeE implements Node {
+public class NodeE implements Node, Cluster {
 
     private UUID nodeId;
+    private UUID clusterId;
     private String name;
 
     @Override
@@ -23,5 +24,14 @@ public class NodeE implements Node {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public UUID getClusterId() {
+        return clusterId;
+    }
+
+    public void setClusterId(UUID id) {
+        this.clusterId = id;
     }
 }
