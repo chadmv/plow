@@ -29,10 +29,9 @@ public class FolderDaoTests extends AbstractTest {
 
     @Test
     public void testGetDefaultFolder() {
-        Project project = projectDao.get("test");
-        Folder folder1 = folderDao.createFolder(project, "test");
-        projectDao.setDefaultFolder(project, folder1);
-        Folder folder2 = folderDao.getDefaultFolder(project);
+        Folder folder1 = folderDao.createFolder(testProject, "test");
+        projectDao.setDefaultFolder(testProject, folder1);
+        Folder folder2 = folderDao.getDefaultFolder(testProject);
         assertEquals(folder1, folder2);
     }
 }
