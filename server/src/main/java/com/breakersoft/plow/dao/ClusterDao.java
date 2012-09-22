@@ -10,6 +10,6 @@ public interface ClusterDao {
 
     Cluster getCluster(UUID id);
 
-    Cluster getCluster(String id);
+    Cluster getCluster(String name);
 
 }

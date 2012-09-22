@@ -9,7 +9,6 @@ import org.junit.Test;
 import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.test.AbstractTest;
-import com.google.common.collect.Lists;
 
 public class ClusterDaoTests extends AbstractTest {
 
@@ -29,9 +28,9 @@ public class ClusterDaoTests extends AbstractTest {
     }
 
     @Test
-    public void getByStringId() {
+    public void getByName() {
         Cluster c1 = clusterDao.create("default", "default");
-        Cluster c2 = clusterDao.getCluster(c1.getClusterId().toString());
+        Cluster c2 = clusterDao.getCluster("default");
         assertEquals(c1, c2);
     }
 }

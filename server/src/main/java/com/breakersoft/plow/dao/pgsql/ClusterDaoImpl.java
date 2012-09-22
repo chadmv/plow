@@ -47,9 +47,17 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
         return jdbc.queryForObject(GET, MAPPER, id);
     }
 
+    private static final String GET_BY_NAME =
+            "SELECT " +
+                "pk_cluster " +
+            "FROM " +
+                "plow.cluster " +
+            "WHERE " +
+                "str_name = ?";
+
     @Override
-    public Cluster getCluster(String id) {
-        return jdbc.queryForObject(GET, MAPPER, UUID.fromString(id));
+    public Cluster getCluster(String name) {
+        return jdbc.queryForObject(GET_BY_NAME, MAPPER, name);
     }
 
     private static final String INSERT =
