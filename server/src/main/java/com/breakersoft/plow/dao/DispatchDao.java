@@ -25,4 +25,6 @@ public interface DispatchDao {
     DispatchFolder getDispatchFolder(Folder folder);
 
     List<DispatchProject> getSortedProjectList(Node node);
+
+    DispatchNode getDispatchNode(String name);
 }

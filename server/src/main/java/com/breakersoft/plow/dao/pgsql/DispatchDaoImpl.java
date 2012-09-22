@@ -3,8 +3,10 @@ package com.breakersoft.plow.dao.pgsql;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +29,43 @@ import com.breakersoft.plow.thrift.TaskState;
 import com.google.common.primitives.Floats;
 
 @Repository
-public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
+public abstract class DispatchDaoImpl extends AbstractDao implements DispatchDao {
+
+    public static final RowMapper<DispatchNode> DNODE_MAPPER = new RowMapper<DispatchNode>() {
+        @Override
+        public DispatchNode mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+            DispatchNode node = new DispatchNode();
+            node.setNodeId((UUID) rs.getObject("pk_node"));
+            node.setClusterId((UUID) rs.getObject("pk_cluster"));
+            node.setTags(new HashSet<String>(
+                    Arrays.asList((String[])rs.getArray("str_tags").getArray())));
+            node.setIdleCores(rs.getInt("int_free_cores"));
+            node.setIdleMemory(rs.getInt("int_free_mem"));
+            node.setName(rs.getString("str_name"));
+            return node;
+        }
+    };
+
+    private static final String GET_DISPATCH_HOST =
+            "SELECT " +
+                "node.pk_node,"+
+                "node.pk_cluster,"+
+                "node.str_tags,"+
+                "node_dsp.int_free_cores,"+
+                "node_dsp.int_free_memory " +
+            "FROM " +
+                "plow.node," +
+                "plow.node_dsp "+
+            "WHERE " +
+                "node.pk_node = node_dsp.pk_node " +
+            "AND " +
+                "node.str_name = ?";
+
+    @Override
+    public DispatchNode getDispatchNode(String name) {
+        return jdbc.queryForObject(GET_DISPATCH_HOST, DNODE_MAPPER, name);
+    }
 
     public static final RowMapper<DispatchProject> DPROJECT_MAPPER = new RowMapper<DispatchProject>() {
         @Override
