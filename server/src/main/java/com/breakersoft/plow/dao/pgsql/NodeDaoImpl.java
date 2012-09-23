@@ -1,9 +1,12 @@
 package com.breakersoft.plow.dao.pgsql;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -25,9 +28,8 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "pk_cluster",
                 "str_name",
                 "str_ipaddr",
-                "int_boot_time",
-                "int_created_time",
-                "int_ping_time"),
+                "str_tags",
+                "int_created_time"),
 
         JdbcUtils.Insert("plow.node_status",
                 "pk_node",
@@ -37,6 +39,8 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "int_free_memory",
                 "int_swap",
                 "int_free_swap",
+                "int_boot_time",
+                "int_ping_time",
                 "str_proc",
                 "str_os"),
 
@@ -49,17 +53,28 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     };
 
     @Override
-    public Node create(Cluster cluster, Ping ping) {
+    public Node create(final Cluster cluster, final Ping ping) {
 
         final UUID id = UUID.randomUUID();
         final long time = System.currentTimeMillis();
 
-        jdbc.update(INSERT[0], id, cluster.getClusterId(),
-                ping.hostname,
-                ping.ipAddr,
-                ping.bootTime,
-                time,
-                time);
+        final String clusterTag = jdbc.queryForObject(
+                "SELECT str_tag FROM plow.cluster WHERE pk_cluster=?",
+                String.class, cluster.getClusterId());
+
+        jdbc.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
+                final PreparedStatement ps = conn.prepareStatement(INSERT[0]);
+                ps.setObject(1, id);
+                ps.setObject(2, cluster.getClusterId());
+                ps.setString(3, ping.hostname);
+                ps.setString(4, ping.ipAddr);
+                ps.setArray(5, conn.createArrayOf("text", new String[] { clusterTag }));
+                ps.setLong(6, time);
+                return ps;
+            }
+        });
 
         jdbc.update(INSERT[1], id,
                 ping.hw.physicalCpus,
@@ -68,6 +83,8 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 ping.hw.freeRamMb,
                 ping.hw.totalSwapMb,
                 ping.hw.freeSwapMb,
+                ping.bootTime,
+                time,
                 ping.hw.cpuModel,
                 ping.hw.platform);
 
