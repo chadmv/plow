@@ -1,14 +1,28 @@
 package com.breakersoft.plow.dispatcher;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
+import org.slf4j.Logger;
+
+import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Project;
+import com.breakersoft.plow.dao.DispatchDao;
+import com.breakersoft.plow.event.JobLaunchEvent;
+import com.breakersoft.plow.rnd.RndClient;
+import com.breakersoft.plow.rnd.thrift.RunProcessCommand;
 import com.breakersoft.plow.service.DispatcherService;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 
@@ -23,10 +37,10 @@ import com.google.common.collect.Maps;
  */
 public class DispatcherThread implements Runnable {
 
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(DispatcherThread.class);
+
     private static final int EXPECTED_PROJECT_COUNT = 16;
-    private static final int EXPECTED_FOLDER_COUNT = 128;
-    private static final int EXPECTED_JOB_COUNT = 512;
-    private static final int EXPECTED_LAYER_COUNT = 2048;
 
     private boolean enabled = true;
 
@@ -34,40 +48,15 @@ public class DispatcherThread implements Runnable {
     private final DispatcherService dispatcherService;
     private boolean doReload = true;
 
-    ConcurrentMap<UUID, DispatchFolder> folderIndex;
-    ConcurrentMap<UUID, DispatchJob> jobIndex;
-    ConcurrentMap<UUID, DispatchLayer> layerIndex;
-
-    Map<Project, ArrayList<DispatchLayer>> currentLayers;
-
-    ArrayList<DispatchLayer> newLayers;
-    ArrayList<DispatchLayer> oldLayers;
+    private final Map<UUID, ArrayList<DispatchJob>> activeJobs;
+    private final ConcurrentLinkedQueue<DispatchJob> newJobs;
 
     public DispatcherThread(Dispatcher dispatcher, DispatcherService service) {
         this.dispatcher = dispatcher;
         this.dispatcherService = service;
 
-        folderIndex = new MapMaker()
-            .concurrencyLevel(1)
-            .initialCapacity(EXPECTED_FOLDER_COUNT)
-            .weakValues()
-            .makeMap();
-
-        jobIndex = new MapMaker()
-            .concurrencyLevel(1)
-            .initialCapacity(EXPECTED_JOB_COUNT)
-            .weakValues()
-            .makeMap();
-
-        layerIndex = new MapMaker()
-            .concurrencyLevel(1)
-            .initialCapacity(EXPECTED_LAYER_COUNT)
-            .weakValues()
-            .makeMap();
-
-        currentLayers =
-                Maps.newHashMapWithExpectedSize(
-                EXPECTED_PROJECT_COUNT);
+        newJobs = new ConcurrentLinkedQueue<DispatchJob>();
+        activeJobs = Maps.newHashMapWithExpectedSize(EXPECTED_PROJECT_COUNT);
     }
 
     @Override
@@ -75,77 +64,158 @@ public class DispatcherThread implements Runnable {
 
         while(enabled) {
 
-            update();
-
             // Pull a node out of the dispatcher queue.
             DispatchNode node = dispatcher.getNextDispatchNode();
 
-            // Pull the sorted show list based on priority
-            // for the given node.
-            List<Project> projects = dispatcherService.getSortedProjectList(node);
+            // The thread was interrupted?  Not sure if a null
+            // is the best way to handle it or if we should
+            // catch it here.
+            if (node == null) {
+                logger.info("getNextDispatchNode returned null, exiting the dispatch thread.");
+                return;
+            }
+        }
+        // TODO Auto-generated method stub
+    }
 
-            for (Project project: projects) {
+    public void dispatch(DispatchNode node) {
 
-                DispatchJob dispatchedJob = null;
-                UUID id = project.getProjectId();
+        logger.info("Dispatching: " + node.getName());
 
-                Collections.sort(currentLayers.get(id));
+        // Pull the sorted show list based on priority
+        // for the given node.
+        final List<DispatchProject> projects =
+                dispatcherService.getSortedProjectList(node);
 
-                for (DispatchLayer layer: currentLayers.get(id)) {
+        update();
 
-                    // Don't dispatch the last job again.
-                    if (layer.getJob().equals(dispatchedJob)) {
+        for (DispatchProject project: projects) {
+
+            final UUID id = project.getProjectId();
+
+            if (!activeJobs.containsKey(id)) {
+                continue;
+            }
+
+            if (activeJobs.get(id).size() == 0) {
+                continue;
+            }
+
+            logger.info("Dispatching project: " + project.getProjectId());
+            Collections.sort(activeJobs.get(id));
+
+            for (DispatchJob job: activeJobs.get(id)) {
+
+                logger.info(job + " is up for dispatch.");
+
+                if (job.getWaitingFrames() == 0) {
+                    logger.info(job + " has no pending frames.");
+                    continue;
+                }
+
+                List<DispatchLayer> layers = Lists.newArrayList();
+                for (DispatchLayer layer: job.getLayers()) {
+
+                    if (layer.getWaitingFrames() == 0) {
+                        logger.info(layer + " has no pending frames.");
                         continue;
                     }
 
-                    // Make sure we can dispatch from at
-                    // least a single layer.
-                    if (!layer.canDispatch(node)) {
-                        continue;
+                    if (dispatcher.canDispatch(layer, node)) {
+                        logger.info("Can dispatch " + layer);
+                        layers.add(layer);
                     }
+                    else {
+                        logger.info("Cannot dispatch " + layer);
+                    }
+                }
 
-                    dispatcher.dispatch(layer.getJob(), node);
-                    dispatchedJob = layer.getJob();
+                logger.info("Layers to dipsatch " + layers.size());
+
+                /**
+                 * This should be better.
+                 */
+                Collections.sort(layers, new Comparator<DispatchLayer>() {
+                    @Override
+                    public int compare(DispatchLayer o1, DispatchLayer o2) {
+                        return ComparisonChain.start()
+                                .compare(o2.getWaitingFrames(), o1.getWaitingFrames())
+                                .result();
+                    }
+                });
+
+                for (DispatchLayer layer: layers) {
+
+                    List<DispatchTask> tasks =
+                            dispatcherService.getTasks(layer, node);
+
+                    for (DispatchTask task: tasks) {
+
+                        DispatchProc proc = new DispatchProc();
+                        proc.setFrameId(task.getTaskId());
+                        proc.setNodeId(node.getNodeId());
+                        proc.setQuotaId(project.getQuotaId());
+                        proc.setProcId(UUID.randomUUID());
+                        proc.setCores(layer.getMinCores());
+                        proc.setFrameName(task.getName());
+                        proc.setNumber(task.getNumber());
+
+                        dispatcherService.createDispatchProc(proc);
+                        runProcess(task, proc, node);
+                    }
                 }
             }
         }
-
-        // TODO Auto-generated method stub
-
     }
 
-    public void addDispatchableLayers(List<DispatchLayer> layers) {
-        newLayers.addAll(layers);
+    private void runProcess(DispatchTask task, DispatchProc proc, DispatchNode node) {
+
+        RunProcessCommand cmd = new RunProcessCommand();
+        cmd.command = Arrays.asList(task.getCommand());
+        cmd.cores = proc.getCores();
+        cmd.env = Maps.newHashMap();
+        cmd.frameId = task.getTaskId().toString();
+        cmd.procId = proc.getProcId().toString();
+        cmd.logFile = String.format("/tmp/%s.log", task.getName());
+
+        RndClient client = new RndClient(node.getName(), 11338);
+        client.runProcess(cmd);
     }
 
-    public void removeDispatchableLayers(List<DispatchLayer> layers) {
-        oldLayers.addAll(layers);
+    public void addJob(DispatchJob job) {
+        logger.info("Adding new job to newJobs list");
+        newJobs.add(job);
     }
 
-    private void update() {
-        removeLayers();
-        addLayers();
+    public void update() {
+        logger.info("Updating!");
+        addNewJobs();
     }
 
-    private void removeLayers() {
-        for (DispatchLayer layer: oldLayers) {
-            UUID project = layer.getFolder().getProjectId();
-            currentLayers.get(project).remove(layer);
+    private void addNewJobs() {
+
+        int count = 0;
+        while (true) {
+
+            DispatchJob job = newJobs.poll();
+            if (job == null) {
+                break;
+            }
+            count++;
+
+            if (!activeJobs.containsKey(job.getProjectId())) {
+                activeJobs.put(job.getProjectId(),
+                        new ArrayList<DispatchJob>(100));
+            }
+            activeJobs.get(job.getProjectId()).add(job);
         }
-        System.gc();
+
+        logger.info("Added " + count + " jobs to the dispatcher.");
     }
 
-    private void addLayers() {
-        for (DispatchLayer layer: newLayers) {
-            currentLayers.get(layer.getFolder().getProjectId()).add(layer);
 
-            DispatchFolder folder = layer.getFolder();
-            DispatchJob job = layer.getJob();
-
-            folderIndex.putIfAbsent(folder.getFolderId(), folder);
-            jobIndex.putIfAbsent(job.getJobId(), job);
-            layerIndex.putIfAbsent(layer.getLayerId(), layer);
-        }
+    public int getWaitingJobs() {
+        return newJobs.size();
     }
 
 }

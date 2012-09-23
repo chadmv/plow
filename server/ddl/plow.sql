@@ -1,4 +1,7 @@
 
+
+CREATE SCHEMA plow;
+
 /**
  * Projects
  */
@@ -19,12 +22,13 @@ CREATE TABLE plow.folder (
   str_name VARCHAR(96) NOT NULL
 ) WITHOUT OIDS;
 
+
 CREATE TABLE plow.folder_dsp (
   pk_folder UUID NOT NULL PRIMARY KEY,
   int_max_cores INTEGER NOT NULL DEFAULT -1,
   int_min_cores INTEGER NOT NULL DEFAULT 0,
   int_run_cores INTEGER NOT NULL DEFAULT 0
-);
+) WITHOUT OIDS;
 
 /**
  * Jobs
@@ -42,6 +46,13 @@ CREATE TABLE plow.job (
   time_started BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
   time_stopped BIGINT DEFAULT 0
 ) WITHOUT OIDS;
+
+CREATE TABLE plow.job_dsp (
+  pk_job UUID NOT NULL PRIMARY KEY,
+  int_max_cores INTEGER NOT NULL DEFAULT -1,
+  int_min_cores INTEGER NOT NULL DEFAULT 0,
+  int_run_cores INTEGER NOT NULL DEFAULT 0
+);
 
 /**
  * Layers
@@ -73,9 +84,8 @@ CREATE TABLE plow.task (
   int_number INTEGER NOT NULL,
   int_state SMALLINT NOT NULL,
   int_depend_count INTEGER NOT NULL DEFAULT 0,
-  int_layer_order INTEGER NOT NULL,
   int_task_order INTEGER NOT NULL,
-  b_reserved BOOLEAN DEFAULT 'f' NOT NULL
+  bool_reserved BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
 
@@ -112,10 +122,11 @@ CREATE TABLE plow.layer_count (
 CREATE TABLE plow.cluster (
   pk_cluster UUID NOT NULL PRIMARY KEY,
   str_name VARCHAR(128) NOT NULL,
-  str_tag VARCHAR(32) NOT NULL
+  str_tag VARCHAR(32) NOT NULL,
+  bool_locked BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
-INSERT INTO plow.cluster ('00000000-0000-0000-0000-000000000000', 'unassigned');
+INSERT INTO plow.cluster ('00000000-0000-0000-0000-000000000000', 'unassigned', 'unassigned');
 
 /** Tag and name are unique **/
 
@@ -126,9 +137,8 @@ CREATE TABLE plow.node (
   str_ipaddr VARCHAR(15) NOT NULL,
   int_state SMALLINT NOT NULL DEFAULT 0,
   int_lock_state SMALLINT NOT NULL DEFAULT 0,
-  int_boot_time BIGINT NOT NULL,
   int_created_time BIGINT NOT NULL,
-  int_ping_time BIGINT NOT NULL
+  str_tags TEXT[] NOT NULL
 ) WITHOUT OIDS;
 
 /**
@@ -142,6 +152,8 @@ CREATE TABLE plow.node_status (
   int_free_memory INTEGER NOT NULL,
   int_swap INTEGER NOT NULL,
   int_free_swap INTEGER NOT NULL,
+  int_boot_time BIGINT NOT NULL,
+  int_ping_time BIGINT NOT NULL,
   str_proc VARCHAR(128) NOT NULL,
   str_os VARCHAR(128) NOT NULL
 ) WITHOUT OIDS;
@@ -160,18 +172,14 @@ CREATE TABLE plow.quota (
   pk_project UUID NOT NULL,
   int_size INTEGER NOT NULL,
   int_burst INTEGER NOT NULL,
+  int_run_cores INTEGER DEFAULT 0 NOT NULL,
   bool_locked BOOLEAN DEFAULT 'f' NOT NULL
-) WITHOUT OIDS;
-
-CREATE TABLE plow.quota_dsp (
-  pk_quota UUID NOT NULL PRIMARY KEY,
-  int_cores INTEGER DEFAULT 0 NOT NULL
 ) WITHOUT OIDS;
 
 CREATE TABLE plow.proc (
   pk_proc UUID NOT NULL PRIMARY KEY,
   pk_quota UUID NOT NULL,
-  pk_host UUID NOT NULL,
+  pk_node UUID NOT NULL,
   pk_task UUID NOT NULL,
   int_cores SMALLINT NOT NULL,
   int_mem INTEGER NOT NULL,

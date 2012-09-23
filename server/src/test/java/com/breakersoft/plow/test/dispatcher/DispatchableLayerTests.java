@@ -27,29 +27,6 @@ public class DispatchableLayerTests {
     @Test
     public void sortTest() {
 
-        Random random = new Random(UUID.randomUUID().getMostSignificantBits());
-
-        DispatchJob job = new DispatchJob();
-        DispatchFolder folder= new DispatchFolder();
-
-        final List<DispatchLayer> layers = Lists.newArrayList();
-        for (int i=0; i<100000; i++) {
-            DispatchLayer layer = new DispatchLayer();
-            layer.setJob(job);
-            layer.setFolder(folder);
-            layer.setMinCores(100);
-            layer.setMaxCores(100);
-            layer.setTags(ImmutableSet.of("foo"));
-            layer.setTier(random.nextFloat());
-            layers.add(layer);
-
-
-        }
-        long t = System.currentTimeMillis();
-        Collections.sort(layers);
-        System.out.println(System.currentTimeMillis() - t);
-
-
 
     }
 

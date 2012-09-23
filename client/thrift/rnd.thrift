@@ -62,7 +62,7 @@ service RndServiceApi {
     void processCompleted(1:ProcessResult result) throws (1:RndException e)
 }
 
-service RndProcessApi {
+service RndNodeApi {
         
     void runProcess(1:RunProcessCommand process) throws (1:RndException ouch),
 }

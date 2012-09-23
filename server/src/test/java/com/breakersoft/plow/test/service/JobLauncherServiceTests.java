@@ -5,6 +5,7 @@ import javax.annotation.Resource;
 import org.junit.Test;
 
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobLauncherService;
 import com.breakersoft.plow.test.AbstractTest;
 
@@ -15,9 +16,9 @@ public class JobLauncherServiceTests extends AbstractTest {
 
     @Test
     public void testCreate() {
-        Job job = jobLauncherService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobLauncherService.launch(getTestBlueprint());
 
-        assertLayerCount(job, 1);
-        assertFrameCount(job, 10);
+        assertLayerCount(event.getJob(), 1);
+        assertFrameCount(event.getJob(), 10);
     }
 }
