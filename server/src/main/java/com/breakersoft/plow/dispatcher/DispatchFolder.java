@@ -8,18 +8,16 @@ public final class DispatchFolder extends FolderE implements Dispatchable  {
     private int minCores;
     private int maxCores;
     private int runCores;
-
     private float tier;
-    private boolean dispatchable;
+
+    public DispatchFolder() {
+        tier = 0.0f;
+    }
 
     public DispatchFolder(Folder folder) {
         this();
         setFolderId(folder.getFolderId());
         setProjectId(folder.getProjectId());
-    }
-
-    public DispatchFolder() {
-        tier = 0.0f;
     }
 
     public int getMaxCores() {
@@ -36,6 +34,7 @@ public final class DispatchFolder extends FolderE implements Dispatchable  {
 
     public void setMinCores(int maxCores) {
         this.maxCores = maxCores;
+        recalculate();
     }
 
     public int getRunCores() {
@@ -44,24 +43,24 @@ public final class DispatchFolder extends FolderE implements Dispatchable  {
 
     @Override
     public float getTier() {
-        // TODO Auto-generated method stub
         return tier;
     }
 
     @Override
     public boolean isDispatchable() {
-        // TODO Auto-generated method stub
-        return dispatchable;
+        return true;
     }
 
     @Override
     public void incrementCores(int inc) {
         runCores = runCores + inc;
+        recalculate();
     }
 
     @Override
     public void decrementCores(int dec) {
         runCores = runCores - dec;
+        recalculate();
     }
 
     @Override

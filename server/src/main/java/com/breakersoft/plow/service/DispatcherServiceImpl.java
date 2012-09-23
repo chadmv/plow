@@ -9,10 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.dao.DispatchDao;
+import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.DispatchFolder;
 import com.breakersoft.plow.dispatcher.DispatchJob;
+import com.breakersoft.plow.dispatcher.DispatchLayer;
 import com.breakersoft.plow.dispatcher.DispatchNode;
+import com.breakersoft.plow.dispatcher.DispatchProc;
 import com.breakersoft.plow.dispatcher.DispatchProject;
+import com.breakersoft.plow.dispatcher.DispatchTask;
 
 @Service
 @Transactional
@@ -20,6 +24,9 @@ public class DispatcherServiceImpl implements DispatcherService {
 
     @Autowired
     private DispatchDao dispatchDao;
+
+    @Autowired
+    private ProcDao procDao;
 
     @Override
     @Transactional(readOnly=true)
@@ -43,5 +50,22 @@ public class DispatcherServiceImpl implements DispatcherService {
     @Transactional(readOnly=true)
     public DispatchNode getDispatchNode(String name) {
         return dispatchDao.getDispatchNode(name);
+    }
+
+    @Override
+    @Transactional(readOnly=true)
+    public List<DispatchTask> getTasks(DispatchLayer layer, DispatchNode node) {
+        return dispatchDao.getFrames(layer, node);
+    }
+
+    @Override
+    @Transactional(readOnly=true)
+    public List<DispatchLayer> getDispatchLayers(Job job) {
+        return dispatchDao.getDispatchLayers(job);
+    }
+
+    @Override
+    public void createDispatchProc (DispatchProc proc) {
+        procDao.create(proc);
     }
 }

@@ -1,5 +1,7 @@
 package com.breakersoft.plow.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import com.breakersoft.plow.FrameSet;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Project;
+import com.breakersoft.plow.dao.FolderDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
@@ -19,6 +22,8 @@ import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.json.Blueprint;
 import com.breakersoft.plow.json.BlueprintLayer;
+import com.breakersoft.plow.thrift.JobState;
+import com.google.common.collect.Lists;
 
 @Service
 @Transactional
@@ -32,6 +37,9 @@ public class JobLauncherServiceImpl implements JobLauncherService {
     ProjectDao projectDao;
 
     @Autowired
+    FolderDao folderDao;
+
+    @Autowired
     JobDao jobDao;
 
     @Autowired
@@ -43,23 +51,25 @@ public class JobLauncherServiceImpl implements JobLauncherService {
     @Autowired
     EventManager eventManager;
 
-    public Job launch(Blueprint blueprint) {
+    public JobLaunchEvent launch(Blueprint blueprint) {
 
-        Project project = projectDao.get(blueprint.getProject());
-        Job job = jobDao.create(project, blueprint);
+        final Project project = projectDao.get(blueprint.getProject());
+        final Job job = jobDao.create(project, blueprint);
+        final Folder folder = filterJob(job, project);
 
-
-        createJobTopology(job, blueprint);
-
+        createJobTopology(job, project, blueprint);
 
         jobDao.updateFrameStatesForLaunch(job);
         jobDao.updateFrameCountsForLaunch(job);
+        jobDao.setJobState(job, JobState.RUNNING);
 
-        eventManager.post(new JobLaunchEvent(job, blueprint));
+        //TODO: do this someplace else. (tranny hook or aspect)
+        // Don't want to add jobs to the dispatcher that fail to
+        // commit to the DB.
+        JobLaunchEvent event = new JobLaunchEvent(job, folder, blueprint);
+        eventManager.post(event);
 
-
-
-        return job;
+        return event;
     }
 
     public void shutdown(Job job) {
@@ -67,18 +77,13 @@ public class JobLauncherServiceImpl implements JobLauncherService {
 
     }
 
-    private Folder filterJob(Job job) {
-        return null;
-
-
-
+    private Folder filterJob(Job job, Project project) {
+        // TODO: fully implement
+        return folderDao.getDefaultFolder(project);
     }
 
-    private void createJobTopology(Job job, Blueprint blueprint) {
-
-        Project project = projectDao.get(blueprint.getProject());
-
-        JobLaunchEvent event = new JobLaunchEvent(job, blueprint);
+    private void createJobTopology(
+            Job job, Project project, Blueprint blueprint) {
 
         int layerOrder = 0;
         for (BlueprintLayer blayer: blueprint.getLayers()) {
@@ -92,7 +97,5 @@ public class JobLauncherServiceImpl implements JobLauncherService {
             }
             layerOrder++;
         }
-
-
     }
 }

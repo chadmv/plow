@@ -6,9 +6,8 @@ public class DispatchProc extends ProcE {
 
     private String frameName;
     private int number;
-    private String[] command;
-    private int minCores;
-    private int minMemory;
+    private int cores;
+    private int memory;
 
     public String getFrameName() {
         return frameName;
@@ -26,27 +25,19 @@ public class DispatchProc extends ProcE {
         this.number = number;
     }
 
-    public String[] getCommand() {
-        return command;
+    public int getCores() {
+        return cores;
     }
 
-    public void setCommand(String[] command) {
-        this.command = command;
+    public void setCores(int cores) {
+        this.cores = cores;
     }
 
-    public int getMinCores() {
-        return minCores;
+    public int getMemory() {
+        return memory;
     }
 
-    public void setMinCores(int minCores) {
-        this.minCores = minCores;
-    }
-
-    public int getMinMemory() {
-        return minMemory;
-    }
-
-    public void setMinMemory(int minMemory) {
-        this.minMemory = minMemory;
+    public void setMemory(int memory) {
+        this.memory = memory;
     }
 }

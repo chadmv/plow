@@ -1,14 +1,22 @@
 package com.breakersoft.plow.dispatcher;
 
-import com.breakersoft.plow.JobE;
+import java.util.List;
 
-public final class DispatchJob extends JobE implements Dispatchable {
+import com.breakersoft.plow.JobE;
+import com.google.common.collect.ComparisonChain;
+
+public final class DispatchJob extends JobE implements Dispatchable, Comparable<DispatchJob> {
 
     private int minCores;
     private int maxCores;
     private int runCores;
+    private int waitingFrames;
+    private String name;
+
     private float tier;
-    private boolean dispatchable;
+
+    private List<DispatchLayer> layers;
+    private DispatchFolder folder;
 
     public DispatchJob() {
         tier = 0.0f;
@@ -20,11 +28,7 @@ public final class DispatchJob extends JobE implements Dispatchable {
 
     @Override
     public boolean isDispatchable() {
-        // TODO Auto-generated method stub
-        if (runCores >= maxCores) {
-            return false;
-        }
-        return dispatchable;
+        return true;
     }
 
     public void setMinCores(int cores) {
@@ -56,5 +60,50 @@ public final class DispatchJob extends JobE implements Dispatchable {
         else {
             tier = runCores / minCores;
         }
+    }
+
+    public DispatchFolder getFolder() {
+        return folder;
+    }
+
+    public void setFolder(DispatchFolder folder) {
+        this.folder = folder;
+    }
+
+    public List<DispatchLayer> getLayers() {
+        return layers;
+    }
+
+    public void setLayers(List<DispatchLayer> layers) {
+        this.layers = layers;
+    }
+
+    @Override
+    public int compareTo(DispatchJob other) {
+        return ComparisonChain.start()
+                .compare(folder.getTier(), other.getFolder().getTier())
+                .compare(getTier(), getTier())
+                .result();
+    }
+
+    public int getWaitingFrames() {
+        return waitingFrames;
+    }
+
+    public void setWaitingFrames(int waitingFrames) {
+        this.waitingFrames = waitingFrames;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s/%s", getJobId(), name);
     }
 }

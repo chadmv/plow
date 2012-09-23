@@ -1,14 +1,15 @@
 package com.breakersoft.plow.dispatcher;
 
+import java.util.UUID;
+
 import com.breakersoft.plow.ProjectE;
 
 public class DispatchProject extends ProjectE {
 
-    float tier;
+    private float tier;
+    private UUID quotaId;
 
-    public DispatchProject() {
-
-    }
+    public DispatchProject() { }
 
     public void setTier(float tier) {
         this.tier = tier;
@@ -16,5 +17,13 @@ public class DispatchProject extends ProjectE {
 
     public float getTier() {
         return this.tier;
+    }
+
+    public UUID getQuotaId() {
+        return quotaId;
+    }
+
+    public void setQuotaId(UUID quotaId) {
+        this.quotaId = quotaId;
     }
 }

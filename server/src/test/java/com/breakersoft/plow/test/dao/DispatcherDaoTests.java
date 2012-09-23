@@ -18,7 +18,9 @@ import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dispatcher.DispatchFolder;
 import com.breakersoft.plow.dispatcher.DispatchJob;
+import com.breakersoft.plow.dispatcher.DispatchNode;
 import com.breakersoft.plow.dispatcher.DispatchProject;
+import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobLauncherService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
@@ -52,16 +54,35 @@ public class DispatcherDaoTests extends AbstractTest {
 
     @Test
     public void testGetDispatchJob() {
-        Job job = jobLauncherService.launch(getTestBlueprint());
-        DispatchJob djob = dispatchDao.getDispatchJob(job);
+        JobLaunchEvent event = jobLauncherService.launch(getTestBlueprint());
+        DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
         assertTrue(djob.getTier() == 0);
     }
 
     @Test
     public void testSortedProjects() {
         Node node =  nodeService.createNode(getTestNodePing());
-        quotaDao.create(testProject, clusterDao.getCluster("unassigned"), 10, 15);
         List<DispatchProject> projects =  dispatchDao.getSortedProjectList(node);
+        for (DispatchProject project: projects) {
+            logger.info(project.getProjectId());
+        }
         assertEquals(1, projects.size());
+    }
+
+    @Test
+    public void testGetDispatchHost() {
+        Node node =  nodeService.createNode(getTestNodePing());
+        DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
+    }
+
+    @Test
+    public void testGetFrames() {
+        Node node =  nodeService.createNode(getTestNodePing());
+        DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
+
+        JobLaunchEvent event = jobLauncherService.launch(getTestBlueprint());
+        DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
+
+
     }
 }

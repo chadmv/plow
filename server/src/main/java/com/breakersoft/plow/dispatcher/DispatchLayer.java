@@ -1,99 +1,39 @@
 package com.breakersoft.plow.dispatcher;
 
+import java.util.Set;
+
+import org.slf4j.Logger;
+
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.LayerE;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableSet;
 
-public final class DispatchLayer extends LayerE implements Dispatchable, Comparable<DispatchLayer> {
+public final class DispatchLayer extends LayerE {
+
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(DispatchLayer.class);
 
     private int minCores;
     private int maxCores;
-    private int runCores;
     private int minMemory;
-    private float tier = 0.0f;
+    private int waitingFrames;
 
-    private DispatchJob job;
-    private DispatchFolder folder;
-    private boolean isDispatchable;
-
-    private ImmutableSet<String> tags;
+    private Set<String> tags;
 
     public DispatchLayer() { }
 
     public DispatchLayer(Layer layer) {
         this.setJobId(layer.getJobId());
-        this.setLayerId(this.getLayerId());
-    }
-
-    public boolean canDispatch(DispatchNode node) {
-
-        if (!folder.isDispatchable()) {
-            return false;
-        }
-
-        if (!job.isDispatchable()) {
-            return false;
-        }
-
-        if (!isDispatchable()) {
-            return false;
-        }
-
-        if (!isDispatchable()) {
-            return false;
-        }
-
-        if (node.getIdleMemory() < minMemory) {
-            return false;
-        }
-
-        if (node.getIdleCores() < minCores) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public DispatchFolder getFolder() {
-        return folder;
-    }
-
-    public DispatchJob getJob() {
-        return job;
-    }
-
-    public float getTier() {
-        return tier;
-    }
-
-    @Override
-    public boolean isDispatchable() {
-        if (runCores >= maxCores) {
-            return false;
-        }
-        return isDispatchable;
-    }
-
-    @Override
-    public void incrementCores(int cores) {
-        this.runCores = this.runCores + cores;
-        this.recalculate();
-    }
-
-    @Override
-    public void decrementCores(int cores) {
-        this.runCores = this.runCores - cores;
-        this.recalculate();
+        this.setLayerId(layer.getLayerId());
     }
 
     public int getMinCores() {
         return minCores;
     }
 
-    public void setMinCores(int minCores) {
-        this.minCores = minCores;
-        this.recalculate();
+    public void setMinCores(int cores) {
+        this.minCores = cores;
     }
 
     public int getMaxCores() {
@@ -104,11 +44,11 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
         this.maxCores = maxCores;
     }
 
-    public ImmutableSet<String> getTags() {
+    public Set<String> getTags() {
         return tags;
     }
 
-    public void setTags(ImmutableSet<String> tags) {
+    public void setTags(Set<String> tags) {
         this.tags = tags;
     }
 
@@ -120,34 +60,11 @@ public final class DispatchLayer extends LayerE implements Dispatchable, Compara
         this.minMemory = minMemory;
     }
 
-     public void setJob(DispatchJob job) {
-         this.job = job;
-     }
+    public int getWaitingFrames() {
+        return waitingFrames;
+    }
 
-     public void setFolder(DispatchFolder folder) {
-         this.folder = folder;
-     }
-
-     public void setDispatchable(boolean isDispatchable) {
-         this.isDispatchable = isDispatchable;
-     }
-
-     public void recalculate() {
-         if (minCores <= 0) {
-             tier = runCores;
-         }
-         else {
-             tier = runCores / (float) minCores;
-         }
-     }
-
-     @Override
-     public int compareTo(DispatchLayer other) {
-         return ComparisonChain.start()
-                 .compare(this.folder.getTier(), other.getFolder().getTier())
-                 .compare(this.job.getTier(), other.getJob().getTier())
-                 .compare(this.tier, other.getTier())
-                 .result();
-     }
-
+    public void setWaitingFrames(int waitingFrames) {
+        this.waitingFrames = waitingFrames;
+    }
 }
