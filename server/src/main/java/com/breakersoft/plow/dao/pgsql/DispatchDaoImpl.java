@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
@@ -21,6 +22,7 @@ import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.DispatchFolder;
+import com.breakersoft.plow.dispatcher.DispatchLayer;
 import com.breakersoft.plow.dispatcher.DispatchProject;
 import com.breakersoft.plow.dispatcher.DispatchTask;
 import com.breakersoft.plow.dispatcher.DispatchJob;
@@ -29,7 +31,46 @@ import com.breakersoft.plow.thrift.TaskState;
 import com.google.common.primitives.Floats;
 
 @Repository
-public abstract class DispatchDaoImpl extends AbstractDao implements DispatchDao {
+public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
+
+    private static final String GET_DISPATCH_LAYERS =
+            "SELECT " +
+                "layer.pk_layer,"+
+                "layer.pk_job,"+
+                "layer.int_max_cores,"+
+                "layer.int_min_cores,"+
+                "layer.int_min_mem,"+
+                "layer.str_tags,"+
+                "layer_count.int_waiting " +
+            "FROM " +
+                "plow.layer,"+
+                "plow.layer_count " +
+            "WHERE " +
+                "layer.pk_layer = layer_count.pk_layer " +
+            "AND " +
+                "layer.pk_job = ?";
+
+    public static final RowMapper<DispatchLayer> DLAYER_MAPPER = new RowMapper<DispatchLayer>() {
+        @Override
+        public DispatchLayer mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+            DispatchLayer layer = new DispatchLayer();
+            layer.setLayerId(UUID.fromString(rs.getString("pk_layer")));
+            layer.setJobId(UUID.fromString(rs.getString("pk_job")));
+            layer.setMaxCores(rs.getInt("int_max_cores"));
+            layer.setMinCores(rs.getInt("int_min_cores"));
+            layer.setMinMemory(rs.getInt("int_min_mem"));
+            layer.setTags(new HashSet<String>(
+                    Arrays.asList((String[])rs.getArray("str_tags").getArray())));
+            layer.setWaitingFrames(rs.getInt("int_waiting"));
+            return layer;
+        }
+    };
+
+    @Override
+    public List<DispatchLayer> getDispatchLayers(Job job) {
+        return jdbc.query(GET_DISPATCH_LAYERS, DLAYER_MAPPER, job.getJobId());
+    }
 
     public static final RowMapper<DispatchNode> DNODE_MAPPER = new RowMapper<DispatchNode>() {
         @Override
@@ -41,7 +82,7 @@ public abstract class DispatchDaoImpl extends AbstractDao implements DispatchDao
             node.setTags(new HashSet<String>(
                     Arrays.asList((String[])rs.getArray("str_tags").getArray())));
             node.setIdleCores(rs.getInt("int_free_cores"));
-            node.setIdleMemory(rs.getInt("int_free_mem"));
+            node.setIdleMemory(rs.getInt("int_free_memory"));
             node.setName(rs.getString("str_name"));
             return node;
         }
@@ -51,6 +92,7 @@ public abstract class DispatchDaoImpl extends AbstractDao implements DispatchDao
             "SELECT " +
                 "node.pk_node,"+
                 "node.pk_cluster,"+
+                "node.str_name,"+
                 "node.str_tags,"+
                 "node_dsp.int_free_cores,"+
                 "node_dsp.int_free_memory " +
@@ -73,6 +115,7 @@ public abstract class DispatchDaoImpl extends AbstractDao implements DispatchDao
                 throws SQLException {
             DispatchProject project = new DispatchProject();
             project.setProjectId((UUID) rs.getObject("pk_project"));
+            project.setQuotaId((UUID) rs.getObject("pk_quota"));
             project.setTier(rs.getFloat("int_run_cores") / rs.getFloat("int_size"));
             return project;
         }
@@ -80,7 +123,8 @@ public abstract class DispatchDaoImpl extends AbstractDao implements DispatchDao
 
     private static final String GET_SORTED_PROJECTS =
             "SELECT " +
-                "pk_project, " +
+                "quota.pk_project, " +
+                "quota.pk_quota,"+
                 "quota.int_run_cores,"+
                 "quota.int_size " +
             "FROM " +
@@ -156,6 +200,8 @@ public abstract class DispatchDaoImpl extends AbstractDao implements DispatchDao
             job.setJobId((UUID) rs.getObject("pk_job"));
             job.setFolderId((UUID) rs.getObject("pk_folder"));
             job.setProjectId((UUID) rs.getObject("pk_project"));
+            job.setName(rs.getString("str_name"));
+            job.setWaitingFrames(rs.getInt("int_waiting"));
             job.setMaxCores(rs.getInt("int_max_cores"));
             job.setMinCores(rs.getInt("int_min_cores"));
             job.incrementCores(rs.getInt("int_run_cores"));
@@ -168,14 +214,19 @@ public abstract class DispatchDaoImpl extends AbstractDao implements DispatchDao
                 "job.pk_job,"+
                 "job.pk_folder, " +
                 "job.pk_project, " +
+                "job.str_name, " +
                 "job_dsp.int_min_cores,"+
                 "job_dsp.int_max_cores,"+
-                "job_dsp.int_run_cores "+
+                "job_dsp.int_run_cores,"+
+                "job_count.int_waiting " +
             "FROM " +
                 "plow.job,"+
-                "plow.job_dsp " +
+                "plow.job_dsp, " +
+                "plow.job_count " +
             "WHERE " +
                 "job.pk_job = job_dsp.pk_job " +
+            "AND " +
+                "job.pk_job = job_count.pk_job " +
             "AND " +
                 "job.pk_job = ?";
 
@@ -203,7 +254,7 @@ public abstract class DispatchDaoImpl extends AbstractDao implements DispatchDao
                 throws SQLException {
 
             DispatchTask frame = new DispatchTask();
-            frame.setTaskId((UUID)rs.getObject("pk_frame"));
+            frame.setTaskId((UUID)rs.getObject("pk_task"));
             frame.setLayerId((UUID) rs.getObject("pk_layer"));
             frame.setNumber(rs.getInt("int_number"));
             frame.setCommand((String[]) rs.getArray("str_command").getArray());
@@ -256,5 +307,34 @@ public abstract class DispatchDaoImpl extends AbstractDao implements DispatchDao
                     ps.setInt(5, TaskState.WAITING.ordinal());
                 }
         }, DFRAME_MAPPER);
+    }
+
+    private static final String GET_FRAMES_BY_LAYER =
+            "SELECT " +
+                "task.pk_task,"+
+                "task.str_name," +
+                "task.int_number," +
+                "layer.pk_layer, "+
+                "layer.str_command "+
+            "FROM " +
+                "plow.layer " +
+                    "INNER JOIN " +
+                "plow.task " +
+                    "ON layer.pk_layer = task.pk_layer " +
+            "WHERE " +
+                "layer.pk_layer = ? " +
+            "AND " +
+                "task.int_state = ? " +
+            "AND " +
+                "task.bool_reserved IS FALSE " +
+            "ORDER BY " +
+                "task.int_task_order ASC " +
+            "LIMIT ?";
+
+    @Override
+    public List<DispatchTask> getFrames(final DispatchLayer layer, final DispatchNode node) {
+        return jdbc.query(GET_FRAMES_BY_LAYER, DFRAME_MAPPER,
+                layer.getLayerId(), TaskState.WAITING.ordinal(),
+                Defaults.DISPATCH_MAX_TASKS_PER_JOB);
     }
 }
