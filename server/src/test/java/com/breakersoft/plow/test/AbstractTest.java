@@ -17,6 +17,7 @@ import com.breakersoft.plow.json.BlueprintLayer;
 import com.breakersoft.plow.rnd.thrift.Hardware;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.service.ProjectService;
+import com.breakersoft.plow.service.QuotaService;
 import com.google.common.collect.Lists;
 
 @Transactional
@@ -28,11 +29,15 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
     @Resource
     ProjectService projectService;
 
+    @Resource
+    QuotaService quotaService;
+
     protected Project testProject;
 
     @Before
     public void initTestProject() {
         testProject = projectService.createProject("unittest", "Unit Test Project");
+        quotaService.createQuota(testProject,"unassigned", 10, 15);
     }
 
     public Blueprint getTestBlueprint() {
