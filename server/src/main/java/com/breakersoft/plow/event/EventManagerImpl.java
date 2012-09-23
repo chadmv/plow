@@ -8,6 +8,7 @@ import com.google.common.eventbus.EventBus;
 public final class EventManagerImpl implements EventManager {
 
     private final EventBus eventBus;
+    private boolean enabled;
 
     public EventManagerImpl() {
         eventBus = new EventBus();
@@ -20,7 +21,17 @@ public final class EventManagerImpl implements EventManager {
 
     @Override
     public void post(Object obj) {
-        eventBus.post(obj);
+        if (isEnabled()) {
+            eventBus.post(obj);
+        }
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
 
