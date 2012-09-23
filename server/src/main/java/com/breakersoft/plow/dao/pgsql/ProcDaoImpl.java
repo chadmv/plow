@@ -56,9 +56,9 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
             JdbcUtils.Insert("plow.proc",
                     "pk_proc",
                     "pk_quota",
-                    "pk_host",
-                    "pk_frame",
-                    "int_cores"+
+                    "pk_node",
+                    "pk_task",
+                    "int_cores",
                     "int_mem");
 
     @Override
@@ -69,8 +69,8 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                 proc.getQuotaId(),
                 proc.getNodeId(),
                 proc.getTaskId(),
-                proc.getMinCores(),
-                proc.getMinMemory());
+                proc.getCores(),
+                proc.getMemory());
     }
 
 }
