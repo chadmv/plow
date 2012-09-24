@@ -3,7 +3,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 import sys
-sys.path.append("../client/python")
+sys.path.append("../../client/python")
 
 import rndlib.server
 
