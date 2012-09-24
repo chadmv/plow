@@ -65,7 +65,8 @@ class ProcessManager(object):
         pthread = ProcessThread(processCmd)
         with self.__lock:
             self.__threads[processCmd.procId] = (processCmd, pthread, cpus)
-        pthread.run()
+        pthread.start()
+        logger.info("procsss thread started");
         return pthread.getProcess()
 
     def processFinished(self, processCmd):
