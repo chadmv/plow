@@ -236,13 +236,13 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     }
 
     @Override
-    public boolean reserveFrame(Task frame) {
+    public boolean reserveTask(Task frame) {
         return jdbc.update("UPDATE plow.frame SET bool_reserved=1 " +
                 "WHERE pk_frame=? AND bool_reserved=0") == 1;
     }
 
     @Override
-    public boolean unReserveFrame(Task frame) {
+    public boolean unreserveTask(Task frame) {
         return jdbc.update("UPDATE plow.frame SET bool_reserved=0 " +
                 "WHERE pk_frame=? AND bool_reserved=1") == 1;
     }

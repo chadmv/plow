@@ -15,9 +15,9 @@ import com.breakersoft.plow.dispatcher.DispatchNode;
 
 public interface DispatchDao {
 
-    boolean reserveFrame(Task frame);
+    boolean reserveTask(Task frame);
 
-    boolean unReserveFrame(Task frame);
+    boolean unreserveTask(Task frame);
 
     List<DispatchTask> getFrames(DispatchJob job, DispatchNode node);
 
