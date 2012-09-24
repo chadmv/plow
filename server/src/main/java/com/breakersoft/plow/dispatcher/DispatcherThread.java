@@ -18,6 +18,7 @@ import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.rnd.RndClient;
+import com.breakersoft.plow.rnd.RndClientException;
 import com.breakersoft.plow.rnd.thrift.RunProcessCommand;
 import com.breakersoft.plow.service.DispatcherService;
 import com.google.common.collect.ComparisonChain;
@@ -132,6 +133,10 @@ public class DispatcherThread implements Runnable {
 
                 logger.info("Layers to dipsatch " + layers.size());
 
+                if (layers.size() == 0) {
+                    break;
+                }
+
                 /**
                  * This should be better.
                  */
@@ -151,6 +156,10 @@ public class DispatcherThread implements Runnable {
 
                     for (DispatchTask task: tasks) {
 
+                        if(!dispatcher.canDispatch(layer, node)) {
+                            break;
+                        }
+
                         DispatchProc proc = new DispatchProc();
                         proc.setFrameId(task.getTaskId());
                         proc.setNodeId(node.getNodeId());
@@ -160,12 +169,27 @@ public class DispatcherThread implements Runnable {
                         proc.setFrameName(task.getName());
                         proc.setNumber(task.getNumber());
 
-                        dispatcherService.createDispatchProc(proc);
-                        runProcess(task, proc, node);
+                        try {
+
+                            dispatcherService.createDispatchProc(proc);
+
+                            node.setIdleCores(node.getIdleCores() - layer.getMinCores());
+                            node.setIdleMemory(node.getIdleMemory() - layer.getMinMemory());
+                            runProcess(task, proc, node);
+
+                        } catch (RndClientException e) {
+                            logger.info("RndClientException, " + e);
+                            return;
+                        }
+                        catch (Exception e) {
+                            //
+                        }
                     }
                 }
             }
         }
+
+        logger.info("Dispatch complete.");
     }
 
     private void runProcess(DispatchTask task, DispatchProc proc, DispatchNode node) {
@@ -180,6 +204,7 @@ public class DispatcherThread implements Runnable {
 
         RndClient client = new RndClient(node.getName(), 11338);
         client.runProcess(cmd);
+        logger.info("process is running");
     }
 
     public void addJob(DispatchJob job) {
