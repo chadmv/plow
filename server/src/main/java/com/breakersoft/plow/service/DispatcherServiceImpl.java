@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.DispatchFolder;
@@ -68,4 +69,17 @@ public class DispatcherServiceImpl implements DispatcherService {
     public void createDispatchProc (DispatchProc proc) {
         procDao.create(proc);
     }
+
+    @Override
+    public boolean reserveTask(Task task) {
+        return dispatchDao.reserveTask(task);
+    }
+
+    @Override
+    public boolean unreserveTask(Task task) {
+        return dispatchDao.unreserveTask(task);
+    }
+
+
+
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.DispatchFolder;
 import com.breakersoft.plow.dispatcher.DispatchJob;
 import com.breakersoft.plow.dispatcher.DispatchLayer;
@@ -27,4 +28,8 @@ public interface DispatcherService {
     void createDispatchProc(DispatchProc proc);
 
     List<DispatchLayer> getDispatchLayers(Job job);
+
+    boolean reserveTask(Task task);
+
+    boolean unreserveTask(Task task);
 }
