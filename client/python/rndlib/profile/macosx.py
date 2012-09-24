@@ -37,7 +37,6 @@ class SystemProfiler(AbstractProfiler):
         memstat.foo(ctypes.byref(f))
         self.data.update(dict([(field[0], 
             getattr(f, field[0])) for field in sysinfo_t._fields_]))
-        logger.info(str(self))
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
