@@ -53,7 +53,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
 
         BlueprintLayer layer = new BlueprintLayer();
         layer.setChunk(1);
-        layer.setCommand(new String[] { "/bin/ls" });
+        layer.setCommand(new String[] { "sleep", "5" });
         layer.setMaxCores(8);
         layer.setMinCores(1);
         layer.setMinMemory(1024);
@@ -78,7 +78,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
 
         Ping ping = new Ping();
         ping.bootTime = System.currentTimeMillis() - 1000;
-        ping.hostname = "test";
+        ping.hostname = "localhost";
         ping.ipAddr = "127.0.0.1";
         ping.isReboot = true;
         ping.processes = Lists.newArrayList();
