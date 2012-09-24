@@ -5,12 +5,16 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
+import org.slf4j.Logger;
 
 import com.breakersoft.plow.rnd.thrift.RndException;
 import com.breakersoft.plow.rnd.thrift.RndNodeApi;
 import com.breakersoft.plow.rnd.thrift.RunProcessCommand;
 
 public class RndClient {
+
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(RndClient.class);
 
     private final String host;
     private final int port;
@@ -44,7 +48,7 @@ public class RndClient {
         try {
             proxy.runProcess(command);
         } catch (RndException | TException e) {
-
+            throw new RndClientException(e);
         }
     }
 }
