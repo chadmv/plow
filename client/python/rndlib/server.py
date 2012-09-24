@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class RndProcessHandler(object):
 
     def runProcess(self, process):
-        core.executeProcessCommand(process)
+        core.runProcess(process)
 
 def start():
     logger.info("Staring Render Node Daemon on TCP port %d" % conf.NETWORK_PORT)
@@ -24,5 +24,5 @@ def start():
     transport = TSocket.TServerSocket(port=conf.NETWORK_PORT)
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
-    server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+    server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
     server.serve()
