@@ -46,8 +46,6 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         bp.setName("test");
         bp.setPaused(false);
         bp.setProject("unittest");
-        bp.setScene("seq");
-        bp.setShot("shot");
         bp.setUid(100);
         bp.setUsername("gandalf");
 
@@ -59,6 +57,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         layer.setMinMemory(1024);
         layer.setName("test_ls");
         layer.setRange("1-10");
+        layer.setTags(new String[] { "unassigned" });
 
         bp.addLayer(layer);
 
@@ -72,7 +71,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         hw.platform = "OSX 10.8.1 x86_64";
         hw.freeRamMb = 4096;
         hw.freeSwapMb = 1024;
-        hw.physicalCpus = 4;
+        hw.physicalCpus = 2;
         hw.totalRamMb = 4096;
         hw.totalSwapMb = 1024;
 
@@ -81,7 +80,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         ping.hostname = "localhost";
         ping.ipAddr = "127.0.0.1";
         ping.isReboot = true;
-        ping.processes = Lists.newArrayList();
+        ping.tasks = Lists.newArrayList();
         ping.hw = hw;
 
         return ping;

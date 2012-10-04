@@ -9,17 +9,15 @@ import javax.annotation.Resource;
 import org.junit.Test;
 
 import com.breakersoft.plow.Folder;
-import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.FolderDao;
-import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.QuotaDao;
-import com.breakersoft.plow.dispatcher.DispatchFolder;
-import com.breakersoft.plow.dispatcher.DispatchJob;
-import com.breakersoft.plow.dispatcher.DispatchNode;
-import com.breakersoft.plow.dispatcher.DispatchProject;
+import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
+import com.breakersoft.plow.dispatcher.domain.DispatchJob;
+import com.breakersoft.plow.dispatcher.domain.DispatchNode;
+import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobLauncherService;
 import com.breakersoft.plow.service.NodeService;
@@ -82,7 +80,16 @@ public class DispatcherDaoTests extends AbstractTest {
 
         JobLaunchEvent event = jobLauncherService.launch(getTestBlueprint());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
+    }
 
+    @Test
+    public void testGetDispatchLayers() {
+        Node node =  nodeService.createNode(getTestNodePing());
+        DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
 
+        JobLaunchEvent event = jobLauncherService.launch(getTestBlueprint());
+        DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
+
+        dispatchDao.getDispatchLayers(djob, dnode);
     }
 }

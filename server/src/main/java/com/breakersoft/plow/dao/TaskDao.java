@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.Layer;
+import com.breakersoft.plow.thrift.TaskState;
 
 public interface TaskDao {
 
@@ -12,4 +13,7 @@ public interface TaskDao {
     Task get(Layer layer, int number);
 
     Task get(UUID id);
+
+    boolean updateState(Task task, TaskState currentState,
+            TaskState newState);
 }

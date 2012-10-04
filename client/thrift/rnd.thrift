@@ -14,26 +14,31 @@ exception RndException {
   3: optional list<string> stack
 }
 
-struct RunProcessCommand {
+struct RunTaskCommand {
     1:common.Guid procId,
-    2:common.Guid frameId,
-    3:i32 cores,
-    4:list<string> command,
-    5:map<string,string> env,
-    6:string logFile
+    2:common.Guid taskId,
+    3:common.Guid jobId,
+    4:i32 cores,
+    5:list<string> command,
+    6:map<string,string> env,
+    7:string logFile
 }
 
-struct Process {
+struct RunningTask {
     1:common.Guid procId,
-    2:common.Guid frameId,
-    3:i64 maxRss,
-    4:i32 pid
+    2:common.Guid taskId,
+    3:common.Guid jobId,
+    4:i64 maxRss,
+    5:i32 pid
 }
 
-struct ProcessResult {
-    1:Process process,
-    2:i32 exitStatus,
-    3:optional byte signal
+struct RunTaskResult {
+    1:common.Guid procId,
+    2:common.Guid taskId,
+    3:common.Guid jobId,
+    4:i64 maxRss,
+    5:i32 exitStatus,
+    6:optional byte exitSignal
 }
 
 struct Hardware {
@@ -53,16 +58,16 @@ struct Ping {
     3:bool isReboot,
     4:i64 bootTime,
     5:Hardware hw,
-    6:list<Process> processes;
+    6:list<RunningTask> tasks;
 }
 
 service RndServiceApi {
         
     void sendPing(1:Ping ping) throws (1:RndException e),
-    void processCompleted(1:ProcessResult result) throws (1:RndException e)
+    void taskComplete(1:RunTaskResult result) throws (1:RndException e)
 }
 
 service RndNodeApi {
         
-    void runProcess(1:RunProcessCommand process) throws (1:RndException ouch),
+    void runTask(1:RunTaskCommand command) throws (1:RndException ouch),
 }

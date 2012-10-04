@@ -15,6 +15,7 @@ import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.json.Blueprint;
 import com.breakersoft.plow.json.BlueprintLayer;
 import com.breakersoft.plow.test.AbstractTest;
+import com.breakersoft.plow.thrift.TaskState;
 
 public class TaskDaoTests extends AbstractTest {
 
@@ -51,4 +52,12 @@ public class TaskDaoTests extends AbstractTest {
         assertEquals(f2, f1);
     }
 
+    @Test
+    public void testUpdateState() {
+        testCreate();
+        assertTrue(taskDao.updateState(task,
+                TaskState.INITIALIZE, TaskState.WAITING));
+        assertFalse(taskDao.updateState(task,
+                TaskState.DEAD, TaskState.RUNNING));
+    }
 }

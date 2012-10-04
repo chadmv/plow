@@ -6,7 +6,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.rnd.thrift.Ping;
-import com.breakersoft.plow.rnd.thrift.ProcessResult;
+import com.breakersoft.plow.rnd.thrift.RunTaskResult;
 import com.breakersoft.plow.rnd.thrift.RndException;
 import com.breakersoft.plow.rnd.thrift.RndServiceApi;
 import com.breakersoft.plow.service.NodeService;
@@ -29,9 +29,9 @@ public class RndThriftServiceImpl implements RndServiceApi.Iface {
     }
 
     @Override
-    public void processCompleted(ProcessResult arg0) throws RndException,
+    public void taskComplete(RunTaskResult result) throws RndException,
             TException {
-        // TODO Auto-generated method stub
+
 
     }
 

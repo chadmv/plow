@@ -1,8 +1,9 @@
-package com.breakersoft.plow.dispatcher;
+package com.breakersoft.plow.dispatcher.domain;
 
 import java.util.List;
 
 import com.breakersoft.plow.JobE;
+import com.breakersoft.plow.dispatcher.Dispatchable;
 import com.google.common.collect.ComparisonChain;
 
 public final class DispatchJob extends JobE implements Dispatchable, Comparable<DispatchJob> {
@@ -70,7 +71,7 @@ public final class DispatchJob extends JobE implements Dispatchable, Comparable<
         this.folder = folder;
     }
 
-    public List<DispatchLayer> getLayers() {
+    public List<DispatchLayer> getDispatchLayers() {
         return layers;
     }
 

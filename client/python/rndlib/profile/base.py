@@ -18,7 +18,7 @@ class AbstractProfiler(object):
         for key, value in self.data.iteritems():
             logger.info("%s = %s" % (key, value))
 
-    def sendPing(self, processes, isReboot=False):
+    def sendPing(self, tasks, isReboot=False):
         
         # Update the values (calls subclass impl)
         self.update()
@@ -41,7 +41,7 @@ class AbstractProfiler(object):
         ping.isReboot = isReboot
         ping.bootTime = self.bootTime
         ping.hw = hw
-        ping.processes = processes
+        ping.tasks = tasks
 
         if conf.NETWORK_DISABLED:
             return

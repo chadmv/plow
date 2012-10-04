@@ -68,4 +68,11 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         task.setLayerId(layer.getLayerId());
         return task;
     }
+
+    @Override
+    public boolean updateState(Task task, TaskState currentState, TaskState newState) {
+        return jdbc.update("UPDATE plow.task SET int_state=? WHERE pk_task=? AND int_state=?",
+                newState.ordinal(), task.getTaskId(), currentState.ordinal()) == 1;
+    }
+
 }

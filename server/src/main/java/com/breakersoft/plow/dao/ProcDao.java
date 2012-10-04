@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.Proc;
-import com.breakersoft.plow.dispatcher.DispatchProc;
+import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 
 public interface ProcDao {
 
@@ -13,5 +13,7 @@ public interface ProcDao {
     Proc getProc(UUID procId);
 
     void create(DispatchProc proc);
+
+    boolean delete(Proc proc);
 
 }

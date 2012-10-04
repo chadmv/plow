@@ -224,8 +224,6 @@ BEGIN
    * Update node_dsp
    **/
   UPDATE plow.node_dsp SET
-    int_cores = int_cores + new.int_cores,
-    int_memory = int_memory + new.int_memory,
     int_free_cores = int_free_cores - new.int_cores,
     int_free_memory = int_free_memory - new.int_memory
   WHERE
@@ -246,6 +244,40 @@ LANGUAGE plpgsql;
 
 CREATE TRIGGER trig_after_proc_created AFTER INSERT ON plow.proc
     FOR EACH ROW EXECUTE PROCEDURE plow.after_proc_created();
+
+/**
+ * plow.after_proc_updated()
+ *
+ *
+ */
+CREATE OR REPLACE FUNCTION plow.after_proc_updated() RETURNS TRIGGER AS $$
+BEGIN
+
+  /**
+   * Node DSP has to be updated with the differences.
+   **/
+  UPDATE plow.node_dsp SET
+    int_free_cores = int_free_cores + (new.int_cores - old.int_cores),
+    int_free_memory = int_free_memory + (new.int_memory - old.int_memory)
+  WHERE
+    pk_node = new.pk_node;
+
+  /**
+   * Update quota dsp
+   **/
+  UPDATE plow.quota_dsp SET
+    int_cores = int_cores + (new.int_cores - old.int_cores)
+  WHERE
+    pk_quota = new.pk_quota;
+
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_after_proc_updated AFTER INSERT ON plow.proc
+    FOR EACH ROW WHEN (OLD.pk_task != NEW.pk_task)
+    EXECUTE PROCEDURE plow.after_proc_created();
 
 /**
  * plow.after_proc_destroyed()

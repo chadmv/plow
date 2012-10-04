@@ -6,7 +6,7 @@ public class ProcE implements Proc {
 
     private UUID procId;
     private UUID quotaId;
-    private UUID frameId;
+    private UUID taskId;
     private UUID nodeId;
 
     public UUID getProcId() {
@@ -22,10 +22,10 @@ public class ProcE implements Proc {
         this.quotaId = quotaId;
     }
     public UUID getTaskId() {
-        return frameId;
+        return taskId;
     }
-    public void setFrameId(UUID frameId) {
-        this.frameId = frameId;
+    public void setTaskId(UUID frameId) {
+        this.taskId = frameId;
     }
     public UUID getNodeId() {
         return nodeId;

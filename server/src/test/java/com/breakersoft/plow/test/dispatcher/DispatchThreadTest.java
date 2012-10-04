@@ -8,14 +8,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.breakersoft.plow.Node;
-import com.breakersoft.plow.dispatcher.DispatchJob;
-import com.breakersoft.plow.dispatcher.DispatchNode;
-import com.breakersoft.plow.dispatcher.Dispatcher;
-import com.breakersoft.plow.dispatcher.DispatcherThread;
+import com.breakersoft.plow.dispatcher.BookingThread;
+import com.breakersoft.plow.dispatcher.DispatchConfiguration;
+import com.breakersoft.plow.dispatcher.DispatchService;
+import com.breakersoft.plow.dispatcher.FrontEndDispatcher;
+import com.breakersoft.plow.dispatcher.domain.DispatchJob;
+import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.EventManagerImpl;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.service.DispatcherService;
 import com.breakersoft.plow.service.JobLauncherService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
@@ -23,10 +24,10 @@ import com.breakersoft.plow.test.AbstractTest;
 public class DispatchThreadTest extends AbstractTest {
 
     @Resource
-    Dispatcher dispatcher;
+    FrontEndDispatcher dispatcher;
 
     @Resource
-    DispatcherService dispatcherService;
+    DispatchService dispatcherService;
 
     @Resource
     JobLauncherService jobLaucherService;
@@ -36,6 +37,9 @@ public class DispatchThreadTest extends AbstractTest {
 
     @Resource
     EventManager eventManager;
+
+    @Resource
+    DispatchConfiguration dispatchConfig;
 
     @Before
     public void init() {
@@ -48,9 +52,9 @@ public class DispatchThreadTest extends AbstractTest {
     public void testHandleJobLaunchedEvent() throws InterruptedException {
 
         JobLaunchEvent event = jobLaucherService.launch(getTestBlueprint());
-        DispatchJob job = dispatcherService.getDispatchJob(event.getJob());
+        DispatchJob job = dispatcherService.getDispatchJob(event);
 
-        DispatcherThread thread = new DispatcherThread(dispatcher, dispatcherService);
+        BookingThread thread = dispatchConfig.getBookingThread();
         assertEquals(0, thread.getWaitingJobs());
 
         thread.addJob(job);
@@ -62,28 +66,25 @@ public class DispatchThreadTest extends AbstractTest {
 
     @Test
     public void testDispatchNode_NoJobs() throws InterruptedException {
-        DispatcherThread thread = new DispatcherThread(dispatcher, dispatcherService);
+        BookingThread thread = dispatchConfig.getBookingThread();
 
         Node node = nodeService.createNode(getTestNodePing());
         DispatchNode dnode = dispatcherService.getDispatchNode(node.getName());
-        thread.dispatch(dnode);
+        thread.book(dnode);
     }
 
     @Test
     public void testDispatchNode_Jobs() throws InterruptedException {
 
-        DispatcherThread thread = new DispatcherThread(dispatcher, dispatcherService);
+        BookingThread thread = dispatchConfig.getBookingThread();
         JobLaunchEvent event = jobLaucherService.launch(getTestBlueprint());
-        DispatchJob job = dispatcherService.getDispatchJob(event.getJob());
+        DispatchJob job = dispatcherService.getDispatchJob(event);
 
         Node node = nodeService.createNode(getTestNodePing());
         DispatchNode dnode = dispatcherService.getDispatchNode(node.getName());
 
-        job.setLayers(dispatcherService.getDispatchLayers(job));
-
-
         thread.addJob(job);
         thread.update();
-        thread.dispatch(dnode);
+        thread.book(dnode);
     }
 }

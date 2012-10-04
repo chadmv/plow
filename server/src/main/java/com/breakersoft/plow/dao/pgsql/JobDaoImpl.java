@@ -76,8 +76,8 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 INSERT[0],
                 jobId,
                 project.getProjectId(),
-                blueprint.getFullJobName(),
-                blueprint.getFullJobName(),
+                blueprint.getName(),
+                blueprint.getName(),
                 blueprint.getUsername(),
                 blueprint.getUid(),
                 JobState.INITIALIZE.ordinal(),
@@ -190,5 +190,17 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         sb.append(" WHERE pk_job=?");
         values.add(job.getJobId());
         jdbc.update(sb.toString(), values.toArray());
+    }
+
+    @Override
+    public boolean hasWaitingFrames(Job job) {
+        return jdbc.queryForInt("SELECT job_count.int_waiting FROM job_count WHERE pk_job=?",
+                job.getJobId()) > 0;
+    }
+
+    @Override
+    public boolean hasPendingFrames(Job job) {
+        return jdbc.queryForInt("SELECT int_total - (int_succeeded + int_eaten) FROM job_count WHERE pk_job=?",
+                job.getJobId()) <= 0;
     }
 }

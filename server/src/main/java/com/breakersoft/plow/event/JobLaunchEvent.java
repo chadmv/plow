@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
-import com.breakersoft.plow.dispatcher.DispatchLayer;
+import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.json.Blueprint;
 
 public class JobLaunchEvent implements Event {

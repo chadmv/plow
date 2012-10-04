@@ -93,13 +93,6 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
             }
         });
 
-        /*
-        jdbc.update(INSERT[0],
-                id, job.getJobId(), layer.getName(), layer.getRange(),
-                layer.getCommandAsJson(), layer.getChunk(), order,
-                layer.getMinCores(), layer.getMaxCores(),
-                layer.getMinMemory());
-         */
         jdbc.update("INSERT INTO plow.layer_count (pk_layer) VALUES (?)", id);
 
         final LayerE result = new LayerE();

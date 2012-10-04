@@ -17,7 +17,7 @@ import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.ProjectDao;
-import com.breakersoft.plow.dispatcher.DispatchLayer;
+import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.json.Blueprint;

@@ -26,7 +26,7 @@ public class JobDaoTests extends AbstractTest {
     public void testGetByNameAndState() {
         Blueprint blueprint = getTestBlueprint();
         Job jobA = jobDao.create(testProject, blueprint);
-        Job jobB = jobDao.get(blueprint.getFullJobName(), JobState.INITIALIZE);
+        Job jobB = jobDao.get(blueprint.getName(), JobState.INITIALIZE);
 
         assertEquals(jobA, jobB);
         assertEquals(jobA.getProjectId(), jobB.getProjectId());

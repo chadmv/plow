@@ -7,9 +7,11 @@ import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 
+import com.breakersoft.plow.exceptions.RndClientConnectionError;
+import com.breakersoft.plow.exceptions.RndClientExecuteException;
 import com.breakersoft.plow.rnd.thrift.RndException;
 import com.breakersoft.plow.rnd.thrift.RndNodeApi;
-import com.breakersoft.plow.rnd.thrift.RunProcessCommand;
+import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 
 public class RndClient {
 
@@ -31,24 +33,24 @@ public class RndClient {
 
     public void connect() {
 
+        logger.info("Connecting to: " + host + ":" + port);
         transport = new TSocket(host, port);
         protocol = new TBinaryProtocol(transport);
 
         try {
             transport.open();
         } catch (TTransportException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RndClientConnectionError(e);
         }
 
-        proxy= new RndNodeApi.Client(protocol);
+        proxy = new RndNodeApi.Client(protocol);
     }
 
-    public void runProcess(RunProcessCommand command) {
+    public void runProcess(RunTaskCommand command) {
         try {
-            proxy.runProcess(command);
+            proxy.runTask(command);
         } catch (RndException | TException e) {
-            throw new RndClientException(e);
+            throw new RndClientExecuteException(e);
         }
     }
 }

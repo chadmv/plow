@@ -15,5 +15,5 @@ public final class Defaults {
     public static String FOLDER_DEFAULT_NAME = "jobs";
 
     public static int DISPATCH_MAX_TASKS_PER_JOB = 8;
-
+    public static int DISPATCH_BOOKING_THREADS = 4;
 }

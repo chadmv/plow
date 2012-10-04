@@ -1,25 +1,26 @@
 package com.breakersoft.plow.dao;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Task;
-import com.breakersoft.plow.dispatcher.DispatchFolder;
-import com.breakersoft.plow.dispatcher.DispatchLayer;
-import com.breakersoft.plow.dispatcher.DispatchProject;
-import com.breakersoft.plow.dispatcher.DispatchTask;
-import com.breakersoft.plow.dispatcher.DispatchJob;
-import com.breakersoft.plow.dispatcher.DispatchNode;
+import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
+import com.breakersoft.plow.dispatcher.domain.DispatchJob;
+import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
+import com.breakersoft.plow.dispatcher.domain.DispatchNode;
+import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.dispatcher.domain.DispatchProject;
+import com.breakersoft.plow.dispatcher.domain.DispatchResource;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 
 public interface DispatchDao {
 
     boolean reserveTask(Task frame);
 
     boolean unreserveTask(Task frame);
-
-    List<DispatchTask> getFrames(DispatchJob job, DispatchNode node);
 
     DispatchJob getDispatchJob(Job job);
 
@@ -29,7 +30,10 @@ public interface DispatchDao {
 
     DispatchNode getDispatchNode(String name);
 
-    List<DispatchTask> getFrames(DispatchLayer layer, DispatchNode node);
+    DispatchProc getDispatchProc(UUID id);
 
-    List<DispatchLayer> getDispatchLayers(Job job);
+    List<DispatchLayer> getDispatchLayers(Job job, DispatchResource resource);
+
+    List<DispatchTask> getDispatchTasks(DispatchLayer layer,
+            DispatchResource resource);
 }

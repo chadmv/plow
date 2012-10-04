@@ -22,9 +22,13 @@ class ResourceManager(object):
         logger.info("Intializing resource manager with %d physical cores." % Profiler.physicalCpus)
 
     def checkout(self, numCores):
+        if numCores < 1:
+            raise ttypes.RndException(1, "Cannot reserve 0 slots")
+
         self.__lock.acquire(True)
         try:
             open_slots = self.getOpenSlots()
+            logger.info(open_slots)
             if numCores > len(open_slots):
                 raise ttypes.RndException(1, "No more open slots")
             result = open_slots[0:numCores]
@@ -67,7 +71,7 @@ class ProcessManager(object):
             self.__threads[processCmd.procId] = (processCmd, pthread, cpus)
         pthread.start()
         logger.info("procsss thread started");
-        return pthread.getProcess()
+        return pthread.getRunningTask()
 
     def processFinished(self, processCmd):
         ResourceMgr.checkin(self.__threads[processCmd.procId][2])
@@ -78,8 +82,8 @@ class ProcessManager(object):
                 logger.warn("Process %s not found: %s" % (processCmd.procId, e))
 
     def sendPing(self, isReboot=False):
-        processes = [p[1].getProcess() for p in self.__threads]
-        Profiler.sendPing(processes, isReboot)
+        tasks = [p[1].getRunningTask() for p in self.__threads]
+        Profiler.sendPing(tasks, isReboot)
 
         self.__timer = threading.Timer(60.0, self.sendPing)
         self.__timer.daemon = True
@@ -88,37 +92,38 @@ class ProcessManager(object):
 
 class ProcessThread(threading.Thread):
 
-    def __init__(self, processCmd):
+    def __init__(self, rtc):
         threading.Thread.__init__(self)
         self.daemon = True
 
-        self.processCmd = processCmd
+        self.__rtc = rtc
         self.__pptr = None
         self.__logfp = None
+        self.__pid = 0
 
-        self.__process = ttypes.Process()
-        self.__process.procId = processCmd.procId
-        self.__process.frameId = processCmd.frameId
-        self.__process.maxRss = 0
-        self.__process.pid = 0
-
-    def getProcess(self):
-        return self.__process
+    def getRunningTask(self):
+        rt = ttypes.RunningTask()
+        rt.jobId = self.__rtc.jobId
+        rt.procId = self.__rtc.procId
+        rt.taskId = self.__rtc.taskId
+        rt.maxRss = 0
+        rt.pid = self.__pid
+        return rt
 
     def run(self):
         retcode = 1
         try:
-            logger.info("Opening log file: %s" % self.processCmd.logFile)
-            self.__logfp = open(self.processCmd.logFile, "w")
+            logger.info("Opening log file: %s" % self.__rtc.logFile)
+            self.__logfp = open(self.__rtc.logFile, "w")
             self.__writeLogHeader()
             self.__logfp.flush()
 
-            logger.info("Running command: %s" % self.processCmd.command)
-            self.__pptr = subprocess.Popen(self.processCmd.command,
+            logger.info("Running command: %s" % self.__rtc.command)
+            self.__pptr = subprocess.Popen(self.__rtc.command,
                 shell=False, stdout=self.__logfp, stderr=self.__logfp)
             
-            self.__process.pid = self.__pptr.pid
-            logger.info("PID: %d" % self.__process.pid)
+            self.__pid = self.__pptr.pid
+            logger.info("PID: %d" % self.__pid)
             retcode = self.__pptr.wait()
         
         except Exception, e:
@@ -128,14 +133,17 @@ class ProcessThread(threading.Thread):
 
     def __completed(self, retcode):
 
-        result = ttypes.ProcessResult()
-        result.process = self.__process
+        result = ttypes.RunTaskResult()
+        result.procId = self.__rtc.procId
+        result.taskId = self.__rtc.taskId
+        result.jobId = self.__rtc.jobId
+        result.maxRss = 0
         if retcode < 0:
             result.exitStatus = 1
-            result.signal = retcode
+            result.exitSignal = retcode
         else:
             result.exitStatus = retcode
-            result.signal = 0
+            result.exitSignal = 0
 
         logger.info("Process result %s" % result)
         if not conf.NETWORK_DISABLED:
@@ -148,7 +156,7 @@ class ProcessThread(threading.Thread):
                     logger.warn("Plow server is down, sleeping for 30 seconds")
                     time.sleep(30)
 
-        ProcessMgr.processFinished(self.processCmd)
+        ProcessMgr.processFinished(self.__rtc)
         self.__writeLogFooter(result)
         self.__logfp.close()
 
@@ -171,8 +179,8 @@ Profiler = SystemProfiler()
 ResourceMgr = ResourceManager()
 ProcessMgr = ProcessManager()
 
-def runProcess(command):
-    return ProcessMgr.runProcess(command)
+def runProcess(rtc):
+    return ProcessMgr.runProcess(rtc)
 
 
 

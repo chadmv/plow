@@ -38,7 +38,7 @@ public class LayerDaoTests extends AbstractTest {
         testCreate();
 
         Blueprint bp = getTestBlueprint();
-        Job job = jobDao.get(bp.getFullJobName(), JobState.INITIALIZE);
+        Job job = jobDao.get(bp.getName(), JobState.INITIALIZE);
         Layer layer1 = layerDao.get(job, "test_ls");
         assertEquals(layer, layer1);
     }

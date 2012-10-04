@@ -1,7 +1,8 @@
-package com.breakersoft.plow.dispatcher;
+package com.breakersoft.plow.dispatcher.domain;
 
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.FolderE;
+import com.breakersoft.plow.dispatcher.Dispatchable;
 
 public final class DispatchFolder extends FolderE implements Dispatchable  {
 

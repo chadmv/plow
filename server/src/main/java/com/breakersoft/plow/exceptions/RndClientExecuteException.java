@@ -1,27 +1,27 @@
-package com.breakersoft.plow.rnd;
+package com.breakersoft.plow.exceptions;
 
-public class RndClientException extends RuntimeException {
+public class RndClientExecuteException extends RuntimeException {
 
-	public RndClientException() {
+	public RndClientExecuteException() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public RndClientException(String message) {
+	public RndClientExecuteException(String message) {
 		super(message);
 		// TODO Auto-generated constructor stub
 	}
 
-	public RndClientException(Throwable cause) {
+	public RndClientExecuteException(Throwable cause) {
 		super(cause);
 		// TODO Auto-generated constructor stub
 	}
 
-	public RndClientException(String message, Throwable cause) {
+	public RndClientExecuteException(String message, Throwable cause) {
 		super(message, cause);
 		// TODO Auto-generated constructor stub
 	}
 
-	public RndClientException(String message, Throwable cause,
+	public RndClientExecuteException(String message, Throwable cause,
 			boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 		// TODO Auto-generated constructor stub

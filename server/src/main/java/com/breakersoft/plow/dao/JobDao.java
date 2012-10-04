@@ -20,4 +20,8 @@ public interface JobDao {
     void updateFrameCountsForLaunch(Job job);
 
     boolean setJobState(Job job, JobState state);
+
+    boolean hasWaitingFrames(Job job);
+
+    boolean hasPendingFrames(Job job);
 }

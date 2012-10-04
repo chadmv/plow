@@ -1,4 +1,4 @@
-package com.breakersoft.plow.dispatcher;
+package com.breakersoft.plow.dispatcher.domain;
 
 import java.util.UUID;
 

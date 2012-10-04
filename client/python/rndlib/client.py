@@ -5,7 +5,7 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.server import TServer
 
-from rpc import RndServiceApi, RndProcessApi
+from rpc import RndServiceApi, RndNodeApi
 
 def getPlowConnection():
     host, port = conf.PLOW_HOSTS[0].split(":")
