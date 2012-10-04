@@ -24,6 +24,9 @@ Client and Tools
 Running the Server
 ==================
 
+You'll need Apache Maven to compile the Plow server, and a webapp container like Apache Tomcat to run it.  This
+will most likely chanage to a runnable jar with embedded Jetty server in the future.
+
 Setting up Postgres
 -------------------
 
@@ -38,9 +41,6 @@ Execute the sql file:
 
 Compiling the Server
 --------------------
-
-You'll need Apache Maven to compile the Plow server, and a webapp container like Apache Tomcat to run it.  This
-will most likely chanage to a runnable jar with embedded Jetty server in the future.
 
     > cd server
     > mvn install
