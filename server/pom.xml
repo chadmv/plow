@@ -18,7 +18,6 @@
       <groupId>org.apache.thrift</groupId>
       <artifactId>libthrift</artifactId>
       <version>0.8.0</version>
-          <scope>compile</scope>
     </dependency>
 
     <dependency>
@@ -43,12 +42,6 @@
       <groupId>postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>9.1-901-1.jdbc4</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.thrift</groupId>
-      <artifactId>libthrift</artifactId>
-      <version>0.8.0</version>
     </dependency>
 
     <dependency>
@@ -209,6 +202,13 @@
           </additionalBuildcommands>
           <downloadSources>true</downloadSources>
           <downloadJavadocs>true</downloadJavadocs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <configuration>
+          <warName>plow</warName>
         </configuration>
       </plugin>
       <plugin>
