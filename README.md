@@ -9,16 +9,16 @@ Requirements
 Server
 ------
 
-Postgresql 9.2
-Java7
+* Postgresql 9.2
+* Java7
 
 Client and Tools
 ----------------
 
-Python 2.6 or 2.7 (sorry, talk to Autodesk)
-Qt 4.7+
-PySide 1.x
-Thrift 0.8 (going to 0.9 soon)
+* Python 2.6 or 2.7 (sorry, talk to Autodesk)
+* Qt 4.7+
+* PySide 1.x
+* Thrift 0.8 (going to 0.9 soon)
 
 
 Running the Server
