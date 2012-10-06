@@ -16,7 +16,7 @@ import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.LayerE;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.LayerDao;
-import com.breakersoft.plow.json.BlueprintLayer;
+import com.breakersoft.plow.thrift.LayerBp;
 import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
@@ -69,7 +69,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
     };
 
     @Override
-    public Layer create(final Job job, final BlueprintLayer layer, final int order) {
+    public Layer create(final Job job, final LayerBp layer, final int order) {
 
         final UUID id = UUID.randomUUID();
 
@@ -81,8 +81,8 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
                 ret.setObject(2, job.getJobId());
                 ret.setString(3, layer.getName());
                 ret.setString(4, layer.getRange());
-                ret.setArray(5, conn.createArrayOf("text", layer.getCommand()));
-                ret.setArray(6, conn.createArrayOf("text", layer.getTags()));
+                ret.setArray(5, conn.createArrayOf("text", layer.getCommand().toArray()));
+                ret.setArray(6, conn.createArrayOf("text", layer.getTags().toArray()));
                 ret.setInt(7, layer.getChunk());
                 ret.setInt(8, order);
                 ret.setInt(9, layer.getMinCores());

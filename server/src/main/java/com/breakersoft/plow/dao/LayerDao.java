@@ -4,11 +4,11 @@ import java.util.UUID;
 
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
-import com.breakersoft.plow.json.BlueprintLayer;
+import com.breakersoft.plow.thrift.LayerBp;
 
 public interface LayerDao {
 
-    Layer create(Job job, BlueprintLayer layer, int order);
+    Layer create(Job job, LayerBp layer, int order);
 
     Layer get(Job job, String name);
 

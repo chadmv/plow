@@ -1,7 +1,5 @@
 package com.breakersoft.plow.service;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,13 +15,11 @@ import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.ProjectDao;
-import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.json.Blueprint;
-import com.breakersoft.plow.json.BlueprintLayer;
+import com.breakersoft.plow.thrift.JobBp;
 import com.breakersoft.plow.thrift.JobState;
-import com.google.common.collect.Lists;
+import com.breakersoft.plow.thrift.LayerBp;
 
 @Service
 @Transactional
@@ -51,7 +47,7 @@ public class JobLauncherServiceImpl implements JobLauncherService {
     @Autowired
     EventManager eventManager;
 
-    public JobLaunchEvent launch(Blueprint blueprint) {
+    public JobLaunchEvent launch(JobBp blueprint) {
 
         final Project project = projectDao.get(blueprint.getProject());
         final Job job = jobDao.create(project, blueprint);
@@ -83,10 +79,10 @@ public class JobLauncherServiceImpl implements JobLauncherService {
     }
 
     private void createJobTopology(
-            Job job, Project project, Blueprint blueprint) {
+            Job job, Project project, JobBp blueprint) {
 
         int layerOrder = 0;
-        for (BlueprintLayer blayer: blueprint.getLayers()) {
+        for (LayerBp blayer: blueprint.getLayers()) {
             Layer layer = layerDao.create(job, blayer, layerOrder);
 
             int frameOrder = 0;

@@ -11,14 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Project;
-import com.breakersoft.plow.dao.ProjectDao;
-import com.breakersoft.plow.json.Blueprint;
-import com.breakersoft.plow.json.BlueprintLayer;
 import com.breakersoft.plow.rnd.thrift.Hardware;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.service.ProjectService;
 import com.breakersoft.plow.service.QuotaService;
+import com.breakersoft.plow.thrift.JobBp;
+import com.breakersoft.plow.thrift.LayerBp;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 @Transactional
 @ContextConfiguration(locations={
@@ -40,26 +40,25 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         quotaService.createQuota(testProject,"unassigned", 10, 15);
     }
 
-    public Blueprint getTestBlueprint() {
+    public JobBp getTestBlueprint() {
 
-        Blueprint bp = new Blueprint();
+        JobBp bp = new JobBp();
         bp.setName("test");
         bp.setPaused(false);
         bp.setProject("unittest");
         bp.setUid(100);
-        bp.setUsername("gandalf");
 
-        BlueprintLayer layer = new BlueprintLayer();
+        LayerBp layer = new LayerBp();
         layer.setChunk(1);
-        layer.setCommand(new String[] { "sleep", "5" });
+        layer.setCommand(Lists.newArrayList("sleep", "5" ));
         layer.setMaxCores(8);
         layer.setMinCores(1);
         layer.setMinMemory(1024);
         layer.setName("test_ls");
         layer.setRange("1-10");
-        layer.setTags(new String[] { "unassigned" });
+        layer.setTags(Sets.newHashSet("unassigned"));
 
-        bp.addLayer(layer);
+        bp.addToLayers(layer);
 
         return bp;
     }

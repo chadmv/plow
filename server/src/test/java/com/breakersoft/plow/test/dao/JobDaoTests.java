@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.dao.JobDao;
-import com.breakersoft.plow.json.Blueprint;
 import com.breakersoft.plow.test.AbstractTest;
+import com.breakersoft.plow.thrift.JobBp;
 import com.breakersoft.plow.thrift.JobState;
 
 public class JobDaoTests extends AbstractTest {
@@ -24,7 +24,7 @@ public class JobDaoTests extends AbstractTest {
 
     @Test
     public void testGetByNameAndState() {
-        Blueprint blueprint = getTestBlueprint();
+        JobBp blueprint = getTestBlueprint();
         Job jobA = jobDao.create(testProject, blueprint);
         Job jobB = jobDao.get(blueprint.getName(), JobState.INITIALIZE);
 
@@ -34,7 +34,7 @@ public class JobDaoTests extends AbstractTest {
 
     @Test
     public void testGetById() {
-        Blueprint blueprint = getTestBlueprint();
+        JobBp blueprint = getTestBlueprint();
         Job jobA = jobDao.create(testProject, blueprint);
         Job jobB = jobDao.get(jobA.getJobId());
 

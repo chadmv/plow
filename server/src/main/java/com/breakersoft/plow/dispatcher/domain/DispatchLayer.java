@@ -6,8 +6,6 @@ import org.slf4j.Logger;
 
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.LayerE;
-import com.google.common.collect.ComparisonChain;
-import com.google.common.collect.ImmutableSet;
 
 public final class DispatchLayer extends LayerE {
 

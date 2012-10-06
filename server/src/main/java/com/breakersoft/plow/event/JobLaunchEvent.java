@@ -1,20 +1,17 @@
 package com.breakersoft.plow.event;
 
-import java.util.List;
-
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
-import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
-import com.breakersoft.plow.json.Blueprint;
+import com.breakersoft.plow.thrift.JobBp;
 
 public class JobLaunchEvent implements Event {
 
     private final Job job;
     private final Folder folder;
-    private final Blueprint blueprint;
+    private final JobBp blueprint;
 
 
-    public JobLaunchEvent(Job job, Folder folder, Blueprint blueprint) {
+    public JobLaunchEvent(Job job, Folder folder, JobBp blueprint) {
         this.job = job;
         this.folder = folder;
         this.blueprint = blueprint;
@@ -24,7 +21,7 @@ public class JobLaunchEvent implements Event {
         return job;
     }
 
-    public Blueprint getBlueprint() {
+    public JobBp getBlueprint() {
         return blueprint;
     }
 

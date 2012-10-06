@@ -4,12 +4,12 @@ import java.util.UUID;
 
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Project;
-import com.breakersoft.plow.json.Blueprint;
+import com.breakersoft.plow.thrift.JobBp;
 import com.breakersoft.plow.thrift.JobState;
 
 public interface JobDao {
 
-    Job create(Project project, Blueprint blueprint);
+    Job create(Project project, JobBp blueprint);
 
     Job get(String name, JobState state);
 
