@@ -75,7 +75,9 @@ public class JobLauncherServiceImpl implements JobLauncherService {
 
     private Folder filterJob(Job job, Project project) {
         // TODO: fully implement
-        return folderDao.getDefaultFolder(project);
+        Folder folder = folderDao.getDefaultFolder(project);
+        jobDao.updateFolder(job, folder);
+        return folder;
     }
 
     private void createJobTopology(
