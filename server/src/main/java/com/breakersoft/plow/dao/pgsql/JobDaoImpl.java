@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.JobE;
 import com.breakersoft.plow.Project;
@@ -90,6 +91,12 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         job.setProjectId(project.getProjectId());
         job.setFolderId(null); // Don't know folder yet
         return job;
+    }
+
+    @Override
+    public void updateFolder(Job job, Folder folder) {
+        jdbc.update("UPDATE plow.job SET pk_folder=? WHERE pk_job=?",
+                folder.getFolderId(), job.getJobId());
     }
 
     @Override

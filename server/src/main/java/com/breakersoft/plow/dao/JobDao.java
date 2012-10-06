@@ -2,6 +2,7 @@ package com.breakersoft.plow.dao;
 
 import java.util.UUID;
 
+import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.thrift.JobBp;
@@ -24,4 +25,6 @@ public interface JobDao {
     boolean hasWaitingFrames(Job job);
 
     boolean hasPendingFrames(Job job);
+
+    void updateFolder(Job job, Folder folder);
 }
