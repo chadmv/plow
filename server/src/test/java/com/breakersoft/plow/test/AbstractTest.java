@@ -15,6 +15,7 @@ import com.breakersoft.plow.rnd.thrift.Hardware;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.service.ProjectService;
 import com.breakersoft.plow.service.QuotaService;
+import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.JobBp;
 import com.breakersoft.plow.thrift.LayerBp;
 import com.google.common.collect.Lists;
@@ -40,13 +41,11 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         quotaService.createQuota(testProject,"unassigned", 10, 15);
     }
 
-    public JobBp getTestBlueprint() {
+    public Blueprint getTestBlueprint() {
 
-        JobBp bp = new JobBp();
-        bp.setName("test");
-        bp.setPaused(false);
-        bp.setProject("unittest");
-        bp.setUid(100);
+        JobBp jbp = new JobBp();
+        jbp.setName("test");
+        jbp.setUid(100);
 
         LayerBp layer = new LayerBp();
         layer.setChunk(1);
@@ -58,7 +57,12 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         layer.setRange("1-10");
         layer.setTags(Sets.newHashSet("unassigned"));
 
-        bp.addToLayers(layer);
+        jbp.addToLayers(layer);
+
+        Blueprint bp = new Blueprint();
+        bp.setPaused(false);
+        bp.setProject("unittest");
+        bp.job = jbp;
 
         return bp;
     }

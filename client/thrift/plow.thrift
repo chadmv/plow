@@ -55,15 +55,20 @@ struct LayerBp {
 
 struct JobBp {
     1:string name,
-    2:string project,
-    3:i32 uid,
-    4:bool paused
-    5:list<LayerBp> layers
+    2:i32 uid,
+    3:list<LayerBp> layers
 }
+
+struct Blueprint {
+    1:JobBp job,
+    2:string project,
+    3:bool paused,
+}
+
 
 service RpcServiceApi {
     
-    JobT launch(1:JobBp blueprint) throws (1:PlowException e),
+    JobT launch(1:Blueprint blueprint) throws (1:PlowException e),
     
 }
 

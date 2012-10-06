@@ -6,11 +6,12 @@ import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.thrift.JobBp;
+import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.JobState;
 
 public interface JobDao {
 
-    Job create(Project project, JobBp blueprint);
+    Job create(Project project, Blueprint blueprint);
 
     Job get(String name, JobState state);
 

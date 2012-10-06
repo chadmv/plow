@@ -16,7 +16,7 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
     JobLauncherService jobLauncherService;
 
     @Override
-    public JobT launch(JobBp bp) throws PlowException, TException {
+    public JobT launch(Blueprint bp) throws PlowException, TException {
 
         logger.info("launchung job! " + bp);
 
@@ -24,7 +24,7 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
 
         JobT result = new JobT();
         result.id = event.getJob().getJobId().toString();
-        result.name = event.getBlueprint().getName();
+        result.name = event.getBlueprint().job.getName();
         return result;
     }
 
