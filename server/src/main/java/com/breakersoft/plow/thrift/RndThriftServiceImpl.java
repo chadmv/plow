@@ -11,6 +11,7 @@ import com.breakersoft.plow.rnd.thrift.RndException;
 import com.breakersoft.plow.rnd.thrift.RndServiceApi;
 import com.breakersoft.plow.service.NodeService;
 
+@ThriftService
 public class RndThriftServiceImpl implements RndServiceApi.Iface {
 
     @Autowired

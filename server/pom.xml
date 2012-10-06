@@ -10,7 +10,7 @@
   <properties>
     <java-version>1.6</java-version>
     <org.springframework-version>3.1.2.RELEASE</org.springframework-version>
-    <org.aspectj-version>1.6.9</org.aspectj-version>
+    <org.aspectj-version>1.6.12</org.aspectj-version>
     <org.slf4j-version>1.5.10</org.slf4j-version>
   </properties>
   <dependencies>
@@ -90,13 +90,22 @@
       <artifactId>spring-tx</artifactId>
       <version>${org.springframework-version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aop</artifactId>
+      <version>${org.springframework-version}</version>
+    </dependency>
     <!-- AspectJ -->
     <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjrt</artifactId>
       <version>${org.aspectj-version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <version>1.6.12</version>
+    </dependency>
     <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib</artifactId>
