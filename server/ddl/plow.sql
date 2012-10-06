@@ -12,6 +12,9 @@ CREATE TABLE plow.project (
   str_title VARCHAR(255) NOT NULL
 ) WITHOUT OIDS;
 
+INSERT INTO plow.project VALUES ('00000000-0000-0000-0000-000000000000', null, 'test', 'The Test Project');
+
+
 /**
  * Folders
  */
@@ -22,6 +25,8 @@ CREATE TABLE plow.folder (
   str_name VARCHAR(96) NOT NULL
 ) WITHOUT OIDS;
 
+INSERT INTO plow.folder VALUES ('00000000-0000-0000-0000-000000000000', null, '00000000-0000-0000-0000-000000000000', 'All Jobs');
+UPDATE plow.project SET pk_folder_default = '00000000-0000-0000-0000-000000000000' WHERE pk_project='00000000-0000-0000-0000-000000000000';
 
 CREATE TABLE plow.folder_dsp (
   pk_folder UUID NOT NULL PRIMARY KEY,
