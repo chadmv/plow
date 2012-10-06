@@ -1,4 +1,4 @@
-package com.breakersoft.plow.rpc;
+package com.breakersoft.plow.thrift;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -11,9 +11,9 @@ import org.apache.thrift.transport.TNonblockingServerTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 
-public class RpcServer {
+public class ThriftServer {
 
-    private Logger logger = org.slf4j.LoggerFactory.getLogger(RpcServer.class);
+    private Logger logger = org.slf4j.LoggerFactory.getLogger(ThriftServer.class);
 
     private final int port;
     private final String name;
@@ -23,7 +23,7 @@ public class RpcServer {
     private TNonblockingServerTransport transport;
     private TServer server;
 
-    public RpcServer(TProcessor processor, int port) {
+    public ThriftServer(TProcessor processor, int port) {
         this.port = port;
         this.name = processor.toString();
         this.processor = processor;

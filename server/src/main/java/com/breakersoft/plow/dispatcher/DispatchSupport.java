@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
-import com.breakersoft.plow.rnd.RndClient;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
+import com.breakersoft.plow.thrift.RndClient;
 import com.google.common.collect.Maps;
 
 /**

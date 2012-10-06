@@ -61,7 +61,7 @@ struct JobBp {
     5:list<LayerBp> layers
 }
 
-service PlowService {
+service RpcServiceApi {
     
     JobT launch(1:JobBp blueprint) throws (1:PlowException e),
     
