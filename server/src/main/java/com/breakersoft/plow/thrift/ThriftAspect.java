@@ -20,6 +20,7 @@ public class ThriftAspect {
             return joinPoint.proceed();
         }
         catch (Throwable t) {
+            t.printStackTrace();
             throw new PlowException(0, "Plow operation failed: "  + t);
         }
     }
