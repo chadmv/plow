@@ -39,7 +39,6 @@ CREATE TABLE plow.job (
   pk_folder UUID,
   str_name VARCHAR(160) NOT NULL,
   str_active_name VARCHAR(160),
-  str_user VARCHAR(128) NOT NULL,
   int_uid INTEGER NOT NULL,
   int_state SMALLINT NOT NULL DEFAULT 0,
   bool_paused BOOLEAN NOT NULL DEFAULT 'f',
@@ -126,7 +125,7 @@ CREATE TABLE plow.cluster (
   bool_locked BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
-INSERT INTO plow.cluster ('00000000-0000-0000-0000-000000000000', 'unassigned', 'unassigned');
+INSERT INTO plow.cluster VALUES ('00000000-0000-0000-0000-000000000000', 'unassigned', 'unassigned', 'f');
 
 /** Tag and name are unique **/
 
@@ -275,9 +274,9 @@ END
 $$
 LANGUAGE plpgsql;
 
-CREATE TRIGGER trig_after_proc_updated AFTER INSERT ON plow.proc
+CREATE TRIGGER trig_after_proc_updated AFTER UPDATE ON plow.proc
     FOR EACH ROW WHEN (OLD.pk_task != NEW.pk_task)
-    EXECUTE PROCEDURE plow.after_proc_created();
+    EXECUTE PROCEDURE plow.after_proc_updated();
 
 /**
  * plow.after_proc_destroyed()
