@@ -87,7 +87,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
                 ret.setInt(8, order);
                 ret.setInt(9, layer.getMinCores());
                 ret.setInt(10, layer.getMaxCores());
-                ret.setInt(11, layer.getMinMemory());
+                ret.setInt(11, layer.getMinRamMb());
 
                 return ret;
             }

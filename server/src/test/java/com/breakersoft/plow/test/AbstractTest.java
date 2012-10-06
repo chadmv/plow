@@ -53,7 +53,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         layer.setCommand(Lists.newArrayList("sleep", "5" ));
         layer.setMaxCores(8);
         layer.setMinCores(1);
-        layer.setMinMemory(1024);
+        layer.setMinRamMb(1024);
         layer.setName("test_ls");
         layer.setRange("1-10");
         layer.setTags(Sets.newHashSet("unassigned"));
