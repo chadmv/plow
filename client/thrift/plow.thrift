@@ -32,5 +32,40 @@ enum TaskState {
     SUCCEEDED
 }
 
+exception PlowException {
+  1: i32 what,
+  2: string why
+}
+
+struct JobT {
+    1:common.Guid id,
+    2:string name
+}
+
+struct LayerBp {
+    1:string name,
+    2:list<string> command;
+    3:set<string> tags,
+    4:string range,
+    5:i32 chunk,
+    6:i32 minCores,
+    7:i32 maxCores,
+    8:i32 minMemory
+}
+
+struct JobBp {
+    1:string name,
+    2:string project,
+    3:i32 uid,
+    4:bool paused
+    5:list<LayerBp> layers
+}
+
+service PlowService {
+    
+    JobT launch(1:JobBp blueprint) throws (1:PlowException e),
+    
+}
+
 
 
