@@ -36,7 +36,7 @@ public class TaskDaoTests extends AbstractTest {
     public void testCreate() {
         Blueprint bp = getTestBlueprint();
         Job job = jobDao.create(testProject, bp);
-        LayerBp bl = bp.job.getLayers().get(0);
+        LayerBp bl = bp.getLayers().get(0);
         layer = layerDao.create(job, bl, 0);
         task = taskDao.create(layer, 1, 0, 0);
     }

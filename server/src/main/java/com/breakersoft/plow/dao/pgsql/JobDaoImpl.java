@@ -82,7 +82,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 blueprint.job.getName(),
                 blueprint.job.getUid(),
                 JobState.INITIALIZE.ordinal(),
-                blueprint.isPaused());
+                blueprint.job.isPaused());
 
         jdbc.update("INSERT INTO plow.job_count (pk_job) VALUES (?)", jobId);
         jdbc.update("INSERT INTO plow.job_dsp (pk_job) VALUES (?)", jobId);

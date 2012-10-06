@@ -50,7 +50,7 @@ public class JobLauncherServiceImpl implements JobLauncherService {
 
     public JobLaunchEvent launch(Blueprint blueprint) {
 
-        final Project project = projectDao.get(blueprint.getProject());
+        final Project project = projectDao.get(blueprint.job.getProject());
         final Job job = jobDao.create(project, blueprint);
         final Folder folder = filterJob(job, project);
 
@@ -85,7 +85,7 @@ public class JobLauncherServiceImpl implements JobLauncherService {
             Job job, Project project, Blueprint blueprint) {
 
         int layerOrder = 0;
-        for (LayerBp blayer: blueprint.job.getLayers()) {
+        for (LayerBp blayer: blueprint.getLayers()) {
             Layer layer = layerDao.create(job, blayer, layerOrder);
 
             int frameOrder = 0;

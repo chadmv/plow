@@ -46,6 +46,8 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         JobBp jbp = new JobBp();
         jbp.setName("test");
         jbp.setUid(100);
+        jbp.setPaused(false);
+        jbp.setProject("unittest");
 
         LayerBp layer = new LayerBp();
         layer.setChunk(1);
@@ -57,12 +59,9 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         layer.setRange("1-10");
         layer.setTags(Sets.newHashSet("unassigned"));
 
-        jbp.addToLayers(layer);
-
         Blueprint bp = new Blueprint();
-        bp.setPaused(false);
-        bp.setProject("unittest");
         bp.job = jbp;
+        bp.addToLayers(layer);
 
         return bp;
     }

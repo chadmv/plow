@@ -55,14 +55,14 @@ struct LayerBp {
 
 struct JobBp {
     1:string name,
-    2:i32 uid,
-    3:list<LayerBp> layers
+    2:string project,
+    3:bool paused,
+    4:i32 uid
 }
 
 struct Blueprint {
     1:JobBp job,
-    2:string project,
-    3:bool paused,
+    2:list<LayerBp> layers
 }
 
 
