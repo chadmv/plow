@@ -1,0 +1,15 @@
+#!/usr/bin/python
+
+import sys
+sys.path.append("../../client/python")
+import plow.tools.app as plowapp
+
+class Plowrun(plowapp.BlueprintApplication):
+
+    def __init__(self):
+        plowapp.BlueprintApplication.__init__(self,
+            "Plowrun - Blueprint launch and execution tool.")
+
+if __name__ == "__main__":
+    app = Plowrun()
+    app.go()

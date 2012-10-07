@@ -1,0 +1,3 @@
+from plow.blueprint.modules.shell import Shell
+
+Shell("foo", cmd=["/bin/ls"])
