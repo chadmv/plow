@@ -3,10 +3,10 @@ import platform
 import socket
 import logging
 
-import rndlib.conf as conf
-import rndlib.client as client
+import plow.rndaemon.conf as conf
+import plow.rndaemon.client as client
 
-from rndlib.rpc import ttypes
+from plow.rndaemon.rpc import ttypes
 
 logger = logging.getLogger(__name__)
 
