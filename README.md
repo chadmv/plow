@@ -24,6 +24,8 @@ Client and Tools
 Running the Server
 ==================
 
+Currently this is somewhat of a manual build process. In in the future well have a script for building a release.
+
 You'll need Apache Maven to compile the Plow server, and a webapp container like Apache Tomcat to run it.  This
 will most likely chanage to a runnable jar with embedded Jetty server in the future.
 
@@ -38,6 +40,24 @@ Execute the sql file:
 
     > psql -h <hostname> -U <username> server/ddl/plow.sql
 
+
+Geneating the Thrift Bindings
+-----------------------------
+
+Plow uses Apache Thrift for client/server communication.
+
+To generate the bindings code for all languages:
+
+    > cd client/thrift
+    > ./generate-sources.sh
+
+For Java, you then need to compile these sources and install the plow-bindings JAR into your local maven repo.  Running
+mvn intall does this for you.
+
+    > cd client/java
+    > mvn install
+
+Once you do that, you can now compile the server.
 
 Compiling the Server
 --------------------
