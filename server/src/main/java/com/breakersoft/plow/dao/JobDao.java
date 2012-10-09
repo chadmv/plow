@@ -5,7 +5,6 @@ import java.util.UUID;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Project;
-import com.breakersoft.plow.thrift.JobBp;
 import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.JobState;
 

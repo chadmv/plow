@@ -16,7 +16,6 @@ import com.breakersoft.plow.JobE;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.JobDao;
-import com.breakersoft.plow.thrift.JobBp;
 import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.thrift.JobState;
