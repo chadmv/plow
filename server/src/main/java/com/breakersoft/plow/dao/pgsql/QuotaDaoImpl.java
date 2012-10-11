@@ -8,9 +8,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Cluster;
+import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.QuotaE;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.util.JdbcUtils;
@@ -73,5 +75,26 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
 
     public Quota getQuota(UUID id) {
         return null;
+    }
+
+    private static final String GET_BY_TASK =
+            "SELECT " +
+                "quota.pk_quota,"+
+                "quota.pk_cluster,"+
+                "quota.pk_project " +
+            "FROM " +
+                "plow.quota, " +
+                "plow.job " +
+            "WHERE " +
+                "job.pk_project = quota.pk_project " +
+            "AND " +
+                "job.pk_job = ? " +
+            "AND " +
+                "quota.pk_cluster = ?";
+
+    @Override
+    public Quota getQuota(Node node, Task task) {
+        return jdbc.queryForObject(GET_BY_TASK, MAPPER,
+                task.getJobId(), node.getClusterId());
     }
 }
