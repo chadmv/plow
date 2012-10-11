@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
@@ -50,5 +51,15 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean setTaskState(Task task, TaskState currentState, TaskState newState) {
         return taskDao.updateState(task, currentState, newState);
+    }
+
+    @Override
+    public Task getTask(Layer layer, int number) {
+        return taskDao.get(layer, number);
+    }
+
+    @Override
+    public Layer getLayer(Job job, String layer) {
+        return layerDao.get(job, layer);
     }
 }

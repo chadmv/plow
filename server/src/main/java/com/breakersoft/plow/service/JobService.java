@@ -1,6 +1,7 @@
 package com.breakersoft.plow.service;
 
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.thrift.TaskState;
 
@@ -15,5 +16,9 @@ public interface JobService {
     Job getJob(String id);
 
     boolean hasPendingFrames(Job job);
+
+    Task getTask(Layer layer, int number);
+
+    Layer getLayer(Job job, String layer);
 
 }
