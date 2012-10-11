@@ -47,8 +47,13 @@ public class DispatchServiceImpl implements DispatchService {
     @Transactional(readOnly=true)
     public DispatchJob getDispatchJob(JobLaunchEvent event) {
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
-        djob.setFolder(dispatchDao.getDispatchFolder(event.getFolder()));
         return djob;
+    }
+
+    @Override
+    @Transactional(readOnly=true)
+    public List<DispatchJob> getDispatchJobs() {
+        return dispatchDao.getDispatchJobs();
     }
 
     @Override

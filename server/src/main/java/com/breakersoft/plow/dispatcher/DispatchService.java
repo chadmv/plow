@@ -51,4 +51,6 @@ public interface DispatchService {
 
     List<DispatchLayer> getDispatchLayers(Job job, DispatchResource resource);
 
+    List<DispatchJob> getDispatchJobs();
+
 }
