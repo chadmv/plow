@@ -25,28 +25,33 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
             TaskE frame = new TaskE();
             frame.setTaskId(UUID.fromString(rs.getString(1)));
             frame.setLayerId(UUID.fromString(rs.getString(2)));
+            frame.setJobId((UUID) rs.getObject(3));
             return frame;
         }
     };
 
     private static final String GET =
             "SELECT " +
-                "pk_task,"+
-                "pk_layer " +
+                "task.pk_task,"+
+                "task.pk_layer, " +
+                "layer.pk_job " +
             "FROM " +
-                "plow.task ";
+                "plow.layer, " +
+                "plow.task " +
+            "WHERE " +
+                "layer.pk_layer = task.pk_layer " ;
 
     @Override
     public Task get(UUID id) {
         return jdbc.queryForObject(
-                GET + "WHERE pk_task=?",
+                GET + "AND task.pk_task=?",
                 MAPPER, id);
     }
 
     @Override
     public Task get(Layer layer, int number) {
         return jdbc.queryForObject(
-                GET + "WHERE pk_layer=? AND int_number=?",
+                GET + "AND layer.pk_layer=? AND task.int_number=?",
                 MAPPER, layer.getLayerId(), number);
     }
 
@@ -66,6 +71,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         TaskE task = new TaskE();
         task.setTaskId(id);
         task.setLayerId(layer.getLayerId());
+        task.setJobId(layer.getJobId());
         return task;
     }
 
