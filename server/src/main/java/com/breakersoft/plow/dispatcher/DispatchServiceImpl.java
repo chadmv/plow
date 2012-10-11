@@ -13,6 +13,7 @@ import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.ProcDao;
+import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
@@ -32,6 +33,9 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Autowired
     private ProcDao procDao;
+
+    @Autowired
+    private QuotaDao quotaDao;
 
     @Override
     @Transactional(readOnly=true)
@@ -98,15 +102,14 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public DispatchProc allocateDispatchProc(DispatchNode node,
-            DispatchProject project, DispatchTask task) {
+    public DispatchProc allocateDispatchProc(DispatchNode node, DispatchTask task) {
 
         node.decrement(task.getMinCores(), task.getMinMemory());
 
         DispatchProc proc = new DispatchProc();
         proc.setTaskId(task.getTaskId());
         proc.setNodeId(node.getNodeId());
-        proc.setQuotaId(project.getQuotaId());
+        proc.setQuotaId(quotaDao.getQuota(node, task).getQuotaId());
         proc.setCores(task.getMinCores());
         proc.setTaskName(task.getName());
         proc.setNodeName(node.getName());

@@ -38,7 +38,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
     @Before
     public void initTestProject() {
         testProject = projectService.createProject("unittest", "Unit Test Project");
-        quotaService.createQuota(testProject,"unassigned", 10, 15);
+        quotaService.createQuota(testProject, "unassigned", 10, 15);
     }
 
     public Blueprint getTestBlueprint() {

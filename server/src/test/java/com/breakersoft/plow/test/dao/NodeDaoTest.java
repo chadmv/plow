@@ -9,7 +9,6 @@ import com.breakersoft.plow.Node;
 import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.test.AbstractTest;
-import com.google.common.collect.Lists;
 
 public class NodeDaoTest extends AbstractTest {
 

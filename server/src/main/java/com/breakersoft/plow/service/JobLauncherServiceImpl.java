@@ -43,7 +43,7 @@ public class JobLauncherServiceImpl implements JobLauncherService {
     LayerDao layerDao;
 
     @Autowired
-    TaskDao frameDao;
+    TaskDao taskDao;
 
     @Autowired
     EventManager eventManager;
@@ -91,7 +91,7 @@ public class JobLauncherServiceImpl implements JobLauncherService {
             int frameOrder = 0;
             FrameSet frameSet = new FrameSet(blayer.getRange());
             for (int frameNum: frameSet) {
-                frameDao.create(layer, frameNum, frameOrder, layerOrder);
+                taskDao.create(layer, frameNum, frameOrder, layerOrder);
                 frameOrder++;
             }
             layerOrder++;

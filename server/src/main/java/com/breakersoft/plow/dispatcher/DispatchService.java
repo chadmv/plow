@@ -40,8 +40,7 @@ public interface DispatchService {
 
     boolean removeProc(Proc proc);
 
-    DispatchProc allocateDispatchProc(DispatchNode node,
-            DispatchProject project, DispatchTask task);
+    DispatchProc allocateDispatchProc(DispatchNode node, DispatchTask task);
 
     void cleanupFailedDispatch(DispatchProc proc);
 

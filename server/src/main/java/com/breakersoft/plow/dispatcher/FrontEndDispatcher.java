@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.Node;
+import com.breakersoft.plow.dispatcher.command.DispatchCommand;
+import com.breakersoft.plow.dispatcher.command.DispatchNodeCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
@@ -52,6 +55,8 @@ public final class FrontEndDispatcher {
     private final List<BookingThread> bookingThreads;
     private final LinkedBlockingQueue<DispatchNode> nodeQueue;
 
+    private final LinkedBlockingQueue<DispatchCommand> commandQueue;
+
     private final ConcurrentMap<UUID, DispatchFolder> folderIndex;
     private final ConcurrentMap<UUID, DispatchJob> jobIndex;
 
@@ -60,6 +65,7 @@ public final class FrontEndDispatcher {
         bookingThreads = Lists.newArrayListWithCapacity(
                 Defaults.DISPATCH_BOOKING_THREADS);
         nodeQueue = new LinkedBlockingQueue<DispatchNode>();
+        commandQueue = new LinkedBlockingQueue<DispatchCommand>();
 
         folderIndex = new MapMaker()
             .concurrencyLevel(Defaults.DISPATCH_BOOKING_THREADS)
@@ -78,27 +84,32 @@ public final class FrontEndDispatcher {
 
     @PostConstruct
     public void init() {
-        for (int i=0; i < Defaults.DISPATCH_BOOKING_THREADS; i++) {
-            bookingThreads.add(dispatchConfig.getBookingThread());
-        }
         eventManager.register(this);
+
+        for (int i=0; i < Defaults.DISPATCH_BOOKING_THREADS; i++) {
+            BookingThread thread = dispatchConfig.getBookingThread();
+            thread.start();
+            bookingThreads.add(thread);
+        }
     }
 
-    public void addBookingThread(BookingThread thread) {
-        bookingThreads.add(thread);
-    }
-
-    public DispatchNode getNextDispatchNode() {
+    public DispatchCommand getNextDispatchCommand() {
         try {
-            return nodeQueue.take();
+            return commandQueue.take();
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             return null;
         }
     }
 
+    public void dispatch(Node node) {
+        dispatch(dispatchService.getDispatchNode(node.getName()));
+    }
+
     public void dispatch(DispatchNode node) {
-        // TODO Auto-generated method stub
+        logger.info("Adding dispatch node: " + node.getName() + "to queue");
+        commandQueue.offer(new DispatchNodeCommand(node));
+        logger.info("Queue size :" + commandQueue.size());
     }
 
     public void dispatch(DispatchJob job, DispatchNode node) {

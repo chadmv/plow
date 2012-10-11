@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.breakersoft.plow.dispatcher.command.DispatchCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
@@ -31,7 +32,7 @@ import com.google.common.collect.Maps;
  * @author chambers
  *
  */
-public class BookingThread implements Runnable {
+public class BookingThread extends Thread {
 
     private static final Logger logger =
             org.slf4j.LoggerFactory.getLogger(BookingThread.class);
@@ -64,17 +65,18 @@ public class BookingThread implements Runnable {
         while(enabled) {
 
             // Pull a node out of the dispatcher queue.
-            DispatchNode node = dispatcher.getNextDispatchNode();
+            DispatchCommand command = dispatcher.getNextDispatchCommand();
 
             // The thread was interrupted?  Not sure if a null
             // is the best way to handle it or if we should
             // catch it here.
-            if (node == null) {
+            if (command == null) {
                 logger.info("getNextDispatchNode returned null, exiting the dispatch thread.");
                 return;
             }
 
-            book(node);
+            logger.info("Dispatcher thread picked up command");
+            command.execute(this);
         }
     }
 
@@ -89,8 +91,9 @@ public class BookingThread implements Runnable {
         final List<DispatchProject> projects =
                 dispatchService.getSortedProjectList(node);
 
-        // Update our job list with waiting data.
-        update();
+        if (projects.isEmpty()) {
+            logger.info("No bookable projects!");
+        }
 
         for (DispatchProject project: projects) {
 
@@ -98,74 +101,92 @@ public class BookingThread implements Runnable {
 
             // Skip over project if there are no active jobs.
             if (!activeJobs.containsKey(id)) {
+                logger.info("No active jobs in project: " + id);
                 continue;
             }
 
             // Skip over project if there are no active jobs.
             if (activeJobs.get(id).size() == 0) {
+                logger.info("No active jobs in project: " + id);
                 continue;
             }
 
-            // Sort the job list for the current project.
-            Collections.sort(activeJobs.get(id));
-
-            for (DispatchJob job: activeJobs.get(id)) {
-
-                logger.info(job + " is up for dispatch.");
-
-                if (job.getWaitingFrames() == 0) {
-                    logger.info(job + " has no pending frames.");
-                    continue;
-                }
-
-                for (DispatchLayer layer:
-                    dispatchService.getDispatchLayers(job, node)) {
-
-                    logger.info("Dispatching layer " + layer.toString());
-
-                    for (DispatchTask task:
-                        dispatchService.getDispatchTasks(layer, node)) {
-
-                        if(!dispatchSupport.canDispatch(task, node)) {
-                            break;
-                        }
-                        DispatchProc proc = null;
-                        try {
-                            proc = dispatchService.allocateDispatchProc(node, project, task);
-                            dispatchSupport.runRndTask(task, proc);
-
-                            if (node.getCores() == 0) {
-                                return;
-                            }
-                        } catch (RndClientConnectionError e) {
-                            // RND Client is down.
-                            logger.warn("RND node is down " + node.getName() + ", " + e);
-                            dispatchService.cleanupFailedDispatch(proc);
-                            //TODO: need to lock out host;
-                            return;
-                        } catch (RndClientExecuteException e) {
-                            logger.warn("RND exception " + e);
-                            dispatchService.cleanupFailedDispatch(proc);
-                            return;
-                        }
-                        catch (DispatchProcAllocationException e) {
-                            // Failed to allocate the proc
-                            logger.warn("Failed to allocation cores from proc.");
-                            //no need to clean
-                            return;
-                        }
-                        catch (Exception e) {
-                            logger.warn("catch all exception " + e);
-                            e.printStackTrace();
-                            return;
-                        }
-                    }
-                }
-            }
+            book(node, project);
         }
-
-        logger.info("Dispatch complete.");
     }
+
+    public void book(DispatchNode node, DispatchProject project) {
+
+        UUID projId = project.getProjectId();
+
+        // Sort the job list for the current project.
+        logger.info("Soring jobs for project " + projId);
+        Collections.sort(activeJobs.get(projId));
+
+        for (DispatchJob job: activeJobs.get(projId)) {
+
+             if (job.getWaitingFrames() == 0) {
+                 logger.info(job + " has no pending frames.");
+                 continue;
+             }
+
+             logger.info(job + " is up for dispatch.");
+             book(node, job);
+         }
+    }
+
+    public void book(DispatchNode node, DispatchJob job) {
+        for (DispatchLayer layer:
+            dispatchService.getDispatchLayers(job, node)) {
+              book(node, layer);
+        }
+    }
+
+    public void book(DispatchNode node, DispatchLayer layer) {
+        for (DispatchTask task:
+            dispatchService.getDispatchTasks(layer, node)) {
+
+            if(!dispatchSupport.canDispatch(task, node)) {
+                break;
+            }
+            book(node, task);
+        }
+    }
+
+    public void book(DispatchNode node, DispatchTask task) {
+
+        DispatchProc proc = null;
+        try {
+            proc = dispatchService.allocateDispatchProc(node, task);
+            dispatchSupport.runRndTask(task, proc);
+
+            if (node.getCores() == 0) {
+                return;
+            }
+        } catch (RndClientConnectionError e) {
+            // RND Client is down.
+            logger.warn("RND node is down " + node.getName() + ", " + e);
+            dispatchService.cleanupFailedDispatch(proc);
+            //TODO: need to lock out host;
+            return;
+        } catch (RndClientExecuteException e) {
+            logger.warn("RND exception " + e);
+            dispatchService.cleanupFailedDispatch(proc);
+            return;
+        }
+        catch (DispatchProcAllocationException e) {
+            // Failed to allocate the proc
+            logger.warn("Failed to allocation cores from proc.");
+            //no need to clean
+            return;
+        }
+        catch (Exception e) {
+            logger.warn("catch all exception " + e);
+            e.printStackTrace();
+            return;
+        }
+    }
+
 
     public void addJob(DispatchJob job) {
         logger.info("Adding new job to newJobs list");
