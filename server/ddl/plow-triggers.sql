@@ -2,7 +2,7 @@
 ---
 --- plow.after_proc_created()
 ---
---- Subtract resources from proc, add them to quota. 
+--- Subtract resources from proc, add them to quota.
 ---
 CREATE OR REPLACE FUNCTION plow.after_proc_created() RETURNS TRIGGER AS $$
 BEGIN
@@ -12,15 +12,15 @@ BEGIN
    **/
   UPDATE plow.node_dsp SET
     int_free_cores = int_free_cores - new.int_cores,
-    int_free_memory = int_free_memory - new.int_memory
+    int_free_memory = int_free_memory - new.int_mem
   WHERE
     pk_node = new.pk_node;
 
   /**
    * Update quota dsp
    **/
-  UPDATE plow.quota_dsp SET
-    int_cores = int_cores + new.int_cores
+  UPDATE plow.quota  SET
+    int_run_cores = int_run_cores + new.int_cores
   WHERE
     pk_quota = new.pk_quota;
 
@@ -45,15 +45,15 @@ BEGIN
    **/
   UPDATE plow.node_dsp SET
     int_free_cores = int_free_cores + (new.int_cores - old.int_cores),
-    int_free_memory = int_free_memory + (new.int_memory - old.int_memory)
+    int_free_memory = int_free_memory + (new.int_mem - old.int_mem)
   WHERE
     pk_node = new.pk_node;
 
   /**
    * Update quota dsp
    **/
-  UPDATE plow.quota_dsp SET
-    int_cores = int_cores + (new.int_cores - old.int_cores)
+  UPDATE plow.quota SET
+    int_run_cores = int_run_cores + (new.int_cores - old.int_cores)
   WHERE
     pk_quota = new.pk_quota;
 
@@ -78,20 +78,20 @@ BEGIN
    * Update node_dsp
    **/
   UPDATE plow.node_dsp SET
-    int_free_cores = int_free_cores + new.int_cores,
-    int_free_memory = int_free_memory + new.int_memory
+    int_free_cores = int_free_cores + old.int_cores,
+    int_free_memory = int_free_memory + old.int_mem
   WHERE
-    pk_node = new.pk_node;
+    pk_node = old.pk_node;
 
   /**
    * Update quota dsp
    **/
-  UPDATE plow.quota_dsp SET
-    int_cores = int_cores - new.int_cores
+  UPDATE plow.quota SET
+    int_run_cores = int_run_cores - old.int_cores
   WHERE
-    pk_quota = new.pk_quota;
+    pk_quota = old.pk_quota;
 
-  RETURN NEW;
+  RETURN OLD;
 END
 $$
 LANGUAGE plpgsql;
@@ -134,7 +134,7 @@ CREATE TRIGGER trig_after_task_state_change AFTER UPDATE ON plow.task
 ---
 --- plow.before_task_depend_check()
 ---
---- Before task dependency check. Runs if the task has a depend count 
+--- Before task dependency check. Runs if the task has a depend count
 --- greater than zero and flips the state to depend.
 ---
 CREATE OR REPLACE FUNCTION plow.before_task_depend_check() RETURNS TRIGGER AS $$
