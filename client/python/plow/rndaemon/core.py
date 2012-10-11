@@ -149,11 +149,11 @@ class ProcessThread(threading.Thread):
         if not conf.NETWORK_DISABLED:
             while True:
                 try:
-                    conn = netcode.getPlowConnection()
-                    conn.processCompleted(result)
+                    conn = client.getPlowConnection()
+                    conn.taskComplete(result)
                     break
                 except Exception, e:
-                    logger.warn("Plow server is down, sleeping for 30 seconds")
+                    logger.warn("Error talking to plow server," + str(e) + ", sleeping for 30 seconds")
                     time.sleep(30)
 
         ProcessMgr.processFinished(self.__rtc)
@@ -171,8 +171,8 @@ class ProcessThread(threading.Thread):
         self.__logfp.write("Render Process Complete\n")
         self.__logfp.write("=====================================\n")
         self.__logfp.write("Exit Status: %d\n" % result.exitStatus)
-        self.__logfp.write("Signal: %d\n" % result.signal)
-        self.__logfp.write("MaxRSS: %d\n" % self.__process.maxRss)
+        self.__logfp.write("Signal: %d\n" % result.exitSignal)
+        self.__logfp.write("MaxRSS: 0\n")
         self.__logfp.write("=====================================\n\n")
 
 Profiler = SystemProfiler()
