@@ -36,4 +36,6 @@ public interface DispatchDao {
 
     List<DispatchTask> getDispatchTasks(DispatchLayer layer,
             DispatchResource resource);
+
+    List<DispatchJob> getDispatchJobs();
 }
