@@ -12,6 +12,7 @@ import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.TaskDao;
+import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.thrift.TaskState;
 
 
@@ -51,6 +52,26 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean setTaskState(Task task, TaskState currentState, TaskState newState) {
         return taskDao.updateState(task, currentState, newState);
+    }
+
+    @Override
+    public boolean startTask(Task task, DispatchProc proc) {
+        return taskDao.start(task);
+    }
+
+    @Override
+    public boolean stopTask(Task task, TaskState state) {
+        return taskDao.stop(task, state);
+    }
+
+    @Override
+    public boolean reserveTask(Task task) {
+        return taskDao.reserve(task);
+    }
+
+    @Override
+    public boolean unreserveTask(Task task) {
+        return taskDao.unreserve(task);
     }
 
     @Override
