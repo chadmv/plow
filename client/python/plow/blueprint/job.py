@@ -15,7 +15,7 @@ class Job(object):
         self.__path = None
 
     def get_path(self):
-        return self.__archive.get_path()
+        return self.__path
 
     def get_name(self):
         return self.__name
