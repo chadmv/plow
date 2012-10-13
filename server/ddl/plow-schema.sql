@@ -126,7 +126,9 @@ CREATE TABLE plow.task (
   int_state SMALLINT NOT NULL,
   int_depend_count INTEGER NOT NULL DEFAULT 0,
   int_task_order INTEGER NOT NULL,
-  bool_reserved BOOLEAN DEFAULT 'f' NOT NULL
+  bool_reserved BOOLEAN DEFAULT 'f' NOT NULL,
+  int_start_time BIGINT DEFAULT 0 NOT NULL,
+  int_stop_time BIGINT DEFAULT 0 NOT NULL
 ) WITHOUT OIDS;
 
 CREATE INDEX task_pk_layer_idx ON plow.task (pk_layer);
