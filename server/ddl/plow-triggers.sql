@@ -112,8 +112,8 @@ DECLARE
 BEGIN
 
   states := ARRAY['INITIALIZE', 'WAITING', 'RUNNING', 'DEAD', 'EATEN' , 'DEPEND', 'SUCCEEDED'];
-  old_state_col := 'int_' || lower(states[old.int_state]);
-  new_state_col := 'int_' || lower(states[new.int_state]);
+  old_state_col := 'int_' || lower(states[old.int_state + 1]);
+  new_state_col := 'int_' || lower(states[new.int_state + 1]);
 
   EXECUTE 'UPDATE plow.layer_count SET ' || old_state_col || '=' || old_state_col || ' -1, '
             || new_state_col || '=' || new_state_col || '+1 WHERE pk_layer=$1' USING new.pk_layer;
