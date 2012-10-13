@@ -14,15 +14,16 @@ class BlueprintRunner(object):
         self.__args = {
             "paused": False
         }
-        pass
+        self.__args.update(kwargs)
 
     def set_arg(self, key, value):
-        pass
+        self.__args[key] = value
 
-    def get_arg(self, key):
-        pass
+    def get_arg(self, key, default=None):
+        self.__args.get(key, default)
 
     def run(self, job):
+
         bp = to_blueprint(job, **self.__args)
         plow_conn = get_plow_conn()
         plow_conn.launch(bp)
@@ -54,14 +55,12 @@ def to_blueprint(job, **kwargs):
     for layer in job.get_layers():
         bpl = ttypes.LayerBp()
         bpl.name = layer.get_name()
-        bpl.command = ["/Users/chambers/src/plow/tools/plowrun/plowrun",
-                       os.path.join(job.get_path(), "blueprint"),
+        bpl.command = ["/Users/chambers/src/plow/tools/taskrun/taskrun",
+                       os.path.join(job.get_path(), "blueprint.yaml"),
                        "-layer",
                        layer.get_name(),
-                       "-execute",
-                       "%{FRAME}",
-                       "-chunk",
-                       "%{CHUNK}"]
+                       "-range",
+                       "%{FRAME}"]
         bpl.tags =  layer.get_arg("tags", ["unassigned"])
         bpl.range = layer.get_arg("frame_range", frange)
         bpl.chunk = layer.get_arg("chunk", 1)
@@ -71,21 +70,6 @@ def to_blueprint(job, **kwargs):
         bp.layers.append(bpl)
 
     return bp
-
-def load_script(path):
-
-    if os.path.basename(path) == "blueprint.yaml":
-        Job.Current = yaml.load(file(path, 'r'))
-        # Yamlized jobs have no session but they
-        # have a path that points to one so we have
-        # to bring back the archive.
-        if Job.Current.get_path():
-            Job.Current.load_archive()
-    else:
-        Job.Current = Job(os.path.basename(path).split(".")[0])
-        execfile(path, {})
-
-    return Job.Current
 
 """
 
