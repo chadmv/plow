@@ -31,8 +31,8 @@ def load_script(path):
         # Yamlized jobs have no session but they
         # have a path that points to one so we have
         # to bring back the archive.
-        if job.get_path():
-            job.load_archive()
+        if Job.Current.get_path():
+            Job.Current.load_archive()
     else:
         Job.Current = Job(os.path.basename(path).split(".")[0])
         execfile(path, {})
@@ -45,6 +45,18 @@ class PlowApplication(object):
     
     def handle_args(self):
         pass
+
+    def go(self):
+        args = self._argparser.parse_args()
+
+        if args.verbose:
+            logging.basicConfig(level=logging.INFO)
+        if args.debug:
+            logging.basicConfig(level=logging.DEBUG)
+  
+
+        # Handle arguments added by specific application.
+        self.handle_args(args)
 
 class BlueprintApplication(object):
 
@@ -68,7 +80,7 @@ class BlueprintApplication(object):
             self._runner.set_arg("pause", args.pause)
         if args.job_name:
             self._runner.set_arg("job_name", args.job_name)
-        self._runner.set_arg("range", args.range)
+        self._runner.set_arg("frame_range", args.range)
 
         # Handle arguments added by specific application.
         self.handle_args(args)
