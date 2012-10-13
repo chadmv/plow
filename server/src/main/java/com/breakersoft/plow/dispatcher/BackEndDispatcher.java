@@ -2,11 +2,10 @@ package com.breakersoft.plow.dispatcher;
 
 import java.util.concurrent.ExecutorService;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Task;
-import com.breakersoft.plow.dispatcher.command.DispatchProcToJobCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
@@ -16,6 +15,9 @@ import com.breakersoft.plow.thrift.TaskState;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 
 public class BackEndDispatcher {
+
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(BackEndDispatcher.class);
 
     @Autowired
     EventManager eventManager;
@@ -40,31 +42,34 @@ public class BackEndDispatcher {
         threadPool = factory.getObject();
     }
 
-    public void processRunTaskResult(RunTaskResult result) {
+    public void taskComplete(RunTaskResult result) {
 
         Task task = jobService.getTask(result.taskId);
-        Job job = jobService.getJob(result.jobId);
         DispatchProc proc = dispatchService.getDispatchProc(result.procId);
 
+        TaskState newState;
+
         if (result.exitStatus == 0) {
-            jobService.setTaskState(task, TaskState.RUNNING, TaskState.SUCCEEDED);
+            newState =  TaskState.SUCCEEDED;
         }
         else {
-            jobService.setTaskState(task, TaskState.RUNNING, TaskState.DEAD);
-        }
-        // TODO depends
-
-
-        if (!jobService.hasWaitingFrames(job)) {
-            dispatchService.removeProc(proc);
+            newState = TaskState.DEAD;
         }
 
-        if (!jobService.hasPendingFrames(job)) {
-            dispatchService.removeProc(proc);
+        logger.info("{} proc reported in task completed, exit status:",
+                proc.getNodeName(), result.exitStatus);
+
+        logger.info("New state {}", newState.toString());
+
+        if (!jobService.stopTask(task, newState)) {
+            // Task was already stopped somehow.
+            // might be a retry or
+            logger.warn("{} task was stopped by another thread.", task.getTaskId());
+            return;
         }
 
-        threadPool.execute(
-                new DispatchProcToJobCommand(job, proc, frontEndDispatcher));
+        logger.info("Clearing proc");
+        dispatchService.removeProc(proc);
     }
 
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.breakersoft.plow.Node;
+import com.breakersoft.plow.dispatcher.BackEndDispatcher;
 import com.breakersoft.plow.dispatcher.FrontEndDispatcher;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
@@ -25,6 +26,9 @@ public class RndThriftServiceImpl implements RndServiceApi.Iface {
     @Autowired
     FrontEndDispatcher frontEndDispatcher;
 
+    @Autowired
+    BackEndDispatcher backEndDispatcher;
+
     @Override
     public void sendPing(Ping ping) throws RndException, TException {
 
@@ -43,8 +47,7 @@ public class RndThriftServiceImpl implements RndServiceApi.Iface {
     @Override
     public void taskComplete(RunTaskResult result) throws RndException,
             TException {
-
-
+        backEndDispatcher.taskComplete(result);
     }
 
 }
