@@ -2,14 +2,39 @@
 
 import sys
 sys.path.append("../../client/python")
-import plow.tools.app as plowapp
+import plow.tools.app as app
+import plow.blueprint.plowrun as plowrun
 
-class Plowrun(plowapp.BlueprintApplication):
+class Plowrun(app.BlueprintApplication):
 
     def __init__(self):
-        plowapp.BlueprintApplication.__init__(self,
+        app.BlueprintApplication.__init__(self,
             "Plowrun - Blueprint launch and execution tool.")
 
+        group = self._argparser.add_argument_group("Plowun Options")
+        group.add_argument("script", metavar="SCRIPT", help="Path to blueprint script.")
+        group.add_argument("range", metavar="FRAME_RANGE", help="Frame range.")
+        group.add_argument("-pause", action="store_true", help="Launch the job in a paused state.")
+        group.add_argument("-job-name", metavar="JOB NAME", help="Set the job name.")
+
+    def handle_args(self, args):
+
+        runner = plowrun.BlueprintRunner()
+
+        if args.pause:
+            runner.set_arg("pause", args.pause)
+        if args.job_name:
+            runner.set_arg("job_name", args.job_name)
+        
+        runner.set_arg("frame_range", args.range)
+
+        job = app.load_script(args.script)
+        job.setup()
+        
+        if len(job.get_layers()) == 0:
+            raise Exception("The job has no layers to execute.");
+        runner.run(job)
+
 if __name__ == "__main__":
-    app = Plowrun()
-    app.go()
+    papp = Plowrun()
+    papp.go()

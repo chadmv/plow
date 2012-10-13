@@ -5,10 +5,10 @@ sys.path.append("../../client/python")
 import plow.tools.app as app
 import plow.fileseq as fileseq
 
-class Taskrun(app.PlowApplication):
+class Taskrun(app.BlueprintApplication):
 
     def __init__(self):
-        app.PlowApplication.__init__(self,
+        app.BlueprintApplication.__init__(self,
             "Taskrun - Blueprint task execution tool")
         group = self._argparser.add_argument_group("Taskrun Options")
         
@@ -22,8 +22,6 @@ class Taskrun(app.PlowApplication):
             help="Frame range to execute.");
 
     def handle_args(self, args):
-        print args
-        print app
         job = app.load_script(args.script)
         layer = job.get_layer(args.layer)
 
