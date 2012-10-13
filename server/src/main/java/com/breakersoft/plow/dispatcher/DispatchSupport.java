@@ -28,6 +28,13 @@ public class DispatchSupport {
 
     public void runRndTask(DispatchTask task, DispatchProc proc) {
 
+        String[] command = task.getCommand();
+        for (int i=0; i<command.length; i++) {
+            String part = command[i];
+            part = part.replace("%{FRAME}", String.valueOf(task.getNumber()));
+            command[i] = part;
+        }
+
         RunTaskCommand cmd = new RunTaskCommand();
         cmd.command = Arrays.asList(task.getCommand());
         cmd.cores = proc.getCores();
