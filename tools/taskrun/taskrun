@@ -1,0 +1,38 @@
+#!/usr/bin/python
+
+import sys
+sys.path.append("../../client/python")
+import plow.tools.app as app
+import plow.fileseq as fileseq
+
+class Taskrun(app.PlowApplication):
+
+    def __init__(self):
+        app.PlowApplication.__init__(self,
+            "Taskrun - Blueprint task execution tool")
+        group = self._argparser.add_argument_group("Taskrun Options")
+        
+        group.add_argument("script", metavar="SCRIPT",
+            help="Path to blueprint script.")
+        group.add_argument("-layer", metavar="LAYER", required=True, 
+            help="Layer to execute task from.")
+        group.add_argument("-task", metavar="TASK",
+            help="Task to execute.");
+        group.add_argument("-range", metavar="RANGE",
+            help="Frame range to execute.");
+
+    def handle_args(self, args):
+        print args
+        print app
+        job = app.load_script(args.script)
+        layer = job.get_layer(args.layer)
+
+        if args.range:
+            frameSet = fileseq.FrameSet(args.range)
+            layer.execute(frameSet)
+        elif args.task:
+            print "not supported"
+
+if __name__ == "__main__":
+    taskrun = Taskrun()
+    taskrun.go()
