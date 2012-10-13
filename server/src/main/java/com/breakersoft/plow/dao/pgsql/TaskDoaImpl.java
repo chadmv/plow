@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
+import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +18,9 @@ import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
 public class TaskDoaImpl extends AbstractDao implements TaskDao {
+
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(TaskDoaImpl.class);
 
     public static final RowMapper<Task> MAPPER = new RowMapper<Task>() {
         @Override
@@ -81,4 +85,59 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                 newState.ordinal(), task.getTaskId(), currentState.ordinal()) == 1;
     }
 
+
+    @Override
+    public boolean reserve(Task task) {
+        return jdbc.update("UPDATE plow.task SET bool_reserved='t' " +
+                "WHERE pk_task=? AND bool_reserved='f'", task.getTaskId()) == 1;
+    }
+
+    @Override
+    public boolean unreserve(Task task) {
+        return jdbc.update("UPDATE plow.task SET bool_reserved='f' " +
+                "WHERE pk_task=? AND bool_reserved='t'", task.getTaskId()) == 1;
+    }
+
+    public static final String START_TASK =
+            "UPDATE " +
+                "plow.task " +
+            "SET " +
+                "int_state = ?, " +
+                "bool_reserved = 'f', " +
+                "int_start_time = EXTRACT(epoch FROM NOW()), " +
+                "int_stop_time = 0 " +
+            "WHERE " +
+                "task.pk_task = ? " +
+            "AND " +
+                "int_state = ? " +
+            "AND " +
+                "bool_reserved = 't'";
+
+    @Override
+    public boolean start(Task task) {
+        return jdbc.update(START_TASK,
+                TaskState.RUNNING.ordinal(),
+                task.getTaskId(),
+                TaskState.WAITING.ordinal()) == 1;
+    }
+
+    public static final String STOP_TASK =
+            "UPDATE " +
+                "plow.task " +
+            "SET " +
+                "int_state = ?, " +
+                "bool_reserved = 'f', " +
+                "int_stop_time = EXTRACT(epoch FROM NOW()) " +
+            "WHERE " +
+                "task.pk_task = ? " +
+            "AND " +
+                "int_state = ? ";
+
+    @Override
+    public boolean stop(Task task, TaskState newState) {
+        return jdbc.update(STOP_TASK,
+                newState.ordinal(),
+                task.getTaskId(),
+                TaskState.RUNNING.ordinal()) == 1;
+    }
 }

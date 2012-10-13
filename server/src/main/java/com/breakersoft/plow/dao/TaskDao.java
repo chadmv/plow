@@ -16,4 +16,13 @@ public interface TaskDao {
 
     boolean updateState(Task task, TaskState currentState,
             TaskState newState);
+
+    boolean reserve(Task frame);
+
+    boolean unreserve(Task frame);
+
+    boolean start(Task task);
+
+    boolean stop(Task task, TaskState newState);
+
 }
