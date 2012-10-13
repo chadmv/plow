@@ -8,7 +8,7 @@ import com.google.common.eventbus.EventBus;
 public final class EventManagerImpl implements EventManager {
 
     private final EventBus eventBus;
-    private boolean enabled;
+    private boolean enabled = true;
 
     public EventManagerImpl() {
         eventBus = new EventBus();
