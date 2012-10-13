@@ -75,7 +75,8 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                     proc.getCores(),
                     proc.getMemory());
         } catch (DataAccessException e) {
-            throw new DispatchProcAllocationException();
+            e.printStackTrace();
+            throw new DispatchProcAllocationException(e);
         }
     }
 

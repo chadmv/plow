@@ -14,6 +14,7 @@ import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dao.QuotaDao;
+import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
@@ -33,6 +34,9 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Autowired
     private ProcDao procDao;
+
+    @Autowired
+    private TaskDao taskDao;
 
     @Autowired
     private QuotaDao quotaDao;
@@ -98,12 +102,12 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Override
     public boolean reserveTask(Task task) {
-        return dispatchDao.reserveTask(task);
+        return taskDao.reserve(task);
     }
 
     @Override
     public boolean unreserveTask(Task task) {
-        return dispatchDao.unreserveTask(task);
+        return taskDao.unreserve(task);
     }
 
     @Override

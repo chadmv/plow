@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.Defaults;
-import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.dispatcher.command.DispatchCommand;
 import com.breakersoft.plow.dispatcher.command.DispatchNodeCommand;
@@ -19,14 +18,9 @@ import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
-import com.breakersoft.plow.dispatcher.domain.DispatchProc;
-import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.event.JobFinishedEvent;
-import com.breakersoft.plow.exceptions.DispatchProcAllocationException;
-import com.breakersoft.plow.exceptions.RndClientConnectionError;
-import com.breakersoft.plow.exceptions.RndClientExecuteException;
 import com.breakersoft.plow.service.JobService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
@@ -53,8 +47,6 @@ public final class FrontEndDispatcher {
     JobService jobService;
 
     private final List<BookingThread> bookingThreads;
-    private final LinkedBlockingQueue<DispatchNode> nodeQueue;
-
     private final LinkedBlockingQueue<DispatchCommand> commandQueue;
 
     private final ConcurrentMap<UUID, DispatchFolder> folderIndex;
@@ -64,7 +56,6 @@ public final class FrontEndDispatcher {
 
         bookingThreads = Lists.newArrayListWithCapacity(
                 Defaults.DISPATCH_BOOKING_THREADS);
-        nodeQueue = new LinkedBlockingQueue<DispatchNode>();
         commandQueue = new LinkedBlockingQueue<DispatchCommand>();
 
         folderIndex = new MapMaker()
@@ -88,9 +79,21 @@ public final class FrontEndDispatcher {
 
         for (int i=0; i < Defaults.DISPATCH_BOOKING_THREADS; i++) {
             BookingThread thread = dispatchConfig.getBookingThread();
-            thread.start();
             bookingThreads.add(thread);
         }
+
+        List<DispatchJob> jobs = dispatchService.getDispatchJobs();
+        logger.info("Loading {} active jobs into dispatcher.", jobs.size());
+
+        for (DispatchJob job: jobs) {
+            addDispatchJob(job);
+        }
+
+        // Want to start these after jobs are added
+        for (BookingThread thread: bookingThreads) {
+            thread.start();
+        }
+
     }
 
     public DispatchCommand getNextDispatchCommand() {
@@ -116,59 +119,24 @@ public final class FrontEndDispatcher {
         logger.info("Dispatch Job " + job);
     }
 
-    public void dispatch(Job job, DispatchProc proc) {
-
-        logger.info("Dispatch Job " + job);
-
-        for (DispatchLayer layer:
-            dispatchService.getDispatchLayers(job, proc)) {
-
-            logger.info("Dispatching layer " + layer.toString());
-
-            for (DispatchTask task:
-                dispatchService.getDispatchTasks(layer, proc)) {
-
-                try {
-                    dispatchSupport.runRndTask(task, proc);
-                } catch (RndClientConnectionError e) {
-                    // RND Client is down.
-                    logger.warn("RND node is down " + proc.getNodeName() + ", " + e);
-                    dispatchService.cleanupFailedDispatch(proc);
-                    //TODO: need to lock out host;
-                    return;
-                } catch (RndClientExecuteException e) {
-                    logger.warn("RND exception " + e);
-                    dispatchService.cleanupFailedDispatch(proc);
-                    return;
-                }
-                catch (DispatchProcAllocationException e) {
-                    // Failed to allocate the proc
-                    logger.warn("Failed to allocation cores from proc.");
-                    //no need to clean
-                    return;
-                }
-                catch (Exception e) {
-                    logger.warn("catch all exception " + e);
-                    return;
-                }
-            }
-        }
-    }
-
     public void dispatch(DispatchLayer layer, DispatchNode node) {
         logger.info("Dispatch Job " + layer);
     }
 
-    @Subscribe
-    public void handleJobLaunchEvent(JobLaunchEvent event) {
-        DispatchJob djob = dispatchService.getDispatchJob(event);
+    public void addDispatchJob(DispatchJob djob) {
         jobIndex.put(djob.getJobId(), djob);
-        folderIndex.put(event.getFolder().getFolderId(),
+        folderIndex.put(djob.getFolderId(),
                 djob.getFolder());
 
         for (BookingThread thread: bookingThreads) {
             thread.addJob(djob);
         }
+    }
+
+    @Subscribe
+    public void handleJobLaunchEvent(JobLaunchEvent event) {
+        logger.info("handling job launch event");
+        addDispatchJob(dispatchService.getDispatchJob(event));
     }
 
     @Subscribe

@@ -2,6 +2,7 @@ package com.breakersoft.plow.dispatcher.domain;
 
 import java.util.Set;
 
+import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.NodeE;
 
 public class DispatchNode extends NodeE implements DispatchResource {
@@ -9,6 +10,7 @@ public class DispatchNode extends NodeE implements DispatchResource {
     private int cores;
     private int memory;
     private Set<String> tags;
+    private boolean dispatchable;
 
     public DispatchNode() { }
 
@@ -39,5 +41,16 @@ public class DispatchNode extends NodeE implements DispatchResource {
     public void decrement(int cores, int memory) {
         this.cores = this.cores - cores;
         this.memory = this.memory - memory;
+    }
+
+    public boolean isDispatchable() {
+        if (cores == 0 || memory <= Defaults.MEMORY_MIN_MB) {
+            return false;
+        }
+        return dispatchable;
+    }
+
+    public void setDispatchable(boolean dispatchable) {
+        this.dispatchable = dispatchable;
     }
 }

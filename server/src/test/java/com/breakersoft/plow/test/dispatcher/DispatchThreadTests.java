@@ -21,7 +21,7 @@ import com.breakersoft.plow.service.JobLauncherService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
 
-public class DispatchThreadTest extends AbstractTest {
+public class DispatchThreadTests extends AbstractTest {
 
     @Resource
     FrontEndDispatcher dispatcher;

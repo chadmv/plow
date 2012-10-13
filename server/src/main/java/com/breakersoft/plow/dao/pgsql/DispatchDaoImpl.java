@@ -19,7 +19,6 @@ import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
-import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
@@ -97,6 +96,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "proc.pk_task,"+
                 "proc.pk_node,"+
                 "proc.pk_task,"+
+                "proc.pk_quota,"+
                 "proc.int_cores,"+
                 "proc.int_mem, " +
                 "node.str_name AS node_name, " +
@@ -146,6 +146,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             node.setCores(rs.getInt("int_free_cores"));
             node.setMemory(rs.getInt("int_free_memory"));
             node.setName(rs.getString("str_name"));
+            node.setDispatchable(true);
             return node;
         }
     };
@@ -314,19 +315,6 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     @Override
     public List<DispatchJob> getDispatchJobs() {
         return jdbc.query(GET_DJOB, DJOB_MAPPER);
-    }
-
-
-    @Override
-    public boolean reserveTask(Task frame) {
-        return jdbc.update("UPDATE plow.frame SET bool_reserved=1 " +
-                "WHERE pk_frame=? AND bool_reserved=0") == 1;
-    }
-
-    @Override
-    public boolean unreserveTask(Task frame) {
-        return jdbc.update("UPDATE plow.frame SET bool_reserved=0 " +
-                "WHERE pk_frame=? AND bool_reserved=1") == 1;
     }
 
     public static final RowMapper<DispatchTask>DTASK_MAPPER =

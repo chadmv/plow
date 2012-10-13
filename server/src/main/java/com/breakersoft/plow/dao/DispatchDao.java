@@ -6,7 +6,6 @@ import java.util.UUID;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
-import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
@@ -16,11 +15,13 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 
+/**
+ * A DAO for obtaining Dispatch brand objects.
+ *
+ * @author chambers
+ *
+ */
 public interface DispatchDao {
-
-    boolean reserveTask(Task frame);
-
-    boolean unreserveTask(Task frame);
 
     DispatchJob getDispatchJob(Job job);
 

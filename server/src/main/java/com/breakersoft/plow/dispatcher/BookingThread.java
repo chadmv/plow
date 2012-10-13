@@ -18,8 +18,8 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.exceptions.DispatchProcAllocationException;
-import com.breakersoft.plow.exceptions.RndClientConnectionError;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
+import com.breakersoft.plow.service.JobService;
 
 import com.google.common.collect.Maps;
 
@@ -46,9 +46,11 @@ public class BookingThread extends Thread {
     private DispatchService dispatchService;
 
     @Autowired
+    private JobService jobService;
+
+    @Autowired
     private DispatchSupport dispatchSupport;
 
-    private boolean doReload = true;
     private boolean enabled = true;
     private final Map<UUID, ArrayList<DispatchJob>> activeJobs;
     private final ConcurrentLinkedQueue<DispatchJob> newJobs;
@@ -111,6 +113,10 @@ public class BookingThread extends Thread {
                 continue;
             }
 
+            if (!node.isDispatchable()) {
+                return;
+            }
+
             book(node, project);
         }
     }
@@ -120,17 +126,22 @@ public class BookingThread extends Thread {
         UUID projId = project.getProjectId();
 
         // Sort the job list for the current project.
-        logger.info("Soring jobs for project " + projId);
+        logger.info("Sorting jobs for project {}", projId);
         Collections.sort(activeJobs.get(projId));
 
         for (DispatchJob job: activeJobs.get(projId)) {
 
              if (job.getWaitingFrames() == 0) {
-                 logger.info(job + " has no pending frames.");
+                 logger.info("{} has no pending frames.", job.getName());
                  continue;
              }
 
-             logger.info(job + " is up for dispatch.");
+             if (!node.isDispatchable()) {
+                 logger.info("{} is no longer dispatchable.", node.getName());
+                 return;
+             }
+
+             logger.info("{} is up for dispatch.", job.getName());
              book(node, job);
          }
     }
@@ -138,7 +149,12 @@ public class BookingThread extends Thread {
     public void book(DispatchNode node, DispatchJob job) {
         for (DispatchLayer layer:
             dispatchService.getDispatchLayers(job, node)) {
-              book(node, layer);
+                if (!node.isDispatchable()) {
+                    logger.info("{} is no longer dispatchable.", node.getName());
+                    return;
+                }
+                logger.info("booking layer: {}", layer.getLayerId());
+                book(node, layer);
         }
     }
 
@@ -147,49 +163,59 @@ public class BookingThread extends Thread {
             dispatchService.getDispatchTasks(layer, node)) {
 
             if(!dispatchSupport.canDispatch(task, node)) {
+                logger.info("{} is no longer dispatchable.", node.getName());
                 break;
             }
+
+            logger.info("booking task: {}", task.getName());
             book(node, task);
         }
     }
 
     public void book(DispatchNode node, DispatchTask task) {
 
+        if (!dispatchService.reserveTask(task)) {
+            logger.warn("Unable to reserve task: {}", task.getName());
+            return;
+        }
+
         DispatchProc proc = null;
         try {
             proc = dispatchService.allocateDispatchProc(node, task);
-            dispatchSupport.runRndTask(task, proc);
-
-            if (node.getCores() == 0) {
-                return;
+            if (jobService.startTask(task, proc)) {
+                dispatchSupport.runRndTask(task, proc);
             }
-        } catch (RndClientConnectionError e) {
-            // RND Client is down.
-            logger.warn("RND node is down " + node.getName() + ", " + e);
-            dispatchService.cleanupFailedDispatch(proc);
-            //TODO: need to lock out host;
-            return;
-        } catch (RndClientExecuteException e) {
-            logger.warn("RND exception " + e);
-            dispatchService.cleanupFailedDispatch(proc);
-            return;
         }
         catch (DispatchProcAllocationException e) {
-            // Failed to allocate the proc
-            logger.warn("Failed to allocation cores from proc.");
-            //no need to clean
-            return;
+            /*
+             * Proc was not able to be allocated from the database.
+             * This usually occurs when another thread is working
+             * on the same host, so its best to just stop dispatching.
+             */
+            logger.warn("Failed to allocate {}/{} from {}",
+                    new Object[] { task.getMinCores(), task.getMinMemory(), node.getName()});
+            node.setDispatchable(false);
+
+        } catch (RndClientExecuteException e) {
+            /*
+             * Unable to talk to host.
+             */
+            logger.warn("Failed to execute task on: {} " + node.getName());
+            dispatchService.cleanupFailedDispatch(proc);
+            node.setDispatchable(false);
         }
         catch (Exception e) {
-            logger.warn("catch all exception " + e);
-            e.printStackTrace();
-            return;
+            /*
+             * Some unexpected exception we didn't think of.
+             */
+            logger.warn("Unexpected task dipatching error, " + e);
+            jobService.unreserveTask(task);
+            dispatchService.cleanupFailedDispatch(proc);
+            node.setDispatchable(false);
         }
     }
 
-
     public void addJob(DispatchJob job) {
-        logger.info("Adding new job to newJobs list");
         newJobs.add(job);
     }
 
@@ -205,13 +231,14 @@ public class BookingThread extends Thread {
 
             DispatchJob job = newJobs.poll();
             if (job == null) {
+                logger.info("No new jobs waiting to be ingested.");
                 break;
             }
             count++;
 
             if (!activeJobs.containsKey(job.getProjectId())) {
                 activeJobs.put(job.getProjectId(),
-                        new ArrayList<DispatchJob>(100));
+                        new ArrayList<DispatchJob>());
             }
             activeJobs.get(job.getProjectId()).add(job);
         }

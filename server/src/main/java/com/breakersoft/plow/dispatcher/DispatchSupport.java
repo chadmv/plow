@@ -44,11 +44,15 @@ public class DispatchSupport {
 
     public boolean canDispatch(DispatchTask task, DispatchNode node) {
 
-        if (node.getMemory() < task.getMinMemory()) {
+        if (!node.isDispatchable()) {
             return false;
         }
 
-        if (node.getCores() < task.getMinCores()) {
+        if (node.getMemory() <= task.getMinMemory()) {
+            return false;
+        }
+
+        if (node.getCores() <= task.getMinCores()) {
             return false;
         }
 

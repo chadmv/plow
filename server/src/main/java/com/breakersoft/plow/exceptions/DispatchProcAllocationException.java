@@ -6,4 +6,7 @@ public class DispatchProcAllocationException extends RuntimeException {
         // TODO Auto-generated constructor stub
     }
 
+    public DispatchProcAllocationException(Exception e) {
+        super(e);
+    }
 }
