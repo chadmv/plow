@@ -93,6 +93,19 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         return job;
     }
 
+    private static final String IS_JOB_FINISHED =
+            "SELECT " +
+                "(int_eaten + int_succeeded) - int_total " +
+            "FROM " +
+                "plow.job_count " +
+            "WHERE " +
+                "job_count.pk_job=?";
+
+    @Override
+    public boolean isJobFinished(Job job) {
+        return jdbc.queryForInt(IS_JOB_FINISHED, job.getJobId()) == 0;
+    }
+
     @Override
     public void updateFolder(Job job, Folder folder) {
         jdbc.update("UPDATE plow.job SET pk_folder=? WHERE pk_job=?",

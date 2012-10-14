@@ -43,4 +43,11 @@ public class JobDaoTests extends AbstractTest {
         assertEquals(jobA, jobB);
         assertEquals(jobA.getProjectId(), jobB.getProjectId());
     }
+
+    @Test
+    public void testIsJobFinshed() {
+        Blueprint bp = getTestBlueprint();
+        Job jobA = jobDao.create(testProject, bp);
+        assertFalse(jobDao.isJobFinished(jobA));
+    }
 }
