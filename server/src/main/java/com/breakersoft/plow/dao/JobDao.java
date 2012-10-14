@@ -27,6 +27,4 @@ public interface JobDao {
     boolean hasPendingFrames(Job job);
 
     void updateFolder(Job job, Folder folder);
-
-    boolean isJobFinished(Job job);
 }

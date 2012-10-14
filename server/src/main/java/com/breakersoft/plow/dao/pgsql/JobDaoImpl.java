@@ -93,19 +93,6 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         return job;
     }
 
-    private static final String IS_JOB_FINISHED =
-            "SELECT " +
-                "(int_eaten + int_succeeded) - int_total " +
-            "FROM " +
-                "plow.job_count " +
-            "WHERE " +
-                "job_count.pk_job=?";
-
-    @Override
-    public boolean isJobFinished(Job job) {
-        return jdbc.queryForInt(IS_JOB_FINISHED, job.getJobId()) == 0;
-    }
-
     @Override
     public void updateFolder(Job job, Folder folder) {
         jdbc.update("UPDATE plow.job SET pk_folder=? WHERE pk_job=?",
@@ -181,6 +168,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         for (Map.Entry<String, List<Integer>> entry: layerRollup.entrySet()) {
             List<Integer> d = entry.getValue();
             values.clear();
+            int total = 0;
 
             sb.setLength(0);
             sb.append("UPDATE plow.layer_count SET");
@@ -189,13 +177,17 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 sb.append(TaskState.findByValue(d.get(i)).toString().toLowerCase());
                 sb.append("=?,");
                 values.add(d.get(i+1));
+                total=total + d.get(i+1);
             }
             sb.deleteCharAt(sb.length() - 1);
             sb.append(" WHERE pk_layer=?");
             values.add(UUID.fromString(entry.getKey()));
             jdbc.update(sb.toString(), values.toArray());
+            jdbc.update("UPDATE layer_count SET int_total=? WHERE pk_layer=?",
+                    total, UUID.fromString(entry.getKey()));
         }
 
+        int total = 0;
         values.clear();
         sb.setLength(0);
         sb.append("UPDATE plow.job_count SET ");
@@ -204,11 +196,15 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
             sb.append(TaskState.findByValue(entry.getKey()).toString().toLowerCase());
             sb.append("=?,");
             values.add(entry.getValue());
+            total=total + entry.getValue();
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append(" WHERE pk_job=?");
         values.add(job.getJobId());
         jdbc.update(sb.toString(), values.toArray());
+        jdbc.update("UPDATE job_count SET int_total=? WHERE pk_job=?",
+                total, job.getJobId());
+
     }
 
     @Override
@@ -217,9 +213,15 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 job.getJobId()) > 0;
     }
 
+    private static final String HAS_PENDING_FRAMES =
+            "SELECT " +
+                "int_total - (int_eaten + int_succeeded) " +
+            "FROM " +
+                "plow.job_count " +
+            "WHERE " +
+                "job_count.pk_job=?";
     @Override
     public boolean hasPendingFrames(Job job) {
-        return jdbc.queryForInt("SELECT int_total - (int_succeeded + int_eaten) FROM job_count WHERE pk_job=?",
-                job.getJobId()) <= 0;
+        return jdbc.queryForInt(HAS_PENDING_FRAMES, job.getJobId()) > 0;
     }
 }

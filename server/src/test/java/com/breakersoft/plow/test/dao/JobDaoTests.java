@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.dao.JobDao;
+import com.breakersoft.plow.event.JobLaunchEvent;
+import com.breakersoft.plow.service.JobLauncherService;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.JobBp;
@@ -17,6 +19,9 @@ public class JobDaoTests extends AbstractTest {
 
     @Resource
     JobDao jobDao;
+
+    @Resource
+    JobLauncherService jobLauncherService;
 
     @Test
     public void testCreate() {
@@ -45,9 +50,9 @@ public class JobDaoTests extends AbstractTest {
     }
 
     @Test
-    public void testIsJobFinshed() {
+    public void testHasPendingFrames() {
         Blueprint bp = getTestBlueprint();
-        Job jobA = jobDao.create(testProject, bp);
-        assertFalse(jobDao.isJobFinished(jobA));
+        JobLaunchEvent event = jobLauncherService.launch(bp);
+        assertTrue(jobDao.hasPendingFrames(event.getJob()));
     }
 }
