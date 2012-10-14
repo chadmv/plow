@@ -9,7 +9,8 @@
                       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 
   <!-- Root Context: defines shared resources visible to all other web components -->
-  <context:property-placeholder location="classpath*:plow.properties" />
+  <context:property-placeholder location="file:resources/plow.properties" ignore-resource-not-found="true"/>
+  <context:property-placeholder location="classpath:plow.properties" ignore-resource-not-found="true"/>
 
   <!-- Root Context: defines shared resources visible to all other web components -->
   <context:annotation-config />
@@ -19,7 +20,7 @@
 
   <bean id="dataSource" class="com.jolbox.bonecp.BoneCPDataSource"
     destroy-method="close">
-    <property name="driverClass" value="${jdbc.driverClassName}" />
+    <property name="driverClass" value="org.postgresql.Driver" />
     <property name="jdbcUrl" value="${jdbc.url}" />
     <property name="username" value="${jdbc.username}" />
     <property name="password" value="${jdbc.password}" />
