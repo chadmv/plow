@@ -10,7 +10,7 @@ import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.test.AbstractTest;
 
-public class NodeDaoTest extends AbstractTest {
+public class NodeDaoTests extends AbstractTest {
 
     @Resource
     NodeDao nodeDao;;
