@@ -8,9 +8,16 @@
                       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
                       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 
-  <!-- Root Context: defines shared resources visible to all other web components -->
-  <context:property-placeholder location="file:resources/plow.properties" ignore-resource-not-found="true"/>
-  <context:property-placeholder location="classpath:plow.properties" ignore-resource-not-found="true"/>
+  <!-- Handle both unit test setup and deployed setup -->
+  <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <property name="ignoreResourceNotFound" value="true"/>
+      <property name="locations">
+          <list>
+              <value>classpath:plow.properties</value>
+              <value>file:resources/plow.properties</value>
+          </list>
+      </property>
+  </bean>
 
   <!-- Root Context: defines shared resources visible to all other web components -->
   <context:annotation-config />
