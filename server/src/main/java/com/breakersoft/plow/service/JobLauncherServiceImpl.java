@@ -17,7 +17,6 @@ import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.ProjectDao;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.thrift.JobBp;
 import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.LayerBp;
