@@ -13,6 +13,7 @@ import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.TaskState;
 
 
@@ -82,5 +83,10 @@ public class JobServiceImpl implements JobService {
     @Override
     public Layer getLayer(Job job, String layer) {
         return layerDao.get(job, layer);
+    }
+
+    @Override
+    public boolean setJobState(Job job, JobState state) {
+        return jobDao.setJobState(job, state);
     }
 }
