@@ -14,6 +14,7 @@ import com.breakersoft.plow.ProcE;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.exceptions.DispatchProcAllocationException;
 import com.breakersoft.plow.util.JdbcUtils;
 
@@ -77,6 +78,25 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
         } catch (DataAccessException e) {
             e.printStackTrace();
             throw new DispatchProcAllocationException(e);
+        }
+    }
+
+    private static final String UPDATE =
+        "UPDATE " +
+            "plow.proc " +
+        "SET " +
+            "pk_task = ? " +
+        "WHERE " +
+            "pk_proc = ?";
+
+    @Override
+    public void update(DispatchProc proc, DispatchTask task) {
+        if (task == null) {
+            jdbc.update(UPDATE, null, proc.getProcId());
+        }
+        else {
+            jdbc.update(UPDATE,
+                task.getTaskId(), proc.getProcId());
         }
     }
 
