@@ -219,7 +219,7 @@ CREATE TABLE plow.proc (
   pk_proc UUID NOT NULL PRIMARY KEY,
   pk_quota UUID NOT NULL,
   pk_node UUID NOT NULL,
-  pk_task UUID NOT NULL,
+  pk_task UUID,
   int_cores SMALLINT NOT NULL,
   int_mem INTEGER NOT NULL,
   int_mem_used INTEGER DEFAULT 0 NOT NULL,

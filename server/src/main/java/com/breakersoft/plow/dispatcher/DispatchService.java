@@ -53,4 +53,8 @@ public interface DispatchService {
 
     List<DispatchJob> getDispatchJobs();
 
+    void assignProc(DispatchProc proc, DispatchTask task);
+
+    void unassignProc(DispatchProc proc);
+
 }

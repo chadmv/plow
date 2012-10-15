@@ -41,7 +41,7 @@ public class RndThriftServiceImpl implements RndServiceApi.Iface {
         }
 
         logger.info("Dispatching " + ping.hostname);
-        frontEndDispatcher.dispatch(node);
+        frontEndDispatcher.book(node);
     }
 
     @Override

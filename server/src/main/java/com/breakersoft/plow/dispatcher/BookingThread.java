@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.breakersoft.plow.dispatcher.command.DispatchCommand;
+import com.breakersoft.plow.dispatcher.command.BookingCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
@@ -67,7 +67,7 @@ public class BookingThread extends Thread {
         while(enabled) {
 
             // Pull a node out of the dispatcher queue.
-            DispatchCommand command = dispatcher.getNextDispatchCommand();
+            BookingCommand command = dispatcher.getNextBookingCommand();
 
             // The thread was interrupted?  Not sure if a null
             // is the best way to handle it or if we should
@@ -201,6 +201,7 @@ public class BookingThread extends Thread {
              * Unable to talk to host.
              */
             logger.warn("Failed to execute task on: {} " + node.getName());
+            jobService.unreserveTask(task);
             dispatchService.cleanupFailedDispatch(proc);
             node.setDispatchable(false);
         }

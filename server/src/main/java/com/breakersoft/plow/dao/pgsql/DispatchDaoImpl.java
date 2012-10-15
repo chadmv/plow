@@ -52,9 +52,9 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "AND " +
                 "layer_count.int_waiting != 0 " +
             "AND " +
-                "layer.int_min_cores < ? " +
+                "layer.int_min_cores <= ? " +
             "AND " +
-                "layer.int_min_mem < ? " +
+                "layer.int_min_mem <= ? " +
             "AND " +
                 "layer.str_tags && ? " +
             "ORDER BY " +
@@ -99,6 +99,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "proc.pk_quota,"+
                 "proc.int_cores,"+
                 "proc.int_mem, " +
+                "node.str_tags,"+
                 "node.str_name AS node_name, " +
                 "task.str_name AS task_name " +
             "FROM " +
@@ -125,6 +126,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             proc.setMemory(rs.getInt("int_mem"));
             proc.setTaskName(rs.getString("task_name"));
             proc.setNodeName(rs.getString("node_name"));
+            proc.setTags(new HashSet<String>(
+                    Arrays.asList((String[])rs.getArray("str_tags").getArray())));
             return proc;
         }
     };
@@ -332,6 +335,16 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             frame.setName(rs.getString("str_name"));
             frame.setMinCores(rs.getInt("int_min_cores"));
             frame.setMinMemory(rs.getInt("int_min_mem"));
+
+            if (rs.getString("str_name") == null) {
+                frame.setName(String.format("%04d-%s",
+                        rs.getInt("int_number"),
+                        rs.getString("layer_name")));
+            }
+            else {
+                frame.setName(rs.getString("str_name"));
+            }
+
             return frame;
         }
     };
@@ -345,7 +358,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "layer.pk_job,"+
                 "layer.str_command, "+
                 "layer.int_min_cores,"+
-                "layer.int_min_mem " +
+                "layer.int_min_mem, " +
+                "layer.str_name AS layer_name " +
             "FROM " +
                 "plow.layer " +
                     "INNER JOIN " +
@@ -354,9 +368,9 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "WHERE " +
                 "layer.pk_layer = ? " +
             "AND " +
-                "layer.int_min_cores < ? " +
+                "layer.int_min_cores <= ? " +
             "AND " +
-                "layer.int_min_mem < ? " +
+                "layer.int_min_mem <= ? " +
             "AND " +
                 "layer.str_tags && ? " +
             "AND " +

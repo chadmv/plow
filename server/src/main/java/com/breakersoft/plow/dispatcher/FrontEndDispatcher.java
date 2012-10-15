@@ -12,15 +12,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Node;
-import com.breakersoft.plow.dispatcher.command.DispatchCommand;
-import com.breakersoft.plow.dispatcher.command.DispatchNodeCommand;
+import com.breakersoft.plow.dispatcher.command.BookingCommand;
+import com.breakersoft.plow.dispatcher.command.BookNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
+import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.event.JobFinishedEvent;
+import com.breakersoft.plow.exceptions.RndClientExecuteException;
 import com.breakersoft.plow.service.JobService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
@@ -47,7 +50,7 @@ public final class FrontEndDispatcher {
     JobService jobService;
 
     private final List<BookingThread> bookingThreads;
-    private final LinkedBlockingQueue<DispatchCommand> commandQueue;
+    private final LinkedBlockingQueue<BookingCommand> bookingQueue;
 
     private final ConcurrentMap<UUID, DispatchFolder> folderIndex;
     private final ConcurrentMap<UUID, DispatchJob> jobIndex;
@@ -56,19 +59,15 @@ public final class FrontEndDispatcher {
 
         bookingThreads = Lists.newArrayListWithCapacity(
                 Defaults.DISPATCH_BOOKING_THREADS);
-        commandQueue = new LinkedBlockingQueue<DispatchCommand>();
+        bookingQueue = new LinkedBlockingQueue<BookingCommand>();
 
         folderIndex = new MapMaker()
             .concurrencyLevel(Defaults.DISPATCH_BOOKING_THREADS)
-            .weakKeys()
-            .weakValues()
             .initialCapacity(100)
             .makeMap();
 
         jobIndex = new MapMaker()
             .concurrencyLevel(Defaults.DISPATCH_BOOKING_THREADS)
-            .weakKeys()
-            .weakValues()
             .initialCapacity(100)
             .makeMap();
     }
@@ -93,37 +92,112 @@ public final class FrontEndDispatcher {
         for (BookingThread thread: bookingThreads) {
             thread.start();
         }
-
     }
 
-    public DispatchCommand getNextDispatchCommand() {
+    public BookingCommand getNextBookingCommand() {
         try {
-            return commandQueue.take();
+            return bookingQueue.take();
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             return null;
         }
     }
 
-    public void dispatch(Node node) {
-        dispatch(dispatchService.getDispatchNode(node.getName()));
+    public void book(Node node) {
+        book(dispatchService.getDispatchNode(node.getName()));
     }
 
-    public void dispatch(DispatchNode node) {
-        logger.info("Adding dispatch node: " + node.getName() + "to queue");
-        commandQueue.offer(new DispatchNodeCommand(node));
-        logger.info("Queue size :" + commandQueue.size());
+    public void book(DispatchNode node) {
+        bookingQueue.offer(new BookNode(node));
     }
 
-    public void dispatch(DispatchJob job, DispatchNode node) {
+    public void book(DispatchNode node, DispatchJob job) {
         logger.info("Dispatch Job " + job);
     }
 
-    public void dispatch(DispatchLayer layer, DispatchNode node) {
+    public void book(DispatchNode node, DispatchLayer layer) {
         logger.info("Dispatch Job " + layer);
     }
 
+    public boolean dispatch(DispatchProc proc, DispatchJob job) {
+
+        logger.info("Dipatching proc: {}", proc);
+
+        final List<DispatchLayer> layers =
+                dispatchService.getDispatchLayers(job, proc);
+
+        logger.info("Dispatching job: {}, matching layers: {}",
+                job.getJobId(), layers.size());
+
+        for (DispatchLayer layer: layers) {
+            logger.info("booking layer: {}", layer.getLayerId());
+            boolean result = dispatch(proc, layer);
+            if (result) {
+                return result;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean dispatch(DispatchProc proc, DispatchLayer layer) {
+
+        final List<DispatchTask> tasks =
+                dispatchService.getDispatchTasks(layer, proc);
+
+        logger.info("Dispatching layer: {}, matching tasks: {}",
+                layer.getLayerId(), tasks.size());
+
+        for (DispatchTask task: tasks) {
+            logger.info("booking task: {}", task.getTaskId());
+            boolean result = dispatch(proc, task);
+            if (result) {
+                return result;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean dispatch(DispatchProc proc, DispatchTask task) {
+
+        if (!dispatchService.reserveTask(task)) {
+            logger.warn("Unable to reserve task: {}", task.getName());
+            return false;
+        }
+
+        try {
+            dispatchService.assignProc(proc, task);
+            if (jobService.startTask(task, proc)) {
+                dispatchSupport.runRndTask(task, proc);
+                return true;
+            }
+        } catch (RndClientExecuteException e) {
+            /*
+             * Unable to talk to host.
+             */
+            logger.warn("Failed to execute task on: {} " + proc.getNodeName());
+            jobService.unreserveTask(task);
+            dispatchService.cleanupFailedDispatch(proc);
+        }
+        catch (Exception e) {
+            /*
+             * Some unexpected exception we didn't think of.
+             */
+            logger.warn("Unexpected task dipatching error, " + e);
+            jobService.unreserveTask(task);
+            dispatchService.cleanupFailedDispatch(proc);
+        }
+
+        return false;
+    }
+
+    public DispatchJob getDispatchJob(UUID id) {
+        return jobIndex.get(id);
+    }
+
     public void addDispatchJob(DispatchJob djob) {
+        logger.info("Adding dispatch job: {}", djob.getJobId());
         jobIndex.put(djob.getJobId(), djob);
         folderIndex.put(djob.getFolderId(),
                 djob.getFolder());

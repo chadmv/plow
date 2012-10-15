@@ -3,11 +3,11 @@ package com.breakersoft.plow.dispatcher.command;
 import com.breakersoft.plow.dispatcher.BookingThread;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 
-public class DispatchNodeCommand implements DispatchCommand {
+public class BookNode implements BookingCommand {
 
     private DispatchNode dispatchNode;
 
-    public DispatchNodeCommand(DispatchNode node) {
+    public BookNode(DispatchNode node) {
         this.dispatchNode = node;
     }
 

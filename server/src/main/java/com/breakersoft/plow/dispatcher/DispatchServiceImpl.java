@@ -111,6 +111,18 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
+    public void unassignProc(DispatchProc proc) {
+        procDao.update(proc, null);
+        proc.setTaskId(null);
+    }
+
+    @Override
+    public void assignProc(DispatchProc proc, DispatchTask task) {
+        procDao.update(proc, task);
+        proc.setTaskId(task.getTaskId());
+    }
+
+    @Override
     public DispatchProc allocateDispatchProc(DispatchNode node, DispatchTask task) {
 
         node.decrement(task.getMinCores(), task.getMinMemory());
@@ -131,6 +143,7 @@ public class DispatchServiceImpl implements DispatchService {
         if (proc == null) {
             return;
         }
+        proc.setTaskId(null);
         removeProc(proc);
     }
 }
