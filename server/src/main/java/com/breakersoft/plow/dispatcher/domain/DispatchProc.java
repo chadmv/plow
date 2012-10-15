@@ -53,4 +53,17 @@ public class DispatchProc extends ProcE implements DispatchResource {
     public Set<String> getTags() {
         return tags;
     }
+
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(32);
+        sb.append(cores);
+        sb.append("/");
+        sb.append(memory);
+        sb.append(":");
+        for (String tag: tags) {
+            sb.append(tag);
+            sb.append(",");
+        }
+        return sb.toString();
+    }
 }
