@@ -49,17 +49,30 @@ public class DispatchSupport {
         logger.info("process is running");
     }
 
+    public boolean canDispatch(DispatchTask task, DispatchProc proc) {
+
+        if (proc.getMemory() < task.getMinMemory()) {
+            return false;
+        }
+
+        if (proc.getCores() < task.getMinCores()) {
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean canDispatch(DispatchTask task, DispatchNode node) {
 
         if (!node.isDispatchable()) {
             return false;
         }
 
-        if (node.getMemory() <= task.getMinMemory()) {
+        if (node.getMemory() < task.getMinMemory()) {
             return false;
         }
 
-        if (node.getCores() <= task.getMinCores()) {
+        if (node.getCores() < task.getMinCores()) {
             return false;
         }
 
