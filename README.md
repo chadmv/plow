@@ -10,7 +10,12 @@ Server
 ------
 
 * Postgresql 9.2
+
+http://www.postgresql.org
+
 * Java7
+
+http://www.java.com/en/download/index.jsp
 
 Client and Tools
 ----------------
