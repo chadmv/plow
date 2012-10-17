@@ -15,6 +15,11 @@ from profile.macosx import SystemProfiler
 logger = logging.getLogger(__name__)
 
 class ResourceManager(object):
+    """
+    The ResourceManager keeps track of the bookable resources on the
+    machine.  This is currently just cores, but memory and GPUS
+    in the future.
+    """
 
     def __init__(self):
         self.__slots = dict([(i, 0) for i in range(0, Profiler.physicalCpus)])
@@ -58,6 +63,10 @@ class ResourceManager(object):
         return [slot for slot in self.__slots if self.__slots[slot] == 0]
 
 class ProcessManager(object):
+    """
+    The ProcessManager keeps track of the running tasks.  Each task
+    is executed in a separate ProcessThread.
+    """
 
     def __init__(self):
         self.__threads = { }
@@ -91,7 +100,10 @@ class ProcessManager(object):
 
 
 class ProcessThread(threading.Thread):
-
+    """
+    The ProcessThreasd wraps a running task.
+    """
+    
     def __init__(self, rtc):
         threading.Thread.__init__(self)
         self.daemon = True
