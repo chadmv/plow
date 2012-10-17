@@ -6,10 +6,10 @@ rm -rf plow/rpc
 rm -rf rndlib/rpc
 
 thrift --gen py:new_style:utf8strings -out ../python/plow plow.thrift
-thrift --gen py:new_style:utf8strings -out ../python/rndlib rnd.thrift
+thrift --gen py:new_style:utf8strings -out ../python/plow/rndaemon rnd.thrift
 
 thrift --gen py:new_style:utf8strings -out ../python/plow/rpc common.thrift
-thrift --gen py:new_style:utf8strings -out ../python/rndlib/rpc common.thrift
+thrift --gen py:new_style:utf8strings -out ../python/plow/rndaemon/rpc common.thrift
 
 # Java
 ########################################################################
