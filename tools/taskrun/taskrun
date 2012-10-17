@@ -21,9 +21,9 @@ class Taskrun(app.BlueprintApplication):
         group.add_argument("-range", metavar="RANGE",
             help="Frame range to execute.");
 
-    def handle_args(self, args):
-        job = app.load_script(args.script)
-        layer = job.get_layer(args.layer)
+    def handleArgs(self, args):
+        job = app.loadScript(args.script)
+        layer = job.getLayer(args.layer)
 
         if args.range:
             frameSet = fileseq.FrameSet(args.range)
