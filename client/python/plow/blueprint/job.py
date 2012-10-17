@@ -1,6 +1,4 @@
 
-import weakref
-
 from archive import Archive
 from exception import LayerException
 
@@ -14,37 +12,40 @@ class Job(object):
         self.__archive = None
         self.__path = None
 
-    def get_path(self):
+    def getPath(self):
         return self.__path
 
-    def get_name(self):
+    def getName(self):
         return self.__name
 
-    def get_layer(self, name):
+    def getLayer(self, name):
         try:
             return self.__layers[1][name]
         except KeyError:
             raise LayerException("Layer %s does not exist." % name)
 
-    def add_layer(self, layer):
+    def addLayer(self, layer):
         
-        if self.__layers[1].has_key(layer.get_name()):
-            raise LayerException("Invalid layer name: %s , duplicate name." % layer.get_name())
+        if self.__layers[1].has_key(layer.getName()):
+            raise LayerException("Invalid layer name: %s , duplicate name." % layer)
         
         self.__layers[0].append(layer)
-        self.__layers[1][layer.get_name()] = layer
-        layer.set_job(self)
+        self.__layers[1][layer.getName()] = layer
+        layer.setJob(self)
 
-    def get_layers(self):
+    def getLayers(self):
         return self.__layers[0]
 
-    def load_archive(self):
+    def loadArchive(self):
         self.__archive = Archive(self)
+
+    def getArchive(self):
+        return self.__archive
 
     def setup(self):
 
         self.__archive = Archive(self)
-        self.__path = self.__archive.get_path()
+        self.__path = self.__archive.getPath()
 
         for layer in self.__layers[0]:
             layer.setup()
@@ -52,7 +53,7 @@ class Job(object):
         archive = self.__archive
         try:
             self.__archive = None
-            archive.put_data("blueprint.yaml", self)
+            archive.putData("blueprint.yaml", self)
         finally:
             self.__archive = archive
 

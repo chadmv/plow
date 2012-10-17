@@ -16,23 +16,22 @@ class BlueprintRunner(object):
         }
         self.__args.update(kwargs)
 
-    def set_arg(self, key, value):
+    def setArg(self, key, value):
         self.__args[key] = value
 
-    def get_arg(self, key, default=None):
+    def getArg(self, key, default=None):
         self.__args.get(key, default)
 
     def run(self, job):
 
-        bp = to_blueprint(job, **self.__args)
-        plow_conn = get_plow_conn()
-        plow_conn.launch(bp)
+        bp = toBlueprint(job, **self.__args)
+        getPlowService().launch(bp)
 
 def plowrun(job, **kwargs):
     bpr = BlueprintRunner(**kwargs)
     bpr.run(job)
 
-def get_plow_conn():
+def getPlowService():
     socket = TSocket.TSocket("localhost", 11336)
     transport = TTransport.TFramedTransport(socket)
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
@@ -40,7 +39,7 @@ def get_plow_conn():
     transport.open()
     return service
 
-def to_blueprint(job, **kwargs):
+def toBlueprint(job, **kwargs):
 
     frange = kwargs.get("frame_range", "1001")
 
@@ -49,24 +48,24 @@ def to_blueprint(job, **kwargs):
     bp.job.project = "test";
     bp.job.uid = os.getuid()
     bp.job.paused = kwargs.get("paused", False)
-    bp.job.name = job.get_name()
+    bp.job.name = job.getName()
     bp.layers = []
 
-    for layer in job.get_layers():
+    for layer in job.getLayers():
         bpl = ttypes.LayerBp()
-        bpl.name = layer.get_name()
+        bpl.name = layer.getName()
         bpl.command = ["/Users/chambers/src/plow/tools/taskrun/taskrun",
-                       os.path.join(job.get_path(), "blueprint.yaml"),
+                       os.path.join(job.getPath(), "blueprint.yaml"),
                        "-layer",
-                       layer.get_name(),
+                       layer.getName(),
                        "-range",
                        "%{FRAME}"]
-        bpl.tags =  layer.get_arg("tags", ["unassigned"])
-        bpl.range = layer.get_arg("frame_range", frange)
-        bpl.chunk = layer.get_arg("chunk", 1)
-        bpl.minCores = layer.get_arg("min_threads", 1)
-        bpl.maxCores = layer.get_arg("max_threads", 0)
-        bpl.minMemory = layer.get_arg("min_ram", 256)
+        bpl.tags =  layer.getArg("tags", ["unassigned"])
+        bpl.range = layer.getArg("frame_range", frange)
+        bpl.chunk = layer.getArg("chunk", 1)
+        bpl.minCores = layer.getArg("min_threads", 1)
+        bpl.maxCores = layer.getArg("max_threads", 0)
+        bpl.minMemory = layer.getArg("min_ram", 256)
         bp.layers.append(bpl)
 
     return bp

@@ -10,7 +10,7 @@ class LayerAspect(type):
         """
         layer = super(LayerAspect, cls).__call__(*args, **kwargs)
         if Job.Current:
-            Job.Current.add_layer(layer)
+            Job.Current.addLayer(layer)
         return layer
 
 class Layer(object):
@@ -24,16 +24,16 @@ class Layer(object):
         self.__tasks = []
         self.__job = None
 
-    def get_name(self):
+    def getName(self):
         return self.__name
 
-    def set_arg(self, name, value):
+    def setArg(self, name, value):
         self.__args[name] = value
 
-    def get_arg(self, name, default=None):
+    def getArg(self, name, default=None):
         return self.__args.get(name, default)
 
-    def require_arg(self, name, types=None):
+    def requireArg(self, name, types=None):
         self.__req_args.append((name, types))
 
     def execute(self, frames):
@@ -42,23 +42,23 @@ class Layer(object):
     def setup(self):
         self._setup()
 
-    def get_job(self):
+    def getJob(self):
         return self.__job
 
-    def set_job(self, job):
-        return self.__job
+    def setJob(self, job):
+        self.__job = job
 
-    def put_data(self, name, data):
-        self.__job.get_session().put_data(
+    def putData(self, name, data):
+        self.__job.getArchive().putData(
             "%s/%s" % (self.__name, name), data)
 
-    def get_data(self, name):
+    def getData(self, name):
         pass
 
-    def put_file(self, name, file):
+    def putFile(self, name, file):
         pass
 
-    def get_file(self, name):
+    def getFile(self, name):
         pass
 
     def _execute(self, frames):

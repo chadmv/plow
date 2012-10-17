@@ -17,21 +17,21 @@ class Plowrun(app.BlueprintApplication):
         group.add_argument("-pause", action="store_true", help="Launch the job in a paused state.")
         group.add_argument("-job-name", metavar="JOB NAME", help="Set the job name.")
 
-    def handle_args(self, args):
+    def handleArgs(self, args):
 
         runner = plowrun.BlueprintRunner()
 
         if args.pause:
-            runner.set_arg("pause", args.pause)
+            runner.setArg("pause", args.pause)
         if args.job_name:
-            runner.set_arg("job_name", args.job_name)
-        
-        runner.set_arg("frame_range", args.range)
+            runner.setArg("job_name", args.job_name)
 
-        job = app.load_script(args.script)
+        runner.setArg("frame_range", args.range)
+
+        job = app.loadScript(args.script)
         job.setup()
         
-        if len(job.get_layers()) == 0:
+        if len(job.getLayers()) == 0:
             raise Exception("The job has no layers to execute.");
         runner.run(job)
 

@@ -15,7 +15,7 @@ class BlueprintApplication(object):
         group.add_argument("-verbose", action="store_true", help="Turn on verbose logging.")
         group.add_argument("-debug", action="store_true", help="Turn on debug logging.")
 
-    def handle_args(self):
+    def handleArgs(self, args):
         pass
 
     def go(self):
@@ -27,17 +27,17 @@ class BlueprintApplication(object):
             logging.basicConfig(level=logging.DEBUG)
   
         # Handle arguments added by specific application.
-        self.handle_args(args)
+        self.handleArgs(args)
 
-def load_script(path):
+def loadScript(path):
 
     if os.path.basename(path) == "blueprint.yaml":
         Job.Current = yaml.load(file(path, 'r'))
         # Yamlized jobs have no session but they
         # have a path that points to one so we have
         # to bring back the archive.
-        if Job.Current.get_path():
-            Job.Current.load_archive()
+        if Job.Current.getPath():
+            Job.Current.loadArchive()
     else:
         Job.Current = Job(os.path.basename(path).split(".")[0])
         execfile(path, {})

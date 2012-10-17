@@ -28,28 +28,28 @@ class Archive(object):
         os.makedirs(self.__path, 0777)
         os.mkdir(os.path.join(self.__path, "layers"), 0777)
 
-    def put_data(self, name, data, layer=None):
+    def putData(self, name, data, layer=None):
         """Puts data into the archive."""
-        path = os.path.join(self.get_path(layer), name);
+        path = os.path.join(self.getPath(layer), name);
         fp = open(path, "w")
         try:
             fp.write(yaml.dump(data))
         finally:
             fp.close()
 
-    def get_data(self, name):
+    def getData(self, name):
         pass
 
-    def put_file(self, name, path):
+    def putFile(self, name, path):
         pass
 
-    def get_file(self, name):
+    def getFile(self, name):
         pass
 
-    def get_path(self, layer=None):
+    def getPath(self, layer=None):
         if layer:
             try:
-                layer_name = layer.get_name()
+                layer_name = layer.getName()
             except:
                 layer_name = str(layer)
             path = os.path.join(self.__path, "layers", layer_name)
