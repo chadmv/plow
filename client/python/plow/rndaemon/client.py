@@ -3,7 +3,6 @@ import conf
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
-from thrift.server import TServer
 
 from rpc import RndServiceApi, RndNodeApi
 
