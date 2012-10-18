@@ -17,7 +17,7 @@ def get(section, key):
     interpolates any environement variables specified in plow.ini.
     """
     interps = Config.get("env", "interpolate").split(",")
-    args = dict([(inter, os.environ[inter]) for inter in interps])
+    args = dict([(inter, os.environ.get(inter, "test")) for inter in interps])
 
     result = Config.get(section, key)
     return result % args
