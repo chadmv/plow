@@ -18,3 +18,10 @@ mkdir -p ../java/src/main/java
 thrift -gen java:java5 --out ../java/src/main/java common.thrift
 thrift -gen java:java5 -out ../java/src/main/java plow.thrift
 thrift -gen java:java5 -out ../java/src/main/java rnd.thrift
+
+# C++
+########################################################################
+rm -rf ../cpp/core/rpc
+mkdir ../cpp/core/rpc
+thrift --gen cpp --out ../cpp/core/rpc common.thrift
+thrift --gen cpp --out ../cpp/core/rpc plow.thrift
