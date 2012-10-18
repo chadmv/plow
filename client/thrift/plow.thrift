@@ -39,13 +39,16 @@ exception PlowException {
 
 struct JobT {
     1:common.Guid id,
-    2:string name,
-    3:JobState state,
-    4:bool paused
-    5:i32 minCores,
-    6:i32 maxCores,
-    7:common.Timestamp startTime,
-    8:common.Timestamp stopTime,
+    2:common.Guid folderId,
+    3:string name,
+    4:string username,
+    5:i32 uid,
+    6:JobState state,
+    7:bool paused
+    8:i32 minCores,
+    9:i32 maxCores,
+    10:common.Timestamp startTime,
+    11:common.Timestamp stopTime,
 }
 
 struct LayerT {
@@ -85,7 +88,8 @@ struct JobBp {
     1:string name,
     2:string project,
     3:bool paused,
-    4:i32 uid
+    4:string username,
+    5:i32 uid
 }
 
 struct Blueprint {
@@ -93,13 +97,20 @@ struct Blueprint {
     2:list<LayerBp> layers
 }
 
+struct JobFilter {
+    1:optional list<string> project,
+    2:optional list<string> user,
+    3:optional string regex,
+    4:optional list<JobState> states
+}
 
 service RpcServiceApi {
     
     JobT launch(1:Blueprint blueprint) throws (1:PlowException e),
     JobT getActiveJob(1:string name) throws (1:PlowException e),
     JobT getJob(1:common.Guid jobId) throws (1:PlowException e),
-    
+    list<JobT> getJobs(1:JobFilter filter) throws (1:PlowException e),
+
     LayerT getLayer(1:common.Guid layerId) throws (1:PlowException e),
     list<LayerT> getLayers(1:common.Guid jobId) throws (1:PlowException e),
 

@@ -46,6 +46,7 @@ CREATE TABLE plow.job (
   pk_folder UUID,
   str_name VARCHAR(160) NOT NULL,
   str_active_name VARCHAR(160),
+  str_username VARCHAR(100) NOT NULL,
   int_uid INTEGER NOT NULL,
   int_state SMALLINT NOT NULL DEFAULT 0,
   bool_paused BOOLEAN NOT NULL DEFAULT 'f',

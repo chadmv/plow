@@ -1,5 +1,6 @@
 import os
 import yaml
+import getpass
 
 import plow.rpc.ttypes as ttypes
 
@@ -46,6 +47,7 @@ def toBlueprint(job, **kwargs):
     bp = ttypes.Blueprint()
     bp.job = ttypes.JobBp()
     bp.job.project = "test";
+    bp.job.username = getpass.getuser()
     bp.job.uid = os.getuid()
     bp.job.paused = kwargs.get("paused", False)
     bp.job.name = job.getName()

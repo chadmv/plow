@@ -46,6 +46,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         JobBp jbp = new JobBp();
         jbp.setName("test");
         jbp.setUid(100);
+        jbp.setUsername("stella");
         jbp.setPaused(false);
         jbp.setProject("unittest");
 
