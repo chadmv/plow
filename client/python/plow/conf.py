@@ -11,6 +11,8 @@ if os.environ.get("PLOW_CFG"):
 else:
     Config.read(["/etc/plow/plow.cfg", os.path.expanduser("~/.plow/plow.cfg")])
 
+assert Config.has_section("plow")
+
 def get(section, key):
     """
     Return the specified configuration option.  Automatically
