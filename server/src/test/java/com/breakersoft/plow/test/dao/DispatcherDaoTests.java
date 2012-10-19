@@ -45,8 +45,8 @@ public class DispatcherDaoTests extends AbstractTest {
 
     @Test
     public void testGetDispatchFolder() {
-        Folder folder = folderDao.getDefaultFolder(testProject);
-        DispatchFolder dfolder = dispatchDao.getDispatchFolder(folder);
+        Folder folder = folderDao.getDefaultFolder(TEST_PROJECT);
+        DispatchFolder dfolder = dispatchDao.getDispatchFolder(folder.getFolderId());
         assertEquals(folder.getFolderId(), dfolder.getFolderId());
     }
 
@@ -55,7 +55,7 @@ public class DispatcherDaoTests extends AbstractTest {
         JobLaunchEvent event = jobLauncherService.launch(getTestBlueprint());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
         assertTrue(djob.getTier() == 0);
-        assertEquals(djob, event.getJob());
+        assertEquals(djob.getJobId(), event.getJob().getJobId());
     }
 
     @Test

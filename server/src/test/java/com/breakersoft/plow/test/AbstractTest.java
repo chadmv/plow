@@ -9,12 +9,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Project;
+import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.rnd.thrift.Hardware;
 import com.breakersoft.plow.rnd.thrift.Ping;
+import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.ProjectService;
-import com.breakersoft.plow.service.QuotaService;
 import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.JobBp;
 import com.breakersoft.plow.thrift.LayerBp;
@@ -31,14 +33,21 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
     ProjectService projectService;
 
     @Resource
-    QuotaService quotaService;
+    NodeService nodeService;
 
-    protected Project testProject;
+    protected Project TEST_PROJECT;
+
+    protected Cluster TEST_CLUSTER;
+
+    protected Quota TEST_QUOTA;
 
     @Before
     public void initTestProject() {
-        testProject = projectService.createProject("unittest", "Unit Test Project");
-        quotaService.createQuota(testProject, "unassigned", 10, 15);
+        TEST_PROJECT = projectService.createProject("unittest", "Unit Test Project");
+        TEST_CLUSTER = nodeService.createCluster("unittest", "unittest");
+        TEST_QUOTA = nodeService.createQuota(TEST_PROJECT, TEST_CLUSTER, 10, 15);
+
+        nodeService.setDefaultCluster(TEST_CLUSTER);
     }
 
     public Blueprint getTestBlueprint() {

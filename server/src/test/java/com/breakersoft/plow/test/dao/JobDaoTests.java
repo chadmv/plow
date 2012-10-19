@@ -25,14 +25,14 @@ public class JobDaoTests extends AbstractTest {
 
     @Test
     public void testCreate() {
-        jobDao.create(testProject, getTestBlueprint());
+        jobDao.create(TEST_PROJECT, getTestBlueprint());
     }
 
     @Test
     public void testGetByNameAndState() {
         Blueprint bp = getTestBlueprint();
         JobBp job = bp.job;
-        Job jobA = jobDao.create(testProject, bp);
+        Job jobA = jobDao.create(TEST_PROJECT, bp);
         Job jobB = jobDao.get(job.getName(), JobState.INITIALIZE);
 
         assertEquals(jobA, jobB);
@@ -42,7 +42,7 @@ public class JobDaoTests extends AbstractTest {
     @Test
     public void testGetById() {
         Blueprint bp = getTestBlueprint();
-        Job jobA = jobDao.create(testProject, bp);
+        Job jobA = jobDao.create(TEST_PROJECT, bp);
         Job jobB = jobDao.get(jobA.getJobId());
 
         assertEquals(jobA, jobB);

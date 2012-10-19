@@ -44,14 +44,10 @@ public class FrontEndDispatcherTests extends AbstractTest {
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         dispatcher.addJob(job);
-
         assertEquals(1, dispatcher.getTotalJobs());
-        assertEquals(1, dispatcher.getTotalFolders());
 
         dispatcher.removeJob(job);
-
         assertEquals(0, dispatcher.getTotalJobs());
-        assertEquals(0, dispatcher.getTotalFolders());
     }
 
     @Test
@@ -71,7 +67,6 @@ public class FrontEndDispatcherTests extends AbstractTest {
 
         dispatcher.handleJobLaunchEvent(event);
         assertEquals(1, dispatcher.getTotalJobs());
-        assertEquals(1, dispatcher.getTotalFolders());
     }
 
 }
