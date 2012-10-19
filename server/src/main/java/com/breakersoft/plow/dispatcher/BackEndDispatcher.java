@@ -66,9 +66,7 @@ public class BackEndDispatcher {
         }
 
         if (!jobService.hasPendingFrames(job)) {
-            if (jobService.setJobState(job, JobState.FINISHED)) {
-                logger.info("{} job has finsihed.", job.getName());
-            }
+            jobService.shutdown(job);
             return;
         }
         dispatchPool.execute(new DispatchProcToJob(proc, job, frontEndDispatcher));
