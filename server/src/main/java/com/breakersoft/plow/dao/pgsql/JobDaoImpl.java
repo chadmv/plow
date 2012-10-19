@@ -107,6 +107,13 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
     }
 
     @Override
+    public boolean shutdown(Job job) {
+        return jdbc.update("UPDATE plow.job SET int_state=?, " +
+                    "time_stopped=EXTRACT(EPOCH FROM NOW()) WHERE pk_job=? AND int_state=?",
+                JobState.FINISHED.ordinal(), job.getJobId(), JobState.RUNNING.ordinal()) == 1;
+    }
+
+    @Override
     public void updateFrameStatesForLaunch(Job job) {
         jdbc.update("UPDATE plow.task SET int_state=? WHERE pk_layer " +
                 "IN (SELECT pk_layer FROM plow.layer WHERE pk_job=?)",

@@ -55,4 +55,12 @@ public class JobDaoTests extends AbstractTest {
         JobLaunchEvent event = jobLauncherService.launch(bp);
         assertTrue(jobDao.hasPendingFrames(event.getJob()));
     }
+
+    @Test
+    public void testShutdown() {
+        Blueprint bp = getTestBlueprint();
+        JobLaunchEvent event = jobLauncherService.launch(bp);
+        assertTrue(jobDao.shutdown(event.getJob()));
+        assertFalse(jobDao.shutdown(event.getJob()));
+    }
 }

@@ -16,6 +16,7 @@ import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.ProjectDao;
 import com.breakersoft.plow.event.EventManager;
+import com.breakersoft.plow.event.JobFinishedEvent;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.JobState;
@@ -68,9 +69,12 @@ public class JobLauncherServiceImpl implements JobLauncherService {
         return event;
     }
 
-    public void shutdown(Job job) {
-        // TODO Auto-generated method stub
-
+    public boolean shutdown(Job job) {
+        if (jobDao.shutdown(job)) {
+            eventManager.post(new JobFinishedEvent(job));
+            return true;
+        }
+        return false;
     }
 
     private Folder filterJob(Job job, Project project) {

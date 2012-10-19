@@ -7,5 +7,5 @@ import com.breakersoft.plow.thrift.Blueprint;
 public interface JobLauncherService {
 
     JobLaunchEvent launch(Blueprint bp);
-    void shutdown(Job job);
+    boolean shutdown(Job job);
 }
