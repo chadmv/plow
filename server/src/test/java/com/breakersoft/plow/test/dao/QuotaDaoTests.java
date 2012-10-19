@@ -11,34 +11,30 @@ import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Task;
-import com.breakersoft.plow.dao.ClusterDao;
-import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobLauncherService;
 import com.breakersoft.plow.service.JobService;
+import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
 
 public class QuotaDaoTests extends AbstractTest {
 
     @Resource
-    ClusterDao clusterDao;
-
-    @Resource
     QuotaDao quotaDao;
 
     @Resource
-    NodeDao nodeDao;
+    JobService jobService;
 
     @Resource
-    JobService jobService;
+    NodeService nodeService;
 
     @Resource
     JobLauncherService jobLaunchserService;
 
     @Test
     public void testCreate() {
-        Cluster c = clusterDao.create("test", "test");
+        Cluster c = nodeService.createCluster("test", "test");
         Quota q1 = quotaDao.create(TEST_PROJECT, c, 10, 100);
         Quota q2 = quotaDao.get(q1.getQuotaId());
         assertEquals(q1, q2);
@@ -46,7 +42,7 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void testGet() {
-        Cluster c = clusterDao.create("test", "test");
+        Cluster c = nodeService.createCluster("test", "test");
         Quota q1 = quotaDao.create(TEST_PROJECT, c, 10, 100);
         Quota q2 = quotaDao.get(q1.getQuotaId());
         Quota q3 = quotaDao.get(q1.getQuotaId());
@@ -56,8 +52,7 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void testGetByNodeAndTask() {
-        Node node = nodeDao.create(
-                clusterDao.getCluster("unassigned"), getTestNodePing());
+        Node node = nodeService.createNode(getTestNodePing());
         JobLaunchEvent event = jobLaunchserService.launch(getTestBlueprint());
         Layer layer = jobService.getLayer(event.getJob(),
                 event.getBlueprint().getLayers().get(0).name);
