@@ -200,8 +200,19 @@ public final class FrontEndDispatcher {
     public void addJob(DispatchJob djob) {
         logger.info("Adding dispatch job: {}", djob.getJobId());
         jobIndex.put(djob.getJobId(), djob);
-        folderIndex.put(djob.getFolderId(),
-                djob.getFolder());
+
+        DispatchFolder folder;
+        if (folderIndex.containsKey(djob.getFolderId())) {
+            folder = folderIndex.get(djob.getFolderId());
+        }
+        else {
+            folder = folderIndex.putIfAbsent(djob.getFolderId(),
+                    dispatchService.getDispatchFolder(djob.getFolderId()));
+            if (folder == null) {
+                folder = folderIndex.get(djob.getFolderId());
+            }
+        }
+        djob.setFolder(folder);
 
         for (BookingThread thread: bookingThreads) {
             thread.addJob(djob);
@@ -212,6 +223,10 @@ public final class FrontEndDispatcher {
         for (BookingThread thread: bookingThreads) {
             thread.removeJob(job);
         }
+
+        DispatchJob djob = jobIndex.get(job.getJobId());
+        djob.setFolder(null);
+
         jobIndex.remove(job.getJobId());
     }
 

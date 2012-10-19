@@ -25,8 +25,6 @@ public interface DispatchDao {
 
     DispatchJob getDispatchJob(Job job);
 
-    DispatchFolder getDispatchFolder(Folder folder);
-
     List<DispatchProject> getSortedProjectList(Node node);
 
     DispatchNode getDispatchNode(String name);
@@ -39,4 +37,6 @@ public interface DispatchDao {
             DispatchResource resource);
 
     List<DispatchJob> getDispatchJobs();
+
+    DispatchFolder getDispatchFolder(UUID folder);
 }

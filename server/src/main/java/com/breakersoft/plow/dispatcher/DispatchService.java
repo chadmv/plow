@@ -1,6 +1,7 @@
 package com.breakersoft.plow.dispatcher;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
@@ -25,8 +26,6 @@ import com.breakersoft.plow.event.JobLaunchEvent;
 public interface DispatchService {
 
     List<DispatchProject> getSortedProjectList(DispatchNode node);
-
-    DispatchFolder getDispatchFolder(Folder folder);
 
     DispatchNode getDispatchNode(String name);
 
@@ -56,5 +55,7 @@ public interface DispatchService {
     void assignProc(DispatchProc proc, DispatchTask task);
 
     void unassignProc(DispatchProc proc);
+
+    DispatchFolder getDispatchFolder(UUID folder);
 
 }

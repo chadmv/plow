@@ -252,8 +252,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "folder.pk_folder = ?";
 
     @Override
-    public DispatchFolder getDispatchFolder(Folder folder) {
-        return jdbc.queryForObject(GET_DFOLDER, DFOLDER_MAPPER, folder.getFolderId());
+    public DispatchFolder getDispatchFolder(UUID folder) {
+        return jdbc.queryForObject(GET_DFOLDER, DFOLDER_MAPPER, folder);
     }
 
     public static final RowMapper<DispatchJob>DJOB_MAPPER =
@@ -272,13 +272,6 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             job.setMinCores(rs.getInt("int_min_cores"));
             job.incrementCores(rs.getInt("int_run_cores"));
 
-            DispatchFolder folder = new DispatchFolder();
-            folder.setFolderId((UUID) rs.getObject("pk_folder"));
-            folder.setMaxCores(rs.getInt("folder_max_cores"));
-            folder.setMinCores(rs.getInt("folder_min_cores"));
-            folder.incrementCores(rs.getInt("folder_run_cores"));
-            job.setFolder(folder);
-
             return job;
         }
     };
@@ -292,22 +285,15 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "job_dsp.int_min_cores,"+
                 "job_dsp.int_max_cores,"+
                 "job_dsp.int_run_cores,"+
-                "job_count.int_waiting, " +
-                "folder_dsp.int_min_cores AS folder_min_cores,"+
-                "folder_dsp.int_max_cores AS folder_max_cores,"+
-                "folder_dsp.int_run_cores AS folder_run_cores " +
+                "job_count.int_waiting " +
             "FROM " +
                 "plow.job,"+
                 "plow.job_dsp, " +
-                "plow.job_count, " +
-                "plow.folder_dsp " +
+                "plow.job_count " +
             "WHERE " +
                 "job.pk_job = job_dsp.pk_job " +
             "AND " +
-                "job.pk_job = job_count.pk_job " +
-            "AND " +
-                "job.pk_folder = folder_dsp.pk_folder ";
-
+                "job.pk_job = job_count.pk_job ";
 
     @Override
     public DispatchJob getDispatchJob(Job job) {

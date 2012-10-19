@@ -102,9 +102,4 @@ public final class DispatchJob extends JobE implements Dispatchable, Comparable<
     public void setName(String name) {
         this.name = name;
     }
-
-    @Override
-    public String toString() {
-        return String.format("%s/%s", getJobId(), name);
-    }
 }

@@ -68,7 +68,7 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Override
     @Transactional(readOnly=true)
-    public DispatchFolder getDispatchFolder(Folder folder) {
+    public DispatchFolder getDispatchFolder(UUID folder) {
         return dispatchDao.getDispatchFolder(folder);
     }
 
