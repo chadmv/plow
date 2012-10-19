@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.dispatcher.command.BookingCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
@@ -54,10 +55,12 @@ public class BookingThread extends Thread {
     private boolean enabled = true;
     private final Map<UUID, ArrayList<DispatchJob>> activeJobs;
     private final ConcurrentLinkedQueue<DispatchJob> newJobs;
+    private final ConcurrentLinkedQueue<Job> removeJobs;
 
     public BookingThread() {
         logger.info("booking thread initialized.");
         newJobs = new ConcurrentLinkedQueue<DispatchJob>();
+        removeJobs = new ConcurrentLinkedQueue<Job>();
         activeJobs = Maps.newHashMapWithExpectedSize(EXPECTED_PROJECT_COUNT);
     }
 
@@ -220,9 +223,26 @@ public class BookingThread extends Thread {
         newJobs.add(job);
     }
 
+    public void removeJob(Job job) {
+        removeJobs.add(job);
+    }
+
     public void update() {
-        logger.info("Updating!");
         addNewJobs();
+        removeFinishedJobs();
+    }
+
+    private void removeFinishedJobs() {
+        int count = 0;
+        while (true) {
+            Job job = removeJobs.poll();
+            if (job == null) {
+                break;
+            }
+            activeJobs.get(job.getProjectId()).remove(job);
+            count++;
+        }
+        logger.info("Removed {} jobs from booking thread.", count);
     }
 
     private void addNewJobs() {
@@ -249,6 +269,14 @@ public class BookingThread extends Thread {
 
     public int getWaitingJobs() {
         return newJobs.size();
+    }
+
+    public int getTotalJobs() {
+        int result = 0;
+        for (List<DispatchJob> jobs: activeJobs.values()) {
+            result += jobs.size();
+        }
+        return result;
     }
 
 }

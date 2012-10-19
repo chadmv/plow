@@ -62,6 +62,11 @@ public class DispatchThreadTests extends AbstractTest {
 
         thread.update();
         assertEquals(0, thread.getWaitingJobs());
+        assertEquals(1, thread.getTotalJobs());
+
+        thread.removeJob(job);
+        thread.update();
+        assertEquals(0, thread.getTotalJobs());
     }
 
     @Test

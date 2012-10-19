@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.Defaults;
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.dispatcher.command.BookingCommand;
 import com.breakersoft.plow.dispatcher.command.BookNode;
@@ -207,6 +208,22 @@ public final class FrontEndDispatcher {
         }
     }
 
+    public void removeJob(Job job) {
+        for (BookingThread thread: bookingThreads) {
+            thread.removeJob(job);
+        }
+        jobIndex.remove(job.getJobId());
+        folderIndex.remove(job.getFolderId());
+    }
+
+    public int getTotalJobs() {
+        return jobIndex.size();
+    }
+
+    public int getTotalFolders() {
+        return folderIndex.size();
+    }
+
     @Subscribe
     public void handleJobLaunchEvent(JobLaunchEvent event) {
         logger.info("handling job launch event");
@@ -215,6 +232,7 @@ public final class FrontEndDispatcher {
 
     @Subscribe
     public void handleJobShutdownEvent(JobFinishedEvent event) {
-        logger.info("Job shutdown event");
+        logger.info("hanlding job shutdown event");
+        removeJob(event.getJob());
     }
 }

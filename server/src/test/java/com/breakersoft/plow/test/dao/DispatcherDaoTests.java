@@ -55,6 +55,7 @@ public class DispatcherDaoTests extends AbstractTest {
         JobLaunchEvent event = jobLauncherService.launch(getTestBlueprint());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
         assertTrue(djob.getTier() == 0);
+        assertEquals(djob, event.getJob());
     }
 
     @Test
