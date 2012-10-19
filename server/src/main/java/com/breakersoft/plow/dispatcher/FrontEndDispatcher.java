@@ -86,7 +86,7 @@ public final class FrontEndDispatcher {
         logger.info("Loading {} active jobs into dispatcher.", jobs.size());
 
         for (DispatchJob job: jobs) {
-            addDispatchJob(job);
+            addJob(job);
         }
 
         // Want to start these after jobs are added
@@ -197,7 +197,7 @@ public final class FrontEndDispatcher {
         return jobIndex.get(id);
     }
 
-    public void addDispatchJob(DispatchJob djob) {
+    public void addJob(DispatchJob djob) {
         logger.info("Adding dispatch job: {}", djob.getJobId());
         jobIndex.put(djob.getJobId(), djob);
         folderIndex.put(djob.getFolderId(),
@@ -227,7 +227,7 @@ public final class FrontEndDispatcher {
     @Subscribe
     public void handleJobLaunchEvent(JobLaunchEvent event) {
         logger.info("handling job launch event");
-        addDispatchJob(dispatchService.getDispatchJob(event));
+        addJob(dispatchService.getDispatchJob(event));
     }
 
     @Subscribe
