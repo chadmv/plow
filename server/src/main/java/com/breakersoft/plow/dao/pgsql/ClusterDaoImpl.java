@@ -84,4 +84,25 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
         cluster.setClusterId(id);
         return cluster;
     }
+
+    private static final String GET_BY_DEFAULT =
+            "SELECT " +
+                "pk_cluster " +
+            "FROM " +
+                "plow.cluster " +
+            "WHERE " +
+                "bool_default = 't' " +
+            "LIMIT 1";
+
+    @Override
+    public Cluster getDefaultCluster() {
+        return jdbc.queryForObject(GET_BY_DEFAULT, MAPPER);
+    }
+
+    @Override
+    public void setDefaultCluster(Cluster cluster) {
+        jdbc.update("UPDATE cluster SET bool_default='f' WHERE bool_default='t'");
+        jdbc.update("UPDATE cluster SET bool_default='t' WHERE pk_cluster=?", cluster.getClusterId());
+    }
+
 }

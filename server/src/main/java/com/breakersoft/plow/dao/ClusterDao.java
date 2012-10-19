@@ -12,4 +12,7 @@ public interface ClusterDao {
 
     Cluster getCluster(String name);
 
+    void setDefaultCluster(Cluster cluster);
+
+    Cluster getDefaultCluster();
 }

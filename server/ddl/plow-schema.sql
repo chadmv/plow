@@ -150,7 +150,8 @@ CREATE TABLE plow.cluster (
   pk_cluster UUID NOT NULL PRIMARY KEY,
   str_name VARCHAR(128) NOT NULL,
   str_tag VARCHAR(32) NOT NULL,
-  bool_locked BOOLEAN DEFAULT 'f' NOT NULL
+  bool_locked BOOLEAN DEFAULT 'f' NOT NULL,
+  bool_default BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
 CREATE UNIQUE INDEX cluster_str_name_uniq_idx ON plow.cluster (str_name);
