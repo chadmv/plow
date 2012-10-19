@@ -3,6 +3,7 @@ import yaml
 import getpass
 
 import plow.rpc.ttypes as ttypes
+import plow.conf as conf 
 
 from thrift.transport import TSocket
 from thrift.transport import TTransport
@@ -56,12 +57,14 @@ def toBlueprint(job, **kwargs):
     for layer in job.getLayers():
         bpl = ttypes.LayerBp()
         bpl.name = layer.getName()
-        bpl.command = ["/Users/chambers/src/plow/tools/taskrun/taskrun",
-                       os.path.join(job.getPath(), "blueprint.yaml"),
-                       "-layer",
-                       layer.getName(),
-                       "-range",
-                       "%{FRAME}"]
+        bpl.command = [
+            os.path.join(conf.get('env', 'plow_root'), "tools/taskrun/taskrun"),
+            os.path.join(job.getPath(), "blueprint.yaml"),
+            "-layer",
+            layer.getName(),
+            "-range",
+            "%{FRAME}"
+        ]
         bpl.tags =  layer.getArg("tags", ["unassigned"])
         bpl.range = layer.getArg("frame_range", frange)
         bpl.chunk = layer.getArg("chunk", 1)

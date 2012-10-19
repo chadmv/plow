@@ -6,10 +6,24 @@ __all__ = ["Config"]
 
 Config = ConfigParser.RawConfigParser()
 
-if os.environ.get("PLOW_CFG"):
-    Config.read([os.environ["PLOW_CFG"]])
-else:
-    Config.read(["/etc/plow/plow.cfg", os.path.expanduser("~/.plow/plow.cfg")])
+
+def _init():
+    """
+    Parse an initalize the Config object
+    """
+    if os.environ.get("PLOW_CFG"):
+        Config.read([os.environ["PLOW_CFG"]])
+    else:
+        Config.read(["/etc/plow/plow.cfg", os.path.expanduser("~/.plow/plow.cfg")])
+
+    root = os.environ.get("PLOW_ROOT")
+    if not root:
+        root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../'))
+    Config.set('env', 'plow_root', root)
+
+# run as a function to avoid polluting module with temp variables
+_init()
+
 
 assert Config.has_section("plow")
 
