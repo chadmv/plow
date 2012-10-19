@@ -99,6 +99,19 @@ This is current only supported on the Mac.  Linux version is coming soon.
     > ./rndaemon.py
 
 
+The Plow Config File
+--------------------
+
+Before you can talk to the server with the plow client, you must setup the plow
+configuration file.  In the source checkout, this can be found in client/etc/plow.cfg.
+
+You can point plow at that configuration using the PLOW_CFG environment variable.
+
+    > export PLOW_CFG="client/plow.plow.cfg"
+
+Plow will also look for a configuration at /etc/plow/plow.cfg and ~/.plow/plow.cfg
+
+
 Launching the Test Job
 ----------------------
 
