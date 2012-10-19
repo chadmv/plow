@@ -21,7 +21,7 @@ import com.breakersoft.plow.service.JobLauncherService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
 
-public class DispatchThreadTests extends AbstractTest {
+public class BookingThreadTests extends AbstractTest {
 
     @Resource
     FrontEndDispatcher dispatcher;
@@ -55,18 +55,19 @@ public class DispatchThreadTests extends AbstractTest {
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         BookingThread thread = dispatchConfig.getBookingThread();
-        assertEquals(0, thread.getWaitingJobs());
+        assertEquals(0, thread.getAddedJobCount());
 
         thread.addJob(job);
-        assertEquals(1, thread.getWaitingJobs());
+        assertEquals(1, thread.getAddedJobCount());
 
         thread.update();
-        assertEquals(0, thread.getWaitingJobs());
-        assertEquals(1, thread.getTotalJobs());
+        assertEquals(0, thread.getAddedJobCount());
+        assertEquals(1, thread.getTotalJobCount());
 
         thread.removeJob(job);
+        assertEquals(1, thread.getRemovedJobCount());
         thread.update();
-        assertEquals(0, thread.getTotalJobs());
+        assertEquals(0, thread.getTotalJobCount());
     }
 
     @Test

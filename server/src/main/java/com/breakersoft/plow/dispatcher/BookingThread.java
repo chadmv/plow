@@ -54,12 +54,12 @@ public class BookingThread extends Thread {
 
     private boolean enabled = true;
     private final Map<UUID, ArrayList<DispatchJob>> activeJobs;
-    private final ConcurrentLinkedQueue<DispatchJob> newJobs;
+    private final ConcurrentLinkedQueue<DispatchJob> addJobs;
     private final ConcurrentLinkedQueue<Job> removeJobs;
 
     public BookingThread() {
         logger.info("booking thread initialized.");
-        newJobs = new ConcurrentLinkedQueue<DispatchJob>();
+        addJobs = new ConcurrentLinkedQueue<DispatchJob>();
         removeJobs = new ConcurrentLinkedQueue<Job>();
         activeJobs = Maps.newHashMapWithExpectedSize(EXPECTED_PROJECT_COUNT);
     }
@@ -220,7 +220,7 @@ public class BookingThread extends Thread {
     }
 
     public void addJob(DispatchJob job) {
-        newJobs.add(job);
+        addJobs.add(job);
     }
 
     public void removeJob(Job job) {
@@ -250,7 +250,7 @@ public class BookingThread extends Thread {
         int count = 0;
         while (true) {
 
-            DispatchJob job = newJobs.poll();
+            DispatchJob job = addJobs.poll();
             if (job == null) {
                 logger.info("No new jobs waiting to be ingested.");
                 break;
@@ -267,11 +267,15 @@ public class BookingThread extends Thread {
         logger.info("Added " + count + " jobs to the dispatcher.");
     }
 
-    public int getWaitingJobs() {
-        return newJobs.size();
+    public int getAddedJobCount() {
+        return addJobs.size();
     }
 
-    public int getTotalJobs() {
+    public int getRemovedJobCount() {
+        return removeJobs.size();
+    }
+
+    public int getTotalJobCount() {
         int result = 0;
         for (List<DispatchJob> jobs: activeJobs.values()) {
             result += jobs.size();
