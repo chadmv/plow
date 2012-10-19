@@ -1,5 +1,6 @@
 
 CREATE SCHEMA plow;
+CREATE LANGUAGE plpgsql;
 
 ---
 --- Project
