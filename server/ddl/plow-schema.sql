@@ -55,6 +55,9 @@ CREATE TABLE plow.job (
   time_stopped BIGINT DEFAULT 0
 ) WITHOUT OIDS;
 
+CREATE UNIQUE INDEX job_str_active_name_uniq_idx ON plow.job (str_active_name);
+
+
 ---
 
 CREATE TABLE plow.job_dsp (
