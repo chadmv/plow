@@ -4,6 +4,8 @@ import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.event.JobLaunchEvent;
+import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.TaskState;
 
@@ -32,4 +34,8 @@ public interface JobService {
     boolean unreserveTask(Task task);
 
     boolean setJobState(Job job, JobState state);
+
+    JobLaunchEvent launch(Blueprint bp);
+
+    boolean shutdown(Job job);
 }

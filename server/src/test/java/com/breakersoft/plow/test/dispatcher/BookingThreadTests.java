@@ -17,7 +17,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.EventManagerImpl;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.service.JobLauncherService;
+import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
 
@@ -30,7 +30,7 @@ public class BookingThreadTests extends AbstractTest {
     DispatchService dispatcherService;
 
     @Resource
-    JobLauncherService jobLaucherService;
+    JobService jobService;
 
     @Resource
     NodeService nodeService;
@@ -51,7 +51,7 @@ public class BookingThreadTests extends AbstractTest {
     @Test
     public void testHandleJobLaunchedEvent() throws InterruptedException {
 
-        JobLaunchEvent event = jobLaucherService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestBlueprint());
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         BookingThread thread = dispatchConfig.getBookingThread();
@@ -83,7 +83,7 @@ public class BookingThreadTests extends AbstractTest {
     public void testDispatchNode_Jobs() throws InterruptedException {
 
         BookingThread thread = dispatchConfig.getBookingThread();
-        JobLaunchEvent event = jobLaucherService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestBlueprint());
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         Node node = nodeService.createNode(getTestNodePing());

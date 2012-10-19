@@ -13,7 +13,6 @@ import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.service.JobLauncherService;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
@@ -28,9 +27,6 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Resource
     NodeService nodeService;
-
-    @Resource
-    JobLauncherService jobLaunchserService;
 
     @Test
     public void testCreate() {
@@ -53,7 +49,7 @@ public class QuotaDaoTests extends AbstractTest {
     @Test
     public void testGetByNodeAndTask() {
         Node node = nodeService.createNode(getTestNodePing());
-        JobLaunchEvent event = jobLaunchserService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestBlueprint());
         Layer layer = jobService.getLayer(event.getJob(),
                 event.getBlueprint().getLayers().get(0).name);
         Task task = jobService.getTask(layer, 1);

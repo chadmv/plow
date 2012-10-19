@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.service.JobLauncherService;
+import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 
 @ThriftService
@@ -16,7 +16,7 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
     private Logger logger = org.slf4j.LoggerFactory.getLogger(RpcThriftServiceImpl.class);
 
     @Autowired
-    JobLauncherService jobLauncherService;
+    JobService jobService;
 
     @Autowired
     ThriftJobDao thriftJobDao;
@@ -24,9 +24,9 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
     @Override
     public JobT launch(Blueprint bp) throws PlowException, TException {
 
-        logger.info("launchung job! " + bp);
+        logger.info("launchung job: {} ", bp);
 
-        JobLaunchEvent event =  jobLauncherService.launch(bp);
+        JobLaunchEvent event =  jobService.launch(bp);
 
         JobT result = new JobT();
         result.id = event.getJob().getJobId().toString();

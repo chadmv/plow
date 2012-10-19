@@ -19,7 +19,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.service.JobLauncherService;
+import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
 
@@ -41,7 +41,7 @@ public class DispatcherDaoTests extends AbstractTest {
     QuotaDao quotaDao;
 
     @Resource
-    JobLauncherService jobLauncherService;
+    JobService jobService;
 
     @Test
     public void testGetDispatchFolder() {
@@ -52,7 +52,7 @@ public class DispatcherDaoTests extends AbstractTest {
 
     @Test
     public void testGetDispatchJob() {
-        JobLaunchEvent event = jobLauncherService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestBlueprint());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
         assertTrue(djob.getTier() == 0);
         assertEquals(djob.getJobId(), event.getJob().getJobId());
@@ -79,7 +79,7 @@ public class DispatcherDaoTests extends AbstractTest {
         Node node =  nodeService.createNode(getTestNodePing());
         DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
 
-        JobLaunchEvent event = jobLauncherService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestBlueprint());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
     }
 
@@ -88,7 +88,7 @@ public class DispatcherDaoTests extends AbstractTest {
         Node node =  nodeService.createNode(getTestNodePing());
         DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
 
-        JobLaunchEvent event = jobLauncherService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestBlueprint());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
 
         dispatchDao.getDispatchLayers(djob, dnode);

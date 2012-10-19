@@ -13,7 +13,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.EventManagerImpl;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.service.JobLauncherService;
+import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.test.AbstractTest;
 
 public class FrontEndDispatcherTests extends AbstractTest {
@@ -25,7 +25,7 @@ public class FrontEndDispatcherTests extends AbstractTest {
     DispatchService dispatcherService;
 
     @Resource
-    JobLauncherService jobLaucherService;
+    JobService jobService;
 
     @Resource
     EventManager eventManager;
@@ -40,7 +40,7 @@ public class FrontEndDispatcherTests extends AbstractTest {
     @Test
     public void testAddAndRemoveJob() {
 
-        JobLaunchEvent event = jobLaucherService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestBlueprint());
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         dispatcher.addJob(job);
@@ -52,7 +52,7 @@ public class FrontEndDispatcherTests extends AbstractTest {
 
     @Test
     public void testGetJob() {
-        JobLaunchEvent event = jobLaucherService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestBlueprint());
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         dispatcher.addJob(job);
@@ -62,7 +62,7 @@ public class FrontEndDispatcherTests extends AbstractTest {
 
     @Test
     public void testHandleJobLaunchEvent() {
-        JobLaunchEvent event = jobLaucherService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestBlueprint());
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         dispatcher.handleJobLaunchEvent(event);

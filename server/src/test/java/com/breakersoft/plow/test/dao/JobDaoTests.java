@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.service.JobLauncherService;
+import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.JobBp;
@@ -21,7 +21,7 @@ public class JobDaoTests extends AbstractTest {
     JobDao jobDao;
 
     @Resource
-    JobLauncherService jobLauncherService;
+    JobService jobService;
 
     @Test
     public void testCreate() {
@@ -52,14 +52,14 @@ public class JobDaoTests extends AbstractTest {
     @Test
     public void testHasPendingFrames() {
         Blueprint bp = getTestBlueprint();
-        JobLaunchEvent event = jobLauncherService.launch(bp);
+        JobLaunchEvent event = jobService.launch(bp);
         assertTrue(jobDao.hasPendingFrames(event.getJob()));
     }
 
     @Test
     public void testShutdown() {
         Blueprint bp = getTestBlueprint();
-        JobLaunchEvent event = jobLauncherService.launch(bp);
+        JobLaunchEvent event = jobService.launch(bp);
         assertTrue(jobDao.shutdown(event.getJob()));
         assertFalse(jobDao.shutdown(event.getJob()));
     }
