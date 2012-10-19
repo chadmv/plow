@@ -193,7 +193,7 @@ public final class FrontEndDispatcher {
         return false;
     }
 
-    public DispatchJob getDispatchJob(UUID id) {
+    public DispatchJob getJob(UUID id) {
         return jobIndex.get(id);
     }
 
@@ -213,7 +213,6 @@ public final class FrontEndDispatcher {
             thread.removeJob(job);
         }
         jobIndex.remove(job.getJobId());
-        folderIndex.remove(job.getFolderId());
     }
 
     public int getTotalJobs() {

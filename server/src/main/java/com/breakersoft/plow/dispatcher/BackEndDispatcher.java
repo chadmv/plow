@@ -40,7 +40,7 @@ public class BackEndDispatcher {
     public void taskComplete(RunTaskResult result) {
 
         Task task = jobService.getTask(result.taskId);
-        DispatchJob job = frontEndDispatcher.getDispatchJob(task.getJobId());
+        DispatchJob job = frontEndDispatcher.getJob(task.getJobId());
         DispatchProc proc = dispatchService.getDispatchProc(result.procId);
 
         TaskState newState;
