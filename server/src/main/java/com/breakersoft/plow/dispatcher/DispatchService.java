@@ -3,7 +3,6 @@ package com.breakersoft.plow.dispatcher;
 import java.util.List;
 import java.util.UUID;
 
-import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Task;

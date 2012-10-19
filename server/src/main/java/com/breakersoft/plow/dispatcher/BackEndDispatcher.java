@@ -13,10 +13,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
 import com.breakersoft.plow.service.JobService;
-import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.TaskState;
-
-import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 
 public class BackEndDispatcher {
 
