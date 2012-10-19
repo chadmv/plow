@@ -11,7 +11,7 @@ import com.breakersoft.plow.service.JobLauncherService;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.JobFilter;
-import com.breakersoft.plow.thrift.RpcDataService;
+import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 
 public class ThriftJobDaoTests extends AbstractTest {
 
@@ -19,20 +19,20 @@ public class ThriftJobDaoTests extends AbstractTest {
     JobLauncherService jobLauncherService;
 
     @Resource
-    RpcDataService rpcDataService;
+    ThriftJobDao thriftJobDao;
 
     @Test
     public void getJobs() {
         Blueprint bp = getTestBlueprint();
         JobLaunchEvent event = jobLauncherService.launch(bp);
 
-        assertEquals(1, rpcDataService.getJobs(new JobFilter()).size());
+        assertTrue(thriftJobDao.getJobs(new JobFilter()).size() > 0);
 
         JobFilter f = new JobFilter();
-        f.addToUser("chambers");
-        assertEquals(0, rpcDataService.getJobs(f).size());
+        f.addToUser("lila");
+        assertEquals(0, thriftJobDao.getJobs(f).size());
 
         f.addToUser("stella");
-        assertEquals(1, rpcDataService.getJobs(f).size());
+        assertEquals(1, thriftJobDao.getJobs(f).size());
     }
 }

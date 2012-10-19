@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.thrift.JobFilter;
@@ -17,6 +18,7 @@ import com.breakersoft.plow.util.JdbcUtils;
 import com.google.common.collect.Lists;
 
 @Repository
+@Transactional(readOnly = true)
 public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
 
     public static final RowMapper<JobT> MAPPER = new RowMapper<JobT>() {

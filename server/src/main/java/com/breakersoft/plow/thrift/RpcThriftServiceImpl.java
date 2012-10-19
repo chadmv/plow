@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobLauncherService;
+import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 
 @ThriftService
 public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
@@ -18,7 +19,7 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
     JobLauncherService jobLauncherService;
 
     @Autowired
-    RpcDataService rpcDataService;
+    ThriftJobDao thriftJobDao;
 
     @Override
     public JobT launch(Blueprint bp) throws PlowException, TException {
@@ -71,7 +72,7 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
 
     @Override
     public List<JobT> getJobs(JobFilter filter) throws PlowException, TException {
-        return rpcDataService.getJobs(filter);
+        return thriftJobDao.getJobs(filter);
     }
 
 }
