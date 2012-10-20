@@ -11,6 +11,8 @@ thrift --gen py:new_style:utf8strings -out ../python/plow/rndaemon rnd.thrift
 thrift --gen py:new_style:utf8strings -out ../python/plow/rpc common.thrift
 thrift --gen py:new_style:utf8strings -out ../python/plow/rndaemon/rpc common.thrift
 
+cp plow__init__.py ../python/plow/__init__.py
+
 # Java
 ########################################################################
 rm -rf ../java/src/main/java/
