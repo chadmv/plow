@@ -22,7 +22,7 @@ def start():
     handler = RndProcessHandler()
     processor = RndNodeApi.Processor(handler)
     transport = TSocket.TServerSocket(port=conf.NETWORK_PORT)
-    tfactory = TTransport.TBufferedTransportFactory()
+    tfactory = TTransport.TFramedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
     server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
     server.serve()
