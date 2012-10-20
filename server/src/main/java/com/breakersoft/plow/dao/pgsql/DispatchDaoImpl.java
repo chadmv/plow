@@ -28,6 +28,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.TaskState;
 import com.google.common.primitives.Floats;
 
@@ -302,7 +303,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
 
     @Override
     public List<DispatchJob> getDispatchJobs() {
-        return jdbc.query(GET_DJOB, DJOB_MAPPER);
+        return jdbc.query(GET_DJOB + " AND job.int_state=?", DJOB_MAPPER,
+                JobState.RUNNING.ordinal());
     }
 
     public static final RowMapper<DispatchTask>DTASK_MAPPER =
