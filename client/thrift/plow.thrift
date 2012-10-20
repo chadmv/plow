@@ -49,6 +49,14 @@ struct JobT {
     9:i32 maxCores,
     10:common.Timestamp startTime,
     11:common.Timestamp stopTime,
+    12:i32 totalTaskCount,
+    13:i32 succeededTaskCount,
+    14:i32 runningTaskCount,
+    15:i32 deadTaskCount,
+    16:i32 eatenTaskCount,
+    17:i32 waitingTaskCount,
+    18:i32 dependTaskCount,
+    19:i32 runningCoreCount,
 }
 
 struct LayerT {

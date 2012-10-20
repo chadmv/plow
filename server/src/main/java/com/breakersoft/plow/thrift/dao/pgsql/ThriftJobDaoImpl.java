@@ -36,6 +36,15 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             job.startTime = rs.getLong("time_started");
             job.stopTime = rs.getLong("time_stopped");
             job.state = JobState.findByValue(rs.getInt("int_state"));
+
+            job.totalTaskCount = rs.getInt("int_total");
+            job.succeededTaskCount = rs.getInt("int_succeeded");
+            job.runningTaskCount = rs.getInt("int_running");
+            job.deadTaskCount = rs.getInt("int_dead");
+            job.eatenTaskCount = rs.getInt("int_eaten");
+            job.waitingTaskCount = rs.getInt("int_waiting");
+            job.dependTaskCount = rs.getInt("int_depend");
+
             return job;
         }
     };
@@ -53,13 +62,20 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             "job.time_stopped,"+
             "job_dsp.int_max_cores,"+
             "job_dsp.int_min_cores,"+
-            "job_dsp.int_run_cores " +
+            "job_dsp.int_run_cores, " +
+            "job_count.int_total, "+
+            "job_count.int_succeeded,"+
+            "job_count.int_running,"+
+            "job_count.int_dead,"+
+            "job_count.int_eaten,"+
+            "job_count.int_waiting,"+
+            "job_count.int_depend "+
         "FROM " +
             "job " +
         "INNER JOIN job_dsp ON job.pk_job = job_dsp.pk_job " +
+        "INNER JOIN job_count ON job.pk_job = job_count.pk_job " +
         "INNER JOIN folder ON job.pk_folder = folder.pk_folder " +
         "INNER JOIN project ON job.pk_project = project.pk_project ";
-
 
     @Override
     public List<JobT> getJobs(JobFilter filter) {
