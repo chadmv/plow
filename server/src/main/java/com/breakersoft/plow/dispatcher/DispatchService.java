@@ -40,7 +40,7 @@ public interface DispatchService {
 
     DispatchProc allocateDispatchProc(DispatchNode node, DispatchTask task);
 
-    void cleanupFailedDispatch(DispatchProc proc);
+    void unbookProc(DispatchProc proc);
 
     DispatchProc getDispatchProc(String id);
 

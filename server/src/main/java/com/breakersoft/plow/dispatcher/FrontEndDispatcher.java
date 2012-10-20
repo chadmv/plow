@@ -134,10 +134,10 @@ public final class FrontEndDispatcher {
             logger.info("booking layer: {}", layer.getLayerId());
             boolean result = dispatch(proc, layer);
             if (result) {
-                return result;
+                return true;
             }
         }
-
+        dispatchService.unbookProc(proc);
         return false;
     }
 
@@ -153,10 +153,11 @@ public final class FrontEndDispatcher {
             logger.info("booking task: {}", task.getTaskId());
             boolean result = dispatch(proc, task);
             if (result) {
-                return result;
+                return true;
             }
         }
 
+        dispatchService.unbookProc(proc);
         return false;
     }
 
@@ -179,7 +180,7 @@ public final class FrontEndDispatcher {
              */
             logger.warn("Failed to execute task on: {} " + proc.getNodeName());
             jobService.unreserveTask(task);
-            dispatchService.cleanupFailedDispatch(proc);
+            dispatchService.unbookProc(proc);
         }
         catch (Exception e) {
             /*
@@ -187,7 +188,7 @@ public final class FrontEndDispatcher {
              */
             logger.warn("Unexpected task dipatching error, " + e);
             jobService.unreserveTask(task);
-            dispatchService.cleanupFailedDispatch(proc);
+            dispatchService.unbookProc(proc);
         }
 
         return false;

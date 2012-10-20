@@ -205,7 +205,7 @@ public class BookingThread extends Thread {
              */
             logger.warn("Failed to execute task on: {} " + node.getName());
             jobService.unreserveTask(task);
-            dispatchService.cleanupFailedDispatch(proc);
+            dispatchService.unbookProc(proc);
             node.setDispatchable(false);
         }
         catch (Exception e) {
@@ -214,7 +214,7 @@ public class BookingThread extends Thread {
              */
             logger.warn("Unexpected task dipatching error, " + e);
             jobService.unreserveTask(task);
-            dispatchService.cleanupFailedDispatch(proc);
+            dispatchService.unbookProc(proc);
             node.setDispatchable(false);
         }
     }

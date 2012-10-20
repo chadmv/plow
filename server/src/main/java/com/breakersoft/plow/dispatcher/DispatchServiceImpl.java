@@ -138,7 +138,7 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public void cleanupFailedDispatch(DispatchProc proc) {
+    public void unbookProc(DispatchProc proc) {
         if (proc == null) {
             return;
         }

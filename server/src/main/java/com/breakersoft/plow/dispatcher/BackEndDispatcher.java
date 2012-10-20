@@ -64,7 +64,7 @@ public class BackEndDispatcher {
 
         if (!jobService.hasPendingFrames(job)) {
             jobService.shutdown(job);
-            return;
+            dispatchService.unbookProc(proc);
         }
         dispatchPool.execute(new DispatchProcToJob(proc, job, frontEndDispatcher));
     }
