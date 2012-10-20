@@ -6,10 +6,12 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 
+import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.Blueprint;
 import com.breakersoft.plow.thrift.JobFilter;
+import com.breakersoft.plow.thrift.JobT;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 
 public class ThriftJobDaoTests extends AbstractTest {
@@ -33,5 +35,15 @@ public class ThriftJobDaoTests extends AbstractTest {
 
         f.addToUser("stella");
         assertEquals(1, thriftJobDao.getJobs(f).size());
+    }
+
+    @Test
+    public void getJob() {
+        Blueprint bp = getTestBlueprint();
+        JobLaunchEvent event = jobService.launch(bp);
+
+        JobT job = thriftJobDao.getJob(
+                event.getJob().getJobId().toString());
+        assertEquals(job.id, event.getJob().getJobId().toString());
     }
 }

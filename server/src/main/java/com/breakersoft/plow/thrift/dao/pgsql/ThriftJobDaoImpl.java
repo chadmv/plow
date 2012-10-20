@@ -3,6 +3,7 @@ package com.breakersoft.plow.thrift.dao.pgsql;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.RowMapper;
@@ -112,6 +113,11 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
         return jdbc.query(sb.toString(), MAPPER, values.toArray());
     }
 
+    private static final String GET_BY_ID =
+            GET + " WHERE job.pk_job=?";
 
-
+    @Override
+    public JobT getJob(String jobId) {
+        return jdbc.queryForObject(GET_BY_ID, MAPPER, UUID.fromString(jobId));
+    }
 }

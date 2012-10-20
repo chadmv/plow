@@ -41,9 +41,8 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
     }
 
     @Override
-    public JobT getJob(String arg0) throws PlowException, TException {
-        // TODO Auto-generated method stub
-        return null;
+    public JobT getJob(String jobId) throws PlowException, TException {
+        return thriftJobDao.getJob(jobId);
     }
 
     @Override

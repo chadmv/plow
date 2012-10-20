@@ -9,4 +9,6 @@ public interface ThriftJobDao {
 
     List<JobT> getJobs(JobFilter filter);
 
+    JobT getJob(String jobId);
+
 }
