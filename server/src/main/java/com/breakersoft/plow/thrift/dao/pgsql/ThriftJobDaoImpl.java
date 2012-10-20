@@ -120,4 +120,12 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
     public JobT getJob(String jobId) {
         return jdbc.queryForObject(GET_BY_ID, MAPPER, UUID.fromString(jobId));
     }
+
+    private static final String GET_BY_NAME =
+            GET + " WHERE job.str_active_name=?";
+
+    @Override
+    public JobT getActiveJob(String name) {
+        return jdbc.queryForObject(GET_BY_NAME, MAPPER, name);
+    }
 }

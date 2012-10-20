@@ -46,4 +46,15 @@ public class ThriftJobDaoTests extends AbstractTest {
                 event.getJob().getJobId().toString());
         assertEquals(job.id, event.getJob().getJobId().toString());
     }
+
+    @Test
+    public void getActiveJob() {
+        Blueprint bp = getTestBlueprint();
+        JobLaunchEvent event = jobService.launch(bp);
+
+        String jobName = event.getBlueprint().getJob().name;
+
+        JobT job = thriftJobDao.getActiveJob(jobName);
+        assertEquals(job.name, jobName);
+    }
 }

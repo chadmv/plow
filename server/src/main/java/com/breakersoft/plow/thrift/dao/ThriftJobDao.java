@@ -11,4 +11,6 @@ public interface ThriftJobDao {
 
     JobT getJob(String jobId);
 
+    JobT getActiveJob(String name);
+
 }
