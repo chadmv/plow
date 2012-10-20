@@ -56,7 +56,7 @@ CREATE TABLE plow.job (
 ) WITHOUT OIDS;
 
 CREATE UNIQUE INDEX job_str_active_name_uniq_idx ON plow.job (str_active_name);
-
+CREATE INDEX job_int_state_idx ON plow.job (int_state);
 
 ---
 
