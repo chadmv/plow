@@ -115,7 +115,7 @@ struct JobFilter {
 service RpcServiceApi {
     
     JobT launch(1:Blueprint blueprint) throws (1:PlowException e),
-    JobT getActiveJob(1:string name) throws (1:PlowException e),
+    JobT getRunningJob(1:string name) throws (1:PlowException e),
     JobT getJob(1:common.Guid jobId) throws (1:PlowException e),
     list<JobT> getJobs(1:JobFilter filter) throws (1:PlowException e),
 

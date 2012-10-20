@@ -125,7 +125,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             GET + " WHERE job.str_active_name=?";
 
     @Override
-    public JobT getActiveJob(String name) {
+    public JobT getRunningJob(String name) {
         return jdbc.queryForObject(GET_BY_NAME, MAPPER, name);
     }
 }

@@ -35,8 +35,8 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
     }
 
     @Override
-    public JobT getActiveJob(String name) throws PlowException, TException {
-        return thriftJobDao.getActiveJob(name);
+    public JobT getRunningJob(String name) throws PlowException, TException {
+        return thriftJobDao.getRunningJob(name);
     }
 
     @Override

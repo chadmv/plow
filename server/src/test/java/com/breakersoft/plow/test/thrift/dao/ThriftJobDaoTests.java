@@ -48,13 +48,13 @@ public class ThriftJobDaoTests extends AbstractTest {
     }
 
     @Test
-    public void getActiveJob() {
+    public void getRunningJob() {
         Blueprint bp = getTestBlueprint();
         JobLaunchEvent event = jobService.launch(bp);
 
         String jobName = event.getBlueprint().getJob().name;
 
-        JobT job = thriftJobDao.getActiveJob(jobName);
+        JobT job = thriftJobDao.getRunningJob(jobName);
         assertEquals(job.name, jobName);
     }
 }
