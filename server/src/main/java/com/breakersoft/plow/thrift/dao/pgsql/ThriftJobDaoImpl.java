@@ -32,7 +32,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             job.name = rs.getString("str_name");
             job.paused = rs.getBoolean("bool_paused");
             job.maxCores = rs.getInt("int_max_cores");
-            job.maxCores = rs.getInt("int_min_cores");
+            job.minCores = rs.getInt("int_min_cores");
             job.startTime = rs.getLong("time_started");
             job.stopTime = rs.getLong("time_stopped");
             job.state = JobState.findByValue(rs.getInt("int_state"));
