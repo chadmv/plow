@@ -100,7 +100,10 @@ CREATE table plow.layer (
   int_min_mem INTEGER NOT NULL
 ) WITHOUT OIDS;
 
+CREATE INDEX layer_pk_job_idx ON plow.layer (pk_job);
 CREATE INDEX layer_str_tags_gin_idx ON plow.layer USING gin(str_tags);
+
+CREATE UNIQUE INDEX layer_str_name_pk_job_uniq_idx ON plow.layer (str_name, pk_job);
 
 ---
 
