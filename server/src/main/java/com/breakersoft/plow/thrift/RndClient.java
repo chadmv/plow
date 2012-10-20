@@ -9,6 +9,7 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 
+import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
 import com.breakersoft.plow.rnd.thrift.RndException;
 import com.breakersoft.plow.rnd.thrift.RndNodeApi;
@@ -33,6 +34,7 @@ public class RndClient {
 
     public RndNodeApi.Client connect() throws TTransportException {
         socket = new TSocket(host, port);
+        socket.setTimeout(Defaults.RND_CLIENT_SOCKET_TIMEOUT_MS);
         transport = new TFramedTransport(socket);
         protocol = new TBinaryProtocol(socket);
         transport.open();
