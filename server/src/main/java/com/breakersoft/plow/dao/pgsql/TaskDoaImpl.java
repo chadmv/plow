@@ -104,8 +104,8 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
             "SET " +
                 "int_state = ?, " +
                 "bool_reserved = 'f', " +
-                "int_start_time = EXTRACT(epoch FROM NOW()), " +
-                "int_stop_time = 0 " +
+                "time_started = EXTRACT(epoch FROM NOW()), " +
+                "time_stopped = 0 " +
             "WHERE " +
                 "task.pk_task = ? " +
             "AND " +
@@ -127,7 +127,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
             "SET " +
                 "int_state = ?, " +
                 "bool_reserved = 'f', " +
-                "int_stop_time = EXTRACT(epoch FROM NOW()) " +
+                "time_stopped = EXTRACT(epoch FROM NOW()) " +
             "WHERE " +
                 "task.pk_task = ? " +
             "AND " +
