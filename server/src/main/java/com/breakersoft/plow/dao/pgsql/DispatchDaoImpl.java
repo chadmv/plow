@@ -101,16 +101,15 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "proc.int_mem, " +
                 "node.str_tags,"+
                 "node.str_name AS node_name, " +
-                "task.str_name AS task_name " +
+                "task.str_name AS task_name, " +
+                "task.pk_layer, " +
+                "layer.pk_job " +
             "FROM " +
-                "proc," +
-                "node," +
-                "task " +
+                "proc " +
+            "INNER JOIN node ON proc.pk_node = node.pk_node " +
+            "INNER JOIN task ON proc.pk_task = task.pk_task " +
+            "INNER JOIN layer ON task.pk_layer = layer.pk_layer " +
             "WHERE " +
-                "proc.pk_task = task.pk_task " +
-            "AND " +
-                "proc.pk_node = node.pk_node " +
-            "AND " +
                 "pk_proc = ?";
 
     public static final RowMapper<DispatchProc> DPROC_MAPPER = new RowMapper<DispatchProc>() {
@@ -122,6 +121,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             proc.setTaskId((UUID) rs.getObject("pk_task"));
             proc.setNodeId((UUID) rs.getObject("pk_node"));
             proc.setQuotaId((UUID) rs.getObject("pk_quota"));
+            proc.setJobId((UUID) rs.getObject("pk_job"));
+            proc.setLayerId((UUID) rs.getObject("pk_layer"));
             proc.setCores(rs.getInt("int_cores"));
             proc.setMemory(rs.getInt("int_mem"));
             proc.setTaskName(rs.getString("task_name"));
@@ -322,16 +323,9 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             frame.setName(rs.getString("str_name"));
             frame.setMinCores(rs.getInt("int_min_cores"));
             frame.setMinMemory(rs.getInt("int_min_mem"));
-
-            if (rs.getString("str_name") == null) {
-                frame.setName(String.format("%04d-%s",
-                        rs.getInt("int_number"),
-                        rs.getString("layer_name")));
-            }
-            else {
-                frame.setName(rs.getString("str_name"));
-            }
-
+            frame.setTags(new HashSet<String>(
+                    Arrays.asList((String[])rs.getArray("str_tags").getArray())));
+            frame.setName(rs.getString("str_name"));
             return frame;
         }
     };
@@ -346,7 +340,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "layer.str_command, "+
                 "layer.int_min_cores,"+
                 "layer.int_min_mem, " +
-                "layer.str_name AS layer_name " +
+                "layer.str_name AS layer_name, " +
+                "layer.str_tags " +
             "FROM " +
                 "plow.layer " +
                     "INNER JOIN " +

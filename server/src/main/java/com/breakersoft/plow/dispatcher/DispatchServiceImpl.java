@@ -22,7 +22,10 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.event.EventManager;
+import com.breakersoft.plow.event.JobBookedEvent;
 import com.breakersoft.plow.event.JobLaunchEvent;
+import com.breakersoft.plow.event.JobUnbookedEvent;
 
 @Service
 @Transactional
@@ -39,6 +42,9 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Autowired
     private QuotaDao quotaDao;
+
+    @Autowired
+    EventManager eventManager;
 
     @Override
     @Transactional(readOnly=true)
@@ -133,6 +139,9 @@ public class DispatchServiceImpl implements DispatchService {
         proc.setCores(task.getMinCores());
         proc.setTaskName(task.getName());
         proc.setNodeName(node.getName());
+        proc.setJobId(task.getJobId());
+        proc.setLayerId(task.getLayerId());
+        proc.setTags(task.getTags());
         createDispatchProc(proc);
         return proc;
     }
@@ -144,5 +153,6 @@ public class DispatchServiceImpl implements DispatchService {
         }
         proc.setTaskId(null);
         removeProc(proc);
+        eventManager.post(new JobUnbookedEvent(proc));
     }
 }

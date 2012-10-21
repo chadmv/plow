@@ -1,6 +1,7 @@
 package com.breakersoft.plow.dispatcher.domain;
 
 import java.util.Set;
+import java.util.UUID;
 
 import com.breakersoft.plow.ProcE;
 
@@ -12,6 +13,9 @@ public class DispatchProc extends ProcE implements DispatchResource {
     private int cores;
     private int memory;
     private Set<String> tags;
+
+    private UUID jobId;
+    private UUID layerId;
 
     public void setTags(Set<String> tags) {
         this.tags = tags;
@@ -65,5 +69,21 @@ public class DispatchProc extends ProcE implements DispatchResource {
             sb.append(",");
         }
         return sb.toString();
+    }
+
+    public UUID getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(UUID jobId) {
+        this.jobId = jobId;
+    }
+
+    public UUID getLayerId() {
+        return layerId;
+    }
+
+    public void setLayerId(UUID layerId) {
+        this.layerId = layerId;
     }
 }

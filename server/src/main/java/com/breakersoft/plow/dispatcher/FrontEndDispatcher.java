@@ -22,8 +22,10 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
+import com.breakersoft.plow.event.JobBookedEvent;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.event.JobFinishedEvent;
+import com.breakersoft.plow.event.JobUnbookedEvent;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
 import com.breakersoft.plow.service.JobService;
 import com.google.common.collect.Lists;
@@ -237,6 +239,40 @@ public final class FrontEndDispatcher {
 
     public int getTotalFolders() {
         return folderIndex.size();
+    }
+
+    @Subscribe
+    public void handleJobBookedEvent(JobBookedEvent event) {
+        DispatchJob job = jobIndex.get(event.getTask().getJobId());
+        // May have been killed
+        if (job == null) {
+            return;
+        }
+        DispatchProc proc = event.getProc();
+        synchronized (job) {
+            job.incrementCores(proc.getCores());
+        }
+        DispatchFolder folder = folderIndex.get(job.getFolderId());
+        synchronized (folder) {
+            folder.incrementCores(proc.getCores());
+        }
+    }
+
+    @Subscribe
+    public void handleJobUnbookedEvent(JobUnbookedEvent event) {
+        DispatchJob job = jobIndex.get(event.getProc().getJobId());
+        // May have been killed
+        if (job == null) {
+            return;
+        }
+        DispatchProc proc = event.getProc();
+        synchronized (job) {
+            job.decrementCores(proc.getCores());
+        }
+        DispatchFolder folder = folderIndex.get(job.getFolderId());
+        synchronized (folder) {
+            folder.decrementCores(proc.getCores());
+        }
     }
 
     @Subscribe

@@ -14,10 +14,14 @@ import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.FolderDao;
 import com.breakersoft.plow.dao.QuotaDao;
+import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
+import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
+import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
@@ -42,6 +46,9 @@ public class DispatcherDaoTests extends AbstractTest {
 
     @Resource
     JobService jobService;
+
+    @Resource
+    DispatchService dispatchService;
 
     @Test
     public void testGetDispatchFolder() {
@@ -69,18 +76,54 @@ public class DispatcherDaoTests extends AbstractTest {
     }
 
     @Test
-    public void testGetDispatchHost() {
+    public void testGetDispatchNode() {
         Node node =  nodeService.createNode(getTestNodePing());
         DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
     }
 
     @Test
-    public void testGetFrames() {
+    public void testGetDispatchProc() {
         Node node =  nodeService.createNode(getTestNodePing());
         DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
 
         JobLaunchEvent event = jobService.launch(getTestBlueprint());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
+
+        DispatchProc proc = null;
+
+        for (DispatchLayer layer: dispatchDao.getDispatchLayers(djob, dnode)) {
+            for (DispatchTask task: dispatchDao.getDispatchTasks(layer, dnode)) {
+                proc = dispatchService.allocateDispatchProc(dnode, task);
+                break;
+            }
+        }
+
+        assertNotNull(proc);
+        DispatchProc proc2 = dispatchDao.getDispatchProc(proc.getProcId());
+        assertEquals(proc.getCores(), proc2.getCores());
+        assertEquals(proc.getJobId(), proc2.getJobId());
+        assertEquals(proc.getLayerId(), proc2.getLayerId());
+        assertEquals(proc.getMemory(), proc2.getMemory());
+        assertEquals(proc.getNodeId(), proc2.getNodeId());
+        assertEquals(proc.getNodeName(), proc2.getNodeName());
+        assertEquals(proc.getProcId(), proc2.getProcId());
+        assertEquals(proc.getQuotaId(), proc2.getQuotaId());
+        assertEquals(proc.getTags(), proc2.getTags());
+        assertEquals(proc.getTaskId(), proc2.getTaskId());
+        assertEquals(proc.getTaskName(), proc2.getTaskName());
+    }
+
+    @Test
+    public void testGetDispatchTasks() {
+        Node node =  nodeService.createNode(getTestNodePing());
+        DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
+
+        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
+
+        for (DispatchLayer layer: dispatchDao.getDispatchLayers(djob, dnode)) {
+            assertTrue(dispatchDao.getDispatchTasks(layer, dnode).size() > 0);
+        }
     }
 
     @Test
