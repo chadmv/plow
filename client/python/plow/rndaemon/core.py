@@ -161,8 +161,9 @@ class ProcessThread(threading.Thread):
         if not conf.NETWORK_DISABLED:
             while True:
                 try:
-                    conn = client.getPlowConnection()
-                    conn.taskComplete(result)
+                    service, transport = client.getPlowConnection()
+                    service.taskComplete(result)
+                    transport.close()
                     break
                 except Exception, e:
                     logger.warn("Error talking to plow server," + str(e) + ", sleeping for 30 seconds")

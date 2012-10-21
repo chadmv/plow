@@ -63,7 +63,7 @@ struct Ping {
 
 service RndServiceApi {
         
-    void sendPing(1:Ping ping) throws (1:RndException e),
+    oneway void sendPing(1:Ping ping),
     void taskComplete(1:RunTaskResult result) throws (1:RndException e)
 }
 

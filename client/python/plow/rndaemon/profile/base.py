@@ -48,8 +48,9 @@ class AbstractProfiler(object):
 
         logger.info("Sending ping: %s" % ping)
         try:
-            conn = client.getPlowConnection()
-            conn.sendPing(ping)
+            service, transport = client.getPlowConnection()
+            service.sendPing(ping)
+            transport.close()
         except Exception, e:
             logger.warn("Unable to send ping to plow server, %s" % e)
 

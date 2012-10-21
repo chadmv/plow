@@ -13,7 +13,7 @@ def getPlowConnection():
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
     service = RndServiceApi.Client(protocol)
     transport.open()
-    return service
+    return (service, transport)
 
 def getLocalConnection():
     socket = TSocket.TSocket("localhost", conf.NETWORK_PORT)
