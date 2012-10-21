@@ -18,6 +18,8 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.event.EventManager;
+import com.breakersoft.plow.event.JobBookedEvent;
 import com.breakersoft.plow.exceptions.DispatchProcAllocationException;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
 import com.breakersoft.plow.service.JobService;
@@ -51,6 +53,9 @@ public class BookingThread extends Thread {
 
     @Autowired
     private DispatchSupport dispatchSupport;
+
+    @Autowired
+    private EventManager eventManager;
 
     private boolean enabled = true;
     private final Map<UUID, ArrayList<DispatchJob>> activeJobs;
@@ -187,6 +192,7 @@ public class BookingThread extends Thread {
             proc = dispatchService.allocateDispatchProc(node, task);
             if (jobService.startTask(task, proc)) {
                 dispatchSupport.runRndTask(task, proc);
+                eventManager.post(new JobBookedEvent(proc, task));
             }
         }
         catch (DispatchProcAllocationException e) {
