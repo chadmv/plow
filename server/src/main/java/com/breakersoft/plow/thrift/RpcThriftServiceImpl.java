@@ -1,6 +1,7 @@
 package com.breakersoft.plow.thrift;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
+import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 
 @ThriftService
 public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
@@ -20,6 +22,9 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
 
     @Autowired
     ThriftJobDao thriftJobDao;
+
+    @Autowired
+    ThriftLayerDao thriftLayerDao;
 
     @Override
     public JobT launch(Blueprint bp) throws PlowException, TException {
@@ -45,15 +50,13 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
     }
 
     @Override
-    public LayerT getLayer(String arg0) throws PlowException, TException {
-        // TODO Auto-generated method stub
-        return null;
+    public LayerT getLayer(String id) throws PlowException, TException {
+        return thriftLayerDao.getLayer(UUID.fromString(id));
     }
 
     @Override
-    public List<LayerT> getLayers(String arg0) throws PlowException, TException {
-        // TODO Auto-generated method stub
-        return null;
+    public List<LayerT> getLayers(String jobId) throws PlowException, TException {
+        return thriftLayerDao.getLayers(UUID.fromString(jobId));
     }
 
     @Override

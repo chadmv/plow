@@ -120,6 +120,13 @@ CREATE TABLE plow.layer_count (
 
 CREATE INDEX layer_count_int_waiting_idx ON plow.layer_count (int_waiting);
 
+---
+
+CREATE TABLE plow.layer_dsp (
+  pk_layer UUID NOT NULL PRIMARY KEY,
+  int_run_cores INTEGER NOT NULL DEFAULT 0
+);
+
 ----------------------------------------------------------
 
 ---

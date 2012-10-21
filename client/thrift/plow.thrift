@@ -67,7 +67,15 @@ struct LayerT {
     5:set<string> tags,
     6:i32 minCores,
     7:i32 maxCores,
-    8:i32 minRamMb
+    8:i32 minRamMb,
+    9:i32 totalTaskCount,
+    10:i32 succeededTaskCount,
+    11:i32 runningTaskCount,
+    12:i32 deadTaskCount,
+    13:i32 eatenTaskCount,
+    14:i32 waitingTaskCount,
+    15:i32 dependTaskCount,
+    16:i32 runningCoreCount,
 }
 
 struct TaskT {
