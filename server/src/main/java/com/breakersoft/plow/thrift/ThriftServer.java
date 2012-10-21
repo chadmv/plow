@@ -4,8 +4,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.thrift.TProcessor;
+import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadedSelectorServer;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TNonblockingServerSocket;
 import org.apache.thrift.transport.TNonblockingServerTransport;
 import org.apache.thrift.transport.TTransportException;
@@ -20,7 +22,7 @@ public class ThriftServer {
     private final TProcessor processor;
     private final Thread thread;
 
-    private TNonblockingServerTransport transport;
+    private TNonblockingServerSocket transport;
     private TServer server;
 
     public ThriftServer(TProcessor processor, int port) {
@@ -39,8 +41,10 @@ public class ThriftServer {
             server = new TThreadedSelectorServer(
                     new TThreadedSelectorServer.Args(transport)
                 .processor(processor)
-                .workerThreads(16)
-                .selectorThreads(4));
+                .workerThreads(8)
+                .selectorThreads(4)
+                .protocolFactory(new TBinaryProtocol.Factory(true, true))
+                .transportFactory(new TFramedTransport.Factory()));
             thread.start();
 
         } catch (TTransportException e) {
