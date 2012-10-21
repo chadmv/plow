@@ -32,11 +32,18 @@ public class RndClient {
         this.port = port;
     }
 
+    /*
+    TFramedTransport
+    socket = TSocket.TSocket(host, int(port))
+    transport = TTransport.TFramedTransport(socket)
+    protocol = TBinaryProtocol.TBinaryProtocol(transport)
+    service = RndServiceApi.Client(protocol)
+    */
     public RndNodeApi.Client connect() throws TTransportException {
         socket = new TSocket(host, port);
         socket.setTimeout(Defaults.RND_CLIENT_SOCKET_TIMEOUT_MS);
         transport = new TFramedTransport(socket);
-        protocol = new TBinaryProtocol(socket);
+        protocol = new TBinaryProtocol(transport);
         transport.open();
         return new RndNodeApi.Client(protocol);
     }
@@ -44,7 +51,7 @@ public class RndClient {
     public void runProcess(RunTaskCommand command) {
         try {
             connect().runTask(command);
-        } catch (RndException | TException e) {
+        } catch (TException e) {
             throw new RndClientExecuteException(e);
         }
         finally {

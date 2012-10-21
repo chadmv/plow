@@ -21,9 +21,9 @@ def start():
     logger.info("Staring Render Node Daemon on TCP port %d" % conf.NETWORK_PORT)
     handler = RndProcessHandler()
     processor = RndNodeApi.Processor(handler)
-    transport = TSocket.TServerSocket(port=conf.NETWORK_PORT)
+    socket = TSocket.TServerSocket(port=conf.NETWORK_PORT)
     tfactory = TTransport.TFramedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
-    server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
+    server = TServer.TThreadedServer(processor, socket, tfactory, pfactory)
     server.serve()
 
