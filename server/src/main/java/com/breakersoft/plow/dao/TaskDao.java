@@ -8,7 +8,7 @@ import com.breakersoft.plow.thrift.TaskState;
 
 public interface TaskDao {
 
-    Task create(Layer layer, int number, int frameOrder, int layerOrder);
+    Task create(Layer layer, String name, int number, int frameOrder, int layerOrder);
 
     Task get(Layer layer, int number);
 

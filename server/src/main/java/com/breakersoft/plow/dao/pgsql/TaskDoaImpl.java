@@ -66,10 +66,10 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                     "int_state");
 
     @Override
-    public Task create(Layer layer, int number, int taskOrder, int layerOrder) {
+    public Task create(Layer layer, String name, int number, int taskOrder, int layerOrder) {
         final UUID id = UUID.randomUUID();
 
-        jdbc.update(INSERT, id, layer.getLayerId(), null,
+        jdbc.update(INSERT, id, layer.getLayerId(), name,
                 number, taskOrder, TaskState.INITIALIZE.ordinal());
 
         TaskE task = new TaskE();

@@ -97,7 +97,8 @@ public class JobServiceImpl implements JobService {
             int frameOrder = 0;
             FrameSet frameSet = new FrameSet(blayer.getRange());
             for (int frameNum: frameSet) {
-                taskDao.create(layer, frameNum, frameOrder, layerOrder);
+                taskDao.create(layer, String.format("%04d-%s", frameNum, blayer.getName()),
+                        frameNum, frameOrder, layerOrder);
                 frameOrder++;
             }
             layerOrder++;
