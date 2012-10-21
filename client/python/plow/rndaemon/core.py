@@ -10,7 +10,7 @@ import rpc.ttypes as ttypes
 
 from datetime import datetime
 
-from profile.macosx import SystemProfiler
+from profile import SystemProfiler
 
 logger = logging.getLogger(__name__)
 

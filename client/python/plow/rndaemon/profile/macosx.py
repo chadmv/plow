@@ -32,6 +32,9 @@ class SystemProfiler(AbstractProfiler):
     def __init__(self):
         AbstractProfiler.__init__(self)
 
+    def __repr__(self):
+        return "<%s: OSX>" % self.__class__.__name__
+
     def update(self):
         f = sysinfo_t()
         memstat.foo(ctypes.byref(f))
