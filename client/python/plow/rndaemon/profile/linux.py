@@ -57,10 +57,12 @@ class SystemProfiler(AbstractProfiler):
         memstats = psutil.virtual_memory()
         swapstats = psutil.swap_memory()
 
+        b_to_mb = 1024**2
         self.data.update({
-            'freeRamMb'     : memstats.available / 1024 / 1024,
-            'totalRamMb'    : memstats.total / 1024 / 1024,
-            'totalSwapMb'   : swapstats.total / 1024 / 1024,
+            'freeRamMb'     : memstats.available / b_to_mb,
+            'totalRamMb'    : memstats.total / b_to_mb,
+            'freeSwapMb'    : swapstats.free / b_to_mb,
+            'totalSwapMb'   : swapstats.total / b_to_mb,
         })        
 
 
