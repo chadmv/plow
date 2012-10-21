@@ -31,10 +31,10 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             task.startTime = rs.getLong("time_started");
             task.stopTime = rs.getLong("time_stopped");
             task.state = TaskState.findByValue(rs.getInt("int_state"));
-            task.maxRss = rs.getInt("int_max_rss");
-            task.currentRss = rs.getInt("int_current_rss");
-            task.currentNodeName = rs.getString("str_current_node_name");
-            task.runningCores = rs.getInt("int_current_cores");
+            task.lastMaxRss = rs.getInt("int_last_max_rss");
+            task.lastRss = rs.getInt("int_last_rss");
+            task.lastNodeName = rs.getString("str_last_node_name");
+            task.lastCores = rs.getInt("int_last_cores");
             return task;
         }
     };
@@ -49,10 +49,10 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "task.int_task_order,"+
             "task.time_started, " +
             "task.time_stopped," +
-            "task.int_max_rss,"+
-            "task.int_current_rss,"+
-            "task.str_current_node_name,"+
-            "task.int_current_cores " +
+            "task.int_last_max_rss,"+
+            "task.int_last_rss,"+
+            "task.str_last_node_name,"+
+            "task.int_last_cores " +
         "FROM " +
             "task ";
 

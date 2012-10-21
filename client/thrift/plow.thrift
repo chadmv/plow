@@ -87,10 +87,10 @@ struct TaskT {
     6:TaskState state,
     7:common.Timestamp startTime,
     8:common.Timestamp stopTime,
-    9:string currentNodeName,
-    10:i32 currentRss,
-    11:i32 maxRss,
-    12:i32 runningCores
+    9:string lastNodeName,
+    10:i32 lastRss,
+    11:i32 lastCores,
+    12:i32 lastMaxRss
 }
 
 struct LayerBp {
