@@ -11,6 +11,7 @@ import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
+import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 
 @ThriftService
 public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
@@ -25,6 +26,9 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
 
     @Autowired
     ThriftLayerDao thriftLayerDao;
+
+    @Autowired
+    ThriftTaskDao thriftTaskDao;
 
     @Override
     public JobT launch(Blueprint bp) throws PlowException, TException {
@@ -60,15 +64,13 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
     }
 
     @Override
-    public TaskT getTask(String arg0) throws PlowException, TException {
-        // TODO Auto-generated method stub
-        return null;
+    public TaskT getTask(String id) throws PlowException, TException {
+        return thriftTaskDao.getTask(UUID.fromString(id));
     }
 
     @Override
-    public List<TaskT> getTasks(String arg0) throws PlowException, TException {
-        // TODO Auto-generated method stub
-        return null;
+    public List<TaskT> getTasks(String layerId) throws PlowException, TException {
+        return thriftTaskDao.getTasks(UUID.fromString(layerId));
     }
 
     @Override

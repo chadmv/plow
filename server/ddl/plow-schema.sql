@@ -142,12 +142,17 @@ CREATE TABLE plow.task (
   int_depend_count INTEGER NOT NULL DEFAULT 0,
   int_task_order INTEGER NOT NULL,
   bool_reserved BOOLEAN DEFAULT 'f' NOT NULL,
-  int_start_time BIGINT DEFAULT 0 NOT NULL,
-  int_stop_time BIGINT DEFAULT 0 NOT NULL
+  time_started BIGINT DEFAULT 0 NOT NULL,
+  time_stopped BIGINT DEFAULT 0 NOT NULL,
+  int_max_rss INTEGER DEFAULT 0 NOT NULL,
+  int_current_rss INTEGER DEFAULT 0 NOT NULL,
+  str_current_node_name VARCHAR(128),
+  int_current_cores SMALLINT DEFAULT 0 NOT NULL
 ) WITHOUT OIDS;
 
 CREATE INDEX task_pk_layer_idx ON plow.task (pk_layer);
 CREATE INDEX task_int_state_idx ON plow.task (int_state);
+
 
 
 ----------------------------------------------------------

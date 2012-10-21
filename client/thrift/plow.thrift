@@ -81,12 +81,16 @@ struct LayerT {
 struct TaskT {
     1:common.Guid id,
     2:string name,
-    3:TaskState state,
-    4:i32 maxRss,
-    5:i32 currentRss,
-    6:i32 runTime,
+    3:i32 number,
+    4:i32 dependCount,
+    5:i32 order,
+    6:TaskState state,
     7:common.Timestamp startTime,
     8:common.Timestamp stopTime,
+    9:string currentNodeName,
+    10:i32 currentRss,
+    11:i32 maxRss,
+    12:i32 runningCores
 }
 
 struct LayerBp {
