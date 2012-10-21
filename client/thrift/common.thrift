@@ -1,8 +1,8 @@
 /* Common Thrift Definitions */
 
 namespace java com.breakersoft.plow.thrift
-namespace py rpc
-namespace cpp rpc
+namespace py common
+namespace cpp common
 
 /**
 * A GUID type. Every object has a unique GUI in the format
