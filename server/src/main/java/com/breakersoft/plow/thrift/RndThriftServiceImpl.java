@@ -40,7 +40,7 @@ public class RndThriftServiceImpl implements RndServiceApi.Iface {
             node = nodeService.createNode(ping);
         }
 
-        logger.info("Dispatching " + ping.hostname);
+        logger.info("{} node reporting in.", node.getName());
         frontEndDispatcher.book(node);
     }
 
