@@ -258,16 +258,16 @@ public class BookingThread extends Thread {
 
             DispatchJob job = addJobs.poll();
             if (job == null) {
-                logger.info("No new jobs waiting to be ingested.");
                 break;
             }
-            count++;
-
-            if (!activeJobs.containsKey(job.getProjectId())) {
-                activeJobs.put(job.getProjectId(),
-                        new ArrayList<DispatchJob>());
+            else {
+                count++;
+                if (!activeJobs.containsKey(job.getProjectId())) {
+                    activeJobs.put(job.getProjectId(),
+                            new ArrayList<DispatchJob>());
+                }
+                activeJobs.get(job.getProjectId()).add(job);
             }
-            activeJobs.get(job.getProjectId()).add(job);
         }
 
         logger.info("Added " + count + " jobs to the dispatcher.");
