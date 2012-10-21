@@ -47,17 +47,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             return layer;
         }
     };
-    /*
-    str_name VARCHAR(200) NOT NULL,
-    str_range TEXT NOT NULL,
-    str_command TEXT[] NOT NULL,
-    str_tags TEXT[] NOT NULL,
-    int_chunk_size INTEGER NOT NULL,
-    int_order INTEGER NOT NULL,
-    int_min_cores SMALLINT NOT NULL,
-    int_max_cores SMALLINT NOT NULL,
-    int_min_mem INTEGER NOT NULL
-    */
+
     private static final String GET =
             "SELECT " +
                 "layer.pk_layer,"+
