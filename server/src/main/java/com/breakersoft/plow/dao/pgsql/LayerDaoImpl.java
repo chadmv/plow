@@ -60,13 +60,11 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
                 MAPPER, id);
     }
 
-    private static final String INSERT[] = {
-
+    private static final String INSERT =
         JdbcUtils.Insert("plow.layer",
                 "pk_layer", "pk_job", "str_name", "str_range",
                 "str_command", "str_tags", "int_chunk_size", "int_order",
-                "int_min_cores", "int_max_cores", "int_min_mem")
-    };
+                "int_min_cores", "int_max_cores", "int_min_mem");
 
     @Override
     public Layer create(final Job job, final LayerBp layer, final int order) {
@@ -76,7 +74,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
         jdbc.update(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
-                final PreparedStatement ret = conn.prepareStatement(INSERT[0]);
+                final PreparedStatement ret = conn.prepareStatement(INSERT);
                 ret.setObject(1, id);
                 ret.setObject(2, job.getJobId());
                 ret.setString(3, layer.getName());
@@ -94,6 +92,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
         });
 
         jdbc.update("INSERT INTO plow.layer_count (pk_layer) VALUES (?)", id);
+        jdbc.update("INSERT INTO plow.layer_dsp (pk_layer) VALUES (?)", id);
 
         final LayerE result = new LayerE();
         result.setLayerId(id);
