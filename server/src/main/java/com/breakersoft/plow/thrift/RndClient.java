@@ -31,13 +31,6 @@ public class RndClient {
         this.port = port;
     }
 
-    /*
-    TFramedTransport
-    socket = TSocket.TSocket(host, int(port))
-    transport = TTransport.TFramedTransport(socket)
-    protocol = TBinaryProtocol.TBinaryProtocol(transport)
-    service = RndServiceApi.Client(protocol)
-    */
     public RndNodeApi.Client connect() throws TTransportException {
         socket = new TSocket(host, port);
         socket.setTimeout(Defaults.RND_CLIENT_SOCKET_TIMEOUT_MS);
