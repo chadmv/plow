@@ -232,7 +232,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             folder.setProjectId((UUID)rs.getObject("pk_project"));
             folder.setMinCores(rs.getInt("int_min_cores"));
             folder.setMaxCores(rs.getInt("int_max_cores"));
-            folder.incrementCores(rs.getInt("int_run_cores"));
+            folder.setRunCores(rs.getInt("int_run_cores"));
             return folder;
         }
     };
