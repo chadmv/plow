@@ -41,6 +41,14 @@ public final class DispatchJob extends JobE implements Dispatchable, Comparable<
         this.minCores = cores;
     }
 
+    public int getMaxCores() {
+        return runCores;
+    }
+
+    public int getRunCores() {
+        return runCores;
+    }
+
     @Override
     public void incrementCores(int inc) {
         runCores = runCores + inc;
