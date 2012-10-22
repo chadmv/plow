@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
-import com.breakersoft.plow.rnd.thrift.RndException;
 import com.breakersoft.plow.rnd.thrift.RndNodeApi;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 
