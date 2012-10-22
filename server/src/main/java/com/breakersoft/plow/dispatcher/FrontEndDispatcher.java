@@ -124,7 +124,7 @@ public final class FrontEndDispatcher {
 
     public boolean dispatch(DispatchProc proc, DispatchJob job) {
 
-        logger.info("Dipatching proc: {}", proc);
+        logger.info("Dipatching proc {} -> {}", proc, job.getName());
 
         final List<DispatchLayer> layers =
                 dispatchService.getDispatchLayers(job, proc);
@@ -244,35 +244,54 @@ public final class FrontEndDispatcher {
     @Subscribe
     public void handleJobBookedEvent(JobBookedEvent event) {
         DispatchJob job = jobIndex.get(event.getTask().getJobId());
-        // May have been killed
         if (job == null) {
+            logger.info("Unable to handle job booked event, job was shutdown.");
             return;
         }
+        final DispatchFolder folder = folderIndex.get(job.getFolderId());
+
+        logger.info("Handling job booked event, before {} / {}",
+                job.getRunCores(), folder.getRunCores());
+
+
         DispatchProc proc = event.getProc();
         synchronized (job) {
             job.incrementCores(proc.getCores());
         }
-        DispatchFolder folder = folderIndex.get(job.getFolderId());
+
         synchronized (folder) {
             folder.incrementCores(proc.getCores());
         }
+
+        logger.info("Handling job booked event, after: {} / {}",
+                job.getRunCores(), folder.getRunCores());
     }
 
     @Subscribe
     public void handleJobUnbookedEvent(JobUnbookedEvent event) {
-        DispatchJob job = jobIndex.get(event.getProc().getJobId());
-        // May have been killed
+
+        final DispatchJob job = jobIndex.get(event.getProc().getJobId());
         if (job == null) {
+            logger.info("Unable to handle job unbooked event, job was shutdown.");
             return;
         }
+
+        final DispatchFolder folder = folderIndex.get(job.getFolderId());
+
+        logger.info("Handling job unbooked event, before {} / {}",
+                job.getRunCores(), folder.getRunCores());
+
         DispatchProc proc = event.getProc();
         synchronized (job) {
             job.decrementCores(proc.getCores());
         }
-        DispatchFolder folder = folderIndex.get(job.getFolderId());
+
         synchronized (folder) {
             folder.decrementCores(proc.getCores());
         }
+
+        logger.info("Handling job unbooked event, after: {} / {}",
+                job.getRunCores(), folder.getRunCores());
     }
 
     @Subscribe
