@@ -39,7 +39,7 @@ public final class DispatchFolder extends FolderE implements Dispatchable  {
     }
 
     public int getRunCores() {
-        return maxCores;
+        return runCores;
     }
 
     @Override
@@ -61,6 +61,11 @@ public final class DispatchFolder extends FolderE implements Dispatchable  {
     @Override
     public void decrementCores(int dec) {
         runCores = runCores - dec;
+        recalculate();
+    }
+
+    public void setRunCores(int cores) {
+        runCores = cores;
         recalculate();
     }
 
