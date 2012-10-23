@@ -14,7 +14,7 @@ from profile import SystemProfiler
 
 logger = logging.getLogger(__name__)
 
-class ResourceManager(object):
+class _ResourceManager(object):
     """
     The ResourceManager keeps track of the bookable resources on the
     machine.  This is currently just cores, but memory and GPUS
@@ -62,7 +62,7 @@ class ResourceManager(object):
     def getOpenSlots(self):
         return [slot for slot in self.__slots if self.__slots[slot] == 0]
 
-class ProcessManager(object):
+class _ProcessManager(object):
     """
     The ProcessManager keeps track of the running tasks.  Each task
     is executed in a separate ProcessThread.
@@ -79,7 +79,7 @@ class ProcessManager(object):
         with self.__lock:
             self.__threads[processCmd.procId] = (processCmd, pthread, cpus)
         pthread.start()
-        logger.info("procsss thread started");
+        logger.info("procsss thread started")
         return pthread.getRunningTask()
 
     def processFinished(self, processCmd):
@@ -101,7 +101,7 @@ class ProcessManager(object):
 
 class ProcessThread(threading.Thread):
     """
-    The ProcessThreasd wraps a running task.
+    The ProcessThread wraps a running task.
     """
     
     def __init__(self, rtc):
@@ -111,7 +111,13 @@ class ProcessThread(threading.Thread):
         self.__rtc = rtc
         self.__pptr = None
         self.__logfp = None
-        self.__pid = 0
+        self.__pid = -1
+
+    def __repr__(self):
+        return "<%s: (procId: %s, pid: %d)>" % (
+            self.__class__.__name__, 
+            self.__rtc.procId, 
+            self.__pid)
 
     def getRunningTask(self):
         rt = ttypes.RunningTask()
@@ -189,8 +195,8 @@ class ProcessThread(threading.Thread):
         self.__logfp.write("=====================================\n\n")
 
 Profiler = SystemProfiler()
-ResourceMgr = ResourceManager()
-ProcessMgr = ProcessManager()
+ResourceMgr = _ResourceManager()
+ProcessMgr = _ProcessManager()
 
 def runProcess(rtc):
     return ProcessMgr.runProcess(rtc)
