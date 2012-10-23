@@ -23,6 +23,9 @@ class AbstractProfiler(object):
         # Update the values (calls subclass impl)
         self.update()
 
+        if conf.NETWORK_DISABLED:
+            return
+
         # Create the hardware profile
         hw = ttypes.Hardware()
         hw.physicalCpus = self.physicalCpus
@@ -43,9 +46,6 @@ class AbstractProfiler(object):
         ping.hw = hw
         ping.tasks = tasks
 
-        if conf.NETWORK_DISABLED:
-            return
-
         logger.info("Sending ping: %s" % ping)
         try:
             service, transport = client.getPlowConnection()
@@ -54,8 +54,41 @@ class AbstractProfiler(object):
         except Exception, e:
             logger.warn("Unable to send ping to plow server, %s" % e)
 
-    def update(self):
+
+    def _update(self):
+        """
+        Protected update method, for subclasses to define 
+        how to populate the profile data on the specific platform. 
+        The class will call this method first, followed by post operations 
+        to clean the data if needed.
+        """
         pass
+
+
+    def update(self):
+        """
+        Public update() method
+
+        Don't re-implement this method in subclasses. 
+        Instead, re-implement the protected _update(). 
+        This method will be called after running _update().
+        """
+        self._update()
+
+        for name in ('logicalCpus', 'physicalCpus', 'totalRamMb'):
+            val = conf.getint('profile', name)
+            if val is not None and val > 0:
+
+                # Limit the total ram value, and also
+                # adjust the free ram to cap out as well.
+                if name == 'totalRamMb':
+                    if val >= self.totalRamMb:
+                        continue
+                    self.freeRamMb = min(val, self.freeRamMb)
+
+                setattr(self, name, val)
+                logger.debug("Using profile override: %s = %s" % (name, val))
+
 
     def __getattr__(self, k):
         return self.data[k]
