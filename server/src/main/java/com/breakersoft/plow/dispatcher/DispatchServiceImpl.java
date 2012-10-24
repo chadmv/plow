@@ -23,7 +23,6 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
-import com.breakersoft.plow.event.JobBookedEvent;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.event.JobUnbookedEvent;
 
@@ -151,8 +150,14 @@ public class DispatchServiceImpl implements DispatchService {
         if (proc == null) {
             return;
         }
+        if (proc.getProcId() == null) {
+            return;
+        }
+
         proc.setTaskId(null);
+        proc.setProcId(null);
         removeProc(proc);
+
         eventManager.post(new JobUnbookedEvent(proc));
     }
 }
