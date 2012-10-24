@@ -15,7 +15,13 @@ logger = logging.getLogger(__name__)
 class RndProcessHandler(object):
 
     def runTask(self, rtc):
-        core.runProcess(rtc)
+        core.ProcessMgr.runProcess(rtc)
+
+    def killRunningTask(self, rTask):
+        core.ProcessMgr.killRunningTask(rTask)
+
+    def getRunningTasks(self):
+        return core.ProcessMgr.getRunningTasks()
 
 
 def get_server(api, handler, port):

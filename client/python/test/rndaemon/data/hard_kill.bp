@@ -1,0 +1,7 @@
+from plow.blueprint.modules.shell import Shell
+from plow.conf import Config
+import os
+
+CMD = os.path.join(Config.get('env', 'plow_root'), 'client/python/test/rndaemon/utils/cmds.py')
+
+Shell("hard_to_kill_job", cmd=[CMD, "hard_to_kill" ])

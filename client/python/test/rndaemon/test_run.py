@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import sys
 
@@ -8,14 +10,17 @@ import unittest
 import time
 import threading
 
-import plow.rndaemon.conf as conf 
-conf.NETWORK_DISABLED = True
+import plow.conf as conf 
+import plow.rndaemon.conf as rndconf 
+rndconf.NETWORK_DISABLED = True
 
 import plow.rndaemon.rpc.ttypes as ttypes
 import plow.rndaemon.core as core
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
+
+PLOW_ROOT = conf.Config.get('env', 'plow_root')
 
 
 class TestResourceManager(unittest.TestCase):
@@ -44,26 +49,43 @@ class TestProcessManager(unittest.TestCase):
         self._logfile = os.path.join(self._logdir, "rndlogfile.log")
 
     def testRunTaskCommand(self):
-        process = ttypes.RunTaskCommand()
-        process.procId = "a"
-        process.taskId=  "b"
-        process.cores = 1
-        process.command=["/bin/ls", self._logdir]
-        process.env = { },
-        process.logFile = self._logfile 
-        core.runProcess(process)
+        process = self.getNewTaskCommand()
+        process.command = ["/bin/ls", self._logdir]
+        core.ProcessMgr.runProcess(process)
         time.sleep(1)
 
     def testRunTaskCommandOutOfCores(self):
+        process = self.getNewTaskCommand()
+        process.cores = 9999
+        process.command = ["/bin/ls", self._logdir]
+        self.assertRaises(ttypes.RndException, core.ProcessMgr.runProcess, process)
+
+    def testKillRunningTask(self):
+        cmd = os.path.join(PLOW_ROOT, 'client/python/test/rndaemon/utils/cmds.py')
+
+        process = self.getNewTaskCommand()
+        process.command = [cmd, 'hard_to_kill']
+        core.ProcessMgr.runProcess(process)
+        time.sleep(1)
+
+        runningTasks = core.ProcessMgr.getRunningTasks()
+        total = len(runningTasks)
+        self.assertEqual(total, 1, msg="Expected there to be one running task")
+
+        core.ProcessMgr.killRunningTask(runningTasks[0])
+        time.sleep(1)
+
+        count = len(core.ProcessMgr.getRunningTasks())
+        self.assertEqual(count, 0, msg="Should not have any running tasks anymore")
+
+    def getNewTaskCommand(self):
         process = ttypes.RunTaskCommand()
         process.procId = "a"
-        process.taskId =  "b"
-        process.cores = 9999
-        process.command=["/bin/ls", self._logdir]
-        process.env = { },
+        process.taskId = "b"
+        process.cores = 1
+        process.env = {},
         process.logFile = self._logfile 
-        self.assertRaises(ttypes.RndException, core.runProcess, process)
-
+        return process
 
 class TestCommunications(unittest.TestCase):
     """
