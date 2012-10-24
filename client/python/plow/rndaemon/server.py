@@ -17,13 +17,17 @@ class RndProcessHandler(object):
     def runTask(self, rtc):
         core.runProcess(rtc)
 
-def start():
-    logger.info("Staring Render Node Daemon on TCP port %d" % conf.NETWORK_PORT)
-    handler = RndProcessHandler()
-    processor = RndNodeApi.Processor(handler)
-    socket = TSocket.TServerSocket(port=conf.NETWORK_PORT)
+
+def get_server(api, handler, port):
+    processor = api.Processor(handler)
+    socket = TSocket.TServerSocket(port=port)
     tfactory = TTransport.TFramedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
-    server = TServer.TThreadedServer(processor, socket, tfactory, pfactory)
-    server.serve()
+    server = TServer.TThreadedServer(processor, socket, tfactory, pfactory)    
+    return server
 
+
+def start():
+    logger.info("Staring Render Node Daemon on TCP port %d" % conf.NETWORK_PORT)
+    server = get_server(RndNodeApi, RndProcessHandler(), conf.NETWORK_PORT)
+    server.serve()

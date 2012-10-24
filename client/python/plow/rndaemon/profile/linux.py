@@ -53,7 +53,7 @@ class SystemProfiler(AbstractProfiler):
             'logicalCpus'   : psutil.NUM_CPUS,
         })
 
-    def update(self):
+    def _update(self):
         memstats = psutil.virtual_memory()
         swapstats = psutil.swap_memory()
 

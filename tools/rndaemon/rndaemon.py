@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import logging
-logging.basicConfig(level=logging.INFO)
+import sys
+
+lvl = logging.DEBUG if '-debug' in sys.argv else logging.INFO
+logging.basicConfig(level=lvl)
 
 import sys
 sys.path.append("../../client/python")
@@ -8,5 +11,8 @@ sys.path.append("../../client/python")
 import plow.rndaemon.server as server
 
 if __name__ == "__main__":
-    server.start()
+    try:
+        server.start()
+    except KeyboardInterrupt:
+        sys.exit(2)
 
