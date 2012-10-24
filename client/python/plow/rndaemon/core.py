@@ -94,7 +94,7 @@ class _ProcessManager(object):
         tasks = [p[1].getRunningTask() for p in self.__threads]
         Profiler.sendPing(tasks, isReboot)
 
-        self.__timer = threading.Timer(60.0, self.sendPing)
+        self.__timer = threading.Timer(conf.NETWORK_PING_INTERVAL, self.sendPing)
         self.__timer.daemon = True
         self.__timer.start()
 
