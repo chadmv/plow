@@ -63,10 +63,13 @@ public class BackEndDispatcher {
         }
 
         if (!jobService.hasPendingFrames(job)) {
-            jobService.shutdown(job);
             dispatchService.unbookProc(proc);
+            jobService.shutdown(job);
+            logger.info("Job has no pending frames, unbooking");
         }
-        dispatchPool.execute(new DispatchProcToJob(proc, job, frontEndDispatcher));
+        else {
+            dispatchPool.execute(new DispatchProcToJob(proc, job, frontEndDispatcher));
+        }
     }
 
 }
