@@ -19,10 +19,12 @@ def getPlowConnection(host=None, port=None):
     transport.open()
     return (service, transport)
 
-def getLocalConnection():
-    socket = TSocket.TSocket("localhost", conf.NETWORK_PORT)
+def getLocalConnection(port=None):
+    if port is None:
+        port = conf.NETWORK_PORT
+    socket = TSocket.TSocket("localhost", port)
     transport = TTransport.TFramedTransport(socket)
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
     service = RndNodeApi.Client(protocol)
     transport.open()
-    return service
+    return (service, transport)
