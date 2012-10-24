@@ -124,7 +124,7 @@ public final class FrontEndDispatcher {
 
     public boolean dispatch(DispatchProc proc, DispatchJob job) {
 
-        logger.info("Dipatching proc: {}", proc);
+        logger.info("Dipatching proc {} -> {}", proc, job.getName());
 
         final List<DispatchLayer> layers =
                 dispatchService.getDispatchLayers(job, proc);
@@ -222,15 +222,25 @@ public final class FrontEndDispatcher {
         }
     }
 
-    public void removeJob(Job job) {
+    /**
+     * Finalize the job by making it not dispatcher yet but
+     * don't remove it from the dispatcher yet because there
+     * may still be tasks reporting in finished processes that
+     * need to update the folder stats.
+     *
+     * A quartz process will sweep these out later.
+     *
+     * @param job
+     */
+    public void finalizeJob(Job job) {
         for (BookingThread thread: bookingThreads) {
             thread.removeJob(job);
         }
 
         DispatchJob djob = jobIndex.get(job.getJobId());
-        djob.setFolder(null);
-
-        jobIndex.remove(job.getJobId());
+        djob.setWaitingFrames(0);
+        //TODO put in a timestamp so the sweeper knows
+        // when to clear these out.
     }
 
     public int getTotalJobs() {
@@ -244,35 +254,54 @@ public final class FrontEndDispatcher {
     @Subscribe
     public void handleJobBookedEvent(JobBookedEvent event) {
         DispatchJob job = jobIndex.get(event.getTask().getJobId());
-        // May have been killed
         if (job == null) {
+            logger.info("Unable to handle job booked event, job was shutdown.");
             return;
         }
+        final DispatchFolder folder = folderIndex.get(job.getFolderId());
+
+        logger.info("Handling job booked event, before {} / {}",
+                job.getRunCores(), folder.getRunCores());
+
+
         DispatchProc proc = event.getProc();
         synchronized (job) {
             job.incrementCores(proc.getCores());
         }
-        DispatchFolder folder = folderIndex.get(job.getFolderId());
+
         synchronized (folder) {
             folder.incrementCores(proc.getCores());
         }
+
+        logger.info("Handling job booked event, after: {} / {}",
+                job.getRunCores(), folder.getRunCores());
     }
 
     @Subscribe
     public void handleJobUnbookedEvent(JobUnbookedEvent event) {
-        DispatchJob job = jobIndex.get(event.getProc().getJobId());
-        // May have been killed
+
+        final DispatchJob job = jobIndex.get(event.getProc().getJobId());
         if (job == null) {
+            logger.info("Unable to handle job unbooked event, job was shutdown.");
             return;
         }
+
+        final DispatchFolder folder = folderIndex.get(job.getFolderId());
+
+        logger.info("Handling job unbooked event, before {} / {}",
+                job.getRunCores(), folder.getRunCores());
+
         DispatchProc proc = event.getProc();
         synchronized (job) {
             job.decrementCores(proc.getCores());
         }
-        DispatchFolder folder = folderIndex.get(job.getFolderId());
+
         synchronized (folder) {
             folder.decrementCores(proc.getCores());
         }
+
+        logger.info("Handling job unbooked event, after: {} / {}",
+                job.getRunCores(), folder.getRunCores());
     }
 
     @Subscribe
@@ -284,6 +313,6 @@ public final class FrontEndDispatcher {
     @Subscribe
     public void handleJobShutdownEvent(JobFinishedEvent event) {
         logger.info("hanlding job shutdown event");
-        removeJob(event.getJob());
+        finalizeJob(event.getJob());
     }
 }
