@@ -3,16 +3,19 @@ import threading
 import subprocess
 import logging
 import time
+from datetime import datetime
+
+import psutil
 
 import conf
 import client
 import rpc.ttypes as ttypes
 
-from datetime import datetime
-
-from profile import SystemProfiler
+from profile import SystemProfiler as _SystemProfiler
 
 logger = logging.getLogger(__name__)
+
+__all__ = ['Profiler', 'ResourceMgr', 'ProcessMgr']
 
 class _ResourceManager(object):
     """
@@ -91,12 +94,38 @@ class _ProcessManager(object):
                 logger.warn("Process %s not found: %s" % (processCmd.procId, e))
 
     def sendPing(self, isReboot=False):
-        tasks = [p[1].getRunningTask() for p in self.__threads]
+        tasks = self.getRunningTasks()
         Profiler.sendPing(tasks, isReboot)
 
-        self.__timer = threading.Timer(60.0, self.sendPing)
+        self.__timer = threading.Timer(conf.NETWORK_PING_INTERVAL, self.sendPing)
         self.__timer.daemon = True
         self.__timer.start()
+
+    def killRunningTask(self, rTask):
+        logger.info("kill requested for task %s" % rTask)
+
+        with self.__lock:
+            try:
+                pthread = self.__threads[rTask.procId][1]
+            except KeyError:
+                err = "Process %s not found" % rTask.procId
+                logger.warn(err)
+                # TODO: Raise a proper exception type? or
+                # fail quietly?
+                raise ttypes.RndException(1, err)
+
+        _, not_killed = pthread.killProcess()
+
+        if not_killed:
+            err = "Failed to kill the following pids for task %s: %s" % \
+                    (rTask.taskId, ','.join(not_killed))
+            logger.warn(err)
+            raise ttypes.RndException(1, err)
+
+
+    def getRunningTasks(self):
+        return [t[1].getRunningTask() for t in self.__threads.itervalues()]
+
 
 
 class ProcessThread(threading.Thread):
@@ -149,6 +178,73 @@ class ProcessThread(threading.Thread):
         finally:
             self.__completed(retcode)
 
+
+    def killProcess(self):
+        """
+        killProcess() -> (list killed_pids, list not_killed)
+
+        Stop the entire process tree
+
+        Returns a tuple of two lists. The first list contains 
+        the pids from the process tree that were successfully 
+        stopped. The second list contains pids that were not 
+        able to be stopped successfully.
+        """
+        p = psutil.Process(self.__pid)
+        children = p.get_children(recursive=True)
+
+        # kill the top parent
+        self.__killOneProcess(p)
+
+        # make sure each process in the tree is really dead
+        killed = []
+        not_killed = []
+
+        for child in children:
+            success = self.__killOneProcess(child)
+            if success:
+                killed.append(child.pid)
+            else:
+                not_killed.append(child.pid)
+
+        return killed, not_killed
+
+
+    def __killOneProcess(self, p):
+        """
+        __killOneProcess(psutil.Process p) -> bool
+
+        Try and nicely stop a Process first, then kill it. 
+        Return True if process was killed.
+        """
+        try: p.wait(0.001)
+        except psutil.TimeoutExpired: pass
+        if not p.is_running():
+            return True
+
+        pid = p.pid 
+
+        logger.info("Asking nicely for pid %d (%s) to stop" % (pid, p.name))
+        p.terminate()
+        try: p.wait(5)
+        except psutil.TimeoutExpired: pass
+
+        if not p.is_running():
+            return True
+
+        logger.info("Killing pid %d (%s)" % (pid, p.name))
+        p.kill()
+        try: p.wait(1)
+        except psutil.TimeoutExpired: pass
+        
+        if p.is_running():
+            logger.warn("Failed to properly kill pid %d (taskId: %s)" % \
+                (pid, self.__rtc.taskId))    
+            return False 
+
+        return True
+
+
     def __completed(self, retcode):
 
         result = ttypes.RunTaskResult()
@@ -194,12 +290,10 @@ class ProcessThread(threading.Thread):
         self.__logfp.write("MaxRSS: 0\n")
         self.__logfp.write("=====================================\n\n")
 
-Profiler = SystemProfiler()
+Profiler    = _SystemProfiler()
 ResourceMgr = _ResourceManager()
-ProcessMgr = _ProcessManager()
+ProcessMgr  = _ProcessManager()
 
-def runProcess(rtc):
-    return ProcessMgr.runProcess(rtc)
 
 
 

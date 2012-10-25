@@ -25,6 +25,7 @@ def _init():
     #
     setattr(mod, 'NETWORK_DISABLED', getboolean('rndaemon', 'network_disabled', False))    
     setattr(mod, 'NETWORK_PORT', getint('rndaemon', 'port', 11338))
+    setattr(mod, 'NETWORK_PING_INTERVAL', getint('rndaemon', 'ping_interval', 60))
 
     hosts_str = get('rndaemon', 'plow_hosts', '')
     if hosts_str:
