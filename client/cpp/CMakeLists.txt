@@ -1,6 +1,8 @@
 project(Plow)
 cmake_minimum_required(VERSION 2.8)
 
+set(CMAKE_OSX_ARCHITECTURES "x86_64")
+
 set (PLOW_VERSION_MAJOR 1)
 set (PLOW_VERSION_MINOR 0)
 set (PLOW_VERSION_PATCH 0)
@@ -14,5 +16,6 @@ set(PLOW_NAMESPACE Plow)
 
 find_package(Boost COMPONENTS REQUIRED)
 find_package(Thrift REQUIRED)
+find_package(Qt4 REQUIRED)
 
-add_subdirectory(core)
+SUBDIRS(src)
