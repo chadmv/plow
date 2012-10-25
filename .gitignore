@@ -4,3 +4,4 @@
 *.pyc
 server/target
 
+client/python/plow.egg-info

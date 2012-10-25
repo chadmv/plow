@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../../'))
 import tempfile
 import unittest
 import time
-import threading
+from multiprocessing import Process, Event 
 
 import plow.conf as conf 
 import plow.rndaemon.conf as rndconf 
@@ -97,20 +97,23 @@ class TestCommunications(unittest.TestCase):
         from plow.rndaemon.server import get_server
         from plow.rndaemon.rpc import RndServiceApi 
 
-        self.event = threading.Event()
+        self.event = Event()
 
-        self.server_port = 9090
+        self.server_port = 9092
 
         handler = ServiceHandler(self.event)
         self.server = get_server(RndServiceApi, handler, self.server_port)
 
-        self.t_server = threading.Thread(target=self.server.serve)
+        self.t_server = Process(target=self.server.serve)
         self.t_server.daemon = True
         self.t_server.start()
+        time.sleep(.1)
 
 
     def tearDown(self):
         self.server.serverTransport.close()
+        self.t_server.terminate()
+        time.sleep(.1)
 
 
     def testSendPing(self):

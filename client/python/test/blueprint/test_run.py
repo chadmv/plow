@@ -2,7 +2,7 @@ import unittest
 import logging
 
 import os
-os.environ["PLOW_CFG"] = "./plow.ini"
+os.environ["PLOW_CFG"] = os.path.join(os.path.dirname(__file__), "plow.ini")
 os.environ["PROJECT"] = "test"
 os.environ["SHOT"] = "test.01"
 

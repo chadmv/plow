@@ -1,11 +1,14 @@
 import os
 import sys
 import ConfigParser
+import logging 
 
 __all__ = ['Config', 'get', 'getboolean', 'getint']
 
 
 Config = ConfigParser.RawConfigParser()
+
+logger = logging.getLogger(__name__)
 
 
 def _init():
@@ -14,9 +17,14 @@ def _init():
     Set module-level globals with the interpreted values.
     """
     if os.environ.has_key("PLOW_RNDAEMON_CFG"):
-        Config.read([os.environ["PLOW_RNDAEMON_CFG"]])
+        cfgs = Config.read([os.environ["PLOW_RNDAEMON_CFG"]])
     else:
-        Config.read(["/etc/plow/rndaemon.cfg", os.path.expanduser("~/.plow/rndaemon.cfg")])
+        cfgs = Config.read(["/etc/plow/rndaemon.cfg", os.path.expanduser("~/.plow/rndaemon.cfg")])
+
+    if cfgs:
+        logger.info('Config read from: %s' % cfgs)
+    else:
+        logger.warn('No config files found. Using default options')
 
     mod = sys.modules[__name__]
 

@@ -19,6 +19,10 @@ def _init():
     root = os.environ.get("PLOW_ROOT")
     if not root:
         root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../'))
+
+    if not 'env' in Config.sections():
+        Config.add_section('env')
+        
     Config.set('env', 'plow_root', root)
 
 # run as a function to avoid polluting module with temp variables

@@ -1,4 +1,7 @@
+#!/usr/bin/env python
+
 import logging
+import sys
 
 import conf
 import core
@@ -36,4 +39,9 @@ def get_server(api, handler, port):
 def start():
     logger.info("Staring Render Node Daemon on TCP port %d" % conf.NETWORK_PORT)
     server = get_server(RndNodeApi, RndProcessHandler(), conf.NETWORK_PORT)
-    server.serve()
+  
+    try:
+        server.serve()
+    except KeyboardInterrupt:
+        sys.exit(2)
+
