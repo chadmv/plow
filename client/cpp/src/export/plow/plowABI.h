@@ -6,8 +6,8 @@
 #define PLOW_VERSION "1.0.0"
 #define PLOW_VERSION_NS v1
 
-#define PLOW_NAMESPACE_ENTER namespace PLOW_NAMESPACE { namespace PLOW_VERSION_NS {
-#define PLOW_NAMESPACE_EXIT }}
+#define PLOW_NAMESPACE_ENTER namespace PLOW_NAMESPACE {
+#define PLOW_NAMESPACE_EXIT }
 #define PLOW_NAMESPACE_USING using namespace PLOW_NAMESPACE;
 
 #define PLOWEXPORT __attribute__ ((visibility("default")))

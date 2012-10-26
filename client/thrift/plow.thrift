@@ -5,7 +5,7 @@ include "common.thrift"
 
 namespace java com.breakersoft.plow.thrift
 namespace py rpc
-namespace cpp rpc
+namespace cpp Plow
 
 /**
 * Job State Enum

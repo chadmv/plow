@@ -2,7 +2,7 @@
 
 namespace java com.breakersoft.plow.thrift
 namespace py common
-namespace cpp common
+namespace cpp Plow
 
 /**
 * A GUID type. Every object has a unique GUI in the format

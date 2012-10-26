@@ -15,12 +15,12 @@ class PlowClient::Connection
         ~Connection();
         void connect();
         void disconnect();
-        rpc::RpcServiceApiClient getService();        
+        RpcServiceApiClient getService();        
     private:
         boost::shared_ptr<TSocket> socket;
         boost::shared_ptr<TTransport> transport;
         boost::shared_ptr<TProtocol> protocol;
-        rpc::RpcServiceApiClient service;
+        RpcServiceApiClient service;
 };
 
 PlowClient::Connection::Connection():
@@ -45,14 +45,14 @@ void PlowClient::Connection::disconnect() {
     transport->close();
 }
 
-rpc::RpcServiceApiClient PlowClient::Connection::getService() {
+RpcServiceApiClient PlowClient::Connection::getService() {
   return service;
 }
 
 PlowClient::PlowClient():
     m_conn(new PlowClient::Connection)
 {
-    
+
 }
 
 PlowClient::~PlowClient()
