@@ -1,6 +1,6 @@
 
 include_directories(
-    ${CMAKE_SOURCE_DIR}/src/export
+    ${CMAKE_SOURCE_DIR}/src/export/plow
     ${Thrift_INCLUDE_DIR}
     ${Thrift_INCLUDE_DIR}/thrift
     ${Boost_INCLUDE_DIRS}

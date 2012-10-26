@@ -23,7 +23,17 @@ thrift -gen java:java5 -out ../java/src/main/java rnd.thrift
 
 # C++
 ########################################################################
-rm -rf ../cpp/src/core/rpc
-mkdir ../cpp/src/core/rpc
-thrift --gen cpp --out ../cpp/src/core/rpc common.thrift
-thrift --gen cpp --out ../cpp/src/core/rpc plow.thrift
+
+OUT="../cpp/src/core/rpc"
+EXP="../cpp/src/export/plow"
+
+rm -rf $OUT
+mkdir $OUT
+
+thrift --gen cpp --out $OUT common.thrift
+thrift --gen cpp --out $OUT plow.thrift
+
+mv $OUT/common_*.h $EXP
+mv $OUT/plow_*.h $EXP
+
+rm $OUT/RpcServiceApi_server.skeleton.cpp

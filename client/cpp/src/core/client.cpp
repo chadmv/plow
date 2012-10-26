@@ -1,6 +1,15 @@
-#include "client.h"
+
+#include "plow.h"
+#include "rpc/RpcServiceApi.h"
+
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <transport/TSocket.h>
+#include <transport/TBufferTransports.h>
+#include <protocol/TBinaryProtocol.h>
 
 #include <iostream>
+#include <vector>
 
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;
@@ -46,13 +55,13 @@ void PlowClient::Connection::disconnect() {
 }
 
 RpcServiceApiClient PlowClient::Connection::getService() {
-  return service;
+    return service;
 }
 
 PlowClient::PlowClient():
     m_conn(new PlowClient::Connection)
 {
-
+    m_conn->connect();
 }
 
 PlowClient::~PlowClient()
@@ -60,9 +69,9 @@ PlowClient::~PlowClient()
 
 }
 
-void PlowClient::getJobs() const
+void PlowClient::getJobs(std::vector<JobT>& jobs, const JobFilter& filter) const
 {
-
+    m_conn->getService().getJobs(jobs, filter);
 }
 
 PLOW_NAMESPACE_EXIT

@@ -5,6 +5,7 @@
 
 PLOW_NAMESPACE_ENTER
 
+class PlowClient;
 
 PLOW_NAMESPACE_EXIT
 #endif
