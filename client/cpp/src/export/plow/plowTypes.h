@@ -4,9 +4,7 @@
 #include "plowABI.h"
 
 PLOW_NAMESPACE_ENTER
-{
 
 
-}
 PLOW_NAMESPACE_EXIT
 #endif
