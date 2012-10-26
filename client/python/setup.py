@@ -7,47 +7,57 @@ except:
     pass
 
 import os
+import glob
 from setuptools import setup, find_packages
 
 __ROOT__ = os.path.dirname(__file__)
 
 execfile(os.path.join(__ROOT__, 'plow/version.py'))
 
-def get_description():
-    README = os.path.abspath(os.path.join(__ROOT__, '../../README.md'))
-    with open(README, 'r') as f:
-        return f.read()
+def get_data(*paths):
+    data = []
+    for p in paths:
+        data.extend(glob.glob(os.path.join(__ROOT__, p)))
+
+    return data
 
 
 setup(
 
     name = "plow",
     version = __version__,
-    packages = find_packages(),
+    packages = find_packages() + ['plow.rpc', 'plow.rndaemon.rpc'],
 
     install_requires = [
         'psutil>=0.6.1',
-        'thrift>=0.9.0'
+        'thrift>=0.9.0',
+        'argparse',
+        'PyYAML',
     ],
 
     entry_points = {
         'console_scripts': [
-            'rndaemon = plow.tools.rndaemon:main [OPTS]',
+            'rndaemon = plow.tools.rndaemon:main',
         ],
-    },
-
-    extras_require = {
-        'OPTS':  ["argparse"],
     },
 
     # TODO: Some tests need to be made runable without an independant server
     test_suite = "test.tests_all",
 
+    include_package_data=True,
+    package_data = {
+        'plow': ['rndaemon/profile/*.dylib'],
+        'test': ['blueprint/*.ini'],
+    },
 
+    # TODO: Force an installation of confs to /etc/plow ? (would imply sudo)
+    data_files = [
+        (os.path.expanduser('~/etc/plow'), get_data('etc/*.cfg')),
+    ],
 
     # Meta-stuff
     description='Python client for the Plow render farm',
-    long_description=get_description(),
+    # long_description=get_description(),
     keywords=['render', 'renderfarm', 'management', 'queue', 'plow', 'visualfx',
                 'vfx', 'visual', 'fx', 'maya', 'blender', 'nuke', '3dsmax', 'houdini'],
     url='https://github.com/sqlboy/plow/',
