@@ -22,8 +22,7 @@ Client and Tools
 
 * Python 2.6 or 2.7 (sorry, talk to Autodesk)
 * Qt 4.7+
-* PySide 1.x
-* Thrift 0.8 (going to 0.9 soon)
+* Thrift 0.9
 
 Installing the Server
 =====================
@@ -43,10 +42,10 @@ Create a databse for plow, doesn't matter what its called.
 
 Execute the sql file:
 
-    > psql -h <hostname> -U <username> ddl/plow-schema.sql
-    > psql -h <hostname> -U <username> ddl/plow-triggers.sql
-    > psql -h <hostname> -U <username> ddl/plow-functions.sql
-    > psql -h <hostname> -U <username> ddl/plow-data.sql
+    $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-schema.sql
+    $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-triggers.sql
+    $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-functions.sql
+    $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-data.sql
 
 
 Starting the Server
@@ -61,12 +60,6 @@ Starting the Server
 
     > export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.7.0_10.jdk/Contents/Home"
     > ./plow.sh
-
-
-Install the Python Library and Tools
-====================================
-
-Currently this is only done through a source checkout.
 
 
 Generating the Thrift Bindings
@@ -90,10 +83,36 @@ mvn intall does this for you.
     > mvn install
 
 
+Install the Python Library and Tools
+====================================
+
+The latest Python client can be install from the source checkout using the following:
+
+(first make sure to generate the thift bindings)
+
+```
+> cd client/python
+> python setup.py install
+```
+
+You will still want to manually copy the `etc/*.cfg` files to either `/etc/plow/` or `~/.plow/`
+
+Or you can use pip with one of the packaged releases at https://github.com/sqlboy/plow/downloads
+
+`$ pip install https://github.com/downloads/sqlboy/plow/plow-client-python-<VERSION>.tar.gz`
+
+This will also install the `etc/*.cfg` files to your `~/.plow/`
+
+
+
 Running the Render Node Daemon
 ------------------------------
 
-This is current only supported on the Mac.  Linux version is coming soon.
+This is current supported on the Mac/Linux
+
+If you have installed the client tools using the `setup.py`, then you should now have `rndaemon` command in your path.
+
+Otherwise:
 
     > cd tools/rndaemon
     > ./rndaemon.py
