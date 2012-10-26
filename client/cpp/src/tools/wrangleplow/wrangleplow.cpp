@@ -1,6 +1,10 @@
 #include "wrangleplow.h"
 #include "ui_wrangleplow.h"
 
+#include "plow.h"
+
+#include <vector>
+
 namespace Plow {
 namespace WranglePlow {
 
@@ -14,6 +18,25 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::updateJobs()
+{
+    PlowClient client;
+
+    std::vector<JobT> jobs;
+    JobFilter filter;
+
+    client.getJobs(jobs, filter);
+
+    QTreeWidget *tree = ui->treeWidget;
+    for (std::vector<JobT>::iterator i = jobs.begin();
+                                     i != jobs.end();
+                                     ++i)
+    {
+        QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString(i->name.c_str())));
+        tree->insertTopLevelItem(0, item);
+    }
 }
 
 }

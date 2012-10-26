@@ -2,10 +2,13 @@
 #define WRANGLEPLOW_H
 
 #include <QMainWindow>
-#include <QWidget>
+#include <QString>
+#include <QStringList>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
 
@@ -19,7 +22,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    
+
+    void updateJobs();
+        
 private:
     Ui::MainWindow *ui;
 };
