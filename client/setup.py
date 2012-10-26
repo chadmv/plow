@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 try:
-    from ez_setup import use_setuptools
+    from python.ez_setup import use_setuptools
     use_setuptools()
 except:
     pass
@@ -12,21 +12,22 @@ from setuptools import setup, find_packages
 
 __ROOT__ = os.path.dirname(__file__)
 
-execfile(os.path.join(__ROOT__, 'plow/version.py'))
+execfile(os.path.join(__ROOT__, 'python/plow/version.py'))
 
 def get_data(*paths):
     data = []
     for p in paths:
         data.extend(glob.glob(os.path.join(__ROOT__, p)))
-
     return data
 
 
 setup(
 
-    name = "plow",
+    name = "PyPlow",
     version = __version__,
-    packages = find_packages() + ['plow.rpc', 'plow.rndaemon.rpc'],
+
+    package_dir = {'': 'python'},
+    packages = find_packages('python'),
 
     install_requires = [
         'psutil>=0.6.1',
@@ -46,13 +47,15 @@ setup(
 
     include_package_data=True,
     package_data = {
-        'plow': ['rndaemon/profile/*.dylib'],
-        'test': ['blueprint/*.ini'],
+        'plow': [
+            'rndaemon/profile/*.dylib',
+            'blueprint/*.ini',
+        ],
     },
 
     # TODO: Force an installation of confs to /etc/plow ? (would imply sudo)
     data_files = [
-        (os.path.expanduser('~/etc/plow'), get_data('etc/*.cfg')),
+        (os.path.expanduser('~/.plow/'), get_data('etc/*.cfg')),
     ],
 
     # Meta-stuff
