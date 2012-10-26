@@ -106,6 +106,13 @@ Or you can use pip with one of the packaged releases at https://github.com/sqlbo
 This will also install the `etc/*.cfg` files to your `~/.plow/`
 
 
+Compiling the C++ Library
+-------------------------
+
+    $ cd client/cpp/build
+    $ cmake ../
+    $ make
+
 
 Running the Render Node Daemon
 ------------------------------
