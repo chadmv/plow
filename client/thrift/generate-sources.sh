@@ -23,7 +23,7 @@ thrift -gen java:java5 -out ../java/src/main/java rnd.thrift
 
 # C++
 ########################################################################
-rm -rf ../cpp/core/rpc
-mkdir ../cpp/core/rpc
-thrift --gen cpp --out ../cpp/core/rpc common.thrift
-thrift --gen cpp --out ../cpp/core/rpc plow.thrift
+rm -rf ../cpp/src/core/rpc
+mkdir ../cpp/src/core/rpc
+thrift --gen cpp --out ../cpp/src/core/rpc common.thrift
+thrift --gen cpp --out ../cpp/src/core/rpc plow.thrift
