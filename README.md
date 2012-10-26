@@ -101,7 +101,7 @@ You will still want to manually copy the `etc/*.cfg` files to either `/etc/plow/
 
 Or you can use pip with one of the packaged releases at https://github.com/sqlboy/plow/downloads
 
-`$ pip install https://github.com/downloads/sqlboy/plow/plow-client-python-<VERSION>.tar.gz`
+`$ pip install https://github.com/downloads/sqlboy/plow/PyPlow-0.1.tar.gz`
 
 This will also install the `etc/*.cfg` files to your `~/.plow/`
 
@@ -112,12 +112,14 @@ Running the Render Node Daemon
 
 This is current supported on the Mac/Linux
 
-If you have installed the client tools using the `setup.py`, then you should now have `rndaemon` command in your path.
+If you have installed the client tools using the `setup.py`, then you should now have `rndaemon` command in your path:
 
-Otherwise:
+    $ rndaemon
 
-    > cd tools/rndaemon
-    > ./rndaemon.py
+Otherwise, you can use the script included in the tools directory under the root of the repository:
+
+    $ cd tools/rndaemon
+    $ ./rndaemon.py
 
 
 The Plow Config File
