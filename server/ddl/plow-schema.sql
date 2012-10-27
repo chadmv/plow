@@ -48,6 +48,7 @@ CREATE TABLE plow.job (
   str_name VARCHAR(160) NOT NULL,
   str_active_name VARCHAR(160),
   str_username VARCHAR(100) NOT NULL,
+  str_log_path TEXT,
   int_uid INTEGER NOT NULL,
   int_state SMALLINT NOT NULL DEFAULT 0,
   bool_paused BOOLEAN NOT NULL DEFAULT 'f',
