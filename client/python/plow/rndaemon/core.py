@@ -227,7 +227,7 @@ class ProcessThread(threading.Thread):
         maxTries = 8
         sleep = 10
         
-        while (True):
+        while True:
             if numTries >= maxTries:
                 raise Exception("Failed creating log path after %d tries." % numTries)
             try:
