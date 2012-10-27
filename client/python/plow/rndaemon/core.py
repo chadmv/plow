@@ -3,6 +3,8 @@ import threading
 import subprocess
 import logging
 import time
+import os
+import errno
 from datetime import datetime
 
 import psutil
@@ -160,6 +162,7 @@ class ProcessThread(threading.Thread):
     def run(self):
         retcode = 1
         try:
+            self.__makeLogDir(self.__rtc.logFile)
             logger.info("Opening log file: %s" % self.__rtc.logFile)
             self.__logfp = open(self.__rtc.logFile, "w")
             self.__writeLogHeader()
@@ -209,6 +212,38 @@ class ProcessThread(threading.Thread):
 
         return killed, not_killed
 
+    def __makeLogDir(self, path):
+        """
+        __makeLogDir(path) -> void
+
+        Make sure the directory for the task logs exist.  There is
+        the potential for a race condition here due to NFS caching.
+        """
+        folder = os.path.dirname(path)
+        if os.path.exists(folder):
+            return
+
+        numTries = 0
+        maxTries = 8
+        sleep = 10
+        
+        while (True):
+            if numTries >= maxTries:
+                raise Exception("Failed creating log path after %d tries." % numTries)
+            try:
+                os.makedirs(path)
+            except OSError, exp:
+                logger.warn("Error creating log path: %s, %s %d" % (folder, exp, exp.errno))
+                if exp.errno != errno.EEXIST:
+                    # If it already exists, clear the NFS cache for the parent
+                    # which should make the directory visible to os.path.exists
+                    os.utime(os.path.dirname(folder), None)
+            
+            if os.path.exists(folder):
+                return
+            
+            time.sleep(sleep)
+            numTries+=1
 
     def __killOneProcess(self, p):
         """
@@ -272,15 +307,18 @@ class ProcessThread(threading.Thread):
                     time.sleep(30)
 
         ProcessMgr.processFinished(self.__rtc)
-        self.__writeLogFooter(result)
-        self.__logfp.close()
+        self.__writeLogFooterAndClose(result)
 
     def __writeLogHeader(self):
         self.__logfp.write("Render Process Begin\n")
         self.__logfp.write("================================================================\n")
 
-    def __writeLogFooter(self, result):
+    def __writeLogFooterAndClose(self, result):
         # TODO: Add more stuff here
+        # Check to ensure the log is not None, which it would be
+        # if the thread failed to open the log file.
+        if not self.__logfp:
+            return
         self.__logfp.flush()
         self.__logfp.write("\n\n\n")
         self.__logfp.write("Render Process Complete\n")
@@ -289,6 +327,8 @@ class ProcessThread(threading.Thread):
         self.__logfp.write("Signal: %d\n" % result.exitSignal)
         self.__logfp.write("MaxRSS: 0\n")
         self.__logfp.write("=====================================\n\n")
+        self.__logfp.close()
+
 
 Profiler    = _SystemProfiler()
 ResourceMgr = _ResourceManager()
