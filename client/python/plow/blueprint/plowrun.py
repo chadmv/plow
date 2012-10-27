@@ -76,27 +76,5 @@ def toBlueprint(job, **kwargs):
 
     return bp
 
-"""
-
-
-struct LayerBp {
-    1:string name,
-    2:list<string> command;
-    3:set<string> tags,
-    4:string range,
-    5:i32 chunk,
-    6:i32 minCores,
-    7:i32 maxCores,
-    8:i32 minMemory
-}
-
-struct JobBp {
-    1:string name,
-    2:string project,
-    3:i32 uid,
-    4:bool paused
-    5:list<LayerBp> layers
-}
-"""
 
 
