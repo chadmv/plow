@@ -7,7 +7,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
-import com.breakersoft.plow.thrift.RndClient;
+import com.breakersoft.plow.rndaemon.RndClient;
 
 /**
  * Non-transactional dispatcher operations.

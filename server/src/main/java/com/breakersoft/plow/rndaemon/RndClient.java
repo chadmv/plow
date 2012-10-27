@@ -1,4 +1,4 @@
-package com.breakersoft.plow.thrift;
+package com.breakersoft.plow.rndaemon;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
