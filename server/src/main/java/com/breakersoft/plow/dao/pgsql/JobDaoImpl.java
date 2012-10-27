@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Folder;
@@ -26,7 +27,6 @@ import com.google.common.collect.Maps;
 @Repository
 public final class JobDaoImpl extends AbstractDao implements JobDao {
 
-    @SuppressWarnings("unused")
     private static final Logger logger =
             org.slf4j.LoggerFactory.getLogger(JobDaoImpl.class);
 
@@ -225,13 +225,28 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
 
     private static final String HAS_PENDING_FRAMES =
             "SELECT " +
-                "int_total - (int_eaten + int_succeeded) " +
+                "job_count.int_total - (job_count.int_eaten + job_count.int_succeeded) AS pending, " +
+                "job.int_state " +
             "FROM " +
-                "plow.job_count " +
+                "plow.job " +
+                    "INNER JOIN " +
+                        "plow.job_count " +
+                    "ON " +
+                        "job.pk_job = job_count.pk_job " +
             "WHERE " +
-                "job_count.pk_job=?";
+                "job.pk_job=?";
     @Override
     public boolean hasPendingFrames(Job job) {
-        return jdbc.queryForInt(HAS_PENDING_FRAMES, job.getJobId()) > 0;
+        SqlRowSet row =  jdbc.queryForRowSet(HAS_PENDING_FRAMES, job.getJobId());
+        if (!row.first()) {
+            return false;
+        }
+        if (row.getInt("int_state") == JobState.FINISHED.ordinal()) {
+            return false;
+        }
+        if (row.getInt("pending") == 0) {
+            return false;
+        }
+        return true;
     }
 }
