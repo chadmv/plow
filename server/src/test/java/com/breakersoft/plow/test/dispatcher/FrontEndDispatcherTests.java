@@ -46,7 +46,7 @@ public class FrontEndDispatcherTests extends AbstractTest {
         dispatcher.addJob(job);
         assertEquals(1, dispatcher.getTotalJobs());
 
-        dispatcher.removeJob(job);
+        dispatcher.finalizeJob(job);
         assertEquals(0, dispatcher.getTotalJobs());
     }
 
@@ -57,7 +57,7 @@ public class FrontEndDispatcherTests extends AbstractTest {
 
         dispatcher.addJob(job);
         assertEquals(job, dispatcher.getJob(job.getJobId()));
-        dispatcher.removeJob(job);
+        dispatcher.finalizeJob(job);
     }
 
     @Test

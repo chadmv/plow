@@ -23,6 +23,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
+import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
@@ -114,6 +115,38 @@ public class DispatcherDaoTests extends AbstractTest {
         assertEquals(proc.getTags(), proc2.getTags());
         assertEquals(proc.getTaskId(), proc2.getTaskId());
         assertEquals(proc.getTaskName(), proc2.getTaskName());
+    }
+
+    @Test
+    public void testGetRunTaskCommand() {
+        Node node =  nodeService.createNode(getTestNodePing());
+        DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
+
+        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
+
+        DispatchProc proc = null;
+        DispatchTask task = null;
+        for (DispatchLayer layer: dispatchDao.getDispatchLayers(djob, dnode)) {
+            for (DispatchTask _task: dispatchDao.getDispatchTasks(layer, dnode)) {
+                proc = dispatchService.allocateDispatchProc(dnode, _task);
+                task = _task;
+                break;
+            }
+        }
+        assertNotNull(proc);
+        assertNotNull(task);
+
+        RunTaskCommand command = dispatchDao.getRunTaskCommand(task, proc);
+        assertNotNull(command.command);
+        assertNotNull(command.cores);
+        assertNotNull(command.env);
+        assertNotNull(command.jobId);
+        assertNotNull(command.logFile);
+        assertNotNull(command.procId);
+        assertNotNull(command.taskId);
+        assertNotNull(command.uid);
+        assertNotNull(command.username);
     }
 
     @Test
