@@ -3,12 +3,12 @@ package com.breakersoft.plow.dispatcher;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Job;
-import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.ProcDao;
@@ -25,10 +25,14 @@ import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.event.JobUnbookedEvent;
+import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 
 @Service
 @Transactional
 public class DispatchServiceImpl implements DispatchService {
+
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(DispatchServiceImpl.class);
 
     @Autowired
     private DispatchDao dispatchDao;
@@ -100,11 +104,6 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public boolean removeProc(Proc proc) {
-        return procDao.delete(proc);
-    }
-
-    @Override
     public boolean reserveTask(Task task) {
         return taskDao.reserve(task);
     }
@@ -146,18 +145,30 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public void unbookProc(DispatchProc proc) {
+    public RunTaskCommand getRuntaskCommand(DispatchTask task, DispatchProc proc) {
+        return dispatchDao.getRunTaskCommand(task, proc);
+    }
+
+    @Override
+    public void unbookProc(DispatchProc proc, String why) {
+
         if (proc == null) {
-            return;
-        }
-        if (proc.getProcId() == null) {
+            logger.info("proc is null;");
             return;
         }
 
-        proc.setTaskId(null);
-        proc.setProcId(null);
-        removeProc(proc);
+        if (!proc.isAllocated()) {
+            logger.warn("Ignoring unbook proc on {}, {}", proc.getProcId(), why);
+            return;
+        }
 
-        eventManager.post(new JobUnbookedEvent(proc));
+        logger.info("unbooking proc: {}, {}", proc.getProcId(), why);
+
+        if (procDao.delete(proc)) {
+            logger.info("Proc unbooked {}", proc.getProcId());
+            proc.setTaskId(null);
+            proc.setAllocated(false);
+            eventManager.post(new JobUnbookedEvent(proc));
+        }
     }
 }

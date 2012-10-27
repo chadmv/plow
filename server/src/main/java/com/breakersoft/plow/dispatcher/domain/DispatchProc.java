@@ -16,6 +16,7 @@ public class DispatchProc extends ProcE implements DispatchResource {
 
     private UUID jobId;
     private UUID layerId;
+    private boolean allocated;
 
     public void setTags(Set<String> tags) {
         this.tags = tags;
@@ -85,5 +86,13 @@ public class DispatchProc extends ProcE implements DispatchResource {
 
     public void setLayerId(UUID layerId) {
         this.layerId = layerId;
+    }
+
+    public boolean isAllocated() {
+        return allocated;
+    }
+
+    public void setAllocated(boolean allocated) {
+        this.allocated = allocated;
     }
 }
