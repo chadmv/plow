@@ -21,7 +21,9 @@ struct RunTaskCommand {
     4:i32 cores,
     5:list<string> command,
     6:map<string,string> env,
-    7:string logFile
+    7:string logFile,
+    8:i32 uid,
+    9:string username
 }
 
 struct RunningTask {
