@@ -136,7 +136,7 @@ public class DispatchServiceImpl implements DispatchService {
         proc.setQuotaId(quotaDao.getQuota(node, task).getQuotaId());
         proc.setCores(task.getMinCores());
         proc.setTaskName(task.getName());
-        proc.setNodeName(node.getName());
+        proc.setHostname(node.getName());
         proc.setJobId(task.getJobId());
         proc.setLayerId(task.getLayerId());
         proc.setTags(task.getTags());

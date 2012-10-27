@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public class ProcE implements Proc {
 
+    private String hostname;
     private UUID procId;
     private UUID quotaId;
     private UUID taskId;
@@ -32,5 +33,14 @@ public class ProcE implements Proc {
     }
     public void setNodeId(UUID nodeId) {
         this.nodeId = nodeId;
+    }
+
+    @Override
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
     }
 }

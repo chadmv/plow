@@ -128,7 +128,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             proc.setCores(rs.getInt("int_cores"));
             proc.setMemory(rs.getInt("int_mem"));
             proc.setTaskName(rs.getString("task_name"));
-            proc.setNodeName(rs.getString("node_name"));
+            proc.setHostname(rs.getString("node_name"));
             proc.setTags(new HashSet<String>(
                     Arrays.asList((String[])rs.getArray("str_tags").getArray())));
             proc.setAllocated(true);

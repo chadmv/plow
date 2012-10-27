@@ -30,18 +30,23 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
             proc.setQuotaId((UUID)rs.getObject(1));
             proc.setNodeId((UUID)rs.getObject(3));
             proc.setTaskId((UUID)rs.getObject(4));
+            proc.setHostname(rs.getString(5));
             return proc;
         }
     };
 
     private static final String GET =
             "SELECT " +
-                "pk_proc,"+
-                "pk_quota,"+
-                "pk_host,"+
-                "pk_frame,"+
+                "proc.pk_proc,"+
+                "proc.pk_quota,"+
+                "proc.pk_host,"+
+                "proc.pk_frame,"+
+                "node.str_name " +
             "FROM " +
-                "plow.proc ";
+                "plow.proc " +
+                    "INNER JOIN plow.node " +
+                "ON " +
+                    "proc.pk_node = node.pk_node " ;
 
     private static final String GET_BY_ID = GET +"WHERE pk_proc = ?";
     @Override

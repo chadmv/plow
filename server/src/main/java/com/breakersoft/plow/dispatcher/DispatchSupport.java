@@ -24,7 +24,7 @@ public class DispatchSupport {
     DispatchService dispatcherService;
 
     public void runRndTask(RunTaskCommand cmd, DispatchProc proc) {
-        RndClient client = new RndClient(proc.getNodeName(), 11338);
+        RndClient client = new RndClient(proc.getHostname(), 11338);
         client.runProcess(cmd);
     }
 

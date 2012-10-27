@@ -109,7 +109,7 @@ public class DispatcherDaoTests extends AbstractTest {
         assertEquals(proc.getLayerId(), proc2.getLayerId());
         assertEquals(proc.getMemory(), proc2.getMemory());
         assertEquals(proc.getNodeId(), proc2.getNodeId());
-        assertEquals(proc.getNodeName(), proc2.getNodeName());
+        assertEquals(proc.getHostname(), proc2.getHostname());
         assertEquals(proc.getProcId(), proc2.getProcId());
         assertEquals(proc.getQuotaId(), proc2.getQuotaId());
         assertEquals(proc.getTags(), proc2.getTags());

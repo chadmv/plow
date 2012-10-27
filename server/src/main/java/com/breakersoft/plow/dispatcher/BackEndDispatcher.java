@@ -49,7 +49,7 @@ public class BackEndDispatcher {
         }
 
         logger.info("{} proc reported in task completed: {}, exit status: {}",
-                new Object[] { proc.getNodeName(), proc.getTaskName(), result.exitStatus });
+                new Object[] { proc.getHostname(), proc.getTaskName(), result.exitStatus });
         logger.info("New state {}", newState.toString());
 
         if (!jobService.stopTask(task, newState)) {

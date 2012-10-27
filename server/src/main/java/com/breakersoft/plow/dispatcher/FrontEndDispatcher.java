@@ -183,7 +183,7 @@ public final class FrontEndDispatcher {
             /*
              * Unable to talk to host.
              */
-            logger.warn("Failed to execute task on: {} " + proc.getNodeName());
+            logger.warn("Failed to execute task on: {} " + proc.getHostname());
             jobService.unreserveTask(task);
             dispatchService.unbookProc(proc, e.getMessage());
         }

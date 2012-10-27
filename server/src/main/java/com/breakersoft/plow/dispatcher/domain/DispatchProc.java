@@ -8,7 +8,6 @@ import com.breakersoft.plow.ProcE;
 public class DispatchProc extends ProcE implements DispatchResource {
 
     private String taskName;
-    private String nodeName;
 
     private int cores;
     private int memory;
@@ -44,14 +43,6 @@ public class DispatchProc extends ProcE implements DispatchResource {
 
     public void setMemory(int memory) {
         this.memory = memory;
-    }
-
-    public String getNodeName() {
-        return nodeName;
-    }
-
-    public void setNodeName(String nodeName) {
-        this.nodeName = nodeName;
     }
 
     @Override
