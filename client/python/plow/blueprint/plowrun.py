@@ -51,7 +51,7 @@ def toBlueprint(job, **kwargs):
     bp.job.username = getpass.getuser()
     bp.job.uid = os.getuid()
     bp.job.paused = kwargs.get("paused", False)
-    bp.job.name = job.getName()
+    bp.job.name = kwargs.get("job_name", job.getName())
     bp.job.logPath = conf.get("blueprint", "log_path");
     bp.layers = []
 
