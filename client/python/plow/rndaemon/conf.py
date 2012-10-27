@@ -1,7 +1,7 @@
 import os
 import sys
 import ConfigParser
-import logging 
+import logging
 
 __all__ = ['Config', 'get', 'getboolean', 'getint']
 
@@ -31,7 +31,7 @@ def _init():
     #
     # rndaemon options
     #
-    setattr(mod, 'NETWORK_DISABLED', getboolean('rndaemon', 'network_disabled', False))    
+    setattr(mod, 'NETWORK_DISABLED', getboolean('rndaemon', 'network_disabled', False))
     setattr(mod, 'NETWORK_PORT', getint('rndaemon', 'port', 11338))
     setattr(mod, 'NETWORK_PING_INTERVAL', getint('rndaemon', 'ping_interval', 60))
 
@@ -47,31 +47,31 @@ def _init():
 
 def get(section, key, default=None):
     """
-    Return the specified configuration option. 
+    Return the specified configuration option.
     """
     try:
         return Config.get(section, key)
-    except ConfigParser.NoOptionError:
+    except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
         return default
 
 def getboolean(section, key, default=None):
     """
-    Return the specified configuration option as a boolean. 
+    Return the specified configuration option as a boolean.
     """
     try:
         return Config.getboolean(section, key)
-    except ConfigParser.NoOptionError:
-        return default 
+    except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+        return default
 
 
 def getint(section, key, default=None):
     """
-    Return the specified configuration option as a int. 
+    Return the specified configuration option as a int.
     """
     try:
         return Config.getint(section, key)
-    except ConfigParser.NoOptionError:
-        return default 
+    except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+        return default
 
 # Init the config at import time
 _init()
