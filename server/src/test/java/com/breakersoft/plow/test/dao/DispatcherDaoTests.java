@@ -57,7 +57,7 @@ public class DispatcherDaoTests extends AbstractTest {
         DispatchFolder dfolder = dispatchDao.getDispatchFolder(folder.getFolderId());
         assertEquals(folder.getFolderId(), dfolder.getFolderId());
         assertEquals(0, dfolder.getRunCores());
-        assertEquals(0, dfolder.getMinCores());
+        assertEquals(-1, dfolder.getMinCores());
         assertEquals(-1, dfolder.getMaxCores());
     }
 
