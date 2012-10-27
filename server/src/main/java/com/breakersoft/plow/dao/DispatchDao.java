@@ -13,6 +13,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 
 /**
  * A DAO for obtaining Dispatch brand objects.
@@ -38,4 +39,6 @@ public interface DispatchDao {
     List<DispatchJob> getDispatchJobs();
 
     DispatchFolder getDispatchFolder(UUID folder);
+
+    RunTaskCommand getRunTaskCommand(DispatchTask task, DispatchProc proc);
 }

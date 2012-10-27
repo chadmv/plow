@@ -28,8 +28,10 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.TaskState;
+import com.google.common.collect.Maps;
 import com.google.common.primitives.Floats;
 
 @Repository
@@ -129,6 +131,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             proc.setNodeName(rs.getString("node_name"));
             proc.setTags(new HashSet<String>(
                     Arrays.asList((String[])rs.getArray("str_tags").getArray())));
+            proc.setAllocated(true);
             return proc;
         }
     };
@@ -318,8 +321,6 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             frame.setTaskId((UUID)rs.getObject("pk_task"));
             frame.setLayerId((UUID) rs.getObject("pk_layer"));
             frame.setJobId((UUID) rs.getObject("pk_job"));
-            frame.setNumber(rs.getInt("int_number"));
-            frame.setCommand((String[]) rs.getArray("str_command").getArray());
             frame.setName(rs.getString("str_name"));
             frame.setMinCores(rs.getInt("int_min_cores"));
             frame.setMinMemory(rs.getInt("int_min_mem"));
@@ -334,10 +335,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "SELECT " +
                 "task.pk_task,"+
                 "task.str_name," +
-                "task.int_number," +
                 "layer.pk_layer, "+
                 "layer.pk_job,"+
-                "layer.str_command, "+
                 "layer.int_min_cores,"+
                 "layer.int_min_mem, " +
                 "layer.str_name AS layer_name, " +
@@ -378,5 +377,58 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 return ps;
             }
         }, DTASK_MAPPER);
+    }
+
+    public static final RowMapper<RunTaskCommand> RUN_TASK_MAPPER =
+            new RowMapper<RunTaskCommand>() {
+        @Override
+        public RunTaskCommand mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+
+            RunTaskCommand task = new RunTaskCommand();
+            task.logFile = "/tmp/task.log";
+            task.uid = rs.getInt("int_uid");
+            task.username = rs.getString("str_username");
+            task.env = Maps.newHashMap();
+
+            task.command = Arrays.asList((String[])rs.getArray("str_command").getArray());
+            for (int i=0; i<task.command.size(); i++) {
+                String part = task.command.get(i);
+                part = part.replace("%{FRAME}", String.valueOf(rs.getInt("int_number")));
+                task.command.set(i, part);
+            }
+
+            return task;
+        }
+    };
+
+    private static final String GET_RUN_TASK =
+            "SELECT " +
+                "job.int_uid," +
+                "job.str_username," +
+                "job.str_log_path, " +
+                "layer.str_command, " +
+                "task.int_number, " +
+                "task.str_name " +
+            "FROM " +
+                "plow.task " +
+                "INNER JOIN " +
+                    "plow.layer " +
+                        "ON layer.pk_layer = task.pk_layer " +
+                "INNER JOIN " +
+                    "plow.job " +
+                        "ON layer.pk_job = job.pk_job " +
+            "WHERE " +
+                "task.pk_task = ? ";
+
+    @Override
+    public RunTaskCommand getRunTaskCommand(DispatchTask task, DispatchProc proc) {
+        RunTaskCommand command = jdbc.queryForObject(
+                GET_RUN_TASK, RUN_TASK_MAPPER, task.getTaskId());
+        command.jobId = task.getJobId().toString();
+        command.taskId = task.getTaskId().toString();
+        command.procId = proc.getProcId().toString();
+        command.cores = proc.getCores();
+        return command;
     }
 }
