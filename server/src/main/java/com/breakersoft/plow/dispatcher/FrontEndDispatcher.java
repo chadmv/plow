@@ -139,7 +139,8 @@ public final class FrontEndDispatcher {
                 return true;
             }
         }
-        dispatchService.unbookProc(proc);
+        dispatchService.unbookProc(proc,
+                "Proc failed to dispatch job " + job.getJobId());
         return false;
     }
 
@@ -159,7 +160,8 @@ public final class FrontEndDispatcher {
             }
         }
 
-        dispatchService.unbookProc(proc);
+        dispatchService.unbookProc(proc,
+                "Proc failed to dispatch layer " + layer.getJobId());
         return false;
     }
 
@@ -173,7 +175,8 @@ public final class FrontEndDispatcher {
         try {
             dispatchService.assignProc(proc, task);
             if (jobService.startTask(task, proc)) {
-                dispatchSupport.runRndTask(task, proc);
+                dispatchSupport.runRndTask(
+                        dispatchService.getRuntaskCommand(task, proc), proc);
                 return true;
             }
         } catch (RndClientExecuteException e) {
@@ -182,7 +185,7 @@ public final class FrontEndDispatcher {
              */
             logger.warn("Failed to execute task on: {} " + proc.getNodeName());
             jobService.unreserveTask(task);
-            dispatchService.unbookProc(proc);
+            dispatchService.unbookProc(proc, e.getMessage());
         }
         catch (Exception e) {
             /*
@@ -190,7 +193,7 @@ public final class FrontEndDispatcher {
              */
             logger.warn("Unexpected task dipatching error, " + e);
             jobService.unreserveTask(task);
-            dispatchService.unbookProc(proc);
+            dispatchService.unbookProc(proc, e.getMessage());
         }
 
         return false;

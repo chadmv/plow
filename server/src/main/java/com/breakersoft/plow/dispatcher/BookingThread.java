@@ -191,7 +191,8 @@ public class BookingThread extends Thread {
         try {
             proc = dispatchService.allocateDispatchProc(node, task);
             if (jobService.startTask(task, proc)) {
-                dispatchSupport.runRndTask(task, proc);
+                dispatchSupport.runRndTask(
+                        dispatchService.getRuntaskCommand(task, proc), proc);
                 eventManager.post(new JobBookedEvent(proc, task));
             }
         }
@@ -211,7 +212,7 @@ public class BookingThread extends Thread {
              */
             logger.warn("Failed to execute task on: {} " + node.getName());
             jobService.unreserveTask(task);
-            dispatchService.unbookProc(proc);
+            dispatchService.unbookProc(proc, e.getMessage());
             node.setDispatchable(false);
         }
         catch (Exception e) {
@@ -220,7 +221,7 @@ public class BookingThread extends Thread {
              */
             logger.warn("Unexpected task dipatching error, " + e);
             jobService.unreserveTask(task);
-            dispatchService.unbookProc(proc);
+            dispatchService.unbookProc(proc, e.getMessage());
             node.setDispatchable(false);
         }
     }
