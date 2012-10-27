@@ -68,7 +68,8 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
     private static final String INSERT[] = {
         JdbcUtils.Insert("plow.job",
                 "pk_job", "pk_project", "str_name", "str_active_name",
-                "str_username", "int_uid", "int_state", "bool_paused"),
+                "str_username", "int_uid", "int_state", "bool_paused",
+                "str_log_path")
     };
 
     @Override
@@ -84,7 +85,9 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 blueprint.job.username,
                 blueprint.job.getUid(),
                 JobState.INITIALIZE.ordinal(),
-                blueprint.job.isPaused());
+                blueprint.job.isPaused(),
+                String.format("%s/%s",
+                        blueprint.job.logPath, blueprint.job.name));
 
         jdbc.update("INSERT INTO plow.job_count (pk_job) VALUES (?)", jobId);
         jdbc.update("INSERT INTO plow.job_dsp (pk_job) VALUES (?)", jobId);

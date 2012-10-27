@@ -109,7 +109,8 @@ struct JobBp {
     2:string project,
     3:bool paused,
     4:string username,
-    5:i32 uid
+    5:i32 uid,
+    6:string logPath
 }
 
 struct Blueprint {
