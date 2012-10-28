@@ -2,12 +2,14 @@ package com.breakersoft.plow.dao.pgsql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.ProcE;
@@ -111,4 +113,16 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                 "DELETE FROM plow.proc WHERE pk_proc=?", proc.getProcId()) == 1;
     }
 
+    @Override
+    public List<Proc> getProcs(Job job) {
+        return jdbc.query(GET +
+                " WHERE proc.pk_job=? ORDER BY proc.pk_proc", MAPPER, job.getJobId());
+    }
+
+    @Override
+    public boolean setProcUnbooked(Proc proc, boolean unbooked) {
+        return jdbc.update(
+                "UPDATE plow.proc SET bool_unbooked=? WHERE proc.pk_proc=?",
+                unbooked, proc.getProcId()) == 1;
+    }
 }
