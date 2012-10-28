@@ -130,6 +130,8 @@ service RpcServiceApi {
     JobT launch(1:Blueprint blueprint) throws (1:PlowException e),
     JobT getRunningJob(1:string name) throws (1:PlowException e),
     JobT getJob(1:common.Guid jobId) throws (1:PlowException e),
+    bool killJob(1:common.Guid jobId, 2:string reason) throws (1:PlowException e),
+
     list<JobT> getJobs(1:JobFilter filter) throws (1:PlowException e),
 
     LayerT getLayer(1:common.Guid layerId) throws (1:PlowException e),

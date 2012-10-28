@@ -7,8 +7,10 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
+import com.breakersoft.plow.service.JobStateManager;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
@@ -29,6 +31,9 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
 
     @Autowired
     ThriftTaskDao thriftTaskDao;
+
+    @Autowired
+    JobStateManager jobStateManager;
 
     @Override
     public JobT launch(Blueprint bp) throws PlowException, TException {
@@ -78,4 +83,8 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
         return thriftJobDao.getJobs(filter);
     }
 
+    @Override
+    public boolean killJob(String jobId, String reason) throws PlowException, TException {
+        return jobStateManager.killJob(jobService.getJob(jobId), reason);
+    }
 }
