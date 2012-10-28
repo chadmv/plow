@@ -26,6 +26,9 @@ class RndProcessHandler(object):
     def getRunningTasks(self):
         return core.ProcessMgr.getRunningTasks()
 
+    def reboot(self, now=False):
+        core.ProcessMgr.reboot(now)
+        
 
 def get_server(api, handler, port):
     processor = api.Processor(handler)

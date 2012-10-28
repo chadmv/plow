@@ -76,6 +76,9 @@ class _ProcessManager(object):
     def __init__(self):
         self.__threads = { }
         self.__lock = threading.Lock()
+        self.__timer = None 
+        self.__isReboot = threading.Event()
+
         self.sendPing(True)
 
     def runProcess(self, processCmd):
@@ -95,13 +98,34 @@ class _ProcessManager(object):
             except Exception, e:
                 logger.warn("Process %s not found: %s" % (processCmd.procId, e))
 
-    def sendPing(self, isReboot=False):
+    def sendPing(self, isReboot=False, repeat=True):
+        # TODO: What is the purpose of the isReboot flag?
+        # Using the internal flag to determine if we are in a 
+        # reboot state.
+        isReboot = self.__isReboot.isSet()
+
         tasks = self.getRunningTasks()
         Profiler.sendPing(tasks, isReboot)
 
-        self.__timer = threading.Timer(conf.NETWORK_PING_INTERVAL, self.sendPing)
-        self.__timer.daemon = True
-        self.__timer.start()
+        # TODO: Maybe there needs to be a seperate thread for this check
+        # but for now it is part of the ping loop.
+        if isReboot and not tasks:
+            logger.info("Task queue is empty and daemon is scheduled for reboot")
+            try:
+                Profiler.reboot()
+            except ttypes.RndException, e:
+                # on next loop, the server will see that the system
+                # is no longer in isReboot state
+                logger.warn(e.why)
+                self.__isReboot.clear()
+            else:
+                # just in case
+                return
+
+        if repeat:
+            self.__timer = threading.Timer(conf.NETWORK_PING_INTERVAL, self.sendPing)
+            self.__timer.daemon = True
+            self.__timer.start()
 
     def killRunningTask(self, rTask):
         logger.info("kill requested for task %s" % rTask)
@@ -128,6 +152,41 @@ class _ProcessManager(object):
     def getRunningTasks(self):
         return [t[1].getRunningTask() for t in self.__threads.itervalues()]
 
+
+    def reboot(self, now=False):
+        """
+        reboot (bool now=False)
+
+        Reboot the system as soon as it becomes idle. That is, 
+        when no tasks are running. 
+
+        If now == True, reboot immediately, regardless of any 
+        in-progress render tasks. 
+        """
+        # TODO: For now, assuming that even if they aren't root,
+        # that they may have permission to reboot. This means a
+        # reboot(now=False) will not raise an exception to the caller.
+        #
+        # if os.geteuid() != 0:
+        #     err = "rndaemon not running as user with permission to reboot system"
+        #     raise ttypes.RndException(1, err)
+
+        self.__isReboot.set() 
+
+        if now:
+            logger.info("*SYSTEM GOING DOWN FOR IMMEDIATE REBOOT*")
+            with self.__lock:
+                if self.__timer:
+                    self.__timer.cancel()
+                # The reboot could happen from the ping if the task
+                # queue is empty. 
+                self.sendPing(repeat=False)
+            # Otherwise, the reboot will happen here, regardless
+            # of whether there are active tasks running.
+            Profiler.reboot()
+
+        else:
+            logger.info("*Reboot scheduled at next idle event*")
 
 
 class ProcessThread(threading.Thread):

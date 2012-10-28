@@ -2,8 +2,8 @@
 
 # Python
 ########################################################################
-rm -rf plow/rpc
-rm -rf rndlib/rpc
+rm -rf ../python/plow/rpc
+rm -rf ../python/plow/rndaemon/rpc
 
 thrift --gen py:new_style:utf8strings -out ../python/plow plow.thrift
 thrift --gen py:new_style:utf8strings -out ../python/plow/rndaemon rnd.thrift

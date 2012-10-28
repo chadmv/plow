@@ -1,12 +1,13 @@
 
+import os
 import platform
 import socket
 import logging
+import subprocess
 
 import plow.rndaemon.conf as conf
 import plow.rndaemon.client as client
-
-from plow.rndaemon.rpc import ttypes
+import plow.rndaemon.rpc.ttypes as ttypes
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +89,25 @@ class AbstractProfiler(object):
 
                 setattr(self, name, val)
                 logger.debug("Using profile override: %s = %s" % (name, val))
+
+
+    def reboot(self):
+        """
+        reboot()
+
+        Platform-specific procedure to reboot the system. 
+        Should be implemented in a subclass if platform is not POSIX 
+        """
+        p = subprocess.Popen(['/usr/bin/sudo', '-n', '/sbin/reboot'], 
+                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        
+        out, _ = p.communicate()
+
+        # if we have gotten here, then the reboot obviously failed
+        err = "System failed to reboot (status %d): %s" % (p.returncode, out.strip())
+        logger.warn(err)
+        raise ttypes.RndException(p.returncode, err)
+
 
 
     def __getattr__(self, k):
