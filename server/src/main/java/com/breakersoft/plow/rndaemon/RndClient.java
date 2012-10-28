@@ -10,6 +10,7 @@ import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 
 import com.breakersoft.plow.Defaults;
+import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
 import com.breakersoft.plow.rnd.thrift.RndNodeApi;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
@@ -26,9 +27,9 @@ public class RndClient {
     private TTransport transport;
     private TProtocol protocol;
 
-    public RndClient(String host, int port) {
+    public RndClient(String host) {
         this.host = host;
-        this.port = port;
+        this.port = 11338;
     }
 
     public RndNodeApi.Client connect() throws TTransportException {
@@ -40,9 +41,21 @@ public class RndClient {
         return new RndNodeApi.Client(protocol);
     }
 
+    //TODO change to runTask
     public void runProcess(RunTaskCommand command) {
         try {
             connect().runTask(command);
+        } catch (TException e) {
+            throw new RndClientExecuteException(e);
+        }
+        finally {
+            socket.close();
+        }
+    }
+
+    public void kill(Proc proc, String reason) {
+        try {
+            connect().killRunningTask(proc.getProcId().toString(), reason);
         } catch (TException e) {
             throw new RndClientExecuteException(e);
         }
