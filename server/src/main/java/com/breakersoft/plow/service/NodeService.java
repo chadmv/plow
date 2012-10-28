@@ -1,7 +1,11 @@
 package com.breakersoft.plow.service;
 
+import java.util.List;
+
 import com.breakersoft.plow.Cluster;
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
+import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.rnd.thrift.Ping;
@@ -18,5 +22,8 @@ public interface NodeService {
     Cluster getCluster(String name);
     Cluster getDefaultCluster();
     void setDefaultCluster(Cluster cluster);
+
+    List<Proc> getProcs(Job job);
+    boolean setProcUnbooked(Proc proc, boolean unbooked);
 
 }

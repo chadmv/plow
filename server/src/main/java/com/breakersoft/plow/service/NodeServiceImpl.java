@@ -1,15 +1,20 @@
 package com.breakersoft.plow.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Cluster;
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
+import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.NodeDao;
+import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.rnd.thrift.Ping;
 
@@ -22,6 +27,9 @@ public class NodeServiceImpl implements NodeService {
 
     @Autowired
     ClusterDao clusterDao;
+
+    @Autowired
+    ProcDao procDao;
 
     @Autowired
     QuotaDao quotaDao;
@@ -79,4 +87,13 @@ public class NodeServiceImpl implements NodeService {
         clusterDao.setDefaultCluster(cluster);
     }
 
+    @Override
+    public List<Proc> getProcs(Job job) {
+        return procDao.getProcs(job);
+    }
+
+    @Override
+    public boolean setProcUnbooked(Proc proc, boolean unbooked) {
+        return procDao.setProcUnbooked(proc, unbooked);
+    }
 }
