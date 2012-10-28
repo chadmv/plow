@@ -103,6 +103,14 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             values.add(filter.regex);
         }
 
+        if (filter.isSetStates() && !filter.states.isEmpty()) {
+            clauses.add(JdbcUtils.In(
+                    "job.int_state", filter.states.size()));
+            for (JobState state: filter.states) {
+                values.add(state.ordinal());
+            }
+        }
+
         final StringBuilder sb = new StringBuilder(512);
         sb.append(GET);
         if (!values.isEmpty()) {
