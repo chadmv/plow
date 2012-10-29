@@ -290,9 +290,9 @@ class ProcessThread(threading.Thread):
             if numTries >= maxTries:
                 raise Exception("Failed creating log path after %d tries." % numTries)
             try:
-                os.makedirs(path)
+                os.makedirs(folder, 0777)
             except OSError, exp:
-                logger.warn("Error creating log path: %s, %s %d" % (folder, exp, exp.errno))
+                logger.warn("Error creating log path: %s, %s %d", folder, exp, exp.errno)
                 if exp.errno != errno.EEXIST:
                     # If it already exists, clear the NFS cache for the parent
                     # which should make the directory visible to os.path.exists
