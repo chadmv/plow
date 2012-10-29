@@ -44,6 +44,11 @@ def _init():
     else:
         setattr(mod, 'PLOW_HOSTS', ["localhost:11337"])
 
+    #
+    # task options
+    #
+    setattr(mod, 'TASK_PROXY_USER', get('task', 'proxy_user', ''))
+
 
 def get(section, key, default=None):
     """

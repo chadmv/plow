@@ -5,7 +5,11 @@ import logging
 import time
 import os
 import errno
+import pwd
+import traceback
+import tempfile
 from datetime import datetime
+from functools import partial
 
 import psutil
 
@@ -219,17 +223,18 @@ class ProcessThread(threading.Thread):
         return rt
 
     def run(self):
+        rtc = self.__rtc 
         retcode = 1
         try:
-            self.__makeLogDir(self.__rtc.logFile)
-            logger.info("Opening log file: %s" % self.__rtc.logFile)
-            self.__logfp = open(self.__rtc.logFile, "w")
+            self.__makeLogDir(rtc.logFile)
+            logger.info("Opening log file: %s" % rtc.logFile)
+            self.__logfp = open(rtc.logFile, "w")
             self.__writeLogHeader()
             self.__logfp.flush()
 
-            logger.info("Running command: %s" % self.__rtc.command)
-            self.__pptr = subprocess.Popen(self.__rtc.command,
-                shell=False, stdout=self.__logfp, stderr=self.__logfp)
+            logger.info("Running command: %s" % rtc.command)
+            opts = self.__getProcessOpts()
+            self.__pptr = subprocess.Popen(rtc.command, **opts)
             
             self.__pid = self.__pptr.pid
             logger.info("PID: %d" % self.__pid)
@@ -237,6 +242,8 @@ class ProcessThread(threading.Thread):
         
         except Exception, e:
             logger.warn("Failed to execute command: %s" % e)
+            logger.debug(traceback.format_exc())
+
         finally:
             self.__completed(retcode)
 
@@ -369,8 +376,9 @@ class ProcessThread(threading.Thread):
         self.__writeLogFooterAndClose(result)
 
     def __writeLogHeader(self):
-        self.__logfp.write("Render Process Begin\n")
-        self.__logfp.write("================================================================\n")
+        self.__logfp.write(
+            "Render Process Begin\n" \
+            "================================================================\n")
 
     def __writeLogFooterAndClose(self, result):
         # TODO: Add more stuff here
@@ -379,14 +387,77 @@ class ProcessThread(threading.Thread):
         if not self.__logfp:
             return
         self.__logfp.flush()
-        self.__logfp.write("\n\n\n")
-        self.__logfp.write("Render Process Complete\n")
-        self.__logfp.write("=====================================\n")
-        self.__logfp.write("Exit Status: %d\n" % result.exitStatus)
-        self.__logfp.write("Signal: %d\n" % result.exitSignal)
-        self.__logfp.write("MaxRSS: 0\n")
-        self.__logfp.write("=====================================\n\n")
+        self.__logfp.write(
+            "\n\n\n" \
+            "Render Process Complete\n" \
+            "=====================================\n" \
+            "Exit Status: %d\n" \
+            "Signal: %d\n" \
+            "MaxRSS: 0\n" \
+            "=====================================\n\n" \
+            % (result.exitStatus, result.exitSignal))
         self.__logfp.close()
+
+    def __getProcessOpts(self):
+        """ 
+        __getProcessOpts() -> dict 
+
+        Returns a dict of the keyword args 
+        for the subprocess command
+        """
+        opts = dict(
+            shell   = False,
+            stdout  = self.__logfp, 
+            stderr  = self.__logfp,
+            env     = os.environ.copy()
+        )
+
+        # TODO: Might need to be moved to profile module
+        # if we end up wanting to support windows too, to
+        # create an platform-independant wrapper.
+        if os.geteuid() == 0:
+
+            uid = self.__rtc.uid
+            gid = None
+            p_struct = None 
+
+            if conf.TASK_PROXY_USER:
+                try:
+                    p_struct = pwd.getpwnam(conf.TASK_PROXY_USER)
+                except KeyError:
+                    logger.warn("User '%s' not found. Not changing for task")
+                else:
+                    uid, gid = p_struct.pw_uid, p_struct.pw_gid
+
+            if p_struct is None or not conf.TASK_PROXY_USER:
+                p_struct = pwd.getpwuid(uid)
+                gid = p_struct.pw_gid
+
+            username = p_struct.pw_name
+            homedir = p_struct.pw_dir
+
+            if not os.path.exists(homedir):
+                homedir = tempfile.gettempdir()
+
+            opts['cwd'] = homedir
+
+            opts['env'].update({
+                'USERNAME'  : username,
+                'LOGNAME'   : username,
+                'USER'      : username,
+                'PWD'       : homedir,
+                'HOME'      : homedir,
+            })
+
+            def demote(*args):
+                user_id, group_id = args
+                os.setgid(group_id)
+                os.setuid(user_id)
+
+            logger.debug("Switching user to (%d, %d)", uid, gid)
+            opts['preexec_fn'] = partial(demote, uid, gid)
+
+        return opts
 
 
 Profiler    = _SystemProfiler()
