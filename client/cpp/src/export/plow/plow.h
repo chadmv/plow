@@ -34,6 +34,8 @@ class PLOWEXPORT PlowClient
         Connection * m_conn;
 };
 
+extern PLOWEXPORT PlowClient* getConnection();
+
 PLOW_NAMESPACE_EXIT
 
 #endif

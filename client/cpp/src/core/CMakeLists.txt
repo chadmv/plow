@@ -16,4 +16,4 @@ list(APPEND core_export_headers ${CMAKE_BINARY_DIR}/src/export/plowABI.h)
 
 add_library(plow SHARED ${src_files})
 add_dependencies(plow Thrift)
-target_link_libraries(plow Thrift)
+target_link_libraries(plow Thrift ${Boost_THREAD_LIBRARY})

@@ -14,7 +14,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 enable_language(CXX)
 set(PLOW_NAMESPACE Plow)
 
-find_package(Boost COMPONENTS REQUIRED)
+find_package(Boost COMPONENTS REQUIRED thread)
 find_package(Thrift REQUIRED)
 find_package(Qt4 REQUIRED)
 

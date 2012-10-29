@@ -8,6 +8,8 @@
 #include <transport/TBufferTransports.h>
 #include <protocol/TBinaryProtocol.h>
 
+#include <boost/thread/tss.hpp>
+
 #include <iostream>
 #include <vector>
 
@@ -42,7 +44,6 @@ PlowClient::Connection::Connection():
     
 PlowClient::Connection::~Connection()
 {
-    disconnect();   
 }
 
 void PlowClient::Connection::connect()
@@ -66,12 +67,23 @@ PlowClient::PlowClient():
 
 PlowClient::~PlowClient()
 {
-
+    m_conn->disconnect();
 }
 
 void PlowClient::getJobs(std::vector<JobT>& jobs, const JobFilter& filter) const
 {
     m_conn->getService().getJobs(jobs, filter);
+}
+
+
+PlowClient* getConnection()
+{
+    static boost::thread_specific_ptr<PlowClient> instance;
+    if(!instance.get())
+    {
+        instance.reset(new PlowClient);
+    }
+    return instance.get();
 }
 
 PLOW_NAMESPACE_EXIT

@@ -22,12 +22,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::updateJobs()
 {
-    PlowClient client;
+    PlowClient* client = getConnection();
 
     std::vector<JobT> jobs;
     JobFilter filter;
 
-    client.getJobs(jobs, filter);
+    std::vector<JobState::type> states;
+    states.push_back(JobState::RUNNING);
+    filter.__set_states(states);
+
+    client->getJobs(jobs, filter);
 
     QTreeWidget *tree = ui->treeWidget;
     for (std::vector<JobT>::iterator i = jobs.begin();
