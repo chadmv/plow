@@ -4,6 +4,27 @@ import sys
 import logging
 
 
+
+class RndFormatter(logging.Formatter):
+
+    debug_fmt  = "%(asctime)s %(levelname)-8s %(name)s:%(lineno)d - %(message)s"
+    standard_fmt = "%(asctime)s %(levelname)-8s %(name)s - %(message)s"
+
+    def format(self, record):
+
+        orig = self._fmt 
+
+        if record.levelno == logging.DEBUG:
+            self._fmt = self.debug_fmt
+        else:
+            self._fmt = self.standard_fmt
+
+        result = logging.Formatter.format(self, record)
+        self._fmt = orig
+
+        return result
+
+
 def main():
 
     import argparse
@@ -18,8 +39,14 @@ def main():
 
     args = parser.parse_args()  
 
-    lvl = logging.DEBUG if args.debug else logging.INFO
-    logging.basicConfig(level=lvl)
+    logger = logging.getLogger()
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = RndFormatter(datefmt='%Y-%m-%d %H:%M:%S')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
+    logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
 
     import plow.rndaemon.server as server
 
@@ -27,6 +54,7 @@ def main():
         server.start()
     except KeyboardInterrupt:
         sys.exit(2)
+
 
 if __name__ == "__main__":
     main()
