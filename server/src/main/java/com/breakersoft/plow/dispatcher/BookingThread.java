@@ -20,7 +20,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobBookedEvent;
-import com.breakersoft.plow.exceptions.DispatchProcAllocationException;
+import com.breakersoft.plow.exceptions.ResourceAllocationException;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
 import com.breakersoft.plow.service.JobService;
 
@@ -196,7 +196,7 @@ public class BookingThread extends Thread {
                 eventManager.post(new JobBookedEvent(proc, task));
             }
         }
-        catch (DispatchProcAllocationException e) {
+        catch (ResourceAllocationException e) {
             /*
              * Proc was not able to be allocated from the database.
              * This usually occurs when another thread is working
