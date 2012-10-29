@@ -189,7 +189,7 @@ public class BookingThread extends Thread {
 
         DispatchProc proc = null;
         try {
-            proc = dispatchService.allocateDispatchProc(node, task);
+            proc = dispatchService.createProc(node, task);
             if (jobService.startTask(task, proc)) {
                 dispatchSupport.runRndTask(
                         dispatchService.getRuntaskCommand(task, proc), proc);

@@ -56,7 +56,7 @@ public class ProcDaoTests extends AbstractTest {
 
         for (DispatchLayer layer: dispatchDao.getDispatchLayers(djob, dnode)) {
             for (DispatchTask dtask: dispatchDao.getDispatchTasks(layer, dnode)) {
-                proc = dispatchService.allocateDispatchProc(dnode, dtask);
+                proc = dispatchService.createProc(dnode, dtask);
                 task = dtask;
                 break;
             }

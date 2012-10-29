@@ -99,11 +99,6 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public void createDispatchProc (DispatchProc proc) {
-        procDao.create(proc);
-    }
-
-    @Override
     public boolean reserveTask(Task task) {
         return taskDao.reserve(task);
     }
@@ -126,7 +121,7 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public DispatchProc allocateDispatchProc(DispatchNode node, DispatchTask task) {
+    public DispatchProc createProc(DispatchNode node, DispatchTask task) {
 
         node.decrement(task.getMinCores(), task.getMinMemory());
 
@@ -140,7 +135,9 @@ public class DispatchServiceImpl implements DispatchService {
         proc.setJobId(task.getJobId());
         proc.setLayerId(task.getLayerId());
         proc.setTags(task.getTags());
-        createDispatchProc(proc);
+
+        procDao.create(proc);
+
         return proc;
     }
 

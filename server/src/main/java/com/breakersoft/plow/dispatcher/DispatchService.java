@@ -28,15 +28,13 @@ public interface DispatchService {
 
     DispatchNode getDispatchNode(String name);
 
-    void createDispatchProc(DispatchProc proc);
-
     boolean reserveTask(Task task);
 
     boolean unreserveTask(Task task);
 
     DispatchJob getDispatchJob(JobLaunchEvent event);
 
-    DispatchProc allocateDispatchProc(DispatchNode node, DispatchTask task);
+    DispatchProc createProc(DispatchNode node, DispatchTask task);
 
     DispatchProc getDispatchProc(String id);
 

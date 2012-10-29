@@ -97,7 +97,7 @@ public class DispatcherDaoTests extends AbstractTest {
 
         for (DispatchLayer layer: dispatchDao.getDispatchLayers(djob, dnode)) {
             for (DispatchTask task: dispatchDao.getDispatchTasks(layer, dnode)) {
-                proc = dispatchService.allocateDispatchProc(dnode, task);
+                proc = dispatchService.createProc(dnode, task);
                 break;
             }
         }
@@ -129,7 +129,7 @@ public class DispatcherDaoTests extends AbstractTest {
         DispatchTask task = null;
         for (DispatchLayer layer: dispatchDao.getDispatchLayers(djob, dnode)) {
             for (DispatchTask _task: dispatchDao.getDispatchTasks(layer, dnode)) {
-                proc = dispatchService.allocateDispatchProc(dnode, _task);
+                proc = dispatchService.createProc(dnode, _task);
                 task = _task;
                 break;
             }
