@@ -17,7 +17,7 @@ import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
-import com.breakersoft.plow.exceptions.DispatchProcAllocationException;
+import com.breakersoft.plow.exceptions.ResourceAllocationException;
 import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
@@ -83,8 +83,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                     proc.getCores(),
                     proc.getMemory());
         } catch (DataAccessException e) {
-            e.printStackTrace();
-            throw new DispatchProcAllocationException(e);
+            throw new ResourceAllocationException(e);
         }
     }
 
