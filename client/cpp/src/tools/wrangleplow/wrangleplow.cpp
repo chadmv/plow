@@ -38,7 +38,8 @@ void MainWindow::updateJobs()
                                      i != jobs.end();
                                      ++i)
     {
-        QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString(i->name.c_str())));
+        QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0,
+            QStringList(QString(i->name.c_str())));
         tree->insertTopLevelItem(0, item);
     }
 }
