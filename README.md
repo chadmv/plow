@@ -3,6 +3,8 @@ Plow
 
 Plow is a simple render farm.
 
+Project home: http://code.google.com/p/plow/
+
 Requirements
 ============
 
@@ -31,7 +33,7 @@ The plow server acts as the central brain for your render farm.  It contains the
 dispatcher and exposes a thrift API for interacting with jobs.
 
 This assumes your downloading the latest binary release from:
-https://github.com/sqlboy/plow/downloads
+http://code.google.com/p/plow/downloads
 
 Setting up Postgres
 -------------------
@@ -99,12 +101,6 @@ The latest Python client can be install from the source checkout using the follo
 
 You will still want to manually copy the `etc/*.cfg` files to either `/etc/plow/` or `~/.plow/`
 
-Or you can use pip with one of the packaged releases at https://github.com/sqlboy/plow/downloads
-
-`$ pip install https://github.com/downloads/sqlboy/plow/PyPlow-0.1.tar.gz`
-
-This will also install the `etc/*.cfg` files to your `~/.plow/`
-
 
 Compiling the C++ Library
 -------------------------
@@ -117,7 +113,7 @@ Compiling the C++ Library
 Running the Render Node Daemon
 ------------------------------
 
-This is current supported on the Mac/Linux
+Currently supported on Mac/Linux
 
 If you have installed the client tools using the `setup.py`, then you should now have `rndaemon` command in your path:
 
@@ -128,6 +124,11 @@ Otherwise, you can use the script included in the tools directory under the root
     $ cd tools/rndaemon
     $ ./rndaemon.py
 
+The daemon will first look for an optional config file explicitely set with the `PLOW_RNDAEMON_CFG` environment variable:
+`export PLOW_RNDAEMON_CFG="client/etc/rndaemon.cfg"`
+
+Otherwise, it will search for `/etc/plow/rndaemon.cfg` and then `~/.plow/rndaemon.cfg`
+
 
 The Plow Config File
 --------------------
@@ -137,7 +138,7 @@ configuration file.  In the source checkout, this can be found in client/etc/plo
 
 You can point plow at that configuration using the PLOW_CFG environment variable.
 
-    > export PLOW_CFG="client/plow.plow.cfg"
+    > export PLOW_CFG="client/etc/plow.cfg"
 
 Plow will also look for a configuration at /etc/plow/plow.cfg and ~/.plow/plow.cfg
 
