@@ -58,4 +58,41 @@ public class QuotaDaoTests extends AbstractTest {
         assertEquals(node.getClusterId(), quota.getClusterId());
         assertEquals(event.getJob().getProjectId(), quota.getProjectId());
     }
+
+    @Test
+    public void allocateResources() {
+        Cluster c = nodeService.createCluster("test", "test");
+        Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
+
+        quotaDao.allocateResources(quota, 5);
+        assertEquals(5,
+                simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
+                        quota.getQuotaId()));
+    }
+
+    @Test
+    public void freeResources() {
+        Cluster c = nodeService.createCluster("test", "test");
+        Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
+
+        quotaDao.allocateResources(quota, 5);
+        assertEquals(5,
+                simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
+                        quota.getQuotaId()));
+
+        quotaDao.freeResources(quota, 1);
+        assertEquals(4,
+                simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
+                        quota.getQuotaId()));
+
+        quotaDao.allocateResources(quota, 6);
+        assertEquals(10,
+                simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
+                        quota.getQuotaId()));
+
+        quotaDao.freeResources(quota, 10);
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
+                        quota.getQuotaId()));
+    }
 }

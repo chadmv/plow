@@ -97,4 +97,30 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
         return jdbc.queryForObject(GET_BY_TASK, MAPPER,
                 task.getJobId(), node.getClusterId());
     }
+
+    private static final String ALLOCATE_RESOURCE =
+            "UPDATE " +
+                "plow.quota " +
+            "SET " +
+                "int_run_cores = int_run_cores + ? " +
+            "WHERE " +
+                "quota.pk_quota = ?";
+
+    @Override
+    public void allocateResources(Quota quota, int cores) {
+        jdbc.update(ALLOCATE_RESOURCE, cores, quota.getQuotaId());
+    }
+
+    private static final String FREE_RESOURCE =
+            "UPDATE " +
+                "plow.quota " +
+            "SET " +
+                "int_run_cores = int_run_cores - ? " +
+            "WHERE " +
+                "quota.pk_quota = ?";
+
+    @Override
+    public void freeResources(Quota quota, int cores) {
+        jdbc.update(FREE_RESOURCE, cores, quota.getQuotaId());
+    }
 }
