@@ -7,7 +7,6 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.breakersoft.plow.Job;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.JobStateManager;

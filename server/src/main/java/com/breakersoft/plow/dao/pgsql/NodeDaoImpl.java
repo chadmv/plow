@@ -16,6 +16,7 @@ import com.breakersoft.plow.Node;
 import com.breakersoft.plow.NodeE;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.NodeDao;
+import com.breakersoft.plow.exceptions.ResourceAllocationException;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.util.JdbcUtils;
 
@@ -130,8 +131,59 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
         return jdbc.queryForObject(GET_BY_NAME, MAPPER, hostname);
     }
 
+    private static final String GET_BY_ID =
+            "SELECT " +
+                "pk_node, " +
+                "pk_cluster, "+
+                "str_name " +
+            "FROM " +
+                "plow.node " +
+            "WHERE " +
+                "node.pk_node=?";
+
+    @Override
+    public Node get(UUID id) {
+        return jdbc.queryForObject(GET_BY_ID, MAPPER, id);
+    }
+
     private int getBookableMemory(int memory) {
         return memory = memory - Defaults.MEMORY_RESERVE_MB;
     }
 
+    private static final String ALLOCATE_RESOURCES =
+            "UPDATE " +
+                "plow.node_dsp " +
+            "SET " +
+                "int_free_cores = int_free_cores - ?," +
+                "int_free_memory = int_free_memory - ? " +
+            "WHERE " +
+                "node_dsp.int_free_cores >= ? " +
+            "AND " +
+                "node_dsp.int_free_memory >= ? " +
+            "AND " +
+                "node_dsp.pk_node = ? ";
+
+    @Override
+    public void allocateResources(Node node, int cores, int memory) {
+        if (jdbc.update(ALLOCATE_RESOURCES,
+                cores, memory, cores, memory, node.getNodeId()) != 1) {
+            String msg = String.format("Failed to allocate %d/%d from %s",
+                    cores, memory, node.getName());
+            throw new ResourceAllocationException(msg);
+        }
+    }
+
+    private static final String FREE_RESOURCES =
+            "UPDATE " +
+                "plow.node_dsp " +
+            "SET " +
+                "int_free_cores = int_free_cores + ?," +
+                "int_free_memory = int_free_memory + ? " +
+            "WHERE " +
+                "node_dsp.pk_node = ? ";
+
+    @Override
+    public void freeResources(Node node, int cores, int memory) {
+        jdbc.update(FREE_RESOURCES, cores, memory, node.getNodeId());
+    }
 }

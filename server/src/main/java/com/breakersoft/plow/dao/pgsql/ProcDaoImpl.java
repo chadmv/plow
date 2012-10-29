@@ -17,7 +17,7 @@ import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
-import com.breakersoft.plow.exceptions.DispatchProcAllocationException;
+import com.breakersoft.plow.exceptions.ResourceAllocationException;
 import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
@@ -29,7 +29,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                 throws SQLException {
             ProcE proc = new ProcE();
             proc.setProcId((UUID)rs.getObject(1));
-            proc.setQuotaId((UUID)rs.getObject(1));
+            proc.setQuotaId((UUID)rs.getObject(2));
             proc.setNodeId((UUID)rs.getObject(3));
             proc.setTaskId((UUID)rs.getObject(4));
             proc.setHostname(rs.getString(5));
@@ -41,8 +41,8 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
             "SELECT " +
                 "proc.pk_proc,"+
                 "proc.pk_quota,"+
-                "proc.pk_host,"+
-                "proc.pk_frame,"+
+                "proc.pk_node,"+
+                "proc.pk_task,"+
                 "node.str_name " +
             "FROM " +
                 "plow.proc " +
@@ -56,7 +56,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
         return jdbc.queryForObject(GET_BY_ID, MAPPER, procId);
     }
 
-    private static final String GET_BY_FR = GET +"WHERE pk_frame = ?";
+    private static final String GET_BY_FR = GET +"WHERE pk_task = ?";
     @Override
     public Proc getProc(Task frame) {
         return jdbc.queryForObject(GET_BY_FR, MAPPER, frame.getTaskId());
@@ -83,8 +83,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                     proc.getCores(),
                     proc.getMemory());
         } catch (DataAccessException e) {
-            e.printStackTrace();
-            throw new DispatchProcAllocationException(e);
+            throw new ResourceAllocationException(e);
         }
     }
 

@@ -5,8 +5,10 @@ import static org.junit.Assert.*;
 import javax.annotation.Resource;
 
 import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Cluster;
@@ -24,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 @Transactional
+@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={
         "file:src/main/webapp/WEB-INF/spring/root-context.xml"
     })

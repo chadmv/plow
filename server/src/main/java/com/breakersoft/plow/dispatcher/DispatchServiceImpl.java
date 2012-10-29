@@ -9,8 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.Node;
+import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.DispatchDao;
+import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dao.TaskDao;
@@ -39,6 +42,9 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Autowired
     private ProcDao procDao;
+
+    @Autowired
+    private NodeDao nodeDao;
 
     @Autowired
     private TaskDao taskDao;
@@ -99,11 +105,6 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public void createDispatchProc (DispatchProc proc) {
-        procDao.create(proc);
-    }
-
-    @Override
     public boolean reserveTask(Task task) {
         return taskDao.reserve(task);
     }
@@ -126,21 +127,26 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public DispatchProc allocateDispatchProc(DispatchNode node, DispatchTask task) {
+    public DispatchProc createProc(DispatchNode node, DispatchTask task) {
 
-        node.decrement(task.getMinCores(), task.getMinMemory());
+        final Quota quota = quotaDao.getQuota(node, task);
 
-        DispatchProc proc = new DispatchProc();
+        final DispatchProc proc = new DispatchProc();
         proc.setTaskId(task.getTaskId());
         proc.setNodeId(node.getNodeId());
-        proc.setQuotaId(quotaDao.getQuota(node, task).getQuotaId());
+        proc.setQuotaId(quota.getQuotaId());
         proc.setCores(task.getMinCores());
         proc.setTaskName(task.getName());
         proc.setHostname(node.getName());
         proc.setJobId(task.getJobId());
         proc.setLayerId(task.getLayerId());
         proc.setTags(task.getTags());
-        createDispatchProc(proc);
+
+        procDao.create(proc);
+        nodeDao.allocateResources(node, task.getMinCores(), task.getMinMemory());
+        quotaDao.allocateResources(quota, task.getMinCores());
+
+        node.decrement(task.getMinCores(), task.getMinMemory());
         return proc;
     }
 
@@ -165,10 +171,20 @@ public class DispatchServiceImpl implements DispatchService {
         logger.info("unbooking proc: {}, {}", proc.getProcId(), why);
 
         if (procDao.delete(proc)) {
+
             logger.info("Proc unbooked {}", proc.getProcId());
-            proc.setTaskId(null);
+
+            final Quota quota = quotaDao.get(proc.getQuotaId());
+            final Node node = nodeDao.get(proc.getNodeId());
+
+            nodeDao.freeResources(node, proc.getCores(), proc.getMemory());
+            quotaDao.freeResources(quota, proc.getCores());
+
             proc.setAllocated(false);
             eventManager.post(new JobUnbookedEvent(proc));
+        }
+        else {
+            logger.warn("{} was alredy unbooked.", proc.getProcId());
         }
     }
 }

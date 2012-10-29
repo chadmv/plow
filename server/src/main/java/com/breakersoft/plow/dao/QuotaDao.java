@@ -16,4 +16,8 @@ public interface QuotaDao {
 
     Quota getQuota(Node node, Task task);
 
+    void allocateResources(Quota quota, int cores);
+
+    void freeResources(Quota quota, int cores);
+
 }
