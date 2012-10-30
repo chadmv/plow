@@ -43,7 +43,7 @@ setup(
     },
 
     # TODO: Some tests need to be made runable without an independant server
-    test_suite = "test.tests_all",
+    test_suite = "plow.test.tests_all",
 
     include_package_data=True,
     package_data = {

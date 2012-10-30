@@ -131,14 +131,14 @@ class _ProcessManager(object):
             self.__timer.daemon = True
             self.__timer.start()
 
-    def killRunningTask(self, rTask):
-        logger.info("kill requested for task %s" % rTask)
+    def killRunningTask(self, procId):
+        logger.info("kill requested for procId %s" % procId)
 
         with self.__lock:
             try:
-                pthread = self.__threads[rTask.procId][1]
+                pthread = self.__threads[procId][1]
             except KeyError:
-                err = "Process %s not found" % rTask.procId
+                err = "Process %s not found" % procId
                 logger.warn(err)
                 # TODO: Raise a proper exception type? or
                 # fail quietly?
@@ -147,8 +147,8 @@ class _ProcessManager(object):
         _, not_killed = pthread.killProcess()
 
         if not_killed:
-            err = "Failed to kill the following pids for task %s: %s" % \
-                    (rTask.taskId, ','.join(not_killed))
+            err = "Failed to kill the following pids for prodId %s: %s" % \
+                    (procId, ','.join(not_killed))
             logger.warn(err)
             raise ttypes.RndException(1, err)
 

@@ -61,7 +61,7 @@ class TestProcessManager(unittest.TestCase):
         self.assertRaises(ttypes.RndException, core.ProcessMgr.runProcess, process)
 
     def testKillRunningTask(self):
-        cmd = os.path.join(PLOW_ROOT, 'client/python/test/rndaemon/utils/cmds.py')
+        cmd = os.path.join(PLOW_ROOT, 'client/python/plow/test/rndaemon/utils/cmds.py')
 
         process = self.getNewTaskCommand()
         process.command = [cmd, 'hard_to_kill']
@@ -72,7 +72,7 @@ class TestProcessManager(unittest.TestCase):
         total = len(runningTasks)
         self.assertEqual(total, 1, msg="Expected there to be one running task")
 
-        core.ProcessMgr.killRunningTask(runningTasks[0])
+        core.ProcessMgr.killRunningTask(runningTasks[0].procId)
         time.sleep(1)
 
         count = len(core.ProcessMgr.getRunningTasks())
@@ -111,9 +111,8 @@ class TestCommunications(unittest.TestCase):
 
 
     def tearDown(self):
-        self.server.serverTransport.close()
         self.t_server.terminate()
-        time.sleep(.1)
+        time.sleep(.5)
 
 
     def testSendPing(self):
