@@ -11,8 +11,11 @@ import os
 import time 
 import sys
 import subprocess
+import platform
 import multiprocessing as mp
 from signal import signal, SIGTERM
+
+import psutil 
 
 import logging
 
@@ -42,6 +45,20 @@ def hard_to_kill():
 
 	signal(SIGTERM, ignore)
 	do_sleep(3)
+
+
+def cpu_affinity():
+	"""
+
+	"""
+	if platform.system() not in ('Linux', 'FreeBSD'):
+		cpus = tuple(xrange(psutil.NUM_CPUS))
+		logging.warn('(Platform Unsupported; Showing all) cpu_affinity == %s', cpus)
+		return
+
+	aff = psutil.Process(os.getpid()).get_cpu_affinity()
+	logging.info('cpu_affinity == %s', tuple(aff))
+	spawn(1)
 
 
 def do_sleep(spawn_more=0):
@@ -79,6 +96,7 @@ def spawn(num=1):
 COMMANDS = (
 	easy_to_kill,
 	hard_to_kill,
+	cpu_affinity,
 )
 
 def fail():
@@ -95,6 +113,7 @@ if __name__ == "__main__":
 
 	for fn in COMMANDS:
 		if fn.__name__ == cmdName:
+			logging.info("Running as UID,GID == %d,%d", os.getuid(), os.getgid())
 			fn()
 			sys.exit(0)
 

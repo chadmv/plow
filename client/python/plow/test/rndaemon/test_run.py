@@ -8,7 +8,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../../'))
 import tempfile
 import unittest
 import time
+import math
+import re 
+import platform
+
 from multiprocessing import Process, Event 
+from ast import literal_eval 
 
 import plow.conf as conf 
 import plow.rndaemon.conf as rndconf 
@@ -22,6 +27,12 @@ logging.basicConfig(level=logging.DEBUG)
 
 PLOW_ROOT = conf.Config.get('env', 'plow_root')
 
+rndconf.TASK_PROXY_USER = os.getenv('PLOW_PROXY_USER', rndconf.TASK_PROXY_USER)
+
+CMDS_UTIL = os.path.join(PLOW_ROOT, 'client/python/plow/test/rndaemon/utils/cmds.py')
+
+IS_LINUX = platform.system() in ('FreeBSD', 'Linux')
+
 
 class TestResourceManager(unittest.TestCase):
 
@@ -29,42 +40,92 @@ class TestResourceManager(unittest.TestCase):
         manager = core.ResourceMgr
         totalCores = core.Profiler.physicalCpus
 
-        assert totalCores == len(manager.getSlots())
-        assert totalCores == len(manager.getOpenSlots())
+        slots = len(manager.getSlots())
+        self.assertEqual(totalCores, slots)
 
-        slots = manager.checkout(1)
-        assert len(manager.getOpenSlots()) == (totalCores-1)
+        slots = len(manager.getOpenSlots())
+        self.assertEqual(totalCores, slots)
 
-        slots += manager.checkout(1)
-        assert len(manager.getOpenSlots()) == (totalCores-2)
+        slots = []
+        for i in xrange(1, totalCores+1):
+            slots += manager.checkout(1)
+            total = totalCores - i
+            openslots = len(manager.getOpenSlots())
+            self.assertEqual(total, openslots)
 
         manager.checkin(slots)
-        assert len(manager.getOpenSlots()) == totalCores
+        openslots = len(manager.getOpenSlots())
+        self.assertEqual(totalCores, openslots)
 
 
 class TestProcessManager(unittest.TestCase):
 
+    _logdir = tempfile.gettempdir()
+    _totalCores = core.Profiler.physicalCpus
+
     def setUp(self):
-        self._logdir = tempfile.gettempdir()
-        self._logfile = os.path.join(self._logdir, "rndlogfile.log")
+        self._logfile = tempfile.mktemp('.log', 'plow-test-')
+
+    def tearDown(self):
+        # give these types of tests a moment to close down
+        time.sleep(.5)
 
     def testRunTaskCommand(self):
         process = self.getNewTaskCommand()
-        process.command = ["/bin/ls", self._logdir]
+        process.command = [CMDS_UTIL, 'cpu_affinity']
         core.ProcessMgr.runProcess(process)
-        time.sleep(1)
+        
+        while core.ProcessMgr.getRunningTasks():
+            time.sleep(.1)
+
+        captured_affinity = tuple(self.getLogCpuAffinity(process.logFile))
+        count = len(captured_affinity)
+        self.assertTrue(count == 1, "Expected only 1 result. Got %d" % count)
+
+        if IS_LINUX:
+            captured = captured_affinity[0]
+            cpu_set = set()
+            logical_cpus = core.Profiler.cpuprofile.logical_cpus
+
+            for i in xrange(process.cores):
+                cpu_set.update(logical_cpus[i])
+
+            cpu_tuple = tuple(cpu_set)
+            self.assertEqual(captured, cpu_tuple, 
+                'Captured cpu affinity %s does not match expected %s' % (cpu_tuple, captured))
+
+
+    def testRunTaskCommandHalfCores(self):
+        if self._totalCores < 3:
+            return
+
+        cores = int(math.ceil(self._totalCores * .5))
+
+        process = self.getNewTaskCommand()
+        process.cores = cores
+        process.command = [CMDS_UTIL, 'cpu_affinity']
+
+        core.ProcessMgr.runProcess(process)
+
+
+    def testRunTaskCommandMaxCores(self):
+        process = self.getNewTaskCommand()
+        process.cores = self._totalCores
+        process.command = [CMDS_UTIL, 'cpu_affinity']
+
+        core.ProcessMgr.runProcess(process)
+
 
     def testRunTaskCommandOutOfCores(self):
         process = self.getNewTaskCommand()
-        process.cores = 9999
+        process.cores = self._totalCores + 1
         process.command = ["/bin/ls", self._logdir]
         self.assertRaises(ttypes.RndException, core.ProcessMgr.runProcess, process)
 
-    def testKillRunningTask(self):
-        cmd = os.path.join(PLOW_ROOT, 'client/python/plow/test/rndaemon/utils/cmds.py')
 
+    def testKillRunningTask(self):
         process = self.getNewTaskCommand()
-        process.command = [cmd, 'hard_to_kill']
+        process.command = [CMDS_UTIL, 'hard_to_kill']
         core.ProcessMgr.runProcess(process)
         time.sleep(1)
 
@@ -72,11 +133,17 @@ class TestProcessManager(unittest.TestCase):
         total = len(runningTasks)
         self.assertEqual(total, 1, msg="Expected there to be one running task")
 
-        core.ProcessMgr.killRunningTask(runningTasks[0].procId)
+        task = runningTasks[0]
+        core.ProcessMgr.killRunningTask(task.procId)
         time.sleep(1)
 
         count = len(core.ProcessMgr.getRunningTasks())
         self.assertEqual(count, 0, msg="Should not have any running tasks anymore")
+
+        sig, status = self.getLogSignalStatus(process.logFile)
+        self.assertEqual(status, 1, "Expected a 1 Exit Status, but got %s" % status)
+        self.assertEqual(sig, -9, "Expected a -9 Signal, but got %s" % sig)
+
 
     def getNewTaskCommand(self):
         process = ttypes.RunTaskCommand()
@@ -86,6 +153,43 @@ class TestProcessManager(unittest.TestCase):
         process.env = {},
         process.logFile = self._logfile 
         return process
+
+
+    @staticmethod
+    def getLogSignalStatus(logfile):
+        status = None
+        signal = None
+        status_field = 'Exit Status:'
+        signal_field = 'Signal:'
+
+        with open(logfile) as f:
+            for line in f:
+                if line.startswith(status_field):
+                    try: status = int(line.split(status_field, 1)[-1])
+                    except: pass
+                elif line.startswith(signal_field):
+                    try: signal = int(line.split(signal_field, 1)[-1])
+                    except: pass
+
+        return signal, status 
+
+    @staticmethod 
+    def getLogCpuAffinity(logfile):
+        affinity = set()
+
+        with open(logfile) as f:
+            for line in f:
+                match = re.search(r'cpu_affinity == (\([\d, ]+\))', line)
+                if match:
+                    try:
+                        cpus = literal_eval(match.group(1))
+                    except:
+                        continue
+                    affinity.add(cpus)
+
+        return affinity
+
+
 
 class TestCommunications(unittest.TestCase):
     """

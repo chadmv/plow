@@ -5,11 +5,7 @@ import logging
 import time
 import os
 import errno
-import pwd
 import traceback
-import tempfile
-from datetime import datetime
-from functools import partial
 
 import psutil
 
@@ -31,9 +27,9 @@ class _ResourceManager(object):
     """
 
     def __init__(self):
-        self.__slots = dict([(i, 0) for i in range(0, Profiler.physicalCpus)])
+        self.__slots = dict((i, 0) for i in xrange(Profiler.physicalCpus))
         self.__lock = threading.Lock()
-        logger.info("Intializing resource manager with %d physical cores." % Profiler.physicalCpus)
+        logger.info("Intializing resource manager with %d physical cores.", Profiler.physicalCpus)
 
     def checkout(self, numCores):
         if numCores < 1:
@@ -48,7 +44,7 @@ class _ResourceManager(object):
             result = open_slots[0:numCores]
             for i in result:
                 self.__slots[i] = 1
-            logger.info("Checked out CPUS: %s" % result)
+            logger.info("Checked out CPUS: %s", result)
             return result
         finally:
             self.__lock.release()
@@ -60,7 +56,7 @@ class _ResourceManager(object):
                 if self.__slots[core] == 1:
                     self.__slots[core] = 0
                 else:
-                    logger.warn("Failed to check in core: %d" + core)
+                    logger.warn("Failed to check in core: %d", core)
         finally:
             self.__lock.release()
         logger.info("Checked in CPUS: %s" % cores)
@@ -87,7 +83,7 @@ class _ProcessManager(object):
 
     def runProcess(self, processCmd):
         cpus = ResourceMgr.checkout(processCmd.cores)
-        pthread = ProcessThread(processCmd)
+        pthread = ProcessThread(processCmd, cpus)
         with self.__lock:
             self.__threads[processCmd.procId] = (processCmd, pthread, cpus)
         pthread.start()
@@ -100,7 +96,7 @@ class _ProcessManager(object):
             try:
                 del self.__threads[processCmd.procId]
             except Exception, e:
-                logger.warn("Process %s not found: %s" % (processCmd.procId, e))
+                logger.warn("Process %s not found: %s", processCmd.procId, e)
 
     def sendPing(self, isReboot=False, repeat=True):
         # TODO: What is the purpose of the isReboot flag?
@@ -198,7 +194,7 @@ class ProcessThread(threading.Thread):
     The ProcessThread wraps a running task.
     """
     
-    def __init__(self, rtc):
+    def __init__(self, rtc, cpus=None):
         threading.Thread.__init__(self)
         self.daemon = True
 
@@ -206,6 +202,8 @@ class ProcessThread(threading.Thread):
         self.__pptr = None
         self.__logfp = None
         self.__pid = -1
+
+        self.__cpus = cpus or set()
 
     def __repr__(self):
         return "<%s: (procId: %s, pid: %d)>" % (
@@ -232,9 +230,17 @@ class ProcessThread(threading.Thread):
             self.__writeLogHeader()
             self.__logfp.flush()
 
+            opts = {
+                'stdout': self.__logfp, 
+                'stderr': subprocess.STDOUT,
+                'uid'   : self.__rtc.uid,
+                'cpus'  : self.__cpus,
+            }
+
+            cmd, opts = Profiler.getSubprocessOpts(rtc.command, **opts)
+
             logger.info("Running command: %s" % rtc.command)
-            opts = self.__getProcessOpts()
-            self.__pptr = subprocess.Popen(rtc.command, **opts)
+            self.__pptr = subprocess.Popen(cmd, **opts)
             
             self.__pid = self.__pptr.pid
             logger.info("PID: %d" % self.__pid)
@@ -398,66 +404,7 @@ class ProcessThread(threading.Thread):
             % (result.exitStatus, result.exitSignal))
         self.__logfp.close()
 
-    def __getProcessOpts(self):
-        """ 
-        __getProcessOpts() -> dict 
 
-        Returns a dict of the keyword args 
-        for the subprocess command
-        """
-        opts = dict(
-            shell   = False,
-            stdout  = self.__logfp, 
-            stderr  = self.__logfp,
-            env     = os.environ.copy()
-        )
-
-        # TODO: Might need to be moved to profile module
-        # if we end up wanting to support windows too, to
-        # create an platform-independant wrapper.
-        if os.geteuid() == 0:
-
-            uid = self.__rtc.uid
-            gid = None
-            p_struct = None 
-
-            if conf.TASK_PROXY_USER:
-                try:
-                    p_struct = pwd.getpwnam(conf.TASK_PROXY_USER)
-                except KeyError:
-                    logger.warn("User '%s' not found. Not changing for task")
-                else:
-                    uid, gid = p_struct.pw_uid, p_struct.pw_gid
-
-            if p_struct is None or not conf.TASK_PROXY_USER:
-                p_struct = pwd.getpwuid(uid)
-                gid = p_struct.pw_gid
-
-            username = p_struct.pw_name
-            homedir = p_struct.pw_dir
-
-            if not os.path.exists(homedir):
-                homedir = tempfile.gettempdir()
-
-            opts['cwd'] = homedir
-
-            opts['env'].update({
-                'USERNAME'  : username,
-                'LOGNAME'   : username,
-                'USER'      : username,
-                'PWD'       : homedir,
-                'HOME'      : homedir,
-            })
-
-            def demote(*args):
-                user_id, group_id = args
-                os.setgid(group_id)
-                os.setuid(user_id)
-
-            logger.debug("Switching user to (%d, %d)", uid, gid)
-            opts['preexec_fn'] = partial(demote, uid, gid)
-
-        return opts
 
 
 Profiler    = _SystemProfiler()

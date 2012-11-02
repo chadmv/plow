@@ -7,7 +7,7 @@ import logging
 
 from ctypes.util import find_library
 
-from base import AbstractProfiler
+from .posix import SystemProfiler as PosixSystemProfiler
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +27,7 @@ class sysinfo_t(ctypes.Structure):
         ("bootTime", ctypes.c_uint64),
         ("cpuModel", ctypes.c_char_p)]
 
-class SystemProfiler(AbstractProfiler):
-
-    def __init__(self):
-        AbstractProfiler.__init__(self)
+class SystemProfiler(PosixSystemProfiler):
 
     def __repr__(self):
         return "<%s: OSX>" % self.__class__.__name__
@@ -41,9 +38,7 @@ class SystemProfiler(AbstractProfiler):
         self.data.update(dict([(field[0], 
             getattr(f, field[0])) for field in sysinfo_t._fields_]))
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    s = SystemProfiler()
+
 
 
 
