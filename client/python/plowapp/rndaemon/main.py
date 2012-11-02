@@ -48,7 +48,7 @@ def main():
 
     logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
 
-    import plow.rndaemon.server as server
+    import server
 
     try:
         server.start()

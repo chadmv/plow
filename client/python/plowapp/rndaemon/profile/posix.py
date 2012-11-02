@@ -11,8 +11,8 @@ from functools import partial
 
 from .base import AbstractProfiler
 
-import plow.rndaemon.rpc.ttypes as ttypes
-import plow.rndaemon.conf as conf
+import plowapp.rndaemon.rpc.ttypes as ttypes
+import plowapp.rndaemon.conf as conf
 
 logger = logging.getLogger(__name__)
 
