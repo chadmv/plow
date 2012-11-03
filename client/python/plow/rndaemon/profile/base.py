@@ -1,4 +1,4 @@
-
+import os
 import platform
 import socket
 import logging
@@ -104,12 +104,21 @@ class AbstractProfiler(object):
         """
         getSubprocessOpts(list|str cmd, **kwargs) -> (cmd, dict)
 
-        Abstract method for returning the appropriate subprocess.Popen 
+        Method for returning the appropriate subprocess.Popen 
         arguments and keyword arguments for a given platform. 
 
-        Should be implemented in subclasses. 
         """
-        raise NotImplementedError("getSubprocessOpts() is an abstract method")
+        env = kwargs.get('env') or os.environ.copy()
+
+        opts = dict(
+            shell   = False,
+            stdout  = kwargs.get('stdout'), 
+            stderr  = kwargs.get('stderr'),
+            cwd     = kwargs.get('cwd'),
+            env     = env,
+        )
+
+        return cmd, opts
 
 
     def __getattr__(self, k):
