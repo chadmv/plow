@@ -1,4 +1,3 @@
 from static import *
 
-from rpc.ttypes import JobSpecT, LayerSpecT
-
+from rpc.ttypes import JobSpecT, LayerSpecT, JobState, TaskState
