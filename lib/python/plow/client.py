@@ -48,7 +48,7 @@ class PlowConnection(object):
     def service(self):
         if not self.__service:
             self.__transport.open()
-            self.__service = RpcServiceApi.Client(self.__protocol)
+            self.__service = RpcService.Client(self.__protocol)
         return self.__service
 
     def __randomServer(self):

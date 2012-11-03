@@ -15,17 +15,18 @@ def _init():
         cfgs = _Config.read([
             os.path.join(os.environ.get("PLOW_ROOT", "/usr/local"), "etc/plow/blueprint.cfg"),
             os.path.expanduser("~/.plow/blueprint.cfg")])
+    print cfgs
 
 # run as a function to avoid polluting module with temp variables
 _init()
 
-def get(section, key):
+def get(section, key, interp=None):
     """
     Return the specified configuration option.  Automatically
     interpolates any environement variables specified in plow.ini.
     """
     interps = _Config.get("env", "interpolate").split(",")
     args = dict([(inter, os.environ.get(inter, "test")) for inter in interps])
-
-    result = _Config.get(section, key)
-    return result % args
+    if interp:
+        args.update(interp)
+    return _Config.get(section, key) % args

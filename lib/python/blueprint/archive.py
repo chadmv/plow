@@ -19,11 +19,10 @@ class Archive(object):
     def __init__(self, job):
         self.__job = job
         self.__path = os.path.join(
-            conf.get("defaults", "archive_dir"), str(uuid.uuid4()))
+            conf.get("templates", "archive_dir", {"JOB_NAME": job.getName()}), "-%s" % uuid.uuid4())
         self.__make()
 
     def __make(self):
-        logger.info(self.__path)
         os.makedirs(self.__path, 0777)
         os.mkdir(os.path.join(self.__path, "layers"), 0777)
 
