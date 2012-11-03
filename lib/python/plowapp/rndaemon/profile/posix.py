@@ -11,8 +11,8 @@ from functools import partial
 
 from .base import AbstractProfiler
 
-import plowapp.rndaemon.rpc.ttypes as ttypes
-import plowapp.rndaemon.conf as conf
+from ..rpc import ttypes
+from .. import conf
 
 logger = logging.getLogger(__name__)
 
@@ -48,16 +48,10 @@ class SystemProfiler(AbstractProfiler):
         arguments and kw arguments for a POSIX platform. 
 
         """
+        cmd, opts = super(SystemProfiler, self).getSubprocessOpts(cmd, **kwargs)
+
         if isinstance(cmd, (str, unicode)):
             cmd = shlex.split(cmd)
-
-        opts = dict(
-            shell   = False,
-            stdout  = kwargs.get('stdout'), 
-            stderr  = kwargs.get('stderr'),
-            cwd     = kwargs.get('cwd'),
-            env     = kwargs.get('env') or os.environ.copy(),
-        )
 
         uid = kwargs.get('uid')
 

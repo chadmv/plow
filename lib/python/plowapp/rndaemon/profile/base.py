@@ -1,11 +1,11 @@
-
+import os
 import platform
 import socket
 import logging
 
-import plowapp.rndaemon.conf as conf
-import plowapp.rndaemon.client as client
-import plowapp.rndaemon.rpc.ttypes as ttypes
+from .. import conf
+from .. import client
+from ..rpc import ttypes
 
 logger = logging.getLogger(__name__)
 
@@ -104,12 +104,21 @@ class AbstractProfiler(object):
         """
         getSubprocessOpts(list|str cmd, **kwargs) -> (cmd, dict)
 
-        Abstract method for returning the appropriate subprocess.Popen 
+        Method for returning the appropriate subprocess.Popen 
         arguments and keyword arguments for a given platform. 
 
-        Should be implemented in subclasses. 
         """
-        raise NotImplementedError("getSubprocessOpts() is an abstract method")
+        env = kwargs.get('env') or os.environ.copy()
+
+        opts = dict(
+            shell   = False,
+            stdout  = kwargs.get('stdout'), 
+            stderr  = kwargs.get('stderr'),
+            cwd     = kwargs.get('cwd'),
+            env     = env,
+        )
+
+        return cmd, opts
 
 
     def __getattr__(self, k):
