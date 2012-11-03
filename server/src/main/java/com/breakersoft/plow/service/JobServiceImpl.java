@@ -131,26 +131,6 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public boolean startTask(Task task, DispatchProc proc) {
-        return taskDao.start(task);
-    }
-
-    @Override
-    public boolean stopTask(Task task, TaskState state) {
-        return taskDao.stop(task, state);
-    }
-
-    @Override
-    public boolean reserveTask(Task task) {
-        return taskDao.reserve(task);
-    }
-
-    @Override
-    public boolean unreserveTask(Task task) {
-        return taskDao.unreserve(task);
-    }
-
-    @Override
     public Task getTask(Layer layer, int number) {
         return taskDao.get(layer, number);
     }

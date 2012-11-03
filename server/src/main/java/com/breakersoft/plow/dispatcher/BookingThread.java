@@ -190,7 +190,7 @@ public class BookingThread extends Thread {
         DispatchProc proc = null;
         try {
             proc = dispatchService.createProc(node, task);
-            if (jobService.startTask(task, proc)) {
+            if (dispatchService.startTask(task, proc)) {
                 dispatchSupport.runRndTask(
                         dispatchService.getRuntaskCommand(task, proc), proc);
                 eventManager.post(new JobBookedEvent(proc, task));
@@ -211,7 +211,7 @@ public class BookingThread extends Thread {
              * Unable to talk to host.
              */
             logger.warn("Failed to execute task on: {} " + node.getName());
-            jobService.unreserveTask(task);
+            dispatchService.unreserveTask(task);
             dispatchService.unbookProc(proc, e.getMessage());
             node.setDispatchable(false);
         }
@@ -220,7 +220,7 @@ public class BookingThread extends Thread {
              * Some unexpected exception we didn't think of.
              */
             logger.warn("Unexpected task dipatching error, " + e);
-            jobService.unreserveTask(task);
+            dispatchService.unreserveTask(task);
             dispatchService.unbookProc(proc, e.getMessage());
             node.setDispatchable(false);
         }

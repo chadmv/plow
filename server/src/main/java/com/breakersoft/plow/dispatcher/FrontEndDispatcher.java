@@ -174,7 +174,7 @@ public final class FrontEndDispatcher {
 
         try {
             dispatchService.assignProc(proc, task);
-            if (jobService.startTask(task, proc)) {
+            if (dispatchService.startTask(task, proc)) {
                 dispatchSupport.runRndTask(
                         dispatchService.getRuntaskCommand(task, proc), proc);
                 return true;
@@ -184,7 +184,7 @@ public final class FrontEndDispatcher {
              * Unable to talk to host.
              */
             logger.warn("Failed to execute task on: {} " + proc.getHostname());
-            jobService.unreserveTask(task);
+            dispatchService.unreserveTask(task);
             dispatchService.unbookProc(proc, e.getMessage());
         }
         catch (Exception e) {
@@ -192,7 +192,7 @@ public final class FrontEndDispatcher {
              * Some unexpected exception we didn't think of.
              */
             logger.warn("Unexpected task dipatching error, " + e);
-            jobService.unreserveTask(task);
+            dispatchService.unreserveTask(task);
             dispatchService.unbookProc(proc, e.getMessage());
         }
 

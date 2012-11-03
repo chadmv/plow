@@ -25,14 +25,6 @@ public interface JobService {
 
     Layer getLayer(Job job, String layer);
 
-    boolean startTask(Task task, DispatchProc proc);
-
-    boolean stopTask(Task task, TaskState state);
-
-    boolean reserveTask(Task task);
-
-    boolean unreserveTask(Task task);
-
     boolean setJobState(Job job, JobState state);
 
     JobLaunchEvent launch(JobSpecT jobspec);

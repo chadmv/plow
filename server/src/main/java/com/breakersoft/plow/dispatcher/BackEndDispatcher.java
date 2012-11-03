@@ -52,7 +52,7 @@ public class BackEndDispatcher {
                 new Object[] { proc.getHostname(), proc.getTaskName(), result.exitStatus });
         logger.info("New state {}", newState.toString());
 
-        if (!jobService.stopTask(task, newState)) {
+        if (!dispatchService.stopTask(task, newState)) {
             // Task was already stopped somehow.
             // might be a retry or
             logger.warn("{} task was stopped by another thread.", proc.getTaskName());

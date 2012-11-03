@@ -15,6 +15,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
+import com.breakersoft.plow.thrift.TaskState;
 
 /**
  * Transactional dispatcher opterations.
@@ -54,5 +55,9 @@ public interface DispatchService {
     RunTaskCommand getRuntaskCommand(DispatchTask task, DispatchProc proc);
 
     void unbookProc(DispatchProc proc, String fromWhere);
+
+    boolean startTask(Task task, DispatchProc proc);
+
+    boolean stopTask(Task task, TaskState state);
 
 }

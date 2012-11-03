@@ -29,6 +29,7 @@ import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.event.JobUnbookedEvent;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
+import com.breakersoft.plow.thrift.TaskState;
 
 @Service
 @Transactional
@@ -112,6 +113,16 @@ public class DispatchServiceImpl implements DispatchService {
     @Override
     public boolean unreserveTask(Task task) {
         return taskDao.unreserve(task);
+    }
+
+    @Override
+    public boolean startTask(Task task, DispatchProc proc) {
+        return taskDao.start(task);
+    }
+
+    @Override
+    public boolean stopTask(Task task, TaskState state) {
+        return taskDao.stop(task, state);
     }
 
     @Override
