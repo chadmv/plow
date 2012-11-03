@@ -9,17 +9,15 @@ def _init():
     """
     Parse an initalize the Config object
     """
-    if os.environ.get("PLOW_CFG"):
-        _Config.read([os.environ["PLOW_CFG"]])
+    if os.environ.get("BLUEPRINT_CFG"):
+        cgfs = _Config.read([os.environ["BLUEPRINT_CFG"]])
     else:
-        _Config.read([
-            os.path.join(os.environ.get("PLOW_ROOT", "/usr/local"), "etc/plow/plow.cfg"),
-            os.path.expanduser("~/.plow/plow.cfg")])
+        cfgs = _Config.read([
+            os.path.join(os.environ.get("PLOW_ROOT", "/usr/local"), "etc/plow/blueprint.cfg"),
+            os.path.expanduser("~/.plow/blueprint.cfg")])
 
 # run as a function to avoid polluting module with temp variables
 _init()
-
-assert _Config.has_section("plow")
 
 def get(section, key):
     """

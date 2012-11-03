@@ -5,9 +5,8 @@ import uuid
 import logging
 import yaml
 
-import plow.conf as conf
-
-from plow.blueprint.exception import ArchiveException
+import conf
+from exception import ArchiveException
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +19,7 @@ class Archive(object):
     def __init__(self, job):
         self.__job = job
         self.__path = os.path.join(
-            conf.get("blueprint", "archive_path"), str(uuid.uuid4()))
+            conf.get("defaults", "archive_dir"), str(uuid.uuid4()))
         self.__make()
 
     def __make(self):

@@ -1,8 +1,8 @@
 
 import logging
 
-from plow.blueprint.layer import Layer
-from plow.blueprint.io import shellOut
+from blueprint.layer import Layer
+from blueprint.io import shellOut
 
 logger = logging.getLogger(__name__)
 

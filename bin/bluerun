@@ -2,12 +2,12 @@
 import sys
 import argparse
 
-import blueprint
+import blueprint.app
 
 class Bluerun(blueprint.app.Application):
 
     def __init__(self):
-        app.BlueprintApplication.__init__(self,
+        blueprint.app.Application.__init__(self,
             "Bluerun - Blueprint launch and execution tool.")
 
         group = self._argparser.add_argument_group("Bluerun Options")
@@ -33,8 +33,8 @@ class Bluerun(blueprint.app.Application):
 
         runner.setArg("script", args.script)
         runner.setArg("frame_range", args.range)
-        runner.run()
+        runner.launch()
 
 if __name__ == "__main__":
-    papp = Plowrun()
-    papp.go()
+    app = Bluerun()
+    app.go()
