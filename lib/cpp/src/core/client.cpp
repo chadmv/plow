@@ -1,6 +1,6 @@
 
 #include "plow.h"
-#include "rpc/RpcServiceApi.h"
+#include "rpc/RpcService.h"
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -23,15 +23,15 @@ class PlowClient::Connection
 {
     public:
         Connection();
-        ~Connection();
+        virtual ~Connection();
         void connect();
         void disconnect();
-        RpcServiceApiClient getService();        
+        RpcServiceClient proxy();        
     private:
         boost::shared_ptr<TSocket> socket;
         boost::shared_ptr<TTransport> transport;
         boost::shared_ptr<TProtocol> protocol;
-        RpcServiceApiClient service;
+        RpcServiceClient service;
 };
 
 PlowClient::Connection::Connection():
@@ -51,11 +51,13 @@ void PlowClient::Connection::connect()
     transport->open();
 }
 
-void PlowClient::Connection::disconnect() {
+void PlowClient::Connection::disconnect()
+{
     transport->close();
 }
 
-RpcServiceApiClient PlowClient::Connection::getService() {
+RpcServiceClient PlowClient::Connection::proxy()
+{
     return service;
 }
 
@@ -70,13 +72,12 @@ PlowClient::~PlowClient()
     m_conn->disconnect();
 }
 
-void PlowClient::getJobs(std::vector<JobT>& jobs, const JobFilter& filter) const
+void PlowClient::getJobs(std::vector<JobT>& jobs, const JobFilterT& filter) const
 {
-    m_conn->getService().getJobs(jobs, filter);
+    m_conn->proxy().getJobs(jobs, filter);
 }
 
-
-PlowClient* getConnection()
+PlowClient* getClient()
 {
     static boost::thread_specific_ptr<PlowClient> instance;
     if(!instance.get())

@@ -3,8 +3,7 @@
 
 #import <vector>
 
-#include "plowABI.h"
-#include "plowTypes.h"
+#include "plow_abi.h"
 
 #include "common_types.h"
 #include "common_constants.h"
@@ -24,9 +23,10 @@ class PLOWEXPORT PlowClient
 {
     public:
         PlowClient();
-        ~PlowClient();
+        virtual ~PlowClient();
 
-        void getJobs(std::vector<JobT>& jobs, const JobFilter& filter) const;
+        void getJobs(std::vector<JobT>& jobs, const JobFilterT& filter) const;
+        JobT launch(const JobSpecT& spec) const;
 
     private:
         class Connection;
@@ -34,7 +34,7 @@ class PLOWEXPORT PlowClient
         Connection * m_conn;
 };
 
-extern PLOWEXPORT PlowClient* getConnection();
+extern PLOWEXPORT PlowClient* getClient();
 
 PLOW_NAMESPACE_EXIT
 

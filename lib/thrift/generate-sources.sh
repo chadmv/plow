@@ -36,4 +36,4 @@ thrift --gen cpp --out $OUT plow.thrift
 mv $OUT/common_*.h $EXP
 mv $OUT/plow_*.h $EXP
 
-rm $OUT/RpcServiceApi_server.skeleton.cpp
+rm $OUT/RpcService_server.skeleton.cpp

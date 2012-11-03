@@ -22,10 +22,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::updateJobs()
 {
-    PlowClient* client = getConnection();
+    PlowClient* client = getClient();
 
     std::vector<JobT> jobs;
-    JobFilter filter;
+    JobFilterT filter;
 
     std::vector<JobState::type> states;
     states.push_back(JobState::RUNNING);

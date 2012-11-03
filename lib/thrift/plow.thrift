@@ -93,7 +93,7 @@ struct TaskT {
     12:i32 lastMaxRss
 }
 
-struct LayerBp {
+struct LayerSpecT {
     1:string name,
     2:list<string> command;
     3:set<string> tags,
@@ -104,35 +104,31 @@ struct LayerBp {
     8:i32 minRamMb
 }
 
-struct JobBp {
+struct JobSpecT {
     1:string name,
     2:string project,
     3:bool paused,
     4:string username,
     5:i32 uid,
     6:string logPath
+    7:list<LayerSpecT> layers
 }
 
-struct Blueprint {
-    1:JobBp job,
-    2:list<LayerBp> layers
+struct JobFilterT {
+    1:list<string> project,
+    2:list<string> user,
+    3:string regex,
+    4:list<JobState> states
 }
 
-struct JobFilter {
-    1:optional list<string> project,
-    2:optional list<string> user,
-    3:optional string regex,
-    4:optional list<JobState> states
-}
-
-service RpcServiceApi {
+service RpcService {
     
-    JobT launch(1:Blueprint blueprint) throws (1:PlowException e),
+    JobT launch(1:JobSpecT spec) throws (1:PlowException e),
     JobT getRunningJob(1:string name) throws (1:PlowException e),
     JobT getJob(1:common.Guid jobId) throws (1:PlowException e),
     bool killJob(1:common.Guid jobId, 2:string reason) throws (1:PlowException e),
 
-    list<JobT> getJobs(1:JobFilter filter) throws (1:PlowException e),
+    list<JobT> getJobs(1:JobFilterT filter) throws (1:PlowException e),
 
     LayerT getLayer(1:common.Guid layerId) throws (1:PlowException e),
     list<LayerT> getLayers(1:common.Guid jobId) throws (1:PlowException e),
