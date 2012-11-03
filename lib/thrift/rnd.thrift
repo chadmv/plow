@@ -72,7 +72,7 @@ service RndServiceApi {
 service RndNodeApi {
         
     void runTask(1:RunTaskCommand command) throws (1:RndException e),
-    void killRunningTask(1:common.Guid procId) throws (1:RndException e),
+    void killRunningTask(1:common.Guid procId, 2:string reason) throws (1:RndException e),
     list<RunningTask> getRunningTasks() throws (1:RndException e),
 
     void reboot(1: bool now) throws (1:RndException e),
