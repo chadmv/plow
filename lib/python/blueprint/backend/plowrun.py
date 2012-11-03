@@ -27,7 +27,8 @@ def serialize(runner):
     job = runner.getJob()
 
     spec = plow.JobSpecT()
-    spec.project = runner.getArg("project")
+    spec.project = os.environ.get("PLOW_PROJECT",
+        conf.get("defaults", "project"))
     spec.username = getpass.getuser()
     spec.uid = os.getuid()
     spec.paused = runner.getArg("pasued")
