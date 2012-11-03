@@ -3,9 +3,9 @@ import platform
 import socket
 import logging
 
-import plow.rndaemon.conf as conf
-import plow.rndaemon.client as client
-import plow.rndaemon.rpc.ttypes as ttypes
+from .. import conf
+from .. import client
+from ..rpc import ttypes
 
 logger = logging.getLogger(__name__)
 
