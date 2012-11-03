@@ -1,17 +1,18 @@
 #!/usr/bin/python
-
 import sys
-sys.path.append("../../client/python")
-import plow.tools.app as app
-import plow.blueprint.plowrun as plowrun
+import argparse
 
-class Plowrun(app.BlueprintApplication):
+import blueprint
+
+class Bluerun(blueprint.app.Application):
 
     def __init__(self):
         app.BlueprintApplication.__init__(self,
-            "Plowrun - Blueprint launch and execution tool.")
+            "Bluerun - Blueprint launch and execution tool.")
 
-        group = self._argparser.add_argument_group("Plowun Options")
+        group = self._argparser.add_argument_group("Bluerun Options")
+        group.add_argument("-server", metavar="HOSTNAME", help="Specify the server to communicate with, if any.")
+        group.add_argument("-backend", metavar="BACKEND", help="Specify the queuing backend plugin.")
         group.add_argument("script", metavar="SCRIPT", help="Path to blueprint script.")
         group.add_argument("range", metavar="FRAME_RANGE", help="Frame range.")
         group.add_argument("-pause", action="store_true", help="Launch the job in a paused state.")
@@ -19,21 +20,20 @@ class Plowrun(app.BlueprintApplication):
 
     def handleArgs(self, args):
 
-        runner = plowrun.BlueprintRunner()
+        runner = blueprint.app.BlueprintRunner()
 
+        if args.server:
+            runner.setArg("server", args.server)
+        if args.backend:
+            runner.setArg("backend", args.backend)
         if args.pause:
             runner.setArg("pause", args.pause)
         if args.job_name:
             runner.setArg("job_name", args.job_name)
 
+        runner.setArg("script", args.script)
         runner.setArg("frame_range", args.range)
-
-        job = app.loadScript(args.script)
-        job.setup()
-        
-        if len(job.getLayers()) == 0:
-            raise Exception("The job has no layers to execute.");
-        runner.run(job)
+        runner.run()
 
 if __name__ == "__main__":
     papp = Plowrun()
