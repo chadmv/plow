@@ -3,7 +3,6 @@ package com.breakersoft.plow.service;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
-import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;

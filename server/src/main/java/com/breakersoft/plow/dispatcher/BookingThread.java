@@ -22,7 +22,6 @@ import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobBookedEvent;
 import com.breakersoft.plow.exceptions.ResourceAllocationException;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
-import com.breakersoft.plow.service.JobService;
 
 import com.google.common.collect.Maps;
 
@@ -47,9 +46,6 @@ public class BookingThread extends Thread {
 
     @Autowired
     private DispatchService dispatchService;
-
-    @Autowired
-    private JobService jobService;
 
     @Autowired
     private DispatchSupport dispatchSupport;
