@@ -127,8 +127,8 @@ class _ProcessManager(object):
             self.__timer.daemon = True
             self.__timer.start()
 
-    def killRunningTask(self, procId):
-        logger.info("kill requested for procId %s" % procId)
+    def killRunningTask(self, procId, reason):
+        logger.info("kill requested for procId %s, %s" % (procId, reason))
 
         with self.__lock:
             try:

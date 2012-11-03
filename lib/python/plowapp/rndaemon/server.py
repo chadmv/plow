@@ -20,8 +20,8 @@ class RndProcessHandler(object):
     def runTask(self, rtc):
         core.ProcessMgr.runProcess(rtc)
 
-    def killRunningTask(self, procId):
-        core.ProcessMgr.killRunningTask(procId)
+    def killRunningTask(self, procId, reason):
+        core.ProcessMgr.killRunningTask(procId, reason)
 
     def getRunningTasks(self):
         return core.ProcessMgr.getRunningTasks()
