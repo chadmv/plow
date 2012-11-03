@@ -230,11 +230,15 @@ class ProcessThread(threading.Thread):
             self.__writeLogHeader()
             self.__logfp.flush()
 
+            env = os.environ.copy()
+            env.update(rtc.env)
+
             opts = {
                 'stdout': self.__logfp, 
                 'stderr': subprocess.STDOUT,
                 'uid'   : self.__rtc.uid,
                 'cpus'  : self.__cpus,
+                'env'   : env,
             }
 
             cmd, opts = Profiler.getSubprocessOpts(rtc.command, **opts)

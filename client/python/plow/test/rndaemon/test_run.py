@@ -150,7 +150,7 @@ class TestProcessManager(unittest.TestCase):
         process.procId = "a"
         process.taskId = "b"
         process.cores = 1
-        process.env = {},
+        process.env = {}
         process.logFile = self._logfile 
         return process
 
@@ -253,7 +253,7 @@ class ServiceHandler(object):
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    for t in (TestResourceManager, TestProcessManager, TestCommunications):
+    for t in (TestCommunications, TestResourceManager, TestProcessManager):
         suite.addTest(unittest.TestLoader().loadTestsFromTestCase(t))
     unittest.TextTestRunner(verbosity=2).run(suite)
 

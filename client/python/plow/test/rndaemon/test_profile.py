@@ -18,6 +18,21 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
 class TestSystemProfiler(unittest.TestCase):
 
+    def testProfile(self):
+        prof = SystemProfiler()
+
+        cmd, opts = prof.getSubprocessOpts('some command')
+        
+        self.assertEqual(cmd, ['some', 'command'], 
+            "String command should have been split into a list")
+
+        self.assertTrue(isinstance(opts['env'], dict))
+
+        for k,v in opts['env'].iteritems():
+            self.assertTrue(isinstance(v, str), 
+                "ENV key '%s' has a value %s of type %s instead of str()" % (k, v, type(v)))
+
+
     def testLinuxCpuProfile(self):
 
         from plow.rndaemon.profile.linux import CpuProfile 
