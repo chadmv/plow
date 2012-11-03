@@ -1,12 +1,16 @@
 Plow
 ====
 
-Plow is a simple render farm.
+Plow is render farm management software specifically designed for VFX workloads.
 
-Project home: http://code.google.com/p/plow/
+There are currently no official releases of Plow, so the following instructions will get
+you started with a source checkout of Plow.  Please report any issues on
+our Google code page.
 
-Requirements
-============
+Google Project home: http://code.google.com/p/plow/
+
+Developent Environment Requirements
+===================================
 
 Server
 ------
@@ -22,9 +26,11 @@ http://www.java.com/en/download/index.jsp
 Client and Tools
 ----------------
 
-* Python 2.6 or 2.7 (sorry, talk to Autodesk)
+* Python 2.6 or 2.7
 * Qt 4.7+
 * Thrift 0.9
+* Boost
+* Cmake
 
 Installing the Server
 =====================
@@ -32,7 +38,7 @@ Installing the Server
 The plow server acts as the central brain for your render farm.  It contains the plow
 dispatcher and exposes a thrift API for interacting with jobs.
 
-This assumes your downloading the latest binary release from:
+For convinience a binary distributation of the server can be found here:
 http://code.google.com/p/plow/downloads
 
 Setting up Postgres
@@ -50,20 +56,6 @@ Execute the sql file:
     $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-triggers.sql
     $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-functions.sql
     $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-data.sql
-
-
-Starting the Server
--------------------
-
-    > tar -zxvf plow-server-bin-0.1-alpha.tar.gz
-    > cd plow-server-bin-0.1-alpha
-    > ./plow.sh
-
-    If Java7 is not in your path, plow will pick it up if the JAVA_HOME env var is set.  On Mac, this will
-    be something like this:
-
-    > export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.7.0_10.jdk/Contents/Home"
-    > ./plow.sh
 
 
 Generating the Thrift Bindings
@@ -110,6 +102,29 @@ Compiling the C++ Library
     $ make
 
 
+Running the Tools
+=================
+
+First thing you need to do if you are using a git checkout of plow is setup your environment.
+
+    $ export PLOW_ROOT="/path/to/plow/checkout"
+    $ export PYTHONPATH="/path/to/plow/checkout/lib/python"
+    $ export PATH="$PATH:$PLOW_ROOT/bin"
+
+Starting the Server
+-------------------
+
+    > tar -zxvf plow-server-bin-0.1-alpha.tar.gz
+    > cd plow-server-bin-0.1-alpha
+    > ./plow.sh
+
+    If Java7 is not in your path, plow will pick it up if the JAVA_HOME env var is set.  On Mac, this will
+    be something like this:
+
+    > export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.7.0_10.jdk/Contents/Home"
+    > ./plow.sh
+
+
 Running the Render Node Daemon
 ------------------------------
 
@@ -119,45 +134,20 @@ If you have installed the client tools using the `setup.py`, then you should now
 
     $ rndaemon
 
-Otherwise, you can use the script included in the tools directory under the root of the repository:
+Otherwise, you can launch rndaemon from your git checkout.
 
-    $ cd tools/rndaemon
-    $ ./rndaemon.py
+    $ bin/rndaemon.py
 
 The daemon will first look for an optional config file explicitely set with the `PLOW_RNDAEMON_CFG` environment variable:
-`export PLOW_RNDAEMON_CFG="client/etc/rndaemon.cfg"`
 
-Otherwise, it will search for `/etc/plow/rndaemon.cfg` and then `~/.plow/rndaemon.cfg`
+    $ export PLOW_RNDAEMON_CFG="client/etc/rndaemon.cfg"
 
-
-The Plow Config File
---------------------
-
-Before you can talk to the server with the plow client, you must setup the plow
-configuration file.  In the source checkout, this can be found in client/etc/plow.cfg.
-
-You can point plow at that configuration using the PLOW_CFG environment variable.
-
-    > export PLOW_CFG="client/etc/plow.cfg"
-
-Plow will also look for a configuration at /etc/plow/plow.cfg and ~/.plow/plow.cfg
-
+Otherwise, it will search for `$PLOW_ROOT/etc/plow/rndaemon.cfg` and then `~/.plow/rndaemon.cfg`
 
 Launching the Test Job
 ----------------------
 
 Plow includes the blueprint module for job launching and description.
 
-You'll need to set a couple environment vars to launch the test job:
-
-    > export PROJECT="test"
-    > export SHOT="test.01"
-
-The full path to the plow configuration file.  You might want to actually
-check out the configuration file and edit as necessary.
-
-    > export PLOW_CFG="/plow.git/client/etc/plow.ini"
-
-    > cd tools/plowrun
-    > plowrun script.bp 1-100 -debug
+    > plowrun $PLOW_ROOT/share/blueprint/examples/script.bp 1-100 -debug
 
