@@ -13,8 +13,8 @@ import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.test.AbstractTest;
-import com.breakersoft.plow.thrift.Blueprint;
-import com.breakersoft.plow.thrift.LayerBp;
+import com.breakersoft.plow.thrift.JobSpecT;
+import com.breakersoft.plow.thrift.LayerSpecT;
 import com.breakersoft.plow.thrift.TaskState;
 
 public class TaskDaoTests extends AbstractTest {
@@ -34,10 +34,10 @@ public class TaskDaoTests extends AbstractTest {
 
     @Test
     public void testCreate() {
-        Blueprint bp = getTestBlueprint();
-        Job job = jobDao.create(TEST_PROJECT, bp);
-        LayerBp bl = bp.getLayers().get(0);
-        layer = layerDao.create(job, bl, 0);
+        JobSpecT spec = getTestJobSpec();
+        Job job = jobDao.create(TEST_PROJECT, spec);
+        LayerSpecT lspec = spec.getLayers().get(0);
+        layer = layerDao.create(job, lspec, 0);
         task = taskDao.create(layer, "0001-test", 1, 0, 0);
     }
 

@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.test.AbstractTest;
-import com.breakersoft.plow.thrift.Blueprint;
+import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.TaskT;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 
@@ -25,8 +25,8 @@ public class ThriftTaskDaoTests extends AbstractTest {
 
     @Test
     public void testGetTask() {
-        Blueprint bp = getTestBlueprint();
-        jobService.launch(bp);
+        JobSpecT spec = getTestJobSpec();
+        jobService.launch(spec);
 
         @SuppressWarnings("deprecation")
         UUID id = simpleJdbcTemplate.queryForObject(
@@ -37,8 +37,8 @@ public class ThriftTaskDaoTests extends AbstractTest {
 
     @Test
     public void testGetTasks() {
-        Blueprint bp = getTestBlueprint();
-        jobService.launch(bp);
+        JobSpecT spec = getTestJobSpec();
+        jobService.launch(spec);
 
         @SuppressWarnings("deprecation")
         UUID id = simpleJdbcTemplate.queryForObject(

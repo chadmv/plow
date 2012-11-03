@@ -17,7 +17,7 @@ import com.breakersoft.plow.JobE;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.JobDao;
-import com.breakersoft.plow.thrift.Blueprint;
+import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.util.JdbcUtils;
@@ -73,21 +73,21 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
     };
 
     @Override
-    public Job create(Project project, Blueprint blueprint) {
+    public Job create(Project project, JobSpecT jobSpec) {
 
         final UUID jobId = UUID.randomUUID();
         jdbc.update(
                 INSERT[0],
                 jobId,
                 project.getProjectId(),
-                blueprint.job.getName(),
-                blueprint.job.getName(),
-                blueprint.job.username,
-                blueprint.job.getUid(),
+                jobSpec.getName(),
+                jobSpec.getName(),
+                jobSpec.username,
+                jobSpec.getUid(),
                 JobState.INITIALIZE.ordinal(),
-                blueprint.job.isPaused(),
+                jobSpec.isPaused(),
                 String.format("%s/%s",
-                        blueprint.job.logPath, blueprint.job.name));
+                        jobSpec.logPath, jobSpec.name));
 
         jdbc.update("INSERT INTO plow.job_count (pk_job) VALUES (?)", jobId);
         jdbc.update("INSERT INTO plow.job_dsp (pk_job) VALUES (?)", jobId);

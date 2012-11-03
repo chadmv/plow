@@ -35,12 +35,12 @@ public class ServerConfiguration {
     @Bean
     public ThriftServer getRpcThriftServer() {
         return new ThriftServer(
-                new RpcServiceApi.Processor<RpcServiceApi.Iface>(
+                new RpcService.Processor<RpcService.Iface>(
                         getRpcService()), 11336);
     }
 
     @Bean
-    public RpcServiceApi.Iface getRpcService() {
+    public RpcService.Iface getRpcService() {
         return new RpcThriftServiceImpl();
     }
 }

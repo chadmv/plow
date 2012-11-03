@@ -51,7 +51,7 @@ public class BookingThreadTests extends AbstractTest {
     @Test
     public void testHandleJobLaunchedEvent() throws InterruptedException {
 
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         BookingThread thread = dispatchConfig.getBookingThread();
@@ -83,7 +83,7 @@ public class BookingThreadTests extends AbstractTest {
     public void testDispatchNode_Jobs() throws InterruptedException {
 
         BookingThread thread = dispatchConfig.getBookingThread();
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         Node node = nodeService.createNode(getTestNodePing());

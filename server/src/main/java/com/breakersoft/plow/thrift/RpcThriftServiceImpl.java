@@ -15,7 +15,7 @@ import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 
 @ThriftService
-public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
+public class RpcThriftServiceImpl implements RpcService.Iface {
 
     private Logger logger = org.slf4j.LoggerFactory.getLogger(RpcThriftServiceImpl.class);
 
@@ -35,15 +35,15 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
     JobStateManager jobStateManager;
 
     @Override
-    public JobT launch(Blueprint bp) throws PlowException, TException {
+    public JobT launch(JobSpecT spec) throws PlowException, TException {
 
-        logger.info("launchung job: {} ", bp);
+        logger.info("launchung job: {} ", spec);
 
-        JobLaunchEvent event =  jobService.launch(bp);
+        JobLaunchEvent event =  jobService.launch(spec);
 
         JobT result = new JobT();
         result.id = event.getJob().getJobId().toString();
-        result.name = event.getBlueprint().job.getName();
+        result.name = event.getJobSpec().getName();
         return result;
     }
 
@@ -78,7 +78,7 @@ public class RpcThriftServiceImpl implements RpcServiceApi.Iface {
     }
 
     @Override
-    public List<JobT> getJobs(JobFilter filter) throws PlowException, TException {
+    public List<JobT> getJobs(JobFilterT filter) throws PlowException, TException {
         return thriftJobDao.getJobs(filter);
     }
 

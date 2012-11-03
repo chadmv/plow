@@ -63,7 +63,7 @@ public class DispatcherDaoTests extends AbstractTest {
 
     @Test
     public void testGetDispatchJob() {
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
         assertTrue(djob.getTier() == 0);
         assertEquals(djob.getJobId(), event.getJob().getJobId());
@@ -90,7 +90,7 @@ public class DispatcherDaoTests extends AbstractTest {
         Node node =  nodeService.createNode(getTestNodePing());
         DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
 
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
 
         DispatchProc proc = null;
@@ -122,7 +122,7 @@ public class DispatcherDaoTests extends AbstractTest {
         Node node =  nodeService.createNode(getTestNodePing());
         DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
 
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
 
         DispatchProc proc = null;
@@ -154,7 +154,7 @@ public class DispatcherDaoTests extends AbstractTest {
         Node node =  nodeService.createNode(getTestNodePing());
         DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
 
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
 
         for (DispatchLayer layer: dispatchDao.getDispatchLayers(djob, dnode)) {
@@ -167,7 +167,7 @@ public class DispatcherDaoTests extends AbstractTest {
         Node node =  nodeService.createNode(getTestNodePing());
         DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
 
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
 
         dispatchDao.getDispatchLayers(djob, dnode);

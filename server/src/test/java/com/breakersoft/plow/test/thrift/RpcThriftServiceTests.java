@@ -7,17 +7,17 @@ import org.junit.Test;
 
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.PlowException;
-import com.breakersoft.plow.thrift.RpcServiceApi;
+import com.breakersoft.plow.thrift.RpcService;
 
 public class RpcThriftServiceTests extends AbstractTest {
 
     @Resource
-    RpcServiceApi.Iface rpcService;
+    RpcService.Iface rpcService;
 
     @Test
     public void testLaunch() throws PlowException, TException {
 
-        rpcService.launch(getTestBlueprint());
+        rpcService.launch(getTestJobSpec());
     }
 
 }

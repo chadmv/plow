@@ -58,7 +58,7 @@ public class ProcDaoTests extends AbstractTest {
         Node node =  nodeService.createNode(getTestNodePing());
         dnode = dispatchDao.getDispatchNode(node.getName());
 
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
 
         for (DispatchLayer layer: dispatchDao.getDispatchLayers(djob, dnode)) {

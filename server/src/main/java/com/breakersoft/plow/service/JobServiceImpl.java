@@ -21,9 +21,9 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobFinishedEvent;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.thrift.Blueprint;
+import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
-import com.breakersoft.plow.thrift.LayerBp;
+import com.breakersoft.plow.thrift.LayerSpecT;
 import com.breakersoft.plow.thrift.TaskState;
 
 
@@ -50,13 +50,13 @@ public class JobServiceImpl implements JobService {
     EventManager eventManager;
 
     @Override
-    public JobLaunchEvent launch(Blueprint blueprint) {
+    public JobLaunchEvent launch(JobSpecT jobspec) {
 
-        final Project project = projectDao.get(blueprint.job.getProject());
-        final Job job = jobDao.create(project, blueprint);
+        final Project project = projectDao.get(jobspec.getProject());
+        final Job job = jobDao.create(project, jobspec);
         final Folder folder = filterJob(job, project);
 
-        createJobTopology(job, project, blueprint);
+        createJobTopology(job, project, jobspec);
 
         jobDao.updateFrameStatesForLaunch(job);
         jobDao.updateFrameCountsForLaunch(job);
@@ -65,7 +65,7 @@ public class JobServiceImpl implements JobService {
         //TODO: do this someplace else. (tranny hook or aspect)
         // Don't want to add jobs to the dispatcher that fail to
         // commit to the DB.
-        JobLaunchEvent event = new JobLaunchEvent(job, folder, blueprint);
+        JobLaunchEvent event = new JobLaunchEvent(job, folder, jobspec);
         eventManager.post(event);
 
         return event;
@@ -88,10 +88,10 @@ public class JobServiceImpl implements JobService {
     }
 
     private void createJobTopology(
-            Job job, Project project, Blueprint blueprint) {
+            Job job, Project project, JobSpecT jobspec) {
 
         int layerOrder = 0;
-        for (LayerBp blayer: blueprint.getLayers()) {
+        for (LayerSpecT blayer: jobspec.getLayers()) {
             Layer layer = layerDao.create(job, blayer, layerOrder);
 
             int frameOrder = 0;

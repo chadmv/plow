@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
-import com.breakersoft.plow.thrift.JobFilter;
+import com.breakersoft.plow.thrift.JobFilterT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.JobT;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
@@ -81,7 +81,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
         "INNER JOIN project ON job.pk_project = project.pk_project ";
 
     @Override
-    public List<JobT> getJobs(JobFilter filter) {
+    public List<JobT> getJobs(JobFilterT filter) {
 
         final List<String> clauses = Lists.newArrayListWithExpectedSize(6);
         final List<Object> values = Lists.newArrayList();

@@ -16,7 +16,7 @@ import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.LayerE;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.LayerDao;
-import com.breakersoft.plow.thrift.LayerBp;
+import com.breakersoft.plow.thrift.LayerSpecT;
 import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
@@ -67,7 +67,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
                 "int_min_cores", "int_max_cores", "int_min_mem");
 
     @Override
-    public Layer create(final Job job, final LayerBp layer, final int order) {
+    public Layer create(final Job job, final LayerSpecT layer, final int order) {
 
         final UUID id = UUID.randomUUID();
 

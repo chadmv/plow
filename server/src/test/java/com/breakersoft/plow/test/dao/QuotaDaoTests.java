@@ -49,9 +49,9 @@ public class QuotaDaoTests extends AbstractTest {
     @Test
     public void testGetByNodeAndTask() {
         Node node = nodeService.createNode(getTestNodePing());
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         Layer layer = jobService.getLayer(event.getJob(),
-                event.getBlueprint().getLayers().get(0).name);
+                event.getJobSpec().getLayers().get(0).name);
         Task task = jobService.getTask(layer, 1);
         Quota quota = quotaDao.getQuota(node, task);
 

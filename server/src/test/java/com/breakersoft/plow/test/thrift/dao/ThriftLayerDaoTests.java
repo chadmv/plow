@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.test.AbstractTest;
-import com.breakersoft.plow.thrift.Blueprint;
+import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 
 public class ThriftLayerDaoTests extends AbstractTest {
@@ -22,9 +22,8 @@ public class ThriftLayerDaoTests extends AbstractTest {
 
     @Test
     public void getLayers() {
-        Blueprint bp = getTestBlueprint();
-        JobLaunchEvent event = jobService.launch(bp);
-
+        JobSpecT jobSpec = getTestJobSpec();
+        JobLaunchEvent event = jobService.launch(jobSpec);
         assertEquals(1, thriftLayerDao.getLayers(event.getJob().getJobId()).size());
     }
 }

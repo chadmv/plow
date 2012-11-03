@@ -15,7 +15,7 @@ public class JobLauncherServiceTests extends AbstractTest {
 
     @Test
     public void testCreate() {
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
 
         assertLayerCount(event.getJob(), 1);
         assertFrameCount(event.getJob(), 10);

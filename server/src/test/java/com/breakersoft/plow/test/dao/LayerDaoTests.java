@@ -11,10 +11,9 @@ import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.test.AbstractTest;
-import com.breakersoft.plow.thrift.Blueprint;
-import com.breakersoft.plow.thrift.JobBp;
+import com.breakersoft.plow.thrift.JobSpecT;
+import com.breakersoft.plow.thrift.LayerSpecT;
 import com.breakersoft.plow.thrift.JobState;
-import com.breakersoft.plow.thrift.LayerBp;
 
 public class LayerDaoTests extends AbstractTest {
 
@@ -28,18 +27,17 @@ public class LayerDaoTests extends AbstractTest {
 
     @Test
     public void testCreate() {
-        Blueprint bp = getTestBlueprint();
-        Job job = jobDao.create(TEST_PROJECT, bp);
-        LayerBp bl = bp.getLayers().get(0);
+        JobSpecT spec = getTestJobSpec();
+        Job job = jobDao.create(TEST_PROJECT, spec);
+        LayerSpecT bl = spec.getLayers().get(0);
         layer = layerDao.create(job, bl, 0);
     }
 
     @Test
     public void testGetByName() {
         testCreate();
-        Blueprint bp = getTestBlueprint();
-        JobBp jbp = bp.job;
-        Job job = jobDao.get(jbp.getName(), JobState.INITIALIZE);
+        JobSpecT spec = getTestJobSpec();
+        Job job = jobDao.get(spec.getName(), JobState.INITIALIZE);
         Layer layer1 = layerDao.get(job, "test_ls");
         assertEquals(layer, layer1);
     }

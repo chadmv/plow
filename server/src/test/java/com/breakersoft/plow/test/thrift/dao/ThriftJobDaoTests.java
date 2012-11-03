@@ -9,8 +9,8 @@ import org.junit.Test;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.test.AbstractTest;
-import com.breakersoft.plow.thrift.Blueprint;
-import com.breakersoft.plow.thrift.JobFilter;
+import com.breakersoft.plow.thrift.JobSpecT;
+import com.breakersoft.plow.thrift.JobFilterT;
 import com.breakersoft.plow.thrift.JobT;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 
@@ -24,12 +24,12 @@ public class ThriftJobDaoTests extends AbstractTest {
 
     @Test
     public void getJobs() {
-        Blueprint bp = getTestBlueprint();
-        jobService.launch(bp);
+        JobSpecT spec = getTestJobSpec();
+        jobService.launch(spec);
 
-        assertTrue(thriftJobDao.getJobs(new JobFilter()).size() > 0);
+        assertTrue(thriftJobDao.getJobs(new JobFilterT()).size() > 0);
 
-        JobFilter f = new JobFilter();
+        JobFilterT f = new JobFilterT();
         f.addToUser("lila");
         assertEquals(0, thriftJobDao.getJobs(f).size());
 
@@ -39,8 +39,8 @@ public class ThriftJobDaoTests extends AbstractTest {
 
     @Test
     public void getJob() {
-        Blueprint bp = getTestBlueprint();
-        JobLaunchEvent event = jobService.launch(bp);
+        JobSpecT spec = getTestJobSpec();
+        JobLaunchEvent event = jobService.launch(spec);
 
         JobT job = thriftJobDao.getJob(
                 event.getJob().getJobId().toString());
@@ -49,10 +49,10 @@ public class ThriftJobDaoTests extends AbstractTest {
 
     @Test
     public void getRunningJob() {
-        Blueprint bp = getTestBlueprint();
-        JobLaunchEvent event = jobService.launch(bp);
+        JobSpecT spec = getTestJobSpec();
+        JobLaunchEvent event = jobService.launch(spec);
 
-        String jobName = event.getBlueprint().getJob().name;
+        String jobName = event.getJobSpec().getName();
 
         JobT job = thriftJobDao.getRunningJob(jobName);
         assertEquals(job.name, jobName);

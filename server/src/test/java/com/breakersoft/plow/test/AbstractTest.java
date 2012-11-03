@@ -19,9 +19,8 @@ import com.breakersoft.plow.rnd.thrift.Hardware;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.ProjectService;
-import com.breakersoft.plow.thrift.Blueprint;
-import com.breakersoft.plow.thrift.JobBp;
-import com.breakersoft.plow.thrift.LayerBp;
+import com.breakersoft.plow.thrift.JobSpecT;
+import com.breakersoft.plow.thrift.LayerSpecT;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -53,16 +52,16 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         nodeService.setDefaultCluster(TEST_CLUSTER);
     }
 
-    public Blueprint getTestBlueprint() {
+    public JobSpecT getTestJobSpec() {
 
-        JobBp jbp = new JobBp();
-        jbp.setName("test");
-        jbp.setUid(100);
-        jbp.setUsername("stella");
-        jbp.setPaused(false);
-        jbp.setProject("unittest");
+        JobSpecT jobspec = new JobSpecT();
+        jobspec.setName("test");
+        jobspec.setUid(100);
+        jobspec.setUsername("stella");
+        jobspec.setPaused(false);
+        jobspec.setProject("unittest");
 
-        LayerBp layer = new LayerBp();
+        LayerSpecT layer = new LayerSpecT();
         layer.setChunk(1);
         layer.setCommand(Lists.newArrayList("sleep", "5" ));
         layer.setMaxCores(8);
@@ -72,11 +71,9 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         layer.setRange("1-10");
         layer.setTags(Sets.newHashSet("unittest"));
 
-        Blueprint bp = new Blueprint();
-        bp.job = jbp;
-        bp.addToLayers(layer);
+        jobspec.addToLayers(layer);
 
-        return bp;
+        return jobspec;
     }
 
     public  Ping getTestNodePing() {

@@ -40,7 +40,7 @@ public class FrontEndDispatcherTests extends AbstractTest {
     @Test
     public void testAddAndRemoveJob() {
 
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         dispatcher.addJob(job);
@@ -52,7 +52,7 @@ public class FrontEndDispatcherTests extends AbstractTest {
 
     @Test
     public void testGetJob() {
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         dispatcher.addJob(job);
@@ -62,7 +62,7 @@ public class FrontEndDispatcherTests extends AbstractTest {
 
     @Test
     public void testHandleJobLaunchEvent() {
-        JobLaunchEvent event = jobService.launch(getTestBlueprint());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchJob job = dispatcherService.getDispatchJob(event);
 
         dispatcher.handleJobLaunchEvent(event);
