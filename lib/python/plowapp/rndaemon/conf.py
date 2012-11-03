@@ -19,8 +19,9 @@ def _init():
     if os.environ.has_key("PLOW_RNDAEMON_CFG"):
         cfgs = Config.read([os.environ["PLOW_RNDAEMON_CFG"]])
     else:
-        cfgs = Config.read(["/etc/plow/rndaemon.cfg", os.path.expanduser("~/.plow/rndaemon.cfg")])
-
+        cfgs = Config.read([
+            os.path.join(os.environ.get("PLOW_ROOT", "/usr/local"), "etc/plow/rndaemon.cfg"),
+            os.path.expanduser("~/.plow/rndaemon.cfg")])
     if cfgs:
         logger.info('Config read from: %s' % cfgs)
     else:
