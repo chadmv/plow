@@ -4,9 +4,9 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
-from rpc import RpcServiceApi
+from rpc import RpcService
 
-import plow.conf as conf
+import conf
 
 class Singleton(type):
     def __init__(cls, name, bases, dict):

@@ -2,19 +2,20 @@
 
 import unittest
 
-PREFIX = 'plow.test'
+TESTS = []
 
-TESTS = (
-    'rndaemon.test_profile',
-    'rndaemon.test_run.TestCommunications',
-    'rndaemon.test_run.TestResourceManager',
-    'rndaemon.test_run.TestProcessManager',
-)
+# rndaemon tests
+TESTS += ['.'.join(['plowapp.rndaemon.test', p]) for p in (
+    'test_profile',
+    'test_run.TestCommunications',
+    'test_run.TestResourceManager',
+    'test_run.TestProcessManager',
+    )
+]
 
 def additional_tests():
-    tests = ['.'.join([PREFIX, name]) for name in TESTS]
     suite = unittest.TestSuite()
-    suite.addTest(unittest.TestLoader().loadTestsFromNames(tests))
+    suite.addTest(unittest.TestLoader().loadTestsFromNames(TESTS))
     return suite
 
 

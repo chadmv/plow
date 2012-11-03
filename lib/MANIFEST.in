@@ -1,2 +1,2 @@
-recursive-include python *.dylib *.ini *.cfg *.bp
+recursive-include python *.dylib *.dat *.bp *.ini
 graft etc

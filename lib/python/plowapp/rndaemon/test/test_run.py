@@ -3,8 +3,6 @@
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../../'))
-
 import tempfile
 import unittest
 import time
@@ -15,21 +13,18 @@ import platform
 from multiprocessing import Process, Event 
 from ast import literal_eval 
 
-import plow.conf as conf 
-import plow.rndaemon.conf as rndconf 
-rndconf.NETWORK_DISABLED = True
+from plowapp.rndaemon import conf 
+conf.NETWORK_DISABLED = True
 
-import plow.rndaemon.rpc.ttypes as ttypes
-import plow.rndaemon.core as core
+from plowapp.rndaemon.rpc import ttypes, RndServiceApi
+from plowapp.rndaemon import core, server, client
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-PLOW_ROOT = conf.Config.get('env', 'plow_root')
+conf.TASK_PROXY_USER = os.getenv('PLOW_PROXY_USER', conf.TASK_PROXY_USER)
 
-rndconf.TASK_PROXY_USER = os.getenv('PLOW_PROXY_USER', rndconf.TASK_PROXY_USER)
-
-CMDS_UTIL = os.path.join(PLOW_ROOT, 'client/python/plow/test/rndaemon/utils/cmds.py')
+CMDS_UTIL = os.path.join(os.path.dirname(__file__), 'utils/cmds.py')
 
 IS_LINUX = platform.system() in ('FreeBSD', 'Linux')
 
@@ -198,15 +193,12 @@ class TestCommunications(unittest.TestCase):
     """
 
     def setUp(self):
-        from plow.rndaemon.server import get_server
-        from plow.rndaemon.rpc import RndServiceApi 
-
         self.event = Event()
 
         self.server_port = 9092
 
         handler = ServiceHandler(self.event)
-        self.server = get_server(RndServiceApi, handler, self.server_port)
+        self.server = server.get_server(RndServiceApi, handler, self.server_port)
 
         self.t_server = Process(target=self.server.serve)
         self.t_server.daemon = True
@@ -224,13 +216,10 @@ class TestCommunications(unittest.TestCase):
         Get a connection to the local "server" and test 
         that it receives a ping.
         """
-        from plow.rndaemon.client import getPlowConnection
-        from plow.rndaemon.rpc.ttypes import Ping, Hardware
+        ping = ttypes.Ping()
+        ping.hw = ttypes.Hardware()
 
-        ping = Ping()
-        ping.hw = Hardware()
-
-        service, transport = getPlowConnection('localhost', self.server_port)
+        service, transport = client.getPlowConnection('localhost', self.server_port)
         service.sendPing(ping)
         self.event.wait(3)
 

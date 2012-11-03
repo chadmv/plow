@@ -6,3 +6,4 @@ server/target
 
 client/python/plow.egg-info
 *.egg-info
+lib/etc

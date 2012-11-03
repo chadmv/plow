@@ -2,8 +2,6 @@
 import os
 import ConfigParser
 
-__all__ = ["Config"]
-
 _Config = ConfigParser.RawConfigParser()
 _Args = { }
 
@@ -23,16 +21,14 @@ _init()
 
 assert _Config.has_section("plow")
 
-def get(section, key):
+def get(section, key, default=None):
     """
-    Return the specified configuration option.  Automatically
-    interpolates any environement variables specified in plow.ini.
+    Return the specified configuration option.
     """
-    interps = _Config.get("env", "interpolate").split(",")
-    args = dict([(inter, os.environ.get(inter, "test")) for inter in interps])
-
-    result = _Config.get(section, key)
-    return result % args
+    try:
+        return _Config.get(section, key)
+    except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+        return default
 
 
  

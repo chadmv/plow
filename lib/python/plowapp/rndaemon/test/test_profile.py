@@ -3,12 +3,11 @@
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../../'))
-
 import unittest
 import platform
 
-from plow.rndaemon.profile import SystemProfiler
+from plowapp.rndaemon.profile import SystemProfiler
+from plowapp.rndaemon.profile.linux import CpuProfile 
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -34,8 +33,6 @@ class TestSystemProfiler(unittest.TestCase):
 
 
     def testLinuxCpuProfile(self):
-
-        from plow.rndaemon.profile.linux import CpuProfile 
 
         saved = CpuProfile.CPUINFO 
         CpuProfile.CPUINFO = os.path.join(DATA_DIR, 'cpuinfo.dat')

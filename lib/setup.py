@@ -8,17 +8,29 @@ except:
 
 import os
 import glob
+import shutil
+
 from setuptools import setup, find_packages
 
-__ROOT__ = os.path.dirname(__file__)
+ROOT = os.path.dirname(__file__)
 
-execfile(os.path.join(__ROOT__, 'python/plow/version.py'))
+execfile(os.path.join(ROOT, 'python/plow/version.py'))
 
 def get_data(*paths):
     data = []
     for p in paths:
-        data.extend(glob.glob(os.path.join(__ROOT__, p)))
+        data.extend(glob.iglob(os.path.abspath(os.path.join(ROOT, p))))
     return data
+
+
+# manually graft in the parent etc/ directory so we can properly
+# dist it from here
+ETC_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../etc'))
+ETC_DST_DIR = os.path.join(ROOT, 'etc')
+if os.path.isdir(ETC_SRC_DIR):
+    if os.path.isdir(ETC_DST_DIR):
+        shutil.rmtree(ETC_DST_DIR)
+    shutil.copytree(ETC_SRC_DIR, ETC_DST_DIR)
 
 
 setup(
@@ -27,7 +39,7 @@ setup(
     version = __version__,
 
     package_dir = {'': 'python'},
-    packages = find_packages('python'),
+    packages = find_packages('python', exclude=['tests', 'tests.*']),
 
     install_requires = [
         'psutil>=0.6.1',
@@ -38,24 +50,23 @@ setup(
 
     entry_points = {
         'console_scripts': [
-            'rndaemon = plow.tools.rndaemon:main',
+            'rndaemon = plowapp.rndaemon.main:main',
         ],
     },
 
     # TODO: Some tests need to be made runable without an independant server
-    test_suite = "plow.test.test_all",
+    test_suite = "tests.test_all",
 
     include_package_data=True,
     package_data = {
-        'plow': [
+        'plowapp': [
             'rndaemon/profile/*.dylib',
-            'blueprint/*.ini',
         ],
     },
 
     # TODO: Force an installation of confs to /etc/plow ? (would imply sudo)
     data_files = [
-        (os.path.expanduser('~/.plow/'), get_data('etc/*.cfg')),
+        ("/usr/local/etc/plow", get_data('etc/plow/*.cfg')),
     ],
 
     # Meta-stuff

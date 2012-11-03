@@ -6,13 +6,10 @@ os.environ["PLOW_CFG"] = os.path.join(os.path.dirname(__file__), "plow.ini")
 os.environ["PROJECT"] = "test"
 os.environ["SHOT"] = "test.01"
 
-import sys
-sys.path.append("../..")
+import blueprint as bp
+import blueprint.plowrun as plowrun
 
-import plow.blueprint as bp
-import plow.blueprint.plowrun as plowrun
-
-from plow.blueprint.modules.shell import Shell
+from blueprint.modules.shell import Shell
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -25,9 +22,6 @@ class BlueprintTests(unittest.TestCase):
 
         plowrun.plowrun(job)
 
-
-
-        
 
 
 
