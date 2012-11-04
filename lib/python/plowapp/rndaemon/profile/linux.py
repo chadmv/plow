@@ -23,6 +23,7 @@ class SystemProfiler(PosixSystemProfiler):
         self.data['bootTime'] = int(psutil.BOOT_TIME)
 
         self.cpuprofile = None
+
         self._init_cpu_info()
 
     def __repr__(self):
@@ -37,7 +38,9 @@ class SystemProfiler(PosixSystemProfiler):
 
         if cpuinfo.physical_cpus:
             # grab the model of the first processor entry
-            model = cpuinfo.physical_cpus.itervalues().next().get('model', '')
+            first_cpu = cpuinfo.physical_cpus.itervalues().next()
+            model = first_cpu.get('model', '')
+            self.hyperthread_factor = first_cpu.get('ht_factor', 1)
 
         self.data.update({
             'cpuModel'      : model,
@@ -71,8 +74,12 @@ class SystemProfiler(PosixSystemProfiler):
         """
         cmd, opts = super(SystemProfiler, self).getSubprocessOpts(cmd, **kwargs)
 
-        uid = opts['env'].get('PLOW_TASK_UID')
-        gid = opts['env'].get('PLOW_TASK_GID')
+        cpuprofile = self.cpuprofile
+
+        env = opts['env']
+
+        uid = env.get('PLOW_TASK_UID')
+        gid = env.get('PLOW_TASK_GID')
         cpus = kwargs.get('cpus', set())
 
         opts['preexec_fn'] = partial(self._preexec_fn, 
