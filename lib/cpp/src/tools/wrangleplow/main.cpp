@@ -7,7 +7,6 @@ int main(int argc, char *argv[])
 
   WranglePlow::MainWindow wrangleplow;
   wrangleplow.show();
-  wrangleplow.updateJobs();
 
   return app.exec();
 }

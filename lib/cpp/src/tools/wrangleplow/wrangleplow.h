@@ -2,6 +2,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "JobTree.h"
+
 #include <QMainWindow>
 #include <QTreeWidget>
 
@@ -13,13 +15,12 @@ namespace WranglePlow {
         
     public:
         MainWindow();
-        void updateJobs();
-    
+
     protected:
         void closeEvent(QCloseEvent *event);
 
     private:
-        QTreeWidget* treeWidget;
+        Plow::Gui::JobTree* jobTree;
     };
 
 }
