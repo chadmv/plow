@@ -29,6 +29,11 @@ class sysinfo_t(ctypes.Structure):
 
 class SystemProfiler(PosixSystemProfiler):
 
+    def __init__(self):
+        super(SystemProfiler, self).__init__()
+
+        self.hyperthread_factor = max(self.logicalCpus // self.physicalCpus, 1)
+
     def __repr__(self):
         return "<%s: OSX>" % self.__class__.__name__
 

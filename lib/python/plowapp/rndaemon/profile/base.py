@@ -12,10 +12,21 @@ logger = logging.getLogger(__name__)
 class AbstractProfiler(object):
     def __init__(self):
         self.data = { "platform": platform.platform() }
+
         self.update()
+
+        self.hyperthread_factor = max(self.logicalCpus // self.physicalCpus, 1)
 
         for key, value in self.data.iteritems():
             logger.info("%s = %s" % (key, value))
+
+
+    def __getattr__(self, k):
+        return self.data[k]
+
+    def __str__(self):
+        return str(self.data)
+
 
     def sendPing(self, tasks, isReboot=False):
         
@@ -110,6 +121,14 @@ class AbstractProfiler(object):
         """
         env = kwargs.get('env') or os.environ.copy()
 
+        core_count = len(kwargs.get('cpus', [0]))
+        
+        if not env.has_key('PLOW_CORES'):
+            env['PLOW_CORES'] = str(core_count)
+        
+        if not env.has_key('PLOW_THREADS'):
+            env['PLOW_THREADS'] = str(core_count * self.hyperthread_factor)
+
         opts = dict(
             shell   = False,
             stdout  = kwargs.get('stdout'), 
@@ -121,8 +140,3 @@ class AbstractProfiler(object):
         return cmd, opts
 
 
-    def __getattr__(self, k):
-        return self.data[k]
-
-    def __str__(self):
-        return str(self.data)

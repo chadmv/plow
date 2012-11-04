@@ -7,10 +7,11 @@ import unittest
 import platform
 
 from plowapp.rndaemon.profile import SystemProfiler
-from plowapp.rndaemon.profile.linux import CpuProfile 
+import plowapp.rndaemon.profile.linux as linuxProfiler 
+
 
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -32,14 +33,45 @@ class TestSystemProfiler(unittest.TestCase):
                 "ENV key '%s' has a value %s of type %s instead of str()" % (k, v, type(v)))
 
 
+    def testeHyperThread(self):
+        prof = SystemProfiler()
+
+        prof.hyperthread_factor = 2
+
+        # pretend we want to run with 3 cores with HT
+        _, opts = prof.getSubprocessOpts([], cpus=range(3))
+
+        env = opts['env']
+        self.assertEqual(env['PLOW_CORES'], '3')
+        self.assertEqual(env['PLOW_THREADS'], '6')
+
+        prof.hyperthread_factor = 1
+
+        # pretend we want to run with 2 cores w/o HT
+        _, opts = prof.getSubprocessOpts([], cpus=range(2))
+
+        env = opts['env']
+        self.assertEqual(env['PLOW_CORES'], '2')
+        self.assertEqual(env['PLOW_THREADS'], '2')
+
+        prof.hyperthread_factor = 2
+
+        # pretend we want to run with 8 cores with HT
+        _, opts = prof.getSubprocessOpts([], cpus=range(8))
+
+        env = opts['env']
+        self.assertEqual(env['PLOW_CORES'], '8')
+        self.assertEqual(env['PLOW_THREADS'], '16')
+
+
     def testLinuxCpuProfile(self):
 
-        saved = CpuProfile.CPUINFO 
-        CpuProfile.CPUINFO = os.path.join(DATA_DIR, 'cpuinfo.dat')
+        saved = linuxProfiler.CpuProfile.CPUINFO 
+        linuxProfiler.CpuProfile.CPUINFO = os.path.join(DATA_DIR, 'cpuinfo.dat')
 
-        cpu_profile = CpuProfile()
+        cpu_profile = linuxProfiler.CpuProfile()
 
-        CpuProfile.CPUINFO = saved
+        linuxProfiler.CpuProfile.CPUINFO = saved
 
         self.assertEqual(cpu_profile.num_cpus, 16)
         self.assertEqual(cpu_profile.num_phys_cpus, 8)
