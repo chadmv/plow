@@ -16,8 +16,10 @@ JobTree::JobTree(QWidget *parent) : QWidget(parent)
     treeWidget = new QTreeWidget;
     treeWidget->setHeaderLabels(header);
     treeWidget->setColumnCount(4);
-
+    treeWidget->setColumnWidth(0, 300);
+    
     layout->addWidget(treeWidget);
+
 }
 
 void JobTree::updateJobs()
@@ -48,5 +50,6 @@ void JobTree::updateJobs()
     }
 }
 
-}
-}
+
+} // Gui
+} // Plow
