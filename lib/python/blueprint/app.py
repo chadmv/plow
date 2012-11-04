@@ -55,7 +55,6 @@ class BlueprintRunner(object):
 
     def launch(self):
         # Load the backend module
-        print conf.get("defaults", "backend")
         backend = loadBackendPlugin(self.getArg("backend",
             conf.get("defaults", "backend")))
         backend.launch(self)
