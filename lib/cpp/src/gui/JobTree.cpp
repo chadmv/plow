@@ -2,6 +2,7 @@
 #include "plow.h"
 
 #include <QStringList>
+#include <QString>
 
 namespace Plow { namespace Gui {
 
@@ -36,8 +37,13 @@ void JobTree::updateJobs()
                                      i != jobs.end();
                                      ++i)
     {
-        QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0,
-            QStringList(QString(i->name.c_str())));
+        QStringList data;
+        data << QString::fromStdString(i->name)
+             << QString::number(i->runningCoreCount)
+             << QString::number(i->maxCores)
+             << QString::number(i->waitingTaskCount);
+
+        QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, data);
         treeWidget->insertTopLevelItem(0, item);
     }
 }
