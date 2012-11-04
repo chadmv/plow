@@ -1,23 +1,28 @@
 #include "wrangleplow.h"
-#include "ui_wrangleplow.h"
-
 #include "plow.h"
 
+#include <QTreeWidgetItem>
 #include <vector>
 
-namespace Plow {
+using namespace Plow;
+
 namespace WranglePlow {
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow()
 {
-    ui->setupUi(this);
+    QStringList header;
+    header << "Job" << "Cores" << "Max" << "Waiting";
+
+    treeWidget = new QTreeWidget;
+    treeWidget->setHeaderLabels(header);
+    treeWidget->setColumnCount(4);
+
+    setCentralWidget(treeWidget);
 }
 
-MainWindow::~MainWindow()
+void MainWindow::closeEvent(QCloseEvent *event)
 {
-    delete ui;
+
 }
 
 void MainWindow::updateJobs()
@@ -33,16 +38,14 @@ void MainWindow::updateJobs()
 
     client->getJobs(jobs, filter);
 
-    QTreeWidget *tree = ui->treeWidget;
     for (std::vector<JobT>::iterator i = jobs.begin();
                                      i != jobs.end();
                                      ++i)
     {
         QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0,
             QStringList(QString(i->name.c_str())));
-        tree->insertTopLevelItem(0, item);
+        treeWidget->insertTopLevelItem(0, item);
     }
 }
 
-}
 }

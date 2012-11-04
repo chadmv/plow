@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
   QApplication app(argc, argv);
 
-  Plow::WranglePlow::MainWindow wrangleplow;
+  WranglePlow::MainWindow wrangleplow;
   wrangleplow.show();
   wrangleplow.updateJobs();
 
