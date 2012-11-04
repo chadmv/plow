@@ -7,6 +7,7 @@ int main(int argc, char *argv[])
 
   WranglePlow::MainWindow wrangleplow;
   wrangleplow.show();
+  wrangleplow.resize(1024, 768);
 
   return app.exec();
 }
