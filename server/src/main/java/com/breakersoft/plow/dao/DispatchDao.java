@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
@@ -41,4 +42,8 @@ public interface DispatchDao {
     DispatchFolder getDispatchFolder(UUID folder);
 
     RunTaskCommand getRunTaskCommand(DispatchTask task, DispatchProc proc);
+
+    void subtractFromDispatchTotals(DispatchProc proc);
+
+    void addToDispatchTotals(DispatchProc proc);
 }

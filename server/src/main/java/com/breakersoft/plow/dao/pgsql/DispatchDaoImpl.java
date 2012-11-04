@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
@@ -433,5 +434,29 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         command.procId = proc.getProcId().toString();
         command.cores = proc.getCores();
         return command;
+    }
+
+    @Override
+    public void addToDispatchTotals(DispatchProc proc) {
+        jdbc.update(
+                "UPDATE plow.folder_dsp SET int_run_cores=int_run_cores+? WHERE pk_folder=(" +
+                        "SELECT pk_folder FROM job WHERE pk_job=?)", proc.getCores(), proc.getJobId());
+        jdbc.update(
+                "UPDATE plow.job_dsp SET int_run_cores=int_run_cores+? WHERE pk_job=?",
+                proc.getCores(), proc.getJobId());
+        jdbc.update("UPDATE layer_dsp SET int_run_cores=int_run_cores+? WHERE pk_layer=?",
+                proc.getCores(), proc.getLayerId());
+    }
+
+    @Override
+    public void subtractFromDispatchTotals(DispatchProc proc) {
+        jdbc.update(
+                "UPDATE plow.folder_dsp SET int_run_cores=int_run_cores-? WHERE pk_folder=(" +
+                        "SELECT pk_folder FROM job WHERE pk_job=?)",  proc.getCores(), proc.getJobId());
+        jdbc.update(
+                "UPDATE plow.job_dsp SET int_run_cores=int_run_cores-? WHERE pk_job=?",
+                proc.getCores(), proc.getJobId());
+        jdbc.update("UPDATE layer_dsp SET int_run_cores=int_run_cores-? WHERE pk_layer=?",
+                proc.getCores(), proc.getLayerId());
     }
 }

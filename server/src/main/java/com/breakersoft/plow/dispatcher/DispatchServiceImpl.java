@@ -13,6 +13,9 @@ import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.DispatchDao;
+import com.breakersoft.plow.dao.FolderDao;
+import com.breakersoft.plow.dao.JobDao;
+import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dao.QuotaDao;
@@ -49,6 +52,15 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Autowired
     private TaskDao taskDao;
+
+    @Autowired
+    private JobDao jobDao;
+
+    @Autowired
+    private LayerDao layerDao;
+
+    @Autowired
+    private FolderDao folderDao;
 
     @Autowired
     private QuotaDao quotaDao;
@@ -156,6 +168,7 @@ public class DispatchServiceImpl implements DispatchService {
         procDao.create(proc);
         nodeDao.allocateResources(node, task.getMinCores(), task.getMinMemory());
         quotaDao.allocateResources(quota, task.getMinCores());
+        dispatchDao.addToDispatchTotals(proc);
 
         node.decrement(task.getMinCores(), task.getMinMemory());
         return proc;
@@ -190,6 +203,7 @@ public class DispatchServiceImpl implements DispatchService {
 
             nodeDao.freeResources(node, proc.getCores(), proc.getMemory());
             quotaDao.freeResources(quota, proc.getCores());
+            dispatchDao.subtractFromDispatchTotals(proc);
 
             proc.setAllocated(false);
             eventManager.post(new JobUnbookedEvent(proc));
