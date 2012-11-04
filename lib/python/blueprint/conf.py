@@ -20,13 +20,13 @@ def _init():
 # run as a function to avoid polluting module with temp variables
 _init()
 
-def get(section, key, interp=None):
+def get(section, key, **kwargs):
     """
     Return the specified configuration option.  Automatically
     interpolates any environement variables specified in plow.ini.
     """
     interps = _Config.get("env", "interpolate").split(",")
     args = dict([(inter, os.environ.get(inter, "test")) for inter in interps])
-    if interp:
-        args.update(interp)
+    if kwargs:
+        args.update(kwargs)
     return _Config.get(section, key) % args
