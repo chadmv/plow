@@ -2,6 +2,9 @@
 
 import unittest
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 TESTS = []
 
 # rndaemon tests

@@ -73,21 +73,10 @@ class TestProcessManager(unittest.TestCase):
         while core.ProcessMgr.getRunningTasks():
             time.sleep(.1)
 
-        captured_affinity = tuple(self.getLogCpuAffinity(process.logFile))
-        count = len(captured_affinity)
-        self.assertTrue(count == 1, "Expected only 1 result. Got %d" % count)
+        sig, status = self.getLogSignalStatus(process.logFile)
+        self.assertEqual(status, 0, "Expected a 0 Exit Status, but got %s" % status)
 
-        if IS_LINUX:
-            captured = captured_affinity[0]
-            cpu_set = set()
-            logical_cpus = core.Profiler.cpuprofile.logical_cpus
-
-            for i in xrange(process.cores):
-                cpu_set.update(logical_cpus[i])
-
-            cpu_tuple = tuple(cpu_set)
-            self.assertEqual(captured, cpu_tuple, 
-                'Captured cpu affinity %s does not match expected %s' % (cpu_tuple, captured))
+        self.cpuAffinityTestUtil(process.logFile)
 
 
     def testRunTaskCommandHalfCores(self):
@@ -102,6 +91,11 @@ class TestProcessManager(unittest.TestCase):
 
         core.ProcessMgr.runProcess(process)
 
+        while core.ProcessMgr.getRunningTasks():
+            time.sleep(.1)
+
+        self.cpuAffinityTestUtil(process.logFile)
+
 
     def testRunTaskCommandMaxCores(self):
         process = self.getNewTaskCommand()
@@ -109,6 +103,11 @@ class TestProcessManager(unittest.TestCase):
         process.command = [CMDS_UTIL, 'cpu_affinity']
 
         core.ProcessMgr.runProcess(process)
+
+        while core.ProcessMgr.getRunningTasks():
+            time.sleep(.1)
+            
+        self.cpuAffinityTestUtil(process.logFile)
 
 
     def testRunTaskCommandOutOfCores(self):
@@ -129,15 +128,22 @@ class TestProcessManager(unittest.TestCase):
         self.assertEqual(total, 1, msg="Expected there to be one running task")
 
         task = runningTasks[0]
-        core.ProcessMgr.killRunningTask(task.procId)
+        core.ProcessMgr.killRunningTask(task.procId, "Killing for testing reasons")
         time.sleep(1)
 
         count = len(core.ProcessMgr.getRunningTasks())
-        self.assertEqual(count, 0, msg="Should not have any running tasks anymore")
+        self.assertEqual(count, 0, 
+            msg="Expected 0 running tasks but got %s" % count)
+
+        i = 0
+        while core.ProcessMgr.getRunningTasks():
+            time.sleep(.25)
+            self.assertTrue(i < 10, "Tasks are still running when they should be dead by now")
+            i+=1
 
         sig, status = self.getLogSignalStatus(process.logFile)
         self.assertEqual(status, 1, "Expected a 1 Exit Status, but got %s" % status)
-        self.assertEqual(sig, -9, "Expected a -9 Signal, but got %s" % sig)
+        # self.assertEqual(sig, -9, "Expected a -9 Signal, but got %s" % sig)
 
 
     def getNewTaskCommand(self):
@@ -148,6 +154,24 @@ class TestProcessManager(unittest.TestCase):
         process.env = {}
         process.logFile = self._logfile 
         return process
+
+
+    def cpuAffinityTestUtil(self, logfile):
+        captured_affinity = tuple(self.getLogCpuAffinity(logfile))
+        count = len(captured_affinity)
+        self.assertTrue(count == 1, "Expected only 1 result. Got %d" % count)
+
+        if IS_LINUX:
+            captured = captured_affinity[0]
+            cpu_set = set()
+            logical_cpus = core.Profiler.cpuprofile.logical_cpus
+
+            for i in xrange(process.cores):
+                cpu_set.update(logical_cpus[i])
+
+            cpu_tuple = tuple(cpu_set)
+            self.assertEqual(captured, cpu_tuple, 
+                'Captured cpu affinity %s does not match expected %s' % (cpu_tuple, captured))
 
 
     @staticmethod
@@ -167,6 +191,7 @@ class TestProcessManager(unittest.TestCase):
                     except: pass
 
         return signal, status 
+
 
     @staticmethod 
     def getLogCpuAffinity(logfile):

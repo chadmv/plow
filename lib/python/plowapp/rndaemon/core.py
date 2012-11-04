@@ -59,7 +59,7 @@ class _ResourceManager(object):
                     logger.warn("Failed to check in core: %d", core)
         finally:
             self.__lock.release()
-        logger.info("Checked in CPUS: %s" % cores)
+        logger.info("Checked in CPUS: %s", cores)
 
     def getSlots(self):
         return dict(self.__slots)
@@ -128,7 +128,7 @@ class _ProcessManager(object):
             self.__timer.start()
 
     def killRunningTask(self, procId, reason):
-        logger.info("kill requested for procId %s, %s" % (procId, reason))
+        logger.info("kill requested for procId %s, %s", procId, reason)
 
         with self.__lock:
             try:
@@ -198,12 +198,14 @@ class ProcessThread(threading.Thread):
         threading.Thread.__init__(self)
         self.daemon = True
 
+        self.__logfp = None
+        self.__cpus = cpus or set()
+
         self.__rtc = rtc
         self.__pptr = None
         self.__logfp = None
         self.__pid = -1
 
-        self.__cpus = cpus or set()
 
     def __repr__(self):
         return "<%s: (procId: %s, pid: %d)>" % (
@@ -220,15 +222,14 @@ class ProcessThread(threading.Thread):
         rt.pid = self.__pid
         return rt
 
+
     def run(self):
         rtc = self.__rtc 
         retcode = 1
+
         try:
-            self.__makeLogDir(rtc.logFile)
-            logger.info("Opening log file: %s" % rtc.logFile)
-            self.__logfp = open(rtc.logFile, "w")
-            self.__writeLogHeader()
-            self.__logfp.flush()
+            logger.info("Opening log file: %s", rtc.logFile)
+            self.__logfp = ProcessLog(self.__rtc.logFile)
 
             env = os.environ.copy()
             env.update(rtc.env)
@@ -243,15 +244,15 @@ class ProcessThread(threading.Thread):
 
             cmd, opts = Profiler.getSubprocessOpts(rtc.command, **opts)
 
-            logger.info("Running command: %s" % rtc.command)
-            self.__pptr = subprocess.Popen(cmd, **opts)
+            logger.info("Running command: %s", rtc.command)
+            self.__pptr = p = subprocess.Popen(cmd, **opts)
             
             self.__pid = self.__pptr.pid
             logger.info("PID: %d" % self.__pid)
             retcode = self.__pptr.wait()
         
         except Exception, e:
-            logger.warn("Failed to execute command: %s" % e)
+            logger.warn("Failed to execute command: %s", e)
             logger.debug(traceback.format_exc())
 
         finally:
@@ -288,9 +289,127 @@ class ProcessThread(threading.Thread):
 
         return killed, not_killed
 
-    def __makeLogDir(self, path):
+
+    def __killOneProcess(self, p):
         """
-        __makeLogDir(path) -> void
+        __killOneProcess(psutil.Process p) -> bool
+
+        Try and nicely stop a Process first, then kill it. 
+        Return True if process was killed.
+        """
+        try: p.wait(0.001)
+        except psutil.TimeoutExpired: pass
+        if not p.is_running():
+            return True
+
+        pid = p.pid 
+
+        logger.info("Asking nicely for pid %d (%s) to stop", pid, p.name)
+        p.terminate()
+        try: p.wait(5)
+        except psutil.TimeoutExpired: pass
+
+        if not p.is_running():
+            return True
+
+        logger.info("Killing pid %d (%s)", pid, p.name)
+        p.kill()
+        try: p.wait(1)
+        except psutil.TimeoutExpired: pass
+        
+        if p.is_running():
+            logger.warn("Failed to properly kill pid %d (taskId: %s)", pid, self.__rtc.taskId)
+            return False 
+
+        return True
+
+
+    def __completed(self, retcode):
+        result = ttypes.RunTaskResult()
+        result.procId = self.__rtc.procId
+        result.taskId = self.__rtc.taskId
+        result.jobId = self.__rtc.jobId
+        result.maxRss = 0
+        if retcode < 0:
+            result.exitStatus = 1
+            result.exitSignal = retcode
+        else:
+            result.exitStatus = retcode
+            result.exitSignal = 0
+
+        logger.info("Process result %s", result)
+        if not conf.NETWORK_DISABLED:
+            while True:
+                try:
+                    service, transport = client.getPlowConnection()
+                    service.taskComplete(result)
+                    transport.close()
+                    break
+                except Exception, e:
+                    logger.warn("Error talking to plow server, %s, sleeping for 30 seconds", e)
+                    time.sleep(30)
+
+        ProcessMgr.processFinished(self.__rtc)
+        if self.__logfp is not None:
+            self.__logfp.writeLogFooterAndClose(result)
+
+
+
+class ProcessLog(object):
+    """
+    ProcessLog 
+
+    Wraps a file object to provide methods related 
+    to common logging format of a running task. 
+
+    Creates directories, and opens the given filename. 
+    Writes headers and footers. 
+
+    Passes all standard file methods through to the file 
+    object. 
+    """
+    def __init__(self, name, mode='w', buffering=-1):
+        self.makeLogDir(name)
+        self._fileObj = open(name, mode, buffering)
+        self.writeLogHeader()
+
+    def __del__(self):
+        self._fileObj.close()
+
+    def __getattr__(self, name):
+        return getattr(self._fileObj, name)
+
+    def writeLogHeader(self):
+        self._fileObj.write(
+            "Render Process Begin\n" \
+            "================================================================\n"
+        )
+        self._fileObj.flush()
+
+    def writeLogFooterAndClose(self, result):
+        # TODO: Add more stuff here
+        # Check to ensure the log is not None, which it would be
+        # if the thread failed to open the log file.
+        if self._fileObj.closed:
+            return
+
+        self._fileObj.flush()
+        self._fileObj.write(
+            "\n\n\n" \
+            "Render Process Complete\n" \
+            "=====================================\n" \
+            "Exit Status: %d\n" \
+            "Signal: %d\n" \
+            "MaxRSS: 0\n" \
+            "=====================================\n\n" \
+            % (result.exitStatus, result.exitSignal))
+
+        self._fileObj.close() 
+
+    @staticmethod 
+    def makeLogDir(path):
+        """
+        makeLogDir(str path) -> void
 
         Make sure the directory for the task logs exist.  There is
         the potential for a race condition here due to NFS caching.
@@ -320,95 +439,6 @@ class ProcessThread(threading.Thread):
             
             time.sleep(sleep)
             numTries+=1
-
-    def __killOneProcess(self, p):
-        """
-        __killOneProcess(psutil.Process p) -> bool
-
-        Try and nicely stop a Process first, then kill it. 
-        Return True if process was killed.
-        """
-        try: p.wait(0.001)
-        except psutil.TimeoutExpired: pass
-        if not p.is_running():
-            return True
-
-        pid = p.pid 
-
-        logger.info("Asking nicely for pid %d (%s) to stop" % (pid, p.name))
-        p.terminate()
-        try: p.wait(5)
-        except psutil.TimeoutExpired: pass
-
-        if not p.is_running():
-            return True
-
-        logger.info("Killing pid %d (%s)" % (pid, p.name))
-        p.kill()
-        try: p.wait(1)
-        except psutil.TimeoutExpired: pass
-        
-        if p.is_running():
-            logger.warn("Failed to properly kill pid %d (taskId: %s)" % \
-                (pid, self.__rtc.taskId))    
-            return False 
-
-        return True
-
-
-    def __completed(self, retcode):
-
-        result = ttypes.RunTaskResult()
-        result.procId = self.__rtc.procId
-        result.taskId = self.__rtc.taskId
-        result.jobId = self.__rtc.jobId
-        result.maxRss = 0
-        if retcode < 0:
-            result.exitStatus = 1
-            result.exitSignal = retcode
-        else:
-            result.exitStatus = retcode
-            result.exitSignal = 0
-
-        logger.info("Process result %s" % result)
-        if not conf.NETWORK_DISABLED:
-            while True:
-                try:
-                    service, transport = client.getPlowConnection()
-                    service.taskComplete(result)
-                    transport.close()
-                    break
-                except Exception, e:
-                    logger.warn("Error talking to plow server," + str(e) + ", sleeping for 30 seconds")
-                    time.sleep(30)
-
-        ProcessMgr.processFinished(self.__rtc)
-        self.__writeLogFooterAndClose(result)
-
-    def __writeLogHeader(self):
-        self.__logfp.write(
-            "Render Process Begin\n" \
-            "================================================================\n")
-
-    def __writeLogFooterAndClose(self, result):
-        # TODO: Add more stuff here
-        # Check to ensure the log is not None, which it would be
-        # if the thread failed to open the log file.
-        if not self.__logfp:
-            return
-        self.__logfp.flush()
-        self.__logfp.write(
-            "\n\n\n" \
-            "Render Process Complete\n" \
-            "=====================================\n" \
-            "Exit Status: %d\n" \
-            "Signal: %d\n" \
-            "MaxRSS: 0\n" \
-            "=====================================\n\n" \
-            % (result.exitStatus, result.exitSignal))
-        self.__logfp.close()
-
-
 
 
 Profiler    = _SystemProfiler()
