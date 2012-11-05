@@ -65,6 +65,7 @@ Plow uses Apache Thrift for client/server communication.  You can download thrif
 
 http://thrift.apache.org
 
+You must generate the thrift bindings for anything to work. 
 To generate the bindings code for all languages:
 
     > cd client/thrift
