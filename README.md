@@ -68,7 +68,7 @@ http://thrift.apache.org
 You must generate the thrift bindings for anything to work. 
 To generate the bindings code for all languages:
 
-    > cd client/thrift
+    > cd lib/thrift
     > ./generate-sources.sh
 
 You can skip the next step if your using the plow server binary release.
@@ -76,7 +76,7 @@ You can skip the next step if your using the plow server binary release.
 For Java, you then need to compile these sources and install the plow-bindings JAR into your local maven repo.  Running
 mvn intall does this for you.
 
-    > cd client/java
+    > cd lib/java
     > mvn install
 
 
@@ -88,17 +88,17 @@ The latest Python client can be install from the source checkout using the follo
 (first make sure to generate the thift bindings)
 
 ```
-> cd client/python
+> cd lib/python
 > python setup.py install
 ```
 
-You will still want to manually copy the `etc/*.cfg` files to either `/etc/plow/` or `~/.plow/`
+You will still want to manually copy the `etc/*.cfg` files to either `/usr/local/etc/plow/` or `~/.plow/`
 
 
 Compiling the C++ Library
 -------------------------
 
-    $ cd client/cpp/build
+    $ cd lib/cpp/build
     $ cmake ../
     $ make
 
@@ -135,15 +135,15 @@ If you have installed the client tools using the `setup.py`, then you should now
 
     $ rndaemon
 
-Otherwise, you can launch rndaemon from your git checkout.
+Otherwise, you can launch rndaemon from your git checkout (after setting your environment variables and ensuring you have all python dependencies installed).
 
-    $ bin/rndaemon.py
+    $ bin/rndaemon
 
 The daemon will first look for an optional config file explicitely set with the `PLOW_RNDAEMON_CFG` environment variable:
 
-    $ export PLOW_RNDAEMON_CFG="client/etc/rndaemon.cfg"
+    $ export PLOW_RNDAEMON_CFG="/path/to/etc/plow/rndaemon.cfg"
 
-Otherwise, it will search for `$PLOW_ROOT/etc/plow/rndaemon.cfg` and then `~/.plow/rndaemon.cfg`
+Otherwise, it will search for: `/usr/local/etc/rndaemon.cfg`, `$PLOW_ROOT/etc/plow/rndaemon.cfg`, and then `~/.plow/rndaemon.cfg`
 
 Launching the Test Job
 ----------------------

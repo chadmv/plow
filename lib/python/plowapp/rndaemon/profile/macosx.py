@@ -44,6 +44,28 @@ class SystemProfiler(PosixSystemProfiler):
             getattr(f, field[0])) for field in sysinfo_t._fields_]))
 
 
+    def getSubprocessOpts(self, cmd, **kwargs):
+        """
+        getSubprocessOpts(list|str cmd, **kwargs) -> (cmd, dict)
+
+        Method for returning the appropriate subprocess.Popen 
+        arguments and kw arguments for an OSX platform. 
+
+        """
+        cmd, opts = super(SystemProfiler, self).getSubprocessOpts(cmd, **kwargs)
+
+        env = opts['env']
+        core_count = int(env['PLOW_CORES'])
+
+        # only allow hyperthreads if the subprocess is requesting
+        # all cpus on the machine, since we have no way to set cpu
+        # affinity on OSX.
+        if core_count >= self.physicalCpus:
+            env['PLOW_THREADS'] = str(core_count * self.hyperthread_factor) 
+        else:
+            env['PLOW_THREADS'] = str(core_count)
+
+        return cmd, opts
 
 
 
