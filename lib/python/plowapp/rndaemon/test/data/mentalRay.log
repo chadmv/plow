@@ -1,0 +1,399 @@
+
+Starting "/Applications/Autodesk/maya2013/Maya.app/Contents/bin/maya"
+
+mental ray for Maya 2013 
+mental ray: version 3.10.1.4, Jan 31 2012, revision 165283
+File read in 2 seconds.
+Warning: line 1: This file is from an older version of Maya.  If saved, it will not be readable by previous versions.
+Result: /path/to/scene/mental_ray.mb
+Prog: (Mayatomr.Scene) : optimize animation detection: done 3 animated nodes
+MEM  0.0      6 MB info : virtual memory limit set to 9693 MB
+Info: (mental ray) : number of render thread(s): 1
+Info: (Mayatomr.Nodes) : custom string options found
+Info: (Mayatomr.Nodes) : derive mental ray global approximation settings from Maya
+Info: (Mayatomr.Nodes) : derive mental ray global displacement settings from Maya
+Info: (Mayatomr.Scene) : update lights and related shaders
+Prog: (Mayatomr.Scene) : DAG node: spotLight1
+Prog: (Mayatomr.Scene) : DAG node: spotLight2
+Info: (Mayatomr.Scene) : update cameras and related shaders
+Info: (Mayatomr.Scene) : update geometry and materials
+Prog: (Mayatomr.Scene) : DAG node: pSphere1
+Info: (Mayatomr.Scene) : render camera: camera1
+MEM  0.2      6 MB info : physical memory detected: total 12288 MB, free 8971 MB
+SCEN 0.2      7 MB progr: begin scene preprocessing for frame 1
+SCEN 0.2      8 MB info : 1 geometry leaf instance (1 scheduled, 0 cached, 0 shared)
+SCEN 0.2      8 MB info : 2 light leaf instances
+SCEN 0.2      8 MB info : wallclock  0:00:00.00 for scene preprocessing
+SCEN 0.2      8 MB info : CPU usage  0:00:00.00 for scene preprocessing
+SCEN 0.2      8 MB info : current mem usage 8 MB, max mem usage 8 MB
+RC   0.2      8 MB info : scene extent: (-3.84,-3.23,-3.37) : (2.62,3.23,3.10)
+RC   0.2      8 MB info : option: scanline          off
+RC   0.2      8 MB info : option: trace             on
+RC   0.2      8 MB info : option:   trace depth     reflection 10, refraction 10, sum 20
+RC   0.2      8 MB info : option:   acceleration    bsp2
+RC   0.2      8 MB info : option: shadow            on
+RC   0.2      8 MB info : option:   shadow maps       (use) (recompute) 
+RC   0.2      8 MB info : option: lightmap          on
+RC   0.2      8 MB info : option: motion            off
+RC   0.2      8 MB info : option: luminance weights 0.212671 0.71516 0.072169
+RC   0.2      8 MB info : option: caustic           off
+RC   0.2      8 MB info : option: globillum         off
+RC   0.2      8 MB info : option: finalgather       off
+RC   0.2      8 MB info : option: samples           min 0, max 2
+RC   0.2      8 MB info : option:   contrast        0.1 0.1 0.1 0.1, all buffers
+RC   0.2      8 MB info : option: filter            gauss 3 3
+RC   0.2      8 MB info : option: face              both
+RC   0.2      8 MB info : option: hair              on
+RC   0.2      8 MB info : option: task size         32
+RC   0.2      8 MB info : option: lens              on
+RC   0.2      8 MB info : option: volume            on
+RC   0.2      8 MB info : option: geometry          on
+RC   0.2      8 MB info : option: displace          on
+RC   0.2      8 MB info : option: premultiply       on
+RC   0.2      8 MB info : option: colorclip         raw
+RC   0.2      8 MB info : option: output            on
+RC   0.2      8 MB info : option: merge             on
+RC   0.2      8 MB info : option: texture cache     local
+RC   0.2      8 MB info : option:   limit           dynamic
+RC   0.2      8 MB info : option: fb mem management mapped
+RC   0.2      8 MB info : camera: type     filter     name
+RC   0.2      8 MB info :         rgba     yes        mayaGlow
+RC   0.2      8 MB info :         rgba     yes        mayaColor
+RC   0.2      8 MB info : camera: focal length      1.37795
+RC   0.2      8 MB info : camera: aperture          1.25984
+RC   0.2      8 MB info : camera: aspect            1.33333
+RC   0.2      8 MB info : camera: resolution        640 480
+RC   0.2      8 MB info : camera: clip              0.1 10000
+RC   0.2      8 MB info : camera: frame             1 1 0
+RC   0.2      8 MB progr: rendering
+RCI  0.2      8 MB progr: begin intersection preprocessing
+RCI  0.2      8 MB info : using BSP2 for eye rays
+RCI  0.2      8 MB info : using BSP2 for secondary rays
+RCI  0.2      8 MB progr: end intersection preprocessing
+RCI  0.2      8 MB info : wallclock  0:00:00.00 for intersection prep.
+RCI  0.2      8 MB info : CPU usage  0:00:00.00 for intersection prep.
+RCI  0.2      8 MB info : current mem usage 8 MB, max mem usage 9 MB
+PHEN 0.2      8 MB info : -----------------------------------------------
+PHEN 0.2      8 MB info : mayabase version 10.8, compiled on Feb 22 2012.
+PHEN 0.2      8 MB info : -----------------------------------------------
+JOB  0.2      8 MB progr:     0.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     0.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     1.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     1.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     1.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     2.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     2.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     2.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     3.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     3.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     3.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     4.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     4.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     4.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     5.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     5.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     5.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     6.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     6.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     6.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     7.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     7.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     7.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     8.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     8.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     8.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     9.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     9.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:     9.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    10.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    10.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    10.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    11.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    11.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    11.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    12.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    12.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    12.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    13.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    13.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    13.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    14.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    14.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    14.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    15.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    15.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    15.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    16.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    16.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    16.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    17.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    17.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    17.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    18.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    18.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    18.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    19.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    19.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    19.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    20.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    20.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    20.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    21.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    21.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    21.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    22.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    22.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    22.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    23.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    23.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    23.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    24.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    24.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    24.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    25.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    25.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    25.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    26.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    26.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    26.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    27.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    27.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    27.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    28.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    28.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    28.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    29.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    29.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    29.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    30.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    30.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    30.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    31.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    31.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    31.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    32.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    32.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    32.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    33.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    33.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    33.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    34.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    34.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    34.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    35.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    35.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    35.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    36.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    36.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    36.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    37.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    37.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    37.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    38.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    38.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    38.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    39.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    39.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    39.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    40.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    40.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    40.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    41.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    41.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    41.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    42.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    42.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    42.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    43.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    43.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    43.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    44.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    44.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    44.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    45.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    45.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    45.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    46.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    46.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    46.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    47.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    47.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    47.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    48.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    48.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    48.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    49.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    49.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    49.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    50.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    50.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    50.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    51.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    51.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    51.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    52.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    52.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    52.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    53.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    53.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    53.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    54.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    54.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    54.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    55.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    55.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    55.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    56.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    56.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    56.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    57.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    57.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    57.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    58.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    58.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    58.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    59.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    59.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    59.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    60.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    60.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    60.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    61.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    61.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    61.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    62.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    62.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    62.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    63.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    63.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    63.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    64.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    64.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    64.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    65.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    65.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    65.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    66.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    66.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    66.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    67.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    67.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    67.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    68.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    68.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    68.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    69.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    69.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    69.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    70.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    70.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    70.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    71.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    71.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    71.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    72.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    72.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    72.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    73.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    73.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    73.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    74.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    74.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    74.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    75.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    75.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    75.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    76.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    76.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    76.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    77.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    77.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    77.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    78.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    78.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    78.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    79.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    79.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    79.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    80.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    80.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    80.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    81.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    81.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    81.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    82.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    82.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    82.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    83.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    83.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    83.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    84.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    84.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    84.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    85.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    85.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    85.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    86.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    86.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    86.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    87.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    87.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    87.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    88.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    88.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    88.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    89.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    89.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    89.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    90.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    90.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    90.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    91.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    91.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    91.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    92.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    92.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    92.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    93.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    93.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    93.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    94.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    94.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    94.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    95.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    95.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    95.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    96.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    96.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    96.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    97.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    97.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    97.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    98.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    98.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    98.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    99.0%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    99.3%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:    99.6%    rendered on developer.domain.com.2
+JOB  0.2      8 MB progr:   100.0%    rendered on developer.domain.com.2
+RC   0.2      8 MB info : rendering statistics
+RC   0.2      8 MB info :   type                           number   per eye ray
+RC   0.2      8 MB info :   eye rays                       383206          1.00
+RC   0.2      8 MB info :   reflection rays                 88304          0.23
+RC   0.2      8 MB info :   environment rays                87405          0.23
+PHEN 0.2      8 MB progr: calling output shaders
+PHEN 0.2      8 MB progr: maya_shaderglow(): Computing glow...
+PHEN 0.2     10 MB info : maya_shaderglow(): Glow: Filter Width .... 21
+PHEN 0.2     10 MB info : maya_shaderglow():       Resolution ...... 0.638926
+PHEN 0.2     10 MB info : maya_shaderglow():       Normalization ... 0.882000
+PHEN 0.2     10 MB info : maya_shaderglow(): Halo: Filter Width .... 51
+PHEN 0.2     10 MB info : maya_shaderglow():       Resolution ...... 0.260841
+PHEN 0.2     10 MB info : maya_shaderglow():       Normalization ... 5.202000
+PHEN 0.2     10 MB progr: maya_shaderglow(): Done!
+RC   0.2      8 MB progr: writing frame buffer mayaColor to image file /path/to/render/location/images/mental_ray.iff.1 (frame 1)
+RC   0.2      8 MB progr: rendering finished
+RC   0.2      8 MB info : wallclock  0:00:02.43 for rendering
+RC   0.2      8 MB info : CPU usage  0:00:02.43 for rendering
+RC   0.2      8 MB info : current mem usage 8 MB, max mem usage 12 MB
+GAPM 0.2      8 MB info : triangle count (including retessellation) :         760
+Scene /path/to/scene/mental_ray.mb completed.

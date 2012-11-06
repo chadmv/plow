@@ -50,6 +50,11 @@ def _init():
     #
     setattr(mod, 'TASK_PROXY_USER', get('task', 'proxy_user', ''))
 
+    progress_patterns = {}
+    if Config.has_section('task_progress_patterns'):
+        progress_patterns = dict(Config.items('task_progress_patterns'))
+    setattr(mod, 'TASK_PROGRESS_PATTERNS', progress_patterns)
+
 
 def get(section, key, default=None):
     """

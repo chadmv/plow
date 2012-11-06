@@ -17,7 +17,7 @@ from plowapp.rndaemon import conf
 conf.NETWORK_DISABLED = True
 
 from plowapp.rndaemon.rpc import ttypes, RndServiceApi
-from plowapp.rndaemon import core, server, client
+from plowapp.rndaemon import core, server, client, utils
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -25,6 +25,7 @@ logging.basicConfig(level=logging.DEBUG)
 conf.TASK_PROXY_USER = os.getenv('PLOW_PROXY_USER', conf.TASK_PROXY_USER)
 
 CMDS_UTIL = os.path.join(os.path.dirname(__file__), 'utils/cmds.py')
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
 IS_LINUX = platform.system() in ('FreeBSD', 'Linux')
 
@@ -63,7 +64,7 @@ class TestProcessManager(unittest.TestCase):
 
     def tearDown(self):
         # give these types of tests a moment to close down
-        time.sleep(.5)
+        time.sleep(1)
 
     def testRunTaskCommand(self):
         process = self.getNewTaskCommand()
@@ -233,7 +234,7 @@ class TestCommunications(unittest.TestCase):
 
     def tearDown(self):
         self.t_server.terminate()
-        time.sleep(.5)
+        time.sleep(1)
 
 
     def testSendPing(self):
@@ -263,6 +264,40 @@ class ServiceHandler(object):
     def sendPing(self, ping):
         self.event.set()
 
+
+class TestLogParser(unittest.TestCase):
+
+    def testProgressStatic(self):
+        parser = utils.LogParser([
+            '^Fra:\d+ .*? \| Rendering \| .*? (\d+/\d+)$',
+            '^JOB[\w. ]+:\s+([\d.]+%)\s+'])
+
+        logtests = {
+            'blender.log': {
+                'total': 42,
+                'indexes': [(0, 0.0), (5, .4375), (20, .671875), (30, .828125), (-1, 1.0)]
+            },
+            'mentalRay.log': {
+                'total': 300,
+                'indexes': [(0, .003), (20, .07), (50, .17), (150, .503), (250, .836), (-1, 1.0)]
+            }
+        }
+
+        for name, attribs in logtests.iteritems():
+            log = os.path.join(DATA_DIR, name)
+
+            progs = []
+            for line in open(log):
+                val = parser.parseProgress(line)
+                if val is not None:
+                    progs.append(val)
+
+            total = attribs['total']
+            found = len(progs)
+            self.assertEqual(found, total, "Expected %d progress updates. Got %d" % (total, found))
+
+            for idx, val in attribs['indexes']:
+                self.assertEqual(progs[idx], val)
 
 
 if __name__ == "__main__":
