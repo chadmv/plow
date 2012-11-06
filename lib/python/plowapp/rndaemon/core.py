@@ -7,6 +7,8 @@ import os
 import errno
 import traceback
 
+from collections import namedtuple
+
 import psutil
 
 import conf
@@ -17,7 +19,12 @@ from profile import SystemProfiler as _SystemProfiler
 
 logger = logging.getLogger(__name__)
 
+
 __all__ = ['Profiler', 'ResourceMgr', 'ProcessMgr']
+
+
+_RunningProc = namedtuple("RunningProc", "processCmd pthread cpus")
+
 
 class _ResourceManager(object):
     """
@@ -85,13 +92,13 @@ class _ProcessManager(object):
         cpus = ResourceMgr.checkout(processCmd.cores)
         pthread = ProcessThread(processCmd, cpus)
         with self.__lock:
-            self.__threads[processCmd.procId] = (processCmd, pthread, cpus)
+            self.__threads[processCmd.procId] = _RunningProc(processCmd, pthread, cpus)
         pthread.start()
         logger.info("procsss thread started")
         return pthread.getRunningTask()
 
     def processFinished(self, processCmd):
-        ResourceMgr.checkin(self.__threads[processCmd.procId][2])
+        ResourceMgr.checkin(self.__threads[processCmd.procId].cpus)
         with self.__lock:
             try:
                 del self.__threads[processCmd.procId]
@@ -132,7 +139,7 @@ class _ProcessManager(object):
 
         with self.__lock:
             try:
-                pthread = self.__threads[procId][1]
+                pthread = self.__threads[procId].pthread
             except KeyError:
                 err = "Process %s not found" % procId
                 logger.warn(err)
@@ -150,7 +157,7 @@ class _ProcessManager(object):
 
 
     def getRunningTasks(self):
-        return [t[1].getRunningTask() for t in self.__threads.itervalues()]
+        return [t.pthread.getRunningTask() for t in self.__threads.itervalues()]
 
 
     def reboot(self, now=False):
