@@ -33,31 +33,32 @@ class TestSystemProfiler(unittest.TestCase):
                 "ENV key '%s' has a value %s of type %s instead of str()" % (k, v, type(v)))
 
 
-    def testeHyperThread(self):
+    def testHyperThread(self):
         prof = SystemProfiler()
 
-        prof.hyperthread_factor = 2
+        prof.physicalCpus = 8
+        prof.logicalCpus = 16
 
-        # pretend we want to run with 3 cores with HT
+        # hyperthreading enabled but not max procs
+        prof.hyperthread_factor = 2
         _, opts = prof.getSubprocessOpts([], cpus=range(3))
 
         env = opts['env']
         self.assertEqual(env['PLOW_CORES'], '3')
-        self.assertEqual(env['PLOW_THREADS'], '6')
+        self.assertEqual(env['PLOW_THREADS'], '3')
 
-        prof.hyperthread_factor = 1
 
         # pretend we want to run with 2 cores w/o HT
+        prof.hyperthread_factor = 1
         _, opts = prof.getSubprocessOpts([], cpus=range(2))
 
         env = opts['env']
         self.assertEqual(env['PLOW_CORES'], '2')
         self.assertEqual(env['PLOW_THREADS'], '2')
 
+        # hyperthreading enabled and max procs
         prof.hyperthread_factor = 2
-
-        # pretend we want to run with 8 cores with HT
-        _, opts = prof.getSubprocessOpts([], cpus=range(8))
+        _, opts = prof.getSubprocessOpts([], cpus=range(prof.physicalCpus))
 
         env = opts['env']
         self.assertEqual(env['PLOW_CORES'], '8')

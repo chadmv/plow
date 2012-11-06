@@ -44,7 +44,7 @@ def hard_to_kill():
 		logging.info("Received SIGTERM: Not gunna die easily!! Ignoring.")
 
 	signal(SIGTERM, ignore)
-	do_sleep(3)
+	do_sleep(2)
 
 
 def cpu_affinity():
