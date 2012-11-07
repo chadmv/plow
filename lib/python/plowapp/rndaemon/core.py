@@ -196,6 +196,19 @@ class _ProcessManager(object):
             logger.info("*Reboot scheduled at next idle event*")
 
 
+class RunningTask(ttypes.RunningTask):
+    def __repr__(self):
+        D = self.__dict__.copy()
+
+        # elide the log string if its too big
+        lastLog = D['lastLog']
+        if len(lastLog) > 50:
+            D['lastLog'] = '%s...' % lastLog[:47]
+
+        L = ('%s=%r' % (key, value) for key, value in D.iteritems())
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))        
+
+
 class _ProcessThread(threading.Thread):
     """
     The _ProcessThread wraps a running task.
@@ -220,8 +233,15 @@ class _ProcessThread(threading.Thread):
             self.__rtc.procId, 
             self.__pid)
 
+
     def getRunningTask(self):
-        rt = ttypes.RunningTask()
+        """
+        getRunningTask() -> RunningTask
+
+        Returns a RunningTask instance representing 
+        the current state of the task.
+        """
+        rt = RunningTask()
         rt.jobId = self.__rtc.jobId
         rt.procId = self.__rtc.procId
         rt.taskId = self.__rtc.taskId
