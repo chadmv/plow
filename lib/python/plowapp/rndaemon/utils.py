@@ -1,13 +1,106 @@
 
+import os 
+import time
 import re
+import errno
+import logging
 from ast import literal_eval
 
 import conf
 
+logger = logging.getLogger(__name__)
 
-class LogParser(object):
+
+class ProcessLog(object):
+    """
+    ProcessLog 
+
+    Wraps a file object to provide methods related 
+    to common logging format of a running task. 
+
+    Creates directories, and opens the given filename. 
+    Writes headers and footers. 
+
+    Passes all standard file methods through to the file 
+    object. 
+    """
+    def __init__(self, name, mode='w', buffering=-1):
+        self.makeLogDir(name)
+        self._fileObj = open(name, mode, buffering)
+        self.writeLogHeader()
+
+    def __del__(self):
+        if self._fileObj is not None:
+        	self._fileObj.close()
+
+    def __getattr__(self, name):
+        return getattr(self._fileObj, name)
+
+    def writeLogHeader(self):
+        self._fileObj.write(
+            "Render Process Begin\n" \
+            "================================================================\n"
+        )
+        self._fileObj.flush()
+
+    def writeLogFooterAndClose(self, result):
+        # TODO: Add more stuff here
+        # Check to ensure the log is not None, which it would be
+        # if the thread failed to open the log file.
+        if self._fileObj.closed:
+            return
+
+        self._fileObj.flush()
+        self._fileObj.write(
+            "\n\n\n" \
+            "Render Process Complete\n" \
+            "=====================================\n" \
+            "Exit Status: %d\n" \
+            "Signal: %d\n" \
+            "MaxRSS: 0\n" \
+            "=====================================\n\n" \
+            % (result.exitStatus, result.exitSignal))
+
+        self._fileObj.close() 
+
+    @staticmethod 
+    def makeLogDir(path):
+        """
+        makeLogDir(str path) -> void
+
+        Make sure the directory for the task logs exist.  There is
+        the potential for a race condition here due to NFS caching.
+        """
+        folder = os.path.dirname(path)
+        if os.path.exists(folder):
+            return
+
+        numTries = 0
+        maxTries = 8
+        sleep = 10
+        
+        while True:
+            if numTries >= maxTries:
+                raise Exception("Failed creating log path after %d tries." % numTries)
+            try:
+                os.makedirs(folder, 0777)
+            except OSError, exp:
+                logger.warn("Error creating log path: %s, %s %d", folder, exp, exp.errno)
+                if exp.errno != errno.EEXIST:
+                    # If it already exists, clear the NFS cache for the parent
+                    # which should make the directory visible to os.path.exists
+                    os.utime(os.path.dirname(folder), None)
+            
+            if os.path.exists(folder):
+                return
+            
+            time.sleep(sleep)
+            numTries+=1
+
+
+class ProcessLogParser(object):
 	"""
-	LogParser 
+	ProcessLogParser 
 
 	Provides pattern matching operations on lines from log 
 	files, matching a given set of regular expression. 
@@ -98,4 +191,6 @@ class LogParser(object):
 			return next((i for i in match.groups() if i), None)
 
 		return None
+
+
 
