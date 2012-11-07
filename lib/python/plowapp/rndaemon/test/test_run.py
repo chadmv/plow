@@ -10,6 +10,7 @@ import math
 import re 
 import platform
 
+from functools import partial
 from multiprocessing import Process, Event 
 from ast import literal_eval 
 
@@ -61,10 +62,13 @@ class TestProcessManager(unittest.TestCase):
 
     def setUp(self):
         self._logfile = tempfile.mktemp('.log', 'plow-test-')
+        self._processmgr_processFinished = core.ProcessMgr.processFinished
 
     def tearDown(self):
         # give these types of tests a moment to close down
         time.sleep(1)
+        core.ProcessMgr.processFinished = self._processmgr_processFinished
+
 
     def testRunTaskCommand(self):
         process = self.getNewTaskCommand()
@@ -147,6 +151,42 @@ class TestProcessManager(unittest.TestCase):
         # self.assertEqual(sig, -9, "Expected a -9 Signal, but got %s" % sig)
 
 
+    def testTaskProgress(self):
+        # disable the callback 
+
+        D = {'result': None}
+
+        def processFinished(d, rtc):
+            d['result'] = rtc 
+
+        core.ProcessMgr.processFinished = partial(processFinished, D)
+
+        process = self.getNewTaskCommand()
+        process.taskTypes = ['blender', 'mray']
+
+        for log in ('blender.log', 'mentalRay.log'):
+            process.command = [CMDS_UTIL, 'echo_log', os.path.join(DATA_DIR, log)]
+
+            t = core._ProcessThread(process, cpus=[0])
+
+            running = t.getRunningTask()
+            self.assertEqual(running.progress, 0,
+                'Initial progress for "%s" job should be 0' % log)
+
+            t.start()
+            t.join()
+
+            self.assertTrue(D['result'] is not None)
+            self.assertEqual(D['result'].exitStatus, 0)
+
+            running = t.getRunningTask()
+
+            self.assertEqual(running.progress, 1,
+                'Final progress for "%s" job should be 1' % log)
+
+            D['result'] = None
+
+
     def getNewTaskCommand(self):
         process = ttypes.RunTaskCommand()
         process.procId = "a"
@@ -223,7 +263,7 @@ class TestCommunications(unittest.TestCase):
 
         self.server_port = 9092
 
-        handler = ServiceHandler(self.event)
+        handler = _ServiceHandler(self.event)
         self.server = server.get_server(RndServiceApi, handler, self.server_port)
 
         self.t_server = Process(target=self.server.serve)
@@ -256,7 +296,7 @@ class TestCommunications(unittest.TestCase):
         transport.close()
 
 
-class ServiceHandler(object):
+class _ServiceHandler(object):
 
     def __init__(self, evt):
         self.event = evt 
@@ -268,7 +308,7 @@ class ServiceHandler(object):
 class TestLogParser(unittest.TestCase):
 
     def testProgressStatic(self):
-        parser = utils.LogParser([
+        parser = utils.ProcessLogParser([
             '^Fra:\d+ .*? \| Rendering \| .*? (\d+/\d+)$',
             '^JOB[\w. ]+:\s+([\d.]+%)\s+'])
 
@@ -298,6 +338,9 @@ class TestLogParser(unittest.TestCase):
 
             for idx, val in attribs['indexes']:
                 self.assertEqual(progs[idx], val)
+
+
+
 
 
 if __name__ == "__main__":

@@ -24,11 +24,11 @@ logging.basicConfig(
 	level=logging.INFO)
 
 
-def easy_to_kill():
+def easy_to_kill(*args):
 	"""
 	Exits nicely on a SIGTERM
 	"""
-	def handler(*args):
+	def handler(*args2):
 		logging.info("Received SIGTERM: I will stop now")
 		sys.exit(SIGTERM)
 
@@ -36,18 +36,18 @@ def easy_to_kill():
 	do_sleep(3)
 
 
-def hard_to_kill():
+def hard_to_kill(*args):
 	"""
 	Ignores a SIGTERM and keeps running
 	"""
-	def ignore(*args):
+	def ignore(*args2):
 		logging.info("Received SIGTERM: Not gunna die easily!! Ignoring.")
 
 	signal(SIGTERM, ignore)
 	do_sleep(2)
 
 
-def cpu_affinity():
+def cpu_affinity(*args):
 	"""
 
 	"""
@@ -59,6 +59,16 @@ def cpu_affinity():
 	aff = psutil.Process(os.getpid()).get_cpu_affinity()
 	logging.info('cpu_affinity == %s', tuple(aff))
 	spawn(1)
+
+
+def echo_log(log, *args):
+	"""
+	Echo a log file, line by line, to stdout
+	"""
+	with open(log) as f:
+		for line in f:
+			sys.stdout.write(line)
+			sys.stdout.flush()
 
 
 def do_sleep(spawn_more=0):
@@ -97,10 +107,11 @@ COMMANDS = (
 	easy_to_kill,
 	hard_to_kill,
 	cpu_affinity,
+	echo_log,
 )
 
 def fail():
-	print "Usage: %s <command>" % sys.argv[0]
+	print "Usage: %s <command> [arg1, ...]" % sys.argv[0]
 	print [c.__name__ for c in COMMANDS]
 	sys.exit(255)
 
@@ -111,10 +122,12 @@ if __name__ == "__main__":
 	except IndexError:
 		fail()
 
+	args = sys.argv[2:]
+	
 	for fn in COMMANDS:
 		if fn.__name__ == cmdName:
 			logging.info("Running as UID,GID == %d,%d", os.getuid(), os.getgid())
-			fn()
+			fn(*args)
 			sys.exit(0)
 
 	# no valid commands passed

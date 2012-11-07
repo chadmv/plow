@@ -226,6 +226,10 @@ class _ProcessThread(threading.Thread):
         self.__logfp = None
         self.__pid = -1
 
+        self.__progressLock = threading.Lock()
+        self.__progress = 0.0
+        self.__lastLog = ""
+
 
     def __repr__(self):
         return "<%s: (procId: %s, pid: %d)>" % (
@@ -247,6 +251,11 @@ class _ProcessThread(threading.Thread):
         rt.taskId = self.__rtc.taskId
         rt.maxRss = 0
         rt.pid = self.__pid
+
+        with self.__progressLock:
+            rt.progress = self.__progress 
+            rt.lastLog = self.__lastLog or None 
+
         return rt
 
 
@@ -261,8 +270,14 @@ class _ProcessThread(threading.Thread):
             env = os.environ.copy()
             env.update(rtc.env)
 
+            parser = None
+            if rtc.taskTypes:
+                parser = utils.ProcessLogParser.fromTaskTypes(rtc.taskTypes)
+                if not parser.progress:
+                    parser = None
+
             opts = {
-                'stdout': self.__logfp, 
+                'stdout': subprocess.PIPE, 
                 'stderr': subprocess.STDOUT,
                 'uid'   : self.__rtc.uid,
                 'cpus'  : self.__cpus,
@@ -273,10 +288,33 @@ class _ProcessThread(threading.Thread):
 
             logger.info("Running command: %s", rtc.command)
             self.__pptr = p = subprocess.Popen(cmd, **opts)
-            
-            self.__pid = self.__pptr.pid
-            logger.info("PID: %d" % self.__pid)
-            retcode = self.__pptr.wait()
+
+            self.__pid = p.pid
+            logger.info("PID: %d", self.__pid)
+
+
+            writeLog    = self.__logfp.write 
+            r_pipe      = self.__pptr.stdout 
+            lock        = self.__progressLock
+
+            for line in iter(r_pipe.readline, ""):
+                writeLog(line)
+
+                with lock:
+                    self.__lastLog = line
+
+                    if parser:
+                        prog = parser.parseProgress(line)
+                        if prog is not None:
+                            self.__progress = prog 
+
+            r_pipe.close()
+
+            try:
+                retcode = p.wait()
+            except OSError:
+                pass
+
         
         except Exception, e:
             logger.warn("Failed to execute command: %s", e)

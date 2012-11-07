@@ -23,7 +23,8 @@ struct RunTaskCommand {
     6:map<string,string> env,
     7:string logFile,
     8:i32 uid,
-    9:string username
+    9:string username,
+    10:optional list<string> taskTypes
 }
 
 struct RunningTask {
@@ -31,7 +32,9 @@ struct RunningTask {
     2:common.Guid taskId,
     3:common.Guid jobId,
     4:i64 maxRss,
-    5:i32 pid
+    5:i32 pid,
+    6:optional double progress = 0.0,
+    7:optional string lastLog = ""
 }
 
 struct RunTaskResult {
