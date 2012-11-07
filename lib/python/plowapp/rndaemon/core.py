@@ -90,20 +90,20 @@ class _ProcessManager(object):
 
     def runProcess(self, processCmd):
         cpus = ResourceMgr.checkout(processCmd.cores)
-        pthread = ProcessThread(processCmd, cpus)
+        pthread = _ProcessThread(processCmd, cpus)
         with self.__lock:
             self.__threads[processCmd.procId] = _RunningProc(processCmd, pthread, cpus)
         pthread.start()
-        logger.info("procsss thread started")
+        logger.info("process thread started")
         return pthread.getRunningTask()
 
-    def processFinished(self, processCmd):
-        ResourceMgr.checkin(self.__threads[processCmd.procId].cpus)
+    def processFinished(self, processResult):
+        ResourceMgr.checkin(self.__threads[processResult.procId].cpus)
         with self.__lock:
             try:
-                del self.__threads[processCmd.procId]
+                del self.__threads[processResult.procId]
             except Exception, e:
-                logger.warn("Process %s not found: %s", processCmd.procId, e)
+                logger.warn("Process %s not found: %s", processResult.procId, e)
 
     def sendPing(self, isReboot=False, repeat=True):
         # TODO: What is the purpose of the isReboot flag?
@@ -196,9 +196,9 @@ class _ProcessManager(object):
             logger.info("*Reboot scheduled at next idle event*")
 
 
-class ProcessThread(threading.Thread):
+class _ProcessThread(threading.Thread):
     """
-    The ProcessThread wraps a running task.
+    The _ProcessThread wraps a running task.
     """
     
     def __init__(self, rtc, cpus=None):
@@ -356,7 +356,7 @@ class ProcessThread(threading.Thread):
                     logger.warn("Error talking to plow server, %s, sleeping for 30 seconds", e)
                     time.sleep(30)
 
-        ProcessMgr.processFinished(self.__rtc)
+        ProcessMgr.processFinished(result)
         if self.__logfp is not None:
             self.__logfp.writeLogFooterAndClose(result)
 
