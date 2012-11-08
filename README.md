@@ -65,7 +65,7 @@ Plow uses Apache Thrift for client/server communication.  You can download thrif
 
 http://thrift.apache.org
 
-You must generate the thrift bindings for anything to work. 
+You must generate the thrift bindings for anything to work.
 To generate the bindings code for all languages:
 
     > cd lib/thrift
@@ -102,6 +102,19 @@ Compiling the C++ Library
     $ cmake ../
     $ make
 
+Starting the Server
+-------------------
+
+    > tar -zxvf plow-server-bin-0.0.5-alpha.tar.gz
+    > cd plow-server-bin-0.0.5-alpha
+    > ./plow.sh
+
+    If Java7 is not in your path, plow will pick it up if the JAVA_HOME env var is set.  On Mac, this will
+    be something like this:
+
+    > export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.7.0_10.jdk/Contents/Home"
+    > ./plow.sh
+
 
 Running the Tools
 =================
@@ -112,18 +125,11 @@ First thing you need to do if you are using a git checkout of plow is setup your
     $ export PYTHONPATH="/path/to/plow/checkout/lib/python"
     $ export PATH="$PATH:$PLOW_ROOT/bin"
 
-Starting the Server
--------------------
+(OR if you are in bash, you can just source setup_env.sh located on the root level.
+ This should set all your environment variables, including all config env variables.
+  > source setup_env.sh
+)
 
-    > tar -zxvf plow-server-bin-0.1-alpha.tar.gz
-    > cd plow-server-bin-0.1-alpha
-    > ./plow.sh
-
-    If Java7 is not in your path, plow will pick it up if the JAVA_HOME env var is set.  On Mac, this will
-    be something like this:
-
-    > export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.7.0_10.jdk/Contents/Home"
-    > ./plow.sh
 
 
 Running the Render Node Daemon
@@ -150,5 +156,5 @@ Launching the Test Job
 
 Plow includes the blueprint module for job launching and description.
 
-    > plowrun $PLOW_ROOT/share/blueprint/examples/script.bp 1-100 -debug
+    > bluerun $PLOW_ROOT/share/blueprint/examples/script.bp 1-100 -debug
 
