@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 
+import com.breakersoft.plow.FrameRange;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.dao.JobDao;
@@ -25,10 +26,12 @@ public class LayerDaoTests extends AbstractTest {
 
     private Layer layer;
 
+    private Job job;
+
     @Test
     public void testCreate() {
         JobSpecT spec = getTestJobSpec();
-        Job job = jobDao.create(TEST_PROJECT, spec);
+        job = jobDao.create(TEST_PROJECT, spec);
         LayerSpecT bl = spec.getLayers().get(0);
         layer = layerDao.create(job, bl, 0);
     }
@@ -48,4 +51,19 @@ public class LayerDaoTests extends AbstractTest {
         Layer layer1 = layerDao.get(layer.getLayerId());
         assertEquals(layer, layer1);
     }
+
+    @Test
+    public void testGetByIndex() {
+        testCreate();
+        Layer layer1 = layerDao.get(job, 0);
+        assertEquals(layer, layer1);
+    }
+
+    @Test
+    public void testGetFrameRange() {
+        testCreate();
+        FrameRange frange = layerDao.getFrameRange(layer);
+        assertEquals(10, frange.frameSet.size());
+    }
+
 }
