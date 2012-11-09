@@ -29,4 +29,10 @@ public interface JobDao {
     void updateFolder(Job job, Folder folder);
 
     boolean shutdown(Job job);
+
+    Job getActive(String name);
+
+    Job getByActiveNameOrId(String identifer);
+
+    Job getActive(UUID id);
 }

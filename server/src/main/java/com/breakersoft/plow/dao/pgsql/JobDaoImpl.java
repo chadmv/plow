@@ -59,6 +59,28 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
     }
 
     @Override
+    public Job getActive(String name) {
+        return jdbc.queryForObject(
+                GET + "WHERE str_active_name=?", MAPPER, name);
+    }
+
+    @Override
+    public Job getActive(UUID id) {
+        return jdbc.queryForObject(
+                GET + "WHERE pk_job=? AND int_state!=?", MAPPER,
+                id, JobState.FINISHED.ordinal());
+    }
+
+    @Override
+    public Job getByActiveNameOrId(String identifer) {
+        try {
+            return getActive(UUID.fromString(identifer));
+        } catch (IllegalArgumentException e) {
+            return getActive(identifer);
+        }
+    }
+
+    @Override
     public Job get(UUID id) {
         return jdbc.queryForObject(
                 GET + "WHERE pk_job=?",

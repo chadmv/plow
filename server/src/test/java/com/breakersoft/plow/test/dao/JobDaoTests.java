@@ -48,6 +48,39 @@ public class JobDaoTests extends AbstractTest {
     }
 
     @Test
+    public void testGetActiveById() {
+        JobSpecT spec = getTestJobSpec();
+        Job jobA = jobDao.create(TEST_PROJECT, spec);
+        Job jobB = jobDao.getActive(jobA.getJobId());
+
+        assertEquals(jobA, jobB);
+        assertEquals(jobA.getProjectId(), jobB.getProjectId());
+    }
+
+    @Test
+    public void testGetActiveByName() {
+        JobSpecT spec = getTestJobSpec();
+        Job jobA = jobDao.create(TEST_PROJECT, spec);
+        Job jobB = jobDao.getActive(spec.getName());
+
+        assertEquals(jobA, jobB);
+        assertEquals(jobA.getProjectId(), jobB.getProjectId());
+    }
+
+    @Test
+    public void testGetActiveByNameOrId() {
+        JobSpecT spec = getTestJobSpec();
+        Job jobA = jobDao.create(TEST_PROJECT, spec);
+        Job jobB = jobDao.get(jobA.getJobId());
+        Job jobC = jobDao.getByActiveNameOrId(spec.getName());
+
+        assertEquals(jobA, jobB);
+        assertEquals(jobA, jobC);
+        assertEquals(jobA.getProjectId(), jobB.getProjectId());
+    }
+
+
+    @Test
     public void testHasPendingFrames() {
         JobSpecT spec = getTestJobSpec();
         JobLaunchEvent event = jobService.launch(spec);
