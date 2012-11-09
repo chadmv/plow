@@ -24,16 +24,15 @@ JobTree::JobTree(QWidget *parent) : QWidget(parent)
 
 void JobTree::updateJobs()
 {
-    PlowClient* client = getClient();
 
     std::vector<JobT> jobs;
     JobFilterT filter;
 
     std::vector<JobState::type> states;
     states.push_back(JobState::RUNNING);
-    filter.__set_states(states);
+    filter.states = states;
 
-    client->getJobs(jobs, filter);
+    getJobs(jobs, filter);
 
     for (std::vector<JobT>::iterator i = jobs.begin();
                                      i != jobs.end();

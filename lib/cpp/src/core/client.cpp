@@ -1,6 +1,5 @@
 
 #include "plow.h"
-#include "rpc/RpcService.h"
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -72,9 +71,9 @@ PlowClient::~PlowClient()
     m_conn->disconnect();
 }
 
-void PlowClient::getJobs(std::vector<JobT>& jobs, const JobFilterT& filter) const
+RpcServiceClient PlowClient::proxy()
 {
-    m_conn->proxy().getJobs(jobs, filter);
+    return m_conn->proxy();
 }
 
 PlowClient* getClient()

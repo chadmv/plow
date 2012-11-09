@@ -9,6 +9,7 @@
 #include "common_constants.h"
 #include "plow_types.h"
 #include "plow_constants.h"
+#include "RpcService.h"
 
 
 /*!rst::
@@ -24,10 +25,7 @@ class PLOWEXPORT PlowClient
     public:
         PlowClient();
         virtual ~PlowClient();
-
-        void getJobs(std::vector<JobT>& jobs, const JobFilterT& filter) const;
-        JobT launch(const JobSpecT& spec) const;
-
+        RpcServiceClient proxy();
     private:
         class Connection;
         friend class Connection;
@@ -35,6 +33,7 @@ class PLOWEXPORT PlowClient
 };
 
 extern PLOWEXPORT PlowClient* getClient();
+extern PLOWEXPORT void getJobs(std::vector<JobT>& jobs, const JobFilterT& filter);
 
 PLOW_NAMESPACE_EXIT
 
