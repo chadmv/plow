@@ -24,6 +24,8 @@ public interface JobService {
 
     Layer getLayer(Job job, String layer);
 
+    Layer getLayer(Job job, int idx);
+
     boolean setJobState(Job job, JobState state);
 
     JobLaunchEvent launch(JobSpecT jobspec);

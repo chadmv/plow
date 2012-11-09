@@ -140,6 +140,11 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public Layer getLayer(Job job, int idx) {
+        return layerDao.get(job, idx);
+    }
+
+    @Override
     public boolean setJobState(Job job, JobState state) {
         return jobDao.setJobState(job, state);
     }
