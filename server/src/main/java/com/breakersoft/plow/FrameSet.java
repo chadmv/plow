@@ -59,6 +59,10 @@ public final class FrameSet implements Iterable<Integer> {
         return range;
     }
 
+    public boolean contains(int frame) {
+        return set.contains(frame);
+    }
+
     private void parseFrameRange() {
 
         for (String part: range.split(",")) {
