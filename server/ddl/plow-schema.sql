@@ -137,6 +137,7 @@ CREATE TABLE plow.layer_dsp (
 CREATE TABLE plow.task (
   pk_task UUID NOT NULL PRIMARY KEY,
   pk_layer UUID NOT NULL,
+  pk_job UUID NOT NULL,
   str_name VARCHAR(255),
   int_number INTEGER NOT NULL,
   int_state SMALLINT NOT NULL,
@@ -152,9 +153,8 @@ CREATE TABLE plow.task (
 ) WITHOUT OIDS;
 
 CREATE INDEX task_pk_layer_idx ON plow.task (pk_layer);
+CREATE INDEX task_pk_job_idx ON plow.task (pk_job);
 CREATE INDEX task_int_state_idx ON plow.task (int_state);
-
-
 
 ----------------------------------------------------------
 

@@ -38,7 +38,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
             "SELECT " +
                 "task.pk_task,"+
                 "task.pk_layer, " +
-                "layer.pk_job " +
+                "task.pk_job " +
             "FROM " +
                 "plow.layer, " +
                 "plow.task " +
@@ -59,17 +59,27 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                 MAPPER, layer.getLayerId(), number);
     }
 
+    @Override
+    public Task getByNameOrId(Layer layer, String identifer) {
+        try {
+            return get(UUID.fromString(identifer));
+        } catch (IllegalArgumentException e) {
+            return jdbc.queryForObject(
+                    GET + "AND layer.pk_layer=? AND task.str_name=?",
+                    MAPPER, layer.getLayerId(), identifer);
+        }
+    }
+
     private static final String INSERT =
             JdbcUtils.Insert("plow.task",
-                    "pk_task", "pk_layer", "str_name",
-                    "int_number", "int_task_order",
-                    "int_state");
+                    "pk_task", "pk_layer", "pk_job", "str_name",
+                    "int_number", "int_task_order", "int_state");
 
     @Override
     public Task create(Layer layer, String name, int number, int taskOrder, int layerOrder) {
         final UUID id = UUID.randomUUID();
 
-        jdbc.update(INSERT, id, layer.getLayerId(), name,
+        jdbc.update(INSERT, id, layer.getLayerId(), layer.getJobId(), name,
                 number, taskOrder, TaskState.INITIALIZE.ordinal());
 
         TaskE task = new TaskE();

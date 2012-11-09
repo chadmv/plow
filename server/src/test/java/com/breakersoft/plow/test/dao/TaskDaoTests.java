@@ -53,6 +53,21 @@ public class TaskDaoTests extends AbstractTest {
     }
 
     @Test
+    public void testGetByNameOrId() {
+        testCreate();
+        Task f1 = taskDao.get(task.getTaskId());
+        assertEquals(task, f1);
+
+        Task f2 = taskDao.getByNameOrId(layer, f1.getTaskId().toString());
+        assertEquals(task, f1);
+        assertEquals(f2, f1);
+
+        Task f3 = taskDao.getByNameOrId(layer, "0001-test");
+        assertEquals(task, f3);
+        assertEquals(f2, f3);
+    }
+
+    @Test
     public void testUpdateState() {
         testCreate();
         assertTrue(taskDao.updateState(task,

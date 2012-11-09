@@ -25,4 +25,6 @@ public interface TaskDao {
 
     boolean stop(Task task, TaskState newState);
 
+    Task getByNameOrId(Layer layer, String identifer);
+
 }
