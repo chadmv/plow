@@ -17,6 +17,7 @@ import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.rnd.thrift.Hardware;
 import com.breakersoft.plow.rnd.thrift.Ping;
+import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.ProjectService;
 import com.breakersoft.plow.thrift.JobSpecT;
@@ -37,6 +38,9 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
     @Resource
     NodeService nodeService;
 
+    @Resource
+    protected JobService jobService;
+
     protected Project TEST_PROJECT;
 
     protected Cluster TEST_CLUSTER;
@@ -53,9 +57,13 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
     }
 
     public JobSpecT getTestJobSpec() {
+        return getTestJobSpec("test");
+    }
+
+    public JobSpecT getTestJobSpec(String name) {
 
         JobSpecT jobspec = new JobSpecT();
-        jobspec.setName("test");
+        jobspec.setName(name);
         jobspec.setUid(100);
         jobspec.setUsername("stella");
         jobspec.setPaused(false);
