@@ -159,6 +159,36 @@ CREATE INDEX task_int_state_idx ON plow.task (int_state);
 ----------------------------------------------------------
 
 ---
+--- Dependencies
+---
+
+CREATE TABLE plow.depend (
+    pk_depend UUID NOT NULL PRIMARY KEY,
+    uuid_sig UUID NOT NULL,
+    int_type SMALLINT NOT NULL,
+    bool_active BOOLEAN NOT NULL DEFAULT 't',
+    pk_dependent_job UUID NOT NULL,
+    pk_dependon_job UUID NOT NULL,
+    pk_dependent_layer UUID,
+    pk_dependon_layer UUID,
+    pk_dependent_task UUID,
+    pk_dependon_task UUID,
+    time_created BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
+    time_modified BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())
+);
+
+CREATE UNIQUE INDEX depend_uuid_sig_idx ON plow.depend (uuid_sig);
+
+CREATE INDEX depend_dependent_job_idx ON plow.depend (pk_dependent_job);
+CREATE INDEX depend_dependon_job_idx ON plow.depend (pk_dependon_job);
+CREATE INDEX depend_dependent_layer_idx ON plow.depend (pk_dependent_layer);
+CREATE INDEX depend_dependon_layer_idx ON plow.depend (pk_dependon_layer);
+CREATE INDEX depend_dependent_task_idx ON plow.depend (pk_dependent_task);
+CREATE INDEX depend_dependon_task_idx ON plow.depend (pk_dependon_task);
+
+----------------------------------------------------------
+
+---
 --- Cluster
 ---
 

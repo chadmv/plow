@@ -32,6 +32,15 @@ enum TaskState {
     SUCCEEDED
 }
 
+enum DependType {
+    JOB_ON_JOB,
+    LAYER_ON_LAYER,
+    LAYER_ON_TASK,
+    TASK_ON_LAYER,
+    TASK_ON_TASK,
+    TASK_BY_TASK
+}
+
 exception PlowException {
     1: i32 what,
     2: string why
@@ -93,6 +102,19 @@ struct TaskT {
     12:i32 lastMaxRss
 }
 
+/**
+* DependSpecT describes a dependency launched with a JobSpec.
+**/
+struct DependSpecT {
+    1:DependType type,
+    2:string dependentJob,
+    3:string dependOnJob,
+    4:string dependentLayer,
+    5:string dependOnLayer,
+    6:string dependentTask,
+    7:string dependOnTask
+}
+
 struct LayerSpecT {
     1:string name,
     2:list<string> command;
@@ -111,7 +133,8 @@ struct JobSpecT {
     4:string username,
     5:i32 uid,
     6:string logPath
-    7:list<LayerSpecT> layers
+    7:list<LayerSpecT> layers,
+    8:list<DependSpecT> depends
 }
 
 struct JobFilterT {
