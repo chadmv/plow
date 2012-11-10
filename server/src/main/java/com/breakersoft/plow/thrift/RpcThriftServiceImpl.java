@@ -48,7 +48,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public JobT getRunningJob(String name) throws PlowException, TException {
+    public JobT getActiveJob(String name) throws PlowException, TException {
         return thriftJobDao.getRunningJob(name);
     }
 
@@ -73,8 +73,8 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public List<TaskT> getTasks(String layerId) throws PlowException, TException {
-        return thriftTaskDao.getTasks(UUID.fromString(layerId));
+    public List<TaskT> getTasks(TaskFilterT filter) throws PlowException, TException {
+        return thriftTaskDao.getTasks(filter);
     }
 
     @Override

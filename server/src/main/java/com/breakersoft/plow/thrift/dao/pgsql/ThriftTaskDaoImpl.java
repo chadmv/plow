@@ -5,14 +5,17 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
+import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.thrift.TaskT;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
+import com.google.common.collect.Lists;
 
 @Repository
 @Transactional(readOnly = true)
@@ -64,11 +67,24 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
         return jdbc.queryForObject(GET_BY_ID, MAPPER, id);
     }
 
-    private static final String GET_BY_LAYER =
-            GET + " WHERE pk_layer=?";
-
     @Override
-    public List<TaskT> getTasks(UUID layerId) {
-        return jdbc.query(GET_BY_LAYER, MAPPER, layerId);
+    public List<TaskT> getTasks(TaskFilterT filter) {
+        List<String> where = Lists.newArrayList();
+        List<Object> values = Lists.newArrayList();
+
+        if (filter.isSetJobId()) {
+            where.add(" task.pk_job = ? ");
+            values.add(UUID.fromString(filter.jobId));
+        }
+        else {
+            throw new RuntimeException("At least a jobId must be set.");
+        }
+
+        final StringBuilder sb = new StringBuilder(512);
+        sb.append(GET);
+        sb.append(" WHERE ");
+        sb.append(StringUtils.join(where, " AND "));
+        sb.append(" ORDER BY int_order ASC");
+        return jdbc.query(sb.toString(), MAPPER, values.toArray());
     }
 }

@@ -144,6 +144,14 @@ struct JobFilterT {
     4:list<JobState> states
 }
 
+struct TaskFilterT {
+    1:required common.Guid jobId,
+    2:list<common.Guid> layerIds,
+    3:list<TaskState> states,
+    4:i32 limit = 0,
+    5:i32 offset = 0
+}
+
 service RpcService {
     
     JobT launch(1:JobSpecT spec) throws (1:PlowException e),
@@ -157,8 +165,8 @@ service RpcService {
     list<LayerT> getLayers(1:common.Guid jobId) throws (1:PlowException e),
 
     TaskT getTask(1:common.Guid taskId) throws (1:PlowException e),
-    list<TaskT> getTasksByLayer(1:common.Guid layerId, 2:list<i32> limit) throws (1:PlowException e),
-    list<TaskT> getTasksByJob(1:common.Guid jobId, 2:list<i32> limit) throws (1:PlowException e),
+    list<TaskT> getTasks(1:TaskFilterT filter) throws (1:PlowException e),
+
 
 }
 
