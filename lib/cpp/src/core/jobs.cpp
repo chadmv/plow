@@ -1,5 +1,6 @@
 
 #include "plow.h"
+#include "client.h"
 
 #include <vector>
 #include <string>

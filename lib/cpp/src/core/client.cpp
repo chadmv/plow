@@ -1,5 +1,6 @@
-
+#include "client.h"
 #include "plow.h"
+
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -22,7 +23,6 @@ class PlowClient::Connection
 {
     public:
         Connection();
-        virtual ~Connection();
         void connect();
         void disconnect();
         RpcServiceClient proxy();        
@@ -38,10 +38,6 @@ PlowClient::Connection::Connection():
     transport(new TFramedTransport(socket)),
     protocol(new TBinaryProtocol(transport)),
     service(protocol)
-{
-}
-    
-PlowClient::Connection::~Connection()
 {
 }
 
