@@ -9,9 +9,11 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 
+import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.JobSpecT;
+import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskT;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 
@@ -38,12 +40,12 @@ public class ThriftTaskDaoTests extends AbstractTest {
     @Test
     public void testGetTasks() {
         JobSpecT spec = getTestJobSpec();
-        jobService.launch(spec);
+        JobLaunchEvent event = jobService.launch(spec);
 
-        @SuppressWarnings("deprecation")
-        UUID id = simpleJdbcTemplate.queryForObject(
-                "SELECT pk_layer FROM task LIMIT 1", UUID.class);
-        List<TaskT> task = thriftTaskDao.getTasks(id);
+        TaskFilterT filter = new TaskFilterT();
+        filter.jobId = event.getJob().getJobId().toString();
+
+        List<TaskT> task = thriftTaskDao.getTasks(filter);
         assertTrue(task.size() > 0);
     }
 }

@@ -84,7 +84,7 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
         sb.append(GET);
         sb.append(" WHERE ");
         sb.append(StringUtils.join(where, " AND "));
-        sb.append(" ORDER BY int_order ASC");
+        sb.append(" ORDER BY int_task_order ASC");
         return jdbc.query(sb.toString(), MAPPER, values.toArray());
     }
 }
