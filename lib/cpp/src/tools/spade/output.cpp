@@ -16,11 +16,25 @@ void display_node_list()
     std::vector<NodeT> nodes;
     getNodes(nodes, filter);
 
+
+
     for (std::vector<NodeT>::iterator i = nodes.begin();
                                       i != nodes.end();
                                       ++i)
     {
-        std::cout << std::left << std::setw(32) << i->name << std::endl; 
+
+        int runningCores = i->totalCores - i->idleCores;
+
+        std::cout << std::left 
+            << std::setw(28) << i->name
+            << std::setw(20) << i->clusterName
+            << std::setw(8) << _NodeState_VALUES_TO_NAMES.find(i->state)->second
+            << std::setw(8) << _LockState_VALUES_TO_NAMES.find(i->lockState)->second
+            << std::right
+            << std::setfill('0') << std::setw(2) << runningCores 
+            << "/" 
+            << std::setfill('0') << std::setw(2) << i->totalCores
+            << std::endl;
     }
 }
 
