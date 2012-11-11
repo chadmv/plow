@@ -41,7 +41,7 @@ public class NodeDaoTests extends AbstractTest {
 
         // Check to ensure the procs/memory were subtracted from the host.
         assertEquals(ping.hw.physicalCpus - 1,
-                simpleJdbcTemplate.queryForInt("SELECT int_free_cores FROM node_dsp WHERE pk_node=?",
+                simpleJdbcTemplate.queryForInt("SELECT int_idle_cores FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
 
         assertEquals(ping.hw.totalRamMb - 1024 - Defaults.MEMORY_RESERVE_MB,
@@ -67,7 +67,7 @@ public class NodeDaoTests extends AbstractTest {
         nodeDao.freeResources(node, 1, 1024);
 
         assertEquals(ping.hw.physicalCpus,
-                simpleJdbcTemplate.queryForInt("SELECT int_free_cores FROM node_dsp WHERE pk_node=?",
+                simpleJdbcTemplate.queryForInt("SELECT int_idle_cores FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
 
         assertEquals(ping.hw.totalRamMb - Defaults.MEMORY_RESERVE_MB,

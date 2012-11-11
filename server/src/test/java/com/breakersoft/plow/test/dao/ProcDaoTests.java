@@ -75,7 +75,7 @@ public class ProcDaoTests extends AbstractTest {
 
         // Check to ensure the procs/memory were subtracted from the host.
         assertEquals(dnode.getCores(),
-                simpleJdbcTemplate.queryForInt("SELECT int_free_cores FROM node_dsp WHERE pk_node=?",
+                simpleJdbcTemplate.queryForInt("SELECT int_idle_cores FROM node_dsp WHERE pk_node=?",
                         dnode.getNodeId()));
 
         assertEquals(dnode.getMemory(),

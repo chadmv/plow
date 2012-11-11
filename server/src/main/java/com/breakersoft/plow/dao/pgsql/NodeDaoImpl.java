@@ -29,10 +29,9 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "pk_cluster",
                 "str_name",
                 "str_ipaddr",
-                "str_tags",
-                "int_created_time"),
+                "str_tags"),
 
-        JdbcUtils.Insert("plow.node_status",
+        JdbcUtils.Insert("plow.node_sys",
                 "pk_node",
                 "int_phys_cores",
                 "int_log_cores",
@@ -41,14 +40,13 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "int_swap",
                 "int_free_swap",
                 "int_boot_time",
-                "int_ping_time",
-                "str_proc",
-                "str_os"),
+                "str_cpu_model",
+                "str_platform"),
 
         JdbcUtils.Insert("plow.node_dsp",
                 "pk_node",
                 "int_cores",
-                "int_free_cores",
+                "int_idle_cores",
                 "int_memory",
                 "int_free_memory")
     };
@@ -57,7 +55,6 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     public Node create(final Cluster cluster, final Ping ping) {
 
         final UUID id = UUID.randomUUID();
-        final long time = System.currentTimeMillis();
 
         final String clusterTag = jdbc.queryForObject(
                 "SELECT str_tag FROM plow.cluster WHERE pk_cluster=?",
@@ -72,7 +69,6 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 ps.setString(3, ping.hostname);
                 ps.setString(4, ping.ipAddr);
                 ps.setArray(5, conn.createArrayOf("text", new String[] { clusterTag }));
-                ps.setLong(6, time);
                 return ps;
             }
         });
@@ -85,7 +81,6 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 ping.hw.totalSwapMb,
                 ping.hw.freeSwapMb,
                 ping.bootTime,
-                time,
                 ping.hw.cpuModel,
                 ping.hw.platform);
 
@@ -154,10 +149,10 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
             "UPDATE " +
                 "plow.node_dsp " +
             "SET " +
-                "int_free_cores = int_free_cores - ?," +
+                "int_idle_cores = int_idle_cores - ?," +
                 "int_free_memory = int_free_memory - ? " +
             "WHERE " +
-                "node_dsp.int_free_cores >= ? " +
+                "node_dsp.int_idle_cores >= ? " +
             "AND " +
                 "node_dsp.int_free_memory >= ? " +
             "AND " +
@@ -177,7 +172,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
             "UPDATE " +
                 "plow.node_dsp " +
             "SET " +
-                "int_free_cores = int_free_cores + ?," +
+                "int_idle_cores = int_idle_cores + ?," +
                 "int_free_memory = int_free_memory + ? " +
             "WHERE " +
                 "node_dsp.pk_node = ? ";

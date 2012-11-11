@@ -40,6 +40,7 @@ CREATE TRIGGER trig_after_task_state_change AFTER UPDATE ON plow.task
 CREATE OR REPLACE FUNCTION plow.before_task_depend_check() RETURNS TRIGGER AS $$
 BEGIN
   NEW.int_state := 5;
+  RETURN NEW;
 END
 $$
 LANGUAGE plpgsql;

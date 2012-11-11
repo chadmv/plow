@@ -94,7 +94,7 @@ struct QuotaT {
     9:i32 freeCores,
 }
 
-struct NodeStatusT {
+struct NodeSystemT {
     1:i32 physicalCores,
     2:i32 logicalCores,
     3:i32 totalRamMb,               
@@ -122,7 +122,7 @@ struct NodeT {
     13:i32 idleCores,
     14:i32 totalRamMb,
     15:i32 freeRamMb,
-    16:NodeStatusT status
+    16:NodeSystemT system
 }
 
 struct ProcT {

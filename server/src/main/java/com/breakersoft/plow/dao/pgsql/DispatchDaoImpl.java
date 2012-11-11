@@ -151,7 +151,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             node.setClusterId((UUID) rs.getObject("pk_cluster"));
             node.setTags(new HashSet<String>(
                     Arrays.asList((String[])rs.getArray("str_tags").getArray())));
-            node.setCores(rs.getInt("int_free_cores"));
+            node.setCores(rs.getInt("int_idle_cores"));
             node.setMemory(rs.getInt("int_free_memory"));
             node.setName(rs.getString("str_name"));
             node.setDispatchable(true);
@@ -165,7 +165,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "node.pk_cluster,"+
                 "node.str_name,"+
                 "node.str_tags,"+
-                "node_dsp.int_free_cores,"+
+                "node_dsp.int_idle_cores,"+
                 "node_dsp.int_free_memory " +
             "FROM " +
                 "plow.node," +

@@ -216,7 +216,8 @@ CREATE TABLE plow.node (
   str_ipaddr VARCHAR(15) NOT NULL,
   int_state SMALLINT NOT NULL DEFAULT 0,
   int_lock_state SMALLINT NOT NULL DEFAULT 0,
-  int_created_time BIGINT NOT NULL,
+  time_created BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
+  time_updated BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
   str_tags TEXT[] NOT NULL
 ) WITHOUT OIDS;
 
@@ -225,7 +226,7 @@ CREATE INDEX node_int_state_idx ON plow.node (int_state);
 
 ---
 
-CREATE TABLE plow.node_status (
+CREATE TABLE plow.node_sys (
   pk_node UUID NOT NULL PRIMARY KEY,
   int_phys_cores SMALLINT NOT NULL,
   int_log_cores SMALLINT NOT NULL,
@@ -234,9 +235,8 @@ CREATE TABLE plow.node_status (
   int_swap INTEGER NOT NULL,
   int_free_swap INTEGER NOT NULL,
   int_boot_time BIGINT NOT NULL,
-  int_ping_time BIGINT NOT NULL,
-  str_proc VARCHAR(128) NOT NULL,
-  str_os VARCHAR(128) NOT NULL
+  str_cpu_model TEXT NOT NULL,
+  str_platform TEXT NOT NULL
 ) WITHOUT OIDS;
 
 ---
@@ -245,7 +245,7 @@ CREATE TABLE plow.node_dsp (
   pk_node UUID NOT NULL PRIMARY KEY,
   int_cores SMALLINT NOT NULL,
   int_memory INTEGER NOT NULL,
-  int_free_cores SMALLINT NOT NULL,
+  int_idle_cores SMALLINT NOT NULL,
   int_free_memory INTEGER NOT NULL
 ) WITHOUT OIDS;
 
