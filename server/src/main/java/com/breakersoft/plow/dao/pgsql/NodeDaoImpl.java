@@ -39,7 +39,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "int_free_memory",
                 "int_swap",
                 "int_free_swap",
-                "int_boot_time",
+                "time_booted",
                 "str_cpu_model",
                 "str_platform"),
 
