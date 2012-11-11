@@ -33,10 +33,10 @@ import com.google.common.collect.Sets;
 public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringContextTests {
 
     @Resource
-    ProjectService projectService;
+    protected ProjectService projectService;
 
     @Resource
-    NodeService nodeService;
+    protected NodeService nodeService;
 
     @Resource
     protected JobService jobService;

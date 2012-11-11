@@ -12,6 +12,7 @@ import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.JobStateManager;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
+import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 
 @ThriftService
@@ -30,6 +31,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     ThriftTaskDao thriftTaskDao;
+
+    @Autowired
+    ThriftNodeDao thriftNodeDao;
 
     @Autowired
     JobStateManager jobStateManager;
@@ -85,5 +89,18 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     @Override
     public boolean killJob(String jobId, String reason) throws PlowException, TException {
         return jobStateManager.killJob(jobService.getJob(jobId), reason);
+    }
+
+    @Override
+    public NodeT getNode(String id) throws PlowException, TException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<NodeT> getNodes(NodeFilterT filter) throws PlowException,
+            TException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
