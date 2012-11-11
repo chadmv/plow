@@ -9,6 +9,21 @@ using namespace Plow;
 
 namespace Spade {
 
+void display_node_list()
+{
+    NodeFilterT filter;
+
+    std::vector<NodeT> nodes;
+    getNodes(nodes, filter);
+
+    for (std::vector<NodeT>::iterator i = nodes.begin();
+                                      i != nodes.end();
+                                      ++i)
+    {
+        std::cout << std::left << std::setw(32) << i->name << std::endl; 
+    }
+}
+
 void display_job_list()
 {
 

@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
         ("help", "display help")
         ("lj", "display list of active jobs")
         ("lt", "display list of tasks")
+        ("ln", "display list of nodes")
         ;
 
     // Query Options
@@ -63,12 +64,22 @@ int main(int argc, char *argv[])
                 std::cerr << "ERROR: You must specify at least a job when listing tasks." << std::endl;
             }
         }
+        else if (vm.count("ln"))
+        {
+            Spade::display_node_list();
+        }
     }
     catch(const opt::error& e) 
     { 
-      std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
-      std::cerr << all_options << std::endl; 
-      return COMMAND_LINE_ERROR; 
+        std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
+        std::cerr << all_options << std::endl; 
+        return COMMAND_LINE_ERROR; 
+    }
+    catch(const std::exception& ex)
+    {
+        std::cerr << "ERROR: " << ex.what() << std::endl << std::endl; 
+        std::cerr << all_options << std::endl; 
+        return COMMAND_LINE_ERROR;    
     }
 
     return COMMAND_LINE_SUCCESS;

@@ -21,6 +21,8 @@ extern PLOWEXPORT void getJobs(std::vector<JobT>& jobs, const JobFilterT& filter
 extern PLOWEXPORT void getTasks(std::vector<TaskT>& tasks, const TaskFilterT& filter);
 extern PLOWEXPORT void getActiveJob(JobT& job, const std::string& name);
 
+extern PLOWEXPORT void getNodes(std::vector<NodeT>& nodes, const NodeFilterT& filter);
+
 extern PLOWEXPORT void formatTime(std::string& output, const Timestamp ts);
 extern PLOWEXPORT void formatDuration(std::string& output, const int duration);
 
