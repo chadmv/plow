@@ -19,7 +19,7 @@ def serialize(runner):
     Convert the job from the internal blueprint stucture to a plow JobSpec.
     """
     job = runner.getJob()
-    base_name = job.getName()
+    base_name = runner.getArg("job_name", job.getName())
     job_name = conf.get("templates", "job_name", JOB_NAME=base_name)
     log_dir = conf.get("templates", "log_dir", JOB_NAME=base_name)
     
