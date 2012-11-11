@@ -201,8 +201,8 @@ class RunningTask(ttypes.RunningTask):
         D = self.__dict__.copy()
 
         # elide the log string if its too big
-        lastLog = D['lastLog']
-        if len(lastLog) > 50:
+        lastLog = D.get('lastLog')
+        if lastLog and len(lastLog) > 50:
             D['lastLog'] = '%s...' % lastLog[:47]
 
         L = ('%s=%r' % (key, value) for key, value in D.iteritems())
