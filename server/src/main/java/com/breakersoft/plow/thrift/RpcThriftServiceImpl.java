@@ -100,7 +100,6 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     @Override
     public List<NodeT> getNodes(NodeFilterT filter) throws PlowException,
             TException {
-        // TODO Auto-generated method stub
-        return null;
+        return thriftNodeDao.getNodes(filter);
     }
 }
