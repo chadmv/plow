@@ -7,10 +7,14 @@ INCLUDE(${QT_USE_FILE})
 
 SET(PLOW_GUI_SRCS_CXX
     JobTree.cpp
+    NodeModel.cpp 
+    NodeTableWidget.cpp 
 )
 
 SET(PLOW_GUI_MOC_HDRS
     JobTree.h
+    NodeModel.h 
+    NodeTableWidget.h
 )
 
 SET(PLOW_GUI_UI_FILES
