@@ -4,6 +4,9 @@
 #include <QWidget>
 
 class QTableView;
+
+namespace Plow { namespace Gui {
+
 class NodeModel;
 
 class NodeTableWidget : public QWidget
@@ -22,5 +25,8 @@ private:
     QTableView* tableView;
 
 };
+
+} // Gui
+} // Plow
 
 #endif // NODETABLEWIDGET_H

@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     QVBoxLayout* layout = new QVBoxLayout(central);
 
     QPushButton* reload = new QPushButton("Reload");
-    NodeModel* model = new NodeModel;
+    Plow::Gui::NodeModel* model = new Plow::Gui::NodeModel;
     QObject::connect(reload, SIGNAL(clicked()), model, SLOT(populate()));
 
     // First table
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     group1->setLayout(new QVBoxLayout);
     group1->layout()->setMargin(2);
 
-    NodeTableWidget* view = new NodeTableWidget;
+    Plow::Gui::NodeTableWidget* view = new Plow::Gui::NodeTableWidget;
     view->setModel(model);
     group1->layout()->addWidget(view);
 
@@ -49,3 +49,4 @@ int main(int argc, char *argv[])
 
     return a.exec();
 }
+

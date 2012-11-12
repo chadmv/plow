@@ -6,6 +6,8 @@
 #include "NodeModel.h"
 #include "NodeTableWidget.h"
 
+namespace Plow { namespace Gui {
+
 NodeTableWidget::NodeTableWidget(QWidget *parent) :
     QWidget(parent)
 {
@@ -31,3 +33,7 @@ NodeModel* NodeTableWidget::model() {
 void NodeTableWidget::setModel(NodeModel* model) {
     tableView->setModel(model);
 }
+
+
+} // Gui
+} // Plow

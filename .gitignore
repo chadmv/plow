@@ -7,3 +7,9 @@ server/target
 client/python/plow.egg-info
 *.egg-info
 lib/etc
+*.o
+*.pro
+moc_*.cpp
+*.pro.user
+Makefile
+lib/cpp/src/gui/examples/examples.app
