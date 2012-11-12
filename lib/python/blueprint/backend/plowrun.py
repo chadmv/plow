@@ -1,9 +1,12 @@
 import os
 import yaml
 import getpass
+import pprint
 
 import plow
 import blueprint.conf as conf
+
+from blueprint import Layer
 
 def launch(runner):
     """
@@ -12,7 +15,10 @@ def launch(runner):
     runner.setup()
     spec = serialize(runner)
 
-    plow.submitJobSpec(spec)
+    if runner.getArg("pretend"):
+        pprint.pprint(spec)
+    else:
+        plow.submitJobSpec(spec)
 
 def serialize(runner):
     """
@@ -51,6 +57,29 @@ def serialize(runner):
         lspec.minCores = layer.getArg("min_threads", 1)
         lspec.maxCores = layer.getArg("max_threads", 0)
         lspec.minMemory = layer.getArg("min_ram", 256)
+        lspec.depends = []
+
+        for depend in layer.getDepends():
+
+            dspec = plow.DependSpecT()
+            if depend.type == layer.DependAll:
+                dspec.type = plow.DependType.LAYER_ON_LAYER
+            elif depend.type == layer.DependByTask:
+                dspec.type = plow.DependType.TASK_BY_TASK
+            else:
+                raise Exception("Invalid layer depend type: %s"  % depend.type)
+
+            if isinstance(depend.dependent, (Layer,)):
+                dspec.dependentLayer = depend.dependent.getName()
+            else:
+                dspec.dependentLayer = str(depend.dependent)
+
+            if isinstance(depend.dependOn, (Layer,)):
+                dspec.dependOnLayer = depend.dependOn.getName()
+            else:
+                dspec.dependOnLayer = str(depend.dependOn)
+
+            lspec.depends.append(dspec)
 
         spec.layers.append(lspec)
 
