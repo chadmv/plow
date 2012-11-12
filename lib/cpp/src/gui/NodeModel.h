@@ -15,7 +15,7 @@ template <class Key, class T> class InitializableQMap : public QMap<Key,T>
 {
 public:
     inline InitializableQMap<Key,T> &operator<< (const QPair<Key,T> &t)
-    { insert(t.first,t.second); return *this; }
+    { this->insert(t.first,t.second); return *this; }
 };
 
 
