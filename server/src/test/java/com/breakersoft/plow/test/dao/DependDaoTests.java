@@ -22,6 +22,54 @@ public class DependDaoTests extends AbstractTest {
     DependDao dependDao;
 
     @Test
+    public void testSatisfyDepend() {
+        JobSpecT spec1 = getTestJobSpec("depend_test_1");
+        JobSpecT spec2 = getTestJobSpec("depend_test_2");
+
+        JobLaunchEvent event1 = jobService.launch(spec1);
+        JobLaunchEvent event2 = jobService.launch(spec2);
+
+        DependSpecT dspec = new DependSpecT();
+        dspec.type = DependType.JOB_ON_JOB;
+        dspec.dependentJob = event1.getJob().getJobId().toString();
+        dspec.dependOnJob = event2.getJob().getJobId().toString();
+
+        Depend depend = dependDao.createJobOnJob(event1.getJob(), event2.getJob());
+        dependDao.satisfyDepend(depend);
+
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM depend WHERE uuid_sig IS NULL"));
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM depend WHERE bool_active='f'"));
+    }
+
+    @Test
+    public void testUpdateDependCounts() {
+        JobSpecT spec1 = getTestJobSpec("depend_test_1");
+        JobSpecT spec2 = getTestJobSpec("depend_test_2");
+
+        JobLaunchEvent event1 = jobService.launch(spec1);
+        JobLaunchEvent event2 = jobService.launch(spec2);
+
+        DependSpecT dspec = new DependSpecT();
+        dspec.type = DependType.JOB_ON_JOB;
+        dspec.dependentJob = event1.getJob().getJobId().toString();
+        dspec.dependOnJob = event2.getJob().getJobId().toString();
+
+        Depend depend = dependDao.createJobOnJob(event1.getJob(), event2.getJob());
+        dependDao.incrementDependCounts(depend);
+
+        assertEquals(10,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task"));
+
+        dependDao.satisfyDepend(depend);
+        dependDao.decrementDependCounts(depend);
+
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task"));
+    }
+
+    @Test
     public void testJobOnJob() {
         JobSpecT spec1 = getTestJobSpec("depend_test_1");
         JobSpecT spec2 = getTestJobSpec("depend_test_2");
