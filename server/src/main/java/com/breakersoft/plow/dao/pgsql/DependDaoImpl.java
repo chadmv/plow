@@ -99,7 +99,7 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
     }
 
     private static final String BASE_DEC =
-            "UPDATE plow.task SET int_depend_count=int_depend_count +1 WHERE ";
+            "UPDATE plow.task SET int_depend_count=int_depend_count -1 WHERE ";
 
     public void decrementDependCounts(Depend depend) {
 
