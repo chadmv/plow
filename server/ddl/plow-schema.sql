@@ -164,7 +164,7 @@ CREATE INDEX task_int_state_idx ON plow.task (int_state);
 
 CREATE TABLE plow.depend (
     pk_depend UUID NOT NULL PRIMARY KEY,
-    uuid_sig UUID NOT NULL,
+    uuid_sig UUID,
     int_type SMALLINT NOT NULL,
     bool_active BOOLEAN NOT NULL DEFAULT 't',
     pk_dependent_job UUID NOT NULL,
