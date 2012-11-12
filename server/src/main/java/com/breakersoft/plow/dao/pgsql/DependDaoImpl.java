@@ -132,7 +132,9 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
             "AND " +
                 "int_type IN (?,?) " +
             "AND " +
-                "pk_dependon_task=?";
+                "pk_dependon_task=? " +
+            "ORDER BY " +
+                "depend.pk_depend ";
 
     @Override
     public List<Depend> getOnTaskDepends(Task task) {
@@ -143,7 +145,7 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
     }
 
     private static final String SATISFY =
-            "UPDATE depend SET bool_active='f' WHERE pk_depend=? AND bool_active='t'";
+            "UPDATE depend SET uuid_sig=NULL, bool_active='f' WHERE pk_depend=? AND bool_active='t'";
 
     @Override
     public boolean satisfyDepend(Depend depend) {
