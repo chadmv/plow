@@ -20,6 +20,7 @@ import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobFinishedEvent;
 import com.breakersoft.plow.event.JobLaunchEvent;
+import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.LayerSpecT;
@@ -48,6 +49,9 @@ public class JobServiceImpl implements JobService {
     @Autowired
     EventManager eventManager;
 
+    @Autowired
+    DependService dependService;
+
     @Override
     public JobLaunchEvent launch(JobSpecT jobspec) {
 
@@ -56,6 +60,7 @@ public class JobServiceImpl implements JobService {
         final Folder folder = filterJob(job, project);
 
         createJobTopology(job, project, jobspec);
+        createDependencies(job, jobspec);
 
         jobDao.updateFrameStatesForLaunch(job);
         jobDao.updateFrameCountsForLaunch(job);
@@ -103,6 +108,43 @@ public class JobServiceImpl implements JobService {
             layerOrder++;
         }
     }
+
+    private void createDependencies(Job job, JobSpecT jspec) {
+
+        for (LayerSpecT layer: jspec.getLayers()) {
+            if (!layer.isSetDepends()) {
+                continue;
+            }
+            for (DependSpecT depend: layer.getDepends()) {
+                // Fill in job IDs
+                if (!depend.isSetDependentJob()) {
+                    depend.setDependentJob(job.getJobId().toString());
+                }
+
+                if (!depend.isSetDependOnJob()) {
+                    depend.setDependOnJob(job.getJobId().toString());
+                }
+
+                dependService.createDepend(depend);
+            }
+        }
+
+        if (jspec.isSetDepends()) {
+            for (DependSpecT depend: jspec.getDepends()) {
+
+                if (!depend.isSetDependentJob()) {
+                    depend.setDependentJob(job.getJobId().toString());
+                }
+
+                if (!depend.isSetDependOnJob()) {
+                    depend.setDependOnJob(job.getJobId().toString());
+                }
+
+                dependService.createDepend(depend);
+            }
+        }
+    }
+
 
     @Override
     public Job getJob(String id) {
