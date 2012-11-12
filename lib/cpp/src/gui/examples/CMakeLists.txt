@@ -10,25 +10,11 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 #
 # NodeWidget
 #
-SET(nodeWidget_SOURCES 
-	../NodeModel.cpp 
-	../NodeTableWidget.cpp 
-)
-
-SET(nodeWidget_HEADERS 
-	../NodeModel.h  
-	../NodeTableWidget.h
-)
-
-
-QT4_WRAP_CPP( nodeWidget_HEADERS_MOC ${nodeWidget_HEADERS} )
-
 IF(APPLE)
-	ADD_EXECUTABLE(nodeWidget MACOSX_BUNDLE
-		nodeWidget.cpp ${nodeWidget_SOURCES} ${nodeWidget_HEADERS_MOC})	
+	ADD_EXECUTABLE(nodeWidget MACOSX_BUNDLE nodeWidget.cpp)	
 ELSEIF(UNIX)
-	ADD_EXECUTABLE(nodeWidget 
-		nodeWidget.cpp ${nodeWidget_SOURCES} ${nodeWidget_HEADERS_MOC})
+	ADD_EXECUTABLE(nodeWidget nodeWidget.cpp)
 ENDIF()
 
-TARGET_LINK_LIBRARIES(nodeWidget ${QT_LIBRARIES})
+add_dependencies(nodeWidget plowgui)
+TARGET_LINK_LIBRARIES(nodeWidget plowgui ${QT_LIBRARIES})
