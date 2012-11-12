@@ -15,6 +15,7 @@ import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.DependType;
 import com.breakersoft.plow.thrift.JobSpecT;
+import com.breakersoft.plow.thrift.TaskState;
 
 public class DependServiceTests extends AbstractTest {
 
@@ -175,6 +176,17 @@ public class DependServiceTests extends AbstractTest {
         assertEquals(0,
                 simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
                 event2.getJob().getJobId()));
+
+        dependService.satisfyDependsOn(dependOnTask);
+
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
+
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM task WHERE int_state=?",
+                TaskState.DEPEND.ordinal()));
+
     }
 
     @Test
@@ -206,5 +218,4 @@ public class DependServiceTests extends AbstractTest {
                 simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
                 event2.getJob().getJobId()));
     }
-
 }

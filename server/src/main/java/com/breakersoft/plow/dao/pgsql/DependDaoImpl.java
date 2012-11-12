@@ -2,6 +2,7 @@ package com.breakersoft.plow.dao.pgsql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -119,6 +120,34 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
         }
 
         logger.info("Incremented depend counts {}", depend.getType(), result);
+    }
+
+    private static final String GET_BY_TASK =
+            "SELECT " +
+                "depend.* " +
+            "FROM " +
+                "depend " +
+            "WHERE " +
+                "bool_active='t' " +
+            "AND " +
+                "int_type IN (?,?) " +
+            "AND " +
+                "pk_dependon_task=?";
+
+    @Override
+    public List<Depend> getOnTaskDepends(Task task) {
+        return jdbc.query(GET_BY_TASK, MAPPER,
+                DependType.LAYER_ON_TASK.ordinal(),
+                DependType.TASK_ON_TASK.ordinal(),
+                task.getTaskId());
+    }
+
+    private static final String SATISFY =
+            "UPDATE depend SET bool_active='f' WHERE pk_depend=? AND bool_active='t'";
+
+    @Override
+    public boolean satisfyDepend(Depend depend) {
+        return jdbc.update(SATISFY, depend.getDependId()) == 1;
     }
 
     private static final String INSERT =

@@ -5,6 +5,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Depend;
 import com.breakersoft.plow.FrameRange;
@@ -19,6 +20,7 @@ import com.breakersoft.plow.thrift.DependSpecT;
 import com.google.common.collect.Sets;
 
 @Service
+@Transactional
 public class DependServiceImpl implements DependService {
 
     private Logger logger = org.slf4j.LoggerFactory.getLogger(DependServiceImpl.class);
@@ -103,6 +105,15 @@ public class DependServiceImpl implements DependService {
             dependDao.incrementDependCounts(depend);
         }
         return depend;
+    }
+
+    @Override
+    public void satisfyDependsOn(Task task) {
+        for (Depend depend: dependDao.getOnTaskDepends(task)) {
+            if (dependDao.satisfyDepend(depend)) {
+                dependDao.decrementDependCounts(depend);
+            }
+        }
     }
 
     private void createTaskByTask(Layer dependentLayer, Layer dependOnLayer) {

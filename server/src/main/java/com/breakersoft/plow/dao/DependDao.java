@@ -1,5 +1,6 @@
 package com.breakersoft.plow.dao;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.breakersoft.plow.Depend;
@@ -17,4 +18,7 @@ public interface DependDao {
     void incrementDependCounts(Depend depend);
     void decrementDependCounts(Depend depend);
     Depend get(UUID id);
+
+    List<Depend> getOnTaskDepends(Task task);
+    boolean satisfyDepend(Depend depend);
 }
