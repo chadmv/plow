@@ -12,6 +12,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
+import com.breakersoft.plow.service.DependService;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.thrift.TaskState;
 
@@ -25,6 +26,9 @@ public class BackEndDispatcher {
 
     @Autowired
     DispatchService dispatchService;
+
+    @Autowired
+    DependService dependService;
 
     @Autowired
     FrontEndDispatcher frontEndDispatcher;
@@ -60,6 +64,11 @@ public class BackEndDispatcher {
         }
         else {
             dispatchService.unassignProc(proc);
+            dependService.satisfyDependsOn(task);
+
+            //TODO: check if layer is layer and satisfy depends.
+            //TODO: check if job is complete and satisfy depends.
+
         }
 
         if (!jobService.hasPendingFrames(job)) {
