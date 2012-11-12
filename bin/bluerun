@@ -17,6 +17,7 @@ class Bluerun(blueprint.app.Application):
         group.add_argument("range", metavar="FRAME_RANGE", help="Frame range.")
         group.add_argument("-pause", action="store_true", help="Launch the job in a paused state.")
         group.add_argument("-job-name", metavar="JOB NAME", help="Set the job name.")
+        group.add_argument("-pretend", action="store_true", help="Do everything except launch the job.")
 
     def handleArgs(self, args):
 
@@ -30,6 +31,8 @@ class Bluerun(blueprint.app.Application):
             runner.setArg("pause", args.pause)
         if args.job_name:
             runner.setArg("job_name", args.job_name)
+        if args.pretend:
+            runner.setArg("pretend", args.pretend)
 
         runner.setArg("script", args.script)
         runner.setArg("frame_range", args.range)
