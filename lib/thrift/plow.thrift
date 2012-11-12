@@ -214,7 +214,8 @@ struct LayerSpecT {
     5:i32 chunk,
     6:i32 minCores,
     7:i32 maxCores,
-    8:i32 minRamMb
+    8:i32 minRamMb,
+    9:list<DependSpecT> depends
 }
 
 struct JobSpecT {
