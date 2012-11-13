@@ -20,6 +20,7 @@ PLOW_NAMESPACE_ENTER
 extern PLOWEXPORT void getJobs(std::vector<JobT>& jobs, const JobFilterT& filter);
 extern PLOWEXPORT void getTasks(std::vector<TaskT>& tasks, const TaskFilterT& filter);
 extern PLOWEXPORT void getActiveJob(JobT& job, const std::string& name);
+extern PLOWEXPORT void killJob(const JobT& job);
 
 extern PLOWEXPORT void getNodes(std::vector<NodeT>& nodes, const NodeFilterT& filter);
 
