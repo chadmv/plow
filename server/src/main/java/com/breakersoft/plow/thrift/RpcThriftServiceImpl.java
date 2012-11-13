@@ -36,7 +36,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     ThriftNodeDao thriftNodeDao;
 
     @Autowired
-    StateManager jobStateManager;
+    StateManager stateManager;
 
     @Override
     public JobT launch(JobSpecT spec) throws PlowException, TException {
@@ -88,7 +88,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Override
     public boolean killJob(String jobId, String reason) throws PlowException, TException {
-        return jobStateManager.killJob(jobService.getJob(jobId), reason);
+        return stateManager.killJob(jobService.getJob(jobId), reason);
     }
 
     @Override
