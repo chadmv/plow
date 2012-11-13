@@ -1,63 +1,106 @@
 #include <QStandardItem>
 #include <QDebug>
 
-#include "plow_types.h"
 #include "NodeModel.h"
 
 namespace Plow { namespace Gui {
 
-
-NodeModel::NodeModel(QObject *parent) :
-    QStandardItemModel(parent)
-{
-    QStringList labels;
-    labels << "Host"
-           << "Platform"        << "Cpu Model"
-           << "Cluster"
-           << "State"           << "Locked"
-           << "Cores (Total)"   << "Cores (Idle)"
-           << "Ram (Total)"     << "Ram (Free)"
-           << "Swap (Total)"    << "Swap (Free)"
-           << "Uptime";
-
-    setHorizontalHeaderLabels(labels);
-}
-
-// Temp
+// Temp Fixture Declaration
 NodeList getHosts(int amount);
 
+
+NodeModel::NodeModel(QObject *parent)
+    : QAbstractTableModel(parent)
+{}
+
+NodeModel::~NodeModel() {
+    nodes.clear();
+}
+
+Callbacks NodeModel::displayRoleCallbacks = Callbacks()
+            << &DisplayRoleCallbacks::name
+            << &DisplayRoleCallbacks::platform
+            << &DisplayRoleCallbacks::cpuModel
+            << &DisplayRoleCallbacks::clusterName
+            << &DisplayRoleCallbacks::nodeState
+            << &DisplayRoleCallbacks::lockState
+            << &DisplayRoleCallbacks::totalCores
+            << &DisplayRoleCallbacks::idleCores
+            << &DisplayRoleCallbacks::totalRamMb
+            << &DisplayRoleCallbacks::freeRamMb
+            << &DisplayRoleCallbacks::totalSwapMb
+            << &DisplayRoleCallbacks::freeSwapMb
+            << &DisplayRoleCallbacks::bootTime;
+
+QStringList NodeModel::headerLabels = QStringList()
+        << "Host"
+        << "Platform"
+        << "Cpu Model"
+        << "Cluster"
+        << "State"
+        << "Locked"
+        << "Cores (Total)"
+        << "Cores (Idle)"
+        << "Ram (Total)"
+        << "Ram (Free)"
+        << "Swap (Total)"
+        << "Swap (Free)"
+        << "Uptime";
+
+
+int NodeModel::rowCount(const QModelIndex &parent) const {
+    Q_UNUSED(parent);
+    return static_cast<int>(nodes.size());
+}
+
+int NodeModel::columnCount(const QModelIndex &parent) const {
+    Q_UNUSED(parent);
+    return headerLabels.count();
+}
+
+QVariant NodeModel::data(const QModelIndex &index, int role) const {
+    QVariant ret;
+
+    if (!index.isValid())
+        return ret;
+
+//    int row = index.row();
+//    int col = index.column();
+
+//    if (0 <= row && row < rowCount(QModelIndex())) {
+    if (role == Qt::DisplayRole) {
+        NodeT aNode = nodes.at(index.row());
+        ret = displayRoleCallbacks[index.column()](aNode);
+    }
+//    }
+
+    return ret;
+}
+
+QVariant NodeModel::headerData(int section,
+                               Qt::Orientation orientation,
+                               int role) const {
+    if (role != Qt::DisplayRole)
+        return QVariant();
+
+    if (orientation == Qt::Vertical)
+        return QVariant(section);
+
+    return QVariant(headerLabels.at(section));
+}
+
 void NodeModel::populate() {
-    while (rowCount()) {
-        removeRow(0);
-    }
+    beginResetModel();
+    nodes.clear();
+    nodes = getHosts(10000);
+    endResetModel();
+}
 
-    QList<QStandardItem*> aList;
+const NodeT* NodeModel::nodeFromIndex(const QModelIndex &index) const {
+    if (index.isValid())
+        return &(nodes.at(index.row()));
 
-    NodeT aNode;
-    NodeList nodeList = getHosts(100);
-
-    for (NodeList::iterator it = nodeList.begin(); it < nodeList.end(); it++) {
-        aNode = *it;
-
-        aList << new QStandardItem(QString::fromStdString(aNode.name))
-              << new QStandardItem(QString::fromStdString(aNode.system.platform))
-              << new QStandardItem(QString::fromStdString(aNode.system.cpuModel))
-              << new QStandardItem(QString::fromStdString(aNode.clusterName))
-              << new QStandardItem(enumToString("NODE_STATE", aNode.state))
-              << new QStandardItem(enumToString("LOCK_STATE", aNode.lockState))
-              << new QStandardItem(QString::number(aNode.totalCores))
-              << new QStandardItem(QString::number(aNode.idleCores))
-              << new QStandardItem(QString::number(aNode.system.totalRamMb))
-              << new QStandardItem(QString::number(aNode.system.freeRamMb))
-              << new QStandardItem(QString::number(aNode.system.totalSwapMb))
-              << new QStandardItem(QString::number(aNode.system.freeSwapMb))
-              << new QStandardItem(QString::number(aNode.bootTime))
-              ;
-
-        appendRow(aList);
-        aList.clear();
-    }
-
+    return 0;
 }
 
 
@@ -93,10 +136,9 @@ NodeList getHosts(int amount) {
 
     NodeT aNode;
 
-    for (int row=0; row < amount; ++row) {
-
-        i_cpus      = p_cpus.at(randInt(0,p_cpus.count()-1));
-        i_ram       = t_ram.at(randInt(0,t_ram.count()-1));
+    for (int row = 0; row < amount; ++row) {
+        i_cpus      = p_cpus.at(randInt(0, p_cpus.count() - 1));
+        i_ram       = t_ram.at(randInt(0, t_ram.count() - 1));
         i_swap      = i_ram * .5;
         i_uptime    = randInt(10, 5 * 24 * 60 * 60);
 
@@ -120,6 +162,5 @@ NodeList getHosts(int amount) {
     return result;
 }
 
-
-} // Gui
-} // Plow
+}  // Gui
+}  // Plow

@@ -30,10 +30,8 @@ NodeModel* NodeTableWidget::model() {
     return qobject_cast<NodeModel*>(tableView->model());
 }
 
-void NodeTableWidget::setModel(NodeModel* model) {
-    tableView->setModel(model);
+void NodeTableWidget::setModel(NodeModel* nodeModel) {
+    tableView->setModel(nodeModel);
 }
-
-
-} // Gui
-} // Plow
+}  // Gui
+}  // Plow
