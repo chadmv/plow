@@ -1,27 +1,11 @@
 #include <QStandardItem>
-#include <QMetaEnum>
 #include <QDebug>
-
-#include <vector>
 
 #include "plow_types.h"
 #include "NodeModel.h"
 
 namespace Plow { namespace Gui {
 
-const InitializableQMap<NodeState::type, QString> NodeModel::NODE_STATES = \
-        InitializableQMap<NodeState::type, QString>()
-            << QPair<NodeState::type, QString>(NodeState::UP, QString("UP"))
-            << QPair<NodeState::type, QString>(NodeState::DOWN, QString("DOWN"))
-            << QPair<NodeState::type, QString>(NodeState::REPAIR, QString("REPAIR"))
-            << QPair<NodeState::type, QString>(NodeState::REBOOT, QString("REBOOT"))
-            ;
-
-const InitializableQMap<LockState::type, QString> NodeModel::LOCK_STATES = \
-        InitializableQMap<LockState::type, QString>()
-            << QPair<LockState::type, QString>(LockState::OPEN, QString("OPEN"))
-            << QPair<LockState::type, QString>(LockState::LOCKED, QString("LOCKED"))
-            ;
 
 NodeModel::NodeModel(QObject *parent) :
     QStandardItemModel(parent)
@@ -59,8 +43,8 @@ void NodeModel::populate() {
               << new QStandardItem(QString::fromStdString(aNode.system.platform))
               << new QStandardItem(QString::fromStdString(aNode.system.cpuModel))
               << new QStandardItem(QString::fromStdString(aNode.clusterName))
-              << new QStandardItem(QString(NODE_STATES.value(aNode.state)))
-              << new QStandardItem(QString(LOCK_STATES.value(aNode.lockState)))
+              << new QStandardItem(enumToString("NODE_STATE", aNode.state))
+              << new QStandardItem(enumToString("LOCK_STATE", aNode.lockState))
               << new QStandardItem(QString::number(aNode.totalCores))
               << new QStandardItem(QString::number(aNode.idleCores))
               << new QStandardItem(QString::number(aNode.system.totalRamMb))
