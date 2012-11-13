@@ -37,7 +37,7 @@ CREATE TRIGGER trig_after_task_state_change AFTER UPDATE ON plow.task
 --- Before task dependency check. Runs if the task has a depend count
 --- greater than zero and flips the state to depend.
 ---
-CREATE OR REPLACE FUNCTION plow.before_update_set_depend RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION plow.before_update_set_depend() RETURNS TRIGGER AS $$
 BEGIN
   NEW.int_state := 5;
   RETURN NEW;
@@ -55,7 +55,7 @@ CREATE TRIGGER trig_before_update_set_depend BEFORE UPDATE ON plow.task
 --- Before task dependency check. Runs if the task has a depend count
 --- greater than zero and flips the state to depend.
 ---
-CREATE OR REPLACE FUNCTION plow.before_update_set_waiting RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION plow.before_update_set_waiting() RETURNS TRIGGER AS $$
 BEGIN
   NEW.int_state := 1;
   RETURN NEW;
