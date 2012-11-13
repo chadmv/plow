@@ -1,5 +1,6 @@
 package com.breakersoft.plow.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -108,30 +109,30 @@ public class DependServiceImpl implements DependService {
     }
 
     @Override
-    public void satisfyDependsOn(Task task) {
-        for (Depend depend: dependDao.getOnTaskDepends(task)) {
-            if (dependDao.satisfyDepend(depend)) {
-                dependDao.decrementDependCounts(depend);
-            }
+    public boolean satisfyDepend(Depend depend) {
+        if (dependDao.satisfyDepend(depend)) {
+            dependDao.decrementDependCounts(depend);
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void satisfyDependsOn(Layer layer) {
-        for (Depend depend: dependDao.getOnLayerDepends(layer)) {
-            if (dependDao.satisfyDepend(depend)) {
-                dependDao.decrementDependCounts(depend);
-            }
-        }
+    @Transactional(readOnly=true)
+    public List<Depend> getOnJobDepends(Job job) {
+        return dependDao.getOnJobDepends(job);
     }
 
     @Override
-    public void satisfyDependsOn(Job job) {
-        for (Depend depend: dependDao.getOnJobDepends(job)) {
-            if (dependDao.satisfyDepend(depend)) {
-                dependDao.decrementDependCounts(depend);
-            }
-        }
+    @Transactional(readOnly=true)
+    public List<Depend> getOnLayerDepends(Layer layer) {
+        return dependDao.getOnLayerDepends(layer);
+    }
+
+    @Override
+    @Transactional(readOnly=true)
+    public List<Depend> getOnTaskDepends(Task task) {
+        return dependDao.getOnTaskDepends(task);
     }
 
     private void createTaskByTask(Layer dependentLayer, Layer dependOnLayer) {

@@ -1,5 +1,7 @@
 package com.breakersoft.plow.service;
 
+import java.util.List;
+
 import com.breakersoft.plow.Depend;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
@@ -10,9 +12,11 @@ public interface DependService {
 
     public Depend createDepend(DependSpecT spec);
 
-    void satisfyDependsOn(Task task);
+    List<Depend> getOnJobDepends(Job job);
 
-    void satisfyDependsOn(Layer layer);
+    List<Depend> getOnLayerDepends(Layer layer);
 
-    void satisfyDependsOn(Job job);
+    List<Depend> getOnTaskDepends(Task task);
+
+    boolean satisfyDepend(Depend depend);
 }

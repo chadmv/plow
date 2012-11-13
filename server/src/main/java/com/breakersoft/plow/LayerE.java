@@ -4,23 +4,30 @@ import java.util.UUID;
 
 public class LayerE implements Layer {
 
-	private UUID layerId;
-	private UUID jobId;
+    private UUID layerId;
+    private UUID jobId;
 
-	public UUID getLayerId() {
-		return layerId;
-	}
-	public void setLayerId(UUID layerId) {
-		this.layerId = layerId;
-	}
-	public UUID getJobId() {
-		return jobId;
-	}
-	public void setJobId(UUID jobId) {
-		this.jobId = jobId;
-	}
+    public LayerE() { }
+
+    public LayerE(Task task) {
+        layerId = task.getLayerId();
+        jobId = task.getJobId();
+    }
+
+    public UUID getLayerId() {
+        return layerId;
+    }
+    public void setLayerId(UUID layerId) {
+        this.layerId = layerId;
+    }
+    public UUID getJobId() {
+        return jobId;
+    }
+    public void setJobId(UUID jobId) {
+        this.jobId = jobId;
+    }
     public int hashCode() {
-    	return layerId.hashCode();
+        return layerId.hashCode();
     }
     public boolean equals(Object obj) {
         if (obj == null)

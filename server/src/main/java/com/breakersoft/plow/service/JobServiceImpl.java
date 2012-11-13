@@ -78,7 +78,6 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean shutdown(Job job) {
         if (jobDao.shutdown(job)) {
-            eventManager.post(new JobFinishedEvent(job));
             return true;
         }
         return false;
