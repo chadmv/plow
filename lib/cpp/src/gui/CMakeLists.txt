@@ -28,6 +28,6 @@ SOURCE_GROUP("Generated Files" REGULAR_EXPRESSION "(ui_.*h)$")
 SOURCE_GROUP("UI Files" REGULAR_EXPRESSION ".*.ui$")
 
 add_library(plowgui SHARED ${PLOW_GUI_SRCS_CXX})
-target_link_libraries(plowgui Thrift ${Boost_THREAD_LIBRARY} plow ${QT_LIBRARIES})
+target_link_libraries(plowgui plow ${QT_LIBRARIES})
 
 add_subdirectory(examples)
