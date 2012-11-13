@@ -73,6 +73,12 @@ public class DependServiceTests extends AbstractTest {
         assertEquals(0,
                 simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
                 event2.getJob().getJobId()));
+
+        dependService.satisfyDependsOn(dependOnLayer);
+
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
     }
 
     @Test
@@ -140,6 +146,12 @@ public class DependServiceTests extends AbstractTest {
         assertEquals(0,
                 simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
                 event2.getJob().getJobId()));
+
+        dependService.satisfyDependsOn(dependOnLayer);
+
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
     }
 
     @Test

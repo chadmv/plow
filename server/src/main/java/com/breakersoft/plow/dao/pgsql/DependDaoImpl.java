@@ -144,6 +144,28 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
                 task.getTaskId());
     }
 
+    private static final String GET_BY_LAYER =
+            "SELECT " +
+                "depend.* " +
+            "FROM " +
+                "depend " +
+            "WHERE " +
+                "bool_active='t' " +
+            "AND " +
+                "int_type IN (?,?) " +
+            "AND " +
+                "pk_dependon_layer=? " +
+            "ORDER BY " +
+                "depend.pk_depend ";
+
+    @Override
+    public List<Depend> getOnLayerDepends(Layer layer) {
+        return jdbc.query(GET_BY_LAYER, MAPPER,
+                DependType.LAYER_ON_LAYER.ordinal(),
+                DependType.TASK_ON_LAYER.ordinal(),
+                layer.getLayerId());
+    }
+
     private static final String SATISFY =
             "UPDATE depend SET uuid_sig=NULL, bool_active='f' WHERE pk_depend=? AND bool_active='t'";
 
