@@ -16,6 +16,7 @@ TESTS += ['.'.join(['plowapp.rndaemon.test', p]) for p in (
     )
 ]
 
+
 def additional_tests():
     suite = unittest.TestSuite()
     suite.addTest(unittest.TestLoader().loadTestsFromNames(TESTS))

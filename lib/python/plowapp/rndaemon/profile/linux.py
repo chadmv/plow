@@ -5,7 +5,7 @@ import os
 import re
 import logging
 import itertools
-from functools import partial 
+from functools import partial
 
 import psutil
 
@@ -14,6 +14,7 @@ from .posix import SystemProfiler as PosixSystemProfiler
 logger = logging.getLogger(__name__)
 
 __all__ = ["SystemProfiler"]
+
 
 class SystemProfiler(PosixSystemProfiler):
 
@@ -43,33 +44,31 @@ class SystemProfiler(PosixSystemProfiler):
             self.hyperthread_factor = first_cpu.get('ht_factor', 1)
 
         self.data.update({
-            'cpuModel'      : model,
-            'physicalCpus'  : cpuinfo.num_phys_cpus,
-            'logicalCpus'   : psutil.NUM_CPUS,
+            'cpuModel': model,
+            'physicalCpus': cpuinfo.num_phys_cpus,
+            'logicalCpus': psutil.NUM_CPUS,
         })
 
         self.cpuprofile = cpuinfo
-
 
     def _update(self):
         memstats = psutil.virtual_memory()
         swapstats = psutil.swap_memory()
 
-        b_to_mb = 1024**2
+        b_to_mb = 1024 ** 2
         self.data.update({
-            'freeRamMb'     : memstats.available / b_to_mb,
-            'totalRamMb'    : memstats.total / b_to_mb,
-            'freeSwapMb'    : swapstats.free / b_to_mb,
-            'totalSwapMb'   : swapstats.total / b_to_mb,
-        })        
-
+            'freeRamMb': memstats.available / b_to_mb,
+            'totalRamMb': memstats.total / b_to_mb,
+            'freeSwapMb': swapstats.free / b_to_mb,
+            'totalSwapMb': swapstats.total / b_to_mb,
+        })
 
     def getSubprocessOpts(self, cmd, **kwargs):
         """
         getSubprocessOpts(list|str cmd, **kwargs) -> (cmd, dict)
 
-        Method for returning the appropriate subprocess.Popen 
-        arguments and kw arguments for a Linux platform. 
+        Method for returning the appropriate subprocess.Popen
+        arguments and kw arguments for a Linux platform.
 
         """
         cmd, opts = super(SystemProfiler, self).getSubprocessOpts(cmd, **kwargs)
@@ -83,10 +82,10 @@ class SystemProfiler(PosixSystemProfiler):
         cpus = kwargs.get('cpus', set())
 
         opts['preexec_fn'] = partial(self._preexec_fn, 
-            uid, gid, cpus, self.cpuprofile.logical_cpus )
+                                    uid, gid, cpus, 
+                                    self.cpuprofile.logical_cpus)
 
         return cmd, opts
-
 
     @staticmethod
     def _preexec_fn(*args):
@@ -116,7 +115,6 @@ class SystemProfiler(PosixSystemProfiler):
         p.set_cpu_affinity(logical_ids)
 
 
-
 class CpuProfile(object):
     """
     CpuProfile 
@@ -132,10 +130,10 @@ class CpuProfile(object):
     CPUINFO = '/proc/cpuinfo'
 
     def __init__(self):
-        self.physical_cpus  = {}
-        self.logical_cpus   = {}
-        self.num_cpus       = 0
-        self.num_phys_cpus  = 0
+        self.physical_cpus = {}
+        self.logical_cpus = {}
+        self.num_cpus = 0
+        self.num_phys_cpus = 0
 
         self.update()
 
@@ -144,7 +142,7 @@ class CpuProfile(object):
             'processor', 'physical id', 'siblings', 
             'cpu cores', 'core id', 'model name'
         ])
-        
+
         cpus = {}
         proc = {}
 
@@ -156,26 +154,26 @@ class CpuProfile(object):
                 # if we reach a delimeter, save the current
                 # proc object before clearing and starting over
                 if proc and line.strip() == "":
-                    phys_id     = proc.get('physical id', -1)
-                    core_id     = proc.get('core id', log_cpu_count)
-                    proc_id     = proc['processor']
-                    phys_dict   = cpus.get(phys_id, {})
+                    phys_id = proc.get('physical id', -1)
+                    core_id = proc.get('core id', log_cpu_count)
+                    proc_id = proc['processor']
+                    phys_dict = cpus.get(phys_id, {})
 
                     phys_dict.setdefault('processors', {})\
                                 .setdefault(core_id, set()).add(proc_id)
 
-                    if not cpus.has_key(phys_id):
-                        sibs        = proc.get('siblings', 1)
-                        cores       = proc.get('cpu cores', 1)
-                        model       = re.sub(r'\s+', ' ', proc['model name'])
-                        ht_factor   = (sibs / cores) if (sibs > cores) else 1
+                    if not phys_id in cpus:
+                        sibs = proc.get('siblings', 1)
+                        cores = proc.get('cpu cores', 1)
+                        model = re.sub(r'\s+', ' ', proc['model name'])
+                        ht_factor = (sibs / cores) if (sibs > cores) else 1
 
-                        phys_dict['siblings']   = sibs
-                        phys_dict['num_cores']  = cores
-                        phys_dict['model']      = model
-                        phys_dict['ht_factor']  = ht_factor
+                        phys_dict['siblings'] = sibs
+                        phys_dict['num_cores'] = cores
+                        phys_dict['model'] = model
+                        phys_dict['ht_factor'] = ht_factor
                         phys_dict['ht_enabled'] = True if ht_factor > 1 else False
-                        
+
                         cpus[phys_id] = phys_dict
 
                     proc = {}
@@ -184,7 +182,7 @@ class CpuProfile(object):
                     continue
 
                 try: 
-                    k,v = re.split(r'\s+:\s*', line, 1)
+                    k, v = re.split(r'\s+:\s*', line, 1)
                 except ValueError: 
                     continue
 
@@ -198,17 +196,13 @@ class CpuProfile(object):
         phys_dict = cpus.get(-1)
         if phys_dict:
             total = len(phys_dict['processors'])
-            phys_dict['siblings']   = total
-            phys_dict['num_cores']  = total
+            phys_dict['siblings'] = total
+            phys_dict['num_cores'] = total
 
-
-        self.num_cpus       = log_cpu_count
-        self.num_phys_cpus  = sum(i['num_cores'] for i in cpus.itervalues())
-        self.physical_cpus  = cpus 
+        self.num_cpus = log_cpu_count
+        self.num_phys_cpus = sum(i['num_cores'] for i in cpus.itervalues())
+        self.physical_cpus = cpus 
 
         self.logical_cpus = dict(enumerate(itertools.chain.from_iterable(
             cpu['processors'].itervalues() for cpu in cpus.itervalues() 
         )))
-
-
-

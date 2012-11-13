@@ -6,6 +6,7 @@ from thrift.protocol import TBinaryProtocol
 
 from rpc import RndServiceApi, RndNodeApi
 
+
 def getPlowConnection(host=None, port=None):
     conf_host, conf_port = conf.PLOW_HOSTS[0].split(":")
     if host is None:
@@ -18,6 +19,7 @@ def getPlowConnection(host=None, port=None):
     service = RndServiceApi.Client(protocol)
     transport.open()
     return (service, transport)
+
 
 def getLocalConnection(port=None):
     if port is None:

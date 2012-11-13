@@ -16,6 +16,7 @@ ROOT = os.path.dirname(__file__)
 
 execfile(os.path.join(ROOT, 'python/plow/version.py'))
 
+
 def get_data(*paths):
     data = []
     for p in paths:
@@ -35,37 +36,37 @@ if os.path.isdir(ETC_SRC_DIR):
 
 setup(
 
-    name = "PyPlow",
-    version = __version__,
+    name="PyPlow",
+    version=__version__,
 
-    package_dir = {'': 'python'},
-    packages = find_packages('python', exclude=['tests', 'tests.*']),
+    package_dir={'': 'python'},
+    packages=find_packages('python', exclude=['tests', 'tests.*']),
 
-    install_requires = [
+    install_requires=[
         'psutil>=0.6.1',
         'thrift>=0.9.0',
         'argparse',
         'PyYAML',
     ],
 
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'rndaemon = plowapp.rndaemon.main:main',
         ],
     },
 
     # TODO: Some tests need to be made runable without an independant server
-    test_suite = "tests.test_all",
+    test_suite="tests.test_all",
 
     include_package_data=True,
-    package_data = {
+    package_data={
         'plowapp': [
             'rndaemon/profile/*.dylib',
         ],
     },
 
     # TODO: Force an installation of confs to /etc/plow ? (would imply sudo)
-    data_files = [
+    data_files=[
         ("/usr/local/etc/plow", get_data('etc/plow/*.cfg')),
     ],
 

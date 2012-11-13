@@ -5,8 +5,8 @@ import logging
 import subprocess
 import os
 import shlex
-import pwd 
-import tempfile 
+import pwd
+import tempfile
 from functools import partial
 
 from .base import AbstractProfiler
@@ -30,15 +30,13 @@ class SystemProfiler(AbstractProfiler):
         """
         p = subprocess.Popen(['/usr/bin/sudo', '-n', '/sbin/reboot'], 
                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        
+
         out, _ = p.communicate()
 
         # if we have gotten here, then the reboot obviously failed
         err = "System failed to reboot (status %d): %s" % (p.returncode, out.strip())
         logger.warn(err)
         raise ttypes.RndException(p.returncode, err)     
-
-
 
     def getSubprocessOpts(self, cmd, **kwargs):
         """
@@ -83,21 +81,20 @@ class SystemProfiler(AbstractProfiler):
             opts['cwd'] = homedir
 
             opts['env'].update({
-                'USERNAME'  : username,
-                'LOGNAME'   : username,
-                'USER'      : username,
-                'PWD'       : homedir,
-                'HOME'      : homedir,
+                'USERNAME': username,
+                'LOGNAME': username,
+                'USER': username,
+                'PWD': homedir,
+                'HOME': homedir,
 
-                'PLOW_TASK_UID' : str(uid),
-                'PLOW_TASK_GID' : str(gid),
+                'PLOW_TASK_UID': str(uid),
+                'PLOW_TASK_GID': str(gid),
             })
 
             logger.debug("Switching user to (%d, %d)", uid, gid)
             opts['preexec_fn'] = partial(self._preexec_fn, uid, gid)
 
         return cmd, opts  
-
 
     @staticmethod
     def _preexec_fn(*args):
@@ -112,5 +109,3 @@ class SystemProfiler(AbstractProfiler):
         uid, gid = args
         os.setgid(gid)
         os.setuid(uid)
-
-

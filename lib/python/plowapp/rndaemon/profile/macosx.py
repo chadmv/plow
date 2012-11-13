@@ -16,6 +16,7 @@ __all__ = ["SystemProfiler"]
 memstat = ctypes.cdll.LoadLibrary(
     os.path.join(os.path.dirname(__file__), "libmemstat.dylib"))
 
+
 class sysinfo_t(ctypes.Structure):
     _fields_ = [
         ("totalRamMb", ctypes.c_uint64),
@@ -26,6 +27,7 @@ class sysinfo_t(ctypes.Structure):
         ("logicalCpus", ctypes.c_uint32),
         ("bootTime", ctypes.c_uint64),
         ("cpuModel", ctypes.c_char_p)]
+
 
 class SystemProfiler(PosixSystemProfiler):
 
@@ -42,7 +44,6 @@ class SystemProfiler(PosixSystemProfiler):
         memstat.foo(ctypes.byref(f))
         self.data.update(dict([(field[0], 
             getattr(f, field[0])) for field in sysinfo_t._fields_]))
-
 
     def getSubprocessOpts(self, cmd, **kwargs):
         """
@@ -66,6 +67,3 @@ class SystemProfiler(PosixSystemProfiler):
             env['PLOW_THREADS'] = str(core_count)
 
         return cmd, opts
-
-
-

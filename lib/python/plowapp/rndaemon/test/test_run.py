@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import sys
-
 import tempfile
 import unittest
 import time
@@ -44,7 +42,7 @@ class TestResourceManager(unittest.TestCase):
         self.assertEqual(totalCores, slots)
 
         slots = []
-        for i in xrange(1, totalCores+1):
+        for i in xrange(1, totalCores + 1):
             slots += manager.checkout(1)
             total = totalCores - i
             openslots = len(manager.getOpenSlots())
@@ -69,12 +67,11 @@ class TestProcessManager(unittest.TestCase):
         time.sleep(1)
         core.ProcessMgr.processFinished = self._processmgr_processFinished
 
-
     def testRunTaskCommand(self):
         process = self.getNewTaskCommand()
         process.command = [CMDS_UTIL, 'cpu_affinity']
         core.ProcessMgr.runProcess(process)
-        
+
         while core.ProcessMgr.getRunningTasks():
             time.sleep(.1)
 
@@ -82,7 +79,6 @@ class TestProcessManager(unittest.TestCase):
         self.assertEqual(status, 0, "Expected a 0 Exit Status, but got %s" % status)
 
         self.cpuAffinityTestUtil(process)
-
 
     def testRunTaskCommandHalfCores(self):
         if self._totalCores < 3:
@@ -101,7 +97,6 @@ class TestProcessManager(unittest.TestCase):
 
         self.cpuAffinityTestUtil(process)
 
-
     def testRunTaskCommandMaxCores(self):
         process = self.getNewTaskCommand()
         process.cores = self._totalCores
@@ -111,16 +106,14 @@ class TestProcessManager(unittest.TestCase):
 
         while core.ProcessMgr.getRunningTasks():
             time.sleep(.1)
-            
-        self.cpuAffinityTestUtil(process)
 
+        self.cpuAffinityTestUtil(process)
 
     def testRunTaskCommandOutOfCores(self):
         process = self.getNewTaskCommand()
         process.cores = self._totalCores + 1
         process.command = ["/bin/ls", self._logdir]
         self.assertRaises(ttypes.RndException, core.ProcessMgr.runProcess, process)
-
 
     def testKillRunningTask(self):
         process = self.getNewTaskCommand()
@@ -144,12 +137,11 @@ class TestProcessManager(unittest.TestCase):
         while core.ProcessMgr.getRunningTasks():
             time.sleep(.25)
             self.assertTrue(i < 10, "Tasks are still running when they should be dead by now")
-            i+=1
+            i += 1
 
         # sig, status = self.getLogSignalStatus(process.logFile)
         # self.assertEqual(status, 1, "Expected a 1 Exit Status, but got %s" % status)
         # self.assertEqual(sig, -9, "Expected a -9 Signal, but got %s" % sig)
-
 
     def testTaskProgress(self):
         # disable the callback 
@@ -195,7 +187,6 @@ class TestProcessManager(unittest.TestCase):
 
             D['result'] = None
 
-
     def getNewTaskCommand(self):
         process = ttypes.RunTaskCommand()
         process.procId = "a"
@@ -204,7 +195,6 @@ class TestProcessManager(unittest.TestCase):
         process.env = {}
         process.logFile = self._logfile 
         return process
-
 
     def cpuAffinityTestUtil(self, process):
         captured_affinity = tuple(self.getLogCpuAffinity(process.logFile))
@@ -223,7 +213,6 @@ class TestProcessManager(unittest.TestCase):
             self.assertEqual(captured, cpu_tuple, 
                 'Captured cpu affinity %s does not match expected %s' % (cpu_tuple, captured))
 
-
     @staticmethod
     def getLogSignalStatus(logfile):
         status = None
@@ -234,14 +223,17 @@ class TestProcessManager(unittest.TestCase):
         with open(logfile) as f:
             for line in f:
                 if line.startswith(status_field):
-                    try: status = int(line.split(status_field, 1)[-1])
-                    except: pass
+                    try: 
+                        status = int(line.split(status_field, 1)[-1])
+                    except: 
+                        pass
                 elif line.startswith(signal_field):
-                    try: signal = int(line.split(signal_field, 1)[-1])
-                    except: pass
+                    try: 
+                        signal = int(line.split(signal_field, 1)[-1])
+                    except: 
+                        pass
 
         return signal, status 
-
 
     @staticmethod 
     def getLogCpuAffinity(logfile):
@@ -258,7 +250,6 @@ class TestProcessManager(unittest.TestCase):
                     affinity.add(cpus)
 
         return affinity
-
 
 
 class TestCommunications(unittest.TestCase):
@@ -280,11 +271,9 @@ class TestCommunications(unittest.TestCase):
         self.t_server.start()
         time.sleep(.1)
 
-
     def tearDown(self):
         self.t_server.terminate()
         time.sleep(1)
-
 
     def testSendPing(self):
         """
@@ -349,13 +338,8 @@ class TestLogParser(unittest.TestCase):
                 self.assertEqual(progs[idx], val)
 
 
-
-
-
 if __name__ == "__main__":
     suite = unittest.TestSuite()
     for t in (TestCommunications, TestResourceManager, TestProcessManager):
         suite.addTest(unittest.TestLoader().loadTestsFromTestCase(t))
     unittest.TextTestRunner(verbosity=2).run(suite)
-
-

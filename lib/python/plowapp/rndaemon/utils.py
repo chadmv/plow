@@ -31,7 +31,7 @@ class ProcessLog(object):
 
     def __del__(self):
         if self._fileObj is not None:
-        	self._fileObj.close()
+            self._fileObj.close()
 
     def __getattr__(self, name):
         return getattr(self._fileObj, name)
@@ -78,7 +78,7 @@ class ProcessLog(object):
         numTries = 0
         maxTries = 8
         sleep = 10
-        
+
         while True:
             if numTries >= maxTries:
                 raise Exception("Failed creating log path after %d tries." % numTries)
@@ -90,107 +90,100 @@ class ProcessLog(object):
                     # If it already exists, clear the NFS cache for the parent
                     # which should make the directory visible to os.path.exists
                     os.utime(os.path.dirname(folder), None)
-            
+
             if os.path.exists(folder):
                 return
-            
+
             time.sleep(sleep)
-            numTries+=1
+            numTries += 1
 
 
 class ProcessLogParser(object):
-	"""
-	ProcessLogParser 
+    """
+    ProcessLogParser 
 
-	Provides pattern matching operations on lines from log 
-	files, matching a given set of regular expression. 
-	"""
+    Provides pattern matching operations on lines from log 
+    files, matching a given set of regular expression. 
+    """
 
-	def __init__(self, progPatterns=None):
-		if progPatterns:
-			self.progress = re.compile('|'.join('(?:%s)' % r for r in progPatterns if r))
-		else:
-			self.progress = None
+    def __init__(self, progPatterns=None):
+        if progPatterns:
+            self.progress = re.compile('|'.join('(?:%s)' % r for r in progPatterns if r))
+        else:
+            self.progress = None
 
+    def parseProgress(self, line):
+        """
+        parseProgress(str line) -> float
 
+        Take a string line and attempt to parse a progress value. 
+        On success, returns a float 0.0 - 1.0
+        Otherwise return None 
+        """
+        if not self.progress:
+            return None 
 
-	def parseProgress(self, line):
-		"""
-		parseProgress(str line) -> float
+        prog = self._parseLine(self.progress, line)
+        if not prog:
+            return None
 
-		Take a string line and attempt to parse a progress value. 
-		On success, returns a float 0.0 - 1.0
-		Otherwise return None 
-		"""
-		if not self.progress:
-			return None 
+        prog_val = 0.0
 
-		prog = self._parseLine(self.progress, line)
-		if not prog:
-			return None
+        if prog[-1] == '%':
+            try:
+                prog_val = literal_eval(prog[:-1])
+            except (ValueError, SyntaxError):
+                pass
+            else:
+                return prog_val / 100.0
 
-		prog_val = 0.0
+        try:
+            prog_val = literal_eval(prog)
 
-		if prog[-1] == '%':
-			try:
-				prog_val = literal_eval(prog[:-1])
-			except ValueError, SyntaxError:
-				pass
-			else:
-				return prog_val / 100.0
+        except ValueError:
 
-		try:
-			prog_val = literal_eval(prog)
-			
-		except ValueError:
+            try:
+                a, b = prog.split('/', 1)
+                prog_val = float(a) / float(b)
 
-			try:
-				a, b = prog.split('/', 1)
-				prog_val = float(a) / float(b)
-			
-			except ValueError:
-				return None
-			
-			except ZeroDivisionError:
-				prog_val = 0.0
+            except ValueError:
+                return None
 
-		if 1 < prog_val <= 100:
-			prog_val /= 100.0
+            except ZeroDivisionError:
+                prog_val = 0.0
 
-		return prog_val
+        if 1 < prog_val <= 100:
+            prog_val /= 100.0
 
+        return prog_val
 
-	@classmethod 
-	def fromTaskTypes(cls, taskTypes):
-		"""
-		fromTaskTypes(str|list taskTypes) -> LogParser
+    @classmethod 
+    def fromTaskTypes(cls, taskTypes):
+        """
+        fromTaskTypes(str|list taskTypes) -> LogParser
 
-		Return a LogParser instance that is set up to parse 
-		the given task types. 
+        Return a LogParser instance that is set up to parse 
+        the given task types. 
 
-		`taskTypes` may be either a single string, or a list 
-		of string task types. They are looked up in the rndaemon 
-		config for matching defined regular expression patterns. 
-		"""
-		if isinstance(taskTypes, (str, unicode)):
-			taskTypes = [taskTypes]
-		
-		progPatterns = filter(None, (conf.TASK_PROGRESS_PATTERNS.get(t) for t in taskTypes))
-		parser = cls(progPatterns=progPatterns)
-		
-		return parser
+        `taskTypes` may be either a single string, or a list 
+        of string task types. They are looked up in the rndaemon 
+        config for matching defined regular expression patterns. 
+        """
+        if isinstance(taskTypes, (str, unicode)):
+            taskTypes = [taskTypes]
 
+        progPatterns = filter(None, (conf.TASK_PROGRESS_PATTERNS.get(t) for t in taskTypes))
+        parser = cls(progPatterns=progPatterns)
 
-	@staticmethod 
-	def _parseLine(pattern, line):
-		"""
-		Find the first capture group of the line
-		"""
-		match = re.search(pattern, line.rstrip())
-		if match:
-			return next((i for i in match.groups() if i), None)
+        return parser
 
-		return None
+    @staticmethod 
+    def _parseLine(pattern, line):
+        """
+        Find the first capture group of the line
+        """
+        match = re.search(pattern, line.rstrip())
+        if match:
+            return next((i for i in match.groups() if i), None)
 
-
-
+        return None

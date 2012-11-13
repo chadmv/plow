@@ -74,6 +74,7 @@ class _ResourceManager(object):
     def getOpenSlots(self):
         return [slot for slot in self.__slots if self.__slots[slot] == 0]
 
+
 class _ProcessManager(object):
     """
     The ProcessManager keeps track of the running tasks.  Each task
@@ -81,7 +82,7 @@ class _ProcessManager(object):
     """
 
     def __init__(self):
-        self.__threads = { }
+        self.__threads = {}
         self.__lock = threading.Lock()
         self.__timer = None 
         self.__isReboot = threading.Event()
@@ -155,10 +156,8 @@ class _ProcessManager(object):
             logger.warn(err)
             raise ttypes.RndException(1, err)
 
-
     def getRunningTasks(self):
         return [t.pthread.getRunningTask() for t in self.__threads.itervalues()]
-
 
     def reboot(self, now=False):
         """
@@ -213,7 +212,6 @@ class _ProcessThread(threading.Thread):
     """
     The _ProcessThread wraps a running task.
     """
-    
     def __init__(self, rtc, cpus=None):
         threading.Thread.__init__(self)
         self.daemon = True
@@ -230,13 +228,11 @@ class _ProcessThread(threading.Thread):
         self.__progress = 0.0
         self.__lastLog = ""
 
-
     def __repr__(self):
         return "<%s: (procId: %s, pid: %d)>" % (
             self.__class__.__name__, 
             self.__rtc.procId, 
             self.__pid)
-
 
     def getRunningTask(self):
         """
@@ -258,7 +254,6 @@ class _ProcessThread(threading.Thread):
 
         return rt
 
-
     def run(self):
         rtc = self.__rtc 
         retcode = 1
@@ -279,9 +274,9 @@ class _ProcessThread(threading.Thread):
             opts = {
                 'stdout': subprocess.PIPE, 
                 'stderr': subprocess.STDOUT,
-                'uid'   : self.__rtc.uid,
-                'cpus'  : self.__cpus,
-                'env'   : env,
+                'uid': self.__rtc.uid,
+                'cpus': self.__cpus,
+                'env': env,
             }
 
             cmd, opts = Profiler.getSubprocessOpts(rtc.command, **opts)
@@ -292,10 +287,9 @@ class _ProcessThread(threading.Thread):
             self.__pid = p.pid
             logger.info("PID: %d", self.__pid)
 
-
-            writeLog    = self.__logfp.write 
-            r_pipe      = self.__pptr.stdout 
-            lock        = self.__progressLock
+            writeLog = self.__logfp.write
+            r_pipe = self.__pptr.stdout 
+            lock = self.__progressLock
 
             for line in iter(r_pipe.readline, ""):
                 writeLog(line)
@@ -315,14 +309,12 @@ class _ProcessThread(threading.Thread):
             except OSError:
                 pass
 
-        
         except Exception, e:
             logger.warn("Failed to execute command: %s", e)
             logger.debug(traceback.format_exc())
 
         finally:
             self.__completed(retcode)
-
 
     def killProcess(self):
         """
@@ -354,7 +346,6 @@ class _ProcessThread(threading.Thread):
 
         return killed, not_killed
 
-
     def __killOneProcess(self, p):
         """
         __killOneProcess(psutil.Process p) -> bool
@@ -362,8 +353,10 @@ class _ProcessThread(threading.Thread):
         Try and nicely stop a Process first, then kill it. 
         Return True if process was killed.
         """
-        try: p.wait(0.001)
-        except psutil.TimeoutExpired: pass
+        try: 
+            p.wait(0.001)
+        except psutil.TimeoutExpired: 
+            pass
         if not p.is_running():
             return True
 
@@ -371,23 +364,26 @@ class _ProcessThread(threading.Thread):
 
         logger.info("Asking nicely for pid %d (%s) to stop", pid, p.name)
         p.terminate()
-        try: p.wait(5)
-        except psutil.TimeoutExpired: pass
+        try: 
+            p.wait(5)
+        except psutil.TimeoutExpired: 
+            pass
 
         if not p.is_running():
             return True
 
         logger.info("Killing pid %d (%s)", pid, p.name)
         p.kill()
-        try: p.wait(1)
-        except psutil.TimeoutExpired: pass
-        
+        try: 
+            p.wait(1)
+        except psutil.TimeoutExpired: 
+            pass
+
         if p.is_running():
             logger.warn("Failed to properly kill pid %d (taskId: %s)", pid, self.__rtc.taskId)
             return False 
 
         return True
-
 
     def __completed(self, retcode):
         result = ttypes.RunTaskResult()
@@ -419,18 +415,6 @@ class _ProcessThread(threading.Thread):
             self.__logfp.writeLogFooterAndClose(result)
 
 
-
-
-
-
-Profiler    = _SystemProfiler()
+Profiler = _SystemProfiler()
 ResourceMgr = _ResourceManager()
-ProcessMgr  = _ProcessManager()
-
-
-
-
-
-
-
-
+ProcessMgr = _ProcessManager()

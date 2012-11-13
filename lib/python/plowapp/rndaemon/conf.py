@@ -16,7 +16,7 @@ def _init():
     Parse an initalize the Config object
     Set module-level globals with the interpreted values.
     """
-    if os.environ.has_key("PLOW_RNDAEMON_CFG"):
+    if "PLOW_RNDAEMON_CFG" in os.environ:
         cfgs = Config.read([os.environ["PLOW_RNDAEMON_CFG"]])
     else:
         cfgs = Config.read([
@@ -64,6 +64,7 @@ def get(section, key, default=None):
         return Config.get(section, key)
     except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
         return default
+
 
 def getboolean(section, key, default=None):
     """

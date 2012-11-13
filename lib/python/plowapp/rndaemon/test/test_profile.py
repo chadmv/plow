@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import sys
-
 import unittest
 import platform
 
@@ -24,16 +22,15 @@ class TestSystemProfiler(unittest.TestCase):
         prof = SystemProfiler()
 
         cmd, opts = prof.getSubprocessOpts('some command')
-        
+
         self.assertEqual(cmd, ['some', 'command'], 
             "String command should have been split into a list")
 
         self.assertTrue(isinstance(opts['env'], dict))
 
-        for k,v in opts['env'].iteritems():
+        for k, v in opts['env'].iteritems():
             self.assertTrue(isinstance(v, str), 
                 "ENV key '%s' has a value %s of type %s instead of str()" % (k, v, type(v)))
-
 
     def testHyperThread(self):
         prof = SystemProfiler()
@@ -54,7 +51,6 @@ class TestSystemProfiler(unittest.TestCase):
             self.assertEqual(env['PLOW_THREADS'], '3', 
                 'on non-Linux, HT should be disabled here')
 
-
         # pretend we want to run with 2 cores w/o HT
         prof.hyperthread_factor = 1
         _, opts = prof.getSubprocessOpts([], cpus=range(2))
@@ -71,9 +67,7 @@ class TestSystemProfiler(unittest.TestCase):
         self.assertEqual(env['PLOW_CORES'], '8')
         self.assertEqual(env['PLOW_THREADS'], '16')
 
-
     def testLinuxCpuProfile(self):
-
         saved = linuxProfiler.CpuProfile.CPUINFO 
         linuxProfiler.CpuProfile.CPUINFO = os.path.join(DATA_DIR, 'cpuinfo.dat')
 
@@ -92,10 +86,10 @@ class TestSystemProfiler(unittest.TestCase):
         self.assertEqual(cpu1['ht_factor'], 2)
 
         expected_processors = {
-            0   : set([1, 9]),
-            1   : set([11, 3]),
-            9   : set([5, 13]),
-            10  : set([15, 7])
+            0: set([1, 9]),
+            1: set([11, 3]),
+            9: set([5, 13]),
+            10: set([15, 7])
         }
 
         self.assertEqual(cpu1['processors'], expected_processors)
@@ -103,10 +97,10 @@ class TestSystemProfiler(unittest.TestCase):
         cpu2 = cpu_profile.physical_cpus[1]
 
         expected_processors = {
-            0   : set([0, 8]),
-            1   : set([2, 10]),
-            9   : set([12, 4]),
-            10  : set([14, 6])
+            0: set([0, 8]),
+            1: set([2, 10]),
+            9: set([12, 4]),
+            10: set([14, 6])
         }
 
         self.assertEqual(cpu2['processors'], expected_processors)
@@ -119,10 +113,6 @@ class TestSystemProfiler(unittest.TestCase):
                 "There should be two processor ids in each set")        
 
 
-
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSystemProfiler)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
-
-

@@ -15,6 +15,7 @@ from rpc import RndNodeApi
 
 logger = logging.getLogger(__name__)
 
+
 class RndProcessHandler(object):
 
     def runTask(self, rtc):
@@ -28,7 +29,7 @@ class RndProcessHandler(object):
 
     def reboot(self, now=False):
         core.ProcessMgr.reboot(now)
-        
+
 
 def get_server(api, handler, port):
     processor = api.Processor(handler)
@@ -42,9 +43,8 @@ def get_server(api, handler, port):
 def start():
     logger.info("Staring Render Node Daemon on TCP port %d" % conf.NETWORK_PORT)
     server = get_server(RndNodeApi, RndProcessHandler(), conf.NETWORK_PORT)
-  
+
     try:
         server.serve()
     except KeyboardInterrupt:
         sys.exit(2)
-
