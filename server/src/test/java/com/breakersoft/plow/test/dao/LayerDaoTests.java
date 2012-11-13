@@ -11,6 +11,7 @@ import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
+import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.LayerSpecT;
@@ -66,4 +67,14 @@ public class LayerDaoTests extends AbstractTest {
         assertEquals(10, frange.frameSet.size());
     }
 
+    @Test
+    public void isLayerComplete() {
+
+        JobSpecT spec = getTestJobSpec();
+        JobLaunchEvent event = jobService.launch(spec);
+
+        layer = jobService.getLayer(event.getJob(), 0);
+        job = event.getJob();
+        assertFalse(layerDao.isLayerComplete(layer));
+    }
 }

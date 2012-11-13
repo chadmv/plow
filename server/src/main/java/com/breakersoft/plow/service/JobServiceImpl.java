@@ -187,6 +187,12 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    @Transactional(readOnly=true)
+    public boolean isLayerComplete(Layer layer) {
+        return layerDao.isLayerComplete(layer);
+    }
+
+    @Override
     public boolean setJobState(Job job, JobState state) {
         return jobDao.setJobState(job, state);
     }

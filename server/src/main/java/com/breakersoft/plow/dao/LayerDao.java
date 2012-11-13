@@ -18,4 +18,6 @@ public interface LayerDao {
     FrameRange getFrameRange(Layer layer);
 
     Layer get(Job job, int idx);
+
+    boolean isLayerComplete(Layer layer);
 }

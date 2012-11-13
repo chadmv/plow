@@ -31,4 +31,6 @@ public interface JobService {
     JobLaunchEvent launch(JobSpecT jobspec);
 
     boolean shutdown(Job job);
+
+    boolean isLayerComplete(Layer layer);
 }
