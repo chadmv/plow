@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
-import com.breakersoft.plow.service.JobStateManager;
+import com.breakersoft.plow.service.StateManager;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
@@ -36,7 +36,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     ThriftNodeDao thriftNodeDao;
 
     @Autowired
-    JobStateManager jobStateManager;
+    StateManager jobStateManager;
 
     @Override
     public JobT launch(JobSpecT spec) throws PlowException, TException {

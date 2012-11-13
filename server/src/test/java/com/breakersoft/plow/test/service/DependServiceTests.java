@@ -10,7 +10,7 @@ import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.DependService;
-import com.breakersoft.plow.service.JobStateManager;
+import com.breakersoft.plow.service.StateManager;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.DependType;
@@ -23,7 +23,7 @@ public class DependServiceTests extends AbstractTest {
     DependService dependService;
 
     @Resource
-    JobStateManager jobStateManager;
+    StateManager jobStateManager;
 
     @Test
     public void testJobOnJob() {

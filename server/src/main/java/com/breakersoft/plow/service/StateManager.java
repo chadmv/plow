@@ -11,7 +11,7 @@ import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobFinishedEvent;
 
 @Component
-public class JobStateManager {
+public class StateManager {
 
     @Autowired
     JobService jobService;

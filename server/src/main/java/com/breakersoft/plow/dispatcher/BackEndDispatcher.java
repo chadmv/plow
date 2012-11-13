@@ -16,7 +16,7 @@ import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
 import com.breakersoft.plow.service.DependService;
 import com.breakersoft.plow.service.JobService;
-import com.breakersoft.plow.service.JobStateManager;
+import com.breakersoft.plow.service.StateManager;
 import com.breakersoft.plow.thrift.TaskState;
 
 public class BackEndDispatcher {
@@ -40,7 +40,7 @@ public class BackEndDispatcher {
     JobService jobService;
 
     @Autowired
-    JobStateManager jobStateManager;
+    StateManager jobStateManager;
 
     private ExecutorService dispatchPool = Executors.newFixedThreadPool(8);
 
