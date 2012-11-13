@@ -78,7 +78,6 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean shutdown(Job job) {
         if (jobDao.shutdown(job)) {
-            eventManager.post(new JobFinishedEvent(job));
             return true;
         }
         return false;
@@ -184,6 +183,12 @@ public class JobServiceImpl implements JobService {
     @Override
     public Layer getLayer(Job job, int idx) {
         return layerDao.get(job, idx);
+    }
+
+    @Override
+    @Transactional(readOnly=true)
+    public boolean isLayerComplete(Layer layer) {
+        return layerDao.isLayerComplete(layer);
     }
 
     @Override

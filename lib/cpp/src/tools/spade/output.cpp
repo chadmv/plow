@@ -76,7 +76,7 @@ void display_task_list(const std::string& job_name)
                                       ++i)
     {
         
-        formatDuration(duration, i->stopTime - i->startTime);
+        formatDuration(duration, i->startTime, i->stopTime);
         formatTime(startTime, i->startTime);
         formatTime(stopTime, i->stopTime);
 

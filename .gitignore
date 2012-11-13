@@ -13,3 +13,4 @@ moc_*.cpp
 *.pro.user
 Makefile
 lib/cpp/src/gui/examples/examples.app
+bin/dev.sh

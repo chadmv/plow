@@ -18,7 +18,9 @@ public interface DependDao {
     void incrementDependCounts(Depend depend);
     void decrementDependCounts(Depend depend);
     Depend get(UUID id);
+    boolean satisfyDepend(Depend depend);
 
     List<Depend> getOnTaskDepends(Task task);
-    boolean satisfyDepend(Depend depend);
+    List<Depend> getOnLayerDepends(Layer layer);
+    List<Depend> getOnJobDepends(Job job);
 }
