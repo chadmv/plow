@@ -22,4 +22,5 @@ public interface DependDao {
 
     List<Depend> getOnTaskDepends(Task task);
     List<Depend> getOnLayerDepends(Layer layer);
+    List<Depend> getOnJobDepends(Job job);
 }

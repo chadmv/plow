@@ -125,6 +125,15 @@ public class DependServiceImpl implements DependService {
         }
     }
 
+    @Override
+    public void satisfyDependsOn(Job job) {
+        for (Depend depend: dependDao.getOnJobDepends(job)) {
+            if (dependDao.satisfyDepend(depend)) {
+                dependDao.decrementDependCounts(depend);
+            }
+        }
+    }
+
     private void createTaskByTask(Layer dependentLayer, Layer dependOnLayer) {
 
         /*

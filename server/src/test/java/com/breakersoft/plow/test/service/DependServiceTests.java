@@ -6,7 +6,6 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 
-import com.breakersoft.plow.Depend;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.event.JobLaunchEvent;
@@ -43,6 +42,12 @@ public class DependServiceTests extends AbstractTest {
         assertEquals(0,
                 simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
                 event2.getJob().getJobId()));
+
+        dependService.satisfyDependsOn(event2.getJob());
+
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
     }
 
     @Test
@@ -112,6 +117,12 @@ public class DependServiceTests extends AbstractTest {
         assertEquals(0,
                 simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
                 event2.getJob().getJobId()));
+
+        dependService.satisfyDependsOn(dependOnTask);
+
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
 
     }
 
@@ -229,5 +240,8 @@ public class DependServiceTests extends AbstractTest {
         assertEquals(0,
                 simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
                 event2.getJob().getJobId()));
+
+        // Satisifed handled by satisfyDependsOn(task)
+
     }
 }
