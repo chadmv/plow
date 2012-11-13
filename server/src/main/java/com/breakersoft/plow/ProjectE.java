@@ -3,20 +3,21 @@ package com.breakersoft.plow;
 import java.util.UUID;
 
 public class ProjectE implements Project {
-	
-	private UUID projectId;
 
-	public UUID getProjectId() {
-		return projectId;
-	}
+    private UUID projectId;
 
-	public void setProjectId(UUID projectId) {
-		this.projectId = projectId;
-	}
-	
-    public int hashCode() {
-    	return projectId.hashCode();
+    public UUID getProjectId() {
+        return projectId;
     }
+
+    public void setProjectId(UUID projectId) {
+        this.projectId = projectId;
+    }
+
+    public int hashCode() {
+        return projectId.hashCode();
+    }
+
     public boolean equals(Object obj) {
         if (obj == null)
             return false;
