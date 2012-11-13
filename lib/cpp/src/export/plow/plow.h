@@ -24,7 +24,7 @@ extern PLOWEXPORT void getActiveJob(JobT& job, const std::string& name);
 extern PLOWEXPORT void getNodes(std::vector<NodeT>& nodes, const NodeFilterT& filter);
 
 extern PLOWEXPORT void formatTime(std::string& output, const Timestamp ts);
-extern PLOWEXPORT void formatDuration(std::string& output, const int duration);
+extern PLOWEXPORT void formatDuration(std::string& output, const int64_t startTime, const int64_t stopTime);
 
 PLOW_NAMESPACE_EXIT
 
