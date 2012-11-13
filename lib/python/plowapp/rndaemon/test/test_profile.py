@@ -15,6 +15,8 @@ logging.basicConfig(level=logging.WARNING)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
+IS_LINUX = platform.system() in ('FreeBSD', 'Linux')
+
 
 class TestSystemProfiler(unittest.TestCase):
 
@@ -45,7 +47,12 @@ class TestSystemProfiler(unittest.TestCase):
 
         env = opts['env']
         self.assertEqual(env['PLOW_CORES'], '3')
-        self.assertEqual(env['PLOW_THREADS'], '3')
+        if IS_LINUX:
+            self.assertEqual(env['PLOW_THREADS'], '6', 
+                'on Linux, HT should be enabled here')
+        else:
+            self.assertEqual(env['PLOW_THREADS'], '3', 
+                'on non-Linux, HT should be disabled here')
 
 
         # pretend we want to run with 2 cores w/o HT

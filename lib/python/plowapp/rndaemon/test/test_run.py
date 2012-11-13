@@ -81,7 +81,7 @@ class TestProcessManager(unittest.TestCase):
         sig, status = self.getLogSignalStatus(process.logFile)
         self.assertEqual(status, 0, "Expected a 0 Exit Status, but got %s" % status)
 
-        self.cpuAffinityTestUtil(process.logFile)
+        self.cpuAffinityTestUtil(process)
 
 
     def testRunTaskCommandHalfCores(self):
@@ -99,7 +99,7 @@ class TestProcessManager(unittest.TestCase):
         while core.ProcessMgr.getRunningTasks():
             time.sleep(.1)
 
-        self.cpuAffinityTestUtil(process.logFile)
+        self.cpuAffinityTestUtil(process)
 
 
     def testRunTaskCommandMaxCores(self):
@@ -112,7 +112,7 @@ class TestProcessManager(unittest.TestCase):
         while core.ProcessMgr.getRunningTasks():
             time.sleep(.1)
             
-        self.cpuAffinityTestUtil(process.logFile)
+        self.cpuAffinityTestUtil(process)
 
 
     def testRunTaskCommandOutOfCores(self):
@@ -159,6 +159,11 @@ class TestProcessManager(unittest.TestCase):
         def processFinished(d, rtc):
             d['result'] = rtc 
 
+        conf.TASK_PROGRESS_PATTERNS = {
+            'blender': '^Fra:\\d+ .*? \\| Rendering \\| .*? (\\d+/\\d+)$',
+            'mray': '^JOB[\\w. ]+:\\s+([\\d.]+%)\\s+'
+        }
+
         core.ProcessMgr.processFinished = partial(processFinished, D)
 
         process = self.getNewTaskCommand()
@@ -185,7 +190,8 @@ class TestProcessManager(unittest.TestCase):
             running = t.getRunningTask()
 
             self.assertEqual(running.progress, 1,
-                'Final progress for "%s" job should be 1' % log)
+                'Final progress for "%s" job should be 1. Got %s' \
+                % (log, running.progress))
 
             D['result'] = None
 
@@ -200,8 +206,8 @@ class TestProcessManager(unittest.TestCase):
         return process
 
 
-    def cpuAffinityTestUtil(self, logfile):
-        captured_affinity = tuple(self.getLogCpuAffinity(logfile))
+    def cpuAffinityTestUtil(self, process):
+        captured_affinity = tuple(self.getLogCpuAffinity(process.logFile))
         count = len(captured_affinity)
         self.assertTrue(count == 1, "Expected only 1 result. Got %d" % count)
 

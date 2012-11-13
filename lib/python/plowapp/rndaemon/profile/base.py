@@ -15,7 +15,8 @@ class AbstractProfiler(object):
 
         self.update()
 
-        self.hyperthread_factor = max(self.logicalCpus // self.physicalCpus, 1)
+        ht_factor = self.data.get('logicalCpus', 1) // self.data.get('physicalCpus', 1)
+        self.hyperthread_factor = max(ht_factor, 1)
 
         for key, value in self.data.iteritems():
             logger.info("%s = %s" % (key, value))
