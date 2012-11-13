@@ -68,6 +68,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                     "pk_quota",
                     "pk_node",
                     "pk_task",
+                    "pk_job",
                     "int_cores",
                     "int_mem");
 
@@ -80,6 +81,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                     proc.getQuotaId(),
                     proc.getNodeId(),
                     proc.getTaskId(),
+                    proc.getJobId(),
                     proc.getCores(),
                     proc.getMemory());
         } catch (DataAccessException e) {

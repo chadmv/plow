@@ -2,6 +2,8 @@ package com.breakersoft.plow.test.dao;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.junit.Before;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Task;
@@ -64,6 +67,7 @@ public class ProcDaoTests extends AbstractTest {
         for (DispatchLayer layer: dispatchDao.getDispatchLayers(djob, dnode)) {
             for (DispatchTask dtask: dispatchDao.getDispatchTasks(layer, dnode)) {
                 proc = dispatchService.createProc(dnode, dtask);
+                logger.info("Proc: " + proc.getProcId());
                 task = dtask;
                 break;
             }
@@ -110,7 +114,13 @@ public class ProcDaoTests extends AbstractTest {
         assertFalse(procDao.delete(proc));
     }
 
+    @Test
     public void testProcsByJob() {
+        Job job = jobService.getJob(task.getJobId().toString());
+        List<Proc> procs = procDao.getProcs(job);
+        assertEquals(1, procs.size());
+        assertEquals(proc.getProcId(), procs.get(0).getProcId());
+        assertTrue(procs.contains(proc));
 
     }
 

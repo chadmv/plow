@@ -271,6 +271,7 @@ CREATE TABLE plow.proc (
   pk_proc UUID NOT NULL PRIMARY KEY,
   pk_quota UUID NOT NULL,
   pk_node UUID NOT NULL,
+  pk_job UUID NOT NULL,
   pk_task UUID,
   int_cores SMALLINT NOT NULL,
   int_mem INTEGER NOT NULL,
@@ -282,3 +283,5 @@ CREATE TABLE plow.proc (
 CREATE INDEX proc_pk_quota_idx ON plow.proc (pk_quota);
 CREATE INDEX proc_pk_node_idx ON plow.proc (pk_node);
 CREATE INDEX proc_pk_task_idx ON plow.proc (pk_task);
+CREATE INDEX proc_pk_job_idx ON pkow.proc (pk_job);
+
