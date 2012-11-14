@@ -78,7 +78,11 @@ public class BackEndDispatcher {
             return;
         }
 
-        if (jobService.isFinished(job)) {
+        if (jobService.isJobPaused(job)) {
+            dispatchService.unbookProc(proc,
+                    "Job is paused: " + job.getJobId());
+        }
+        else if (jobService.isFinished(job)) {
             dispatchService.unbookProc(proc,
                     "Job no longer has pending frames: " + job.getJobId());
             jobStateManager.shutdown(job);
