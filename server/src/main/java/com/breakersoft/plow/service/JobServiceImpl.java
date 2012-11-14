@@ -156,8 +156,8 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public boolean hasPendingFrames(Job job) {
-        return jobDao.hasPendingFrames(job);
+    public boolean isFinished(Job job) {
+        return jobDao.isFinished(job);
     }
 
     @Override
@@ -188,7 +188,7 @@ public class JobServiceImpl implements JobService {
     @Override
     @Transactional(readOnly=true)
     public boolean isLayerComplete(Layer layer) {
-        return layerDao.isLayerComplete(layer);
+        return layerDao.isFinished(layer);
     }
 
     @Override

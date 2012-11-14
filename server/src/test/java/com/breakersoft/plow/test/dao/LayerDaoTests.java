@@ -68,13 +68,13 @@ public class LayerDaoTests extends AbstractTest {
     }
 
     @Test
-    public void isLayerComplete() {
+    public void isFinished() {
 
         JobSpecT spec = getTestJobSpec();
         JobLaunchEvent event = jobService.launch(spec);
 
         layer = jobService.getLayer(event.getJob(), 0);
         job = event.getJob();
-        assertFalse(layerDao.isLayerComplete(layer));
+        assertFalse(layerDao.isFinished(layer));
     }
 }

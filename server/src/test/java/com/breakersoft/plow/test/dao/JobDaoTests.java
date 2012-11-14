@@ -81,10 +81,10 @@ public class JobDaoTests extends AbstractTest {
 
 
     @Test
-    public void testHasPendingFrames() {
+    public void isFinished() {
         JobSpecT spec = getTestJobSpec();
         JobLaunchEvent event = jobService.launch(spec);
-        assertTrue(jobDao.hasPendingFrames(event.getJob()));
+        assertTrue(jobDao.isFinished(event.getJob()));
     }
 
     @Test

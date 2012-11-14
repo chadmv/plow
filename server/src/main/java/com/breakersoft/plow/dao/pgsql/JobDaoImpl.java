@@ -267,7 +267,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
             "WHERE " +
                 "job.pk_job=?";
     @Override
-    public boolean hasPendingFrames(Job job) {
+    public boolean isFinished(Job job) {
         SqlRowSet row =  jdbc.queryForRowSet(HAS_PENDING_FRAMES, job.getJobId());
         if (!row.first()) {
             return false;

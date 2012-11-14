@@ -19,5 +19,5 @@ public interface LayerDao {
 
     Layer get(Job job, int idx);
 
-    boolean isLayerComplete(Layer layer);
+    boolean isFinished(Layer layer);
 }

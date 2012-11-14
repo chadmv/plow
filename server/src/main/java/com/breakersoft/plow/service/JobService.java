@@ -18,7 +18,7 @@ public interface JobService {
 
     Job getJob(String id);
 
-    boolean hasPendingFrames(Job job);
+    boolean isFinished(Job job);
 
     Task getTask(Layer layer, int number);
 
