@@ -87,6 +87,12 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 MAPPER, id);
     }
 
+    @Override
+    public void setPaused(Job job, boolean value) {
+        jdbc.update("UPDATE plow.job SET bool_paused=? WHERE pk_job=?",
+                value, job.getJobId());
+    }
+
     private static final String INSERT[] = {
         JdbcUtils.Insert("plow.job",
                 "pk_job", "pk_project", "str_name", "str_active_name",

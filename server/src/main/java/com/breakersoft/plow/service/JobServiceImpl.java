@@ -195,4 +195,9 @@ public class JobServiceImpl implements JobService {
     public boolean setJobState(Job job, JobState state) {
         return jobDao.setJobState(job, state);
     }
+
+    @Override
+    public void setJobPaused(Job job, boolean value) {
+        jobDao.setPaused(job, value);
+    }
 }

@@ -33,4 +33,6 @@ public interface JobService {
     boolean shutdown(Job job);
 
     boolean isLayerComplete(Layer layer);
+
+    void setJobPaused(Job job, boolean value);
 }

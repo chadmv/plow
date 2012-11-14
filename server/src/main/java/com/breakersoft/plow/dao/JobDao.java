@@ -35,4 +35,6 @@ public interface JobDao {
     Job getByActiveNameOrId(String identifer);
 
     Job getActive(UUID id);
+
+    void setPaused(Job job, boolean value);
 }

@@ -259,6 +259,7 @@ service RpcService {
     JobT getActiveJob(1:string name) throws (1:PlowException e),
     JobT getJob(1:common.Guid jobId) throws (1:PlowException e),
     bool killJob(1:common.Guid jobId, 2:string reason) throws (1:PlowException e),
+    void pauseJob(1:common.Guid jobId, 2:bool paused) throws (1:PlowException e),
 
     list<JobT> getJobs(1:JobFilterT filter) throws (1:PlowException e),
 

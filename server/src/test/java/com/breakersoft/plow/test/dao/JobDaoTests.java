@@ -94,4 +94,19 @@ public class JobDaoTests extends AbstractTest {
         assertTrue(jobDao.shutdown(event.getJob()));
         assertFalse(jobDao.shutdown(event.getJob()));
     }
+
+    @Test
+    public void testPause() {
+        JobSpecT spec = getTestJobSpec();
+        JobLaunchEvent event = jobService.launch(spec);
+        jobDao.setPaused(event.getJob(), true);
+
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM job WHERE bool_paused='t'"));
+
+        jobDao.setPaused(event.getJob(), false);
+
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM job WHERE bool_paused='t'"));
+    }
 }

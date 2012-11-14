@@ -102,4 +102,10 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
             TException {
         return thriftNodeDao.getNodes(filter);
     }
+
+    @Override
+    public void pauseJob(String id, boolean value) throws PlowException,
+            TException {
+        jobService.setJobPaused(jobService.getJob(id), value);
+    }
 }
