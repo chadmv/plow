@@ -31,16 +31,6 @@ class NodeModel
     explicit NodeModel(QObject *parent = 0);
     ~NodeModel();
 
-    int rowCount(const QModelIndex &parent) const;
-    int columnCount(const QModelIndex &parent) const;
-    QVariant data(const QModelIndex &index, int role) const;
-
-    QVariant headerData(int section,
-                        Qt::Orientation orientation,
-                        int role) const;
-
-    const NodeT* nodeFromIndex(const QModelIndex&) const;
-
     enum NODE_STATE {
         UP      = NodeState::UP,
         DOWN    = NodeState::DOWN,
@@ -53,8 +43,20 @@ class NodeModel
         LOCKED  = LockState::LOCKED
     };
 
+    int rowCount(const QModelIndex &parent) const;
+    int columnCount(const QModelIndex &parent) const;
+    QVariant data(const QModelIndex &index, int role) const;
+
+    QVariant headerData(int section,
+                        Qt::Orientation orientation,
+                        int role) const;
+
+    const NodeT* nodeFromIndex(const QModelIndex&) const;
+
+    void setNodeList(const NodeList &aList);
+
  public slots:
-    void populate();
+    void refresh();
 
  private:
     NodeList nodes;

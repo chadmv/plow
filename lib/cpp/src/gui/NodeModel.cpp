@@ -6,14 +6,8 @@ namespace Plow {
 namespace Gui {
 
 //
-// NodeModel
-//
-
-// TODO(justin): Temp Fixture Declaration
-NodeList getHosts(int amount);
-const int HOST_AMOUNT = 20000;
-
 // NodeModel represents a list of NodeT instance
+//
 NodeModel::NodeModel(QObject *parent)
     : QAbstractTableModel(parent)
 {}
@@ -98,14 +92,9 @@ QVariant NodeModel::headerData(int section,
 
 // Retrieve a new list of host data from the data source
 // Resets the model's internal data structure.
-void NodeModel::populate() {
-    beginResetModel();
-    nodes.clear();
-
-    // TODO(justin): Eventually pull real hosts from Thrift rpc
-    nodes = getHosts(HOST_AMOUNT);
-
-    endResetModel();
+void NodeModel::refresh() {
+    NodeList aList;
+    setNodeList(aList);
 }
 
 const NodeT* NodeModel::nodeFromIndex(const QModelIndex &index) const {
@@ -113,6 +102,15 @@ const NodeT* NodeModel::nodeFromIndex(const QModelIndex &index) const {
         return &(nodes.at(index.row()));
 
     return NULL;
+}
+
+// Resets the models internal data structure to the
+// given NodeList
+void NodeModel::setNodeList(const NodeList &aList) {
+    beginResetModel();
+    nodes.clear();
+    nodes = aList;
+    endResetModel();
 }
 
 // NodeProxyModel
@@ -141,61 +139,6 @@ bool NodeProxyModel::lessThan(const QModelIndex &left,
     }
 
     return is_less;
-}
-
-//
-// TODO(justin): Data Fixture
-//
-#define randInt(low, high) (qrand() % ((high + 1) - low) + low)
-
-// Creates random NodeT instance
-NodeList getHosts(int amount) {
-    NodeList result(amount);
-
-    QList<NodeState::type> nodeStates;
-    nodeStates << NodeState::UP
-               << NodeState::DOWN
-               << NodeState::REPAIR
-               << NodeState::REBOOT;
-
-    QList<LockState::type> lockStates;
-    lockStates << LockState::OPEN
-               << LockState::LOCKED;
-
-    QList<int> p_cpus;
-    p_cpus << 1 << 2 << 4 << 8;
-
-    QList<int> t_ram;
-    t_ram << 4096 << 8192 << 16384;
-
-    int i_cpus, i_ram, i_swap, i_uptime;
-
-    NodeT aNode;
-
-    for (int row = 0; row < amount; ++row) {
-        i_cpus      = p_cpus.at(randInt(0, p_cpus.count() - 1));
-        i_ram       = t_ram.at(randInt(0, t_ram.count() - 1));
-        i_swap      = i_ram * .5;
-        i_uptime    = randInt(10, 5 * 24 * 60 * 60);
-
-        aNode = result[row];
-        aNode.name = QString("Host%1").arg(row, 4, 10, QChar('0')).toStdString();
-        aNode.clusterName = "General";
-        aNode.state = nodeStates.at(randInt(0, nodeStates.count()-1));
-        aNode.lockState = lockStates.at(randInt(0, lockStates.count()-1));
-        aNode.totalCores = i_cpus;
-        aNode.idleCores = i_cpus - randInt(0, i_cpus);
-        aNode.bootTime = i_uptime;
-        aNode.system.platform = "Linux";
-        aNode.system.cpuModel = "Xeon 3.0Ghz";
-        aNode.system.totalRamMb = i_ram;
-        aNode.system.freeRamMb = i_ram - randInt(0, i_ram);
-        aNode.system.totalSwapMb = i_swap;
-        aNode.system.freeSwapMb = i_swap - randInt(0, i_swap);
-
-        result[row] = aNode;
-    }
-    return result;
 }
 }  // Gui
 }  // Plow
