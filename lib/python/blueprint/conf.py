@@ -10,7 +10,7 @@ def _init():
     Parse an initalize the Config object
     """
     if os.environ.get("BLUEPRINT_CFG"):
-        cgfs = _Config.read([os.environ["BLUEPRINT_CFG"]])
+        cfgs = _Config.read([os.environ["BLUEPRINT_CFG"]])
     else:
         cfgs = _Config.read([
             os.path.join(os.environ.get("PLOW_ROOT", "/usr/local"), "etc/plow/blueprint.cfg"),
