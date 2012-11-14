@@ -4,24 +4,23 @@
 #include <QWidget>
 
 class QTableView;
+class QAbstractItemModel;
 
-
-namespace Plow { namespace Gui {
-
-class NodeModel;
+namespace Plow {
+namespace Gui {
 
 class NodeTableWidget
         : public QWidget
 {
     Q_OBJECT
 
-public:
+ public:
     explicit NodeTableWidget(QWidget *parent = 0);
 
-    NodeModel* model();
-    void setModel(NodeModel* nodeModel);
+    QAbstractItemModel* model() const;
+    void setModel(QAbstractItemModel* aModel);
 
-private:
+ private:
     QTableView* tableView;
 };
 }  // Gui

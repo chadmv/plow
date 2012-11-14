@@ -2,8 +2,9 @@
 #define PLOW_GUI_NODEMODEL_H_
 
 #include <QAbstractTableModel>
+#include <QSortFilterProxyModel>
 #include <QMetaEnum>
-#include <QList>
+#include <QStringList>
 
 #include <vector>
 
@@ -11,15 +12,14 @@
 
 class QVariant;
 
-namespace Plow { namespace Gui {
+namespace Plow {
+namespace Gui {
 
 //
 // NodeModel
 //
-
 typedef std::vector<Plow::NodeT> NodeList;
 typedef QList< QVariant (*)( NodeT const& ) > Callbacks;
-
 
 class NodeModel
         : public QAbstractTableModel
@@ -27,7 +27,7 @@ class NodeModel
     Q_OBJECT
     Q_ENUMS(NODE_STATE LOCK_STATE)
 
-public:
+ public:
     explicit NodeModel(QObject *parent = 0);
     ~NodeModel();
 
@@ -53,11 +53,10 @@ public:
         LOCKED  = LockState::LOCKED
     };
 
-
-public slots:
+ public slots:
     void populate();
 
-private:
+ private:
     NodeList nodes;
 
     static Callbacks displayRoleCallbacks;
@@ -114,6 +113,21 @@ inline QString NodeModel::enumToString(const char* enumName, T enumVal) {
     QMetaEnum metaEnum = staticMetaObject.enumerator(index);
     return QString(metaEnum.valueToKey(enumVal));
 }
+
+//
+// NodeProxyModel
+//
+class NodeProxyModel
+        : public QSortFilterProxyModel
+{
+    Q_OBJECT
+
+ public:
+    explicit NodeProxyModel(QObject *parent = 0);
+
+    bool lessThan(const QModelIndex &left,
+                  const QModelIndex &right) const;
+};
 }  // Gui
 }  // Plow
 

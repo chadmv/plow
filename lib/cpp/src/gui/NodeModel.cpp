@@ -1,14 +1,19 @@
-#include <QStandardItem>
 #include <QDebug>
 
 #include "NodeModel.h"
 
-namespace Plow { namespace Gui {
+namespace Plow {
+namespace Gui {
 
-// Temp Fixture Declaration
+//
+// NodeModel
+//
+
+// TODO(justin): Temp Fixture Declaration
 NodeList getHosts(int amount);
+const int HOST_AMOUNT = 20000;
 
-
+// NodeModel represents a list of NodeT instance
 NodeModel::NodeModel(QObject *parent)
     : QAbstractTableModel(parent)
 {}
@@ -17,6 +22,8 @@ NodeModel::~NodeModel() {
     nodes.clear();
 }
 
+// Callbacks for formatting the DisplayRole of
+// each field in the NodeT struct.
 Callbacks NodeModel::displayRoleCallbacks = Callbacks()
             << &DisplayRoleCallbacks::name
             << &DisplayRoleCallbacks::platform
@@ -89,10 +96,15 @@ QVariant NodeModel::headerData(int section,
     return QVariant(headerLabels.at(section));
 }
 
+// Retrieve a new list of host data from the data source
+// Resets the model's internal data structure.
 void NodeModel::populate() {
     beginResetModel();
     nodes.clear();
-    nodes = getHosts(10000);
+
+    // TODO(justin): Eventually pull real hosts from Thrift rpc
+    nodes = getHosts(HOST_AMOUNT);
+
     endResetModel();
 }
 
@@ -100,19 +112,43 @@ const NodeT* NodeModel::nodeFromIndex(const QModelIndex &index) const {
     if (index.isValid())
         return &(nodes.at(index.row()));
 
-    return 0;
+    return NULL;
 }
 
+// NodeProxyModel
+//
+// Subclass of a QSortFilterProxyModel.
+// Provides specialized sorting and filtering specifically
+// for a NodeModel.
+NodeProxyModel::NodeProxyModel(QObject *parent)
+    : QSortFilterProxyModel(parent)
+{}
 
+bool NodeProxyModel::lessThan(const QModelIndex &left,
+                              const QModelIndex &right) const {
+    QString leftString = sourceModel()->data(left).toString();
+    QString rightString = sourceModel()->data(right).toString();
+
+    bool is_less;
+    bool is_int;
+
+    int leftInt = leftString.toInt(&is_int);
+    if (is_int) {
+        int rightInt = rightString.toInt();
+        is_less = leftInt < rightInt;
+    } else {
+        is_less = leftString < rightString;
+    }
+
+    return is_less;
+}
 
 //
-// Data Fixture - TEMP
+// TODO(justin): Data Fixture
 //
 #define randInt(low, high) (qrand() % ((high + 1) - low) + low)
 
-/*
- * Create random "node" data
- */
+// Creates random NodeT instance
 NodeList getHosts(int amount) {
     NodeList result(amount);
 
@@ -161,6 +197,5 @@ NodeList getHosts(int amount) {
     }
     return result;
 }
-
 }  // Gui
 }  // Plow
