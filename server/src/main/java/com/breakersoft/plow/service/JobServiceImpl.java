@@ -18,7 +18,6 @@ import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.ProjectDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.event.EventManager;
-import com.breakersoft.plow.event.JobFinishedEvent;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.JobSpecT;
