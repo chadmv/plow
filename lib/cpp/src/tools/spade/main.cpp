@@ -1,14 +1,18 @@
-#include "output.h"
-
 #include <string>
+
 #include <boost/program_options.hpp>
+
+#include "output.h"
+#include "actions.h"
+
+#include "plow/plow.h"
 
 namespace opt = boost::program_options;
 
 namespace 
 { 
-  const size_t COMMAND_LINE_ERROR = 1; 
-  const size_t COMMAND_LINE_SUCCESS = 0; 
+    const size_t COMMAND_LINE_ERROR = 1; 
+    const size_t COMMAND_LINE_SUCCESS = 0;
 }
 
 int main(int argc, char *argv[])
@@ -20,12 +24,15 @@ int main(int argc, char *argv[])
         ("lj", "display list of active jobs")
         ("lt", "display list of tasks")
         ("ln", "display list of nodes")
+        ("kill", "kill specified job, layer, or tasks")
         ;
 
     // Query Options
     opt::options_description query_options("Query Options");
     query_options.add_options()
         ("job,j", opt::value<std::string>(), "JOB NAME")
+        ("layer,l", opt::value<std::string>(), "LAYER NAME")
+        ("task,t", opt::value<std::string>(), "TASK NAME")
         ;
 
     // Standard options
@@ -68,6 +75,15 @@ int main(int argc, char *argv[])
         {
             Spade::display_node_list();
         }
+        else if (vm.count("kill"))
+        {
+
+            if (vm.count("job") && !vm.count("layer") && !vm.count("task"))
+            {
+                Spade::killJob(vm["job"].as<std::string>());
+            }
+        }
+
     }
     catch(const opt::error& e) 
     { 
