@@ -30,6 +30,8 @@ class Layer(object):
         self.__tasks = []
         self.__job = None
         self.__depends = []
+        self.__outputs = { }
+        self.__inputs = { }
 
         self.__handleDependOnArg()
 
@@ -100,6 +102,18 @@ class Layer(object):
 
     def getFile(self, name):
         pass
+
+    def getOutputs(self):
+        return self.__outputs
+
+    def getInputs(self):
+        return self.__inputs
+
+    def addInput(self, name, path, attrs=None):
+        self.__input[name] = (path, attrs)
+
+    def addOutput(self, name, path, attrs=None):
+        self.__output[name] = (path, attrs)
 
     def _execute(self, frames):
         pass
