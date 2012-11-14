@@ -224,7 +224,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
             sb.append(" WHERE pk_layer=?");
             values.add(UUID.fromString(entry.getKey()));
             jdbc.update(sb.toString(), values.toArray());
-            jdbc.update("UPDATE layer_count SET int_total=? WHERE pk_layer=?",
+            jdbc.update("UPDATE plow.layer_count SET int_total=? WHERE pk_layer=?",
                     total, UUID.fromString(entry.getKey()));
         }
 
@@ -243,20 +243,20 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         sb.append(" WHERE pk_job=?");
         values.add(job.getJobId());
         jdbc.update(sb.toString(), values.toArray());
-        jdbc.update("UPDATE job_count SET int_total=? WHERE pk_job=?",
+        jdbc.update("UPDATE plow.job_count SET int_total=? WHERE pk_job=?",
                 total, job.getJobId());
 
     }
 
     @Override
     public boolean isPaused(Job job) {
-        return jdbc.queryForObject("SELECT bool_paused FROM job WHERE pk_job=?",
+        return jdbc.queryForObject("SELECT bool_paused FROM plow.job WHERE pk_job=?",
                 Boolean.class, job.getJobId());
     }
 
     @Override
     public boolean hasWaitingFrames(Job job) {
-        return jdbc.queryForInt("SELECT job_count.int_waiting FROM job_count WHERE pk_job=?",
+        return jdbc.queryForInt("SELECT job_count.int_waiting FROM plow.job_count WHERE pk_job=?",
                 job.getJobId()) > 0;
     }
 
