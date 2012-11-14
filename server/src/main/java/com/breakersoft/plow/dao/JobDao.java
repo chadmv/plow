@@ -37,4 +37,6 @@ public interface JobDao {
     Job getActive(UUID id);
 
     void setPaused(Job job, boolean value);
+
+    boolean isPaused(Job job);
 }

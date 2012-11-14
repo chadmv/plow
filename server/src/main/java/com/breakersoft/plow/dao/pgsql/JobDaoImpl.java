@@ -249,6 +249,12 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
     }
 
     @Override
+    public boolean isPaused(Job job) {
+        return jdbc.queryForObject("SELECT bool_paused FROM job WHERE pk_job=?",
+                Boolean.class, job.getJobId());
+    }
+
+    @Override
     public boolean hasWaitingFrames(Job job) {
         return jdbc.queryForInt("SELECT job_count.int_waiting FROM job_count WHERE pk_job=?",
                 job.getJobId()) > 0;
