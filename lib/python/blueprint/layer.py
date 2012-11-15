@@ -1,6 +1,12 @@
+import os
+import logging
+
 from collections import namedtuple
 
 from job import Job
+from io import Io, system
+
+logger = logging.getLogger(__name__)
 
 LayerDepend = namedtuple("LayerDepend", ["dependent", "dependOn", "type"])
 
@@ -14,6 +20,7 @@ class LayerAspect(type):
         layer = super(LayerAspect, cls).__call__(*args, **kwargs)
         if Job.Current:
             Job.Current.addLayer(layer)
+        layer._afterInit()
         return layer
 
 class Layer(object):
@@ -32,6 +39,7 @@ class Layer(object):
         self.__depends = []
         self.__outputs = { }
         self.__inputs = { }
+        self.__setups = []
 
         self.__handleDependOnArg()
 
@@ -104,21 +112,56 @@ class Layer(object):
         pass
 
     def getOutputs(self):
-        return self.__outputs
+        return self.__outputs.values()
 
     def getInputs(self):
-        return self.__inputs
+        return self.__inputs.values()
 
     def addInput(self, name, path, attrs=None):
-        self.__input[name] = (path, attrs)
+        self.__inputs[name] = Io(name, path, attrs)
 
     def addOutput(self, name, path, attrs=None):
-        self.__output[name] = (path, attrs)
+        self.__outputs[name] = Io(name, path, attrs)
+
+    def getTempDir(self):
+        return os.environ["TMPDIR"]
+
+    def getSetupTasks(self):
+        return list(self.__setups)
+
+    def addSetupTask(self, task):
+        self.__setups.append(task)
+
+    def system(self, cmd):
+        system(cmd)
 
     def _execute(self, frames):
         pass
 
     def _setup(self):
         pass
+
+    def _afterInit(self):
+        pass
+
+    def _afterExecute(self):
+        pass
+
+class Task(Layer):
+
+    def __init__(self, name, **args):
+        Layer.__init__(self, name, **args)
+
+
+class SetupTask(Task):
+    
+    def __init__(self, layer, **args):
+        Task.__init__(self, "%s_setup" % layer.getName(), **args)
+        self.__layer = layer
+        self.__layer.dependOn(self, Layer.DependAll)
+
+    def getLayer(self):
+        return self.__layer
+
 
 
