@@ -15,7 +15,7 @@ def _init():
         cfgs = _Config.read([
             os.path.join(os.environ.get("PLOW_ROOT", "/usr/local"), "etc/plow/blueprint.cfg"),
             os.path.expanduser("~/.plow/blueprint.cfg")])
-    print cfgs
+    assert(cfgs)
 
 # run as a function to avoid polluting module with temp variables
 _init()
