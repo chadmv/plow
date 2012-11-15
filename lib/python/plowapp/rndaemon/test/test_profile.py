@@ -21,6 +21,12 @@ class TestSystemProfiler(unittest.TestCase):
     def testProfile(self):
         prof = SystemProfiler()
 
+        self.assertTrue(all(i >= 0 for i in prof.load), 
+            "System load should not have any negative values: %s" % str(prof.load))
+
+    def testSubprocessOpts(self):
+        prof = SystemProfiler()
+
         cmd, opts = prof.getSubprocessOpts('some command')
 
         self.assertEqual(cmd, ['some', 'command'], 
