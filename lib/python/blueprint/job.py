@@ -42,6 +42,9 @@ class Job(object):
     def getArchive(self):
         return self.__archive
 
+    def putData(self, key, value):
+        return self.__archive.putData(key, value)
+
     def setup(self):
 
         self.__archive = Archive(self)
