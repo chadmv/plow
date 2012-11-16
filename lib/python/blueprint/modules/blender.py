@@ -54,7 +54,7 @@ class Blender(Layer):
         cmd.append("-noaudio")
         cmd.append("-noglsl")
         cmd.append("-nojoystick")
-        cmd.extend(("-t", os.environ.get("PLOW_THREADS", "4")))
+        cmd.extend(("-t", os.environ.get("PLOW_THREADS", "1")))
 
         for f in frames:
             cmd.extend(("-f", str(f)))
