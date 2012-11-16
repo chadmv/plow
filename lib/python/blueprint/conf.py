@@ -1,18 +1,18 @@
 import os
 import ConfigParser
 
-__all__ = ["Config"]
+__all__ = ["Parser"]
 
-_Config = ConfigParser.RawConfigParser()
+Parser = ConfigParser.RawConfigParser()
 
 def _init():
     """
     Parse an initalize the Config object
     """
     if os.environ.get("BLUEPRINT_CFG"):
-        cfgs = _Config.read([os.environ["BLUEPRINT_CFG"]])
+        cfgs = Parser.read([os.environ["BLUEPRINT_CFG"]])
     else:
-        cfgs = _Config.read([
+        cfgs = Parser.read([
             os.path.join(os.environ.get("PLOW_ROOT", "/usr/local"), "etc/plow/blueprint.cfg"),
             os.path.expanduser("~/.plow/blueprint.cfg")])
     assert(cfgs)
@@ -25,8 +25,8 @@ def get(section, key, **kwargs):
     Return the specified configuration option.  Automatically
     interpolates any environement variables specified in plow.ini.
     """
-    interps = _Config.get("env", "interpolate").split(",")
+    interps = Parser.get("env", "interpolate").split(",")
     args = dict([(inter, os.environ.get(inter, "test")) for inter in interps])
     if kwargs:
         args.update(kwargs)
-    return _Config.get(section, key) % args
+    return Parser.get(section, key) % args
