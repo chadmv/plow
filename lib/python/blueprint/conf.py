@@ -25,7 +25,7 @@ def asBool(value):
     """
     Convert a string value into a boolean.
     """
-    return value.lower() in _BOOLEANS:
+    return value.lower() in _BOOLEANS
 
 def get(section, key, **kwargs):
     """
