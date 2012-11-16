@@ -14,7 +14,10 @@ class AbstractProfiler(object):
 
     def __init__(self):
 
-        self.data = {"platform": platform.platform()}
+        self.data = {
+            "platform": platform.platform(),
+            "load": (-1.0, -1.0, -1.0)
+        }
 
         self.update()
 
@@ -49,6 +52,7 @@ class AbstractProfiler(object):
         hw.freeSwapMb = self.freeSwapMb
         hw.cpuModel = self.cpuModel
         hw.platform = self.platform
+        hw.load = self.load
 
         # Create a ping
         ping = ttypes.Ping()
@@ -84,6 +88,11 @@ class AbstractProfiler(object):
         Instead, re-implement the protected _update().
         This method will be called after running _update().
         """
+        try:
+            self.data['load'] = os.getloadavg()
+        except OSError:
+            self.data['load'] = (-1.0, -1.0, -1.0)
+
         self._update()
 
         for name in ('logicalCpus', 'physicalCpus', 'totalRamMb'):
