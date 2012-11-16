@@ -43,6 +43,13 @@ def serialize(runner):
     for layer in job.getLayers():
         lspec = plow.LayerSpecT()
         lspec.name = layer.getName()
+        lspec.tags =  layer.getArg("tags", ["unassigned"])
+        lspec.range = layer.getArg("frame_range", runner.getArg("frame_range", "1001"))
+        lspec.chunk = layer.getArg("chunk", 1)
+        lspec.minCores = layer.getArg("min_threads", 1)
+        lspec.maxCores = layer.getArg("max_threads", 0)
+        lspec.minMemory = layer.getArg("min_ram", 256)
+
         lspec.command = [
             "%s/bin/taskrun" % os.environ.get("PLOW_ROOT", "/usr/local"),
             os.path.join(job.getPath(), "blueprint.yaml"),
@@ -52,12 +59,6 @@ def serialize(runner):
             "%{FRAME}"
         ]
         
-        lspec.tags =  layer.getArg("tags", ["unassigned"])
-        lspec.range = layer.getArg("frame_range", runner.getArg("frame_range", "1001"))
-        lspec.chunk = layer.getArg("chunk", 1)
-        lspec.minCores = layer.getArg("min_threads", 1)
-        lspec.maxCores = layer.getArg("max_threads", 0)
-        lspec.minMemory = layer.getArg("min_ram", 256)
         lspec.depends = []
 
         for depend in layer.getDepends():
