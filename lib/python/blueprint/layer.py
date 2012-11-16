@@ -5,6 +5,7 @@ from collections import namedtuple
 
 from job import Job
 from io import Io, system
+from app import PluginManager
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,12 @@ class LayerAspect(type):
         if Job.Current:
             Job.Current.addLayer(layer)
         layer._afterInit()
+
+        try:
+            PluginManager.initLayer(layer)
+        except Exception, e:
+            logger.warn(e)
+
         return layer
 
 class Layer(object):

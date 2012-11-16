@@ -10,9 +10,53 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "Application",
+    "PluginManager",
     "BlueprintRunner",
     "loadBackendPlugin",
     "loadScript"]
+
+
+class PluginManager(object):
+    """
+    The PluginManager is used to maintain a list of active plugins.
+    """
+    loaded = []
+
+    @classmethod
+    def loadPlugin(cls, module):
+        if module in cls.loaded:
+            return
+        plugin = __import__(module, globals(), locals(), [module])
+        try:
+            plugin.setup()
+        except  AttributeError, e:
+            pass
+        cls.loaded.append(plugin)
+
+    @classmethod
+    def initLayer(cls, layer):
+        for plugin in cls.loaded:
+            plugin.initLayer(layer)
+
+    @classmethod
+    def getActivePlugins(cls):
+        result = []
+        for section in conf.Parser.sections():
+            if not section.startswith("plugin:"):
+                continue
+            if not conf.asBool(conf.get(section, "enabled")):
+                continue
+            result.append(conf.get(section, "module"))
+        return result
+
+    @classmethod
+    def getLoadedPlugins(cls):
+        return cls.loaded
+
+    @classmethod
+    def loadAllPlugins(cls):
+        for plugin in cls.getActivePlugins():
+            cls.loadPlugin(plugin)
 
 class Application(object):
     def __init__(self, descr):
