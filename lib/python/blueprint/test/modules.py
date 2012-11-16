@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 class BlenderModuleTests(unittest.TestCase):
 
-    scene_file = os.path.dirname(__file__) + "data/cube.blend"
+    scene_file = os.path.dirname(__file__) + "data/test.blend"
 
     def testInitialize(self):
         """Initialize a Blender instance."""
@@ -30,7 +30,7 @@ class BlenderModuleTests(unittest.TestCase):
         # Now the outputs should be available.
         outputs = b.getOutputs()
         # Assert we have two outputs.
-        self.assertEquals(2, len(outputs))
+        self.assertEquals(4, len(outputs))
 
     def testExecuteRenderTask(self):
         b = blender.Blender("comp", scene_file=self.scene_file)

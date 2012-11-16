@@ -31,8 +31,8 @@ class BlenderSetup(SetupTask):
         self.system(cmd)
 
         outputs = json.load(open(output_path, "r"))
-        for name, data in outputs.items():
-            layer.addOutput(name, data[0], data[1])
+        for output in outputs:
+            layer.addOutput(output["pass"], output["path"], output)
 
 class Blender(Layer):
     """
@@ -50,12 +50,13 @@ class Blender(Layer):
 
         cmd = [conf.get("Blender", "bin")]
         cmd.append("-b")
-        for f in frames:
-            cmd.extend(("-f", str(f)))
+        cmd.append(self.getArg("scene_file"))
         cmd.append("-noaudio")
         cmd.append("-noglsl")
         cmd.append("-nojoystick")
-        cmd.extend(("-t", os.environ.get("PLOW_THREADS", "1")))
-        cmd.append(self.getArg("scene_file"))
+        cmd.extend(("-t", os.environ.get("PLOW_THREADS", "4")))
+
+        for f in frames:
+            cmd.extend(("-f", str(f)))
 
         self.system(cmd)

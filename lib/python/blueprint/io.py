@@ -15,6 +15,7 @@ class Io(object):
         self.attrs = attrs or dict()
 
     def __str__(self):
-        return "<IO %s %s>" % (self.name, self.path)
+        return "<IO %s %s %s>" % (self.name, self.path, self.attrs)
 
-
+    def __repr__(self):
+        return "<IO %s %s %s>" % (self.name, self.path, self.attrs)

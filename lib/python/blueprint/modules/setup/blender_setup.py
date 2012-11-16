@@ -15,15 +15,19 @@ def getOutputFileNodes():
     return result
 
 def setup():
-    result = { }
+    result = []
 
     for node in getOutputFileNodes():
-        result[node.name] = [node.base_path, {
-            "res_x": bpy.context.scene.render.resolution_x,
-            "res_y": bpy.context.scene.render.resolution_y,
-            "file_format": node.file_slots.items()[0][1].format.file_format,
-            "color_depth": node.file_slots.items()[0][1].format.color_depth}
-        ]
+        for output in node.file_slots.items():
+            result.append({
+                "path": os.path.join(node.base_path, output[1].path),
+                "node": node.name,
+                "pass": "%s_%s" % (node.name, output[1].path.split(".")[0]),
+                "res_x": bpy.context.scene.render.resolution_x,
+                "res_y": bpy.context.scene.render.resolution_y,
+                "file_format": node.file_slots.items()[0][1].format.file_format,
+                "color_depth": node.file_slots.items()[0][1].format.color_depth
+            })
 
     path = os.environ["PLOW_BLENDER_SETUP_PATH"]
     json.dump(result, open(path, "w"))
