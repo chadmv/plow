@@ -9,7 +9,7 @@ __all__ = [
 ]
 
 def submitJobSpec(jobspec):
-    Conn.service.launch(jobspec)
+    return Conn.service.launch(jobspec)
 
 def findJobs(**kwargs):
     filt = ttypes.JobFilter()
