@@ -26,14 +26,14 @@ public class StateManager {
     RndProcessManager processManager;
 
     public boolean killJob(Job job, String reason) {
-        final boolean killResult = jobService.shutdown(job);
+        final boolean killResult = shutdownJob(job);
         if (killResult) {
             processManager.killProcs(job, reason);
         }
         return killResult;
     }
 
-    public boolean shutdown(Job job) {
+    public boolean shutdownJob(Job job) {
         if (jobService.shutdown(job)) {
             satisfyDependsOn(job);
             eventManager.post(new JobFinishedEvent(job));
