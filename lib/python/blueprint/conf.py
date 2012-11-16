@@ -20,6 +20,13 @@ def _init():
 # run as a function to avoid polluting module with temp variables
 _init()
 
+_BOOLEANS = frozenset(["true", "1", "on", "yes"])
+def asBool(value):
+    """
+    Convert a string value into a boolean.
+    """
+    return value.lower() in _BOOLEANS:
+
 def get(section, key, **kwargs):
     """
     Return the specified configuration option.  Automatically
