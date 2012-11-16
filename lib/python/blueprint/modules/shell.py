@@ -2,7 +2,7 @@
 import logging
 
 from blueprint.layer import Layer
-from blueprint.io import shellOut
+from blueprint.io import system
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class Shell(Layer):
 
     def _execute(self, frames):
         for frame in frames:
-            shellOut(self.getArg("cmd"))
+            system(self.getArg("cmd"))
 
 
 
