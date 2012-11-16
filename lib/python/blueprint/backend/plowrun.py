@@ -18,7 +18,8 @@ def launch(runner):
     if runner.getArg("pretend"):
         pprint.pprint(spec)
     else:
-        plow.submitJobSpec(spec)
+        job = plow.submitJobSpec(spec)
+        runner.getJob().putData("jobid", job.id)
 
 def serialize(runner):
     """
