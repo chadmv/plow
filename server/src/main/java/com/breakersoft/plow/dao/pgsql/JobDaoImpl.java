@@ -276,14 +276,14 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
     public boolean isFinished(Job job) {
         SqlRowSet row =  jdbc.queryForRowSet(HAS_PENDING_FRAMES, job.getJobId());
         if (!row.first()) {
-            return false;
+            return true;
         }
         if (row.getInt("int_state") == JobState.FINISHED.ordinal()) {
-            return false;
+            return true;
         }
         if (row.getInt("pending") == 0) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 }

@@ -84,6 +84,8 @@ public class JobDaoTests extends AbstractTest {
     public void isFinished() {
         JobSpecT spec = getTestJobSpec();
         JobLaunchEvent event = jobService.launch(spec);
+        assertFalse(jobDao.isFinished(event.getJob()));
+        jobService.shutdown(event.getJob());
         assertTrue(jobDao.isFinished(event.getJob()));
     }
 
