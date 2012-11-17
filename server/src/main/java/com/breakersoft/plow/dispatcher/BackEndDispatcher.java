@@ -64,11 +64,13 @@ public class BackEndDispatcher {
 
         if (dispatchService.stopTask(task, newState)) {
             dispatchService.unassignProc(proc);
-            jobStateManager.satisfyDependsOn(task);
 
-            final Layer layer = new LayerE(task);
-            if (jobService.isLayerComplete(layer)) {
-                jobStateManager.satisfyDependsOn(layer);
+            if (newState.equals(TaskState.SUCCEEDED)) {
+                jobStateManager.satisfyDependsOn(task);
+                final Layer layer = new LayerE(task);
+                if (jobService.isLayerComplete(layer)) {
+                    jobStateManager.satisfyDependsOn(layer);
+                }
             }
         }
         else {
@@ -85,7 +87,7 @@ public class BackEndDispatcher {
         else if (jobService.isFinished(job)) {
             dispatchService.unbookProc(proc,
                     "Job no longer has pending frames: " + job.getJobId());
-            jobStateManager.shutdown(job);
+            jobStateManager.shutdownJob(job);
         }
         else {
             dispatchPool.execute(new DispatchProcToJob(proc, job, frontEndDispatcher));
