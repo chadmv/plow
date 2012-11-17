@@ -91,7 +91,7 @@ CREATE table plow.layer (
   pk_layer UUID NOT NULL PRIMARY KEY,
   pk_job UUID NOT NULL,
   str_name VARCHAR(200) NOT NULL,
-  str_range TEXT NOT NULL,
+  str_range TEXT,
   str_command TEXT[] NOT NULL,
   str_tags TEXT[] NOT NULL,
   int_chunk_size INTEGER NOT NULL,
