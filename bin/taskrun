@@ -14,22 +14,25 @@ class Taskrun(app.Application):
         
         group.add_argument("script", metavar="SCRIPT",
             help="Path to blueprint script.")
-        group.add_argument("-layer", metavar="LAYER", required=True, 
+        group.add_argument("-layer", metavar="LAYER", 
             help="Layer to execute task from.")
-        group.add_argument("-task", metavar="TASK",
-            help="Task to execute.");
         group.add_argument("-range", metavar="RANGE",
             help="Frame range to execute.");
+        group.add_argument("-task", metavar="TASK",
+            help="Task to execute.");
 
     def handleArgs(self, args):
         job = app.loadScript(args.script)
-        layer = job.getLayer(args.layer)
-
-        if args.range:
-            frameSet = fileseq.FrameSet(args.range)
-            layer.execute(frameSet)
+        
+        if args.layer and args.range:
+            layer = job.getLayer(args.layer)
+            frameset = fileseq.FrameSet(args.range)
+            layer.execute(frameset)
         elif args.task:
-            print "not supported"
+            task = job.getLayer(args.task)
+            task.execute()
+        else:
+            raise Execption("Unsupported operation, must specify layer/range or task")
 
 if __name__ == "__main__":
     taskrun = Taskrun()
