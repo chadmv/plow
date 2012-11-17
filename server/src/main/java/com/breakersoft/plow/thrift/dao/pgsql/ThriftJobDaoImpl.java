@@ -14,6 +14,7 @@ import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.thrift.JobFilterT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.JobT;
+import com.breakersoft.plow.thrift.OutputT;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.google.common.collect.Lists;
@@ -135,5 +136,11 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
     @Override
     public JobT getRunningJob(String name) {
         return jdbc.queryForObject(GET_BY_NAME, MAPPER, name);
+    }
+
+    @Override
+    public List<OutputT> getOutputs(UUID jobId) {
+        return jdbc.query("SELECT str_path, attrs FROM plow.output WHERE pk_job=?",
+                ThriftLayerDaoImpl.OUT_MAPPER, jobId);
     }
 }

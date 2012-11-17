@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.RowMapper;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.thrift.LayerT;
+import com.breakersoft.plow.thrift.OutputT;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 
 @Repository
@@ -83,5 +85,22 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
     @Override
     public List<LayerT> getLayers(UUID jobId) {
         return jdbc.query(GET_BY_JOB, MAPPER, jobId);
+    }
+
+    public static final RowMapper<OutputT> OUT_MAPPER = new RowMapper<OutputT>() {
+        @Override
+        public OutputT mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+            OutputT output = new OutputT();
+            output.setPath(rs.getString("str_path"));
+            output.setAttrs((Map<String, String>) rs.getObject("attrs"));
+            return output;
+        }
+    };
+
+    @Override
+    public List<OutputT> getOutputs(UUID layerId) {
+        return jdbc.query("SELECT str_path, attrs FROM output WHERE pk_layer=?",
+                OUT_MAPPER, layerId);
     }
 }
