@@ -236,6 +236,7 @@ public final class FrontEndDispatcher {
      * @param job
      */
     public void finalizeJob(Job job) {
+        logger.info("Removing job from dispatch threads: {}", job);
         for (BookingThread thread: bookingThreads) {
             thread.removeJob(job);
         }
