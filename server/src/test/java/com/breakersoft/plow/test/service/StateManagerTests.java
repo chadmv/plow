@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.breakersoft.plow.event.EventManager;
+import com.breakersoft.plow.event.EventManagerImpl;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.StateManager;
 import com.breakersoft.plow.test.AbstractTest;
@@ -21,22 +22,13 @@ public class StateManagerTests extends AbstractTest {
     @Resource
     EventManager eventManager;
 
-    private boolean jobLaunchEventHandled;
     private boolean jobShutdownEventHandled;
 
     @Before
     public void reset() {
+        ((EventManagerImpl) eventManager).setEnabled(true);
         eventManager.register(this);
-        jobLaunchEventHandled = false;
         jobShutdownEventHandled = false;
-    }
-
-    @Test
-    public void testLaunchJob() {
-        JobLaunchEvent event = jobService.launch(getTestJobSpec());
-        assertLayerCount(event.getJob(), 1);
-        assertFrameCount(event.getJob(), 10);
-        assertTrue(jobLaunchEventHandled);
     }
 
     @Test
@@ -47,17 +39,11 @@ public class StateManagerTests extends AbstractTest {
     }
 
     @Test
-    public void testKilJobl() {
+    public void testKillJob() {
         JobLaunchEvent event = jobService.launch(getTestJobSpec());
         stateManager.killJob(event.getJob(), "unit test kill");
         assertTrue(jobShutdownEventHandled);
     }
-
-    @Subscribe
-    public void handleJobLaunchEvent(JobLaunchEvent event) {
-        jobLaunchEventHandled = true;
-    }
-
     @Subscribe
     public void handleJobShutdownEvent(JobLaunchEvent event) {
         jobShutdownEventHandled = true;
