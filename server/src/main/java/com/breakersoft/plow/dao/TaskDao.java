@@ -2,6 +2,7 @@ package com.breakersoft.plow.dao;
 
 import java.util.UUID;
 
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.thrift.TaskState;
@@ -25,6 +26,6 @@ public interface TaskDao {
 
     boolean stop(Task task, TaskState newState);
 
-    Task getByNameOrId(Layer layer, String identifer);
+    Task getByNameOrId(Job job, String identifer);
 
 }

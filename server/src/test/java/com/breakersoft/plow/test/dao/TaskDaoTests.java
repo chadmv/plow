@@ -32,10 +32,12 @@ public class TaskDaoTests extends AbstractTest {
 
     private Task task;
 
+    private Job job;
+
     @Test
     public void testCreate() {
         JobSpecT spec = getTestJobSpec();
-        Job job = jobDao.create(TEST_PROJECT, spec);
+        job = jobDao.create(TEST_PROJECT, spec);
         LayerSpecT lspec = spec.getLayers().get(0);
         layer = layerDao.create(job, lspec, 0);
         task = taskDao.create(layer, "0001-test", 1, 0, 0);
@@ -58,11 +60,11 @@ public class TaskDaoTests extends AbstractTest {
         Task f1 = taskDao.get(task.getTaskId());
         assertEquals(task, f1);
 
-        Task f2 = taskDao.getByNameOrId(layer, f1.getTaskId().toString());
+        Task f2 = taskDao.getByNameOrId(job, f1.getTaskId().toString());
         assertEquals(task, f1);
         assertEquals(f2, f1);
 
-        Task f3 = taskDao.getByNameOrId(layer, "0001-test");
+        Task f3 = taskDao.getByNameOrId(job, "0001-test");
         assertEquals(task, f3);
         assertEquals(f2, f3);
     }

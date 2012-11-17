@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.TaskE;
 import com.breakersoft.plow.Layer;
@@ -60,13 +61,13 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
     }
 
     @Override
-    public Task getByNameOrId(Layer layer, String identifer) {
+    public Task getByNameOrId(Job job, String identifer) {
         try {
             return get(UUID.fromString(identifer));
         } catch (IllegalArgumentException e) {
             return jdbc.queryForObject(
-                    GET + "AND layer.pk_layer=? AND task.str_name=?",
-                    MAPPER, layer.getLayerId(), identifer);
+                    GET + "AND task.pk_job=? AND task.str_name=?",
+                    MAPPER, job.getJobId(), identifer);
         }
     }
 
