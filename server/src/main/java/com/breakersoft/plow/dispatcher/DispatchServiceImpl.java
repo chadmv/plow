@@ -188,11 +188,6 @@ public class DispatchServiceImpl implements DispatchService {
             return;
         }
 
-        if (!proc.isAllocated()) {
-            logger.warn("Ignoring unbook proc on {}, {}", proc.getProcId(), why);
-            return;
-        }
-
         logger.info("unbooking proc: {}, {}", proc.getProcId(), why);
 
         if (procDao.delete(proc)) {
