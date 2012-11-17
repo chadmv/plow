@@ -159,6 +159,7 @@ public class DispatchServiceImpl implements DispatchService {
         proc.setNodeId(node.getNodeId());
         proc.setQuotaId(quota.getQuotaId());
         proc.setCores(task.getMinCores());
+        proc.setMemory(task.getMinMemory());
         proc.setTaskName(task.getName());
         proc.setHostname(node.getName());
         proc.setJobId(task.getJobId());
@@ -197,9 +198,11 @@ public class DispatchServiceImpl implements DispatchService {
         if (procDao.delete(proc)) {
 
             logger.info("Proc unbooked {}", proc.getProcId());
-
+            logger.info("Cores: {} Memory: {}", proc.getCores(), proc.getMemory());
             final Quota quota = quotaDao.get(proc.getQuotaId());
             final Node node = nodeDao.get(proc.getNodeId());
+
+
 
             nodeDao.freeResources(node, proc.getCores(), proc.getMemory());
             quotaDao.freeResources(quota, proc.getCores());
