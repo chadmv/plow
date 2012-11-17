@@ -18,7 +18,6 @@ import org.springframework.stereotype.Repository;
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
-import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
@@ -380,6 +379,27 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         }, DTASK_MAPPER);
     }
 
+    private static final String GET_RUN_TASK =
+            "SELECT " +
+                "job.int_uid," +
+                "job.str_username," +
+                "job.str_log_path, " +
+                "job.str_active_name AS job_name, " +
+                "layer.str_command, " +
+                "layer.str_name AS layer_name, " +
+                "task.int_number, " +
+                "task.str_name AS task_name " +
+            "FROM " +
+                "plow.task " +
+                "INNER JOIN " +
+                    "plow.layer " +
+                        "ON layer.pk_layer = task.pk_layer " +
+                "INNER JOIN " +
+                    "plow.job " +
+                        "ON layer.pk_job = job.pk_job " +
+            "WHERE " +
+                "task.pk_task = ? ";
+
     public static final RowMapper<RunTaskCommand> RUN_TASK_MAPPER =
             new RowMapper<RunTaskCommand>() {
         @Override
@@ -397,34 +417,20 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             task.command = Arrays.asList((String[])rs.getArray("str_command").getArray());
             for (int i=0; i<task.command.size(); i++) {
                 String part = task.command.get(i);
-                part = part.replace("%{FRAME}", String.valueOf(rs.getInt("int_number")));
+                part = part.replace("%{RANGE}", String.valueOf(rs.getInt("int_number")));
                 part = part.replace("%{TASK}", rs.getString("task_name"));
                 task.command.set(i, part);
             }
 
+            task.env.put("PLOW_JOB_NAME", rs.getString("job_name"));
+            task.env.put("PLOW_LAYER_NAME", rs.getString("layer_name"));
+            task.env.put("PLOW_TASK_NAME", rs.getString("task_name"));
+            task.env.put("PLOW_LOG_DIR", rs.getString("str_log_path"));
+            task.env.put("PLOW_UID", rs.getString("int_uid"));
+            task.env.put("PLOW_TASK_NUMBER", rs.getString("int_number"));
             return task;
         }
     };
-
-    private static final String GET_RUN_TASK =
-            "SELECT " +
-                "job.int_uid," +
-                "job.str_username," +
-                "job.str_log_path, " +
-                "layer.str_command, " +
-                "layer.str_name AS layer_name, " +
-                "task.int_number, " +
-                "task.str_name AS task_name " +
-            "FROM " +
-                "plow.task " +
-                "INNER JOIN " +
-                    "plow.layer " +
-                        "ON layer.pk_layer = task.pk_layer " +
-                "INNER JOIN " +
-                    "plow.job " +
-                        "ON layer.pk_job = job.pk_job " +
-            "WHERE " +
-                "task.pk_task = ? ";
 
     @Override
     public RunTaskCommand getRunTaskCommand(DispatchTask task, DispatchProc proc) {
@@ -434,6 +440,10 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         command.taskId = task.getTaskId().toString();
         command.procId = proc.getProcId().toString();
         command.cores = proc.getCores();
+        command.env.put("PLOW_TASK_ID", command.taskId);
+        command.env.put("PLOW_JOB_ID", command.jobId);
+        command.env.put("PLOW_PROC_ID", command.procId);
+
         return command;
     }
 
