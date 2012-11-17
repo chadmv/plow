@@ -398,6 +398,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             for (int i=0; i<task.command.size(); i++) {
                 String part = task.command.get(i);
                 part = part.replace("%{FRAME}", String.valueOf(rs.getInt("int_number")));
+                part = part.replace("%{TASK}", rs.getString("task_name"));
                 task.command.set(i, part);
             }
 
