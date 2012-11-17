@@ -67,29 +67,25 @@ public class DependServiceImpl implements DependService {
 
         case LAYER_ON_TASK:
             dependentJob = jobDao.getByActiveNameOrId(spec.dependentJob);
-            dependOnJob = jobDao.getByActiveNameOrId(spec.dependOnJob);
             dependentLayer = layerDao.get(dependentJob, spec.dependentLayer);
-            dependOnLayer = layerDao.get(dependOnJob, spec.dependOnLayer);
-            dependOnTask = taskDao.getByNameOrId(dependOnLayer, spec.dependOnTask);
+            dependOnJob = jobDao.getByActiveNameOrId(spec.dependOnJob);
+            dependOnTask = taskDao.getByNameOrId(dependOnJob, spec.dependOnTask);
             depend = dependDao.createLayerOnTask(dependentLayer, dependOnTask);
             break;
 
         case TASK_ON_LAYER:
             dependentJob = jobDao.getByActiveNameOrId(spec.dependentJob);
+            dependentTask = taskDao.getByNameOrId(dependentJob, spec.dependentTask);
             dependOnJob = jobDao.getByActiveNameOrId(spec.dependOnJob);
-            dependentLayer = layerDao.get(dependentJob, spec.dependentLayer);
             dependOnLayer = layerDao.get(dependOnJob, spec.dependOnLayer);
-            dependentTask = taskDao.getByNameOrId(dependentLayer, spec.dependentTask);
             depend = dependDao.createTaskOnLayer(dependentTask, dependOnLayer);
             break;
 
         case TASK_ON_TASK:
             dependentJob = jobDao.getByActiveNameOrId(spec.dependentJob);
+            dependentTask = taskDao.getByNameOrId(dependentJob, spec.dependentTask);
             dependOnJob = jobDao.getByActiveNameOrId(spec.dependOnJob);
-            dependentLayer = layerDao.get(dependentJob, spec.dependentLayer);
-            dependOnLayer = layerDao.get(dependOnJob, spec.dependOnLayer);
-            dependentTask = taskDao.getByNameOrId(dependentLayer, spec.dependentTask);
-            dependOnTask = taskDao.getByNameOrId(dependOnLayer, spec.dependOnTask);
+            dependOnTask = taskDao.getByNameOrId(dependOnJob, spec.dependOnTask);
             depend = dependDao.createTaskOnTask(dependentTask, dependOnTask);
             break;
 
