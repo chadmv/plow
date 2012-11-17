@@ -128,6 +128,19 @@ CREATE TABLE plow.layer_dsp (
   int_run_cores INTEGER NOT NULL DEFAULT 0
 );
 
+---
+
+CREATE TABLE plow.output (
+    pk_output UUID NOT NULL PRIMARY KEY,
+    pk_layer UUID NOT NULL,
+    pk_job UUID NOT NULL,
+    str_path TEXT NOT NULL,
+    attrs hstore
+);
+
+CREATE INDEX output_pk_layer_idx ON plow.output (pk_layer);
+CREATE INDEX output_pk_job_idx ON plow.output (pk_job);
+
 ----------------------------------------------------------
 
 ---
@@ -283,5 +296,5 @@ CREATE TABLE plow.proc (
 CREATE INDEX proc_pk_quota_idx ON plow.proc (pk_quota);
 CREATE INDEX proc_pk_node_idx ON plow.proc (pk_node);
 CREATE INDEX proc_pk_task_idx ON plow.proc (pk_task);
-CREATE INDEX proc_pk_job_idx ON pkow.proc (pk_job);
+CREATE INDEX proc_pk_job_idx ON plow.proc (pk_job);
 

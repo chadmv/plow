@@ -253,6 +253,11 @@ struct NodeFilterT {
     6:list<LockState> lockStates
 }
 
+struct OutputT {
+    1:string path,
+    2:map<string,string> attrs
+}
+
 service RpcService {
     
     JobT launch(1:JobSpecT spec) throws (1:PlowException e),
@@ -260,11 +265,13 @@ service RpcService {
     JobT getJob(1:common.Guid jobId) throws (1:PlowException e),
     bool killJob(1:common.Guid jobId, 2:string reason) throws (1:PlowException e),
     void pauseJob(1:common.Guid jobId, 2:bool paused) throws (1:PlowException e),
-
     list<JobT> getJobs(1:JobFilterT filter) throws (1:PlowException e),
+    list<OutputT> getJobOutputs(1:common.Guid jobId) throws (1:PlowException e),
 
     LayerT getLayer(1:common.Guid layerId) throws (1:PlowException e),
     list<LayerT> getLayers(1:common.Guid jobId) throws (1:PlowException e),
+    void addOutput(1:common.Guid layerId, 2:string path, 3:map<string,string> attrs) throws (1:PlowException e)
+    list<OutputT> getLayerOutputs(1:common.Guid layerId) throws (1:PlowException e),
 
     TaskT getTask(1:common.Guid taskId) throws (1:PlowException e),
     list<TaskT> getTasks(1:TaskFilterT filter) throws (1:PlowException e),

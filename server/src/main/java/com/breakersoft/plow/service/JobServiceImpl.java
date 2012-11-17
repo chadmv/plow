@@ -1,5 +1,6 @@
 package com.breakersoft.plow.service;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,6 +183,16 @@ public class JobServiceImpl implements JobService {
     @Override
     public Layer getLayer(Job job, int idx) {
         return layerDao.get(job, idx);
+    }
+
+    @Override
+    public Layer getLayer(UUID id) {
+        return layerDao.get(id);
+    }
+
+    @Override
+    public void addLayerOutput(Layer layer, String path, Map<String,String> attrs) {
+        layerDao.addOutput(layer, path, attrs);
     }
 
     @Override

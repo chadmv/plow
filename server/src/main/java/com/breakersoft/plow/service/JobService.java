@@ -1,5 +1,8 @@
 package com.breakersoft.plow.service;
 
+import java.util.Map;
+import java.util.UUID;
+
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
@@ -37,4 +40,8 @@ public interface JobService {
     void setJobPaused(Job job, boolean value);
 
     boolean isJobPaused(Job job);
+
+    Layer getLayer(UUID id);
+
+    void addLayerOutput(Layer layer, String path, Map<String, String> attrs);
 }
