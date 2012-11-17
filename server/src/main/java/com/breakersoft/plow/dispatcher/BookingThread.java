@@ -118,6 +118,7 @@ public class BookingThread extends Thread {
             }
 
             if (!node.isDispatchable()) {
+                logger.info("Node is not dispatchable");
                 return;
             }
 
