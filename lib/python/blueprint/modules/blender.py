@@ -15,13 +15,13 @@ class BlenderSetup(SetupTask):
     def __init__(self, layer, **kwargs):
         SetupTask.__init__(self, layer, **kwargs)
 
-    def _execute(self, frames):
+    def _execute(self):
 
         layer = self.getLayer()
 
         cmd = [conf.get("Blender", "bin")]
         cmd.append("-b")
-        cmd.append(layer.getArg("scene_file"))
+        cmd.append(layer.getInput("scene_file").path)
         cmd.append("--python")
         cmd.append(os.path.join(os.path.dirname(__file__),
             "setup", "blender_setup.py"))
@@ -40,8 +40,10 @@ class Blender(Layer):
     """
     def __init__(self, name, **kwargs):
         Layer.__init__(self, name, **kwargs)
-        
         self.requireArg("scene_file", (str,))
+
+        self.addInput("scene_file",
+            os.path.abspath(self.getArg("scene_file")))
 
     def _setup(self):
         self.addSetupTask(BlenderSetup(self))
@@ -50,7 +52,7 @@ class Blender(Layer):
 
         cmd = [conf.get("Blender", "bin")]
         cmd.append("-b")
-        cmd.append(self.getArg("scene_file"))
+        cmd.append(self.getInput("scene_file").path)
         cmd.append("-noaudio")
         cmd.append("-noglsl")
         cmd.append("-nojoystick")

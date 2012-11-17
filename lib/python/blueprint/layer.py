@@ -1,5 +1,6 @@
 import os
 import logging
+import tempfile
 
 from collections import namedtuple
 
@@ -9,16 +10,22 @@ from app import PluginManager
 
 logger = logging.getLogger(__name__)
 
-LayerDepend = namedtuple("LayerDepend", ["dependent", "dependOn", "type"])
+Depend = namedtuple("Depend", ["dependent", "dependOn", "type", "args"])
+
+class DependType(object):
+    All = "DependAll"
+    ByTask = "ByTask"
 
 class LayerAspect(type):
+
     def __call__(cls, *args, **kwargs):
         """
         Intercepts the creation of layer objects and assigns
-        them to the currnt job, of there is one.  The current job
+        them to the current job, of there is one.  The current job
         is set when a job is loaded via script.
         """
         layer = super(LayerAspect, cls).__call__(*args, **kwargs)
+
         if Job.Current:
             Job.Current.addLayer(layer)
         layer._afterInit()
@@ -30,50 +37,26 @@ class LayerAspect(type):
 
         return layer
 
+
 class Layer(object):
-
+    """
+    A base class which implments the core functionality of
+    an executable entity.
+    """
     __metaclass__ = LayerAspect
-
-    DependAll = "LayerDependAll"
-    DependByTask = "LayerDependTask"
 
     def __init__(self, name, **args):
         self.__name = name
         self.__args = args
-        self.__req_args = []
-        self.__tasks = []
+
         self.__job = None
+        self.__req_args = []
         self.__depends = []
-        self.__outputs = { }
-        self.__inputs = { }
         self.__setups = []
+        self.__outputs = {}
+        self.__inputs = {}
 
-        self.__handleDependOnArg()
-
-    def __handleDependOnArg(self):
-        """
-        Handles the dependOn kwarg passed in via the constructor.
-
-        Dependencies can be specified in the layer constructor one
-        of two ways.  First, by string identifier:
-
-        foo = Layer("foo", dependOn=["bar", "bing:all"])
-
-        Or by reference, using a tuple:
-
-        Layer("zing", dependOn=[(foo, Layer.DependAll)])
-
-        """
-        for dep in self.__args.get("dependOn", list()):
-            if isinstance(dep, (tuple, list)):
-                self.dependOn(LayerDepend(self, dep[0], dep[1]))
-            else:
-                dtype = Layer.DependByTask
-                onLayer = str(dep)
-                if onLayer.endswith(":all"):
-                    dtype = Layer.DependAll
-                    onLayer = onLayer.split(":")[0]
-                self.dependOn(onLayer, dtype) 
+        self.__handleDependArg()
 
     def getName(self):
         return self.__name
@@ -84,39 +67,40 @@ class Layer(object):
     def getArg(self, name, default=None):
         return self.__args.get(name, default)
 
+    def isArgSet(self, name):
+        return self.__args.has_key(name)
+
     def requireArg(self, name, types=None):
         self.__req_args.append((name, types))
 
-    def execute(self, frames):
-        self._execute(frames)
+    def dependOn(self, other, args=None):
+        self.__depends.append(Depend(self, other, DependType.ByTask, args))
 
-    def setup(self):
-        self._setup()
+    def dependAll(self, other, args=None):
+        self.__depends.append(Depend(self, other, DependType.All, args))
+
+    def getDepends(self):
+        return list(self.__depends)
 
     def getJob(self):
         return self.__job
-
-    def setJob(self, job):
-        self.__job = job
 
     def putData(self, name, data):
         self.__job.getArchive().putData(
             "%s/%s" % (self.__name, name), data)
 
-    def dependOn(self, otherLayer, dtype=DependByTask):
-        self.__depends.append(LayerDepend(self, otherLayer, dtype))
-
-    def getDepends(self):
-        return list(self.__depends)
-
     def getData(self, name):
-        pass
+        self.__job.getArchive().getData(
+            "%s/%s" % (self.__name, name))
 
-    def putFile(self, name, file):
-        pass
+    def setJob(self, job):
+        self.__job = job
 
-    def getFile(self, name):
-        pass
+    def getOutput(self, name):
+        return self.__outputs[name]
+
+    def getInput(self, name):
+        return self.__inputs[name]
 
     def getOutputs(self):
         return self.__outputs.values()
@@ -130,9 +114,6 @@ class Layer(object):
     def addOutput(self, name, path, attrs=None):
         self.__outputs[name] = Io(name, path, attrs)
 
-    def getTempDir(self):
-        return os.environ["TMPDIR"]
-
     def getSetupTasks(self):
         return list(self.__setups)
 
@@ -142,30 +123,88 @@ class Layer(object):
     def system(self, cmd):
         system(cmd)
 
-    def _execute(self, frames):
+    def afterInit(self):
+        self._afterInit()
+
+    def setup(self):
+        self._setup()
+
+    def beforeExecute(self):
+        self._beforeExecute()
+
+    def execute(self, *args):
+        self._execute(*args)
+
+    def afterExecute(self):
+        self._afterExecute()
+
+    def getTempDir(self):
+        return tempfile.gettempdir()
+    
+    def getDir(self):
+        return self.__job.getArchive().getPath(self.getName())
+
+    def system(self, cmd):
+        system(cmd)
+
+    def _afterInit(self):
         pass
 
     def _setup(self):
         pass
 
-    def _afterInit(self):
+    def _beforeExecute(self):
+        pass
+
+    def _execute(self):
         pass
 
     def _afterExecute(self):
         pass
+    
+    def __handleDependArg(self):
+        """
+        Handles the dependOn kwarg passed in via the constructor.
+
+        foo = Layer("foo", dependOn=["bar", "bing:all"])
+        Layer("zing", dependOn=[(foo, Layer.DependAll)])
+        """
+        if not self.isArgSet("depend"):
+            return
+
+        depends = self.getArg("depend")
+        if not isinstance(depends, (list,tuple)):
+            depends = [depends]
+
+        for dep in depends:
+            if isinstance(dep, (tuple, list)):
+                self.dependOn(LayerDepend(self, dep[0], dep[1]))
+            else:
+                onLayer = str(dep)
+                if onLayer.endswith(":all"):
+                    self.dependAll(onLayer.split(":")[0])
+                else:
+                    self.dependOn(onLayer)
+
+    def __str__(self):
+        return self.getName()
 
 class Task(Layer):
-
+    """
+    Tasks are indiviudal processes with no-frame range.  Tasks must be parented
+    to a layer.
+    """
     def __init__(self, name, **args):
         Layer.__init__(self, name, **args)
-
-
+   
 class SetupTask(Task):
-    
+
     def __init__(self, layer, **args):
         Task.__init__(self, "%s_setup" % layer.getName(), **args)
-        self.__layer = layer
-        self.__layer.dependOn(self, Layer.DependAll)
+        self.__layer = layer 
+        layer.dependOn(self, DependType.All)
+
+        self.setArg("group", "setups")
 
     def getLayer(self):
         return self.__layer

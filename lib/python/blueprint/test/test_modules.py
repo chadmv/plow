@@ -26,7 +26,7 @@ class BlenderModuleTests(unittest.TestCase):
         b._setup()
 
         # Grab the setup task and execute it.
-        b.getSetupTasks()[0]._execute(None)
+        b.getSetupTasks()[0]._execute()
         # Now the outputs should be available.
         outputs = b.getOutputs()
         # Assert we have two outputs.
@@ -35,7 +35,7 @@ class BlenderModuleTests(unittest.TestCase):
     def testExecuteRenderTask(self):
         b = blender.Blender("comp", scene_file=self.scene_file)
         b._setup()
-        b.getSetupTasks()[0]._execute(None)
+        b.getSetupTasks()[0]._execute()
         b._execute(fileseq.FrameSet("1-2"))
 
 if __name__ == "__main__":
