@@ -206,16 +206,22 @@ struct DependSpecT {
     7:string dependOnTask
 }
 
+struct TaskSpecT {
+    1:string name,
+    2:list<DependSpecT> depends
+}
+
 struct LayerSpecT {
     1:string name,
-    2:list<string> command;
+    2:list<string> command,
     3:set<string> tags,
-    4:string range,
-    5:i32 chunk,
-    6:i32 minCores,
-    7:i32 maxCores,
-    8:i32 minRamMb,
-    9:list<DependSpecT> depends
+    4:optional string range,
+    5:i32 chunk = 1,
+    6:i32 minCores = 1,
+    7:i32 maxCores = 1,
+    8:i32 minRamMb = 2048,
+    9:list<DependSpecT> depends,
+    10:list<TaskSpecT> tasks
 }
 
 struct JobSpecT {

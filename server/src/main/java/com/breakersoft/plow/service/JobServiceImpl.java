@@ -24,6 +24,7 @@ import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.LayerSpecT;
+import com.breakersoft.plow.thrift.TaskSpecT;
 import com.breakersoft.plow.thrift.TaskState;
 
 
@@ -97,12 +98,20 @@ public class JobServiceImpl implements JobService {
         for (LayerSpecT blayer: jobspec.getLayers()) {
             Layer layer = layerDao.create(job, blayer, layerOrder);
 
-            int frameOrder = 0;
-            FrameSet frameSet = new FrameSet(blayer.getRange());
-            for (int frameNum: frameSet) {
-                taskDao.create(layer, String.format("%04d-%s", frameNum, blayer.getName()),
-                        frameNum, frameOrder, layerOrder);
-                frameOrder++;
+            if (blayer.isSetRange()) {
+                int frameOrder = 0;
+                FrameSet frameSet = new FrameSet(blayer.getRange());
+                for (int frameNum: frameSet) {
+                    taskDao.create(layer, String.format("%04d-%s", frameNum, blayer.getName()),
+                            frameNum, frameOrder, layerOrder);
+                    frameOrder++;
+                }
+            }
+            else if (blayer.isSetTasks()) {
+                int taskOrder = 0;
+                for (TaskSpecT task: blayer.getTasks()) {
+                    taskDao.create(layer, task.getName(), 0, taskOrder, layerOrder);
+                }
             }
             layerOrder++;
         }
