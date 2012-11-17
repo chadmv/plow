@@ -22,6 +22,7 @@ import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.ProjectService;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.LayerSpecT;
+import com.breakersoft.plow.thrift.TaskSpecT;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -84,6 +85,35 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         return jobspec;
     }
 
+    public JobSpecT getTestJobSpecManualTasks(String name) {
+
+        JobSpecT jobspec = new JobSpecT();
+        jobspec.setName(name);
+        jobspec.setUid(100);
+        jobspec.setUsername("stella");
+        jobspec.setPaused(false);
+        jobspec.setProject("unittest");
+
+        LayerSpecT layer = new LayerSpecT();
+        layer.setChunk(1);
+        layer.setCommand(Lists.newArrayList("echo", "%{TASK}" ));
+        layer.setMaxCores(8);
+        layer.setMinCores(1);
+        layer.setMinRamMb(1024);
+        layer.setName("random_tasks");
+        layer.setTags(Sets.newHashSet("unittest"));
+
+        jobspec.addToLayers(layer);
+
+        TaskSpecT task = new TaskSpecT();
+        task.name = "task1";
+        task.depends = Lists.newArrayList();
+
+        layer.addToTasks(task);
+
+        return jobspec;
+    }
+
     public  Ping getTestNodePing() {
 
         Hardware hw = new Hardware();
@@ -107,7 +137,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
     }
 
     @SuppressWarnings("deprecation")
-    public void assertFrameCount(Job job, int count) {
+    public void assertTaskCount(Job job, int count) {
         assertEquals(count, simpleJdbcTemplate.queryForInt(
                 "SELECT COUNT(1) FROM plow.task, plow.layer " +
                 "WHERE task.pk_layer = layer.pk_layer AND layer.pk_job=?", job.getJobId()));
