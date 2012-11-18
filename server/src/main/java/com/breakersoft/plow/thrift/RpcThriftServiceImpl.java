@@ -1,6 +1,7 @@
 package com.breakersoft.plow.thrift;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.thrift.TException;
@@ -107,5 +108,25 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     public void pauseJob(String id, boolean value) throws PlowException,
             TException {
         jobService.setJobPaused(jobService.getJob(id), value);
+    }
+
+    @Override
+    public List<OutputT> getJobOutputs(String jobId) throws PlowException,
+            TException {
+        return thriftJobDao.getOutputs(UUID.fromString(jobId));
+    }
+
+    @Override
+    public List<OutputT> getLayerOutputs(String layerId) throws PlowException,
+            TException {
+        return thriftLayerDao.getOutputs(UUID.fromString(layerId));
+    }
+
+    @Override
+    public void addOutput(String layerId, String path, Map<String, String> attrs)
+            throws PlowException, TException {
+        jobService.addLayerOutput(
+                jobService.getLayer(UUID.fromString(layerId)),
+                path, attrs);
     }
 }

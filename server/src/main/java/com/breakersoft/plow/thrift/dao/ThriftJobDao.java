@@ -15,6 +15,6 @@ public interface ThriftJobDao {
 
     JobT getRunningJob(String name);
 
-    List<OutputT> getOutputs(UUID layerId);
+    List<OutputT> getOutputs(UUID jobId);
 
 }
