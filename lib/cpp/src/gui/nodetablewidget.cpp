@@ -3,8 +3,8 @@
 #include <QTableView>
 #include <QPushButton>
 
-#include "NodeModel.h"
-#include "NodeTableWidget.h"
+#include "nodemodel.h"
+#include "nodetablewidget.h"
 
 namespace Plow {
 namespace Gui {
