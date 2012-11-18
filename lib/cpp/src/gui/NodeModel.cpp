@@ -1,6 +1,6 @@
 #include <QDebug>
 
-#include "NodeModel.h"
+#include "nodemodel.h"
 
 namespace Plow {
 namespace Gui {
