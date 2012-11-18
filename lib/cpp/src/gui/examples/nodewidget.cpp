@@ -6,8 +6,7 @@
 #include <QTabWidget>
 #include <QTableView>
 
-#include "nodetablewidget.h"
-#include "nodemodel.h"
+#include "gui/nodetablewidget.h"
 
 #include "fixture_p.h"
 
