@@ -1,7 +1,7 @@
 #ifndef PLOW_GUI_EXAMPLES_FIXTURE_P_H_
 #define PLOW_GUI_EXAMPLES_FIXTURE_P_H_
 
-#include "NodeModel.h"
+#include "gui/NodeModel.h"
 
 class QObject;
 

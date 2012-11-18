@@ -1,8 +1,8 @@
-#include "wrangleplow.h"
-#include "plow.h"
-
 #include <QTreeWidgetItem>
 #include <vector>
+
+#include "plow/plow.h"
+#include "wrangleplow.h"
 
 using namespace Plow;
 

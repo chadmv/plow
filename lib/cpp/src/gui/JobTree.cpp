@@ -1,8 +1,9 @@
-#include "JobTree.h"
-#include "plow.h"
-
 #include <QStringList>
 #include <QString>
+
+#include "plow/plow.h"
+
+#include "JobTree.h"
 
 namespace Plow { namespace Gui {
 

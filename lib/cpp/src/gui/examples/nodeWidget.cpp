@@ -5,8 +5,8 @@
 #include <QPushButton>
 #include <QList>
 
-#include "NodeTableWidget.h"
-#include "NodeModel.h"
+#include "gui/NodeTableWidget.h"
+#include "gui/NodeModel.h"
 
 #include "fixture_p.h"
 

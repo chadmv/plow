@@ -1,17 +1,17 @@
-#include "client.h"
-#include "plow.h"
-
-
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include <transport/TSocket.h>
-#include <transport/TBufferTransports.h>
-#include <protocol/TBinaryProtocol.h>
+
+#include <thrift/transport/TSocket.h>
+#include <thrift/transport/TBufferTransports.h>
+#include <thrift/protocol/TBinaryProtocol.h>
 
 #include <boost/thread/tss.hpp>
 
 #include <iostream>
 #include <vector>
+
+#include "plow/plow.h"
+#include "client.h"
 
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;

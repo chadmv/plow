@@ -8,7 +8,7 @@
 
 #include <vector>
 
-#include "plow_types.h"
+#include "plow/plow.h"
 
 class QVariant;
 
