@@ -1,9 +1,10 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QVBoxLayout>
-#include <QGroupBox>
 #include <QPushButton>
 #include <QList>
+#include <QTabWidget>
+#include <QTableView>
 
 #include "nodetablewidget.h"
 #include "nodemodel.h"
@@ -100,10 +101,6 @@ int main(int argc, char *argv[])
     w.setWindowTitle("Node Manager");
 
     Plow::Gui::NodeModel model;
-    Plow::Gui::NodeProxyModel proxy;
-
-    proxy.setSourceModel(&model);
-
     Plow::Gui::DataFixture fixture(&model);
 
     QWidget* central = new QWidget;
@@ -115,21 +112,20 @@ int main(int argc, char *argv[])
     // Update button will load generated data from a fixture
     QObject::connect(reload, SIGNAL(clicked()), &fixture, SLOT(updateData()));
 
+    QTabWidget* tab = new QTabWidget;
+
     // First table
-    QGroupBox* group1 = new QGroupBox;
-    group1->setTitle("Text Node Table");
-    group1->setLayout(new QVBoxLayout);
-    group1->layout()->setMargin(2);
+    QTableView table1;
+    table1.setModel(&model);
+    tab->addTab(&table1, "Text Table");
 
-    Plow::Gui::NodeTableWidget view;
-    view.setModel(&proxy);
-    group1->layout()->addWidget(&view);
-
-    // Other tables
-
+    // Second Table
+    Plow::Gui::NodeTableWidget table2;
+    table2.setModel(&model);
+    tab->addTab(&table2, "NodeWidget");
 
     layout->addWidget(reload, 0, Qt::AlignRight);
-    layout->addWidget(group1);
+    layout->addWidget(tab);
 
     w.setCentralWidget(central);
     w.show();
