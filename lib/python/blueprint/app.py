@@ -16,6 +16,9 @@ __all__ = [
     "loadScript"]
 
 
+class EventManager(object):
+    pass
+
 class PluginManager(object):
     """
     The PluginManager is used to maintain a list of active plugins.
@@ -28,7 +31,7 @@ class PluginManager(object):
             return
         plugin = __import__(module, globals(), locals(), [module])
         try:
-            plugin.setup()
+            plugin.init()
         except  AttributeError, e:
             pass
         cls.loaded.append(plugin)
@@ -38,6 +41,30 @@ class PluginManager(object):
         for plugin in cls.loaded:
             plugin.initLayer(layer)
 
+    @classmethod
+    def runAfterInit(cls, layer):
+        for plugin in cls.loaded:
+            if getattr(plugin, "afterInit"):
+                plugin.afterInit(layer)
+
+    @classmethod
+    def runSetup(cls, layer):
+        for plugin in cls.loaded:
+            if getattr(plugin, "setup"):
+                plugin.setup(layer)
+
+    @classmethod
+    def runBeforeExecute(cls, layer):
+        for plugin in cls.loaded:
+            if getattr(plugin, "beforeExecute"):
+                plugin.beforeExecute(layer)
+
+    @classmethod
+    def runAfterExecute(cls, layer):
+        for plugin in cls.loaded:
+            if getattr(plugin, "afterExecute"):
+                plugin.afterExecute(layer)
+    
     @classmethod
     def getActivePlugins(cls):
         result = []

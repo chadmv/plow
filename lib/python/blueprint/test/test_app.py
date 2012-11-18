@@ -1,35 +1,49 @@
-import logging
-logging.basicConfig(level=logging.DEBUG)
 
 import os
+import json
 import unittest
+import logging
 
-from blueprint.app import PluginManager
-import blueprint.modules.shell as shell
+import blueprint
+
+from common import TestLayer, TestTask
 
 class PluginManagerTests(unittest.TestCase):
 
-    def testActivePluginsLoaded(self):
-        """Check that the test plugin is loaded at startup."""
-        self.assertEquals(1, len(PluginManager.getLoadedPlugins()))
-        self.assertEquals(1, len(PluginManager.getActivePlugins()))
+    def testInit(self):
+        """Test that the test plugin is being initialized."""
+        self.assertTrue(blueprint.plugins.test_plugin.Init.Loaded)
+
+    def testAfterInit(self):
+        """Test that after_init is being run by the plugin manager."""
+        l = TestLayer("test2")
+        self.assertTrue(blueprint.plugins.test_plugin.Init.AfterInit)
 
     def testSetup(self):
-        """Verify the plugin setup() is called."""
-        import blueprint.plugins.test as test_plugin
-        self.assertTrue(test_plugin.Init.Setup)
+        """Test that setup is being run by the plugin manager."""
+        l = TestLayer("test2")
+        l.setup()
+        self.assertTrue(blueprint.plugins.test_plugin.Init.Setup)
 
-    def testInitOnLayer(self):
-        """Verify layer initialization works."""
-        import blueprint.plugins.test as test_plugin
-        l = shell.Shell("test", cmd=["/bin/ls"])
-        self.assertTrue(l in test_plugin.Init.Layer)
+    def testBeforeExecute(self):
+        """Test that before execute is being run by the plugin manager."""
+        l = TestLayer("test2")
+        l.beforeExecute()
+        self.assertTrue(blueprint.plugins.test_plugin.Init.BeforeExecute)
+
+    def testAfterExecute(self):
+        """Test that after execute is being run by the plugin manager."""
+        l = TestLayer("test2")
+        l.afterExecute()
+        self.assertTrue(blueprint.plugins.test_plugin.Init.AfterExecute)
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    for t in (PluginManagerTests,):
+    for t in (PluginTests,):
         suite.addTest(unittest.TestLoader().loadTestsFromTestCase(t))
     unittest.TextTestRunner(verbosity=2).run(suite)
+
+
 
 
 

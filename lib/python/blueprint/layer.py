@@ -28,13 +28,8 @@ class LayerAspect(type):
 
         if Job.Current:
             Job.Current.addLayer(layer)
-        layer._afterInit()
-
-        try:
-            PluginManager.initLayer(layer)
-        except Exception, e:
-            logger.warn(e)
-
+        
+        layer.afterInit()
         return layer
 
 
@@ -125,18 +120,22 @@ class Layer(object):
 
     def afterInit(self):
         self._afterInit()
+        PluginManager.runAfterInit(self)
 
     def setup(self):
         self._setup()
+        PluginManager.runSetup(self)
 
     def beforeExecute(self):
         self._beforeExecute()
+        PluginManager.runBeforeExecute(self)
 
     def execute(self, *args):
         self._execute(*args)
 
     def afterExecute(self):
         self._afterExecute()
+        PluginManager.runAfterExecute(self)
 
     def getTempDir(self):
         return tempfile.gettempdir()
