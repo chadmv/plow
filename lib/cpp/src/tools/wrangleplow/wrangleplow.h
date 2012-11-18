@@ -2,10 +2,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "JobTree.h"
-
 #include <QMainWindow>
 #include <QTreeWidget>
+
+#include "gui/JobTree.h"
 
 namespace WranglePlow {
 
