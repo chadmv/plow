@@ -2,6 +2,7 @@
 #include <QVBoxLayout>
 #include <QTableView>
 #include <QPushButton>
+#include <QPainter>
 
 #include "nodemodel.h"
 #include "nodetablewidget.h"
@@ -64,16 +65,37 @@ void ResourceDelegate::paint(QPainter *painter,
 {
     QVariant totalData = index.model()->index(index.row(), totalColumn).data();
     QVariant currentData = index.data();
+
     if (totalData.canConvert<double>()
             && currentData.canConvert<double>()) {
 
-        QString text = QString("%1%")
-                .arg((currentData.toDouble() / totalData.toDouble()) * 100,
-                     5, 'f', 1);
+        double total = totalData.toDouble();
+        double current = currentData.toDouble();
+        double ratio = current / total;
+
+        QString text = QString("%1%").arg(ratio * 100, 5, 'f', 1);
 
         QStyleOptionViewItem opt = option;
-        opt.displayAlignment = Qt::AlignCenter;
+        opt.displayAlignment = Qt::AlignRight|Qt::AlignVCenter;
 
+        QLinearGradient grad(opt.rect.topLeft(), opt.rect.topRight());
+        QColor darkGreen = QColor(42,175,32);
+        QColor darkEnd = Qt::white;
+        QColor end = Qt::white;
+
+        if (ratio <= .05) {  // 5% ram warning
+            darkEnd = QColor(255,0,0,.5);
+            end = Qt::red;
+        } else if (ratio <= .15) {  // %15 ram warning
+            darkEnd = QColor(197,203,37,.5);
+            end = Qt::yellow;
+        }
+        grad.setColorAt(0.0, darkGreen);
+        grad.setColorAt(ratio, Qt::green);
+        grad.setColorAt(std::min(ratio + .01, 1.0), end);
+        grad.setColorAt(1.0, darkEnd);
+
+        painter->fillRect(opt.rect, QBrush(grad));
         drawDisplay(painter, opt, opt.rect, text);
 
     } else {
