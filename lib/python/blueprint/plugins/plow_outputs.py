@@ -22,9 +22,9 @@ def afterExecute(layer):
     logger.info("Registering %d outputs" % len(parent.getOutputs()))
     for output in parent.getOutputs():
         logger.info("Registering output with plow: %s" % output.path)
-        plow_layer = plow.getLayer(
+        plow_layer = plow.getLayerByName(
             os.environ.get("PLOW_JOB_ID"), parent.getName())
-        plow.registerOutput(plow_layer, output.path, {})
+        plow.addLayerOutput(plow_layer, output.path, {})
 
 
 

@@ -17,7 +17,7 @@ def launch(runner):
     if runner.getArg("pretend"):
         pprint.pprint(spec)
     else:
-        job = plow.submitJobSpec(spec)
+        job = plow.launchJob(spec)
         runner.getJob().putData("jobid", job.id)
 
 
