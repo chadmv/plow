@@ -87,7 +87,7 @@ class LayerTests(unittest.TestCase):
         l.beforeExecute()
         self.assertTrue(l.beforeExecuteSet)
 
-    def testExecute(self):
+    def testAfterExecute(self):
         """Test that _afterExecute is being called."""
         l = TestLayer("test2")
         self.assertFalse(l.afterExecuteSet)
