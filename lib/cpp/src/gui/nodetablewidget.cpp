@@ -3,6 +3,7 @@
 #include <QTableView>
 #include <QPushButton>
 #include <QPainter>
+#include <QDebug>
 
 #include "nodemodel.h"
 #include "nodetablewidget.h"
@@ -19,8 +20,9 @@ NodeTableWidget::NodeTableWidget(QWidget *parent)
     QVBoxLayout *layout = new QVBoxLayout(this);
 
     // default model
+    NodeModel model;
     proxyModel = new NodeProxyModel(this);
-    proxyModel->setSourceModel(new NodeModel(this));
+    proxyModel->setSourceModel(&model);
 
     tableView = new QTableView(this);
     tableView->verticalHeader()->hide();
@@ -31,15 +33,23 @@ NodeTableWidget::NodeTableWidget(QWidget *parent)
     tableView->sortByColumn(0, Qt::AscendingOrder);
     tableView->setModel(proxyModel);
 
-    tableView->setColumnHidden(8, true); // total RAM
-    tableView->setColumnHidden(10, true); // total SWAP
-
     layout->addWidget(tableView);
 
-    // Map free ram to total ram
-    tableView->setItemDelegateForColumn(9, new ResourceDelegate(8, this));
-    // Map free swap to total swap
-    tableView->setItemDelegateForColumn(11, new ResourceDelegate(10, this));
+    int col_ram_total = model.indexOfHeaderName("Ram (Total)");
+    int col_ram_free = model.indexOfHeaderName("Ram (Free)");
+    int col_swap_total = model.indexOfHeaderName("Swap (Total)");
+    int col_swap_free = model.indexOfHeaderName("Swap (Free)");
+
+    tableView->setColumnHidden(col_ram_total, true);
+    tableView->setColumnHidden(col_swap_total, true);
+
+    tableView->setItemDelegateForColumn(
+                col_ram_free,
+                new ResourceDelegate(this));
+
+    tableView->setItemDelegateForColumn(
+                col_swap_free,
+                new ResourceDelegate(this));
 }
 
 NodeModel* NodeTableWidget::model() const {
@@ -53,27 +63,19 @@ void NodeTableWidget::setModel(NodeModel *aModel) {
 //
 // ResourceDelegate
 //
-ResourceDelegate::ResourceDelegate(int totalColumn, QObject *parent)
+ResourceDelegate::ResourceDelegate(QObject *parent)
     : QItemDelegate(parent)
-{
-    this->totalColumn = totalColumn;
-}
+{}
 
 void ResourceDelegate::paint(QPainter *painter,
                              const QStyleOptionViewItem &option,
                              const QModelIndex &index) const
 {
-    QVariant totalData = index.model()->index(index.row(), totalColumn).data();
-    QVariant currentData = index.data();
+    QVariant currentData = index.data(Qt::UserRole);
+    if (currentData.canConvert<double>()) {
+        double ratio = currentData.toDouble();
 
-    if (totalData.canConvert<double>()
-            && currentData.canConvert<double>()) {
-
-        double total = totalData.toDouble();
-        double current = currentData.toDouble();
-        double ratio = current / total;
-
-        QString text = QString("%1%").arg(ratio * 100, 5, 'f', 1);
+        QString text = QString("%1%").arg(ratio * 100, 5, 'f', 2);
 
         QStyleOptionViewItem opt = option;
         opt.displayAlignment = Qt::AlignRight|Qt::AlignVCenter;
@@ -81,9 +83,12 @@ void ResourceDelegate::paint(QPainter *painter,
         QLinearGradient grad(opt.rect.topLeft(), opt.rect.topRight());
         QColor darkGreen = QColor(42,175,32);
         QColor darkEnd = Qt::white;
-        QColor end = Qt::white;
+        QColor end = darkEnd;
 
-        if (ratio <= .05) {  // 5% ram warning
+        if (ratio == 1.0) {
+            darkEnd = Qt::green;
+            end = darkEnd;
+        } else if (ratio <= .05) {  // 5% ram warning
             darkEnd = QColor(255,0,0,.5);
             end = Qt::red;
         } else if (ratio <= .15) {  // %15 ram warning

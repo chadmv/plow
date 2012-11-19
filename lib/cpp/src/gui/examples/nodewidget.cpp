@@ -46,7 +46,7 @@ NodeList DataFixture::getHosts(const int &amount) const {
                << LockState::LOCKED;
 
     QList<int> p_cpus;
-    p_cpus << 1 << 2 << 4 << 8;
+    p_cpus << 1 << 2 << 4 << 8 << 16;
 
     QList<int> t_ram;
     t_ram << 4096 << 8192 << 16384;
@@ -62,7 +62,7 @@ NodeList DataFixture::getHosts(const int &amount) const {
         i_uptime    = randInt(10, 5 * 24 * 60 * 60);
 
         aNode = result[row];
-        aNode.name = QString("Host%1").arg(row, 4, 10, QChar('0')).toStdString();
+        aNode.name = QString("Host%1").arg(row, 1, 10, QChar('0')).toStdString();
         aNode.clusterName = "General";
         aNode.state = nodeStates.at(randInt(0, nodeStates.count()-1));
         aNode.lockState = lockStates.at(randInt(0, lockStates.count()-1));
@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
 
     Plow::Gui::NodeModel model;
     Plow::Gui::DataFixture fixture(&model);
+//    fixture.host_count = 25;
 
     QWidget* central = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout(central);
@@ -125,6 +126,8 @@ int main(int argc, char *argv[])
 
     layout->addWidget(reload, 0, Qt::AlignRight);
     layout->addWidget(tab);
+
+    tab->setCurrentIndex(1);
 
     w.setCentralWidget(central);
     w.show();

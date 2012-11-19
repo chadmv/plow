@@ -39,14 +39,12 @@ class ResourceDelegate : public QItemDelegate
     Q_OBJECT
 
  public:
-    ResourceDelegate(int totalColumn, QObject *parent = 0);
+    ResourceDelegate(QObject *parent = 0);
 
     void paint(QPainter *painter,
                const QStyleOptionViewItem &option,
                const QModelIndex &index) const;
 
- private:
-    int totalColumn;
 };
 
 }  // Gui
