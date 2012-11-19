@@ -6,7 +6,6 @@ include_directories(
 )
 
 file(GLOB_RECURSE src_files "${CMAKE_SOURCE_DIR}/src/core/*.cpp")
-#file(GLOB_RECURSE core_export_headers "${CMAKE_SOURCE_DIR}/src/export/plow/*.h")
 
 message(STATUS "Create plow_abi.h from plow_abi.h.in")
 configure_file(${CMAKE_SOURCE_DIR}/src/export/plow/plow_abi.h.in
