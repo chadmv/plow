@@ -15,4 +15,9 @@ typedef string Guid
 **/
 typedef i64 Timestamp
 
+/**
+* A map for attrs.
+**/
+typedef map<string,string> Attrs
+
 

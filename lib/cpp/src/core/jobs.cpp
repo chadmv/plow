@@ -20,6 +20,12 @@ void getActiveJob(JobT& job, const std::string& name)
     client->proxy().getActiveJob(job, name);
 }
 
+void getJobById(JobT& job, const Guid& id)
+{
+    PlowClient* client = getClient();
+    client->proxy().getJob(job, id);
+}
+
 void getTasks(std::vector<TaskT>& tasks, const TaskFilterT& filter)
 {
     PlowClient* client = getClient();
@@ -34,5 +40,48 @@ void killJob(const JobT& job)
     getClient()->proxy().killJob(job.id, ss.str()); 
 }
 
+void launchJob(JobT& job, const JobSpecT& jobSpec)
+{
+    getClient()->proxy().launch(job, jobSpec);
+}
+
+void pauseJob(const JobT& job, const bool value)
+{
+    getClient()->proxy().pauseJob(job.id, value);
+}
+
+void getJobOutputs(std::vector<OutputT>& outputs, const JobT& job)
+{
+    getClient()->proxy().getJobOutputs(outputs, job.id);
+}
+
+// Layers
+
+void getLayerById(LayerT& layer, const Guid& id)
+{
+    getClient()->proxy().getLayerById(layer, id);
+}
+
+void getLayerByName(LayerT& layer, const JobT& job, const std::string& name)
+{
+    getClient()->proxy().getLayer(layer, job.id, name);
+}
+
+void getLayerOutputs(std::vector<OutputT> outputs, const LayerT& layer)
+{
+    getClient()->proxy().getLayerOutputs(outputs, layer.id);
+}
+
+void addLayerOutput(const LayerT& layer, const std::string& path, const Attrs& attrs)
+{
+    getClient()->proxy().addOutput(layer.id, path, attrs);
+}
+
+// Tasks
+
+void getTaskById(TaskT& task, const Guid& id)
+{
+    getClient()->proxy().getTask(task, id);
+}
 
 PLOW_NAMESPACE_EXIT

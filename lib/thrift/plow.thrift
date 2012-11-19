@@ -261,7 +261,7 @@ struct NodeFilterT {
 
 struct OutputT {
     1:string path,
-    2:map<string,string> attrs
+    2:common.Attrs attrs
 }
 
 service RpcService {
@@ -278,7 +278,7 @@ service RpcService {
     LayerT getLayer(1:common.Guid jobId, 2:string name) throws (1:PlowException e),
 
     list<LayerT> getLayers(1:common.Guid jobId) throws (1:PlowException e),
-    void addOutput(1:common.Guid layerId, 2:string path, 3:map<string,string> attrs) throws (1:PlowException e)
+    void addOutput(1:common.Guid layerId, 2:string path, 3:common.Attrs attrs) throws (1:PlowException e)
     list<OutputT> getLayerOutputs(1:common.Guid layerId) throws (1:PlowException e),
 
     TaskT getTask(1:common.Guid taskId) throws (1:PlowException e),
