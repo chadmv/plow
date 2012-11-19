@@ -76,6 +76,7 @@ def serialize(runner):
             task_layer.command = [
                 "%s/plow_wrapper.sh" % os.path.dirname(__file__),
                 "%s/bin/taskrun" % os.environ.get("PLOW_ROOT", "/usr/local"),
+                "-debug",
                 os.path.join(job.getPath(), "blueprint.yaml"),
                 "-task",
                 "%{TASK}"
@@ -96,6 +97,7 @@ def serialize(runner):
             lspec.command = [
                 "%s/plow_wrapper.sh" % os.path.dirname(__file__),
                 "%s/bin/taskrun" % os.environ.get("PLOW_ROOT", "/usr/local"),
+                "-debug",
                 os.path.join(job.getPath(), "blueprint.yaml"),
                 "-layer",
                 layer.getName(),
