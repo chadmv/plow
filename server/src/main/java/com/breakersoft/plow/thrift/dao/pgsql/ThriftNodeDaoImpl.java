@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -106,4 +107,10 @@ public class ThriftNodeDaoImpl extends AbstractDao implements ThriftNodeDao {
         return jdbc.query(GET, MAPPER);
     }
 
+    private final String GET_BY_ID = GET + " WHERE node.pk_node=?";
+
+    @Override
+    public NodeT getNode(UUID id) {
+        return jdbc.queryForObject(GET_BY_ID, MAPPER, id);
+    }
 }

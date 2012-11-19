@@ -6,9 +6,11 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 
+import com.breakersoft.plow.Node;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.NodeFilterT;
+import com.breakersoft.plow.thrift.NodeT;
 import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
 
 public class ThriftNodeDaoTests  extends AbstractTest {
@@ -21,6 +23,14 @@ public class ThriftNodeDaoTests  extends AbstractTest {
         Ping ping = getTestNodePing();
         nodeService.createNode(ping);
         assertEquals(1, thriftNodeDao.getNodes(new NodeFilterT()).size());
+    }
+
+    @Test
+    public void testGetNodeById() {
+        Ping ping = getTestNodePing();
+        Node node = nodeService.createNode(ping);
+        NodeT nodet = thriftNodeDao.getNode(node.getNodeId());
+        assertEquals(node.getNodeId().toString(), nodet.id);
     }
 
 }
