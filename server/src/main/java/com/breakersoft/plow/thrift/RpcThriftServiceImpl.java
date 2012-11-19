@@ -63,7 +63,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public LayerT getLayer(String id) throws PlowException, TException {
+    public LayerT getLayerById(String id) throws PlowException, TException {
         return thriftLayerDao.getLayer(UUID.fromString(id));
     }
 
@@ -123,10 +123,16 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public void addOutput(String layerId, String path, Map<String, String> attrs)
+    public void addOutput(String layerId, String path, Map<String,String> attrs)
             throws PlowException, TException {
         jobService.addLayerOutput(
                 jobService.getLayer(UUID.fromString(layerId)),
                 path, attrs);
+    }
+
+    @Override
+    public LayerT getLayer(String jobId, String name) throws PlowException,
+            TException {
+        return thriftLayerDao.getLayer(UUID.fromString(jobId), name);
     }
 }

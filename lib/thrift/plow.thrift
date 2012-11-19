@@ -274,7 +274,9 @@ service RpcService {
     list<JobT> getJobs(1:JobFilterT filter) throws (1:PlowException e),
     list<OutputT> getJobOutputs(1:common.Guid jobId) throws (1:PlowException e),
 
-    LayerT getLayer(1:common.Guid layerId) throws (1:PlowException e),
+    LayerT getLayerById(1:common.Guid layerId) throws (1:PlowException e),
+    LayerT getLayer(1:common.Guid jobId, 2:string name) throws (1:PlowException e),
+
     list<LayerT> getLayers(1:common.Guid jobId) throws (1:PlowException e),
     void addOutput(1:common.Guid layerId, 2:string path, 3:map<string,string> attrs) throws (1:PlowException e)
     list<OutputT> getLayerOutputs(1:common.Guid layerId) throws (1:PlowException e),

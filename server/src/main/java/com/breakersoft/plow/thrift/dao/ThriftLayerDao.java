@@ -15,4 +15,6 @@ public interface ThriftLayerDao {
 
     List<OutputT> getOutputs(UUID layerId);
 
+    LayerT getLayer(UUID jobId, String name);
+
 }
