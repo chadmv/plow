@@ -55,6 +55,8 @@ class NodeModel
 
     void setNodeList(const NodeList &aList);
 
+    int indexOfHeaderName(const QString &value) const;
+
  public slots:
     void refresh();
 
@@ -67,48 +69,52 @@ class NodeModel
     template<typename T>
     static QString enumToString(const char*, T);
 
-    struct DisplayRoleCallbacks {
-        static QVariant name(NodeT const& n)
-        { return QVariant(QString::fromStdString(n.name)); }
-
-        static QVariant platform(NodeT const& n)
-        { return QVariant(QString::fromStdString(n.system.platform)); }
-
-        static QVariant cpuModel(NodeT const& n)
-        { return QVariant(QString::fromStdString(n.system.cpuModel)); }
-
-        static QVariant clusterName(NodeT const& n)
-        { return QVariant(QString::fromStdString(n.clusterName)); }
-
-        static QVariant nodeState(NodeT const& n)
-        { return QVariant(enumToString("NODE_STATE", n.state)); }
-
-        static QVariant lockState(NodeT const& n)
-        { return QVariant(enumToString("LOCK_STATE", n.lockState)); }
-
-        static QVariant totalCores(NodeT const& n)
-        { return QVariant(QString::number(n.totalCores)); }
-
-        static QVariant idleCores(NodeT const& n)
-        { return QVariant(QString::number(n.idleCores)); }
-
-        static QVariant totalRamMb(NodeT const& n)
-        { return QVariant(QString::number(n.system.totalRamMb)); }
-
-        static QVariant freeRamMb(NodeT const& n)
-        { return QVariant(QString::number(n.system.freeRamMb)); }
-
-        static QVariant totalSwapMb(NodeT const& n)
-        { return QVariant(QString::number(n.system.totalSwapMb)); }
-
-        static QVariant freeSwapMb(NodeT const& n)
-        { return QVariant(QString::number(n.system.freeSwapMb)); }
-
-        static QVariant bootTime(NodeT const& n)
-        { return QVariant(QString::number(n.bootTime)); }
-    };
+    struct DisplayRoleCallbacks;
 };
 
+// NodeModel::DisplayRoleCallbacks
+struct NodeModel::DisplayRoleCallbacks {
+    static QVariant name(NodeT const& n)
+    { return QVariant(QString::fromStdString(n.name)); }
+
+    static QVariant platform(NodeT const& n)
+    { return QVariant(QString::fromStdString(n.system.platform)); }
+
+    static QVariant cpuModel(NodeT const& n)
+    { return QVariant(QString::fromStdString(n.system.cpuModel)); }
+
+    static QVariant clusterName(NodeT const& n)
+    { return QVariant(QString::fromStdString(n.clusterName)); }
+
+    static QVariant nodeState(NodeT const& n)
+    { return QVariant(enumToString("NODE_STATE", n.state)); }
+
+    static QVariant lockState(NodeT const& n)
+    { return QVariant(enumToString("LOCK_STATE", n.lockState)); }
+
+    static QVariant totalCores(NodeT const& n)
+    { return QVariant(n.totalCores); }
+
+    static QVariant idleCores(NodeT const& n)
+    { return QVariant(n.idleCores); }
+
+    static QVariant totalRamMb(NodeT const& n)
+    { return QVariant(n.system.totalRamMb); }
+
+    static QVariant freeRamMb(NodeT const& n)
+    { return QVariant(n.system.freeRamMb); }
+
+    static QVariant totalSwapMb(NodeT const& n)
+    { return QVariant(n.system.totalSwapMb); }
+
+    static QVariant freeSwapMb(NodeT const& n)
+    { return QVariant(n.system.freeSwapMb); }
+
+    static QVariant bootTime(NodeT const& n)
+    { return QVariant(n.bootTime); }
+};
+
+// NodeMode::enumToString
 template<typename T>
 inline QString NodeModel::enumToString(const char* enumName, T enumVal) {
     int index = staticMetaObject.indexOfEnumerator(enumName);
@@ -129,6 +135,9 @@ class NodeProxyModel
 
     bool lessThan(const QModelIndex &left,
                   const QModelIndex &right) const;
+ protected:
+    bool lessThanAlphaNumeric(const QString &left,
+                              const QString &right) const;
 };
 }  // Gui
 }  // Plow

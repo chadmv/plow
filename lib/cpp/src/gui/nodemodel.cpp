@@ -15,7 +15,6 @@ NodeModel::NodeModel(QObject *parent)
 NodeModel::~NodeModel() {
     nodes.clear();
 }
-
 // Callbacks for formatting the DisplayRole of
 // each field in the NodeT struct.
 Callbacks NodeModel::displayRoleCallbacks = Callbacks()
@@ -65,15 +64,23 @@ QVariant NodeModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid())
         return ret;
 
-//    int row = index.row();
-//    int col = index.column();
+    NodeT aNode = nodes.at(index.row());
 
-//    if (0 <= row && row < rowCount(QModelIndex())) {
     if (role == Qt::DisplayRole) {
-        NodeT aNode = nodes.at(index.row());
         ret = displayRoleCallbacks[index.column()](aNode);
+
+    } else if (role == Qt::UserRole) {
+        int col = index.column();
+
+        if (col == indexOfHeaderName("Ram (Free)"))
+            return QVariant(static_cast<double>(aNode.system.freeRamMb)
+                            / aNode.system.totalRamMb);
+        if (col == indexOfHeaderName("Swap (Free)"))
+            return QVariant(static_cast<double>(aNode.system.freeSwapMb)
+                            / aNode.system.totalSwapMb);
+
+        ret = displayRoleCallbacks[col](aNode);
     }
-//    }
 
     return ret;
 }
@@ -97,11 +104,15 @@ void NodeModel::refresh() {
     setNodeList(aList);
 }
 
-const NodeT* NodeModel::nodeFromIndex(const QModelIndex &index) const {
+const NodeT *NodeModel::nodeFromIndex(const QModelIndex &index) const {
     if (index.isValid())
         return &(nodes.at(index.row()));
 
     return NULL;
+}
+
+int NodeModel::indexOfHeaderName(const QString &value) const {
+    return headerLabels.indexOf(value);
 }
 
 // Resets the models internal data structure to the
@@ -120,25 +131,75 @@ void NodeModel::setNodeList(const NodeList &aList) {
 // for a NodeModel.
 NodeProxyModel::NodeProxyModel(QObject *parent)
     : QSortFilterProxyModel(parent)
-{}
+{
+    setSortRole(Qt::UserRole);
+}
 
+// NodeProxyModel::lessThan
+//
+// Provides sort comparisons on the proper data types
 bool NodeProxyModel::lessThan(const QModelIndex &left,
-                              const QModelIndex &right) const {
-    QString leftString = sourceModel()->data(left).toString();
-    QString rightString = sourceModel()->data(right).toString();
+                              const QModelIndex &right) const
+{
+    QVariant leftData = left.data(sortRole());
+    if (leftData.type() == QVariant::String) {
+        QString leftStr = leftData.toString();
+        QString rightStr = right.data(Qt::UserRole).toString();
+        return lessThanAlphaNumeric(leftStr, rightStr);
+    }
+    return QSortFilterProxyModel::lessThan(left, right);
+}
 
-    bool is_less;
-    bool is_int;
+// NodeProxyModel::lessThanAlphaNumeric
+//
+// Takes two QStrings and splits them up into
+// lists of alpha and numeric groups. Performs
+// numeric based comparison when appropriate.
+bool NodeProxyModel::lessThanAlphaNumeric(const QString &left,
+                                          const QString &right) const
+{
+    static QRegExp alnums("(\\d+|\\D+)");
 
-    int leftInt = leftString.toInt(&is_int);
-    if (is_int) {
-        int rightInt = rightString.toInt();
-        is_less = leftInt < rightInt;
-    } else {
-        is_less = leftString < rightString;
+    if (left == right)
+        return false;
+
+    int pos, leftInt, rightInt;
+    bool isInt;
+    QString leftItem, rightItem;
+    QStringList leftList, rightList;
+    bool leftIsInt, rightIsInt;
+
+    pos = 0;
+    while ((pos = alnums.indexIn(left, pos)) != -1) {
+        leftList << alnums.cap(1);
+        pos += alnums.matchedLength();
     }
 
-    return is_less;
+    pos = 0;
+    while ((pos = alnums.indexIn(right, pos)) != -1) {
+        rightList << alnums.cap(1);
+        pos += alnums.matchedLength();
+    }
+
+    for (int i = 0; i < std::min(leftList.length(), rightList.length()); ++i) {
+        leftItem = leftList.at(i);
+        rightItem = rightList.at(i);
+
+        // if left and right components are both int and not
+        // equal, to a numeric comparison as the result
+        leftInt = leftItem.toInt(&leftIsInt);
+        rightInt = rightItem.toInt(&rightIsInt);
+        if ((leftIsInt && rightIsInt) && (leftInt != rightInt))
+            return leftInt < rightInt;
+
+        // if left and right are string and not equal, do a
+        // string based comparison as result
+        if (leftItem != rightItem)
+            return leftItem < rightItem;
+    }
+    // fallback on just comparing the entire strings
+    return left < right;
 }
+
 }  // Gui
 }  // Plow
