@@ -131,7 +131,9 @@ class Layer(object):
         PluginManager.runBeforeExecute(self)
 
     def execute(self, *args):
+        self.beforeExecute()
         self._execute(*args)
+        self.afterExecute()
 
     def afterExecute(self):
         self._afterExecute()
