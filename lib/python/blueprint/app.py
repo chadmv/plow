@@ -34,35 +34,35 @@ class PluginManager(object):
             plugin.init()
         except  AttributeError, e:
             pass
+        logger.debug("Initialized plugin %s" % plugin)
         cls.loaded.append(plugin)
 
     @classmethod
-    def initLayer(cls, layer):
-        for plugin in cls.loaded:
-            plugin.initLayer(layer)
-
-    @classmethod
     def runAfterInit(cls, layer):
+        logger.debug("Running after init plugins on %s" % layer)
         for plugin in cls.loaded:
-            if getattr(plugin, "afterInit"):
+            if getattr(plugin, "afterInit", False):
                 plugin.afterInit(layer)
 
     @classmethod
     def runSetup(cls, layer):
+        logger.debug("Running setup plugins on %s" % layer)
         for plugin in cls.loaded:
-            if getattr(plugin, "setup"):
+            if getattr(plugin, "setup", False):
                 plugin.setup(layer)
 
     @classmethod
     def runBeforeExecute(cls, layer):
+        logger.debug("Running before execute plugins on %s" % layer)
         for plugin in cls.loaded:
-            if getattr(plugin, "beforeExecute"):
+            if getattr(plugin, "beforeExecute", False):
                 plugin.beforeExecute(layer)
 
     @classmethod
     def runAfterExecute(cls, layer):
+        logger.debug("Running after execute plugins on %s" % layer)
         for plugin in cls.loaded:
-            if getattr(plugin, "afterExecute"):
+            if getattr(plugin, "afterExecute", False):
                 plugin.afterExecute(layer)
     
     @classmethod
@@ -82,6 +82,7 @@ class PluginManager(object):
 
     @classmethod
     def loadAllPlugins(cls):
+        logger.debug("Loading all plugins")
         for plugin in cls.getActivePlugins():
             cls.loadPlugin(plugin)
 
