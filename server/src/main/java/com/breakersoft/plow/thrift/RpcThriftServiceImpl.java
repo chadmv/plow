@@ -94,8 +94,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Override
     public NodeT getNode(String id) throws PlowException, TException {
-        // TODO Auto-generated method stub
-        return null;
+        return thriftNodeDao.getNode(UUID.fromString(id));
     }
 
     @Override
