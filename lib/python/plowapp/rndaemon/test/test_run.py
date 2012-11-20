@@ -119,7 +119,14 @@ class TestProcessManager(unittest.TestCase):
 
     def testKillRunningTask(self):
         process = self.getNewTaskCommand()
-        process.command = [CMDS_UTIL, 'hard_to_kill']
+        # process.command = [CMDS_UTIL, 'hard_to_kill']
+        process.command = [
+            'taskrun',
+             '-debug',
+             '-task',
+             'hard_to_kill_job',
+             os.path.join(DATA_DIR, 'hard_kill.bp')
+        ]
         core.ProcessMgr.runProcess(process)
         time.sleep(1)
 
@@ -138,7 +145,14 @@ class TestProcessManager(unittest.TestCase):
         i = 0
         while core.ProcessMgr.getRunningTasks():
             time.sleep(.25)
-            self.assertTrue(i < 10, "Tasks are still running when they should be dead by now")
+            self.assertTrue(i < 10, 
+                "Tasks are still running when they should be dead by now")
+            i += 1
+
+        sig, status = self.getLogSignalStatus(process.logFile)
+        self.assertEqual(status, 1, "Expected a 0 Exit Status, but got %s" % status)
+        self.assertEqual(sig, -9, "Expected a -9 Signal, but got %s" % sig)
+
 
 
     def testFailedTask(self):

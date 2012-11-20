@@ -39,7 +39,7 @@ class PluginManagerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    for t in (PluginTests,):
+    for t in (PluginManagerTests,):
         suite.addTest(unittest.TestLoader().loadTestsFromTestCase(t))
     unittest.TextTestRunner(verbosity=2).run(suite)
 

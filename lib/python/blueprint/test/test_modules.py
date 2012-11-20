@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 class BlenderModuleTests(unittest.TestCase):
 
-    scene_file = os.path.dirname(__file__) + "data/test.blend"
+    scene_file = os.path.join(os.path.dirname(__file__), "data/test.blend")
 
     def testInitialize(self):
         """Initialize a Blender instance."""
