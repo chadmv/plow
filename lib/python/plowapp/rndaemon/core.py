@@ -224,6 +224,8 @@ class _ProcessThread(threading.Thread):
         self.__logfp = None
         self.__pid = -1
 
+        self.__wasKilled = False
+
         self.__progressLock = threading.Lock()
         self.__progress = 0.0
         self.__lastLog = ""
@@ -304,10 +306,8 @@ class _ProcessThread(threading.Thread):
 
             r_pipe.close()
 
-            try:
-                retcode = p.wait()
-            except OSError:
-                pass
+            retcode = p.wait()
+            logger.debug("Return code: %s", retcode)
 
         except Exception, e:
             logger.warn("Failed to execute command: %s", e)
@@ -329,6 +329,8 @@ class _ProcessThread(threading.Thread):
         """
         p = psutil.Process(self.__pid)
         children = p.get_children(recursive=True)
+
+        self.__wasKilled = True
 
         # kill the top parent
         self.__killOneProcess(p)
@@ -391,7 +393,11 @@ class _ProcessThread(threading.Thread):
         result.taskId = self.__rtc.taskId
         result.jobId = self.__rtc.jobId
         result.maxRss = 0
-        if retcode < 0:
+
+        if self.__wasKilled:
+            result.exitStatus = 1
+            result.exitSignal = retcode if retcode < 0 else -9
+        elif retcode < 0:
             result.exitStatus = 1
             result.exitSignal = retcode
         else:
