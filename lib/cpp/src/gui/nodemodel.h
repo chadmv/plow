@@ -111,7 +111,7 @@ struct NodeModel::DisplayRoleCallbacks {
     { return QVariant(n.system.freeSwapMb); }
 
     static QVariant bootTime(NodeT const& n)
-    { return QVariant(n.bootTime); }
+    { return QVariant(qint64(n.bootTime)); }
 };
 
 // NodeMode::enumToString
