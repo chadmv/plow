@@ -30,8 +30,7 @@ class ShellCommand(Task):
         self.requireArg("cmd", (list, tuple))
 
     def _execute(self):
-        for frame in frames:
-            system(self.getArg("cmd"))
+        system(self.getArg("cmd"))
 
 
 

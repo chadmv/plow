@@ -5,4 +5,4 @@ CMD = os.path.join(
 	os.environ.get("PLOW_ROOT", "/usr/local"), 
 	'lib/python/plowapp/rndaemon/test/utils/cmds.py')
 
-ShellCommand("easy_to_kill_job", cmd=[CMD, "easy_to_kill" ])
+ShellCommand("crashing_job", cmd=[CMD, "crashing" ])

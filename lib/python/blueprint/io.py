@@ -1,12 +1,21 @@
 import logging
 import subprocess
 
+from exception import CommandException
+
 logger = logging.getLogger(__name__)
 
 def system(cmd, frames=None):
-    logger.info("About to run: %s" % " ".join(cmd))
+    cmdStr = " ".join(cmd)
+    logger.info("About to run: %s", cmdStr)
     p = subprocess.Popen(cmd, shell=False)
-    p.wait()
+    ret = p.wait()
+
+    if ret != 0:
+        raise CommandException(
+            'Command exited with a status of %d: "%s"' % (ret, cmdStr),
+            exitStatus=ret
+        )
 
 class Io(object):
     def __init__(self, name, path, attrs=None):

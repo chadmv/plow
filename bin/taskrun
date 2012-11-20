@@ -4,6 +4,7 @@ import traceback
 
 import blueprint.app as app
 import blueprint.fileseq as fileseq
+from blueprint.exception import CommandException
 
 class Taskrun(app.Application):
 
@@ -33,9 +34,14 @@ class Taskrun(app.Application):
                 task = job.getLayer(args.task)
                 task.execute()
             else:
-                raise Execption("Unsupported operation, must specify layer/range or task.")
+                raise Exception("Unsupported operation, must specify layer/range or task.")
+
+        except CommandException, e:
+            print >> sys.stderr, "%s\n" % e
+            sys.exit(e.exitStatus)
+
         except Exception, e:
-            print >> sys.stderr, "Error running task %s" % e
+            print >> sys.stderr, "Error running task %s\n" % e
             traceback.print_exc(file=sys.stderr)
             sys.exit(1)
 

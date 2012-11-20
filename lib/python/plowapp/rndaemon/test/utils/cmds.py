@@ -17,6 +17,8 @@ import psutil
 
 import logging
 
+from plowapp.rndaemon.rpc.ttypes import RndException
+
 logging.basicConfig(
     format='PID %(process)s::%(funcName)s:\t%(message)s',
     level=logging.INFO
@@ -70,6 +72,13 @@ def echo_log(log, *args):
             sys.stdout.flush()
 
 
+def crashing(*args):
+    """
+    Purposely crashes and exits non-zero
+    """
+    raise RndException(what=1, why="Simulating a crash")
+
+
 def do_sleep(spawn_more=0):
     """
     do_sleep(int spawn_more=0)
@@ -83,7 +92,10 @@ def do_sleep(spawn_more=0):
     logging.info("Sleeping")
     if spawn_more > 0:
         spawn(spawn_more)
-    p.wait()
+    try:
+        p.wait()
+    except:
+        pass
 
 
 def spawn(num=1):
@@ -107,6 +119,7 @@ COMMANDS = (
     hard_to_kill,
     cpu_affinity,
     echo_log,
+    crashing,
 )
 
 
@@ -128,6 +141,7 @@ if __name__ == "__main__":
         if fn.__name__ == cmdName:
             logging.info("Running as UID,GID == %d,%d", os.getuid(), os.getgid())
             fn(*args)
+
             sys.exit(0)
 
     # no valid commands passed

@@ -12,6 +12,8 @@ from functools import partial
 from multiprocessing import Process, Event 
 from ast import literal_eval 
 
+import psutil
+
 from plowapp.rndaemon import conf 
 conf.NETWORK_DISABLED = True
 
@@ -137,11 +139,51 @@ class TestProcessManager(unittest.TestCase):
         while core.ProcessMgr.getRunningTasks():
             time.sleep(.25)
             self.assertTrue(i < 10, "Tasks are still running when they should be dead by now")
+
+
+    def testFailedTask(self):
+        D = {'result': None}
+
+        def processFinished(d, rtc):
+            d['result'] = rtc 
+            self._processmgr_processFinished(rtc)
+
+        core.ProcessMgr.processFinished = partial(processFinished, D)
+
+        process = self.getNewTaskCommand()
+        process.command = [
+            'taskrun',
+             '-debug',
+             '-task',
+             'crashing_job',
+             os.path.join(DATA_DIR, 'crashing.bp')
+        ]
+
+        task = core.ProcessMgr.runProcess(process)
+        ppid = task.pid
+
+        try:
+            psutil.Process(ppid).wait(5)
+        except psutil.TimeoutExpired:
+            self.fail("Task should not still be running: %s" % task)
+        except psutil.NoSuchProcess:
+            pass
+
+        i = 0
+        while core.ProcessMgr.getRunningTasks():
+            time.sleep(.25)
+            self.assertTrue(i < 10, 
+                "Tasks are still running when they should be dead by now")
             i += 1
 
-        # sig, status = self.getLogSignalStatus(process.logFile)
-        # self.assertEqual(status, 1, "Expected a 1 Exit Status, but got %s" % status)
-        # self.assertEqual(sig, -9, "Expected a -9 Signal, but got %s" % sig)
+        sig, status = self.getLogSignalStatus(process.logFile)
+        self.assertEqual(sig, 0)
+        self.assertEqual(status, 1)
+
+        self.assertTrue(D['result'] is not None, "Result was %r" % D)
+        self.assertEqual(D['result'].exitStatus, 1)
+        self.assertEqual(D['result'].exitSignal, 0)
+
 
     def testTaskProgress(self):
         # disable the callback 
