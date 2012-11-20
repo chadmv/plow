@@ -14,7 +14,7 @@ from setuptools import setup, find_packages
 
 ROOT = os.path.dirname(__file__)
 
-execfile(os.path.join(ROOT, 'python/plow/version.py'))
+execfile(os.path.join(ROOT, 'plow/version.py'))
 
 
 def get_data(*paths):
@@ -26,7 +26,7 @@ def get_data(*paths):
 
 # manually graft in the parent etc/ directory so we can properly
 # dist it from here
-ETC_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../etc'))
+ETC_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../../etc'))
 ETC_DST_DIR = os.path.join(ROOT, 'etc')
 if os.path.isdir(ETC_SRC_DIR):
     if os.path.isdir(ETC_DST_DIR):
@@ -39,8 +39,8 @@ setup(
     name="PyPlow",
     version=__version__,
 
-    package_dir={'': 'python'},
-    packages=find_packages('python', exclude=['tests', 'tests.*']),
+    # package_dir={'': 'python'},
+    packages=find_packages(exclude=['tests', 'tests.*']),
 
     install_requires=[
         'psutil>=0.6.1',
