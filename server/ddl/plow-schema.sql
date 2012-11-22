@@ -9,7 +9,7 @@ CREATE LANGUAGE plpgsql;
 CREATE TABLE plow.project (
   pk_project UUID NOT NULL PRIMARY KEY,
   pk_folder_default UUID,
-  str_name VARCHAR(8) NOT NULL,
+  str_name VARCHAR(16) NOT NULL,
   str_title VARCHAR(255) NOT NULL
 ) WITHOUT OIDS;
 
@@ -21,10 +21,16 @@ CREATE TABLE plow.project (
 
 CREATE TABLE plow.folder (
   pk_folder UUID NOT NULL PRIMARY KEY,
-  pk_parent UUID,
   pk_project UUID NOT NULL,
-  str_name VARCHAR(96) NOT NULL
+  str_name VARCHAR(128) NOT NULL,
+  int_order SMALLINT NOT NULL,
+  time_created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 ) WITHOUT OIDS;
+
+
+CREATE UNIQUE INDEX folder_name_pk_project_uniq_idx ON plow.folder (str_name, pk_project);
+CREATE INDEX folder_pk_project_idx ON plow.folder (pk_project);
+
 
 ---
 
@@ -376,7 +382,7 @@ CREATE TRIGGER trig_before_update_set_waiting BEFORE UPDATE ON plow.task
 --- Test Project
 ---
 INSERT INTO plow.project VALUES ('00000000-0000-0000-0000-000000000000', null, 'test', 'The Test Project');
-INSERT INTO plow.folder VALUES ('00000000-0000-0000-0000-000000000000', null, '00000000-0000-0000-0000-000000000000', 'All Jobs');
+INSERT INTO plow.folder VALUES ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000', 'The Test Project', 0);
 INSERT INTO folder_dsp VALUES ('00000000-0000-0000-0000-000000000000', -1, 0, 0);
 UPDATE plow.project SET pk_folder_default = '00000000-0000-0000-0000-000000000000' WHERE pk_project='00000000-0000-0000-0000-000000000000';
 

@@ -7,7 +7,6 @@ import javax.annotation.Resource;
 import org.junit.Test;
 
 import com.breakersoft.plow.Folder;
-import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.FolderDao;
 import com.breakersoft.plow.dao.ProjectDao;
 import com.breakersoft.plow.test.AbstractTest;

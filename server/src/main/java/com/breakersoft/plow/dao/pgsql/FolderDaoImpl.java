@@ -2,6 +2,7 @@ package com.breakersoft.plow.dao.pgsql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.RowMapper;
@@ -62,18 +63,33 @@ public class FolderDaoImpl extends AbstractDao implements FolderDao {
     private static final String INSERT =
             JdbcUtils.Insert("plow.folder",
                 "pk_folder",
-                "pk_parent",
                 "pk_project",
+                "int_order",
                 "str_name");
 
     @Override
     public Folder createFolder(Project project, String name) {
         UUID id = UUID.randomUUID();
-        jdbc.update(INSERT, id, null, project.getProjectId(), name);
+
+        // Block out other threads from adding folders.
+        jdbc.queryForObject("SELECT pk_project FROM plow.project WHERE pk_project=? FOR UPDATE",
+                String.class, project.getProjectId());
+
+        jdbc.update(INSERT, id, project.getProjectId(), 32000, name);
         jdbc.update("INSERT INTO plow.folder_dsp (pk_folder) VALUES (?)", id);
-        FolderE folder = new FolderE();
-        folder.setFolderId(id);
-        folder.setProjectId(project.getProjectId());
-        return folder;
+
+        renumber(project);
+        return get(id);
+    }
+
+    public void renumber(Project project) {
+        int order = 0;
+        for(Map<String,Object> item:
+            jdbc.queryForList("SELECT pk_folder FROM folder WHERE pk_project=? ORDER BY int_order",
+                project.getProjectId())) {
+            jdbc.update("UPDATE folder SET int_order=? WHERE pk_folder=?",
+                    order, item.get("pk_folder"));
+            order+=2;
+        }
     }
 }
