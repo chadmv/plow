@@ -1,5 +1,7 @@
 package com.breakersoft.plow.dao;
 
+import java.util.UUID;
+
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Project;
 
@@ -28,6 +30,13 @@ public interface ProjectDao {
      * @param folder
      */
     void setDefaultFolder(Project project, Folder folder);
+
+    /**
+     *
+     * @param id
+     * @return
+     */
+    Project get(UUID id);
 
 
 }

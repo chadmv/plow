@@ -54,6 +54,13 @@ public final class ProjectDaoImpl extends AbstractDao implements ProjectDao {
     }
 
     @Override
+    public Project get(UUID id) {
+        return jdbc.queryForObject(
+                "SELECT pk_project FROM plow.project WHERE pk_project=?",
+                MAPPER, id);
+    }
+
+    @Override
     public void setDefaultFolder(Project project, Folder folder) {
         jdbc.update("UPDATE plow.project SET pk_folder_default=? WHERE pk_project=?",
                 folder.getFolderId(), project.getProjectId());

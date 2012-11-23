@@ -20,4 +20,12 @@ public class ProjectDaoTests extends AbstractTest {
         Project project = projectDao.get("unittest");
         assertEquals(TEST_PROJECT, project);
     }
+
+    @Test
+    public void testGetById() {
+        Project projecta = projectDao.get("unittest");
+        assertEquals(TEST_PROJECT, projecta);
+        Project projectb = projectDao.get(projecta.getProjectId());
+        assertEquals(TEST_PROJECT, projectb);
+    }
 }
