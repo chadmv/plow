@@ -8,12 +8,18 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.breakersoft.plow.Folder;
+import com.breakersoft.plow.Project;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
+import com.breakersoft.plow.service.ProjectService;
 import com.breakersoft.plow.service.StateManager;
+import com.breakersoft.plow.thrift.dao.ThriftFolderDao;
+import com.breakersoft.plow.thrift.dao.ThriftJobBoardDao;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
+import com.breakersoft.plow.thrift.dao.ThriftProjectDao;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 
 @ThriftService
@@ -23,6 +29,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     JobService jobService;
+
+    @Autowired
+    ProjectService projectService;
 
     @Autowired
     ThriftJobDao thriftJobDao;
@@ -35,6 +44,15 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     ThriftNodeDao thriftNodeDao;
+
+    @Autowired
+    ThriftJobBoardDao thriftJobBoardDao;
+
+    @Autowired
+    ThriftProjectDao thriftProjectDao;
+
+    @Autowired
+    ThriftFolderDao thriftFolderDao;
 
     @Autowired
     StateManager stateManager;
@@ -133,5 +151,41 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     public LayerT getLayer(String jobId, String name) throws PlowException,
             TException {
         return thriftLayerDao.getLayer(UUID.fromString(jobId), name);
+    }
+
+    @Override
+    public ProjectT getProject(String id) throws PlowException, TException {
+        return thriftProjectDao.get(UUID.fromString(id));
+    }
+
+    @Override
+    public List<ProjectT> getProjects() throws PlowException, TException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public FolderT getFolder(String id) throws PlowException, TException {
+        return thriftFolderDao.get(UUID.fromString(id));
+    }
+
+    @Override
+    public List<FolderT> getJobBoard(String project) throws PlowException,
+            TException {
+        return thriftJobBoardDao.getJobBoard(UUID.fromString(project));
+    }
+
+    @Override
+    public FolderT createFolder(String projectId, String name) throws PlowException,
+            TException {
+        Project project = projectService.getProject(UUID.fromString(projectId));
+        Folder folder = projectService.createFolder(project, name);
+        return thriftFolderDao.get(folder.getFolderId());
+    }
+
+    @Override
+    public ProjectT getProjectByName(String name) throws PlowException,
+            TException {
+        return thriftProjectDao.get(name);
     }
 }
