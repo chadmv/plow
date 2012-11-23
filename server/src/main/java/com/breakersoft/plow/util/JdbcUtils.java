@@ -1,6 +1,11 @@
 package com.breakersoft.plow.util;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import org.apache.commons.lang.StringUtils;
+
+import com.breakersoft.plow.thrift.TaskTotalsT;
 
 public final class JdbcUtils {
 
@@ -36,5 +41,18 @@ public final class JdbcUtils {
         return String.format("%s IN (%s)", col,
                 StringUtils.repeat("?",",", size));
     }
+
+    public static TaskTotalsT getTaskTotals(ResultSet rs) throws SQLException {
+        TaskTotalsT t = new TaskTotalsT();
+        t.setTotalTaskCount(rs.getInt("int_total"));
+        t.setSucceededTaskCount(rs.getInt("int_succeeded"));
+        t.setRunningTaskCount(rs.getInt("int_running"));
+        t.setDeadTaskCount(rs.getInt("int_dead"));
+        t.setEatenTaskCount(rs.getInt("int_eaten"));
+        t.setWaitingTaskCount(rs.getInt("int_waiting"));
+        t.setDependTaskCount(rs.getInt("int_depend"));
+        return t;
+    }
+
 
 }
