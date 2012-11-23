@@ -1,5 +1,7 @@
 package com.breakersoft.plow.service;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,16 @@ public class ProjectServiceImpl implements ProjectService {
         Folder folder = folderDao.createFolder(project, Defaults.FOLDER_DEFAULT_NAME);
         projectDao.setDefaultFolder(project, folder);
         return project;
+    }
+
+    @Override
+    public Folder createFolder(Project project, String name) {
+        return folderDao.createFolder(project, name);
+    }
+
+    @Override
+    public Project getProject(UUID id) {
+        return projectDao.get(id);
     }
 
 }
