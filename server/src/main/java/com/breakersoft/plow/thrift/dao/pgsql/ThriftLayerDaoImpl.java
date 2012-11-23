@@ -16,6 +16,7 @@ import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.thrift.LayerT;
 import com.breakersoft.plow.thrift.OutputT;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
+import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
 @Transactional(readOnly = true)
@@ -37,15 +38,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             layer.tags = new HashSet<String>(
                     Arrays.asList((String[])rs.getArray("str_tags").getArray()));
 
-            layer.totalTaskCount = rs.getInt("int_total");
-            layer.succeededTaskCount = rs.getInt("int_succeeded");
-            layer.runningTaskCount = rs.getInt("int_running");
-            layer.deadTaskCount = rs.getInt("int_dead");
-            layer.eatenTaskCount = rs.getInt("int_eaten");
-            layer.waitingTaskCount = rs.getInt("int_waiting");
-            layer.dependTaskCount = rs.getInt("int_depend");
-
-
+            layer.setTotals(JdbcUtils.getTaskTotals(rs));
             return layer;
         }
     };

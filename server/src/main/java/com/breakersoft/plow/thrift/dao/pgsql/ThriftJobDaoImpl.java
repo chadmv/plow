@@ -40,15 +40,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             job.startTime = rs.getLong("time_started");
             job.stopTime = rs.getLong("time_stopped");
             job.state = JobState.findByValue(rs.getInt("int_state"));
-
-            job.totalTaskCount = rs.getInt("int_total");
-            job.succeededTaskCount = rs.getInt("int_succeeded");
-            job.runningTaskCount = rs.getInt("int_running");
-            job.deadTaskCount = rs.getInt("int_dead");
-            job.eatenTaskCount = rs.getInt("int_eaten");
-            job.waitingTaskCount = rs.getInt("int_waiting");
-            job.dependTaskCount = rs.getInt("int_depend");
-
+            job.setTotals(JdbcUtils.getTaskTotals(rs));
             return job;
         }
     };
