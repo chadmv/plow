@@ -41,9 +41,9 @@ void JobTree::updateJobs()
     {
         QStringList data;
         data << QString::fromStdString(i->name)
-             << QString::number(i->runningCoreCount)
+             << QString::number(i->runCores)
              << QString::number(i->maxCores)
-             << QString::number(i->waitingTaskCount);
+             << QString::number(i->totals.waitingTaskCount);
 
         QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, data);
         treeWidget->insertTopLevelItem(0, item);
