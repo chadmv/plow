@@ -96,6 +96,7 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
 
                 JobT job = new JobT();
                 job.id = rs.getString("pk_job");
+                job.folderId = rs.getString("pk_folder");
                 job.name = rs.getString("str_name");
                 job.uid = rs.getInt("int_uid");
                 job.username = rs.getString("str_username");
