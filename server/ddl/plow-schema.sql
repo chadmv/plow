@@ -63,7 +63,8 @@ CREATE TABLE plow.job (
 ) WITHOUT OIDS;
 
 CREATE UNIQUE INDEX job_str_active_name_uniq_idx ON plow.job (str_active_name);
-CREATE INDEX job_int_state_idx ON plow.job (int_state);
+CREATE INDEX job_int_state_pk_project_idx ON plow.job (int_state, pk_project);
+CREATE INDEX job_pk_project_idx ON plow.job (pk_project);
 
 ---
 
@@ -301,8 +302,9 @@ CREATE TABLE plow.proc (
 
 CREATE INDEX proc_pk_quota_idx ON plow.proc (pk_quota);
 CREATE INDEX proc_pk_node_idx ON plow.proc (pk_node);
-CREATE INDEX proc_pk_task_idx ON plow.proc (pk_task);
+CREATE UNIQUE INDEX proc_pk_task_uniq_idx ON plow.proc (pk_task);
 CREATE INDEX proc_pk_job_idx ON plow.proc (pk_job);
+
 
 ----------------------------------------------------------
 
@@ -326,8 +328,7 @@ BEGIN
             || new_state_col || '=' || new_state_col || '+1 WHERE pk_layer=$1' USING new.pk_layer;
 
   EXECUTE 'UPDATE plow.job_count SET ' || old_state_col || '=' || old_state_col || ' -1, '
-            || new_state_col || '=' || new_state_col || '+1 WHERE pk_job='
-            || '(SELECT pk_job FROM plow.layer WHERE pk_layer=$1)' USING new.pk_layer;
+            || new_state_col || '=' || new_state_col || '+1 WHERE pk_job=$1' USING new.pk_job;
 
   RETURN NEW;
 END
