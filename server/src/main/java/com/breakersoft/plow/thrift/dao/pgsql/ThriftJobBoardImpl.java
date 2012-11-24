@@ -2,6 +2,7 @@ package com.breakersoft.plow.thrift.dao.pgsql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -16,7 +17,7 @@ import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.thrift.FolderT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.JobT;
-import com.breakersoft.plow.thrift.TaskCounts;
+import com.breakersoft.plow.thrift.TaskTotalsT;
 import com.breakersoft.plow.thrift.dao.ThriftJobBoardDao;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.google.common.collect.Lists;
@@ -53,15 +54,23 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
             "INNER JOIN job_dsp ON job.pk_job = job_dsp.pk_job " +
             "INNER JOIN job_count ON job.pk_job = job_count.pk_job " +
             "WHERE " +
+                "job.int_state = ? " +
+            "AND " +
                 "job.pk_project=?";
 
     private static final String GET_FOLDERS =
             "SELECT " +
                 "folder.pk_folder,"+
                 "folder.str_name, "+
-                "folder.int_order " +
+                "folder.int_order, " +
+                "folder_dsp.int_max_cores, " +
+                "folder_dsp.int_min_cores " +
             "FROM " +
                 "folder " +
+            "INNER JOIN " +
+                "folder_dsp " +
+            "ON " +
+                "folder.pk_folder = folder_dsp.pk_folder " +
             "WHERE " +
                 "folder.pk_project = ? " +
             "ORDER BY " +
@@ -80,7 +89,10 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 folder.setId(rs.getString("pk_folder"));
                 folder.setOrder(rs.getInt("int_order"));
                 folder.setName(rs.getString("str_name"));
-                folder.jobs = Lists.newArrayList();
+                folder.setJobs(new ArrayList<JobT>());
+                folder.setTotals(new TaskTotalsT());
+                folder.setMaxCores(rs.getInt("int_max_cores"));
+                folder.setMinCores(rs.getInt("int_min_cores"));
 
                 result.add(folder);
                 folders.put(folder.getId(), folder);
@@ -96,21 +108,31 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
 
                 JobT job = new JobT();
                 job.id = rs.getString("pk_job");
-                job.folderId = rs.getString("pk_folder");
-                job.name = rs.getString("str_name");
-                job.uid = rs.getInt("int_uid");
-                job.username = rs.getString("str_username");
-                job.paused = rs.getBoolean("bool_paused");
-                job.maxCores = rs.getInt("int_max_cores");
-                job.minCores = rs.getInt("int_min_cores");
-                job.startTime = rs.getLong("time_started");
-                job.stopTime = rs.getLong("time_stopped");
-                job.state = JobState.findByValue(rs.getInt("int_state"));
+                job.setFolderId(rs.getString("pk_folder"));
+                job.setName(rs.getString("str_name"));
+                job.setUid(rs.getInt("int_uid"));
+                job.setUsername(rs.getString("str_username"));
+                job.setPaused(rs.getBoolean("bool_paused"));
+                job.setRunCores(rs.getInt("int_run_cores"));
+                job.setMaxCores(rs.getInt("int_max_cores"));
+                job.setMinCores(rs.getInt("int_min_cores"));
+                job.setStartTime(rs.getLong("time_started"));
+                job.setStopTime(rs.getLong("time_stopped"));
+                job.setState(JobState.findByValue(rs.getInt("int_state")));
                 job.setTotals(JdbcUtils.getTaskTotals(rs));
+
+                folder.totals.deadTaskCount += job.totals.deadTaskCount;
+                folder.totals.dependTaskCount += job.totals.deadTaskCount;
+                folder.totals.eatenTaskCount += job.totals.eatenTaskCount;
+                folder.totals.runningTaskCount += job.totals.runningTaskCount;
+                folder.totals.succeededTaskCount += job.totals.succeededTaskCount;
+                folder.totals.totalTaskCount += job.totals.totalTaskCount;
+                folder.totals.waitingTaskCount += job.totals.waitingTaskCount;
+                folder.runCores += job.runCores;
 
                 folder.jobs.add(job);
             }
-        }, projectId);
+        }, JobState.RUNNING.ordinal(), projectId);
 
         Collections.sort(result, new Comparator<FolderT>() {
             @Override
