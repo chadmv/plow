@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+import os
+
+from blueprint.modules.iconvert import IConvert
+
+start_frame = 1
+end_frame   = 2
+iinput = os.environ["PLOW_ROOT"] + "/share/blueprint/examples/monkey.%04d.png"
+ioutput = "/tmp/result.%04d.jpeg"
+
+IConvert("iconvert_layer", start=start_frame, end=end_frame,
+                           image_input=iinput, image_output=ioutput,
+                           rotccw=True
+                           )
+
