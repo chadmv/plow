@@ -1,5 +1,6 @@
 #include <QDebug>
 
+#include "plow/plow.h"
 #include "nodemodel.h"
 
 namespace Plow {
@@ -90,6 +91,8 @@ QVariant NodeModel::headerData(int section,
 // Resets the model's internal data structure.
 void NodeModel::refresh() {
     NodeList aList;
+    Plow::NodeFilterT filter;
+    Plow::getNodes(aList, filter);
     setNodeList(aList);
 }
 

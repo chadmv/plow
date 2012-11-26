@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QPushButton>
 #include <QList>
 #include <QTabWidget>
@@ -106,11 +107,19 @@ int main(int argc, char *argv[])
     QWidget* central = new QWidget;
     QVBoxLayout* layout = new QVBoxLayout(central);
 
-    QPushButton* reload = new QPushButton("Reload");
-    reload->setFixedWidth(80);
+    QPushButton* reloadLive = new QPushButton("Reload Live");
+    reloadLive->setFixedWidth(130);
+    QPushButton* reloadSim = new QPushButton("Reload Simulated");
+    reloadSim->setFixedWidth(130);
+
+    QHBoxLayout buttonLayout;
+    buttonLayout.addStretch();
+    buttonLayout.addWidget(reloadSim);
+    buttonLayout.addWidget(reloadLive);
 
     // Update button will load generated data from a fixture
-    QObject::connect(reload, SIGNAL(clicked()), &fixture, SLOT(updateData()));
+    QObject::connect(reloadSim, SIGNAL(clicked()), &fixture, SLOT(updateData()));
+    QObject::connect(reloadLive, SIGNAL(clicked()), &model, SLOT(refresh()));
 
     QTabWidget* tab = new QTabWidget;
 
@@ -124,7 +133,7 @@ int main(int argc, char *argv[])
     table2.setModel(&model);
     tab->addTab(&table2, "NodeWidget");
 
-    layout->addWidget(reload, 0, Qt::AlignRight);
+    layout->addLayout(&buttonLayout);
     layout->addWidget(tab);
 
     tab->setCurrentIndex(1);
