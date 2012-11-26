@@ -47,10 +47,10 @@ class IConvert(Layer):
         cmd = [conf.get("Iconvert", "bin")]
 
         supported_options = ["v", "threads", "d", "g", "tile", "scanline", "compression",
-                             "quality", "no-copy-image", "adjust-time", "caption",
-                             "keyword", "clear-keywords", "attrib", "orientation",
+                             "quality", "no_copy_image", "adjust_time", "caption",
+                             "keyword", "clear_keywords", "attrib", "orientation",
                              "rotcw", "rotccw", "rot180", "inplace", "sRGB", "separate",
-                             "contig", "no-clobber"]
+                             "contig", "no_clobber"]
 
         options_with_value = ["threads", "d", "g", "tile", "compression",
                               "quality", "caption", "keyword", "attrib",
