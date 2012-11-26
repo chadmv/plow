@@ -43,8 +43,16 @@ class NodeModel
         LOCKED  = LockState::LOCKED
     };
 
-    int rowCount(const QModelIndex &parent) const;
-    int columnCount(const QModelIndex &parent) const;
+    inline int rowCount(const QModelIndex &parent) const{
+        Q_UNUSED(parent);
+        return static_cast<int>(nodes.size());
+    }
+
+    inline int columnCount(const QModelIndex &parent) const {
+        Q_UNUSED(parent);
+        return headerLabels.count();
+    }
+
     QVariant data(const QModelIndex &index, int role) const;
 
     QVariant headerData(int section,
@@ -55,7 +63,8 @@ class NodeModel
 
     void setNodeList(const NodeList &aList);
 
-    int indexOfHeaderName(const QString &value) const;
+    inline int indexOfHeaderName(const QString &value) const
+    { return headerLabels.indexOf(value); }
 
  public slots:
     void refresh();
@@ -74,43 +83,43 @@ class NodeModel
 
 // NodeModel::DisplayRoleCallbacks
 struct NodeModel::DisplayRoleCallbacks {
-    static QVariant name(NodeT const& n)
+    inline static QVariant name(NodeT const& n)
     { return QVariant(QString::fromStdString(n.name)); }
 
-    static QVariant platform(NodeT const& n)
+    inline static QVariant platform(NodeT const& n)
     { return QVariant(QString::fromStdString(n.system.platform)); }
 
-    static QVariant cpuModel(NodeT const& n)
+    inline static QVariant cpuModel(NodeT const& n)
     { return QVariant(QString::fromStdString(n.system.cpuModel)); }
 
-    static QVariant clusterName(NodeT const& n)
+    inline static QVariant clusterName(NodeT const& n)
     { return QVariant(QString::fromStdString(n.clusterName)); }
 
-    static QVariant nodeState(NodeT const& n)
+    inline static QVariant nodeState(NodeT const& n)
     { return QVariant(enumToString("NODE_STATE", n.state)); }
 
-    static QVariant lockState(NodeT const& n)
+    inline static QVariant lockState(NodeT const& n)
     { return QVariant(enumToString("LOCK_STATE", n.lockState)); }
 
-    static QVariant totalCores(NodeT const& n)
+    inline static QVariant totalCores(NodeT const& n)
     { return QVariant(n.totalCores); }
 
-    static QVariant idleCores(NodeT const& n)
+    inline static QVariant idleCores(NodeT const& n)
     { return QVariant(n.idleCores); }
 
-    static QVariant totalRamMb(NodeT const& n)
+    inline static QVariant totalRamMb(NodeT const& n)
     { return QVariant(n.system.totalRamMb); }
 
-    static QVariant freeRamMb(NodeT const& n)
+    inline static QVariant freeRamMb(NodeT const& n)
     { return QVariant(n.system.freeRamMb); }
 
-    static QVariant totalSwapMb(NodeT const& n)
+    inline static QVariant totalSwapMb(NodeT const& n)
     { return QVariant(n.system.totalSwapMb); }
 
-    static QVariant freeSwapMb(NodeT const& n)
+    inline static QVariant freeSwapMb(NodeT const& n)
     { return QVariant(n.system.freeSwapMb); }
 
-    static QVariant bootTime(NodeT const& n)
+    inline static QVariant bootTime(NodeT const& n)
     { return QVariant(qint64(n.bootTime)); }
 };
 

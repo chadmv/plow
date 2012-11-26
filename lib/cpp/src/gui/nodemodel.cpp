@@ -47,17 +47,6 @@ QStringList NodeModel::headerLabels = QStringList()
         << "Swap (Free)"
         << "Uptime";
 
-
-int NodeModel::rowCount(const QModelIndex &parent) const {
-    Q_UNUSED(parent);
-    return static_cast<int>(nodes.size());
-}
-
-int NodeModel::columnCount(const QModelIndex &parent) const {
-    Q_UNUSED(parent);
-    return headerLabels.count();
-}
-
 QVariant NodeModel::data(const QModelIndex &index, int role) const {
     QVariant ret;
 
@@ -109,10 +98,6 @@ const NodeT *NodeModel::nodeFromIndex(const QModelIndex &index) const {
         return &(nodes.at(index.row()));
 
     return NULL;
-}
-
-int NodeModel::indexOfHeaderName(const QString &value) const {
-    return headerLabels.indexOf(value);
 }
 
 // Resets the models internal data structure to the

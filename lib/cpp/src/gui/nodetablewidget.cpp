@@ -52,13 +52,6 @@ NodeTableWidget::NodeTableWidget(QWidget *parent)
                 new ResourceDelegate(this));
 }
 
-NodeModel* NodeTableWidget::model() const {
-    return qobject_cast<NodeModel*>(proxyModel->sourceModel());
-}
-
-void NodeTableWidget::setModel(NodeModel *aModel) {
-    proxyModel->setSourceModel(aModel);
-}
 
 //
 // ResourceDelegate

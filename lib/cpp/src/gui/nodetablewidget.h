@@ -3,14 +3,12 @@
 
 #include <QWidget>
 #include <QItemDelegate>
+#include "nodemodel.h"
 
 class QTableView;
 
 namespace Plow {
 namespace Gui {
-
-class NodeModel;
-class NodeProxyModel;
 
 //
 // NodeTableWidget
@@ -23,8 +21,11 @@ class NodeTableWidget
  public:
     explicit NodeTableWidget(QWidget *parent = 0);
 
-    NodeModel* model() const;
-    void setModel(NodeModel *aModel);
+    inline NodeModel* model() const
+    { return qobject_cast<NodeModel*>(proxyModel->sourceModel()); }
+
+    inline void setModel(NodeModel *aModel)
+    { proxyModel->setSourceModel(aModel); }
 
  private:
     QTableView* tableView;
