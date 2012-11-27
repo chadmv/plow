@@ -54,13 +54,13 @@ QApplication* createQApp(int &argc, char **argv, int flags)
 }
 
 QList<QColor> PlowStyle::TaskColors = QList<QColor>()
-    << QColor(60, 59, 55) // INIT - should never see
-    << QColor(22, 47, 167) // WAITING
-    << QColor(167, 159, 22) // RUNNING
-    << QColor(167, 20, 14) // DEAD
-    << QColor(116, 5, 0) // EATEN
-    << QColor(166, 12, 143) // DEPEND
-    << QColor(111, 167, 14); // SUCCEEEDED
+    << QColor(60, 59, 55).darker(150) // INIT - should never see
+    << QColor(22, 47, 167).darker(150) // WAITING
+    << QColor(167, 159, 22).darker(150) // RUNNING
+    << QColor(167, 20, 14).darker(150) // DEAD
+    << QColor(116, 5, 0).darker(150) // EATEN
+    << QColor(166, 12, 143).darker(150) // DEPEND
+    << QColor(111, 167, 14).darker(150); // SUCCEEEDED
 
 // PlowStyle
 PlowStyle::PlowStyle() :
@@ -70,14 +70,15 @@ PlowStyle::PlowStyle() :
 void PlowStyle::polish(QPalette &palette) {
 
     QColor grayish(73, 72, 68);
+    QColor fg(195,194,190);
 
     palette = QPalette(grayish);
 
     palette.setBrush(QPalette::Window, QColor(60, 59, 55));
-    palette.setBrush(QPalette::WindowText, QColor(195, 194, 190));
+    palette.setBrush(QPalette::WindowText, fg);
+    palette.setBrush(QPalette::Text, fg.lighter(130));
     palette.setBrush(QPalette::ButtonText, QColor(211, 207, 196));
-    palette.setBrush(QPalette::Text, QColor(223, 219, 207));
-    palette.setBrush(QPalette::BrightText, QColor(224, 218, 220));
+    palette.setBrush(QPalette::BrightText, QColor(242, 237, 240));
 
     QLinearGradient baseGrad(0, 0, 1, 1);
     baseGrad.setColorAt(0, QColor(29, 29, 27));
@@ -92,8 +93,8 @@ void PlowStyle::polish(QPalette &palette) {
     palette.setBrush(QPalette::Highlight, QColor(105, 55, 88));
     palette.setBrush(QPalette::HighlightedText, Qt::white);
 
-    QBrush brush = palette.background();
-    brush.setColor(brush.color().dark());
+    QBrush brush = palette.window();
+    brush.setColor(brush.color().darker());
 
     palette.setBrush(QPalette::Disabled, QPalette::WindowText, brush);
     palette.setBrush(QPalette::Disabled, QPalette::Text, brush);
