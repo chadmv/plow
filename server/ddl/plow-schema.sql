@@ -331,6 +331,7 @@ BEGIN
             || new_state_col || '=' || new_state_col || '+1 WHERE pk_job=$1' USING new.pk_job;
 
   RETURN NEW;
+
 END
 $$
 LANGUAGE plpgsql;

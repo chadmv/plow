@@ -22,6 +22,10 @@ typedef std::vector<Plow::FolderT> JobBoard;
 extern PLOWEXPORT void getProjectById(ProjectT& project, const Guid& id);
 extern PLOWEXPORT void getProjectByName(ProjectT& project, const std::string& name);
 
+extern PLOWEXPORT void getFolders(std::vector<FolderT>& folders, const ProjectT& project);
+extern PLOWEXPORT void getFolderById(FolderT& folder, const Guid& id);
+extern PLOWEXPORT void createFolder(ProjectT& project, const std::string& name);
+
 extern PLOWEXPORT void getJobs(std::vector<JobT>& jobs, const JobFilterT& filter);
 extern PLOWEXPORT void getActiveJob(JobT& job, const std::string& name);
 extern PLOWEXPORT void killJob(const JobT& job);

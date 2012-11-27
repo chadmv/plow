@@ -64,13 +64,11 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 "folder.str_name, "+
                 "folder.int_order, " +
                 "folder_dsp.int_max_cores, " +
-                "folder_dsp.int_min_cores " +
+                "folder_dsp.int_min_cores, " +
+                "folder_dsp.int_run_cores  " +
             "FROM " +
                 "folder " +
-            "INNER JOIN " +
-                "folder_dsp " +
-            "ON " +
-                "folder.pk_folder = folder_dsp.pk_folder " +
+            "INNER JOIN folder_dsp ON folder.pk_folder = folder_dsp.pk_folder " +
             "WHERE " +
                 "folder.pk_project = ? " +
             "ORDER BY " +
@@ -93,6 +91,7 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 folder.setTotals(new TaskTotalsT());
                 folder.setMaxCores(rs.getInt("int_max_cores"));
                 folder.setMinCores(rs.getInt("int_min_cores"));
+                folder.setRunCores(rs.getInt("int_run_cores"));
 
                 result.add(folder);
                 folders.put(folder.getId(), folder);
@@ -128,7 +127,6 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 folder.totals.succeededTaskCount += job.totals.succeededTaskCount;
                 folder.totals.totalTaskCount += job.totals.totalTaskCount;
                 folder.totals.waitingTaskCount += job.totals.waitingTaskCount;
-                folder.runCores += job.runCores;
 
                 folder.jobs.add(job);
             }

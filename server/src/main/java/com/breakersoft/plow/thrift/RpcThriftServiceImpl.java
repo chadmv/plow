@@ -188,4 +188,11 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
             TException {
         return thriftProjectDao.get(name);
     }
+
+    @Override
+    public List<FolderT> getFolders(String projectId) throws PlowException,
+            TException {
+        Project project = projectService.getProject(UUID.fromString(projectId));
+        return thriftFolderDao.getFolders(project);
+    }
 }

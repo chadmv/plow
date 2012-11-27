@@ -292,7 +292,7 @@ service RpcService {
     FolderT createFolder(1:string projectId, 2:string name) throws (1:PlowException e),
     FolderT getFolder(1:string id) throws (1:PlowException e),
     list<FolderT> getJobBoard(1:common.Guid project) throws (1:PlowException e),
-
+    list<FolderT> getFolders(1:common.Guid project) throws (1:PlowException e),
     LayerT getLayerById(1:common.Guid layerId) throws (1:PlowException e),
     LayerT getLayer(1:common.Guid jobId, 2:string name) throws (1:PlowException e),
 
