@@ -8,6 +8,7 @@
 #include <QTableView>
 
 #include "gui/nodetablewidget.h"
+#include "gui/common.h"
 
 #include "fixture_p.h"
 
@@ -94,7 +95,7 @@ void DataFixture::updateData() {
 //
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication *a = Plow::Gui::createQApp(argc, argv);
 
     QMainWindow w;
     w.resize(1200, 600);
@@ -141,6 +142,6 @@ int main(int argc, char *argv[])
     w.setCentralWidget(central);
     w.show();
 
-    return a.exec();
+    return a->exec();
 }
 
