@@ -10,6 +10,33 @@ using namespace Plow;
 
 namespace Spade {
 
+void display_job_board(const std::string& proj_name)
+{   
+    ProjectT proj;
+    getProjectByName(proj, proj_name);
+
+    JobBoard board;
+    getJobBoard(board, proj);
+
+    for (std::vector<FolderT>::iterator i = board.begin();
+                                        i != board.end();
+                                        ++i)
+    {
+
+        std::cout << i->name << std::endl;
+        std::cout << "------------------------------------------------------" << std::endl;
+
+        for(std::vector<JobT>::iterator j = i->jobs.begin();
+                                        j != i->jobs.end();
+                                        j++)
+        {
+
+            std::cout << j->name << std::endl;
+        }
+
+    }
+}
+
 void display_node_list()
 {
     NodeFilterT filter;

@@ -17,6 +17,11 @@ C++ API
 */
 PLOW_NAMESPACE_ENTER
 
+typedef std::vector<Plow::FolderT> JobBoard;
+
+extern PLOWEXPORT void getProjectById(ProjectT& project, const Guid& id);
+extern PLOWEXPORT void getProjectByName(ProjectT& project, const std::string& name);
+
 extern PLOWEXPORT void getJobs(std::vector<JobT>& jobs, const JobFilterT& filter);
 extern PLOWEXPORT void getActiveJob(JobT& job, const std::string& name);
 extern PLOWEXPORT void killJob(const JobT& job);
@@ -24,7 +29,9 @@ extern PLOWEXPORT void launchJob(const JobSpecT& jobSpec);
 extern PLOWEXPORT void pauseJob(const JobT& job, const bool value);
 extern PLOWEXPORT void getJobById(JobT& job, const Guid& id);
 extern PLOWEXPORT void getJobOutputs(std::vector<OutputT>& outputs, const JobT& job);
+extern PLOWEXPORT void getJobBoard(JobBoard& jobBoard, const ProjectT& project);
 
+extern PLOWEXPORT void getLayers(std::vector<LayerT>& layers, const JobT& job);
 extern PLOWEXPORT void getLayerById(LayerT& layer, const Guid& id);
 extern PLOWEXPORT void getLayerByName(LayerT& layer, const JobT& job, const std::string& name);
 extern PLOWEXPORT void addLayerOutput(const LayerT& layer, const std::string& path, const Attrs& attrs);

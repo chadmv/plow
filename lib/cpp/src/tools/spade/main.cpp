@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
     action_options.add_options()
         ("help", "display help")
         ("lj", "display list of active jobs")
+        ("jb", opt::value<std::string>(), "PROJECT")
         ("lt", "display list of tasks")
         ("ln", "display list of nodes")
         ("kill", "kill specified job, layer, or tasks")
@@ -70,6 +71,11 @@ int main(int argc, char *argv[])
             {
                 std::cerr << "ERROR: You must specify at least a job when listing tasks." << std::endl;
             }
+        }
+        else if (vm.count("jb"))
+        {
+            Spade::display_job_board(vm["jb"].as<std::string>());
+
         }
         else if (vm.count("ln"))
         {

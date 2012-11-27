@@ -55,6 +55,12 @@ void getJobOutputs(std::vector<OutputT>& outputs, const JobT& job)
     getClient()->proxy().getJobOutputs(outputs, job.id);
 }
 
+void getJobBoard(JobBoard& jobBoard, const ProjectT& project) {
+
+    getClient()->proxy().getJobBoard(jobBoard, project.id);
+}
+
+
 // Layers
 
 void getLayerById(LayerT& layer, const Guid& id)
@@ -75,6 +81,11 @@ void getLayerOutputs(std::vector<OutputT> outputs, const LayerT& layer)
 void addLayerOutput(const LayerT& layer, const std::string& path, const Attrs& attrs)
 {
     getClient()->proxy().addOutput(layer.id, path, attrs);
+}
+
+void getLayers(std::vector<LayerT>& layers, const JobT& job)
+{
+    getClient()->proxy().getLayers(layers, job.id);
 }
 
 // Tasks
