@@ -197,8 +197,6 @@ public class DispatchServiceImpl implements DispatchService {
             final Quota quota = quotaDao.get(proc.getQuotaId());
             final Node node = nodeDao.get(proc.getNodeId());
 
-
-
             nodeDao.freeResources(node, proc.getCores(), proc.getMemory());
             quotaDao.freeResources(quota, proc.getCores());
             dispatchDao.subtractFromDispatchTotals(proc);
