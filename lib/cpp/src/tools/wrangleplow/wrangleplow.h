@@ -1,27 +1,23 @@
-
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef WRANGLE_PLOW_MAINWINDOW_H
+#define WRANGLE_PLOW_MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QTreeWidget>
 
-#include "gui/JobTree.h"
-
 namespace WranglePlow {
 
-    class MainWindow : public QMainWindow
-    {
-        Q_OBJECT
-        
-    public:
-        MainWindow();
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+    
+public:
+    MainWindow();
 
-    protected:
-        void closeEvent(QCloseEvent *event);
+protected:
+    void closeEvent(QCloseEvent *event);
 
-    private:
-        Plow::Gui::JobTree* jobTree;
-    };
+};
 
-}
-#endif // MAINWINDOW_H
+} // WranglePlow
+
+#endif // WRANGLE_PLOW_MAINWINDOW_H
