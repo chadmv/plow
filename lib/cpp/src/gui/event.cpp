@@ -20,7 +20,6 @@ void EventManager::customEvent(QEvent* event)
 
 void EventManager::handleJobSelected(const QString& id)
 {
-    std::cout << "event manager " << id.toStdString() << std::endl;
     emit jobSelected(id);
 }
 

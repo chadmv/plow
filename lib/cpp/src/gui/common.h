@@ -3,6 +3,8 @@
 
 #include <QApplication>
 #include <QPlastiqueStyle>
+#include <QColor>
+#include <QList>
 
 class QPalette;
 
@@ -15,7 +17,6 @@ namespace Gui {
 QApplication* createQApp(int &argc, char **argv,
                          int flags = QApplication::ApplicationFlags);
 
-
 // PlowStyle
 // Custom QStyle class for Plow apps
 class PlowStyle : public QPlastiqueStyle
@@ -24,6 +25,9 @@ class PlowStyle : public QPlastiqueStyle
 public:
     PlowStyle();
     void polish(QPalette &palette);
+    static QList<QColor> TaskColors;
+
+
 };
 
 }  // Gui

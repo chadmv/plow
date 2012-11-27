@@ -53,6 +53,15 @@ QApplication* createQApp(int &argc, char **argv, int flags)
     return app;
 }
 
+QList<QColor> PlowStyle::TaskColors = QList<QColor>()
+    << QColor(60, 59, 55) // INIT - should never see
+    << QColor(22, 47, 167) // WAITING
+    << QColor(167, 159, 22) // RUNNING
+    << QColor(167, 20, 14) // DEAD
+    << QColor(116, 5, 0) // EATEN
+    << QColor(166, 12, 143) // DEPEND
+    << QColor(111, 167, 14); // SUCCEEEDED
+
 // PlowStyle
 PlowStyle::PlowStyle() :
     QPlastiqueStyle()

@@ -9,6 +9,7 @@
 #include <QHeaderView>
 
 
+#include "common.h"
 #include "event.h"
 #include "task_board.h"
 
@@ -94,6 +95,7 @@ void  TaskBoardWidget::setJob(const JobT& job)
     }
 
     TaskBoardModel *model = new TaskBoardModel(m_filter, this);
+    delete m_view->model();
     m_view->setModel(model);
     m_view->setColumnWidth(0, 500);
 
@@ -175,6 +177,14 @@ QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
             std::string duration;
             formatDuration(duration, task.startTime, task.stopTime);
             return QString(duration.c_str());
+        }
+        break;
+
+    case Qt::BackgroundRole:
+        if (col == 1)
+        {
+            int state = task.state;
+            return PlowStyle::TaskColors[state];
         }
         break;
     }
