@@ -64,7 +64,7 @@ class PluginManager(object):
         for plugin in cls.loaded:
             if getattr(plugin, "afterExecute", False):
                 plugin.afterExecute(layer)
-    
+
     @classmethod
     def getActivePlugins(cls):
         result = []
@@ -92,7 +92,7 @@ class Application(object):
         group = self._argparser.add_argument_group("Logging Options")
         group.add_argument("-verbose", action="store_true",
             help="Turn on verbose logging.")
-        group.add_argument("-debug", action="store_true", 
+        group.add_argument("-debug", action="store_true",
             help="Turn on debug logging.")
 
     def handleArgs(self, args):
@@ -134,6 +134,12 @@ class BlueprintRunner(object):
     def setup(self):
         return self.getJob().setup()
 
+    def setJob(self, job):
+        """ Set Job.Current
+        """
+        self.__job = job
+        return
+
     def getJob(self):
         if not self.__job:
             self.__job = loadScript(self.getArg("script"))
@@ -147,7 +153,7 @@ def loadBackendPlugin(name):
 def loadScript(path):
 
     from blueprint.job import Job
-    
+
     if os.path.basename(path) == "blueprint.yaml":
         Job.Current = yaml.load(file(path, 'r'))
         # Yamlized jobs have no session but they

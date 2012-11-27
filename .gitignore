@@ -16,3 +16,4 @@ lib/cpp/src/gui/examples/examples.app
 bin/dev.sh
 lib/cpp/src/gui/examples/*.app
 lib/python/etc
+*.user

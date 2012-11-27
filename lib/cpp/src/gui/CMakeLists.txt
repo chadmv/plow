@@ -3,6 +3,7 @@ PROJECT(PLOW_GUI)
 INCLUDE(${QT_USE_FILE})
 
 SET(PLOW_GUI_SRCS_CXX
+    common.cpp
     JobTree.cpp
     nodemodel.cpp 
     nodetablewidget.cpp
@@ -13,6 +14,7 @@ SET(PLOW_GUI_SRCS_CXX
 )
 
 SET(PLOW_GUI_MOC_HDRS
+    common.h
     JobTree.h
     nodemodel.h 
     nodetablewidget.h

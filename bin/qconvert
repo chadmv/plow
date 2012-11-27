@@ -1,0 +1,145 @@
+#!/usr/bin/env python
+import sys
+import argparse
+import re
+import time
+
+import blueprint.app
+from blueprint.job import Job
+from blueprint.modules.iconvert import IConvert
+
+class QConvert(blueprint.app.Application):
+    """ A class that converts a commandline tool iconvert into a convert queue """
+    def __init__(self):
+        description  = "qconvert - blueprint wrapper of iconvert tool.\n"
+        description += "Example: qconvert -i /path/input.%04d.png -o /path/output.%04f.jpeg --rot180 --range 1-10 --batch 3"
+        blueprint.app.Application.__init__(self, description)
+
+        group = self._argparser.add_argument_group("qconvert options")
+        group.add_argument("-v", "--verbose", action="store_true", help="Verbose status messages.")
+        group.add_argument("-r", "--range", help="Specify frame range. 1-10")
+        group.add_argument("-b", "--batch", help="Specify batch numbers. default is 5", default=5)
+        group.add_argument("-i", help="Specify full path image input. i.e. /tmp/input.%%%%04d.png")
+        group.add_argument("-o", help="Specify full path image ouput. i.e. /tmp.output.%%%%04d.jpg")
+        group.add_argument("--jobname", help="Specify job name")
+
+        group.add_argument("--threads", help="Specify number of threads. (default 0=#cores)")
+        group.add_argument("--d", help="Set the output data format to one of:uint8, sint8, uint10, uint12, uint16, sint16, half, float, double")
+        group.add_argument("--g", help="Set gamma correction. (default = 1)")
+        group.add_argument("--tile", help="Output as a tiled image. i.e. 4:4")
+        group.add_argument("--scanline", action="store_true", help="Output as a scanline image")
+        group.add_argument("--compression", help="Set the compression method (default = same as input)")
+        group.add_argument("--quality", help="Set the compression quality, 1-100")
+        group.add_argument("--no-copy-image", action="store_true", help="Do not use ImageOutput copy_image functionality")
+        group.add_argument("--adjust-time", action="store_true", help="Adjust file times to match DateTime metadata")
+        group.add_argument("--caption", help="Set caption (ImageDescription)")
+        group.add_argument("--keyword", help="Add a keyword")
+        group.add_argument("--clear-keywords", action="store_true", help="Clear keywords")
+        group.add_argument("--attrib", help="Set a string attribute, name:value")
+        group.add_argument("--orientation", help="Set the orientation")
+        group.add_argument("--rotcw", action="store_true", help="Rotate 90 deg clockwise")
+        group.add_argument("--rotccw", action="store_true", help="Rotate 90 deg counter-clockwise")
+        group.add_argument("--rot180", action="store_true", help="Rotate 180 deg")
+        group.add_argument("--inplace", action="store_true", help="Do operations in place on images")
+        group.add_argument("--sRGB", action="store_true", help="This file is in sRGB color space")
+        group.add_argument("--separate", action="store_true", help="Force planarconfig separate")
+        group.add_argument("--contig", action="store_true", help="Force planarconfig contig")
+        group.add_argument("--no-clobber", action="store_true", help="Do no overwrite existing files")
+
+
+    def batchRange(self,  first, last, steps):
+        """ Given first, last frames and the batch, yield back batched frames """
+        size = steps
+        while first <= last:
+            next = first + size
+            yield first, min(next - 1, last)
+            first = next
+
+
+    def handleArgs(self, args):
+        """ Method to handle args """
+        runner = blueprint.app.BlueprintRunner()
+
+        if args.jobname:
+            runner.setArg("job_name", args.jobname)
+        else:
+            jobname = "qconvert_%s" % str(int(time.time()))
+
+        layers = list()
+        # Create a job instance
+        j = Job(jobname)
+        start = end = 0
+        ranges = args.range
+        (st, e) = str(args.range).split('-')
+
+        options = self.parseArgs(args)
+
+        frameranges = list(self.batchRange(int(st), int(e), int(args.batch)))
+        for fr in frameranges:
+            (start, end) = fr
+            ic = IConvert("layer_%s_%s" % (start, end), start=start, end=end,
+                          image_input=args.i, image_output=args.o, **options)
+            j.addLayer(ic)
+
+        runner.setJob(j)
+        runner.setArg("frame_range", '1-1')
+        runner.launch()
+
+
+    def parseArgs(self, args):
+        """ Given args, parse them and return as key, value dictionary """
+        # too late in the night to think of a cleverer way to do this
+        result = dict()
+        if args.threads:
+            result['threads'] = args.threads
+        if args.d:
+            result['d'] = args.d
+        if args.g:
+            result['g'] = args.g
+
+        if args.tile:
+            tiles = args.tile.split(':')
+            result['tile'] = tiles
+        if args.scanline:
+            result['scanline'] = True
+        if args.compression:
+            result['compression'] = args.compression
+        if args.quality:
+            result['quality'] = args.quality
+        if args.no_copy_image:
+            result['no_copy_image']=True
+        if args.adjust_time:
+            result['adjust_time'] = True
+        if args.caption:
+            result['caption'] = args.caption
+        if args.keyword:
+            result['keyword'] = args.keyword
+        if args.clear_keywords:
+            result['clear_keywords'] = args.clear_keywords
+        if args.attrib:
+            result['attrib'] = args.attrib.split(":")
+        if args.orientation:
+            result['orientation'] = args.orientation
+        if args.rotcw:
+            result['rotcw'] = True
+        if args.rotccw:
+            result['rotccw'] = True
+        if args.rot180:
+            result['rot180'] = True
+        if args.inplace:
+            result['inplace'] = True
+        if args.sRGB:
+            result['sRGB'] = True
+        if args.separate:
+            result['separate'] = True
+        if args.contig:
+            result['contig'] = True
+        if args.no_clobber:
+            result['no_clobber'] = True
+
+        return result
+
+
+if __name__ == "__main__":
+    app = QConvert()
+    app.go()
