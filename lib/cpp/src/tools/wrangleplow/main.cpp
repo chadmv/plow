@@ -9,9 +9,8 @@ int main(int argc, char *argv[])
   QApplication *app = Plow::Gui::createQApp(argc, argv);
 
   WranglePlow::MainWindow wrangleplow;
-  wrangleplow.show();
   wrangleplow.resize(1024, 768);
-  wrangleplow.move(100, 100);
+  wrangleplow.show();
 
   return app->exec();
 }

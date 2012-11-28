@@ -25,7 +25,17 @@ class NodeTableWidget
     { return qobject_cast<NodeModel*>(proxyModel->sourceModel()); }
 
     inline void setModel(NodeModel *aModel)
-    { proxyModel->setSourceModel(aModel); }
+    {
+        delete proxyModel->sourceModel();
+        proxyModel->setSourceModel(aModel);
+    }
+
+ public slots:
+    inline void load()
+    { model()->load(); }
+
+    inline void refresh()
+    { model()->refresh(); }
 
  private:
     QTableView* tableView;

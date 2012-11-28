@@ -20,9 +20,9 @@ NodeTableWidget::NodeTableWidget(QWidget *parent)
     QVBoxLayout *layout = new QVBoxLayout(this);
 
     // default model
-    NodeModel model;
+    NodeModel *model = new NodeModel(this);
     proxyModel = new NodeProxyModel(this);
-    proxyModel->setSourceModel(&model);
+    proxyModel->setSourceModel(model);
 
     tableView = new QTableView(this);
     tableView->verticalHeader()->hide();
@@ -35,10 +35,10 @@ NodeTableWidget::NodeTableWidget(QWidget *parent)
 
     layout->addWidget(tableView);
 
-    int col_ram_total = model.indexOfHeaderName("Ram (Total)");
-    int col_ram_free = model.indexOfHeaderName("Ram (Free)");
-    int col_swap_total = model.indexOfHeaderName("Swap (Total)");
-    int col_swap_free = model.indexOfHeaderName("Swap (Free)");
+    int col_ram_total = model->indexOfHeaderName("Ram (Total)");
+    int col_ram_free = model->indexOfHeaderName("Ram (Free)");
+    int col_swap_total = model->indexOfHeaderName("Swap (Total)");
+    int col_swap_free = model->indexOfHeaderName("Swap (Free)");
 
     tableView->setColumnHidden(col_ram_total, true);
     tableView->setColumnHidden(col_swap_total, true);

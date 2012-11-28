@@ -5,6 +5,7 @@
 
 #include "job_board.h"
 #include "task_board.h"
+#include "nodetablewidget.h"
 #include "event.h"
 
 namespace Plow {
@@ -25,6 +26,15 @@ class TaskBoardDockWidget: public QDockWidget
 
 public:
     TaskBoardDockWidget(TaskBoardWidget* boardWidget, QWidget* parent=0);
+
+};
+
+class NodeTableDockWidget: public QDockWidget
+{
+    Q_OBJECT
+
+public:
+    NodeTableDockWidget(NodeTableWidget* nodeWidget, QWidget* parent=0);
 
 };
 

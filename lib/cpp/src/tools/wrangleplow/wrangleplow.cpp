@@ -3,6 +3,7 @@
 
 #include "plow/plow.h"
 #include "gui/job_board.h"
+#include "gui/nodemodel.h"
 #include "gui/dock_widgets.h"
 
 #include "wrangleplow.h"
@@ -13,14 +14,22 @@ namespace WranglePlow {
 
 MainWindow::MainWindow()
 {
-    Plow::Gui::JobBoardWidget* jobBoard = new Plow::Gui::JobBoardWidget(this);
-    Plow::Gui::JobBoardDockWidget *jobBoardDock = new Plow::Gui::JobBoardDockWidget(jobBoard, this);
+    setDockNestingEnabled(true);
+
+    Gui::JobBoardWidget* jobBoard = new Gui::JobBoardWidget(this);
+    Gui::JobBoardDockWidget *jobBoardDock = new Gui::JobBoardDockWidget(jobBoard, this);
     
-    Plow::Gui::TaskBoardWidget* taskBoard = new Plow::Gui::TaskBoardWidget(this);
-    Plow::Gui::TaskBoardDockWidget *taskBoardDock = new Plow::Gui::TaskBoardDockWidget(taskBoard, this);
+    Gui::TaskBoardWidget* taskBoard = new Gui::TaskBoardWidget(this);
+    Gui::TaskBoardDockWidget *taskBoardDock = new Gui::TaskBoardDockWidget(taskBoard, this);
+
+    Gui::NodeTableWidget *nodeWidget = new Gui::NodeTableWidget(this);
+    Gui::NodeTableDockWidget *nodeTableDock = new Gui::NodeTableDockWidget(nodeWidget, this);
 
     addDockWidget(Qt::TopDockWidgetArea, jobBoardDock);
     addDockWidget(Qt::BottomDockWidgetArea, taskBoardDock);
+    splitDockWidget(taskBoardDock, nodeTableDock, Qt::Vertical);
+
+    nodeWidget->load();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

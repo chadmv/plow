@@ -5,12 +5,14 @@
 #include <QSortFilterProxyModel>
 #include <QMetaEnum>
 #include <QStringList>
+#include <QDateTime>
 
 #include <vector>
 
 #include "plow/plow.h"
 
 class QVariant;
+class QTimer;
 
 namespace Plow {
 namespace Gui {
@@ -43,12 +45,12 @@ class NodeModel
         LOCKED  = LockState::LOCKED
     };
 
-    inline int rowCount(const QModelIndex &parent) const{
+    inline int rowCount(const QModelIndex &parent = QModelIndex()) const {
         Q_UNUSED(parent);
         return static_cast<int>(nodes.size());
     }
 
-    inline int columnCount(const QModelIndex &parent) const {
+    inline int columnCount(const QModelIndex &parent = QModelIndex()) const {
         Q_UNUSED(parent);
         return headerLabels.count();
     }
@@ -67,10 +69,12 @@ class NodeModel
     { return headerLabels.indexOf(value); }
 
  public slots:
+    void load();
     void refresh();
 
  private:
     NodeList nodes;
+    QTimer* refreshTimer;
 
     static Callbacks displayRoleCallbacks;
     static QStringList headerLabels;
@@ -120,7 +124,7 @@ struct NodeModel::DisplayRoleCallbacks {
     { return QVariant(n.system.freeSwapMb); }
 
     inline static QVariant bootTime(NodeT const& n)
-    { return QVariant(qint64(n.bootTime)); }
+    { return QVariant(QDateTime::fromMSecsSinceEpoch(qint64(n.bootTime)*1000)); }
 };
 
 // NodeMode::enumToString

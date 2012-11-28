@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QTimer>
 
 #include "plow/plow.h"
 #include "nodemodel.h"
@@ -9,9 +10,13 @@ namespace Gui {
 //
 // NodeModel represents a list of NodeT instance
 //
-NodeModel::NodeModel(QObject *parent)
-    : QAbstractTableModel(parent)
-{}
+NodeModel::NodeModel(QObject *parent) :
+    QAbstractTableModel(parent),
+    refreshTimer(new QTimer(this))
+{
+    connect(refreshTimer, SIGNAL(timeout()), this, SLOT(refresh()));
+
+}
 
 NodeModel::~NodeModel() {
     nodes.clear();
@@ -56,7 +61,7 @@ QVariant NodeModel::data(const QModelIndex &index, int role) const {
 
     NodeT aNode = nodes.at(index.row());
 
-    if (role == Qt::DisplayRole) {
+    if (role == Qt::DisplayRole || role == Qt::ToolTipRole) {
         ret = displayRoleCallbacks[index.column()](aNode);
 
     } else if (role == Qt::UserRole) {
@@ -65,6 +70,7 @@ QVariant NodeModel::data(const QModelIndex &index, int role) const {
         if (col == indexOfHeaderName("Ram (Free)"))
             return QVariant(static_cast<double>(aNode.system.freeRamMb)
                             / aNode.system.totalRamMb);
+
         if (col == indexOfHeaderName("Swap (Free)"))
             return QVariant(static_cast<double>(aNode.system.freeSwapMb)
                             / aNode.system.totalSwapMb);
@@ -89,11 +95,20 @@ QVariant NodeModel::headerData(int section,
 
 // Retrieve a new list of host data from the data source
 // Resets the model's internal data structure.
-void NodeModel::refresh() {
+// Restarts the refresh timer.
+void NodeModel::load() {
     NodeList aList;
     Plow::NodeFilterT filter;
     Plow::getNodes(aList, filter);
     setNodeList(aList);
+
+    refreshTimer->start(3000);
+}
+
+// Update existing data. Add/Remove new/old data
+void NodeModel::refresh() {
+    // TODO: Actually update instead of reload
+    load();
 }
 
 const NodeT *NodeModel::nodeFromIndex(const QModelIndex &index) const {
@@ -104,8 +119,14 @@ const NodeT *NodeModel::nodeFromIndex(const QModelIndex &index) const {
 }
 
 // Resets the models internal data structure to the
-// given NodeList
+// given NodeList.
+// Also stops the refreshTimer. This is useful if called
+// directly with an explicit NodeList and you do not want
+// the model to continually try and replace it with automatic
+// refreshes.
 void NodeModel::setNodeList(const NodeList &aList) {
+    refreshTimer->stop();
+
     beginResetModel();
     nodes.clear();
     nodes = aList;

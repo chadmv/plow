@@ -19,6 +19,14 @@ TaskBoardDockWidget::TaskBoardDockWidget(TaskBoardWidget* widget, QWidget *paren
     setWidget(widget);
 }
 
+
+NodeTableDockWidget::NodeTableDockWidget(NodeTableWidget* widget, QWidget *parent) :
+    QDockWidget("Nodes", parent)
+{
+
+    setWidget(widget);
+}
+
 } // Plow
 } // Gui
 

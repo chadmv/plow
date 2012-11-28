@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 
     // Update button will load generated data from a fixture
     QObject::connect(reloadSim, SIGNAL(clicked()), &fixture, SLOT(updateData()));
-    QObject::connect(reloadLive, SIGNAL(clicked()), &model, SLOT(refresh()));
+    QObject::connect(reloadLive, SIGNAL(clicked()), &model, SLOT(load()));
 
     QTabWidget* tab = new QTabWidget;
 
