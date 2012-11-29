@@ -56,4 +56,10 @@ public class FrameSetTests {
         assertEquals(1, fs.get(0));
         assertEquals(20, fs.get(19));
     }
+
+    @Test
+    public void testTimestamp() {
+        System.out.println(System.currentTimeMillis());
+    }
+
 }
