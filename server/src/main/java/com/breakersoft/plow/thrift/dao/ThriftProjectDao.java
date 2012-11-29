@@ -10,4 +10,6 @@ public interface ThriftProjectDao {
 
     ProjectT get(String name);
 
+    long getPlowTime();
+
 }

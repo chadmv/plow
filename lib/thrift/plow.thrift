@@ -257,7 +257,8 @@ struct TaskFilterT {
     2:list<common.Guid> layerIds,
     3:list<TaskState> states,
     4:i32 limit = 0,
-    5:i32 offset = 0
+    5:i32 offset = 0,
+    6:i64 lastUpdateTime = 0
 }
 
 struct NodeFilterT {
@@ -276,6 +277,8 @@ struct OutputT {
 
 service RpcService {
     
+    i64 getPlowTime() throws (1:PlowException e),
+
     ProjectT getProject(1:common.Guid id) throws (1:PlowException e),
     ProjectT getProjectByName(1:string name) throws (1:PlowException e),
 

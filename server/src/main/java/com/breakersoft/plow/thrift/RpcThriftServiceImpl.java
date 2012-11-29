@@ -195,4 +195,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
         Project project = projectService.getProject(UUID.fromString(projectId));
         return thriftFolderDao.getFolders(project);
     }
+
+    @Override
+    public long getPlowTime() throws PlowException, TException {
+        return thriftProjectDao.getPlowTime();
+    }
 }

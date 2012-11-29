@@ -28,4 +28,9 @@ public class ThriftProjectDaoTests extends AbstractTest {
         ProjectT project_b = thriftProjectDao.get(UUID.fromString(project_a.id));
         assertEquals(project_a.id, project_b.id);
     }
+
+    @Test
+    public void getPlowtime() {
+        thriftProjectDao.getPlowTime();
+    }
 }
