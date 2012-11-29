@@ -19,7 +19,7 @@ void formatTime(std::string& output, const Timestamp ts)
         return;
     }
 
-    const time_t epoch_time = (time_t)ts;
+    const time_t epoch_time = (time_t)(ts / 1000);
     struct tm * timeinfo;
     timeinfo = std::localtime(&epoch_time);
 
@@ -40,8 +40,11 @@ void formatDuration(std::string& output, int64_t startTime, int64_t stopTime)
     if (stopTime == 0) {
         stopTime = time(NULL);
     }
+    else {
+        stopTime = stopTime / 1000;
+    }
 
-    int64_t duration = stopTime - startTime;
+    int64_t duration = stopTime - (startTime / 1000);
 
     int32_t sec = duration % 60;
     int32_t min = duration / 60;
