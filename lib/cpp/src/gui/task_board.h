@@ -11,6 +11,8 @@
 #include <QTableView>
 #include <QString>
 #include <QPushButton>
+#include <QTimer>
+#include <QLabel>
 
 #include "plow/plow.h"
 
@@ -22,19 +24,27 @@ class TaskBoardModel: public QAbstractTableModel
     Q_OBJECT
 
 public:
-    TaskBoardModel(TaskFilterT* filter, QObject* parent = 0);
+    TaskBoardModel(TaskFilterT filter, QObject* parent = 0);
     ~TaskBoardModel();
     
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     int columnCount (const QModelIndex & parent = QModelIndex() ) const;
     QVariant data (const QModelIndex & index, int role = Qt::DisplayRole) const;
-
+    void init();
     static QStringList HeaderLabels;
+
+public slots:
+    void refresh();
+
+private slots:
+    void refreshRunningTime();
 
 private:
     std::vector<TaskT> m_tasks;
-
-
+    std::map<Guid, int> m_index;
+    uint64_t m_time;
+    TaskFilterT m_filter;
+    QTimer *m_timer;
 };
 
 /*
@@ -70,12 +80,17 @@ public:
 public slots:
     void handleJobSelected(const QString& id);
 
+private slots:
+    void refreshModel();
+
 private:
     TaskFilterT* m_filter;
     QPushButton* m_layers;
     QPushButton* m_states;
-    QLineEdit* m_range;
+    QLabel * m_job_name;
     TaskBoardView* m_view;
+    TaskBoardModel* m_model;
+    QTimer *m_timer;
 };
 
 } // 

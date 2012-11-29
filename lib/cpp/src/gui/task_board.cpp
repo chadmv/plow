@@ -7,7 +7,7 @@
 #include <QAction>
 #include <QMenu>
 #include <QHeaderView>
-
+#include <QTimer>
 
 #include "common.h"
 #include "event.h"
@@ -31,7 +31,7 @@ TaskBoardWidget::TaskBoardWidget(QWidget* parent) :
     m_filter(new TaskFilterT()),
     m_layers(new QPushButton(this)),
     m_states(new QPushButton(this)),
-    m_range(new QLineEdit(this)),
+    m_job_name(new QLabel(this)),
     m_view(new TaskBoardView(this))
 {
     m_layers->setText("Layers");
@@ -56,7 +56,8 @@ TaskBoardWidget::TaskBoardWidget(QWidget* parent) :
     QHBoxLayout* ctl_layout = new QHBoxLayout();
     ctl_layout->addWidget(m_layers);
     ctl_layout->addWidget(m_states);
-    ctl_layout->addWidget(m_range);
+    ctl_layout->addStretch();
+    ctl_layout->addWidget(m_job_name);
 
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->addLayout(ctl_layout);
@@ -64,11 +65,23 @@ TaskBoardWidget::TaskBoardWidget(QWidget* parent) :
 
     connect(EventManager::getInstance(), SIGNAL(jobSelected(QString)),
         this, SLOT(handleJobSelected(QString)));
+
+    m_model = 0;
+    m_timer = new QTimer(this);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(refreshModel()));
 }
 
 TaskBoardWidget::~TaskBoardWidget()
 {
+    delete m_timer;
+}
 
+void TaskBoardWidget::refreshModel()
+{
+    if (m_model)
+    {
+        m_model->refresh();
+    }
 }
 
 void TaskBoardWidget::handleJobSelected(const QString& id)
@@ -80,11 +93,13 @@ void TaskBoardWidget::handleJobSelected(const QString& id)
 
 void  TaskBoardWidget::setJob(const JobT& job)
 {
-    m_filter->jobId = job.id;
+    // Stop the timer
+    m_timer->stop();
 
     std::vector<LayerT> layers;
     Plow::getLayers(layers, job);
 
+    // Update the layer display
     m_layers->menu()->clear();
     for (int r = 0; r < layers.size(); ++r)
     {
@@ -94,11 +109,24 @@ void  TaskBoardWidget::setJob(const JobT& job)
         m_layers->menu()->addAction(action);
     }
 
-    TaskBoardModel *model = new TaskBoardModel(m_filter, this);
-    delete m_view->model();
+    // Set up a new model
+    m_filter->jobId = job.id;
+    TaskBoardModel* model = new TaskBoardModel(*m_filter, this);
+    model->init();
+    
+    m_job_name->setText(QString::fromStdString(job.name));
     m_view->setModel(model);
     m_view->setColumnWidth(0, 500);
 
+    // If we have an old model set, delete it.
+    if (m_model) {
+        delete m_model;
+        m_model = 0;
+    }
+
+    // Set the model and restart the timer.
+    m_model = model;
+    m_timer->start(3000);
 }
 
 TaskFilterT* TaskBoardWidget::getTaskFilter() const
@@ -126,16 +154,68 @@ TaskBoardView::~TaskBoardView()
 **------------------------------------------------*/
 
 
-TaskBoardModel::TaskBoardModel(TaskFilterT* filter, QObject* parent) : 
-    QAbstractTableModel(parent)
+TaskBoardModel::TaskBoardModel(TaskFilterT filter, QObject* parent) : 
+    QAbstractTableModel(parent),
+    m_filter(filter)
 {
-    getTasks(m_tasks, *filter);
-    reset();
+
 }
 
 TaskBoardModel::~TaskBoardModel()
 {
+    m_timer->stop();
+    delete m_timer;
+}
 
+void TaskBoardModel::init()
+{
+    uint64_t qtime = getPlowTime();
+
+    getTasks(m_tasks, m_filter);
+    m_filter.lastUpdateTime = qtime;
+
+    for(int i=0; i<m_tasks.size(); i++) {
+        m_index[m_tasks[i].id] = i;
+    }
+    
+    m_timer = new QTimer(this);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(refreshRunningTime()));
+    m_timer->start(1000);
+}
+
+void TaskBoardModel::refresh()
+{
+
+    // Get the time from the server.
+    uint64_t plow_time = getPlowTime();
+
+    // Make a query to get the tasks since the last update time.
+    std::vector<TaskT> updated;
+    getTasks(updated, m_filter);
+
+    // Set the update time for the next query;
+    m_filter.lastUpdateTime = plow_time;
+
+    std::vector<TaskT>::iterator iter;
+    for (iter = updated.begin(); iter != updated.end(); ++iter)
+    {
+        int idx = m_index[iter->id];
+        m_tasks[idx] = *iter;
+        emit dataChanged(index(idx, 0), index(idx, 3));
+    }
+}
+
+void TaskBoardModel::refreshRunningTime()
+{
+    std::vector<TaskT>::iterator iter;
+    for (iter = m_tasks.begin(); iter != m_tasks.end(); ++iter)
+    {
+        if (iter->state == TaskState::RUNNING)
+        {
+            emit dataChanged(index(m_index[iter->id], 0),
+                             index(m_index[iter->id], 3));
+        }
+    }
 }
 
 int TaskBoardModel::rowCount(const QModelIndex& parent) const
@@ -176,7 +256,7 @@ QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
         {
             std::string duration;
             formatDuration(duration, task.startTime, task.stopTime);
-            return QString(duration.c_str());
+            return QString::fromStdString(duration);
         }
         break;
 
