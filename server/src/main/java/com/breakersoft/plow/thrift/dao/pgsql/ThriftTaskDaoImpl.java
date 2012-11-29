@@ -52,6 +52,7 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "task.int_task_order,"+
             "task.time_started, " +
             "task.time_stopped," +
+            "task.time_updated,"+
             "task.int_last_max_rss,"+
             "task.int_last_rss,"+
             "task.str_last_node_name,"+
@@ -73,11 +74,16 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
         List<Object> values = Lists.newArrayList();
 
         if (filter.isSetJobId()) {
-            where.add(" task.pk_job = ? ");
+            where.add("task.pk_job = ? ");
             values.add(UUID.fromString(filter.jobId));
         }
         else {
             throw new RuntimeException("At least a jobId must be set.");
+        }
+
+        if (filter.getLastUpdateTime() > 0) {
+            where.add("task.time_updated >= ?");
+            values.add(filter.getLastUpdateTime());
         }
 
         final StringBuilder sb = new StringBuilder(512);
@@ -85,6 +91,8 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
         sb.append(" WHERE ");
         sb.append(StringUtils.join(where, " AND "));
         sb.append(" ORDER BY int_task_order ASC");
+
+        System.out.println(sb.toString());
         return jdbc.query(sb.toString(), MAPPER, values.toArray());
     }
 }

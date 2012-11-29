@@ -92,7 +92,8 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
 
     @Override
     public boolean updateState(Task task, TaskState currentState, TaskState newState) {
-        return jdbc.update("UPDATE plow.task SET int_state=? WHERE pk_task=? AND int_state=?",
+        return jdbc.update("UPDATE plow.task SET int_state=?, " +
+                "time_updated = txTimeMillis() WHERE pk_task=? AND int_state=?",
                 newState.ordinal(), task.getTaskId(), currentState.ordinal()) == 1;
     }
 
@@ -115,7 +116,8 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
             "SET " +
                 "int_state = ?, " +
                 "bool_reserved = 'f', " +
-                "time_started = EXTRACT(epoch FROM NOW()), " +
+                "time_updated = txTimeMillis(), " +
+                "time_started = txTimeMillis(), " +
                 "time_stopped = 0 " +
             "WHERE " +
                 "task.pk_task = ? " +
@@ -138,7 +140,8 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
             "SET " +
                 "int_state = ?, " +
                 "bool_reserved = 'f', " +
-                "time_stopped = EXTRACT(epoch FROM NOW()) " +
+                "time_stopped = txTimeMillis(), " +
+                "time_updated = txTimeMillis() " +
             "WHERE " +
                 "task.pk_task = ? " +
             "AND " +

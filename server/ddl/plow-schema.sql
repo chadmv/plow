@@ -3,6 +3,28 @@ CREATE SCHEMA plow;
 CREATE LANGUAGE plpgsql;
 
 ---
+--- Return the current clock time in millis.
+---
+CREATE OR REPLACE FUNCTION plow.currentTimeMillis() RETURNS BIGINT AS $$
+BEGIN
+    return (EXTRACT(EPOCH FROM clock_timestamp()) * 1000)::bigint;
+END;
+$$ LANGUAGE plpgsql;
+
+
+---
+--- Returns the current time in millis, doesn't change during a transaction.
+---
+CREATE OR REPLACE FUNCTION plow.txTimeMillis() RETURNS BIGINT AS $$
+BEGIN
+    return (EXTRACT(EPOCH FROM NOW()) * 1000)::bigint;
+END;
+$$ LANGUAGE plpgsql;
+
+
+----------------------------------------------------------
+
+---
 --- Project
 ---
 
@@ -166,6 +188,7 @@ CREATE TABLE plow.task (
   bool_reserved BOOLEAN DEFAULT 'f' NOT NULL,
   time_started BIGINT DEFAULT 0 NOT NULL,
   time_stopped BIGINT DEFAULT 0 NOT NULL,
+  time_updated BIGINT DEFAULT 0 NOT NULL,
   int_last_max_rss INTEGER DEFAULT 0 NOT NULL,
   int_last_rss INTEGER DEFAULT 0 NOT NULL,
   str_last_node_name VARCHAR(128),
@@ -175,6 +198,7 @@ CREATE TABLE plow.task (
 CREATE INDEX task_pk_layer_idx ON plow.task (pk_layer);
 CREATE INDEX task_pk_job_idx ON plow.task (pk_job);
 CREATE INDEX task_int_state_idx ON plow.task (int_state);
+CREATE INDEX task_time_updated_idx ON plow.task (time_updated);
 CREATE UNIQUE INDEX task_str_name_pk_job_idx_uniq ON plow.task (str_name, pk_job);
 ----------------------------------------------------------
 
@@ -304,7 +328,6 @@ CREATE INDEX proc_pk_quota_idx ON plow.proc (pk_quota);
 CREATE INDEX proc_pk_node_idx ON plow.proc (pk_node);
 CREATE UNIQUE INDEX proc_pk_task_uniq_idx ON plow.proc (pk_task);
 CREATE INDEX proc_pk_job_idx ON plow.proc (pk_job);
-
 
 ----------------------------------------------------------
 

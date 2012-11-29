@@ -44,4 +44,9 @@ public class ThriftProjectDaoImpl extends AbstractDao implements ThriftProjectDa
     public ProjectT get(String name) {
         return jdbc.queryForObject(GET + " WHERE str_name=?", MAPPER, name);
     }
+
+    @Override
+    public long getPlowTime() {
+        return jdbc.queryForLong("SELECT currentTimeMillis()");
+    }
 }
