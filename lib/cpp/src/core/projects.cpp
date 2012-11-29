@@ -8,6 +8,12 @@
 
 PLOW_NAMESPACE_ENTER
 
+
+uint64_t getPlowTime()
+{
+    return getClient()->proxy().getPlowTime();
+}
+
 void getProjectById(ProjectT& project, const Guid& id)
 {
     getClient()->proxy().getProject(project, id);

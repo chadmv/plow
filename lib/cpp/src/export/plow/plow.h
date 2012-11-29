@@ -19,6 +19,7 @@ PLOW_NAMESPACE_ENTER
 
 typedef std::vector<Plow::FolderT> JobBoard;
 
+extern PLOWEXPORT uint64_t getPlowTime();
 extern PLOWEXPORT void getProjectById(ProjectT& project, const Guid& id);
 extern PLOWEXPORT void getProjectByName(ProjectT& project, const std::string& name);
 
