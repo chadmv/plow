@@ -54,15 +54,6 @@ public class DispatchServiceImpl implements DispatchService {
     private TaskDao taskDao;
 
     @Autowired
-    private JobDao jobDao;
-
-    @Autowired
-    private LayerDao layerDao;
-
-    @Autowired
-    private FolderDao folderDao;
-
-    @Autowired
     private QuotaDao quotaDao;
 
     @Autowired
