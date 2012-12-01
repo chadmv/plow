@@ -120,12 +120,21 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Override
     public boolean startTask(Task task, DispatchProc proc) {
-        return taskDao.start(task);
+        if (taskDao.start(task)) {
+            taskDao.resetTaskDispatchData(task,
+                    proc.getHostname(), proc.getCores(), proc.getMemory());
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean stopTask(Task task, TaskState state) {
-        return taskDao.stop(task, state);
+        if (taskDao.stop(task, state)) {
+            taskDao.clearLastLogLine(task);
+            return true;
+        }
+        return false;
     }
 
     @Override

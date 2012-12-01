@@ -2,6 +2,8 @@ package com.breakersoft.plow.test.dao;
 
 import static org.junit.Assert.*;
 
+import java.util.Map;
+
 import javax.annotation.Resource;
 
 import org.junit.Test;
@@ -12,6 +14,7 @@ import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
+import com.breakersoft.plow.rnd.thrift.RunningTask;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.LayerSpecT;
@@ -100,6 +103,33 @@ public class TaskDaoTests extends AbstractTest {
     public void testUnreserve() {
         testCreate();
         taskDao.unreserve(task);
+    }
+
+    @Test
+    public void testResetTaskDispatchData() {
+        testCreate();
+        taskDao.resetTaskDispatchData(task, "foo", 1, 1024);
+    }
+
+    @Test
+    public void testUpdateTaskDispatchData() {
+
+        testCreate();
+
+        RunningTask runtask = new RunningTask();
+        runtask.taskId = task.getTaskId().toString();
+        runtask.lastLog = "foo";
+        runtask.maxRss = 999;
+        runtask.progress = 50;
+        taskDao.updateTaskDispatchData(runtask);
+
+        Map<String,Object> data = this.simpleJdbcTemplate.queryForMap(
+                "SELECT * FROM plow.task_dsp WHERE pk_task=?",
+                task.getTaskId());
+
+        assertEquals(runtask.lastLog, (String) data.get("str_last_log_line"));
+        assertEquals((Long)runtask.maxRss, Long.valueOf((int) data.get("int_last_max_rss")));
+        //TODO: make progress an i16
     }
 
 }

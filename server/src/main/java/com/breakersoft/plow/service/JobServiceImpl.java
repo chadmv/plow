@@ -1,5 +1,8 @@
 package com.breakersoft.plow.service;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,6 +23,7 @@ import com.breakersoft.plow.dao.ProjectDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
+import com.breakersoft.plow.rnd.thrift.RunningTask;
 import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
@@ -223,5 +227,19 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean isJobPaused(Job job) {
         return jobDao.isPaused(job);
+    }
+
+    @Override
+    public void updateRunningTasks(List<RunningTask> runningTasks) {
+        // Sort the tasks by ID to ensure predicatable update.
+        Collections.sort(runningTasks, new Comparator<RunningTask>() {
+            @Override
+            public int compare(RunningTask o1, RunningTask o2) {
+                return o1.taskId.compareTo(o2.taskId);
+            }
+        });
+        for (RunningTask task: runningTasks) {
+            taskDao.updateTaskDispatchData(task);
+        }
     }
 }

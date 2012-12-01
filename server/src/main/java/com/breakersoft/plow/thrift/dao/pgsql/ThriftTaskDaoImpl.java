@@ -37,6 +37,8 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             task.lastMaxRss = rs.getInt("int_last_max_rss");
             task.lastRss = rs.getInt("int_last_rss");
             task.lastNodeName = rs.getString("str_last_node_name");
+            task.lastLogLine = rs.getString("str_last_log_line");
+            task.progress = rs.getInt("int_progress");
             task.lastCores = rs.getInt("int_last_cores");
             return task;
         }
@@ -53,15 +55,19 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "task.time_started, " +
             "task.time_stopped," +
             "task.time_updated,"+
-            "task.int_last_max_rss,"+
-            "task.int_last_rss,"+
-            "task.str_last_node_name,"+
-            "task.int_last_cores " +
+            "task_dsp.int_last_max_rss,"+
+            "task_dsp.int_last_rss,"+
+            "task_dsp.str_last_node_name,"+
+            "task_dsp.str_last_log_line,"+
+            "task_dsp.int_progress," +
+            "task_dsp.int_last_cores " +
         "FROM " +
-            "task ";
+            "task "+
+        "INNER JOIN " +
+            "task_dsp ON task.pk_task = task_dsp.pk_task ";
 
     private static final String GET_BY_ID =
-        GET + " WHERE pk_task=?";
+        GET + " WHERE task.pk_task=?";
 
     @Override
     public TaskT getTask(UUID id) {

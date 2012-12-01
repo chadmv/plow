@@ -8,6 +8,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.dispatcher.BackEndDispatcher;
 import com.breakersoft.plow.dispatcher.FrontEndDispatcher;
+import com.breakersoft.plow.dispatcher.PingHandler;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
 import com.breakersoft.plow.rnd.thrift.RndException;
@@ -21,27 +22,14 @@ public class RndThriftServiceImpl implements RndServiceApi.Iface {
             org.slf4j.LoggerFactory.getLogger(RndThriftServiceImpl.class);
 
     @Autowired
-    NodeService nodeService;
-
-    @Autowired
-    FrontEndDispatcher frontEndDispatcher;
+    PingHandler pingHandler;
 
     @Autowired
     BackEndDispatcher backEndDispatcher;
 
     @Override
     public void sendPing(Ping ping) throws RndException, TException {
-
-        Node node;
-        try {
-            node = nodeService.getNode(ping.hostname);
-            nodeService.updateNode(node, ping);
-        } catch (EmptyResultDataAccessException e) {
-            node = nodeService.createNode(ping);
-        }
-
-        logger.info("{} node reporting in.", node.getName());
-        frontEndDispatcher.book(node);
+        pingHandler.handlePing(ping);
     }
 
     @Override

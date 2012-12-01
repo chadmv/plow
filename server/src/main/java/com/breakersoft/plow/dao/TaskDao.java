@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.Layer;
+import com.breakersoft.plow.rnd.thrift.RunningTask;
 import com.breakersoft.plow.thrift.TaskState;
 
 public interface TaskDao {
@@ -27,5 +28,11 @@ public interface TaskDao {
     boolean stop(Task task, TaskState newState);
 
     Task getByNameOrId(Job job, String identifer);
+
+    void updateTaskDispatchData(RunningTask runTask);
+
+    void resetTaskDispatchData(Task task, String host, int cores, int ram);
+
+    void clearLastLogLine(Task task);
 
 }

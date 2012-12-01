@@ -14,6 +14,7 @@ import com.breakersoft.plow.TaskE;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.TaskDao;
+import com.breakersoft.plow.rnd.thrift.RunningTask;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.util.JdbcUtils;
 
@@ -82,6 +83,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
 
         jdbc.update(INSERT, id, layer.getLayerId(), layer.getJobId(), name,
                 number, taskOrder, TaskState.INITIALIZE.ordinal());
+        jdbc.update("INSERT INTO task_dsp (pk_task) VALUES (?)", id);
 
         TaskE task = new TaskE();
         task.setTaskId(id);
@@ -97,6 +99,66 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                 newState.ordinal(), task.getTaskId(), currentState.ordinal()) == 1;
     }
 
+    @Override
+    public void clearLastLogLine(Task task) {
+        jdbc.update("UPDATE plow.task_dsp SET str_last_log_line=? WHERE pk_task=?", "", task.getTaskId());
+    }
+
+    private static final String RESET_DSP =
+            "UPDATE " +
+                "plow.task_dsp " +
+            "SET " +
+                "str_last_node_name=?,"+
+                "int_last_cores=?,"+
+                "int_last_ram=?,"+
+                "int_last_rss=0,"+
+                "int_last_max_rss=0,"+
+                "int_progress=0,"+
+                "str_last_log_line=NULL " +
+            "WHERE " +
+                "pk_task=?";
+
+    @Override
+    public void resetTaskDispatchData(Task task, String host, int cores, int ram) {
+        jdbc.update(RESET_DSP, host, cores, ram, task.getTaskId());
+    }
+
+    private static final String[] UPDATE_DSP = {
+            "UPDATE " +
+                "plow.task " +
+            "SET " +
+                "time_updated = txTimeMillis() " +
+            "WHERE " +
+                "pk_task=?::uuid " +
+            "AND " +
+                "int_state = ?",
+
+            "UPDATE " +
+                "plow.task_dsp "  +
+            "SET " +
+                "str_last_log_line=?," +
+                "int_last_rss=?,"+
+                "int_last_max_rss=?,"+
+                "int_progress=? "+
+            "WHERE " +
+                "pk_task=?::uuid "
+    };
+
+    @Override
+    public void updateTaskDispatchData(RunningTask runTask) {
+        // TODO: fix this once rnd is pinging in max rss
+        String lastLog = "";
+        if (runTask.isSetLastLog()) {
+            lastLog = runTask.lastLog;
+        }
+
+        if (jdbc.update(UPDATE_DSP[0], runTask.taskId,
+                TaskState.RUNNING.ordinal()) > 0) {
+            jdbc.update(UPDATE_DSP[1],
+                lastLog, runTask.maxRss, runTask.maxRss,
+                (int)runTask.progress, runTask.taskId);
+        }
+    }
 
     @Override
     public boolean reserve(Task task) {
