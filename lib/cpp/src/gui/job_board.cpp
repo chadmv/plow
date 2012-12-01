@@ -9,6 +9,7 @@
 
 #include "event.h"
 #include "job_board.h"
+#include "simple_progressbar_widget.h"
 
 namespace Plow { 
 namespace Gui {
@@ -22,10 +23,10 @@ JobBoardWidget::JobBoardWidget(QWidget *parent) :
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     QStringList header;
-    header << "Job" << "Cores" << "Max" << "Waiting";
+    header << "Job" << "Cores" << "Max" << "Waiting" << "Progress";
 
     treeWidget->setHeaderLabels(header);
-    treeWidget->setColumnCount(4);
+    treeWidget->setColumnCount(5);
     treeWidget->setColumnWidth(0, 300);
     layout->addWidget(treeWidget);
 
@@ -111,6 +112,7 @@ void JobBoardWidget::refresh()
         QTreeWidgetItem *folderItem;
         if (items.find(i->id) != items.end())
         {
+            
             folderItem = items[i->id];
             folderItem->setText(0, i->name.c_str());
             folderItem->setText(1, QString::number(i->runCores));
@@ -129,11 +131,29 @@ void JobBoardWidget::refresh()
         {
             if (items.find(j->id) != items.end())
             {
+                
                 QTreeWidgetItem *jobItem = items[j->id];
                 jobItem->setText(1, QString::number(j->runCores));
                 jobItem->setText(2, QString::number(j->maxCores));
                 jobItem->setText(3, QString::number(j->totals.waitingTaskCount));
-                jobItem->setData(0, Qt::UserRole+1, updateCounter);              
+                jobItem->setData(0, Qt::UserRole+1, updateCounter);       
+
+                // do we need to delete the simpleProgress widget or is this handled by the treeWidget?
+                // The desctructor does seems to get called
+                // http://qt-project.org/forums/viewthread/6490
+                //
+                Plow::Gui::SimpleProgressBarWidget *simpleProgress = new SimpleProgressBarWidget();
+
+                // pass a JobT object to the widget 
+                simpleProgress->setJob((*j));
+
+                QString toolTipString = QString("<b>Job: %1</b>\nSucceeded: %2\nFailed: %3")
+                                                .arg(jobItem->text(0))
+                                                .arg(j->totals.succeededTaskCount)
+                                                .arg(j->totals.deadTaskCount);
+
+                jobItem->setToolTip(4, toolTipString);
+                treeWidget->setItemWidget(jobItem, 4, simpleProgress);
             }
             else
             {
