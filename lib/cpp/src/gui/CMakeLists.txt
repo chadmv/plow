@@ -11,6 +11,7 @@ SET(PLOW_GUI_SRCS_CXX
     task_board.cpp
     dock_widgets.cpp
     event.cpp
+    logviewer.cpp
 )
 
 SET(PLOW_GUI_MOC_HDRS
@@ -22,6 +23,7 @@ SET(PLOW_GUI_MOC_HDRS
     task_board.h
     dock_widgets.h
     event.h
+    logviewer.h
 )
 
 SET(PLOW_GUI_UI_FILES
