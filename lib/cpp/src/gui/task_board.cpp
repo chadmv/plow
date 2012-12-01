@@ -20,8 +20,10 @@ QStringList TaskBoardModel::HeaderLabels = QStringList()
     << "Name"
     << "State"
     << "Node"
-    << "Duration";
+    << "Duration"
+    << "Log";
 
+const int COLUMNS = 5;
 
 /* TaskBoardWidget
 **------------------------------------------------*/
@@ -201,7 +203,7 @@ void TaskBoardModel::refresh()
     {
         int idx = m_index[iter->id];
         m_tasks[idx] = *iter;
-        emit dataChanged(index(idx, 0), index(idx, 3));
+        emit dataChanged(index(idx, 0), index(idx, COLUMNS-1));
     }
 }
 
@@ -213,7 +215,7 @@ void TaskBoardModel::refreshRunningTime()
         if (iter->state == TaskState::RUNNING)
         {
             emit dataChanged(index(m_index[iter->id], 0),
-                             index(m_index[iter->id], 3));
+                             index(m_index[iter->id], COLUMNS-1));
         }
     }
 }
@@ -225,7 +227,7 @@ int TaskBoardModel::rowCount(const QModelIndex& parent) const
 
 int TaskBoardModel::columnCount (const QModelIndex& parent) const
 {
-    return TaskBoardModel::HeaderLabels.size();
+    return COLUMNS;
 }
 
 QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
@@ -257,6 +259,9 @@ QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
             std::string duration;
             formatDuration(duration, task.startTime, task.stopTime);
             return QString::fromStdString(duration);
+        }
+        else if (col == 4) {
+            return QString(task.lastLogLine.c_str());
         }
         break;
 
