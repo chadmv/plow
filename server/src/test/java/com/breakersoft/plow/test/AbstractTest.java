@@ -69,6 +69,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         jobspec.setUsername("stella");
         jobspec.setPaused(false);
         jobspec.setProject("unittest");
+        jobspec.setLogPath("/tmp/plow/unittests/" + name);
 
         LayerSpecT layer = new LayerSpecT();
         layer.setChunk(1);
@@ -93,6 +94,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         jobspec.setUsername("stella");
         jobspec.setPaused(false);
         jobspec.setProject("unittest");
+        jobspec.setLogPath("/tmp/plow/unittests/" + name);
 
         LayerSpecT layer = new LayerSpecT();
         layer.setChunk(1);

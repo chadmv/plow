@@ -12,4 +12,6 @@ public interface ThriftTaskDao {
 
     List<TaskT> getTasks(TaskFilterT filter);
 
+    String getLogPath(UUID id);
+
 }

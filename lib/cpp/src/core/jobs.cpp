@@ -95,4 +95,10 @@ void getTaskById(TaskT& task, const Guid& id)
     getClient()->proxy().getTask(task, id);
 }
 
+void getTaskLogPath(std::string& path, const TaskT& task)
+{
+    getClient()->proxy().getTaskLogPath(path, task.id);
+}
+
+
 PLOW_NAMESPACE_EXIT

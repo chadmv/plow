@@ -74,4 +74,18 @@ public class ThriftTaskDaoTests extends AbstractTest {
         tasks = thriftTaskDao.getTasks(filter);
         assertEquals(0, tasks.size());
     }
+
+    @Test
+    public void getLogPath() {
+        JobSpecT spec = getTestJobSpec();
+        jobService.launch(spec);
+
+        @SuppressWarnings("deprecation")
+        UUID id = simpleJdbcTemplate.queryForObject(
+                "SELECT pk_task FROM task LIMIT 1", UUID.class);
+
+        String logPath = "/tmp/plow/unittests/test/test/test_ls-0010-test_ls.log";
+        String result = thriftTaskDao.getLogPath(id);
+        assertEquals(logPath, result);
+    }
 }

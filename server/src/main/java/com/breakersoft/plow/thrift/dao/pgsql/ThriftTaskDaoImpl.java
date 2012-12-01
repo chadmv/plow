@@ -74,6 +74,25 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
         return jdbc.queryForObject(GET_BY_ID, MAPPER, id);
     }
 
+    private static final String GET_LOG_PATH =
+        "SELECT " +
+            "job.str_log_path || '/' || layer.str_name || '-' || task.str_name || '.log' " +
+        "FROM " +
+            "plow.task " +
+            "INNER JOIN " +
+                "plow.layer " +
+                    "ON layer.pk_layer = task.pk_layer " +
+            "INNER JOIN " +
+                "plow.job " +
+                    "ON layer.pk_job = job.pk_job " +
+        "WHERE " +
+            "task.pk_task = ?";
+
+    @Override
+    public String getLogPath(UUID id) {
+        return jdbc.queryForObject(GET_LOG_PATH, String.class, id);
+    }
+
     @Override
     public List<TaskT> getTasks(TaskFilterT filter) {
         List<String> where = Lists.newArrayList();
@@ -98,7 +117,6 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
         sb.append(StringUtils.join(where, " AND "));
         sb.append(" ORDER BY int_task_order ASC");
 
-        System.out.println(sb.toString());
         return jdbc.query(sb.toString(), MAPPER, values.toArray());
     }
 }
