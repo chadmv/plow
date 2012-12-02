@@ -13,6 +13,7 @@
 #include <QPushButton>
 #include <QTimer>
 #include <QLabel>
+#include <QModelIndex>
 
 #include "plow/plow.h"
 
@@ -30,6 +31,7 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     int columnCount (const QModelIndex & parent = QModelIndex() ) const;
     QVariant data (const QModelIndex & index, int role = Qt::DisplayRole) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     void init();
     static QStringList HeaderLabels;
 
@@ -55,9 +57,13 @@ private:
 class TaskBoardView: public QTableView
 {
     Q_OBJECT
+
 public:
     TaskBoardView(QWidget* parent = 0);
     ~TaskBoardView();
+
+public slots:
+    void taskDoubleClickedHandler(const QModelIndex& index);
 };
 
 

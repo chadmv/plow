@@ -1,5 +1,6 @@
 package com.breakersoft.plow.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -7,6 +8,7 @@ import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.event.JobLaunchEvent;
+import com.breakersoft.plow.rnd.thrift.RunningTask;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.TaskState;
@@ -44,4 +46,6 @@ public interface JobService {
     Layer getLayer(UUID id);
 
     void addLayerOutput(Layer layer, String path, Map<String, String> attrs);
+
+    void updateRunningTasks(List<RunningTask> runningTasks);
 }

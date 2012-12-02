@@ -20,8 +20,14 @@ QStringList TaskBoardModel::HeaderLabels = QStringList()
     << "Name"
     << "State"
     << "Node"
-    << "Duration";
+    << "Duration"
+    << "Log";
 
+const int COLUMNS = TaskBoardModel::HeaderLabels.size();
+
+// Return this rather than creating empty variants
+// all the time.
+const QVariant EMPTY_VARIANT;
 
 /* TaskBoardWidget
 **------------------------------------------------*/
@@ -116,7 +122,7 @@ void  TaskBoardWidget::setJob(const JobT& job)
     
     m_job_name->setText(QString::fromStdString(job.name));
     m_view->setModel(model);
-    m_view->setColumnWidth(0, 500);
+    m_view->setColumnWidth(0, 350);
 
     // If we have an old model set, delete it.
     if (m_model) {
@@ -141,14 +147,24 @@ TaskFilterT* TaskBoardWidget::getTaskFilter() const
 TaskBoardView::TaskBoardView(QWidget* parent) :
     QTableView(parent)
 {
+    setSelectionBehavior(QAbstractItemView::SelectRows);
 
-
+    connect(this, SIGNAL(doubleClicked(const QModelIndex&)),
+        this, SLOT(taskDoubleClickedHandler(const QModelIndex&)));
 }
 
 TaskBoardView::~TaskBoardView()
 {
 
 }
+
+void TaskBoardView::taskDoubleClickedHandler(const QModelIndex& index) 
+{
+    QString taskId = model()->data(index, Qt::UserRole).toString();
+    //TODO: add log file viewer.
+}
+
+
 
 /* TaskBoardModel
 **------------------------------------------------*/
@@ -201,7 +217,7 @@ void TaskBoardModel::refresh()
     {
         int idx = m_index[iter->id];
         m_tasks[idx] = *iter;
-        emit dataChanged(index(idx, 0), index(idx, 3));
+        emit dataChanged(index(idx, 0), index(idx, COLUMNS-1));
     }
 }
 
@@ -213,7 +229,7 @@ void TaskBoardModel::refreshRunningTime()
         if (iter->state == TaskState::RUNNING)
         {
             emit dataChanged(index(m_index[iter->id], 0),
-                             index(m_index[iter->id], 3));
+                             index(m_index[iter->id], COLUMNS-1));
         }
     }
 }
@@ -225,14 +241,23 @@ int TaskBoardModel::rowCount(const QModelIndex& parent) const
 
 int TaskBoardModel::columnCount (const QModelIndex& parent) const
 {
-    return TaskBoardModel::HeaderLabels.size();
+    return COLUMNS;
+}
+
+QVariant TaskBoardModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+    {
+        return TaskBoardModel::HeaderLabels[section];
+    }
+
+    return EMPTY_VARIANT;
 }
 
 QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
 {
-    int row = index.row();
-    int col = index.column();
-
+    const int row = index.row();
+    const int col = index.column();
     const TaskT& task = m_tasks[row];
 
     switch(role)
@@ -258,6 +283,9 @@ QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
             formatDuration(duration, task.startTime, task.stopTime);
             return QString::fromStdString(duration);
         }
+        else if (col == 4) {
+            return QString(task.lastLogLine.c_str());
+        }
         break;
 
     case Qt::BackgroundRole:
@@ -267,9 +295,13 @@ QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
             return PlowStyle::TaskColors[state];
         }
         break;
+
+    case Qt::UserRole:
+        return QString::fromStdString(task.id);
+
     }
 
-    return QVariant();
+    return EMPTY_VARIANT;
 }
 
 } //

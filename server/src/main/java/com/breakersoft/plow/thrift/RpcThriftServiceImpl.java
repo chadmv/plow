@@ -200,4 +200,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     public long getPlowTime() throws PlowException, TException {
         return thriftProjectDao.getPlowTime();
     }
+
+    @Override
+    public String getTaskLogPath(String id) throws PlowException, TException {
+        return thriftTaskDao.getLogPath(UUID.fromString(id));
+    }
 }

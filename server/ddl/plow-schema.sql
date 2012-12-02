@@ -188,11 +188,7 @@ CREATE TABLE plow.task (
   bool_reserved BOOLEAN DEFAULT 'f' NOT NULL,
   time_started BIGINT DEFAULT 0 NOT NULL,
   time_stopped BIGINT DEFAULT 0 NOT NULL,
-  time_updated BIGINT DEFAULT 0 NOT NULL,
-  int_last_max_rss INTEGER DEFAULT 0 NOT NULL,
-  int_last_rss INTEGER DEFAULT 0 NOT NULL,
-  str_last_node_name VARCHAR(128),
-  int_last_cores SMALLINT DEFAULT 0 NOT NULL
+  time_updated BIGINT DEFAULT 0 NOT NULL
 ) WITHOUT OIDS;
 
 CREATE INDEX task_pk_layer_idx ON plow.task (pk_layer);
@@ -200,7 +196,23 @@ CREATE INDEX task_pk_job_idx ON plow.task (pk_job);
 CREATE INDEX task_int_state_idx ON plow.task (int_state);
 CREATE INDEX task_time_updated_idx ON plow.task (time_updated);
 CREATE UNIQUE INDEX task_str_name_pk_job_idx_uniq ON plow.task (str_name, pk_job);
+
 ----------------------------------------------------------
+
+---
+--- Stores runtime status for a task.  This table ensures
+--- the data still exists after the process has stopped.  
+---
+CREATE TABLE task_dsp (
+  pk_task UUID NOT NULL PRIMARY KEY,
+  int_last_max_rss INTEGER DEFAULT 0 NOT NULL,
+  int_last_rss INTEGER DEFAULT 0 NOT NULL,
+  int_last_cores SMALLINT DEFAULT 0 NOT NULL,
+  int_last_ram INTEGER DEFAULT 0 NOT NULL,
+  int_progress SMALLINT DEFAULT 0 NOT NULL,
+  str_last_log_line TEXT,
+  str_last_node_name TEXT
+) WITHOUT OIDS;
 
 ---
 --- Dependencies

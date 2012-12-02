@@ -27,6 +27,13 @@ NodeTableDockWidget::NodeTableDockWidget(NodeTableWidget* widget, QWidget *paren
     setWidget(widget);
 }
 
+
+LogViewerDockWidget::LogViewerDockWidget(LogViewer* widget, QWidget *parent) :
+    QDockWidget("Log Viewer", parent)
+{
+    setWidget(widget);
+}
+
 } // Plow
 } // Gui
 

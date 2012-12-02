@@ -44,6 +44,7 @@ extern PLOWEXPORT void getLayerOutputs(std::vector<OutputT> outputs, const Layer
 
 extern PLOWEXPORT void getTaskById(TaskT& task, const Guid& id);
 extern PLOWEXPORT void getTasks(std::vector<TaskT>& tasks, const TaskFilterT& filter);
+extern PLOWEXPORT void getTaskLogPath(std::string& path, const TaskT& task);
 
 extern PLOWEXPORT void getNodes(std::vector<NodeT>& nodes, const NodeFilterT& filter);
 extern PLOWEXPORT void getNode(NodeT& node, const Guid id);

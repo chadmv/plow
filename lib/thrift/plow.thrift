@@ -186,9 +186,11 @@ struct TaskT {
     7:common.Timestamp startTime,
     8:common.Timestamp stopTime,
     9:string lastNodeName,
-    10:i32 lastRss,
-    11:i32 lastCores,
-    12:i32 lastMaxRss
+    10:string lastLogLine,
+    11:i32 progress,
+    12:i32 lastRss,
+    13:i32 lastCores,
+    14:i32 lastMaxRss
 }
 
 struct FolderT {
@@ -305,6 +307,7 @@ service RpcService {
 
     TaskT getTask(1:common.Guid taskId) throws (1:PlowException e),
     list<TaskT> getTasks(1:TaskFilterT filter) throws (1:PlowException e),
+    string getTaskLogPath(1:common.Guid taskId) throws (1:PlowException e),
 
     NodeT getNode(1:common.Guid nodeId) throws (1:PlowException e),
     list<NodeT> getNodes(1:NodeFilterT filter) throws (1:PlowException e)
