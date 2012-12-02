@@ -23,7 +23,7 @@ QStringList TaskBoardModel::HeaderLabels = QStringList()
     << "Duration"
     << "Log";
 
-const int COLUMNS = 5;
+const int COLUMNS = TaskBoardModel::HeaderLabels.size();
 
 // Return this rather than creating empty variants
 // all the time.
@@ -245,16 +245,11 @@ int TaskBoardModel::columnCount (const QModelIndex& parent) const
 
 QVariant TaskBoardModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (orientation != Qt::Horizontal) {
-        return EMPTY_VARIANT;
-
-    }
-    switch(role)
+    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
     {
-    case Qt::DisplayRole:
         return TaskBoardModel::HeaderLabels[section];
     }
-
+    
     return EMPTY_VARIANT;
 }
 
