@@ -147,6 +147,7 @@ TaskFilterT* TaskBoardWidget::getTaskFilter() const
 TaskBoardView::TaskBoardView(QWidget* parent) :
     QTableView(parent)
 {
+    setSelectionBehavior(QAbstractItemView::SelectRows);
 
     connect(this, SIGNAL(doubleClicked(const QModelIndex&)),
         this, SLOT(taskDoubleClickedHandler(const QModelIndex&)));
