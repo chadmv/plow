@@ -29,7 +29,7 @@ class LogViewer : public QWidget
     QString logPath() const;
 
  public slots:
-    void setCurrentTask(const Plow::TaskT&);
+    void setCurrentTask(const QString &taskId);
     void setLogPath(const QString&);
     void findText(const QString&, const QTextCursor& = QTextCursor(),
                   QTextDocument::FindFlags = 0);
@@ -37,11 +37,13 @@ class LogViewer : public QWidget
     void findNext();
     void startLogTail();
     void stopLogTail();
+    void refreshTasks(const QString&);
 
  private slots:
     void logUpdated();
     void logTailToggled(int);
     void openLogFile();
+    void taskSelected(int);
 
  private:
     QPlainTextEdit *view;
@@ -54,7 +56,7 @@ class LogViewer : public QWidget
     QFileSystemWatcher *logWatcher;
 
     Plow::TaskT currentTask;
-    QList<Plow::TaskT> taskList;
+    QMap<QString,Plow::TaskT> taskMap;
     
 };
 

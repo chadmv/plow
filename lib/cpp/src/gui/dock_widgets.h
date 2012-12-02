@@ -6,7 +6,9 @@
 #include "job_board.h"
 #include "task_board.h"
 #include "nodetablewidget.h"
+#include "logviewer.h"
 #include "event.h"
+
 
 namespace Plow {
 namespace Gui {
@@ -35,6 +37,15 @@ class NodeTableDockWidget: public QDockWidget
 
 public:
     NodeTableDockWidget(NodeTableWidget* nodeWidget, QWidget* parent=0);
+
+};
+
+class LogViewerDockWidget: public QDockWidget
+{
+    Q_OBJECT
+
+public:
+    LogViewerDockWidget(LogViewer* logViewer, QWidget* parent=0);
 
 };
 

@@ -14,6 +14,7 @@
 #include <QFileDialog>
 #include <QDebug>
 
+#include "event.h"
 #include "logviewer.h"
 
 namespace Plow {
@@ -30,22 +31,27 @@ LogViewer::LogViewer(QWidget *parent) :
     addAction(openAction);
 
     searchLine = new QLineEdit(this);
-    logTailCheckbox = new QCheckBox("Tail log:", this);
+    logTailCheckbox = new QCheckBox("Tail log", this);
     taskSelector = new QComboBox(this);
+    taskSelector->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
-    QPushButton *findPrevBtn = new QPushButton("Prev", this);
-    QPushButton *findNextBtn = new QPushButton("Next", this);
-    findPrevBtn->setFixedWidth(35);
-    findNextBtn->setFixedWidth(35);
+    QPushButton *findPrevBtn = new QPushButton("<-", this);
+    QPushButton *findNextBtn = new QPushButton("->", this);
+    findPrevBtn->setFixedSize(26,20);
+    findNextBtn->setFixedSize(26,20);
 
     QHBoxLayout* controlLayout = new QHBoxLayout;
+    controlLayout->setSpacing(0);
     controlLayout->addWidget(new QLabel(tr("Find:")));
+    controlLayout->addSpacing(4);
     controlLayout->addWidget(searchLine);
     controlLayout->addWidget(findPrevBtn);
     controlLayout->addWidget(findNextBtn);
     controlLayout->addStretch();
     controlLayout->addWidget(logTailCheckbox);
+    controlLayout->addStretch();
     controlLayout->addWidget(new QLabel(tr("Task:")));
+    controlLayout->addSpacing(4);
     controlLayout->addWidget(taskSelector);
 
     mainLayout->addLayout(controlLayout);
@@ -73,14 +79,29 @@ LogViewer::LogViewer(QWidget *parent) :
             this, SLOT(logTailToggled(int)));
     connect(searchLine, SIGNAL(textChanged(QString)),
             this, SLOT(findText(QString)));
+    connect(taskSelector, SIGNAL(activated(int)), this, SLOT(taskSelected(int)));
     connect(findPrevBtn, SIGNAL(clicked()), this, SLOT(findPrev()));
     connect(findNextBtn, SIGNAL(clicked()), this, SLOT(findNext()));
     connect(openAction, SIGNAL(triggered()), this, SLOT(openLogFile()));
+
+    connect(EventManager::getInstance(), SIGNAL(jobSelected(QString)),
+            this, SLOT(refreshTasks(QString)));
 }
 
 
-void LogViewer::setCurrentTask(const TaskT &task) {
-    currentTask = task;
+void LogViewer::setCurrentTask(const QString &taskId) {
+    Plow::TaskT aTask = taskMap.value(taskId, Plow::TaskT());
+    if (aTask.id=="" || currentTask == aTask)
+        return;
+
+    currentTask = aTask;
+
+    std::string logpath;
+    Plow::getTaskLogPath(logpath, currentTask);
+    qDebug() << "Received logpath:" << QString::fromStdString(logpath);
+    if (logpath != "")
+        setLogPath(QString::fromStdString(logpath));
+
 }
 
 void LogViewer::setLogPath(const QString &path) {
@@ -169,6 +190,35 @@ void LogViewer::logTailToggled(int state) {
     } else {
         stopLogTail();
     }
+}
+
+void LogViewer::refreshTasks(const QString &jobId) {
+    taskMap.clear();
+    taskSelector->clear();
+
+    std::vector<TaskT> taskList;
+    TaskFilterT t_filter;
+
+    t_filter.jobId = jobId.toStdString();
+    getTasks(taskList, t_filter);
+
+    TaskT task;
+    QString name;
+    QString taskId;
+
+    for (int i=0; i < taskList.size(); ++i) {
+        task = taskList.at(i);
+        name = QString::fromStdString(task.name);
+        taskId = QString::fromStdString(task.id);
+        taskMap.insert(taskId, task);
+        taskSelector->addItem(name, QVariant(taskId));
+    }
+}
+
+void LogViewer::taskSelected(int index) {
+    QString taskId = taskSelector->itemData(index).toString();
+    setCurrentTask(taskId);
+
 }
 
 }  // Gui
