@@ -6,6 +6,7 @@
 #include <QTreeWidget>
 #include <QDockWidget>
 #include <QTreeWidgetItem>
+// #include <QAction>
 
 #include "plow/plow.h"
 
@@ -29,12 +30,16 @@ public slots:
     void refresh();
     void itemSelected(QTreeWidgetItem *item, int column);
 
+private slots:    
+    void onJobKill();
+
 signals:
     void jobSelected(QString id);
 
 private:
 
     void addJobItem(QTreeWidgetItem *parent, JobT* job);
+    void defineActions();
     QTreeWidgetItem* addFolderItem(FolderT* folder);
 
     ItemIndex* itemIndex;

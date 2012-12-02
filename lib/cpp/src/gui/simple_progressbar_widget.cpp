@@ -27,11 +27,14 @@ void SimpleProgressBarWidget::paintEvent(QPaintEvent * event)
 {
 
 
-    QPainter p;
+    QPainter painter;
     QBrush brush(Qt::lightGray, Qt::SolidPattern);
 
     int w = this->width();
     int h = this->height();
+    int leftMargin = 5;
+    int rightMargin = 10;
+    w = w-rightMargin;
 
     int totalTasks = m_job.totals.totalTaskCount;
 
@@ -61,22 +64,29 @@ void SimpleProgressBarWidget::paintEvent(QPaintEvent * event)
     << QRectF (0, 0, w*dependWidth, h)
     << QRectF (0, 0, w*succededWidth, h);
     
-    p.begin(this);
-    
-    float previousRightEdge = 0;
+    painter.begin(this);
+
+    float previousRightEdge = leftMargin;
     for (int i = 0; i < rects.size(); ++i) 
     {    
         grad.setColorAt(0, PlowStyle::TaskColors[i+1]);
         grad.setColorAt(1, PlowStyle::TaskColors[i+1].lighter());
         rects[i].moveLeft(previousRightEdge);
-        p.fillRect(rects[i], grad);
+        painter.fillRect(rects[i], grad);
         previousRightEdge = rects[i].right();
     }
+
+    QPalette palette = QPalette();
+    QPen pen = QPen(palette.buttonText().color());
+    painter.setPen(pen);
+    QRect border = QRect(leftMargin, 0, w, h-2);
+    painter.drawRect(border);
+
     QString progressString;
     progressString.setNum(m_job.totals.waitingTaskCount);
-    p.drawText(0, 0, 120, 200, 0, progressString, 0);
+    painter.drawText(leftMargin+5, 0, 120, 200, 0, progressString, 0);
 
-    p.end();
+    painter.end();
 }
 }  // Gui
 }  // Plow

@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QDateTime>
 #include <QApplication>
+#include <QAction>
 
 #include "plow/plow.h"
 
@@ -28,10 +29,14 @@ JobBoardWidget::JobBoardWidget(QWidget *parent) :
     treeWidget->setHeaderLabels(header);
     treeWidget->setColumnCount(5);
     treeWidget->setColumnWidth(0, 300);
+    treeWidget->setContextMenuPolicy(Qt::ActionsContextMenu);
+    treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
     layout->addWidget(treeWidget);
 
+    defineActions();
     load();
     
+
     QTimer* refreshTimer = new QTimer(this);
     connect(refreshTimer, SIGNAL(timeout()), this, SLOT(refresh()));
     refreshTimer->start(1000);
@@ -45,8 +50,43 @@ JobBoardWidget::JobBoardWidget(QWidget *parent) :
 
 JobBoardWidget::~JobBoardWidget()
 {
+    
     delete treeWidget;
     delete itemIndex;
+}
+
+void JobBoardWidget::defineActions()
+{
+ 
+    QAction* jobKillAction = new QAction(tr("Kill Job"), treeWidget);
+    connect(jobKillAction, SIGNAL(triggered()), this, SLOT(onJobKill()));
+    treeWidget->addAction(jobKillAction);   
+}
+
+void JobBoardWidget::onJobKill()
+{
+    QList<QTreeWidgetItem *> items = treeWidget->selectedItems();
+    if (!items.isEmpty())
+    {
+        for (int i = 0; i < items.size(); ++i) 
+        {
+            QTreeWidgetItem* item = items[i];
+                    
+            JobT job;
+            std::string job_name = item->text(0).toStdString();
+            try
+            {
+                getActiveJob(job, job_name);
+                Plow::killJob(job);
+            }
+            catch(std::exception& e) 
+            {
+                // TODO: not sure what to do with exeptions here
+                qDebug("JobBoardWidget::onKillAction: Exception thrown: %s", e.what());
+            }
+        }
+
+    }
 }
 
 void JobBoardWidget::itemSelected(QTreeWidgetItem *item, int column)
