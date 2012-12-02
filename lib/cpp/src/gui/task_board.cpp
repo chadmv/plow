@@ -249,15 +249,14 @@ QVariant TaskBoardModel::headerData(int section, Qt::Orientation orientation, in
     {
         return TaskBoardModel::HeaderLabels[section];
     }
-    
+
     return EMPTY_VARIANT;
 }
 
 QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
 {
-    int row = index.row();
-    int col = index.column();
-
+    const int row = index.row();
+    const int col = index.column();
     const TaskT& task = m_tasks[row];
 
     switch(role)
