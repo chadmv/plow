@@ -6,7 +6,6 @@
 #include <QTreeWidget>
 #include <QDockWidget>
 #include <QTreeWidgetItem>
-// #include <QAction>
 
 #include "plow/plow.h"
 
