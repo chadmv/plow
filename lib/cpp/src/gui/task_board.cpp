@@ -25,6 +25,10 @@ QStringList TaskBoardModel::HeaderLabels = QStringList()
 
 const int COLUMNS = 5;
 
+// Return this rather than creating empty variants
+// all the time.
+const QVariant EMPTY_VARIANT;
+
 /* TaskBoardWidget
 **------------------------------------------------*/
 
@@ -118,7 +122,7 @@ void  TaskBoardWidget::setJob(const JobT& job)
     
     m_job_name->setText(QString::fromStdString(job.name));
     m_view->setModel(model);
-    m_view->setColumnWidth(0, 500);
+    m_view->setColumnWidth(0, 350);
 
     // If we have an old model set, delete it.
     if (m_model) {
@@ -158,6 +162,8 @@ void TaskBoardView::taskDoubleClickedHandler(const QModelIndex& index)
     QString taskId = model()->data(index, Qt::UserRole).toString();
     //TODO: add log file viewer.
 }
+
+
 
 /* TaskBoardModel
 **------------------------------------------------*/
@@ -235,6 +241,21 @@ int TaskBoardModel::rowCount(const QModelIndex& parent) const
 int TaskBoardModel::columnCount (const QModelIndex& parent) const
 {
     return COLUMNS;
+}
+
+QVariant TaskBoardModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation != Qt::Horizontal) {
+        return EMPTY_VARIANT;
+
+    }
+    switch(role)
+    {
+    case Qt::DisplayRole:
+        return TaskBoardModel::HeaderLabels[section];
+    }
+
+    return EMPTY_VARIANT;
 }
 
 QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
