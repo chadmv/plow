@@ -13,6 +13,7 @@
 #include <QPushButton>
 #include <QTimer>
 #include <QLabel>
+#include <QModelIndex>
 
 #include "plow/plow.h"
 
@@ -55,9 +56,13 @@ private:
 class TaskBoardView: public QTableView
 {
     Q_OBJECT
+
 public:
     TaskBoardView(QWidget* parent = 0);
     ~TaskBoardView();
+
+public slots:
+    void taskDoubleClickedHandler(const QModelIndex& index);
 };
 
 

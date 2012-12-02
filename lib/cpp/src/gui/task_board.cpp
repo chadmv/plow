@@ -144,12 +144,19 @@ TaskBoardView::TaskBoardView(QWidget* parent) :
     QTableView(parent)
 {
 
-
+    connect(this, SIGNAL(doubleClicked(const QModelIndex&)),
+        this, SLOT(taskDoubleClickedHandler(const QModelIndex&)));
 }
 
 TaskBoardView::~TaskBoardView()
 {
 
+}
+
+void TaskBoardView::taskDoubleClickedHandler(const QModelIndex& index) 
+{
+    QString taskId = model()->data(index, Qt::UserRole).toString();
+    //TODO: add log file viewer.
 }
 
 /* TaskBoardModel
@@ -272,6 +279,10 @@ QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
             return PlowStyle::TaskColors[state];
         }
         break;
+
+    case Qt::UserRole:
+        return QString::fromStdString(task.id);
+
     }
 
     return QVariant();
