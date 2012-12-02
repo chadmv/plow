@@ -306,7 +306,7 @@ QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
 
     }
 
-    return QVariant();
+    return EMPTY_VARIANT;
 }
 
 } //
