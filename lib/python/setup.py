@@ -13,6 +13,7 @@ import shutil
 from setuptools import setup, find_packages
 
 ROOT = os.path.dirname(__file__)
+TEMP_BUILD_DIR = os.path.join(ROOT, '__dist__') 
 
 execfile(os.path.join(ROOT, 'plow/version.py'))
 
@@ -20,18 +21,29 @@ execfile(os.path.join(ROOT, 'plow/version.py'))
 def get_data(*paths):
     data = []
     for p in paths:
-        data.extend(glob.iglob(os.path.abspath(os.path.join(ROOT, p))))
+        if not p.startswith(ROOT):
+            p = os.path.join(ROOT, p)
+        data.extend(glob.iglob(os.path.abspath(p)))
     return data
 
+
+def copy_dir(src, dst):
+    if os.path.isdir(src):
+        if os.path.isdir(dst):
+            shutil.rmtree(dst)
+        shutil.copytree(src, dst)    
 
 # manually graft in the parent etc/ directory so we can properly
 # dist it from here
 ETC_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../../etc'))
-ETC_DST_DIR = os.path.join(ROOT, 'etc')
-if os.path.isdir(ETC_SRC_DIR):
-    if os.path.isdir(ETC_DST_DIR):
-        shutil.rmtree(ETC_DST_DIR)
-    shutil.copytree(ETC_SRC_DIR, ETC_DST_DIR)
+ETC_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'etc')
+copy_dir(ETC_SRC_DIR, ETC_DST_DIR)
+
+BIN_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../../bin'))
+BIN_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'bin')
+copy_dir(BIN_SRC_DIR, BIN_DST_DIR)
+
+# open(os.path.join(BIN_DST_DIR, "__init__.py"), 'w').close()
 
 
 setup(
@@ -49,11 +61,20 @@ setup(
         'PyYAML',
     ],
 
+    # scripted functions that will get wrapped
+    # into an entry point script
     entry_points={
         'console_scripts': [
             'rndaemon = plowapp.rndaemon.main:main',
         ],
     },
+
+    # stand-alone scripts from the root bin
+    scripts= \
+        glob.glob(os.path.join(BIN_DST_DIR, "*")) + 
+        [
+            "blueprint/backend/plow_wrapper.sh",
+        ],
 
     # TODO: Some tests need to be made runable without an independant server
     test_suite="tests.test_all",
@@ -69,7 +90,7 @@ setup(
     },
 
     data_files=[
-        ("/usr/local/etc/plow", get_data('etc/plow/*.cfg')),
+        ("/usr/local/etc/plow", get_data(os.path.join(TEMP_BUILD_DIR, 'etc/plow/*.cfg'))),
     ],
 
     # Meta-stuff
@@ -102,3 +123,9 @@ setup(
     ],
 
 )
+
+#
+# Post cleanup
+#
+shutil.rmtree(TEMP_BUILD_DIR)
+

@@ -1,2 +1,2 @@
 global-include *.dylib *.dat *.bp *.ini *.sh
-graft etc
+graft __dist__
