@@ -34,12 +34,13 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             task.startTime = rs.getLong("time_started");
             task.stopTime = rs.getLong("time_stopped");
             task.state = TaskState.findByValue(rs.getInt("int_state"));
-            task.lastMaxRss = rs.getInt("int_last_max_rss");
-            task.lastRss = rs.getInt("int_last_rss");
+            task.cores = rs.getInt("int_cores");
+            task.ramMb = rs.getInt("int_ram");
+            task.maxRamMb = rs.getInt("int_used_ram_max");
+            task.usedRamMb = rs.getInt("int_used_ram");
             task.lastNodeName = rs.getString("str_last_node_name");
             task.lastLogLine = rs.getString("str_last_log_line");
             task.progress = rs.getInt("int_progress");
-            task.lastCores = rs.getInt("int_last_cores");
             return task;
         }
     };
@@ -55,12 +56,14 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "task.time_started, " +
             "task.time_stopped," +
             "task.time_updated,"+
-            "task_dsp.int_last_max_rss,"+
-            "task_dsp.int_last_rss,"+
+            "task_dsp.int_try,"+
+            "task_dsp.int_cores,"+
+            "task_dsp.int_ram,"+
+            "task_dsp.int_used_ram,"+
+            "task_dsp.int_used_ram_max,"+
             "task_dsp.str_last_node_name,"+
             "task_dsp.str_last_log_line,"+
-            "task_dsp.int_progress," +
-            "task_dsp.int_last_cores " +
+            "task_dsp.int_progress " +
         "FROM " +
             "task "+
         "INNER JOIN " +

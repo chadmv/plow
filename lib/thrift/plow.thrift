@@ -187,10 +187,11 @@ struct TaskT {
     8:common.Timestamp stopTime,
     9:string lastNodeName,
     10:string lastLogLine,
-    11:i32 progress,
-    12:i32 lastRss,
-    13:i32 lastCores,
-    14:i32 lastMaxRss
+    11:i32 cores,
+    12:i32 ramMb,
+    13:i32 usedRamMb,
+    14:i32 maxRamMb,
+    15:i32 progress
 }
 
 struct FolderT {
