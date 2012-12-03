@@ -26,9 +26,13 @@ MainWindow::MainWindow()
     Gui::NodeTableWidget *nodeWidget = new Gui::NodeTableWidget(this);
     Gui::NodeTableDockWidget *nodeTableDock = new Gui::NodeTableDockWidget(nodeWidget, this);
 
+    Gui::TaskPieWidget *pieWidget = new Gui::TaskPieWidget(this);
+    Gui::TaskPieDockWidget *pieDock = new Gui::TaskPieDockWidget(pieWidget, this);
+
     addDockWidget(Qt::TopDockWidgetArea, jobBoardDock);
     addDockWidget(Qt::BottomDockWidgetArea, taskBoardDock);
     splitDockWidget(taskBoardDock, nodeTableDock, Qt::Vertical);
+    splitDockWidget(taskBoardDock, pieDock, Qt::Horizontal);
 
     Gui::LogViewer *logView = new Gui::LogViewer(this);
     Gui::LogViewerDockWidget *logViewerDock = new Gui::LogViewerDockWidget(logView, this);

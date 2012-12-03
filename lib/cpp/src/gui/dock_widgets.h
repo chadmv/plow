@@ -7,6 +7,7 @@
 #include "task_board.h"
 #include "nodetablewidget.h"
 #include "logviewer.h"
+#include "task_pie.h"
 #include "event.h"
 
 
@@ -46,6 +47,15 @@ class LogViewerDockWidget: public QDockWidget
 
 public:
     LogViewerDockWidget(LogViewer* logViewer, QWidget* parent=0);
+
+};
+
+class TaskPieDockWidget: public QDockWidget
+{
+    Q_OBJECT
+
+public:
+    TaskPieDockWidget(TaskPieWidget* taskPie, QWidget* parent=0);
 
 };
 

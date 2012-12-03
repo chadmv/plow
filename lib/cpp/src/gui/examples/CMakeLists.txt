@@ -40,3 +40,19 @@ ENDIF()
 
 add_dependencies(logviewer plowgui)
 TARGET_LINK_LIBRARIES(logviewer plowgui ${QT_LIBRARIES})
+
+#
+# Task Pie
+#
+set (taskPie_SOURCE task_pie.cpp)
+
+IF(APPLE)
+        ADD_EXECUTABLE(taskpie MACOSX_BUNDLE
+                ${taskPie_SOURCE})
+ELSEIF(UNIX)
+        ADD_EXECUTABLE(taskpie
+                ${taskPie_SOURCE})
+ENDIF()
+
+add_dependencies(taskpie plowgui)
+TARGET_LINK_LIBRARIES(taskpie plowgui ${QT_LIBRARIES})

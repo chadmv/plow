@@ -31,6 +31,7 @@ public slots:
 
 private slots:    
     void onJobKill();
+    void onTaskPie();
 
 signals:
     void jobSelected(QString id);

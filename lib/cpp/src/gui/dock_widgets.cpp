@@ -34,6 +34,13 @@ LogViewerDockWidget::LogViewerDockWidget(LogViewer* widget, QWidget *parent) :
     setWidget(widget);
 }
 
+
+TaskPieDockWidget::TaskPieDockWidget(TaskPieWidget* widget, QWidget *parent) :
+    QDockWidget("Task Pie", parent)
+{
+    setWidget(widget);
+}
+
 } // Plow
 } // Gui
 
