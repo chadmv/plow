@@ -108,7 +108,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
             "UPDATE " +
                 "plow.task_dsp " +
             "SET " +
-                "int_try = int_try + 1,"+
+                "int_retry = int_retry + 1,"+
                 "int_cores=?,"+
                 "int_ram=?,"+
                 "int_used_ram=0,"+

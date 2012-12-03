@@ -388,9 +388,13 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "layer.str_command, " +
                 "layer.str_name AS layer_name, " +
                 "task.int_number, " +
-                "task.str_name AS task_name " +
+                "task.str_name AS task_name, " +
+                "task_dsp.int_retry " +
             "FROM " +
                 "plow.task " +
+                "INNER JOIN " +
+                    "plow.task_dsp " +
+                        "ON task.pk_task = task_dsp.pk_task " +
                 "INNER JOIN " +
                     "plow.layer " +
                         "ON layer.pk_layer = task.pk_layer " +
@@ -407,9 +411,9 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 throws SQLException {
 
             RunTaskCommand task = new RunTaskCommand();
-            task.logFile = String.format("%s/%s-%s.log",
-                    rs.getString("str_log_path"), rs.getString("layer_name"),
-                    rs.getString("task_name"));
+            task.logFile = String.format("%s/%s.%d.log",
+                    rs.getString("str_log_path"), rs.getString("task_name"),
+                    rs.getInt("int_retry"));
             task.uid = rs.getInt("int_uid");
             task.username = rs.getString("str_username");
             task.env = Maps.newHashMap();

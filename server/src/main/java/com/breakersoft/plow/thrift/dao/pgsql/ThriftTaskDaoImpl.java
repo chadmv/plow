@@ -41,6 +41,7 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             task.lastNodeName = rs.getString("str_last_node_name");
             task.lastLogLine = rs.getString("str_last_log_line");
             task.progress = rs.getInt("int_progress");
+            task.retries = rs.getInt("int_retry");
             return task;
         }
     };
@@ -56,7 +57,7 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "task.time_started, " +
             "task.time_stopped," +
             "task.time_updated,"+
-            "task_dsp.int_try,"+
+            "task_dsp.int_retry,"+
             "task_dsp.int_cores,"+
             "task_dsp.int_ram,"+
             "task_dsp.int_used_ram,"+
@@ -79,15 +80,15 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
 
     private static final String GET_LOG_PATH =
         "SELECT " +
-            "job.str_log_path || '/' || layer.str_name || '-' || task.str_name || '.log' " +
+            "job.str_log_path || '/' || task.str_name || '.' || task_dsp.int_retry || '.log' " +
         "FROM " +
             "plow.task " +
             "INNER JOIN " +
-                "plow.layer " +
-                    "ON layer.pk_layer = task.pk_layer " +
+                "plow.task_dsp " +
+            "ON task.pk_task = task_dsp.pk_task " +
             "INNER JOIN " +
                 "plow.job " +
-                    "ON layer.pk_job = job.pk_job " +
+            "ON task.pk_job = job.pk_job " +
         "WHERE " +
             "task.pk_task = ?";
 

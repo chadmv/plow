@@ -205,7 +205,7 @@ CREATE UNIQUE INDEX task_str_name_pk_job_idx_uniq ON plow.task (str_name, pk_job
 ---
 CREATE TABLE task_dsp (
   pk_task UUID NOT NULL PRIMARY KEY,
-  int_try SMALLINT DEFAULT 0 NOT NULL,
+  int_retry SMALLINT DEFAULT -1 NOT NULL,
   int_cores SMALLINT DEFAULT 0 NOT NULL,
   int_ram INTEGER DEFAULT 0 NOT NULL,
   int_used_ram INTEGER DEFAULT 0 NOT NULL,
