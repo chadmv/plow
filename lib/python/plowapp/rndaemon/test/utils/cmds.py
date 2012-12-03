@@ -11,6 +11,7 @@ import os
 import sys
 import subprocess
 import platform
+import time
 from signal import signal, SIGTERM
 
 import psutil 
@@ -62,14 +63,21 @@ def cpu_affinity(*args):
     spawn(1)
 
 
-def echo_log(log, *args):
+def echo_log(log, pause=0):
     """
     Echo a log file, line by line, to stdout
     """
+    try:
+        pause = float(pause)
+    except:
+        pass
+
     with open(log) as f:
         for line in f:
             sys.stdout.write(line)
             sys.stdout.flush()
+            if pause > 0:
+                time.sleep(pause)
 
 
 def crashing(*args):
