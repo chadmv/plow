@@ -201,7 +201,7 @@ CREATE UNIQUE INDEX task_str_name_pk_job_idx_uniq ON plow.task (str_name, pk_job
 
 ---
 --- Stores runtime status for a task.  This table ensures
---- the data still exists after the process has stopped.  
+--- the data still exists after the process has stopped.
 ---
 CREATE TABLE task_dsp (
   pk_task UUID NOT NULL PRIMARY KEY,
@@ -384,6 +384,7 @@ CREATE TRIGGER trig_after_task_state_change AFTER UPDATE ON plow.task
 CREATE OR REPLACE FUNCTION plow.before_update_set_depend() RETURNS TRIGGER AS $$
 BEGIN
   NEW.int_state := 5;
+  NEW.time_updated := txTimeMillis();
   RETURN NEW;
 END
 $$
@@ -402,6 +403,7 @@ CREATE TRIGGER trig_before_update_set_depend BEFORE UPDATE ON plow.task
 CREATE OR REPLACE FUNCTION plow.before_update_set_waiting() RETURNS TRIGGER AS $$
 BEGIN
   NEW.int_state := 1;
+  NEW.time_updated := txTimeMillis();
   RETURN NEW;
 END
 $$
