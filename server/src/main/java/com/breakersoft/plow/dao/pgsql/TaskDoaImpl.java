@@ -108,19 +108,19 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
             "UPDATE " +
                 "plow.task_dsp " +
             "SET " +
-                "str_last_node_name=?,"+
-                "int_last_cores=?,"+
-                "int_last_ram=?,"+
-                "int_last_rss=0,"+
-                "int_last_max_rss=0,"+
+                "int_retry = int_retry + 1,"+
+                "int_cores=?,"+
+                "int_ram=?,"+
+                "int_used_ram=0,"+
                 "int_progress=0,"+
+                "str_last_node_name=?, "+
                 "str_last_log_line=NULL " +
             "WHERE " +
                 "pk_task=?";
 
     @Override
     public void resetTaskDispatchData(Task task, String host, int cores, int ram) {
-        jdbc.update(RESET_DSP, host, cores, ram, task.getTaskId());
+        jdbc.update(RESET_DSP, cores, ram, host, task.getTaskId());
     }
 
     private static final String[] UPDATE_DSP = {
@@ -137,8 +137,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                 "plow.task_dsp "  +
             "SET " +
                 "str_last_log_line=?," +
-                "int_last_rss=?,"+
-                "int_last_max_rss=?,"+
+                "int_used_ram=?,"+
                 "int_progress=? "+
             "WHERE " +
                 "pk_task=?::uuid "
@@ -155,8 +154,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         if (jdbc.update(UPDATE_DSP[0], runTask.taskId,
                 TaskState.RUNNING.ordinal()) > 0) {
             jdbc.update(UPDATE_DSP[1],
-                lastLog, runTask.maxRss, runTask.maxRss,
-                (int)runTask.progress, runTask.taskId);
+                lastLog, runTask.maxRss, (int)runTask.progress, runTask.taskId);
         }
     }
 

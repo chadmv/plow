@@ -116,6 +116,9 @@ public class TaskDaoTests extends AbstractTest {
 
         testCreate();
 
+        simpleJdbcTemplate.update("UPDATE task SET int_state=? WHERE pk_task=?",
+                TaskState.RUNNING.ordinal(), task.getTaskId());
+
         RunningTask runtask = new RunningTask();
         runtask.taskId = task.getTaskId().toString();
         runtask.lastLog = "foo";
@@ -123,13 +126,13 @@ public class TaskDaoTests extends AbstractTest {
         runtask.progress = 50;
         taskDao.updateTaskDispatchData(runtask);
 
-        Map<String,Object> data = this.simpleJdbcTemplate.queryForMap(
+        Map<String,Object> data = simpleJdbcTemplate.queryForMap(
                 "SELECT * FROM plow.task_dsp WHERE pk_task=?",
                 task.getTaskId());
 
         assertEquals(runtask.lastLog, (String) data.get("str_last_log_line"));
-        assertEquals((Long)runtask.maxRss, Long.valueOf((int) data.get("int_last_max_rss")));
-        //TODO: make progress an i16
+        assertEquals((Long)runtask.maxRss, Long.valueOf((int) data.get("int_used_ram_max")));
+        assertEquals(50, data.get("int_progress"));
     }
 
 }

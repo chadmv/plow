@@ -201,14 +201,15 @@ CREATE UNIQUE INDEX task_str_name_pk_job_idx_uniq ON plow.task (str_name, pk_job
 
 ---
 --- Stores runtime status for a task.  This table ensures
---- the data still exists after the process has stopped.  
+--- the data still exists after the process has stopped.
 ---
 CREATE TABLE task_dsp (
   pk_task UUID NOT NULL PRIMARY KEY,
-  int_last_max_rss INTEGER DEFAULT 0 NOT NULL,
-  int_last_rss INTEGER DEFAULT 0 NOT NULL,
-  int_last_cores SMALLINT DEFAULT 0 NOT NULL,
-  int_last_ram INTEGER DEFAULT 0 NOT NULL,
+  int_retry SMALLINT DEFAULT -1 NOT NULL,
+  int_cores SMALLINT DEFAULT 0 NOT NULL,
+  int_ram INTEGER DEFAULT 0 NOT NULL,
+  int_used_ram INTEGER DEFAULT 0 NOT NULL,
+  int_used_ram_max INTEGER DEFAULT 0 NOT NULL,
   int_progress SMALLINT DEFAULT 0 NOT NULL,
   str_last_log_line TEXT,
   str_last_node_name TEXT
@@ -331,8 +332,6 @@ CREATE TABLE plow.proc (
   pk_task UUID,
   int_cores SMALLINT NOT NULL,
   int_mem INTEGER NOT NULL,
-  int_mem_used INTEGER DEFAULT 0 NOT NULL,
-  int_mem_high INTEGER DEFAULT 0 NOT NULL,
   bool_unbooked BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
@@ -384,6 +383,7 @@ CREATE TRIGGER trig_after_task_state_change AFTER UPDATE ON plow.task
 CREATE OR REPLACE FUNCTION plow.before_update_set_depend() RETURNS TRIGGER AS $$
 BEGIN
   NEW.int_state := 5;
+  NEW.time_updated := txTimeMillis();
   RETURN NEW;
 END
 $$
@@ -402,6 +402,7 @@ CREATE TRIGGER trig_before_update_set_depend BEFORE UPDATE ON plow.task
 CREATE OR REPLACE FUNCTION plow.before_update_set_waiting() RETURNS TRIGGER AS $$
 BEGIN
   NEW.int_state := 1;
+  NEW.time_updated := txTimeMillis();
   RETURN NEW;
 END
 $$
@@ -410,6 +411,25 @@ LANGUAGE plpgsql;
 CREATE TRIGGER trig_before_update_set_waiting BEFORE UPDATE ON plow.task
     FOR EACH ROW WHEN (NEW.int_depend_count=0 AND NEW.int_state=5)
     EXECUTE PROCEDURE plow.before_update_set_waiting();
+
+---
+--- plow.before_update_task_dsp()
+---
+--- Update the int_user_ram_max to a new value if int_used_ram is greater.
+---
+CREATE OR REPLACE FUNCTION plow.before_update_task_dsp() RETURNS TRIGGER AS $$
+BEGIN
+  NEW.int_used_ram_max := NEW.int_used_ram;
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_before_update_task_dsp BEFORE UPDATE ON plow.task_dsp
+    FOR EACH ROW WHEN (NEW.int_used_ram > OLD.int_used_ram_max)
+    EXECUTE PROCEDURE plow.before_update_task_dsp();
+
+
 
 
 ----------------------------------------------------------
