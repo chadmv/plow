@@ -63,9 +63,11 @@ setup(
         'plowapp': [
             'rndaemon/profile/*.dylib',
         ],
+        'blueprint': [
+            'backend/*.sh',
+        ],
     },
 
-    # TODO: Force an installation of confs to /etc/plow ? (would imply sudo)
     data_files=[
         ("/usr/local/etc/plow", get_data('etc/plow/*.cfg')),
     ],
