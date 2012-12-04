@@ -32,8 +32,6 @@ LogViewerDockWidget::LogViewerDockWidget(TabbedLogCollection* widget, QWidget *p
     QDockWidget("Log Viewer", parent)
 {
     setWidget(widget);
-
-    connect(this, SIGNAL(visibilityChanged(bool)), this, SLOT(handleVisibilityChange(bool)));
 }
 
 
@@ -42,12 +40,11 @@ void LogViewerDockWidget::addTask(const QString &taskId) {
     show();
 }
 
-void LogViewerDockWidget::handleVisibilityChange(bool vis) {
-    // TODO: Properly figure out when the dock widget is hidden but NOT
-    // nested as a tab on another dock. If so, then clear all the log tabs.
-//    if (!vis && isFloating())
-//        qobject_cast<TabbedLogCollection*>(widget())->closeAllTabs();
+void LogViewerDockWidget::closeEvent(QCloseEvent *event) {
+    qobject_cast<TabbedLogCollection*>(widget())->closeAllTabs();
+    QDockWidget::closeEvent(event);
 }
+
 
 } // Plow
 } // Gui

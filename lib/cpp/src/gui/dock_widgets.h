@@ -50,8 +50,8 @@ public:
 public slots:
     void addTask(const QString &taskId);
 
-private slots:
-    void handleVisibilityChange(bool);
+protected:
+    void closeEvent(QCloseEvent *event);
 };
 
 } //
