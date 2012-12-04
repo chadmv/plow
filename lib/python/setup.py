@@ -43,8 +43,6 @@ BIN_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../../bin'))
 BIN_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'bin')
 copy_dir(BIN_SRC_DIR, BIN_DST_DIR)
 
-# open(os.path.join(BIN_DST_DIR, "__init__.py"), 'w').close()
-
 
 setup(
 
@@ -71,7 +69,7 @@ setup(
 
     # stand-alone scripts from the root bin
     scripts= \
-        glob.glob(os.path.join(BIN_DST_DIR, "*")) + 
+        [p for p in glob.glob(os.path.join(BIN_DST_DIR, "*")) if not p.endswith('rndaemon')] + 
         [
             "blueprint/backend/plow_wrapper.sh",
         ],
@@ -123,9 +121,4 @@ setup(
     ],
 
 )
-
-#
-# Post cleanup
-#
-shutil.rmtree(TEMP_BUILD_DIR)
 
