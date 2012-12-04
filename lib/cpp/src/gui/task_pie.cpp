@@ -76,8 +76,8 @@ void TaskPieWidget::paintEvent(QPaintEvent * event)
 
 
     p.begin(this);
-    QPen pen = p.pen();
-    // QPen pen = QPen(Qt::NoPen);
+    // QPen pen = p.pen();
+    QPen pen = QPen(Qt::NoPen);
     pen.setColor(QColor(160, 159, 155, 75));
     pen.setWidth(0.541);
     p.setPen(pen);
@@ -110,7 +110,7 @@ void TaskPieWidget::paintEvent(QPaintEvent * event)
         }
         else if (i->state == 1) // waiting
         {
-            p.setBrush(Qt::darkGray);   
+            p.setBrush(QColor(22, 47, 167).darker(150));   
         }
         else if (i->state == 2) // running
         {
@@ -118,7 +118,7 @@ void TaskPieWidget::paintEvent(QPaintEvent * event)
         }        
         else if (i->state == 6) // succeeded
         {
-            p.setBrush(Qt::green);   
+            p.setBrush(QColor(111, 167, 14).darker(150));   
         }
         int index = i-m_tasks.begin();
         p.drawPie(rectangle, index*spanAngle, spanAngle);
