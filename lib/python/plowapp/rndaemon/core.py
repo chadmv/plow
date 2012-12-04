@@ -263,6 +263,7 @@ class _ProcessThread(threading.Thread):
         try:
             logger.info("Opening log file: %s", rtc.logFile)
             self.__logfp = utils.ProcessLog(self.__rtc.logFile)
+            self.__logfp.writeLogHeader(rtc)
 
             env = os.environ.copy()
             env.update(rtc.env)

@@ -28,7 +28,7 @@ NodeTableDockWidget::NodeTableDockWidget(NodeTableWidget* widget, QWidget *paren
 }
 
 
-LogViewerDockWidget::LogViewerDockWidget(LogViewer* widget, QWidget *parent) :
+LogViewerDockWidget::LogViewerDockWidget(TabbedLogCollection* widget, QWidget *parent) :
     QDockWidget("Log Viewer", parent)
 {
     setWidget(widget);
@@ -40,6 +40,17 @@ TaskPieDockWidget::TaskPieDockWidget(TaskPieWidget* widget, QWidget *parent) :
 {
     setWidget(widget);
 }
+
+void LogViewerDockWidget::addTask(const QString &taskId) {
+    qobject_cast<TabbedLogCollection*>(widget())->addTask(taskId);
+    show();
+}
+
+void LogViewerDockWidget::closeEvent(QCloseEvent *event) {
+    qobject_cast<TabbedLogCollection*>(widget())->closeAllTabs();
+    QDockWidget::closeEvent(event);
+}
+
 
 } // Plow
 } // Gui

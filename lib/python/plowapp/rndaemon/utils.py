@@ -27,7 +27,6 @@ class ProcessLog(object):
     def __init__(self, name, mode='w', buffering=-1):
         self.makeLogDir(name)
         self._fileObj = open(name, mode, buffering)
-        self.writeLogHeader()
 
     def __del__(self):
         if self._fileObj is not None:
@@ -36,11 +35,16 @@ class ProcessLog(object):
     def __getattr__(self, name):
         return getattr(self._fileObj, name)
 
-    def writeLogHeader(self):
+    def writeLogHeader(self, rtc):
         self._fileObj.write(
             "Render Process Begin\n" \
             "================================================================\n"
         )
+        self._fileObj.write("COMMAND: %s\n" % " ".join(rtc.command))
+        for key, value in rtc.env.items():
+            self._fileObj.write("ENV: %s=%s\n" % (key, value))
+        self._fileObj.write("================================================================\n")
+
         self._fileObj.flush()
 
     def writeLogFooterAndClose(self, result):

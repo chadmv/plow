@@ -46,8 +46,13 @@ class LogViewerDockWidget: public QDockWidget
     Q_OBJECT
 
 public:
-    LogViewerDockWidget(LogViewer* logViewer, QWidget* parent=0);
+    LogViewerDockWidget(TabbedLogCollection* logViewer, QWidget* parent=0);
 
+public slots:
+    void addTask(const QString &taskId);
+
+protected:
+    void closeEvent(QCloseEvent *event);
 };
 
 class TaskPieDockWidget: public QDockWidget

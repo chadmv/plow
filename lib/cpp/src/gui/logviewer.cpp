@@ -12,14 +12,17 @@
 #include <QPushButton>
 #include <QAction>
 #include <QFileDialog>
+#include <QTabWidget>
 #include <QDebug>
 
-#include "event.h"
 #include "logviewer.h"
 
 namespace Plow {
 namespace Gui {
 
+//
+// LogViewer
+//
 LogViewer::LogViewer(QWidget *parent) :
     QWidget(parent)
 {
@@ -32,8 +35,6 @@ LogViewer::LogViewer(QWidget *parent) :
 
     searchLine = new QLineEdit(this);
     logTailCheckbox = new QCheckBox("Tail log", this);
-    taskSelector = new QComboBox(this);
-    taskSelector->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
     QPushButton *findPrevBtn = new QPushButton("<-", this);
     QPushButton *findNextBtn = new QPushButton("->", this);
@@ -49,10 +50,6 @@ LogViewer::LogViewer(QWidget *parent) :
     controlLayout->addWidget(findNextBtn);
     controlLayout->addStretch();
     controlLayout->addWidget(logTailCheckbox);
-    controlLayout->addStretch();
-    controlLayout->addWidget(new QLabel(tr("Task:")));
-    controlLayout->addSpacing(4);
-    controlLayout->addWidget(taskSelector);
 
     mainLayout->addLayout(controlLayout);
 
@@ -75,32 +72,40 @@ LogViewer::LogViewer(QWidget *parent) :
     // Connections
     connect(logWatcher, SIGNAL(fileChanged(QString)),
             this, SLOT(logUpdated()));
+
     connect(logTailCheckbox, SIGNAL(stateChanged(int)),
             this, SLOT(logTailToggled(int)));
+
     connect(searchLine, SIGNAL(textChanged(QString)),
             this, SLOT(findText(QString)));
-    connect(taskSelector, SIGNAL(activated(int)), this, SLOT(taskSelected(int)));
+
     connect(findPrevBtn, SIGNAL(clicked()), this, SLOT(findPrev()));
     connect(findNextBtn, SIGNAL(clicked()), this, SLOT(findNext()));
     connect(openAction, SIGNAL(triggered()), this, SLOT(openLogFile()));
 
-    connect(EventManager::getInstance(), SIGNAL(jobSelected(QString)),
-            this, SLOT(refreshTasks(QString)));
 }
 
 
 void LogViewer::setCurrentTask(const QString &taskId) {
-    Plow::TaskT aTask = taskMap.value(taskId, Plow::TaskT());
-    if (aTask.id=="" || currentTask == aTask)
+    if (taskId.isEmpty() || currentTask.id == taskId.toStdString())
         return;
 
-    currentTask = aTask;
+    Plow::getTaskById(currentTask, taskId.toStdString());
 
-    std::string logpath;
-    Plow::getTaskLogPath(logpath, currentTask);
-    qDebug() << "Received logpath:" << QString::fromStdString(logpath);
-    if (logpath != "")
-        setLogPath(QString::fromStdString(logpath));
+    std::string c_logpath;
+    Plow::getTaskLogPath(c_logpath, currentTask);
+
+    QString logpath = QString::fromStdString(c_logpath);
+    qDebug() << "Received logpath:" << logpath;
+
+    if (!QFile::exists(logpath)) {
+        qDebug() << "Failed to open file" << logpath;
+        currentTask.id = "";
+        currentTask.name = "";
+        return;
+    }
+
+    setLogPath(logpath);
 
 }
 
@@ -192,33 +197,67 @@ void LogViewer::logTailToggled(int state) {
     }
 }
 
-void LogViewer::refreshTasks(const QString &jobId) {
-    taskMap.clear();
-    taskSelector->clear();
-
-    std::vector<TaskT> taskList;
-    TaskFilterT t_filter;
-
-    t_filter.jobId = jobId.toStdString();
-    getTasks(taskList, t_filter);
-
-    TaskT task;
-    QString name;
-    QString taskId;
-
-    for (int i=0; i < taskList.size(); ++i) {
-        task = taskList.at(i);
-        name = QString::fromStdString(task.name);
-        taskId = QString::fromStdString(task.id);
-        taskMap.insert(taskId, task);
-        taskSelector->addItem(name, QVariant(taskId));
-    }
+QString LogViewer::taskName() const {
+    return QString::fromStdString(currentTask.name);
 }
 
-void LogViewer::taskSelected(int index) {
-    QString taskId = taskSelector->itemData(index).toString();
-    setCurrentTask(taskId);
+QString LogViewer::taskId() const {
+    return QString::fromStdString(currentTask.id);
+}
 
+
+//
+// TabbedLogCollection
+//
+TabbedLogCollection::TabbedLogCollection(QWidget *parent) :
+    QWidget(parent),
+    tabWidget(new QTabWidget(this))
+{
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->addWidget(tabWidget);
+
+    tabWidget->setMovable(false);
+    tabWidget->setTabsClosable(true);
+
+    setLayout(mainLayout);
+
+    connect(tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
+}
+
+void TabbedLogCollection::addTask(const QString &taskId) {
+    if (taskIndex.contains(taskId)) {
+        for (int i=0; i < tabWidget->count(); ++i) {
+            if (qobject_cast<LogViewer*>(tabWidget->widget(i))->taskId() == taskId) {
+                tabWidget->setCurrentIndex(i);
+                break;
+            }
+        }
+        return;
+    }
+
+    LogViewer *logView = new LogViewer(this);
+    logView->setCurrentTask(taskId);
+    if (logView->taskId().isEmpty()) {
+        qDebug() << "Got empty log view. Removing it.";
+        delete logView;
+        return;
+    }
+
+    tabWidget->addTab(logView, logView->taskName());
+    tabWidget->setCurrentWidget(logView);
+    taskIndex.insert(taskId);
+}
+
+void TabbedLogCollection::closeTab(int index) {
+    LogViewer *logview = qobject_cast<LogViewer*>(tabWidget->widget(index));
+    tabWidget->removeTab(index);
+    taskIndex.remove(logview->taskId());
+    delete logview;
+}
+
+void TabbedLogCollection::closeAllTabs() {
+    while (tabWidget->count())
+        closeTab(0);
 }
 
 }  // Gui

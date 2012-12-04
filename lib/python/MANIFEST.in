@@ -1,2 +1,2 @@
-recursive-include python *.dylib *.dat *.bp *.ini
-graft etc
+global-include *.dylib *.dat *.bp *.ini *.sh
+graft __dist__

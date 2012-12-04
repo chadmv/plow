@@ -34,11 +34,12 @@ MainWindow::MainWindow()
     splitDockWidget(taskBoardDock, nodeTableDock, Qt::Vertical);
     splitDockWidget(taskBoardDock, pieDock, Qt::Horizontal);
 
-    Gui::LogViewer *logView = new Gui::LogViewer(this);
+    Gui::TabbedLogCollection *logView = new Gui::TabbedLogCollection(this);
     Gui::LogViewerDockWidget *logViewerDock = new Gui::LogViewerDockWidget(logView, this);
-    logViewerDock->setFloating(true);
     logViewerDock->resize(600,600);
-    logViewerDock->move(this->geometry().topRight()-QPoint(250,100));
+    logViewerDock->hide();
+    logViewerDock->setFloating(true);
+    connect(taskBoard, SIGNAL(logFileViewRequested(QString)), logViewerDock, SLOT(addTask(QString)));
 
     nodeWidget->load();
 }

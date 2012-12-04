@@ -62,7 +62,10 @@ public:
     TaskBoardView(QWidget* parent = 0);
     ~TaskBoardView();
 
-public slots:
+signals:
+    void logFileViewRequested(const QString&);
+
+private slots:
     void taskDoubleClickedHandler(const QModelIndex& index);
 };
 
@@ -85,6 +88,9 @@ public:
 
 public slots:
     void handleJobSelected(const QString& id);
+
+signals:
+    void logFileViewRequested(const QString&);
 
 private slots:
     void refreshModel();

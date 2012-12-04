@@ -75,6 +75,9 @@ TaskBoardWidget::TaskBoardWidget(QWidget* parent) :
     m_model = 0;
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(refreshModel()));
+
+    connect(m_view, SIGNAL(logFileViewRequested(QString)),
+            this, SIGNAL(logFileViewRequested(QString)));
 }
 
 TaskBoardWidget::~TaskBoardWidget()
@@ -97,7 +100,7 @@ void TaskBoardWidget::handleJobSelected(const QString& id)
     setJob(job);
 }
 
-void  TaskBoardWidget::setJob(const JobT& job)
+void TaskBoardWidget::setJob(const JobT& job)
 {
     // Stop the timer
     m_timer->stop();
@@ -161,7 +164,7 @@ TaskBoardView::~TaskBoardView()
 void TaskBoardView::taskDoubleClickedHandler(const QModelIndex& index) 
 {
     QString taskId = model()->data(index, Qt::UserRole).toString();
-    //TODO: add log file viewer.
+    emit logFileViewRequested(taskId);
 }
 
 
