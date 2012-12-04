@@ -17,3 +17,4 @@ bin/dev.sh
 lib/cpp/src/gui/examples/*.app
 lib/python/etc
 *.user
+lib/python/__dist__
