@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     w.setWindowTitle("Log Viewer");
 
     Plow::Gui::LogViewer loggy;
+    loggy.setInterval(3000); // check log every 3 seconds
     w.setCentralWidget(&loggy);
     w.show();
 

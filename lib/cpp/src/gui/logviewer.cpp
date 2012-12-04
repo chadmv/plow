@@ -1,8 +1,6 @@
 #include <QPlainTextEdit>
-#include <QFileSystemWatcher>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QStringList>
 #include <QLineEdit>
 #include <QComboBox>
 #include <QCheckBox>
@@ -19,6 +17,39 @@
 
 namespace Plow {
 namespace Gui {
+
+//
+// FileWatcher
+//
+FileWatcher::FileWatcher(QObject *parent) :
+    QObject(parent)
+{
+    watchTimer = new QTimer(this);
+    watchTimer->setInterval(5000);
+    connect(watchTimer, SIGNAL(timeout()), this, SLOT(checkFiles()));
+}
+
+void FileWatcher::checkFiles() {
+    if (watchedFiles.isEmpty())
+        return;
+
+    QFileInfo info;
+    QString aFile;
+    QDateTime mtime;
+
+    QMap<QString, QDateTime>::iterator i;
+    for (i = watchedFiles.begin(); i != watchedFiles.end(); ++i) {
+        aFile = i.key();
+        info.setFile(aFile);
+        mtime = info.lastModified();
+        if (i.value() != mtime) {
+            i.value() = mtime;
+            qDebug() << "File modified:" << aFile;
+            emit fileChanged(aFile);
+        }
+    }
+}
+
 
 //
 // LogViewer
@@ -67,7 +98,7 @@ LogViewer::LogViewer(QWidget *parent) :
 
     setLayout(mainLayout);
 
-    logWatcher = new QFileSystemWatcher(this);
+    logWatcher = new FileWatcher(this);
 
     // Connections
     connect(logWatcher, SIGNAL(fileChanged(QString)),
@@ -211,6 +242,7 @@ QString LogViewer::taskId() const {
 //
 TabbedLogCollection::TabbedLogCollection(QWidget *parent) :
     QWidget(parent),
+    m_interval(15000),
     tabWidget(new QTabWidget(this))
 {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -236,6 +268,7 @@ void TabbedLogCollection::addTask(const QString &taskId) {
     }
 
     LogViewer *logView = new LogViewer(this);
+    logView->setInterval(m_interval);
     logView->setCurrentTask(taskId);
     if (logView->taskId().isEmpty()) {
         qDebug() << "Got empty log view. Removing it.";
@@ -243,7 +276,9 @@ void TabbedLogCollection::addTask(const QString &taskId) {
         return;
     }
 
-    tabWidget->addTab(logView, logView->taskName());
+    QString name = logView->taskName();
+    int idx = tabWidget->addTab(logView, name);
+    tabWidget->setTabToolTip(idx, name);
     tabWidget->setCurrentWidget(logView);
     taskIndex.insert(taskId);
 }
@@ -258,6 +293,15 @@ void TabbedLogCollection::closeTab(int index) {
 void TabbedLogCollection::closeAllTabs() {
     while (tabWidget->count())
         closeTab(0);
+}
+
+void TabbedLogCollection::setInterval(int msec) {
+    LogViewer *logview;
+    m_interval = msec;
+    for (int i=0; i < tabWidget->count(); ++i) {
+        logview = qobject_cast<LogViewer*>(tabWidget->widget(i));
+        logview->setInterval(m_interval);
+    }
 }
 
 }  // Gui

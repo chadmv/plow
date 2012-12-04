@@ -31,6 +31,7 @@ MainWindow::MainWindow()
     splitDockWidget(taskBoardDock, nodeTableDock, Qt::Vertical);
 
     Gui::TabbedLogCollection *logView = new Gui::TabbedLogCollection(this);
+    logView->setInterval(5000); // Check files every 5 seconds
     Gui::LogViewerDockWidget *logViewerDock = new Gui::LogViewerDockWidget(logView, this);
     logViewerDock->resize(600,600);
     logViewerDock->hide();
