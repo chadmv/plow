@@ -244,6 +244,7 @@ void TabbedLogCollection::addTask(const QString &taskId) {
     }
 
     tabWidget->addTab(logView, logView->taskName());
+    tabWidget->setCurrentWidget(logView);
     taskIndex.insert(taskId);
 }
 
