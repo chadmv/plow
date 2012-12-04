@@ -36,7 +36,6 @@ class ProcessLog(object):
         return getattr(self._fileObj, name)
 
     def writeLogHeader(self, rtc):
-        logger.info("writing log header")
         self._fileObj.write(
             "Render Process Begin\n" \
             "================================================================\n"
