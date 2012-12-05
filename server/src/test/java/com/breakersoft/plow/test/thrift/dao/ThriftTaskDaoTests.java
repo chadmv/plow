@@ -8,8 +8,6 @@ import java.util.UUID;
 import javax.annotation.Resource;
 
 import org.junit.Test;
-import org.springframework.test.annotation.Rollback;
-
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;

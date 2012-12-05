@@ -70,7 +70,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                     "pk_task",
                     "pk_job",
                     "int_cores",
-                    "int_mem");
+                    "int_ram");
 
     @Override
     public void create(DispatchProc proc) {

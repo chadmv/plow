@@ -122,7 +122,7 @@ public class TaskDaoTests extends AbstractTest {
         RunningTask runtask = new RunningTask();
         runtask.taskId = task.getTaskId().toString();
         runtask.lastLog = "foo";
-        runtask.maxRss = 999;
+        runtask.rssMb = 999;
         runtask.progress = 50;
         taskDao.updateTaskDispatchData(runtask);
 
@@ -131,7 +131,7 @@ public class TaskDaoTests extends AbstractTest {
                 task.getTaskId());
 
         assertEquals(runtask.lastLog, (String) data.get("str_last_log_line"));
-        assertEquals((Long)runtask.maxRss, Long.valueOf((int) data.get("int_used_ram_max")));
+        assertEquals((Integer)runtask.rssMb, Integer.valueOf((int) data.get("int_used_ram_max")));
         assertEquals(50, data.get("int_progress"));
     }
 

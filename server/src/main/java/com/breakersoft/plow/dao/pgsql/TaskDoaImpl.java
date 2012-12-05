@@ -154,7 +154,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         if (jdbc.update(UPDATE_DSP[0], runTask.taskId,
                 TaskState.RUNNING.ordinal()) > 0) {
             jdbc.update(UPDATE_DSP[1],
-                lastLog, runTask.maxRss, (int)runTask.progress, runTask.taskId);
+                lastLog, runTask.rssMb, (int)runTask.progress, runTask.taskId);
         }
     }
 

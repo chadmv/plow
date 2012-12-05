@@ -260,7 +260,7 @@ class _ProcessThread(threading.Thread):
 
         self.__metricsLock = threading.Lock()
         self.__metrics = {
-            'rss': 0,
+            'rssMb': 0,
             'cpuPercent': 0,
         }
 
@@ -405,7 +405,7 @@ class _ProcessThread(threading.Thread):
 
         with self.__metricsLock:
             self.__metrics.update({
-                'rss': rss_bytes,
+                'rssMb': rss_bytes / 1024 / 1024,
                 'cpuPercent': cpu_perc,
             })
             # logger.debug("metrics: %s", self.__metrics)
@@ -486,7 +486,7 @@ class _ProcessThread(threading.Thread):
         result.procId = self.__rtc.procId
         result.taskId = self.__rtc.taskId
         result.jobId = self.__rtc.jobId
-        result.maxRss = 0
+        result.maxRssMb = 0
 
         if self.__wasKilled:
             result.exitStatus = 1
@@ -497,6 +497,8 @@ class _ProcessThread(threading.Thread):
         else:
             result.exitStatus = retcode
             result.exitSignal = 0
+
+        max
 
         logger.info("Process result %s", result)
         if not conf.NETWORK_DISABLED:

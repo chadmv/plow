@@ -1,4 +1,12 @@
-
+/**
+ *
+ * Table suffixes.
+ * No suffix - state/configuration data.
+ * _ping - data that is updated via RnDaemon pings
+ * _dsp - data that is updated via dispatch
+ * _count - counts maintained by triggers
+ *
+ */
 CREATE SCHEMA plow;
 CREATE LANGUAGE plpgsql;
 
@@ -110,6 +118,14 @@ CREATE TABLE plow.job_count (
   int_depend INTEGER NOT NULL DEFAULT 0
 ) WITHOUT OIDS;
 
+---
+
+CREATE TABLE plow.job_ping (
+  pk_job UUID NOT NULL PRIMARY KEY,
+  int_max_rss INTEGER NOT NULL DEFAULT 0,
+  int_max_cpu_perc SMALLINT NOT NULL DEFAULT 0
+);
+
 ----------------------------------------------------------
 
 ---
@@ -127,7 +143,7 @@ CREATE table plow.layer (
   int_order INTEGER NOT NULL,
   int_min_cores SMALLINT NOT NULL,
   int_max_cores SMALLINT NOT NULL,
-  int_min_mem INTEGER NOT NULL
+  int_min_ram INTEGER NOT NULL
 ) WITHOUT OIDS;
 
 CREATE INDEX layer_pk_job_idx ON plow.layer (pk_job);
@@ -155,6 +171,13 @@ CREATE INDEX layer_count_int_waiting_idx ON plow.layer_count (int_waiting);
 CREATE TABLE plow.layer_dsp (
   pk_layer UUID NOT NULL PRIMARY KEY,
   int_run_cores INTEGER NOT NULL DEFAULT 0
+);
+
+
+CREATE TABLE plow.layer_ping (
+  pk_layer UUID NOT NULL PRIMARY KEY,
+  int_max_rss INTEGER NOT NULL DEFAULT 0,
+  int_max_cpu_perc SMALLINT NOT NULL DEFAULT 0
 );
 
 ---
@@ -287,8 +310,8 @@ CREATE TABLE plow.node_sys (
   pk_node UUID NOT NULL PRIMARY KEY,
   int_phys_cores SMALLINT NOT NULL,
   int_log_cores SMALLINT NOT NULL,
-  int_memory INTEGER NOT NULL,
-  int_free_memory INTEGER NOT NULL,
+  int_ram INTEGER NOT NULL,
+  int_free_ram INTEGER NOT NULL,
   int_swap INTEGER NOT NULL,
   int_free_swap INTEGER NOT NULL,
   time_booted BIGINT NOT NULL,
@@ -301,9 +324,9 @@ CREATE TABLE plow.node_sys (
 CREATE TABLE plow.node_dsp (
   pk_node UUID NOT NULL PRIMARY KEY,
   int_cores SMALLINT NOT NULL,
-  int_memory INTEGER NOT NULL,
+  int_ram INTEGER NOT NULL,
   int_idle_cores SMALLINT NOT NULL,
-  int_free_memory INTEGER NOT NULL
+  int_free_ram INTEGER NOT NULL
 ) WITHOUT OIDS;
 
 ---
@@ -331,7 +354,7 @@ CREATE TABLE plow.proc (
   pk_job UUID NOT NULL,
   pk_task UUID,
   int_cores SMALLINT NOT NULL,
-  int_mem INTEGER NOT NULL,
+  int_ram INTEGER NOT NULL,
   bool_unbooked BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
