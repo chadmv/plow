@@ -12,6 +12,7 @@
 #include <QTimer>
 #include <QFileInfo>
 #include <QDateTime>
+#include <QSyntaxHighlighter>
 
 #include "plow/plow.h"
 
@@ -83,6 +84,33 @@ class FileWatcher : public QObject
 };
 
 
+// TextHighlighter
+class TextHighlighter : public QSyntaxHighlighter
+{
+    Q_OBJECT
+ public:
+    explicit TextHighlighter(QTextDocument *parent = 0);
+
+ public slots:
+    void setFoundMatchText(const QString&);
+
+ protected:
+    void highlightBlock(const QString &text);
+
+ private:
+    struct HighlightingRule
+    {
+        QRegExp pattern;
+        QTextCharFormat format;
+    };
+    QVector<HighlightingRule> highlightingRules;
+    HighlightingRule foundMatchRule;
+    QTextCharFormat foundMatchFormat;
+    QTextCharFormat errorFormat;
+    QTextCharFormat warningFormat;
+};
+
+
 // LogViewer
 class LogViewer : public QWidget
 {
@@ -118,6 +146,7 @@ class LogViewer : public QWidget
 
  private:
     QPlainTextEdit *view;
+    TextHighlighter *highlighter;
     QLineEdit *searchLine;
     QCheckBox *logTailCheckbox;
 
