@@ -31,10 +31,11 @@ struct RunningTask {
     1:common.Guid procId,
     2:common.Guid taskId,
     3:common.Guid jobId,
-    4:i64 maxRss,
+    4:i64 rss,
     5:i32 pid,
     6:optional double progress = 0.0,
-    7:optional string lastLog = ""
+    7:optional string lastLog = "",
+    8:i16 cpuPercent
 }
 
 struct RunTaskResult {

@@ -5,6 +5,7 @@ import logging
 import time
 import os
 import traceback
+import errno
 
 from collections import namedtuple
 
@@ -26,6 +27,9 @@ __all__ = ['Profiler', 'ResourceMgr', 'ProcessMgr']
 _RunningProc = namedtuple("RunningProc", "processCmd pthread cpus")
 
 
+#
+# _ResourceManager
+#
 class _ResourceManager(object):
     """
     The ResourceManager keeps track of the bookable resources on the
@@ -42,8 +46,7 @@ class _ResourceManager(object):
         if numCores < 1:
             raise ttypes.RndException(1, "Cannot reserve 0 slots")
 
-        self.__lock.acquire(True)
-        try:
+        with self.__lock:
             open_slots = self.getOpenSlots()
             logger.info(open_slots)
             if numCores > len(open_slots):
@@ -53,19 +56,14 @@ class _ResourceManager(object):
                 self.__slots[i] = 1
             logger.info("Checked out CPUS: %s", result)
             return result
-        finally:
-            self.__lock.release()
 
     def checkin(self, cores):
-        self.__lock.acquire(True)
-        try:
+        with self.__lock:
             for core in cores:
                 if self.__slots[core] == 1:
                     self.__slots[core] = 0
                 else:
                     logger.warn("Failed to check in core: %d", core)
-        finally:
-            self.__lock.release()
         logger.info("Checked in CPUS: %s", cores)
 
     def getSlots(self):
@@ -75,17 +73,26 @@ class _ResourceManager(object):
         return [slot for slot in self.__slots if self.__slots[slot] == 0]
 
 
+#
+# _ProcessManager
+#
 class _ProcessManager(object):
     """
     The ProcessManager keeps track of the running tasks.  Each task
     is executed in a separate ProcessThread.
     """
 
+    SAMPLE_INTERVAL_SEC = 10
+
     def __init__(self):
         self.__threads = {}
-        self.__lock = threading.Lock()
+        self.__lock = threading.RLock()
         self.__timer = None 
         self.__isReboot = threading.Event()
+
+        self.__sampler = threading.Thread(target=self._processSampler)
+        self.__sampler.daemon = True 
+        self.__sampler.start()
 
         self.sendPing(True)
 
@@ -112,7 +119,8 @@ class _ProcessManager(object):
         # reboot state.
         isReboot = self.__isReboot.isSet()
 
-        tasks = self.getRunningTasks()
+        with self.__lock:
+            tasks = self.getRunningTasks()
         Profiler.sendPing(tasks, isReboot)
 
         # TODO: Maybe there needs to be a seperate thread for this check
@@ -194,7 +202,24 @@ class _ProcessManager(object):
         else:
             logger.info("*Reboot scheduled at next idle event*")
 
+    def _processSampler(self):
+        """
+        Loop that updates metrics on every running process 
+        at intervals.
+        """
+        while True:
+            with self.__lock:
+                pthreads = [t.pthread for t in self.__threads.itervalues()]
 
+            for pthread in pthreads:
+                pthread.updateMetrics()
+
+            time.sleep(self.SAMPLE_INTERVAL_SEC)
+
+
+#
+# RunningTask
+#
 class RunningTask(ttypes.RunningTask):
     def __repr__(self):
         D = self.__dict__.copy()
@@ -208,6 +233,9 @@ class RunningTask(ttypes.RunningTask):
         return '%s(%s)' % (self.__class__.__name__, ', '.join(L))        
 
 
+#
+# _ProcessThread
+#
 class _ProcessThread(threading.Thread):
     """
     The _ProcessThread wraps a running task.
@@ -230,11 +258,18 @@ class _ProcessThread(threading.Thread):
         self.__progress = 0.0
         self.__lastLog = ""
 
+        self.__metricsLock = threading.Lock()
+        self.__metrics = {
+            'rss': 0,
+            'cpuPercent': 0,
+        }
+
     def __repr__(self):
         return "<%s: (procId: %s, pid: %d)>" % (
             self.__class__.__name__, 
             self.__rtc.procId, 
             self.__pid)
+
 
     def getRunningTask(self):
         """
@@ -247,8 +282,11 @@ class _ProcessThread(threading.Thread):
         rt.jobId = self.__rtc.jobId
         rt.procId = self.__rtc.procId
         rt.taskId = self.__rtc.taskId
-        rt.maxRss = 0
         rt.pid = self.__pid
+
+        with self.__metricsLock:
+            rt.rss = self.__metrics['rss']
+            rt.cpuPercent = self.__metrics['cpuPercent']
 
         with self.__progressLock:
             rt.progress = self.__progress 
@@ -290,6 +328,8 @@ class _ProcessThread(threading.Thread):
             self.__pid = p.pid
             logger.info("PID: %d", self.__pid)
 
+            self.updateMetrics()
+
             writeLog = self.__logfp.write
             r_pipe = self.__pptr.stdout 
             lock = self.__progressLock
@@ -305,9 +345,16 @@ class _ProcessThread(threading.Thread):
                         if prog is not None:
                             self.__progress = prog 
 
+            try:
+                retcode = p.wait()
+            except OSError, e:
+                if e.errno == errno.ECHILD:
+                    pass
+                else:
+                    raise
+
             r_pipe.close()
 
-            retcode = p.wait()
             logger.debug("Return code: %s", retcode)
 
         except Exception, e:
@@ -316,6 +363,52 @@ class _ProcessThread(threading.Thread):
 
         finally:
             self.__completed(retcode)
+
+    def updateMetrics(self):
+        """
+        updateMetrics()
+
+        Resample information about the currently running 
+        process tree, and update member attributes. 
+
+        i.e. rss 
+        """
+        # logger.debug("updateMetrics(): %r", self)
+        try:
+            p = psutil.Process(self.__pid)
+        except psutil.NoSuchProcess:
+            return
+
+        rss_bytes = 0
+        cpu_perc = 0
+
+        try:
+            rss_bytes = p.get_memory_info().rss
+            cpu_perc = p.get_cpu_percent(None)
+        except psutil.Error:
+            return
+
+        children = [child for child in p.get_children(True) 
+                        if child.status != psutil.STATUS_ZOMBIE]
+
+        for child in children:
+            try:
+                rss_bytes += child.get_memory_info().rss
+            except psutil.Error:
+                pass            
+            try:
+                cpu_perc += child.get_cpu_percent(None) 
+            except psutil.Error:
+                pass
+        
+        cpu_perc = int(round(cpu_perc))
+
+        with self.__metricsLock:
+            self.__metrics.update({
+                'rss': rss_bytes,
+                'cpuPercent': cpu_perc,
+            })
+            # logger.debug("metrics: %s", self.__metrics)
 
     def killProcess(self):
         """
@@ -422,6 +515,9 @@ class _ProcessThread(threading.Thread):
             self.__logfp.writeLogFooterAndClose(result)
 
 
+#
+# Singleton Instances
+#
 Profiler = _SystemProfiler()
 ResourceMgr = _ResourceManager()
 ProcessMgr = _ProcessManager()
