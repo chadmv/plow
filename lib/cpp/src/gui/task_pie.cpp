@@ -3,6 +3,7 @@
 
 #include "task_pie.h"
 #include "event.h"
+#include "common.h"
 
 namespace Plow {
 namespace Gui {
@@ -59,34 +60,51 @@ void TaskPieWidget::paintEvent(QPaintEvent * event)
 {
 
     QPainter p;
-    QBrush brush(Qt::lightGray, Qt::SolidPattern);
+    
 
     int w = this->width();
     int h = this->height();
 
-    QLinearGradient grad(w/2, h, w/2, 0);
-    grad.setColorAt(0, Qt::darkGray);
-    grad.setColorAt(1, Qt::white);
+    // QLinearGradient grad(w/2, h, w/2, 0);
+    // grad.setColorAt(0, Qt::darkGray);
+    // grad.setColorAt(1, Qt::white);
 
-    float spanAngle = 5760/10;
+    float spanAngle = 576.0;
     if (m_tasks.size() > 0)
     {       
-        spanAngle = 5760/m_tasks.size();
+        spanAngle = 5760.0/m_tasks.size();
+        // qDebug("%f", spanAngle);
     }
 
 
     p.begin(this);
     // QPen pen = p.pen();
+    
+    p.setRenderHint(QPainter::Antialiasing);
+
+    int padding = 50;
+    int pieDiameter = w-padding;
+    int pieHoriz = (w-pieDiameter)/2;
+    int pieVert = (h-pieDiameter)/2;
+    if ((w+padding) > (h+padding)) 
+    {
+        pieDiameter = h-padding;
+        pieHoriz = (w-pieDiameter)/2;
+        pieVert = (h-pieDiameter)/2;
+    }
+    
+    QRectF rectangle(pieHoriz, pieVert, pieDiameter, pieDiameter);
+    
+    p.setBrush(Qt::NoBrush);
+    // p.drawRect(rectangle);
+    
+    QBrush brush(Qt::lightGray, Qt::SolidPattern);
+    p.setBrush(brush);
     QPen pen = QPen(Qt::NoPen);
     pen.setColor(QColor(160, 159, 155, 75));
     pen.setWidth(0.541);
     p.setPen(pen);
 
-    p.setBrush(brush);
-    p.setRenderHint(QPainter::Antialiasing);
-
-    QRectF rectangle(2, 2, w-2, h-2);
-  
     //   enum TaskState {
     //     INITIALIZE,
     //     WAITING,
@@ -97,29 +115,20 @@ void TaskPieWidget::paintEvent(QPaintEvent * event)
     //     SUCCEEDED
     // }
 
+   
     for (std::vector<TaskT>::iterator i = m_tasks.begin();
                                       i != m_tasks.end();
                                       ++i)
     {
         // std::cout << i->progress << std::endl;
-        
+
         p.setBrush(Qt::gray);
-        if (i->state == 3 || i->state == 4) // dead, eaten
-        {
-            p.setBrush(QColor(167, 20, 14).darker(150));
-        }
-        else if (i->state == 1) // waiting
-        {
-            p.setBrush(QColor(22, 47, 167).darker(150));   
-        }
-        else if (i->state == 2) // running
-        {
-            p.setBrush(QColor(167, 159, 22).darker(150));   
-        }        
-        else if (i->state == 6) // succeeded
-        {
-            p.setBrush(QColor(111, 167, 14).darker(150));   
-        }
+        QColor sliceColor = QColor(PlowStyle::TaskColors[i->state]);
+        
+
+        p.setPen(sliceColor);
+        p.setBrush(sliceColor);   
+
         int index = i-m_tasks.begin();
         p.drawPie(rectangle, index*spanAngle, spanAngle);
         // std::cout << i->state << std::endl;
