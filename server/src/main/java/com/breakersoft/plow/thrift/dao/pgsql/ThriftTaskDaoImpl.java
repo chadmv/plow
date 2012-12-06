@@ -38,6 +38,9 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             task.ramMb = rs.getInt("int_ram");
             task.maxRssMb = rs.getInt("int_max_rss");
             task.rssMb = rs.getInt("int_rss");
+            task.maxRssMb = rs.getInt("int_max_rss");
+            task.cpuPerc = rs.getShort("int_cpu_perc");
+            task.maxCpuPerc = rs.getShort("int_max_cpu_perc");
             task.lastNodeName = rs.getString("str_last_node_name");
             task.lastLogLine = rs.getString("str_last_log_line");
             task.progress = rs.getInt("int_progress");
@@ -62,6 +65,8 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "task.int_ram,"+
             "task_ping.int_rss,"+
             "task_ping.int_max_rss,"+
+            "task_ping.int_cpu_perc,"+
+            "task_ping.int_max_cpu_perc,"+
             "task_ping.str_last_node_name,"+
             "task_ping.str_last_log_line,"+
             "task_ping.int_progress " +

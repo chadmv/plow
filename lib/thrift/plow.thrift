@@ -161,8 +161,7 @@ struct JobT {
     11:common.Timestamp startTime,
     12:common.Timestamp stopTime,
     13:TaskTotalsT totals,
-    14:i32 maxRssMb,
-    15:i16 maxCpuPerc
+    14:i32 maxRssMb
 }
 
 struct LayerT {
@@ -196,7 +195,9 @@ struct TaskT {
     13:i32 ramMb,
     14:i32 rssMb,
     15:i32 maxRssMb,
-    16:i32 progress
+    16:i16 cpuPerc,
+    17:i16 maxCpuPerc,
+    18:i32 progress
 }
 
 struct FolderT {
