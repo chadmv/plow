@@ -24,11 +24,11 @@ JobBoardWidget::JobBoardWidget(QWidget *parent) :
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     QStringList header;
-    header << "Job" << "Cores" << "Max" << "Waiting" << "Progress";
+    header << "Job" << "Cores" << "Min" << "Waiting" << "MaxRSS" << "Progress";
 
     treeWidget->setHeaderLabels(header);
-    treeWidget->setColumnCount(5);
-    treeWidget->setColumnWidth(0, 300);
+    treeWidget->setColumnCount(6);
+    treeWidget->setColumnWidth(0, 400);
     treeWidget->setContextMenuPolicy(Qt::ActionsContextMenu);
     treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
     layout->addWidget(treeWidget);
@@ -107,8 +107,9 @@ void JobBoardWidget::addJobItem(QTreeWidgetItem *parent, JobT* job)
     QStringList data;
     data << QString::fromStdString(job->name)
          << QString::number(job->runCores)
-         << QString::number(job->maxCores)
-         << QString::number(job->totals.waitingTaskCount);
+         << QString::number(job->minCores)
+         << QString::number(job->totals.waitingTaskCount)
+         << QString::number(job->maxRssMb).append("MB");
 
     QTreeWidgetItem *jobItem = new QTreeWidgetItem((QTreeWidget*)0, data);
     jobItem->setData(0, Qt::UserRole+1, updateCounter);  
@@ -123,7 +124,7 @@ QTreeWidgetItem* JobBoardWidget::addFolderItem(FolderT* folder)
     QStringList data;
     data << QString::fromStdString(folder->name)
          << QString::number(folder->runCores)
-         << QString::number(folder->maxCores)
+         << QString::number(folder->minCores)
          << QString::number(folder->totals.waitingTaskCount);
 
     QTreeWidgetItem *folderItem = new QTreeWidgetItem((QTreeWidget*)0, data);
@@ -156,7 +157,7 @@ void JobBoardWidget::refresh()
             folderItem = items[i->id];
             folderItem->setText(0, i->name.c_str());
             folderItem->setText(1, QString::number(i->runCores));
-            folderItem->setText(2, QString::number(i->maxCores));
+            folderItem->setText(2, QString::number(i->minCores));
             folderItem->setText(3, QString::number(i->totals.waitingTaskCount));
             folderItem->setData(0, Qt::UserRole+1, updateCounter);
         }
@@ -174,8 +175,9 @@ void JobBoardWidget::refresh()
                 
                 QTreeWidgetItem *jobItem = items[j->id];
                 jobItem->setText(1, QString::number(j->runCores));
-                jobItem->setText(2, QString::number(j->maxCores));
+                jobItem->setText(2, QString::number(j->minCores));
                 jobItem->setText(3, QString::number(j->totals.waitingTaskCount));
+                jobItem->setText(4, QString::number(j->maxRssMb).append("MB"));
                 jobItem->setData(0, Qt::UserRole+1, updateCounter);       
 
                 // do we need to delete the simpleProgress widget or is this handled by the treeWidget?
@@ -193,7 +195,7 @@ void JobBoardWidget::refresh()
                                                 .arg(j->totals.deadTaskCount);
 
                 jobItem->setToolTip(4, toolTipString);
-                treeWidget->setItemWidget(jobItem, 4, simpleProgress);
+                treeWidget->setItemWidget(jobItem, 5, simpleProgress);
             }
             else
             {
