@@ -389,12 +389,9 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "layer.str_name AS layer_name, " +
                 "task.int_number, " +
                 "task.str_name AS task_name, " +
-                "task_dsp.int_retry " +
+                "task.int_retry " +
             "FROM " +
                 "plow.task " +
-                "INNER JOIN " +
-                    "plow.task_dsp " +
-                        "ON task.pk_task = task_dsp.pk_task " +
                 "INNER JOIN " +
                     "plow.layer " +
                         "ON layer.pk_layer = task.pk_layer " +
@@ -417,7 +414,6 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             task.uid = rs.getInt("int_uid");
             task.username = rs.getString("str_username");
             task.env = Maps.newHashMap();
-
             task.command = Arrays.asList((String[])rs.getArray("str_command").getArray());
             for (int i=0; i<task.command.size(); i++) {
                 String part = task.command.get(i);
@@ -443,10 +439,12 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         command.jobId = task.getJobId().toString();
         command.taskId = task.getTaskId().toString();
         command.procId = proc.getProcId().toString();
+        command.layerId = task.getLayerId().toString();
         command.cores = proc.getCores();
         command.env.put("PLOW_TASK_ID", command.taskId);
         command.env.put("PLOW_JOB_ID", command.jobId);
         command.env.put("PLOW_PROC_ID", command.procId);
+        command.env.put("PLOW_LAYER_ID", command.layerId);
 
         return command;
     }

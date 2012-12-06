@@ -83,7 +83,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
 
         jdbc.update(INSERT, id, layer.getLayerId(), layer.getJobId(), name,
                 number, taskOrder, TaskState.INITIALIZE.ordinal());
-        jdbc.update("INSERT INTO task_dsp (pk_task) VALUES (?)", id);
+        jdbc.update("INSERT INTO task_ping (pk_task) VALUES (?)", id);
 
         TaskE task = new TaskE();
         task.setTaskId(id);
@@ -101,17 +101,15 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
 
     @Override
     public void clearLastLogLine(Task task) {
-        jdbc.update("UPDATE plow.task_dsp SET str_last_log_line=? WHERE pk_task=?", "", task.getTaskId());
+        jdbc.update("UPDATE plow.task_ping SET str_last_log_line=? WHERE pk_task=?", "", task.getTaskId());
     }
 
     private static final String RESET_DSP =
             "UPDATE " +
-                "plow.task_dsp " +
+                "plow.task_ping " +
             "SET " +
-                "int_retry = int_retry + 1,"+
-                "int_cores=?,"+
-                "int_ram=?,"+
-                "int_used_ram=0,"+
+                "int_rss=0,"+
+                "int_cpu_perc=0,"+
                 "int_progress=0,"+
                 "str_last_node_name=?, "+
                 "str_last_log_line=NULL " +
@@ -119,8 +117,8 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                 "pk_task=?";
 
     @Override
-    public void resetTaskDispatchData(Task task, String host, int cores, int ram) {
-        jdbc.update(RESET_DSP, cores, ram, host, task.getTaskId());
+    public void resetTaskDispatchData(Task task, String host) {
+        jdbc.update(RESET_DSP, host, task.getTaskId());
     }
 
     private static final String[] UPDATE_DSP = {
@@ -134,13 +132,33 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                 "int_state = ?",
 
             "UPDATE " +
-                "plow.task_dsp "  +
+                "plow.task_ping "  +
             "SET " +
                 "str_last_log_line=?," +
-                "int_used_ram=?,"+
+                "int_rss=?,"+
+                "int_cpu_perc=?,"+
                 "int_progress=? "+
             "WHERE " +
-                "pk_task=?::uuid "
+                "pk_task=?::uuid ",
+
+            "UPDATE " +
+                "plow.task_ping " +
+            "SET " +
+                "int_max_rss = ? " +
+            "WHERE " +
+                "pk_task=?::uuid " +
+            "AND " +
+                "int_max_rss < ?",
+
+            "UPDATE " +
+                "plow.task_ping " +
+            "SET " +
+                "int_max_cpu_perc = ? " +
+            "WHERE " +
+                "pk_task=?::uuid " +
+            "AND " +
+                "int_max_cpu_perc < ?"
+
     };
 
     @Override
@@ -154,7 +172,11 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         if (jdbc.update(UPDATE_DSP[0], runTask.taskId,
                 TaskState.RUNNING.ordinal()) > 0) {
             jdbc.update(UPDATE_DSP[1],
-                lastLog, runTask.rssMb, (int)runTask.progress, runTask.taskId);
+                lastLog, runTask.rssMb, runTask.cpuPercent, (int)runTask.progress, runTask.taskId);
+            jdbc.update(UPDATE_DSP[2],
+                runTask.rssMb, runTask.taskId, runTask.rssMb);
+            jdbc.update(UPDATE_DSP[3],
+                    runTask.cpuPercent, runTask.taskId, runTask.cpuPercent);
         }
     }
 
@@ -175,7 +197,10 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                 "plow.task " +
             "SET " +
                 "int_state = ?, " +
-                "bool_reserved = 'f', " +
+                "int_cores=?,"+
+                "int_ram=?,"+
+                "bool_reserved = 'f',"+
+                "int_retry=int_retry+1,"+
                 "time_updated = txTimeMillis(), " +
                 "time_started = txTimeMillis(), " +
                 "time_stopped = 0 " +
@@ -187,9 +212,10 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                 "bool_reserved = 't'";
 
     @Override
-    public boolean start(Task task) {
+    public boolean start(Task task, int cores, int memory) {
         return jdbc.update(START_TASK,
                 TaskState.RUNNING.ordinal(),
+                cores, memory,
                 task.getTaskId(),
                 TaskState.WAITING.ordinal()) == 1;
     }

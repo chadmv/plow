@@ -211,7 +211,10 @@ CREATE TABLE plow.task (
   bool_reserved BOOLEAN DEFAULT 'f' NOT NULL,
   time_started BIGINT DEFAULT 0 NOT NULL,
   time_stopped BIGINT DEFAULT 0 NOT NULL,
-  time_updated BIGINT DEFAULT 0 NOT NULL
+  time_updated BIGINT DEFAULT 0 NOT NULL,
+  int_retry SMALLINT DEFAULT -1 NOT NULL,
+  int_cores SMALLINT DEFAULT 0 NOT NULL,
+  int_ram INTEGER DEFAULT 0 NOT NULL
 ) WITHOUT OIDS;
 
 CREATE INDEX task_pk_layer_idx ON plow.task (pk_layer);
@@ -222,17 +225,16 @@ CREATE UNIQUE INDEX task_str_name_pk_job_idx_uniq ON plow.task (str_name, pk_job
 
 ----------------------------------------------------------
 
+
 ---
---- Stores runtime status for a task.  This table ensures
---- the data still exists after the process has stopped.
+--- Stores the ping data for a task.
 ---
-CREATE TABLE task_dsp (
+CREATE TABLE task_ping (
   pk_task UUID NOT NULL PRIMARY KEY,
-  int_retry SMALLINT DEFAULT -1 NOT NULL,
-  int_cores SMALLINT DEFAULT 0 NOT NULL,
-  int_ram INTEGER DEFAULT 0 NOT NULL,
-  int_used_ram INTEGER DEFAULT 0 NOT NULL,
-  int_used_ram_max INTEGER DEFAULT 0 NOT NULL,
+  int_rss INTEGER DEFAULT 0 NOT NULL,
+  int_max_rss INTEGER DEFAULT 0 NOT NULL,
+  int_cpu_perc SMALLINT NOT NULL DEFAULT 0,
+  int_max_cpu_perc SMALLINT NOT NULL DEFAULT 0,
   int_progress SMALLINT DEFAULT 0 NOT NULL,
   str_last_log_line TEXT,
   str_last_node_name TEXT
@@ -434,26 +436,6 @@ LANGUAGE plpgsql;
 CREATE TRIGGER trig_before_update_set_waiting BEFORE UPDATE ON plow.task
     FOR EACH ROW WHEN (NEW.int_depend_count=0 AND NEW.int_state=5)
     EXECUTE PROCEDURE plow.before_update_set_waiting();
-
----
---- plow.before_update_task_dsp()
----
---- Update the int_user_ram_max to a new value if int_used_ram is greater.
----
-CREATE OR REPLACE FUNCTION plow.before_update_task_dsp() RETURNS TRIGGER AS $$
-BEGIN
-  NEW.int_used_ram_max := NEW.int_used_ram;
-  RETURN NEW;
-END
-$$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER trig_before_update_task_dsp BEFORE UPDATE ON plow.task_dsp
-    FOR EACH ROW WHEN (NEW.int_used_ram > OLD.int_used_ram_max)
-    EXECUTE PROCEDURE plow.before_update_task_dsp();
-
-
-
 
 ----------------------------------------------------------
 

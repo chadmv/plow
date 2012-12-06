@@ -230,6 +230,25 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public void updateMaxRssValues(List<RunningTask> runningTasks) {
+        Collections.sort(runningTasks, new Comparator<RunningTask>() {
+            @Override
+            public int compare(RunningTask o1, RunningTask o2) {
+                return o1.layerId.compareTo(o2.layerId);
+            }
+        });
+
+        for (RunningTask task: runningTasks) {
+            layerDao.updateMaxRssMb(UUID.fromString(task.layerId), task.rssMb);
+        }
+
+        for (RunningTask task: runningTasks) {
+            jobDao.updateMaxRssMb(UUID.fromString(task.jobId), task.rssMb);
+        }
+
+    }
+
+    @Override
     public void updateRunningTasks(List<RunningTask> runningTasks) {
         // Sort the tasks by ID to ensure predicatable update.
         Collections.sort(runningTasks, new Comparator<RunningTask>() {

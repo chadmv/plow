@@ -35,6 +35,8 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             layer.minCores = rs.getInt("int_min_cores");
             layer.minRamMb = rs.getInt("int_min_ram");
             layer.range = rs.getString("str_range");
+            layer.setMaxRssMb(rs.getInt("int_max_rss"));
+            layer.setMaxCpuPerc(rs.getShort("int_max_cpu_perc"));
             layer.tags = new HashSet<String>(
                     Arrays.asList((String[])rs.getArray("str_tags").getArray()));
 
@@ -59,10 +61,15 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer_count.int_dead,"+
                 "layer_count.int_eaten,"+
                 "layer_count.int_waiting,"+
-                "layer_count.int_depend "+
+                "layer_count.int_depend, "+
+                "layer_dsp.int_run_cores,"+
+                "layer_ping.int_max_rss,"+
+                "layer_ping.int_max_cpu_perc " +
             "FROM " +
                 "layer " +
-            "INNER JOIN layer_count ON layer.pk_layer = layer_count.pk_layer ";
+            "INNER JOIN layer_count ON layer.pk_layer = layer_count.pk_layer " +
+            "INNER JOIN layer_dsp ON layer.pk_layer = layer_dsp.pk_layer " +
+            "INNER JOIN layer_ping ON layer.pk_layer = layer_ping.pk_layer ";
 
     private static final String GET_BY_ID =
             GET + " WHERE layer.pk_layer = ?";

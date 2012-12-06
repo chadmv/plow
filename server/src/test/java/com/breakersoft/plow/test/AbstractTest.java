@@ -6,6 +6,8 @@ import javax.annotation.Resource;
 
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -150,5 +152,10 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         assertEquals(count, simpleJdbcTemplate.queryForInt(
                 "SELECT COUNT(1) FROM plow.layer " +
                 "WHERE layer.pk_job=?", job.getJobId()));
+    }
+
+    @SuppressWarnings("deprecation")
+    public SimpleJdbcTemplate jdbc() {
+        return simpleJdbcTemplate;
     }
 }

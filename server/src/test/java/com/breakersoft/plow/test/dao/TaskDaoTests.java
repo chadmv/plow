@@ -84,7 +84,7 @@ public class TaskDaoTests extends AbstractTest {
     @Test
     public void testReserve() {
         testCreate();
-        taskDao.start(task);
+        taskDao.start(task, 1, 1024);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class TaskDaoTests extends AbstractTest {
     @Test
     public void testResetTaskDispatchData() {
         testCreate();
-        taskDao.resetTaskDispatchData(task, "foo", 1, 1024);
+        taskDao.resetTaskDispatchData(task, "foo");
     }
 
     @Test
@@ -123,15 +123,19 @@ public class TaskDaoTests extends AbstractTest {
         runtask.taskId = task.getTaskId().toString();
         runtask.lastLog = "foo";
         runtask.rssMb = 999;
+        runtask.cpuPercent = 90;
         runtask.progress = 50;
         taskDao.updateTaskDispatchData(runtask);
 
         Map<String,Object> data = simpleJdbcTemplate.queryForMap(
-                "SELECT * FROM plow.task_dsp WHERE pk_task=?",
+                "SELECT * FROM plow.task_ping WHERE pk_task=?",
                 task.getTaskId());
 
         assertEquals(runtask.lastLog, (String) data.get("str_last_log_line"));
-        assertEquals((Integer)runtask.rssMb, Integer.valueOf((int) data.get("int_used_ram_max")));
+        assertEquals((Integer)runtask.rssMb, Integer.valueOf((int) data.get("int_rss")));
+        assertEquals((Integer)runtask.rssMb, Integer.valueOf((int) data.get("int_max_rss")));
+        assertEquals(runtask.cpuPercent, ((Integer) data.get("int_cpu_perc")).shortValue());
+        assertEquals(runtask.cpuPercent, ((Integer) data.get("int_max_cpu_perc")).shortValue());
         assertEquals(50, data.get("int_progress"));
     }
 
