@@ -18,31 +18,33 @@ struct RunTaskCommand {
     1:common.Guid procId,
     2:common.Guid taskId,
     3:common.Guid jobId,
-    4:i32 cores,
-    5:list<string> command,
-    6:map<string,string> env,
-    7:string logFile,
-    8:i32 uid,
-    9:string username,
-    10:optional list<string> taskTypes
+    4:common.Guid layerId,
+    5:i32 cores,
+    6:list<string> command,
+    7:map<string,string> env,
+    8:string logFile,
+    9:i32 uid,
+    10:string username,
+    11:optional list<string> taskTypes
 }
 
 struct RunningTask {
     1:common.Guid procId,
     2:common.Guid taskId,
     3:common.Guid jobId,
-    4:i64 rss,
-    5:i32 pid,
-    6:optional double progress = 0.0,
-    7:optional string lastLog = "",
-    8:i16 cpuPercent
+    4:common.Guid layerId,
+    5:i32 rssMb,
+    6:i32 pid,
+    7:optional double progress = 0.0,
+    8:optional string lastLog = "",
+    9:i16 cpuPercent
 }
 
 struct RunTaskResult {
     1:common.Guid procId,
     2:common.Guid taskId,
     3:common.Guid jobId,
-    4:i64 maxRss,
+    4:i32 maxRssMb,
     5:i32 exitStatus,
     6:optional byte exitSignal
 }

@@ -80,7 +80,7 @@ public class ProcDaoTests extends AbstractTest {
                         dnode.getNodeId()));
 
         assertEquals(dnode.getMemory(),
-                simpleJdbcTemplate.queryForInt("SELECT int_free_memory FROM node_dsp WHERE pk_node=?",
+                simpleJdbcTemplate.queryForInt("SELECT int_free_ram FROM node_dsp WHERE pk_node=?",
                         dnode.getNodeId()));
 
     }

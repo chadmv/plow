@@ -48,4 +48,6 @@ public interface JobService {
     void addLayerOutput(Layer layer, String path, Map<String, String> attrs);
 
     void updateRunningTasks(List<RunningTask> runningTasks);
+
+    void updateMaxRssValues(List<RunningTask> runningTasks);
 }

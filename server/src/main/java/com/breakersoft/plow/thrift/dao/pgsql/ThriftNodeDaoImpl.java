@@ -43,8 +43,8 @@ public class ThriftNodeDaoImpl extends AbstractDao implements ThriftNodeDao {
             node.setUpdatedTime(rs.getLong("time_updated"));
             node.setCreatedTime(rs.getLong("time_created"));
 
-            node.setTotalRamMb(rs.getInt("int_memory"));
-            node.setFreeRamMb(rs.getInt("int_free_memory"));
+            node.setTotalRamMb(rs.getInt("int_ram"));
+            node.setFreeRamMb(rs.getInt("int_free_ram"));
             node.setTotalCores(rs.getInt("int_cores"));
             node.setIdleCores(rs.getInt("int_idle_cores"));
 
@@ -55,8 +55,8 @@ public class ThriftNodeDaoImpl extends AbstractDao implements ThriftNodeDao {
             system.setTotalSwapMb(rs.getInt("int_swap"));
             system.setFreeSwapMb(rs.getInt("int_free_swap"));
 
-            system.setTotalRamMb(rs.getInt("int_memory_sys"));
-            system.setFreeRamMb(rs.getInt("int_free_memory_sys"));
+            system.setTotalRamMb(rs.getInt("int_ram_sys"));
+            system.setFreeRamMb(rs.getInt("int_free_ram_sys"));
 
             system.setLoad(new ArrayList<Integer>());
             system.setLogicalCores(rs.getInt("int_log_cores"));
@@ -82,8 +82,8 @@ public class ThriftNodeDaoImpl extends AbstractDao implements ThriftNodeDao {
 
                 "node_sys.int_phys_cores,"+
                 "node_sys.int_log_cores,"+
-                "node_sys.int_memory AS int_memory_sys, "+
-                "node_sys.int_free_memory AS int_free_memory_sys,"+
+                "node_sys.int_ram AS int_ram_sys, "+
+                "node_sys.int_free_ram AS int_free_ram_sys,"+
                 "node_sys.int_swap,"+
                 "node_sys.int_free_swap,"+
                 "node_sys.time_booted,"+
@@ -92,8 +92,8 @@ public class ThriftNodeDaoImpl extends AbstractDao implements ThriftNodeDao {
 
                 "node_dsp.int_cores, "+
                 "node_dsp.int_idle_cores, "+
-                "node_dsp.int_memory,"+
-                "node_dsp.int_free_memory, " +
+                "node_dsp.int_ram,"+
+                "node_dsp.int_free_ram, " +
 
                 "cluster.str_name AS cluster_name " +
             "FROM " +

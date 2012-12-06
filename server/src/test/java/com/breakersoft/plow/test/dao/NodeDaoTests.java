@@ -45,7 +45,7 @@ public class NodeDaoTests extends AbstractTest {
                         node.getNodeId()));
 
         assertEquals(ping.hw.totalRamMb - 1024 - Defaults.MEMORY_RESERVE_MB,
-                simpleJdbcTemplate.queryForInt("SELECT int_free_memory FROM node_dsp WHERE pk_node=?",
+                simpleJdbcTemplate.queryForInt("SELECT int_free_ram FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
 
     }
@@ -71,7 +71,7 @@ public class NodeDaoTests extends AbstractTest {
                         node.getNodeId()));
 
         assertEquals(ping.hw.totalRamMb - Defaults.MEMORY_RESERVE_MB,
-                simpleJdbcTemplate.queryForInt("SELECT int_free_memory FROM node_dsp WHERE pk_node=?",
+                simpleJdbcTemplate.queryForInt("SELECT int_free_ram FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
     }
 }

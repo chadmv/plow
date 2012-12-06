@@ -23,4 +23,8 @@ public interface LayerDao {
     boolean isFinished(Layer layer);
 
     void addOutput(Layer layer, String path, Map<String, String> attrs);
+
+    boolean updateMaxRssMb(UUID layerId, int value);
+
+    boolean updateMaxCpuPerc(UUID layerId, int value);
 }

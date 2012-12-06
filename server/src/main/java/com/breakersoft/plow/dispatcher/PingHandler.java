@@ -39,6 +39,7 @@ public class PingHandler {
         }
 
         jobService.updateRunningTasks(ping.tasks);
+        jobService.updateMaxRssValues(ping.tasks);
 
         logger.info("{} node reporting in.", node.getName());
         frontEndDispatcher.book(node);

@@ -160,7 +160,8 @@ struct JobT {
     10:i32 runCores,
     11:common.Timestamp startTime,
     12:common.Timestamp stopTime,
-    13:TaskTotalsT totals
+    13:TaskTotalsT totals,
+    14:i32 maxRssMb
 }
 
 struct LayerT {
@@ -173,7 +174,9 @@ struct LayerT {
     7:i32 maxCores,
     8:i32 minRamMb,
     9:i32 runCores,
-    10:TaskTotalsT totals
+    10:TaskTotalsT totals,
+    11:i32 maxRssMb,
+    12:i16 maxCpuPerc
 }
 
 struct TaskT {
@@ -190,9 +193,11 @@ struct TaskT {
     11:i32 retries,
     12:i32 cores,
     13:i32 ramMb,
-    14:i32 usedRamMb,
-    15:i32 maxRamMb,
-    16:i32 progress
+    14:i32 rssMb,
+    15:i32 maxRssMb,
+    16:i16 cpuPerc,
+    17:i16 maxCpuPerc,
+    18:i32 progress
 }
 
 struct FolderT {

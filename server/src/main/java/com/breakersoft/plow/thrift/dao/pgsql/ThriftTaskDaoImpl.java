@@ -36,8 +36,11 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             task.state = TaskState.findByValue(rs.getInt("int_state"));
             task.cores = rs.getInt("int_cores");
             task.ramMb = rs.getInt("int_ram");
-            task.maxRamMb = rs.getInt("int_used_ram_max");
-            task.usedRamMb = rs.getInt("int_used_ram");
+            task.maxRssMb = rs.getInt("int_max_rss");
+            task.rssMb = rs.getInt("int_rss");
+            task.maxRssMb = rs.getInt("int_max_rss");
+            task.cpuPerc = rs.getShort("int_cpu_perc");
+            task.maxCpuPerc = rs.getShort("int_max_cpu_perc");
             task.lastNodeName = rs.getString("str_last_node_name");
             task.lastLogLine = rs.getString("str_last_log_line");
             task.progress = rs.getInt("int_progress");
@@ -57,18 +60,20 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "task.time_started, " +
             "task.time_stopped," +
             "task.time_updated,"+
-            "task_dsp.int_retry,"+
-            "task_dsp.int_cores,"+
-            "task_dsp.int_ram,"+
-            "task_dsp.int_used_ram,"+
-            "task_dsp.int_used_ram_max,"+
-            "task_dsp.str_last_node_name,"+
-            "task_dsp.str_last_log_line,"+
-            "task_dsp.int_progress " +
+            "task.int_retry,"+
+            "task.int_cores,"+
+            "task.int_ram,"+
+            "task_ping.int_rss,"+
+            "task_ping.int_max_rss,"+
+            "task_ping.int_cpu_perc,"+
+            "task_ping.int_max_cpu_perc,"+
+            "task_ping.str_last_node_name,"+
+            "task_ping.str_last_log_line,"+
+            "task_ping.int_progress " +
         "FROM " +
             "task "+
         "INNER JOIN " +
-            "task_dsp ON task.pk_task = task_dsp.pk_task ";
+            "task_ping ON task.pk_task = task_ping.pk_task ";
 
     private static final String GET_BY_ID =
         GET + " WHERE task.pk_task=?";
@@ -80,12 +85,9 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
 
     private static final String GET_LOG_PATH =
         "SELECT " +
-            "job.str_log_path || '/' || task.str_name || '.' || task_dsp.int_retry || '.log' " +
+            "job.str_log_path || '/' || task.str_name || '.' || task.int_retry || '.log' " +
         "FROM " +
             "plow.task " +
-            "INNER JOIN " +
-                "plow.task_dsp " +
-            "ON task.pk_task = task_dsp.pk_task " +
             "INNER JOIN " +
                 "plow.job " +
             "ON task.pk_job = job.pk_job " +

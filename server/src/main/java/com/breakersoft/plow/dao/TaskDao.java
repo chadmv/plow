@@ -23,16 +23,16 @@ public interface TaskDao {
 
     boolean unreserve(Task frame);
 
-    boolean start(Task task);
-
     boolean stop(Task task, TaskState newState);
 
     Task getByNameOrId(Job job, String identifer);
 
     void updateTaskDispatchData(RunningTask runTask);
 
-    void resetTaskDispatchData(Task task, String host, int cores, int ram);
-
     void clearLastLogLine(Task task);
+
+    boolean start(Task task, int cores, int memory);
+
+    void resetTaskDispatchData(Task task, String host);
 
 }

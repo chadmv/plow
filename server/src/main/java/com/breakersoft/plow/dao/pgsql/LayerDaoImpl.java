@@ -78,7 +78,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
         JdbcUtils.Insert("plow.layer",
                 "pk_layer", "pk_job", "str_name", "str_range",
                 "str_command", "str_tags", "int_chunk_size", "int_order",
-                "int_min_cores", "int_max_cores", "int_min_mem");
+                "int_min_cores", "int_max_cores", "int_min_ram");
 
     @Override
     public Layer create(final Job job, final LayerSpecT layer, final int order) {
@@ -107,6 +107,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
 
         jdbc.update("INSERT INTO plow.layer_count (pk_layer) VALUES (?)", id);
         jdbc.update("INSERT INTO plow.layer_dsp (pk_layer) VALUES (?)", id);
+        jdbc.update("INSERT INTO plow.layer_ping (pk_layer) VALUES (?)", id);
 
         final LayerE result = new LayerE();
         result.setLayerId(id);
@@ -132,6 +133,20 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
             return range;
         }
     };
+
+    @Override
+    public boolean updateMaxRssMb(UUID layerId, int value) {
+        return jdbc.update("UPDATE plow.layer_ping SET int_max_rss=? " +
+                "WHERE pk_layer=? AND int_max_rss < ?",
+                value, layerId, value) == 1;
+    }
+
+    @Override
+    public boolean updateMaxCpuPerc(UUID layerId, int value) {
+        return jdbc.update("UPDATE plow.layer_ping SET int_max_cpu_perc=? " +
+                "WHERE pk_layer=? AND int_max_cpu_perc < ?",
+                value, layerId, value) == 1;
+    }
 
     @Override
     public FrameRange getFrameRange(Layer layer) {

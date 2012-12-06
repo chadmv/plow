@@ -35,8 +35,8 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "pk_node",
                 "int_phys_cores",
                 "int_log_cores",
-                "int_memory",
-                "int_free_memory",
+                "int_ram",
+                "int_free_ram",
                 "int_swap",
                 "int_free_swap",
                 "time_booted",
@@ -47,8 +47,8 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "pk_node",
                 "int_cores",
                 "int_idle_cores",
-                "int_memory",
-                "int_free_memory")
+                "int_ram",
+                "int_free_ram")
     };
 
     @Override
@@ -150,11 +150,11 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "plow.node_dsp " +
             "SET " +
                 "int_idle_cores = int_idle_cores - ?," +
-                "int_free_memory = int_free_memory - ? " +
+                "int_free_ram = int_free_ram - ? " +
             "WHERE " +
                 "node_dsp.int_idle_cores >= ? " +
             "AND " +
-                "node_dsp.int_free_memory >= ? " +
+                "node_dsp.int_free_ram >= ? " +
             "AND " +
                 "node_dsp.pk_node = ? ";
 
@@ -173,7 +173,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "plow.node_dsp " +
             "SET " +
                 "int_idle_cores = int_idle_cores + ?," +
-                "int_free_memory = int_free_memory + ? " +
+                "int_free_ram = int_free_ram + ? " +
             "WHERE " +
                 "node_dsp.pk_node = ? ";
 

@@ -40,6 +40,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             job.startTime = rs.getLong("time_started");
             job.stopTime = rs.getLong("time_stopped");
             job.state = JobState.findByValue(rs.getInt("int_state"));
+            job.setMaxRssMb(rs.getInt("int_max_rss"));
             job.setTotals(JdbcUtils.getTaskTotals(rs));
             return job;
         }
@@ -65,11 +66,13 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             "job_count.int_dead,"+
             "job_count.int_eaten,"+
             "job_count.int_waiting,"+
-            "job_count.int_depend "+
+            "job_count.int_depend,"+
+            "job_ping.int_max_rss "+
         "FROM " +
             "job " +
         "INNER JOIN job_dsp ON job.pk_job = job_dsp.pk_job " +
         "INNER JOIN job_count ON job.pk_job = job_count.pk_job " +
+        "INNER JOIN job_ping ON job.pk_job = job_ping.pk_job " +
         "INNER JOIN folder ON job.pk_folder = folder.pk_folder " +
         "INNER JOIN project ON job.pk_project = project.pk_project ";
 
