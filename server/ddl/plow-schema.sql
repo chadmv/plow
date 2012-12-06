@@ -122,8 +122,7 @@ CREATE TABLE plow.job_count (
 
 CREATE TABLE plow.job_ping (
   pk_job UUID NOT NULL PRIMARY KEY,
-  int_max_rss INTEGER NOT NULL DEFAULT 0,
-  int_max_cpu_perc SMALLINT NOT NULL DEFAULT 0
+  int_max_rss INTEGER NOT NULL DEFAULT 0
 );
 
 ----------------------------------------------------------

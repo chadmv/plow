@@ -49,8 +49,7 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 "job_count.int_eaten,"+
                 "job_count.int_waiting,"+
                 "job_count.int_depend, "+
-                "job_ping.int_max_rss,"+
-                "job_ping.int_max_cpu_perc " +
+                "job_ping.int_max_rss "+
             "FROM " +
                 "job " +
             "INNER JOIN job_dsp ON job.pk_job = job_dsp.pk_job " +
@@ -123,7 +122,6 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 job.setState(JobState.findByValue(rs.getInt("int_state")));
                 job.setTotals(JdbcUtils.getTaskTotals(rs));
                 job.setMaxRssMb(rs.getInt("int_max_rss"));
-                job.setMaxCpuPerc(rs.getShort("int_max_cpu_perc"));
 
                 folder.totals.deadTaskCount += job.totals.deadTaskCount;
                 folder.totals.dependTaskCount += job.totals.deadTaskCount;
