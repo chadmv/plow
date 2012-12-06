@@ -99,6 +99,19 @@ public class LayerDaoTests extends AbstractTest {
     }
 
     @Test
+    public void testUpdateMaxCpu() {
+        testCreate();
+        assertTrue(layerDao.updateMaxCpuPerc(layer.getLayerId(), 1000));
+        int rss = jdbc().queryForInt(
+                "SELECT int_max_cpu_perc FROM layer_ping WHERE pk_layer=?", layer.getLayerId());
+        assertEquals(1000, rss);
+        assertFalse(layerDao.updateMaxCpuPerc(layer.getLayerId(), 999));
+        rss = jdbc().queryForInt(
+                "SELECT int_max_cpu_perc FROM layer_ping WHERE pk_layer=?", layer.getLayerId());
+        assertEquals(1000, rss);
+    }
+
+    @Test
     public void isFinished() {
 
         JobSpecT spec = getTestJobSpec();

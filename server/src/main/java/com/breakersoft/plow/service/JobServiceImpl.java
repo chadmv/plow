@@ -240,6 +240,7 @@ public class JobServiceImpl implements JobService {
 
         for (RunningTask task: runningTasks) {
             layerDao.updateMaxRssMb(UUID.fromString(task.layerId), task.rssMb);
+            layerDao.updateMaxCpuPerc(UUID.fromString(task.layerId), task.cpuPercent);
         }
 
         for (RunningTask task: runningTasks) {
