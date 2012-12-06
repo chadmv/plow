@@ -107,6 +107,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
 
         jdbc.update("INSERT INTO plow.layer_count (pk_layer) VALUES (?)", id);
         jdbc.update("INSERT INTO plow.layer_dsp (pk_layer) VALUES (?)", id);
+        jdbc.update("INSERT INTO plow.layer_ping (pk_layer) VALUES (?)", id);
 
         final LayerE result = new LayerE();
         result.setLayerId(id);
@@ -132,6 +133,13 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
             return range;
         }
     };
+
+    @Override
+    public boolean updateMaxRssMb(UUID layerId, int value) {
+        return jdbc.update("UPDATE plow.layer_ping SET int_max_rss=? " +
+                "WHERE pk_layer=? AND int_max_rss < ?",
+                value, layerId, value) == 1;
+    }
 
     @Override
     public FrameRange getFrameRange(Layer layer) {

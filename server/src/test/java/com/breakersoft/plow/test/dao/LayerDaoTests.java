@@ -60,7 +60,7 @@ public class LayerDaoTests extends AbstractTest {
         layerDao.addOutput(layer, "/tmp/foo_v1.#.exr", attrs);
         layerDao.addOutput(layer, "/tmp/bar_v2.#.exr", attrs);
 
-        simpleJdbcTemplate.queryForInt(
+        jdbc().queryForInt(
                 "SELECT COUNT(1) FROM output WHERE pk_layer=?", layer.getLayerId());
     }
 
@@ -83,6 +83,19 @@ public class LayerDaoTests extends AbstractTest {
         testCreate();
         FrameRange frange = layerDao.getFrameRange(layer);
         assertEquals(10, frange.frameSet.size());
+    }
+
+    @Test
+    public void testUpdateMaxRss() {
+        testCreate();
+        assertTrue(layerDao.updateMaxRssMb(layer.getLayerId(), 1000));
+        int rss = jdbc().queryForInt(
+                "SELECT int_max_rss FROM layer_ping WHERE pk_layer=?", layer.getLayerId());
+        assertEquals(1000, rss);
+        assertFalse(layerDao.updateMaxRssMb(layer.getLayerId(), 999));
+        rss = jdbc().queryForInt(
+                "SELECT int_max_rss FROM layer_ping WHERE pk_layer=?", layer.getLayerId());
+        assertEquals(1000, rss);
     }
 
     @Test

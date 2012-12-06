@@ -119,6 +119,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
 
         jdbc.update("INSERT INTO plow.job_count (pk_job) VALUES (?)", jobId);
         jdbc.update("INSERT INTO plow.job_dsp (pk_job) VALUES (?)", jobId);
+        jdbc.update("INSERT INTO plow.job_ping (pk_job) VALUES (?)", jobId);
 
         final JobE job = new JobE();
         job.setJobId(jobId);
@@ -260,6 +261,12 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 job.getJobId()) > 0;
     }
 
+    @Override
+    public boolean updateMaxRssMb(UUID jobId, int value) {
+        return jdbc.update("UPDATE plow.job_ping SET int_max_rss=? " +
+                "WHERE pk_job=? AND int_max_rss < ?",
+                value, jobId, value) == 1;
+    }
     private static final String HAS_PENDING_FRAMES =
             "SELECT " +
                 "job_count.int_total - (job_count.int_eaten + job_count.int_succeeded) AS pending, " +
