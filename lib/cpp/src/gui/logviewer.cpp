@@ -11,6 +11,7 @@
 #include <QAction>
 #include <QFileDialog>
 #include <QTabWidget>
+#include <QApplication>
 #include <QDebug>
 
 #include "logviewer.h"
@@ -50,6 +51,73 @@ void FileWatcher::checkFiles() {
     }
 }
 
+
+//
+// TextHighlighter
+//
+TextHighlighter::TextHighlighter(QTextDocument *parent) :
+    QSyntaxHighlighter(parent)
+{
+    foundMatchFormat.setForeground(QApplication::palette().highlightedText());
+    foundMatchFormat.setBackground(Qt::darkGreen);
+    foundMatchRule.format = foundMatchFormat;
+    foundMatchRule.pattern = QRegExp("", Qt::CaseInsensitive);
+
+    HighlightingRule rule;
+
+    errorFormat.setForeground(QColor(Qt::red).lighter(115));
+    QStringList errors;
+    errors << "error" << "critical" << "failed" << "fail"
+           << "crashed" << "crash";
+    Q_FOREACH(const QString &pattern, errors) {
+        rule.format = errorFormat;
+        rule.pattern = QRegExp(QString("\\b%1\\b").arg(pattern), Qt::CaseInsensitive);
+        highlightingRules.append(rule);
+    }
+
+    warningFormat.setForeground(QColor(255,168,0));
+    QStringList warnings;
+    warnings << "warning" << "warn";
+    Q_FOREACH(const QString &pattern, warnings) {
+        rule.format = warningFormat;
+        rule.pattern = QRegExp(QString("\\b%1\\b").arg(pattern), Qt::CaseInsensitive);
+        highlightingRules.append(rule);
+    }
+
+}
+
+void TextHighlighter::highlightBlock(const QString &text) {
+
+    Q_FOREACH(const HighlightingRule &rule, highlightingRules) {
+
+        if (rule.pattern.isEmpty())
+            continue;
+
+        QRegExp expression(rule.pattern);
+        int index = expression.indexIn(text);
+        while (index >= 0) {
+            int length = expression.matchedLength();
+            setFormat(index, length, rule.format);
+            index = expression.indexIn(text, index + length);
+        }
+    }
+
+    if (foundMatchRule.pattern.isEmpty())
+        return;
+
+    QRegExp expression(foundMatchRule.pattern);
+    int index = expression.indexIn(text);
+    while (index >= 0) {
+        int length = expression.matchedLength();
+        setFormat(index, length, foundMatchRule.format);
+        index = expression.indexIn(text, index + length);
+    }
+}
+
+void TextHighlighter::setFoundMatchText(const QString &text) {
+    foundMatchRule.pattern.setPattern(text);
+    rehighlight();
+}
 
 //
 // LogViewer
@@ -94,8 +162,10 @@ LogViewer::LogViewer(QWidget *parent) :
     // TODO: Handle logs that overflow this
     // pretty sizeable amount (1 mil paragraphs)
     view->setMaximumBlockCount(1000000);
-    mainLayout->addWidget(view);
 
+    highlighter = new TextHighlighter(view->document());
+
+    mainLayout->addWidget(view);
     setLayout(mainLayout);
 
     logWatcher = new FileWatcher(this);
@@ -110,6 +180,7 @@ LogViewer::LogViewer(QWidget *parent) :
     connect(searchLine, SIGNAL(textChanged(QString)),
             this, SLOT(findText(QString)));
 
+    connect(searchLine, SIGNAL(returnPressed()), this, SLOT(findNext()));
     connect(findPrevBtn, SIGNAL(clicked()), this, SLOT(findPrev()));
     connect(findNextBtn, SIGNAL(clicked()), this, SLOT(findNext()));
     connect(openAction, SIGNAL(triggered()), this, SLOT(openLogFile()));
@@ -168,15 +239,19 @@ void LogViewer::openLogFile() {
         setLogPath(logpath);
 }
 
-void LogViewer::findText(const QString &text, const QTextCursor &cursor,
-                         QTextDocument::FindFlags opts) {
+void LogViewer::findText(const QString &text,
+                         const QTextCursor &cursor,
+                         QTextDocument::FindFlags opts)
+{
     QTextCursor newCursor = view->document()->find(text, cursor, opts);
     if (newCursor.isNull()) {
         qDebug() << "findText: nothing found";
-    } else {
-        view->setTextCursor(newCursor);
     }
+    view->setTextCursor(newCursor);
     view->centerCursor();
+
+    highlighter->setFoundMatchText(text);
+
 }
 
 void LogViewer::findPrev() {
