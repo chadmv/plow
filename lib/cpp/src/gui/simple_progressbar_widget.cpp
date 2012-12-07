@@ -95,14 +95,11 @@ void SimpleProgressBarWidget::paintEvent(QPaintEvent * event)
     QRectF outline = QRectF(leftMargin, 0, w-rightMargin, h-2);
     painter.drawRect(outline);
 
-    // QString progressString;
-    // progressString.setNum(totalTasks-m_job.totals.waitingTaskCount);
-
-    QString progressString = QString("Progress: %1\%")
-                                                .arg((float)(totalTasks-m_job.totals.waitingTaskCount));
-
-
-    painter.drawText(leftMargin+5, 0, 120, 200, 0, progressString, 0);
+    float progressFraction = 1-(m_job.totals.waitingTaskCount/(float)totalTasks);
+    QString progressString;
+    progressString.sprintf("Progress: %.0f \%", progressFraction*100);
+    
+    painter.drawText(leftMargin+5, 0, 300, 200, 0, progressString, 0);
 
     painter.end();
 }
