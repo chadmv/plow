@@ -331,7 +331,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         }
     };
 
-    private static final String GET_TASKS =
+    private static final String GET_DISPATCH_TASKS =
             "SELECT " +
                 "task.pk_task,"+
                 "task.str_name," +
@@ -367,7 +367,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         return jdbc.query(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
-                final PreparedStatement ps = conn.prepareStatement(GET_TASKS);
+                final PreparedStatement ps = conn.prepareStatement(GET_DISPATCH_TASKS);
                 ps.setObject(1, layer.getLayerId());
                 ps.setInt(2, resource.getCores());
                 ps.setInt(3, resource.getMemory());
