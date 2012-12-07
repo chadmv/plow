@@ -20,6 +20,7 @@ QStringList TaskBoardModel::HeaderLabels = QStringList()
     << "Name"
     << "State"
     << "Node"
+    << "Resources"
     << "Duration"
     << "Log";
 
@@ -282,11 +283,15 @@ QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
         }
         else if (col == 3)
         {
+            return QString("%1/%2MB").arg(task.cores).arg(task.ramMb);
+        }
+        else if (col == 4)
+        {
             std::string duration;
             formatDuration(duration, task.startTime, task.stopTime);
             return QString::fromStdString(duration);
         }
-        else if (col == 4) {
+        else if (col == 5) {
             return QString(task.lastLogLine.c_str());
         }
         break;
@@ -296,6 +301,16 @@ QVariant TaskBoardModel::data (const QModelIndex & index, int role) const
         {
             int state = task.state;
             return PlowStyle::TaskColors[state];
+        }
+        break;
+
+    case Qt::ToolTipRole:
+        if (col == 3)
+        {
+            return QString("Allocated Cores: %1\nCurrent CPU Perc:%2\nMax CPU Perc:%3\n")
+                .append("Allocated RAM:%4MB\nCurrent RSS:%5MB\nMaxRSS:%6MB")
+                .arg(task.cores).arg(task.cpuPerc).arg(task.maxCpuPerc)
+                .arg(task.ramMb).arg(task.rssMb).arg(task.maxRssMb);
         }
         break;
 
