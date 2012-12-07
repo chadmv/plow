@@ -282,10 +282,11 @@ class _ProcessThread(threading.Thread):
         rt.jobId = self.__rtc.jobId
         rt.procId = self.__rtc.procId
         rt.taskId = self.__rtc.taskId
+        rt.layerId = self.__rtc.layerId
         rt.pid = self.__pid
 
         with self.__metricsLock:
-            rt.rss = self.__metrics['rss']
+            rt.rssMb = self.__metrics['rssMb']
             rt.cpuPercent = self.__metrics['cpuPercent']
 
         with self.__progressLock:
