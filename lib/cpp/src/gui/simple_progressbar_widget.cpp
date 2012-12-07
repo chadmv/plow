@@ -66,26 +66,18 @@ void SimpleProgressBarWidget::paintEvent(QPaintEvent * event)
     
     QBrush brush(palette.window().color().darker(), Qt::SolidPattern);
     
-    // painter.setBrush(Qt::red);
-    // painter.setBrush(brush);
-
     QRect bgFillRect = QRect(0, 0, w, h);
     painter.fillRect(bgFillRect, brush);
 
-    // painter.setBrush(Qt::NoBrush);
     painter.setBrush(grad);
 
     int previousRightEdge = 0;
     for (int i = 0; i < rects.size(); ++i) 
     {    
-        // std::cout << w << " " << rightMargin <<" " << w-rightMargin*succededWidth<< std::endl;
         grad.setColorAt(0, PlowStyle::TaskColors[i+1]);
         grad.setColorAt(1, PlowStyle::TaskColors[i+1].lighter());
         QRectF mRect = rects[i];
-        // mRect.moveLeft(previousRightEdge);
-        // rects[i].setRight(rects[i].width()-(2)+previousRightEdge);
         painter.fillRect(mRect, grad);
-        // std::cout << rects[i].width() << " " << i <<  " " << rects[i].right(rects[i]) << " " << w  << std::endl;
         previousRightEdge = mRect.right()+5;
     }
 
