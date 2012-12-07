@@ -359,7 +359,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "AND " +
                 "task.bool_reserved IS FALSE " +
             "ORDER BY " +
-                "task.int_task_order ASC " +
+                "task.int_task_order, task.int_layer_order ASC " +
             "LIMIT ?";
 
     @Override

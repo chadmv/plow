@@ -207,6 +207,7 @@ CREATE TABLE plow.task (
   int_state SMALLINT NOT NULL,
   int_depend_count INTEGER NOT NULL DEFAULT 0,
   int_task_order INTEGER NOT NULL,
+  int_layer_order INTEGER NOT NULL,
   bool_reserved BOOLEAN DEFAULT 'f' NOT NULL,
   time_started BIGINT DEFAULT 0 NOT NULL,
   time_stopped BIGINT DEFAULT 0 NOT NULL,
@@ -221,6 +222,8 @@ CREATE INDEX task_pk_job_idx ON plow.task (pk_job);
 CREATE INDEX task_int_state_idx ON plow.task (int_state);
 CREATE INDEX task_time_updated_idx ON plow.task (time_updated);
 CREATE UNIQUE INDEX task_str_name_pk_job_idx_uniq ON plow.task (str_name, pk_job);
+
+CREATE INDEX task_order_idx ON plow.task(int_task_order, int_layer_order);
 
 ----------------------------------------------------------
 
