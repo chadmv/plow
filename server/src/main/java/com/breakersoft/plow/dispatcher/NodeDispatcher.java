@@ -63,6 +63,11 @@ public class NodeDispatcher {
         final List<DispatchProject> projects =
                 dispatchService.getSortedProjectList(node);
 
+        if(projects.isEmpty()) {
+            logger.info("No dispatchable projects");
+            return;
+        }
+
         //TODO: use project_count table to keep track of active
         // jobs, layers, and tasks at the project level so we can
         // return a filtered project list.
@@ -82,6 +87,11 @@ public class NodeDispatcher {
         final List<DispatchableJob> jobs =
                 jobBoard.getDispatchableJobs(node, project);
 
+        if (jobs.isEmpty()) {
+            logger.info("No dispatchable jobs for project: {}", project.getProjectId());
+            return;
+        }
+
         for (DispatchableJob job: jobs) {
             dispatch(result, node, job);
             if (!result.continueDispatching()) {
@@ -94,6 +104,11 @@ public class NodeDispatcher {
 
         final List<DispatchableTask> tasks =
                 dispatchService.getDispatchableTasks(job.jobId, node);
+
+        if (tasks.isEmpty()) {
+            logger.info("No dispatchable tasks for job: {}", job.getJobId());
+            return;
+        }
 
         for (DispatchableTask task: tasks) {
             dispatch(result, node, task);
