@@ -17,10 +17,11 @@ public:
     TaskPieWidget(QWidget *parent = 0, Qt::WindowFlags = 0);
     ~TaskPieWidget();
     void setTasks(std::vector<TaskT> tasks);
+    void setJob(JobT job);
 
 private:
-    int numberOfTasks_;
 	std::vector<TaskT> m_tasks;
+	JobT m_job;
 
 
 public slots:
