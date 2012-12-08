@@ -2,8 +2,10 @@ package com.breakersoft.plow.dispatcher;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 
+import com.breakersoft.plow.Node;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
@@ -24,12 +26,11 @@ public class PingHandler {
     NodeDispatcher nodeDispatcher;
 
     @Autowired
-    TaskCompleteHandler taskCompleteHandler;
+    DispatchService dispatchSerice;
 
     public void handlePing(Ping ping) {
 
-        /*
-        DispatchNode node;
+        Node node;
         try {
             node = nodeService.getNode(ping.hostname);
             nodeService.updateNode(node, ping);
@@ -41,8 +42,10 @@ public class PingHandler {
         jobService.updateMaxRssValues(ping.tasks);
 
         logger.info("{} node reporting in.", node.getName());
-        nodeDispatcher)
-        */
+
+        nodeDispatcher.book(
+                dispatchSerice.getDispatchNode(node.getName()));
+
     }
 
 }
