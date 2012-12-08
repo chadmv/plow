@@ -62,10 +62,7 @@ void JobBoardWidget::defineActions()
     QAction* jobKillAction = new QAction(tr("Kill Job"), treeWidget);
     connect(jobKillAction, SIGNAL(triggered()), this, SLOT(onJobKill()));
     treeWidget->addAction(jobKillAction);   
-
-    QAction* taskPieAction = new QAction(tr("Task Pie"), treeWidget);
-    connect(taskPieAction, SIGNAL(triggered()), this, SLOT(onTaskPie()));
-    treeWidget->addAction(taskPieAction);       
+      
 }
 
 void JobBoardWidget::onJobKill()
@@ -217,12 +214,12 @@ void JobBoardWidget::refresh()
                 // pass a JobT object to the widget 
                 simpleProgress->setJob((*j));
 
-                QString toolTipString = QString("<b>Job: %1</b>\nSucceeded: %2\nFailed: %3")
+                QString toolTipString = QString("Job: %1\nSucceeded: %2\nFailed: %3")
                                                 .arg(jobItem->text(0))
                                                 .arg(j->totals.succeededTaskCount)
                                                 .arg(j->totals.deadTaskCount);
 
-                jobItem->setToolTip(4, toolTipString);
+                jobItem->setToolTip(5, toolTipString);
                 treeWidget->setItemWidget(jobItem, 5, simpleProgress);
             }
             else
