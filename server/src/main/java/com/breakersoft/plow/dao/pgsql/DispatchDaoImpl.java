@@ -327,30 +327,28 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     }
 
     private static final String GET_RUN_TASK =
-            "SELECT " +
-                "job.int_uid," +
-                "job.str_username," +
-                "job.str_log_path, " +
-                "job.str_active_name AS job_name, " +
-                "layer.str_command, " +
-                "layer.str_name AS layer_name, " +
-                "task.int_number, " +
-                "task.pk_task,"+
-                "task.pk_layer,"+
-                "task.pk_job,"+
-                "task.str_name AS task_name, " +
-                "task.int_retry " +
-
-            "FROM " +
-                "plow.task " +
-                "INNER JOIN " +
-                    "plow.layer " +
-                        "ON layer.pk_layer = task.pk_layer " +
-                "INNER JOIN " +
-                    "plow.job " +
-                        "ON layer.pk_job = job.pk_job " +
-            "WHERE " +
-                "task.pk_task = ? ";
+        "SELECT " +
+            "job.int_uid," +
+            "job.str_username," +
+            "job.str_log_path, " +
+            "job.str_active_name AS job_name, " +
+            "layer.str_command, " +
+            "layer.str_name AS layer_name, " +
+            "task.int_number, " +
+            "task.pk_task,"+
+            "task.pk_layer,"+
+            "task.pk_job,"+
+            "task.str_name AS task_name, " +
+            "task.int_retry, " +
+            "proc.pk_proc,"+
+            "proc.int_cores " +
+        "FROM " +
+            "plow.task " +
+                "INNER JOIN plow.proc ON task.pk_task = proc.pk_task " +
+                "INNER JOIN plow.layer ON layer.pk_layer = task.pk_layer " +
+                "INNER JOIN plow.job ON layer.pk_job = job.pk_job " +
+        "WHERE " +
+            "task.pk_task = ? ";
 
     public static final RowMapper<RunTaskCommand> RUN_TASK_MAPPER =
             new RowMapper<RunTaskCommand>() {
@@ -362,8 +360,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             task.jobId = rs.getString("pk_job");
             task.taskId = rs.getString("pk_task");
             task.layerId = rs.getString("pk_layer");
-            //task.procId = rs.getString("pk_proc");
-            //task.cores = rs.getInt("int_cores");
+            task.procId = rs.getString("pk_proc");
+            task.cores = rs.getInt("int_cores");
 
             task.logFile = String.format("%s/%s.%d.log",
                     rs.getString("str_log_path"), rs.getString("task_name"),
@@ -382,7 +380,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             task.env = Maps.newHashMap();
             task.env.put("PLOW_TASK_ID", rs.getString("pk_task"));
             task.env.put("PLOW_JOB_ID", rs.getString("pk_job"));
-            //task.env.put("PLOW_PROC_ID", rs.getString("pk_proc"));
+            task.env.put("PLOW_PROC_ID", rs.getString("pk_proc"));
             task.env.put("PLOW_LAYER_ID", rs.getString("pk_layer"));
             task.env.put("PLOW_JOB_NAME", rs.getString("job_name"));
             task.env.put("PLOW_LAYER_NAME", rs.getString("layer_name"));
