@@ -161,7 +161,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     @Override
     public boolean allocateResources(Node node, int cores, int memory) {
         if (jdbc.update(ALLOCATE_RESOURCES,
-                cores, memory, cores, memory, node.getNodeId()) != 1) {
+                cores, memory, cores, memory, node.getNodeId()) == 1) {
             return true;
         }
 
