@@ -8,29 +8,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.DispatchDao;
-import com.breakersoft.plow.dao.FolderDao;
-import com.breakersoft.plow.dao.JobDao;
-import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
-import com.breakersoft.plow.dispatcher.domain.DispatchJob;
-import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
-import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
+import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.event.JobUnbookedEvent;
+import com.breakersoft.plow.event.ProcAllocatedEvent;
+import com.breakersoft.plow.event.ProcDeallocatedEvent;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.TaskState;
 
@@ -67,15 +63,14 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Override
     @Transactional(readOnly=true)
-    public DispatchJob getDispatchJob(JobLaunchEvent event) {
-        DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
-        return djob;
+    public DispatchableJob getDispatchJob(JobLaunchEvent event) {
+        return dispatchDao.getDispatchableJob(event.getJob());
     }
 
     @Override
     @Transactional(readOnly=true)
-    public List<DispatchJob> getDispatchJobs() {
-        return dispatchDao.getDispatchJobs();
+    public List<DispatchableJob> getDispatchJobs() {
+        return dispatchDao.getDispatchableJobs();
     }
 
     @Override
@@ -97,18 +92,6 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    @Transactional(readOnly=true)
-    public List<DispatchTask> getDispatchTasks(DispatchLayer layer, DispatchResource resource) {
-        return dispatchDao.getDispatchTasks(layer, resource);
-    }
-
-    @Override
-    @Transactional(readOnly=true)
-    public List<DispatchLayer> getDispatchLayers(Job job, DispatchResource resource) {
-        return dispatchDao.getDispatchLayers(job, resource);
-    }
-
-    @Override
     public boolean reserveTask(Task task) {
         return taskDao.reserve(task);
     }
@@ -119,9 +102,9 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public boolean startTask(Task task, DispatchProc proc) {
-        if (taskDao.start(task, proc.getCores(), proc.getMemory())) {
-            taskDao.resetTaskDispatchData(task, proc.getHostname());
+    public boolean startTask(String hostname, DispatchableTask task) {
+        if (taskDao.start(task, task.minCores, task.minRam)) {
+            taskDao.resetTaskDispatchData(task, hostname);
             return true;
         }
         return false;
@@ -143,68 +126,63 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public void assignProc(DispatchProc proc, DispatchTask task) {
+    public void assignProc(DispatchProc proc, DispatchableTask task) {
         procDao.update(proc, task);
         proc.setTaskId(task.getTaskId());
     }
 
     @Override
-    public DispatchProc createProc(DispatchNode node, DispatchTask task) {
+    public DispatchProc allocateProc(DispatchNode node, DispatchableTask task) {
 
         final Quota quota = quotaDao.getQuota(node, task);
+        if(!quotaDao.allocateResources(quota, task.minCores)) {
+            logger.info("Failed to allocate resources from quota.");
+            return null;
+        }
 
-        final DispatchProc proc = new DispatchProc();
-        proc.setTaskId(task.getTaskId());
-        proc.setNodeId(node.getNodeId());
-        proc.setQuotaId(quota.getQuotaId());
-        proc.setCores(task.getMinCores());
-        proc.setMemory(task.getMinMemory());
-        proc.setTaskName(task.getName());
-        proc.setHostname(node.getName());
-        proc.setJobId(task.getJobId());
-        proc.setLayerId(task.getLayerId());
-        proc.setTags(task.getTags());
+        if (!nodeDao.allocateResources(node, task.minCores, task.minRam)) {
+            logger.info("Failed to allocate resource from node: " + node.getName());
+        }
 
-        procDao.create(proc);
-        nodeDao.allocateResources(node, task.getMinCores(), task.getMinMemory());
-        quotaDao.allocateResources(quota, task.getMinCores());
-        dispatchDao.addToDispatchTotals(proc);
+        DispatchProc proc = procDao.create(node, task);
+        dispatchDao.incrementDispatchTotals(proc);
 
-        node.decrement(task.getMinCores(), task.getMinMemory());
+        // TODO: move to post transaction event.
+        eventManager.post(new ProcAllocatedEvent(proc));
+
         return proc;
     }
 
     @Override
-    public RunTaskCommand getRuntaskCommand(DispatchTask task, DispatchProc proc) {
-        return dispatchDao.getRunTaskCommand(task, proc);
+    public void deallocateProc(DispatchProc proc, String why) {
+
+        logger.info("deallocating proc: {}, {}", proc.getProcId(), why);
+
+        if (!procDao.delete(proc)) {
+            logger.warn("{} was alredy unbooked.", proc.getProcId());
+        }
+
+        final Quota quota = quotaDao.getQuota(proc);
+        quotaDao.freeResources(quota, proc.getIdleCores());
+
+        final Node node = nodeDao.get(proc.getNodeId());
+        nodeDao.freeResources(node, proc.getIdleCores(), proc.getIdleRam());
+
+        // Updates the dsp tbles.
+        dispatchDao.decrementDispatchTotals(proc);
+
+        // TODO: most to post transaction event.
+        eventManager.post(new ProcDeallocatedEvent(proc));
     }
 
     @Override
-    public void unbookProc(DispatchProc proc, String why) {
+    public List<DispatchableTask> getDispatchableTasks(UUID jobId,
+            DispatchResource resource) {
+        return dispatchDao.getDispatchableTasks(jobId, resource);
+    }
 
-        if (proc == null) {
-            logger.info("proc is null;");
-            return;
-        }
-
-        logger.info("unbooking proc: {}, {}", proc.getProcId(), why);
-
-        if (procDao.delete(proc)) {
-
-            logger.info("Proc unbooked {}", proc.getProcId());
-            logger.info("Cores: {} Memory: {}", proc.getCores(), proc.getMemory());
-            final Quota quota = quotaDao.get(proc.getQuotaId());
-            final Node node = nodeDao.get(proc.getNodeId());
-
-            nodeDao.freeResources(node, proc.getCores(), proc.getMemory());
-            quotaDao.freeResources(quota, proc.getCores());
-            dispatchDao.subtractFromDispatchTotals(proc);
-
-            proc.setAllocated(false);
-            eventManager.post(new JobUnbookedEvent(proc));
-        }
-        else {
-            logger.warn("{} was alredy unbooked.", proc.getProcId());
-        }
+    @Override
+    public RunTaskCommand getRuntaskCommand(Task task) {
+        return dispatchDao.getRunTaskCommand(task);
     }
 }

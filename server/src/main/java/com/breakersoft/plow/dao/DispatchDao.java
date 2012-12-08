@@ -7,13 +7,12 @@ import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
-import com.breakersoft.plow.dispatcher.domain.DispatchJob;
-import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
-import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
+import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 
 /**
@@ -24,26 +23,24 @@ import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
  */
 public interface DispatchDao {
 
-    DispatchJob getDispatchJob(Job job);
-
     List<DispatchProject> getSortedProjectList(Node node);
 
     DispatchNode getDispatchNode(String name);
 
     DispatchProc getDispatchProc(UUID id);
 
-    List<DispatchLayer> getDispatchLayers(Job job, DispatchResource resource);
-
-    List<DispatchTask> getDispatchTasks(DispatchLayer layer,
-            DispatchResource resource);
-
-    List<DispatchJob> getDispatchJobs();
+    List<DispatchableJob> getDispatchableJobs();
 
     DispatchFolder getDispatchFolder(UUID folder);
 
-    RunTaskCommand getRunTaskCommand(DispatchTask task, DispatchProc proc);
+    List<DispatchableTask> getDispatchableTasks(UUID jobId,
+            DispatchResource resource);
 
-    void subtractFromDispatchTotals(DispatchProc proc);
+    void decrementDispatchTotals(DispatchProc proc);
 
-    void addToDispatchTotals(DispatchProc proc);
+    void incrementDispatchTotals(DispatchProc proc);
+
+    RunTaskCommand getRunTaskCommand(Task task);
+
+    DispatchableJob getDispatchableJob(Job job);
 }

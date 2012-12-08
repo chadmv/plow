@@ -6,13 +6,12 @@ import java.util.UUID;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
-import com.breakersoft.plow.dispatcher.domain.DispatchJob;
-import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
-import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
+import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.TaskState;
@@ -33,31 +32,33 @@ public interface DispatchService {
 
     boolean unreserveTask(Task task);
 
-    DispatchJob getDispatchJob(JobLaunchEvent event);
+    DispatchableJob getDispatchJob(JobLaunchEvent event);
 
-    DispatchProc createProc(DispatchNode node, DispatchTask task);
+    List<DispatchableJob> getDispatchJobs();
 
     DispatchProc getDispatchProc(String id);
-
-    List<DispatchTask> getDispatchTasks(DispatchLayer layer,
-            DispatchResource resource);
-
-    List<DispatchLayer> getDispatchLayers(Job job, DispatchResource resource);
-
-    List<DispatchJob> getDispatchJobs();
-
-    void assignProc(DispatchProc proc, DispatchTask task);
 
     void unassignProc(DispatchProc proc);
 
     DispatchFolder getDispatchFolder(UUID folder);
 
-    RunTaskCommand getRuntaskCommand(DispatchTask task, DispatchProc proc);
-
-    void unbookProc(DispatchProc proc, String fromWhere);
-
-    boolean startTask(Task task, DispatchProc proc);
-
     boolean stopTask(Task task, TaskState state);
+
+    // New stuff.
+
+    List<DispatchableTask> getDispatchableTasks(final UUID jobId, final DispatchResource resource);
+
+    void deallocateProc(DispatchProc proc, String why);
+
+    DispatchProc allocateProc(DispatchNode node, DispatchableTask task);
+
+    RunTaskCommand getRuntaskCommand(Task task);
+
+    boolean startTask(String hostname, DispatchableTask task);
+
+    void assignProc(DispatchProc proc, DispatchableTask task);
+
+
+
 
 }

@@ -1,6 +1,8 @@
 package com.breakersoft.plow.test.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -18,10 +20,8 @@ import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.DispatchService;
-import com.breakersoft.plow.dispatcher.domain.DispatchJob;
-import com.breakersoft.plow.dispatcher.domain.DispatchLayer;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
-import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
@@ -59,27 +59,18 @@ public class ProcDaoTests extends AbstractTest {
         dnode = dispatchDao.getDispatchNode(node.getName());
 
         JobLaunchEvent event = jobService.launch(getTestJobSpec());
-        DispatchJob djob = dispatchDao.getDispatchJob(event.getJob());
-
-        for (DispatchLayer layer: dispatchDao.getDispatchLayers(djob, dnode)) {
-            for (DispatchTask dtask: dispatchDao.getDispatchTasks(layer, dnode)) {
-                proc = dispatchService.createProc(dnode, dtask);
-                logger.info("Proc: " + proc.getProcId());
-                task = dtask;
-                break;
-            }
-        }
+        DispatchableJob  djob = dispatchDao.getDispatchableJob(event.getJob());
     }
 
     @Test
     public void testCreate() {
 
         // Check to ensure the procs/memory were subtracted from the host.
-        assertEquals(dnode.getCores(),
+        assertEquals(dnode.getIdleCores(),
                 simpleJdbcTemplate.queryForInt("SELECT int_idle_cores FROM node_dsp WHERE pk_node=?",
                         dnode.getNodeId()));
 
-        assertEquals(dnode.getMemory(),
+        assertEquals(dnode.getIdleRam(),
                 simpleJdbcTemplate.queryForInt("SELECT int_free_ram FROM node_dsp WHERE pk_node=?",
                         dnode.getNodeId()));
 
@@ -91,7 +82,6 @@ public class ProcDaoTests extends AbstractTest {
         assertEquals(proc.getProcId(), otherProc.getProcId());
         assertEquals(proc.getHostname(), otherProc.getHostname());
         assertEquals(proc.getNodeId(), otherProc.getNodeId());
-        assertEquals(proc.getQuotaId(), otherProc.getQuotaId());
         assertEquals(proc.getTaskId(), otherProc.getTaskId());
     }
 
@@ -101,7 +91,6 @@ public class ProcDaoTests extends AbstractTest {
         assertEquals(proc.getProcId(), otherProc.getProcId());
         assertEquals(proc.getHostname(), otherProc.getHostname());
         assertEquals(proc.getNodeId(), otherProc.getNodeId());
-        assertEquals(proc.getQuotaId(), otherProc.getQuotaId());
         assertEquals(proc.getTaskId(), otherProc.getTaskId());
     }
 
