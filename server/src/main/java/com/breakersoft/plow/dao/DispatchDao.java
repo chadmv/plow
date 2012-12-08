@@ -11,6 +11,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
+import com.breakersoft.plow.dispatcher.domain.DispatchableFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
@@ -31,7 +32,7 @@ public interface DispatchDao {
 
     List<DispatchableJob> getDispatchableJobs();
 
-    DispatchFolder getDispatchFolder(UUID folder);
+    DispatchableFolder getDispatchableFolder(UUID folder);
 
     List<DispatchableTask> getDispatchableTasks(UUID jobId,
             DispatchResource resource);
@@ -43,4 +44,6 @@ public interface DispatchDao {
     RunTaskCommand getRunTaskCommand(Task task);
 
     DispatchableJob getDispatchableJob(Job job);
+
+    List<DispatchableFolder> getDispatchableFolders();
 }
