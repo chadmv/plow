@@ -17,6 +17,7 @@ import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.util.JdbcUtils;
+import com.google.common.base.Preconditions;
 
 @Repository
 public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
@@ -107,25 +108,21 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
             "FROM " +
                 "plow.quota, " +
                 "plow.job, " +
-                "plow.proc, " +
-                "plow.node "+
+                "plow.node " +
             "WHERE " +
-                "proc.pk_job = job.pk_job " +
-            "AND " +
-                "proc.pk_node = node.pk_node " +
-            "AND " +
                 "job.pk_project = quota.pk_project " +
             "AND " +
-                "proc.pk_task = ? " +
+                "quota.pk_cluster = node.pk_cluster " +
+            "AND " +
+                "job.pk_job = ? " +
             "AND " +
                 "node.pk_node = ?";
 
     @Override
     public Quota getQuota(Proc proc) {
-        return jdbc.queryForObject(GET_BY_TASK, MAPPER,
-                proc.getTaskId(), proc.getNodeId());
+        return jdbc.queryForObject(GET_BY_PROC, MAPPER,
+                proc.getJobId(), proc.getNodeId());
     }
-
 
     private static final String ALLOCATE_RESOURCE =
             "UPDATE " +
@@ -135,11 +132,12 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
             "WHERE " +
                 "quota.pk_quota = ? " +
             "AND " +
-                "int_burst < int_run_cores";
+                "int_burst > int_run_cores + ?";
 
     @Override
     public boolean allocateResources(Quota quota, int cores) {
-        return jdbc.update(ALLOCATE_RESOURCE, cores, quota.getQuotaId()) == 1;
+        Preconditions.checkNotNull(quota);
+        return jdbc.update(ALLOCATE_RESOURCE, cores, quota.getQuotaId(), cores) == 1;
     }
 
     private static final String FREE_RESOURCE =
