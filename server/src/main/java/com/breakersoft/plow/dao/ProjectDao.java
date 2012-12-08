@@ -1,5 +1,6 @@
 package com.breakersoft.plow.dao;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.breakersoft.plow.Folder;
@@ -37,6 +38,13 @@ public interface ProjectDao {
      * @return
      */
     Project get(UUID id);
+
+    /**
+     * Get all projects.
+     *
+     * @return
+     */
+    List<Project> getAll();
 
 
 }
