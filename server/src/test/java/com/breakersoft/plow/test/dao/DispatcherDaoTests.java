@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.breakersoft.plow.Folder;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.FolderDao;
@@ -24,7 +25,9 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchableFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
+import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
+import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
@@ -72,7 +75,6 @@ public class DispatcherDaoTests extends AbstractTest {
     public void testGetDispatchFolder() {
         Folder folder = folderDao.getDefaultFolder(TEST_PROJECT);
         DispatchableFolder dfolder = dispatchDao.getDispatchableFolder(folder.getFolderId());
-
     }
 
     @Test
@@ -93,6 +95,12 @@ public class DispatcherDaoTests extends AbstractTest {
     @Test
     public void testGetDispatchNode() {
         DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
+        assertEquals(node.getClusterId(), dnode.getClusterId());
+        assertEquals(node.getIdleCores(), dnode.getIdleCores());
+        assertEquals(node.getIdleRam(), dnode.getIdleRam());
+        assertEquals(node.getName(), dnode.getName());
+        assertEquals(node.getNodeId(), dnode.getNodeId());
+        assertEquals(node.getTags(), dnode.getTags());
     }
 
     @Test
@@ -116,12 +124,28 @@ public class DispatcherDaoTests extends AbstractTest {
     @Test
     public void testGetRunTaskCommand() {
 
+        DispatchResult result = new DispatchResult(node);
+        result.isTest = true;
+        nodeDispatcher.dispatch(result, node);
 
+        DispatchProc proc = result.procs.get(0);
+        Task t = jobService.getTask(proc.getTaskId().toString());
+
+        RunTaskCommand command = dispatchDao.getRunTaskCommand(t);
+        assertEquals(command.jobId, t.getJobId().toString());
+        assertEquals(command.procId, proc.getProcId().toString());
+        assertEquals(command.taskId, proc.getTaskId().toString());
+        assertEquals(command.cores, proc.getIdleCores());
     }
 
     @Test
-    public void testGetDispatchTasks() {
+    public void testGetDispatchableTasks() {
 
+        List<DispatchableTask> tasks =
+                dispatchService.getDispatchableTasks(job.getJobId(), node);
 
+        for (DispatchableTask task: tasks) {
+            assertEquals(job.getJobId(), task.getJobId());
+        }
     }
 }
