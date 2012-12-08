@@ -216,6 +216,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             job.minCores = rs.getInt("int_min_cores");
             job.maxCores = rs.getInt("int_max_cores");
             job.runCores = job.incrementAndGetCores(rs.getInt("int_run_cores"));
+            job.isDispatchable = true;
             return job;
         }
     };
