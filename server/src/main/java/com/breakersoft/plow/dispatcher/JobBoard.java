@@ -157,6 +157,7 @@ public class JobBoard {
                 activeJobs.get(projId).remove(job);
             }
 
+            jobIndex.remove(job);
             logger.info("{} jobs in project {}", projId, activeJobs.get(projId).size());
         }
     }
@@ -195,6 +196,13 @@ public class JobBoard {
     public void handleJobShutdownEvent(JobFinishedEvent event) {
         // Set the job's dispatchable boolean to false.
         logger.info("Job shutdown event " + event.getJob().getJobId());
-        jobIndex.get(event.getJob().getJobId()).isDispatchable = false;
+
+        DispatchableJob job = jobIndex.get(event.getJob().getJobId());
+        if (job == null) {
+            return;
+        }
+        else {
+            job.isDispatchable = false;
+        }
     }
 }
