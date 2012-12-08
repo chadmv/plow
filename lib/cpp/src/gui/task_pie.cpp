@@ -18,10 +18,7 @@ TaskPieWidget::TaskPieWidget(QWidget *parent,  Qt::WindowFlags flag)
 
     connect(EventManager::getInstance(), SIGNAL(jobSelected(QString)),
         this, SLOT(handleJobSelected(QString)));
-
-
-    numberOfTasks_ = 0;
-
+    
 }
 
 
@@ -37,13 +34,18 @@ void TaskPieWidget::setTasks(std::vector<TaskT> tasks)
     update();
 }
 
+void TaskPieWidget::setJob(JobT job)
+{
+    m_job = job;
+    update();
+}
+
+
 void TaskPieWidget::handleJobSelected(const QString& id)
 {
     JobT job;
     getJobById(job, id.toStdString());
-    
-    // int totalTasks = m_tasks.totals.totalTaskCount;
-    // std::cout << id.toStdString() << " " << totalTasks << std::endl;
+    setJob(job);
 
     TaskFilterT filter;
     filter.jobId = job.id;
@@ -52,6 +54,16 @@ void TaskPieWidget::handleJobSelected(const QString& id)
     getTasks(tasks, filter);
     setTasks(tasks);
 
+    std::vector<LayerT> layers;
+    getLayers(layers, job);
+    for (int r = 0; r < layers.size(); ++r)
+    {
+        
+        // QString layerName = QString::fromStdString(layers[r].name);
+        // std::cout << layers[r].name << std::endl;
+    }    
+    
+
     // setJob(job);
 }
 
@@ -59,29 +71,22 @@ void TaskPieWidget::handleJobSelected(const QString& id)
 void TaskPieWidget::paintEvent(QPaintEvent * event)
 {
 
-    QPainter p;
-    
-
+    QPainter painter;
+    QPalette palette = QPalette();
     int w = this->width();
     int h = this->height();
 
-    // QLinearGradient grad(w/2, h, w/2, 0);
-    // grad.setColorAt(0, Qt::darkGray);
-    // grad.setColorAt(1, Qt::white);
-
-    float spanAngle = 576.0;
+    float spanAngle = 5760;
     if (m_tasks.size() > 0)
     {       
         spanAngle = 5760.0/m_tasks.size();
-        // qDebug("%f", spanAngle);
     }
 
 
-    p.begin(this);
-    // QPen pen = p.pen();
-    
-    p.setRenderHint(QPainter::Antialiasing);
+    painter.begin(this);
+    painter.setRenderHint(QPainter::Antialiasing);
 
+    // work out radius
     int padding = 50;
     int pieDiameter = w-padding;
     int pieHoriz = (w-pieDiameter)/2;
@@ -93,51 +98,63 @@ void TaskPieWidget::paintEvent(QPaintEvent * event)
         pieVert = (h-pieDiameter)/2;
     }
     
+    
     QRectF rectangle(pieHoriz, pieVert, pieDiameter, pieDiameter);
-    
-    p.setBrush(Qt::NoBrush);
-    // p.drawRect(rectangle);
-    
     QBrush brush(Qt::lightGray, Qt::SolidPattern);
-    p.setBrush(brush);
     QPen pen = QPen(Qt::NoPen);
-    pen.setColor(QColor(160, 159, 155, 75));
-    pen.setWidth(0.541);
-    p.setPen(pen);
-
-    //   enum TaskState {
-    //     INITIALIZE,
-    //     WAITING,
-    //     RUNNING,
-    //     DEAD,
-    //     EATEN,
-    //     DEPEND,
-    //     SUCCEEDED
-    // }
-
    
     for (std::vector<TaskT>::iterator i = m_tasks.begin();
                                       i != m_tasks.end();
                                       ++i)
     {
-        // std::cout << i->progress << std::endl;
-
-        p.setBrush(Qt::gray);
+        painter.setBrush(Qt::gray);
         QColor sliceColor = QColor(PlowStyle::TaskColors[i->state]);
-        
 
-        p.setPen(sliceColor);
-        p.setBrush(sliceColor);   
+        painter.setPen(sliceColor);
+        painter.setBrush(sliceColor);   
 
         int index = i-m_tasks.begin();
-        p.drawPie(rectangle, index*spanAngle, spanAngle);
-        // std::cout << i->state << std::endl;
+        painter.drawPie(rectangle, index*spanAngle, spanAngle);
 
     }
 
+    // outline
+    pen = QPen(palette.buttonText().color());
+    painter.setPen(pen);
+    painter.setBrush(Qt::NoBrush);
+    painter.drawEllipse(rectangle);
+    
+    // status text
+    QString wait;
+    QString running;
+    QString dead;
+    QString eaten;
+    QString depend;
+    QString succeed;
 
-    // p.drawText(0, 0, 120, 200, 0, tr("My text"), 0);
-    p.end();
+    QList<QString> statusText = QList<QString>()
+    << wait.sprintf("w: %i", m_job.totals.waitingTaskCount)
+    << running.sprintf("r: %i", m_job.totals.runningTaskCount)
+    << dead.sprintf("d: %i", m_job.totals.deadTaskCount)
+    << eaten.sprintf("e: %i", m_job.totals.eatenTaskCount)
+    << depend.sprintf("d: %i", m_job.totals.dependTaskCount)
+    << succeed.sprintf("s: %i", m_job.totals.succeededTaskCount);
+
+    pen = QPen(palette.buttonText().color());
+    painter.setPen(pen);
+
+    QFont font = painter.font();
+    font.setFamily("Monospace");
+    painter.setFont(font);
+
+    const int x_padding = 5;
+    const int y_padding = 15;
+    for (int i = 0; i < statusText.size(); ++i) 
+    { 
+        painter.drawText(x_padding, y_padding*i, statusText[i]);
+    }
+   
+    painter.end();
 }
 
 }  // Gui
