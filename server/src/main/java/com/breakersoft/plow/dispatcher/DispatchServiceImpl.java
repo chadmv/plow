@@ -16,11 +16,11 @@ import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dao.TaskDao;
-import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
+import com.breakersoft.plow.dispatcher.domain.DispatchableFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.EventManager;
@@ -81,9 +81,16 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Override
     @Transactional(readOnly=true)
-    public DispatchFolder getDispatchFolder(UUID folder) {
-        return dispatchDao.getDispatchFolder(folder);
+    public DispatchableFolder getDispatchFolder(UUID folder) {
+        return dispatchDao.getDispatchableFolder(folder);
     }
+
+    @Override
+    @Transactional(readOnly=true)
+    public List<DispatchableFolder> getDispatchFolders() {
+        return dispatchDao.getDispatchableFolders();
+    }
+
 
     @Override
     @Transactional(readOnly=true)
@@ -135,6 +142,7 @@ public class DispatchServiceImpl implements DispatchService {
     public DispatchProc allocateProc(DispatchNode node, DispatchableTask task) {
 
         final Quota quota = quotaDao.getQuota(node, task);
+
         if(!quotaDao.allocateResources(quota, task.minCores)) {
             logger.info("Failed to allocate resources from quota.");
             return null;
@@ -142,6 +150,7 @@ public class DispatchServiceImpl implements DispatchService {
 
         if (!nodeDao.allocateResources(node, task.minCores, task.minRam)) {
             logger.info("Failed to allocate resource from node: " + node.getName());
+            return null;
         }
 
         DispatchProc proc = procDao.create(node, task);
@@ -156,11 +165,11 @@ public class DispatchServiceImpl implements DispatchService {
     @Override
     public void deallocateProc(DispatchProc proc, String why) {
 
-        logger.info("deallocating proc: {}, {}", proc.getProcId(), why);
-
-        if (!procDao.delete(proc)) {
-            logger.warn("{} was alredy unbooked.", proc.getProcId());
+        if (proc == null) {
+            return;
         }
+
+        logger.info("deallocating proc: {}, {}", proc.getProcId(), why);
 
         final Quota quota = quotaDao.getQuota(proc);
         quotaDao.freeResources(quota, proc.getIdleCores());
@@ -171,6 +180,9 @@ public class DispatchServiceImpl implements DispatchService {
         // Updates the dsp tbles.
         dispatchDao.decrementDispatchTotals(proc);
 
+        if (!procDao.delete(proc)) {
+            logger.warn("{} was alredy unbooked.", proc.getProcId());
+        }
         // TODO: most to post transaction event.
         eventManager.post(new ProcDeallocatedEvent(proc));
     }

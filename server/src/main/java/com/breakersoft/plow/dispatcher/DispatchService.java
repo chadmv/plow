@@ -3,13 +3,12 @@ package com.breakersoft.plow.dispatcher;
 import java.util.List;
 import java.util.UUID;
 
-import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Task;
-import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
+import com.breakersoft.plow.dispatcher.domain.DispatchableFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
@@ -40,7 +39,7 @@ public interface DispatchService {
 
     void unassignProc(DispatchProc proc);
 
-    DispatchFolder getDispatchFolder(UUID folder);
+    DispatchableFolder getDispatchFolder(UUID folder);
 
     boolean stopTask(Task task, TaskState state);
 
@@ -57,6 +56,8 @@ public interface DispatchService {
     boolean startTask(String hostname, DispatchableTask task);
 
     void assignProc(DispatchProc proc, DispatchableTask task);
+
+    List<DispatchableFolder> getDispatchFolders();
 
 
 
