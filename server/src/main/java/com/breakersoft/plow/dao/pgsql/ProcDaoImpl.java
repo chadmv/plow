@@ -89,8 +89,8 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
         jdbc.update(INSERT,
                 proc.getProcId(),
                 node.getNodeId(),
-                task.jobId,
                 task.taskId,
+                task.jobId,
                 task.minCores,
                 task.minRam);
 
