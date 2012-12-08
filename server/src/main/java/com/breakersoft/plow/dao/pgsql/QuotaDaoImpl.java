@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Node;
+import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.QuotaE;
@@ -98,17 +99,47 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
                 task.getJobId(), node.getClusterId());
     }
 
+    private static final String GET_BY_PROC =
+            "SELECT " +
+                "quota.pk_quota,"+
+                "quota.pk_cluster,"+
+                "quota.pk_project " +
+            "FROM " +
+                "plow.quota, " +
+                "plow.job, " +
+                "plow.proc, " +
+                "plow.node "+
+            "WHERE " +
+                "proc.pk_job = job.pk_job " +
+            "AND " +
+                "proc.pk_node = node.pk_node " +
+            "AND " +
+                "job.pk_project = quota.pk_project " +
+            "AND " +
+                "proc.pk_task = ? " +
+            "AND " +
+                "node.pk_node = ?";
+
+    @Override
+    public Quota getQuota(Proc proc) {
+        return jdbc.queryForObject(GET_BY_TASK, MAPPER,
+                proc.getTaskId(), proc.getNodeId());
+    }
+
+
     private static final String ALLOCATE_RESOURCE =
             "UPDATE " +
                 "plow.quota " +
             "SET " +
                 "int_run_cores = int_run_cores + ? " +
             "WHERE " +
-                "quota.pk_quota = ?";
+                "quota.pk_quota = ? " +
+            "AND " +
+                "int_burst < int_run_cores";
 
     @Override
-    public void allocateResources(Quota quota, int cores) {
-        jdbc.update(ALLOCATE_RESOURCE, cores, quota.getQuotaId());
+    public boolean allocateResources(Quota quota, int cores) {
+        return jdbc.update(ALLOCATE_RESOURCE, cores, quota.getQuotaId()) == 1;
     }
 
     private static final String FREE_RESOURCE =
