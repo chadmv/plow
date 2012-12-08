@@ -25,17 +25,10 @@ void SimpleProgressBarWidget::setJob(JobT job)
 
 void SimpleProgressBarWidget::paintEvent(QPaintEvent * event)
 {
-
-
-    QPainter painter;
-    QBrush brush(Qt::lightGray, Qt::SolidPattern);
-
     int w = this->width();
     int h = this->height();
     int leftMargin = 5;
     int rightMargin = 10;
-    w = w-rightMargin;
-
     int totalTasks = m_job.totals.totalTaskCount;
 
     float waitingWidth = (float)m_job.totals.waitingTaskCount/(float)totalTasks;
@@ -45,6 +38,7 @@ void SimpleProgressBarWidget::paintEvent(QPaintEvent * event)
     float dependWidth = (float)m_job.totals.dependTaskCount/(float)totalTasks;
     float succededWidth = (float)m_job.totals.succeededTaskCount/(float)totalTasks;
 
+    // test numbers
     // float waitingWidth = 0.16666;
     // float runningWidth = 0.16666;
     // float deadWith = 0.16666;
@@ -56,35 +50,52 @@ void SimpleProgressBarWidget::paintEvent(QPaintEvent * event)
     grad.setColorAt(0, Qt::darkBlue);
     grad.setColorAt(1, Qt::white);
 
-    QList<QRectF> rects = QList<QRectF>()
-    << QRectF (0, 0, w*succededWidth, h)
-    << QRectF (0, 0, w*runningWidth, h)
-    << QRectF (0, 0, w*deadWith, h)
-    << QRectF (0, 0, w*eatenWidth, h)
-    << QRectF (0, 0, w*dependWidth, h)
-    << QRectF (0, 0, w*succededWidth, h);
-    
-    painter.begin(this);
 
-    float previousRightEdge = leftMargin;
+    QList<QRectF> rects = QList<QRectF>()
+    << QRectF (leftMargin, 0, (w-rightMargin)*waitingWidth, h)
+    << QRectF (leftMargin, 0, (w-rightMargin)*runningWidth, h)
+    << QRectF (leftMargin, 0, (w-rightMargin)*deadWith, h)
+    << QRectF (leftMargin, 0, (w-rightMargin)*eatenWidth, h)
+    << QRectF (leftMargin, 0, (w-rightMargin)*dependWidth, h)
+    << QRectF (leftMargin, 0, (w-rightMargin)*succededWidth, h);
+
+    QPainter painter;
+    painter.begin(this);
+    painter.setPen(Qt::NoPen);
+
+    QPalette palette = QPalette();
+    
+    QBrush brush(palette.window().color().darker(), Qt::SolidPattern);
+    
+    QRect bgFillRect = QRect(0, 0, w, h);
+    painter.fillRect(bgFillRect, brush);
+
+    painter.setBrush(grad);
+
+    int previousRightEdge = leftMargin;
     for (int i = 0; i < rects.size(); ++i) 
     {    
         grad.setColorAt(0, PlowStyle::TaskColors[i+1]);
         grad.setColorAt(1, PlowStyle::TaskColors[i+1].lighter());
-        rects[i].moveLeft(previousRightEdge);
-        painter.fillRect(rects[i], grad);
-        previousRightEdge = rects[i].right();
+        QRectF mRect = rects[i];
+        mRect.moveLeft(previousRightEdge);
+        painter.fillRect(mRect, grad);
+        previousRightEdge = mRect.right();
     }
 
-    QPalette palette = QPalette();
     QPen pen = QPen(palette.buttonText().color());
     painter.setPen(pen);
-    QRect border = QRect(leftMargin, 0, w, h-2);
-    painter.drawRect(border);
+    painter.setBrush(Qt::NoBrush);
+    QRectF outline = QRectF(leftMargin, 0, w-rightMargin, h-2);
+    painter.drawRect(outline);
 
+    float progressFraction = 1-(m_job.totals.waitingTaskCount/(float)totalTasks);
     QString progressString;
-    progressString.setNum(m_job.totals.waitingTaskCount);
-    painter.drawText(leftMargin+5, 0, 120, 200, 0, progressString, 0);
+    progressString.sprintf("Progress: %.0f \%", progressFraction*100);
+    QFont font = painter.font();
+    font.setPointSize(font.pointSize()-2);
+    painter.setFont(font);
+    painter.drawText(leftMargin+5, 1, 300, 200, 0, progressString, 0);
 
     painter.end();
 }

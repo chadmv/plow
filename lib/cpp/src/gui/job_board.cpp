@@ -11,6 +11,7 @@
 #include "event.h"
 #include "job_board.h"
 #include "simple_progressbar_widget.h"
+#include "task_pie.h"
 
 namespace Plow { 
 namespace Gui {
@@ -61,6 +62,7 @@ void JobBoardWidget::defineActions()
     QAction* jobKillAction = new QAction(tr("Kill Job"), treeWidget);
     connect(jobKillAction, SIGNAL(triggered()), this, SLOT(onJobKill()));
     treeWidget->addAction(jobKillAction);   
+      
 }
 
 void JobBoardWidget::onJobKill()
@@ -86,6 +88,29 @@ void JobBoardWidget::onJobKill()
             }
         }
 
+    }
+}
+
+void JobBoardWidget::onTaskPie()
+{
+    QList<QTreeWidgetItem *> items = treeWidget->selectedItems ();
+    if (!items.isEmpty())
+    {
+        QTreeWidgetItem* item = items.last();
+        
+        Plow::Gui::TaskPieWidget *taskPie = new TaskPieWidget(0, Qt::Dialog);
+        
+        JobT job;
+        std::string job_name = item->text(0).toStdString();
+        getActiveJob(job, job_name);
+
+        TaskFilterT filter;
+        filter.jobId = job.id;
+
+        std::vector<TaskT> tasks;
+        getTasks(tasks, filter);
+        taskPie->setTasks(tasks);
+        taskPie->show();
     }
 }
 
@@ -189,12 +214,12 @@ void JobBoardWidget::refresh()
                 // pass a JobT object to the widget 
                 simpleProgress->setJob((*j));
 
-                QString toolTipString = QString("<b>Job: %1</b>\nSucceeded: %2\nFailed: %3")
+                QString toolTipString = QString("Job: %1\nSucceeded: %2\nFailed: %3")
                                                 .arg(jobItem->text(0))
                                                 .arg(j->totals.succeededTaskCount)
                                                 .arg(j->totals.deadTaskCount);
 
-                jobItem->setToolTip(4, toolTipString);
+                jobItem->setToolTip(5, toolTipString);
                 treeWidget->setItemWidget(jobItem, 5, simpleProgress);
             }
             else

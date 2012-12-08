@@ -35,6 +35,12 @@ LogViewerDockWidget::LogViewerDockWidget(TabbedLogCollection* widget, QWidget *p
 }
 
 
+TaskPieDockWidget::TaskPieDockWidget(TaskPieWidget* widget, QWidget *parent) :
+    QDockWidget("Task Pie", parent)
+{
+    setWidget(widget);
+}
+
 void LogViewerDockWidget::addTask(const QString &taskId) {
     qobject_cast<TabbedLogCollection*>(widget())->addTask(taskId);
     show();

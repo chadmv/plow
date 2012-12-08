@@ -26,9 +26,15 @@ MainWindow::MainWindow()
     Gui::NodeTableWidget *nodeWidget = new Gui::NodeTableWidget(this);
     Gui::NodeTableDockWidget *nodeTableDock = new Gui::NodeTableDockWidget(nodeWidget, this);
 
+    Gui::TaskPieWidget *pieWidget = new Gui::TaskPieWidget(this);
+    Gui::TaskPieDockWidget *pieDock = new Gui::TaskPieDockWidget(pieWidget, this);
+    pieDock->resize(256, 256);
+    pieDock->hide();
+
     addDockWidget(Qt::TopDockWidgetArea, jobBoardDock);
     addDockWidget(Qt::BottomDockWidgetArea, taskBoardDock);
     splitDockWidget(taskBoardDock, nodeTableDock, Qt::Vertical);
+    splitDockWidget(taskBoardDock, pieDock, Qt::Horizontal);
 
     Gui::TabbedLogCollection *logView = new Gui::TabbedLogCollection(this);
     logView->setInterval(5000); // Check files every 5 seconds
