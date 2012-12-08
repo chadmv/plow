@@ -154,6 +154,13 @@ void TaskPieWidget::paintEvent(QPaintEvent * event)
         painter.drawText(x_padding, y_padding*(i+1), statusText[i]);
     }
    
+    // job name
+    QString jobName = m_job.name.c_str();
+    QFontMetrics metric = painter.fontMetrics();
+    int name_width = metric.width(jobName);
+    painter.drawText((w/2)-(name_width/2), h-10, jobName);
+    
+
     painter.end();
 }
 
