@@ -1,5 +1,6 @@
 package com.breakersoft.plow.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.breakersoft.plow.Folder;
@@ -12,5 +13,7 @@ public interface ProjectService {
     Project getProject(UUID id);
 
     Folder createFolder(Project project, String name);
+
+    List<Project> getProjects();
 
 }

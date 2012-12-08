@@ -1,5 +1,6 @@
 package com.breakersoft.plow.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,16 @@ import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.FolderDao;
 import com.breakersoft.plow.dao.ProjectDao;
+import com.breakersoft.plow.event.EventManager;
+import com.breakersoft.plow.event.FolderCreatedEvent;
+import com.breakersoft.plow.event.ProjectCreatedEvent;
 
 @Service
 @Transactional
 public class ProjectServiceImpl implements ProjectService {
+
+    @Autowired
+    EventManager eventManager;
 
     @Autowired
     ProjectDao projectDao;
@@ -25,14 +32,17 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project createProject(String name, String title) {
         Project project = projectDao.create(name, title);
-        Folder folder = folderDao.createFolder(project, Defaults.FOLDER_DEFAULT_NAME);
+        Folder folder = createFolder(project, Defaults.FOLDER_DEFAULT_NAME);
         projectDao.setDefaultFolder(project, folder);
+        eventManager.post(new ProjectCreatedEvent(project));
         return project;
     }
 
     @Override
     public Folder createFolder(Project project, String name) {
-        return folderDao.createFolder(project, name);
+        Folder folder = folderDao.createFolder(project, name);
+        eventManager.post(new FolderCreatedEvent(folder));
+        return folder;
     }
 
     @Override
@@ -40,4 +50,8 @@ public class ProjectServiceImpl implements ProjectService {
         return projectDao.get(id);
     }
 
+    @Override
+    public List<Project> getProjects() {
+        return projectDao.getAll();
+    }
 }

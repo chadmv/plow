@@ -2,6 +2,7 @@ package com.breakersoft.plow.dao.pgsql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.RowMapper;
@@ -37,7 +38,6 @@ public final class ProjectDaoImpl extends AbstractDao implements ProjectDao {
 
     @Override
     public Project create(String name, String title) {
-
         final UUID projectId = UUID.randomUUID();
         jdbc.update(INSERT, projectId, name, title);
 
@@ -58,6 +58,13 @@ public final class ProjectDaoImpl extends AbstractDao implements ProjectDao {
         return jdbc.queryForObject(
                 "SELECT pk_project FROM plow.project WHERE pk_project=?",
                 MAPPER, id);
+    }
+
+    @Override
+    public List<Project> getAll() {
+        return jdbc.query(
+                "SELECT pk_project FROM plow.project",
+                MAPPER);
     }
 
     @Override
