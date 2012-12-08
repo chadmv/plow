@@ -17,7 +17,7 @@ public class RndThriftServiceImpl implements RndServiceApi.Iface {
     PingHandler pingHandler;
 
     @Autowired
-    TaskCompleteHandler backEndDispatcher;
+    TaskCompleteHandler taskCompleteHandler;
 
     @Override
     public void sendPing(Ping ping) throws RndException, TException {
@@ -27,7 +27,7 @@ public class RndThriftServiceImpl implements RndServiceApi.Iface {
     @Override
     public void taskComplete(RunTaskResult result) throws RndException,
             TException {
-        backEndDispatcher.taskComplete(result);
+        taskCompleteHandler.taskComplete(result);
     }
 
 }
