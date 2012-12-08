@@ -353,16 +353,15 @@ CREATE TABLE plow.quota (
 
 CREATE TABLE plow.proc (
   pk_proc UUID NOT NULL PRIMARY KEY,
-  pk_quota UUID NOT NULL,
   pk_node UUID NOT NULL,
   pk_job UUID NOT NULL,
   pk_task UUID,
   int_cores SMALLINT NOT NULL,
   int_ram INTEGER NOT NULL,
-  bool_unbooked BOOLEAN DEFAULT 'f' NOT NULL
+  bool_unbooked BOOLEAN DEFAULT 'f' NOT NULL,
+  bool_backfill BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
-CREATE INDEX proc_pk_quota_idx ON plow.proc (pk_quota);
 CREATE INDEX proc_pk_node_idx ON plow.proc (pk_node);
 CREATE UNIQUE INDEX proc_pk_task_uniq_idx ON plow.proc (pk_task);
 CREATE INDEX proc_pk_job_idx ON plow.proc (pk_job);

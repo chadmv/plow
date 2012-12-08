@@ -159,13 +159,13 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "node_dsp.pk_node = ? ";
 
     @Override
-    public void allocateResources(Node node, int cores, int memory) {
+    public boolean allocateResources(Node node, int cores, int memory) {
         if (jdbc.update(ALLOCATE_RESOURCES,
                 cores, memory, cores, memory, node.getNodeId()) != 1) {
-            String msg = String.format("Failed to allocate %d/%d from %s",
-                    cores, memory, node.getName());
-            throw new ResourceAllocationException(msg);
+            return true;
         }
+
+        return false;
     }
 
     private static final String FREE_RESOURCES =

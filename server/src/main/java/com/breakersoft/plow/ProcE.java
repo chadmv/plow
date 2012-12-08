@@ -6,21 +6,15 @@ public class ProcE implements Proc {
 
     private String hostname;
     private UUID procId;
-    private UUID quotaId;
     private UUID taskId;
     private UUID nodeId;
+    private UUID jobId;
 
     public UUID getProcId() {
         return procId;
     }
     public void setProcId(UUID procId) {
         this.procId = procId;
-    }
-    public UUID getQuotaId() {
-        return quotaId;
-    }
-    public void setQuotaId(UUID quotaId) {
-        this.quotaId = quotaId;
     }
     public UUID getTaskId() {
         return taskId;
@@ -59,5 +53,11 @@ public class ProcE implements Proc {
         } catch (ClassCastException e) {
             return false;
         }
+    }
+    public UUID getJobId() {
+        return jobId;
+    }
+    public void setJobId(UUID jobId) {
+        this.jobId = jobId;
     }
 }

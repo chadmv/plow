@@ -4,7 +4,7 @@ import java.util.Set;
 
 public interface DispatchResource {
 
-    public int getCores();
-    public int getMemory();
+    public int getIdleCores();
+    public int getIdleRam();
     public Set<String> getTags();
 }

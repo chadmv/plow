@@ -7,7 +7,7 @@ public interface Proc {
     String getHostname();
     UUID getProcId();
     UUID getTaskId();
-    UUID getQuotaId();
     UUID getNodeId();
+    UUID getJobId();
 
 }

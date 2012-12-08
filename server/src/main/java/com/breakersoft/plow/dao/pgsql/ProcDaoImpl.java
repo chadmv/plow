@@ -5,19 +5,18 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Job;
-import com.breakersoft.plow.Task;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.ProcE;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.ProcDao;
+import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
-import com.breakersoft.plow.dispatcher.domain.DispatchTask;
-import com.breakersoft.plow.exceptions.ResourceAllocationException;
+import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
@@ -29,7 +28,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                 throws SQLException {
             ProcE proc = new ProcE();
             proc.setProcId((UUID)rs.getObject(1));
-            proc.setQuotaId((UUID)rs.getObject(2));
+            proc.setJobId((UUID)rs.getObject(2));
             proc.setNodeId((UUID)rs.getObject(3));
             proc.setTaskId((UUID)rs.getObject(4));
             proc.setHostname(rs.getString(5));
@@ -40,7 +39,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
     private static final String GET =
             "SELECT " +
                 "proc.pk_proc,"+
-                "proc.pk_quota,"+
+                "proc.pk_job,"+
                 "proc.pk_node,"+
                 "proc.pk_task,"+
                 "node.str_name " +
@@ -65,7 +64,6 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
     private static final String INSERT =
             JdbcUtils.Insert("plow.proc",
                     "pk_proc",
-                    "pk_quota",
                     "pk_node",
                     "pk_task",
                     "pk_job",
@@ -73,20 +71,31 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                     "int_ram");
 
     @Override
-    public void create(DispatchProc proc) {
+    public DispatchProc create(DispatchNode node, DispatchableTask task) {
+
+        DispatchProc proc = new DispatchProc();
         proc.setProcId(UUID.randomUUID());
-        try {
-            jdbc.update(INSERT,
-                    proc.getProcId(),
-                    proc.getQuotaId(),
-                    proc.getNodeId(),
-                    proc.getTaskId(),
-                    proc.getJobId(),
-                    proc.getCores(),
-                    proc.getMemory());
-        } catch (DataAccessException e) {
-            throw new ResourceAllocationException(e);
-        }
+        proc.setJobId(task.jobId);
+        proc.setTaskId(task.taskId);
+        proc.setHostname(node.getName());
+        proc.setNodeId(node.getNodeId());
+        proc.setAllocated(true);
+        proc.setTags(node.getTags());
+
+        //TODO: make this smarter
+        proc.setCores(task.minCores);
+        proc.setMemory(task.minRam);
+
+        jdbc.update(INSERT,
+                proc.getProcId(),
+                node.getNodeId(),
+                task.jobId,
+                task.taskId,
+                task.minCores,
+                task.minRam);
+
+        return proc;
+
     }
 
     private static final String UPDATE =
@@ -98,7 +107,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
             "pk_proc = ?";
 
     @Override
-    public void update(DispatchProc proc, DispatchTask task) {
+    public void update(DispatchProc proc, DispatchableTask task) {
         if (task == null) {
             jdbc.update(UPDATE, null, proc.getProcId());
         }

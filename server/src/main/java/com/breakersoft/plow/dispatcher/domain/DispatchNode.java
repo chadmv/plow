@@ -14,7 +14,7 @@ public class DispatchNode extends NodeE implements DispatchResource {
 
     public DispatchNode() { }
 
-    public int getCores() {
+    public int getIdleCores() {
         return cores;
     }
 
@@ -22,7 +22,7 @@ public class DispatchNode extends NodeE implements DispatchResource {
         this.cores = cores;
     }
 
-    public int getMemory() {
+    public int getIdleRam() {
         return memory;
     }
 
