@@ -28,6 +28,8 @@ MainWindow::MainWindow()
 
     Gui::TaskPieWidget *pieWidget = new Gui::TaskPieWidget(this);
     Gui::TaskPieDockWidget *pieDock = new Gui::TaskPieDockWidget(pieWidget, this);
+    pieDock->resize(256, 256);
+    pieDock->hide();
 
     addDockWidget(Qt::TopDockWidgetArea, jobBoardDock);
     addDockWidget(Qt::BottomDockWidgetArea, taskBoardDock);
