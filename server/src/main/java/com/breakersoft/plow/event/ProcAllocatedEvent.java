@@ -4,8 +4,10 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 
 public class ProcAllocatedEvent {
 
-    public ProcAllocatedEvent(DispatchProc proc) {
+    public DispatchProc proc;
 
+    public ProcAllocatedEvent(DispatchProc proc) {
+        this.proc = proc;
     }
 
 }

@@ -23,13 +23,12 @@ import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.FolderCreatedEvent;
 import com.breakersoft.plow.event.JobFinishedEvent;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.event.ProcBookedEvent;
-import com.breakersoft.plow.event.ProcUnbookedEvent;
+import com.breakersoft.plow.event.ProcAllocatedEvent;
+import com.breakersoft.plow.event.ProcDeallocatedEvent;
 import com.breakersoft.plow.event.ProjectCreatedEvent;
 import com.breakersoft.plow.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.eventbus.Subscribe;
 
 @Component
@@ -75,6 +74,7 @@ public class JobBoard {
         // Propopulate jobs.
         for (DispatchableJob job: dispatchService.getDispatchJobs()) {
             jobIndex.put(job.jobId, job);
+            activeJobs.get(job.getProjectId()).add(job);
         }
         logger.info("Prepopulated {} jobs.", jobIndex.size());
 
@@ -93,17 +93,16 @@ public class JobBoard {
      */
     public List<DispatchableJob> getDispatchableJobs(DispatchNode node, DispatchProject project) {
 
-        logger.info(" " + node.getTags());
-
         final int count = activeJobs.get(project.getProjectId()).size();
         final List<DispatchableJob> result = Lists.newArrayListWithExpectedSize(count);
 
         for (DispatchableJob job: activeJobs.get(project.getProjectId())) {
 
             // Job has no pending frames.
-            if (!job.isDispatchable) {
+            if (!job.isDispatchable()) {
                 continue;
             }
+
             /*
             // Check tags
             if (Sets.intersection(node.getTags(),
@@ -120,9 +119,9 @@ public class JobBoard {
     }
 
     @Subscribe
-    public void handleProcBookedEvent(ProcBookedEvent event) {
+    public void handleProcBookedEvent(ProcAllocatedEvent event) {
 
-        DispatchableJob job = jobIndex.get(event.getTask().getJobId());
+        DispatchableJob job = jobIndex.get(event.proc.getJobId());
         if (job == null) {
             logger.info("Unable to handle job booked event, job was shutdown.");
             return;
@@ -132,35 +131,50 @@ public class JobBoard {
         logger.info("Handling job booked event, before {} / {}",
                 job.runCores, folder.runCores);
 
-        DispatchProc proc = event.getProc();
+        DispatchProc proc = event.proc;
         job.incrementAndGetCores(proc.getIdleCores());
         folder.incrementAndGetCores(proc.getIdleCores());
     }
 
     @Subscribe
-    public void handleProcUnbookedEvent(ProcUnbookedEvent event) {
+    public void handleProcUnbookedEvent(ProcDeallocatedEvent event) {
 
-        DispatchableJob job = jobIndex.get(event.getProc().getJobId());
+        logger.info("Proc unbooked event: " + event.proc.getProcId());
+
+        DispatchableJob job = jobIndex.get(event.proc.getJobId());
         DispatchableFolder folder = folderIndex.get(job.folderId);
 
-        job.incrementAndGetCores(event.getProc().getIdleCores() * -1);
-        folder.incrementAndGetCores(event.getProc().getIdleCores() * -1);
+        job.incrementAndGetCores(event.proc.getIdleCores() * -1);
+        folder.incrementAndGetCores(event.proc.getIdleCores() * -1);
+
+        logger.info("Job {} at {} running cores.", job.jobId, job.runCores);
 
         if (job.runCores == 0) {
             logger.info("Removing JOB {} from dispatcher.", job.jobId);
-            jobIndex.remove(job.jobId);
+
+            final UUID projId = job.getProjectId();
+            synchronized (activeJobs.get(projId)) {
+                activeJobs.get(projId).remove(job);
+            }
+
+            logger.info("{} jobs in project {}", projId, activeJobs.get(projId).size());
         }
     }
 
     @Subscribe
     public void handleJobLaunchEvent(JobLaunchEvent event) {
-
         logger.info("Job launched event: " + event.getJob().getJobId());
 
         DispatchableJob job = dispatchService.getDispatchJob(event);
         job.folder = folderIndex.get(job.folderId);
         jobIndex.put(job.jobId, job);
-        activeJobs.get(event.getJob().getProjectId()).add(job);
+
+        final UUID projId = event.getJob().getProjectId();
+        synchronized (activeJobs.get(projId)) {
+            activeJobs.get(projId).add(job);
+        }
+
+        logger.info("{} jobs in project {}", projId, activeJobs.get(projId).size());
     }
 
     @Subscribe
@@ -180,6 +194,7 @@ public class JobBoard {
     @Subscribe
     public void handleJobShutdownEvent(JobFinishedEvent event) {
         // Set the job's dispatchable boolean to false.
+        logger.info("Job shutdown event " + event.getJob().getJobId());
         jobIndex.get(event.getJob().getJobId()).isDispatchable = false;
     }
 }
