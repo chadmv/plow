@@ -24,7 +24,7 @@ public class BookNodeCommand implements Runnable {
         final DispatchResult result = new DispatchResult(node);
         dispatcher.dispatch(result, node);
 
-        logger.info("BookNodeCommand dispatched: {}/{} from {}",
+        logger.info("BookNodeCommand dispatched: {}/{}MB from {}",
                 new Object[] { result.cores, result.ram, node.getName()});
     }
 }
