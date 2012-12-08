@@ -13,17 +13,22 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchableFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.event.EventManager;
+import com.breakersoft.plow.event.FolderCreatedEvent;
 import com.breakersoft.plow.event.JobFinishedEvent;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.event.ProcBookedEvent;
 import com.breakersoft.plow.event.ProcUnbookedEvent;
+import com.breakersoft.plow.event.ProjectCreatedEvent;
+import com.breakersoft.plow.service.ProjectService;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.Subscribe;
 
@@ -36,13 +41,43 @@ public class JobBoard {
     @Autowired
     EventManager eventManager;
 
+    @Autowired
+    DispatchService dispatchService;
+
+    @Autowired
+    ProjectService projectService;
 
     private Map<UUID, ArrayList<DispatchableJob>> activeJobs;
     private ConcurrentMap<UUID, DispatchableFolder> folderIndex;
     private ConcurrentMap<UUID, DispatchableJob> jobIndex;
 
+    public JobBoard() {
+        activeJobs = Maps.newHashMap();
+        folderIndex = Maps.newConcurrentMap();
+        jobIndex = Maps.newConcurrentMap();
+    }
+
     @PostConstruct
     public void init() {
+
+        // Pre-populate projects.
+        for (Project project: projectService.getProjects()) {
+            activeJobs.put(project.getProjectId(), new ArrayList<DispatchableJob>(32));
+        }
+        logger.info("Prepopulated {} projects.", activeJobs.size());
+
+        // Prepopulte folders.
+        for (DispatchableFolder folder: dispatchService.getDispatchFolders()) {
+            folderIndex.put(folder.folderId, folder);
+        }
+        logger.info("Prepopulated {} folders.", folderIndex.size());
+
+        // Propopulate jobs.
+        for (DispatchableJob job: dispatchService.getDispatchJobs()) {
+            jobIndex.put(job.jobId, job);
+        }
+        logger.info("Prepopulated {} jobs.", jobIndex.size());
+
         eventManager.register(this);
     }
 
@@ -58,21 +93,24 @@ public class JobBoard {
      */
     public List<DispatchableJob> getDispatchableJobs(DispatchNode node, DispatchProject project) {
 
+        logger.info(" " + node.getTags());
+
         final int count = activeJobs.get(project.getProjectId()).size();
         final List<DispatchableJob> result = Lists.newArrayListWithExpectedSize(count);
 
-        for (DispatchableJob job: activeJobs.get(project)) {
+        for (DispatchableJob job: activeJobs.get(project.getProjectId())) {
 
             // Job has no pending frames.
             if (!job.isDispatchable) {
                 continue;
             }
-
+            /*
             // Check tags
             if (Sets.intersection(node.getTags(),
                     job.tags).isEmpty()) {
                 continue;
             }
+            */
 
             result.add(job);
         }
@@ -116,11 +154,27 @@ public class JobBoard {
 
     @Subscribe
     public void handleJobLaunchEvent(JobLaunchEvent event) {
-        DispatchableJob job = jobIndex.get(event.getJob().getJobId());
-        job.folder = folderIndex.get(job.folderId);
 
+        logger.info("Job launched event: " + event.getJob().getJobId());
+
+        DispatchableJob job = dispatchService.getDispatchJob(event);
+        job.folder = folderIndex.get(job.folderId);
         jobIndex.put(job.jobId, job);
         activeJobs.get(event.getJob().getProjectId()).add(job);
+    }
+
+    @Subscribe
+    public void handleProjectCreatedEvent(ProjectCreatedEvent event) {
+        logger.info("Adding dispatch project: " + event.project.getProjectId());
+        activeJobs.put(event.project.getProjectId(), new ArrayList<DispatchableJob>(32));
+    }
+
+    @Subscribe
+    public void handleFolderCreatedEvent(FolderCreatedEvent event) {
+        logger.info("Adding dispatch folder: " + event.folder.getFolderId());
+        DispatchableFolder folder =
+                dispatchService.getDispatchFolder(event.folder.getFolderId());
+        folderIndex.put(folder.folderId, folder);
     }
 
     @Subscribe
