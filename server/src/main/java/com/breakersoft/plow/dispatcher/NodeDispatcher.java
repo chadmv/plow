@@ -137,6 +137,7 @@ public class NodeDispatcher {
         }
         catch (Exception e) {
             logger.warn("Unexpected task dipatching error, " + e);
+            e.printStackTrace();
             dispatchService.deallocateProc(proc, e.getMessage());
             result.dispatch = false;
         }
