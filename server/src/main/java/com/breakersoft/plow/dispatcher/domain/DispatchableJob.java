@@ -41,8 +41,7 @@ public class DispatchableJob implements Job, Comparable<DispatchableJob> {
     }
 
     public boolean isDispatchable() {
-
-        if (runCores >= maxCores) {
+        if (runCores >= maxCores && maxCores > -1) {
             return false;
         }
 
@@ -62,5 +61,21 @@ public class DispatchableJob implements Job, Comparable<DispatchableJob> {
     @Override
     public UUID getFolderId() {
         return folderId;
+    }
+
+    public int hashCode() {
+        return jobId.hashCode();
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (obj == this)
+            return true;
+        if (obj.getClass() != getClass())
+            return false;
+
+        Job other = (Job) obj;
+        return jobId.equals(other.getJobId());
     }
 }
