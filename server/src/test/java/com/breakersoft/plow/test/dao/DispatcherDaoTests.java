@@ -1,7 +1,6 @@
 package com.breakersoft.plow.test.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.List;
 
@@ -16,13 +15,12 @@ import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.FolderDao;
 import com.breakersoft.plow.dao.QuotaDao;
-import com.breakersoft.plow.dispatcher.DispatchResult;
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.NodeDispatcher;
-import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
+import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchableFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
@@ -110,6 +108,8 @@ public class DispatcherDaoTests extends AbstractTest {
         result.isTest = true;
         nodeDispatcher.dispatch(result, node);
 
+        assertFalse(result.procs.isEmpty());
+
         for (DispatchProc proc: result.procs) {
             DispatchProc dbProc = dispatchDao.getDispatchProc(proc.getProcId());
             assertEquals(proc.getProcId(), dbProc.getProcId());
@@ -127,6 +127,8 @@ public class DispatcherDaoTests extends AbstractTest {
         DispatchResult result = new DispatchResult(node);
         result.isTest = true;
         nodeDispatcher.dispatch(result, node);
+
+        assertFalse(result.procs.isEmpty());
 
         DispatchProc proc = result.procs.get(0);
         Task t = jobService.getTask(proc.getTaskId().toString());

@@ -2,9 +2,9 @@ package com.breakersoft.plow.dispatcher.command;
 
 import org.slf4j.Logger;
 
-import com.breakersoft.plow.dispatcher.DispatchResult;
 import com.breakersoft.plow.dispatcher.NodeDispatcher;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
+import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 
 public class BookNodeCommand implements Runnable {
 

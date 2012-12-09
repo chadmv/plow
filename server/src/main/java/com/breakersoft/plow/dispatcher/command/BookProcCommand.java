@@ -1,8 +1,8 @@
 package com.breakersoft.plow.dispatcher.command;
 
-import com.breakersoft.plow.dispatcher.DispatchResult;
 import com.breakersoft.plow.dispatcher.ProcDispatcher;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 
 public class BookProcCommand implements Runnable {
 

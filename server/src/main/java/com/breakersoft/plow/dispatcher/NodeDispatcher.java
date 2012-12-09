@@ -12,6 +12,7 @@ import com.breakersoft.plow.dispatcher.command.BookNodeCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
+import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.EventManager;
@@ -111,10 +112,10 @@ public class NodeDispatcher {
         }
 
         for (DispatchableTask task: tasks) {
-            dispatch(result, node, task);
-            if (!result.continueDispatching()) {
-                return;
+            if (!result.canDispatch(task)) {
+                break;
             }
+            dispatch(result, node, task);
         }
     }
 

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.breakersoft.plow.dispatcher.command.BookProcCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.rndaemon.RndClient;

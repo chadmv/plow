@@ -1,4 +1,4 @@
-package com.breakersoft.plow.dispatcher;
+package com.breakersoft.plow.dispatcher.domain;
 
 public interface Dispatchable {
 
