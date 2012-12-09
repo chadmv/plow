@@ -26,6 +26,7 @@ import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.event.ProcAllocatedEvent;
 import com.breakersoft.plow.event.ProcDeallocatedEvent;
 import com.breakersoft.plow.event.ProjectCreatedEvent;
+import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -45,6 +46,9 @@ public class JobBoard {
 
     @Autowired
     ProjectService projectService;
+
+    @Autowired
+    JobService jobService;
 
     private Map<UUID, ArrayList<DispatchableJob>> activeJobs;
     private ConcurrentMap<UUID, DispatchableFolder> folderIndex;
@@ -100,6 +104,10 @@ public class JobBoard {
 
             // Job has no pending frames.
             if (!job.isDispatchable()) {
+                continue;
+            }
+
+            if (!jobService.hasWaitingFrames(job)) {
                 continue;
             }
 

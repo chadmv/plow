@@ -43,4 +43,9 @@ public class DispatchProc extends ProcE implements DispatchResource {
     public void setTags(Set<String> tags) {
         this.tags = tags;
     }
+
+    public void allocate(int cores, int ram) {
+        this.cores = this.cores - cores;
+        this.memory = this.memory - ram;
+    }
 }

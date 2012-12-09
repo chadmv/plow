@@ -53,4 +53,10 @@ public class DispatchNode extends NodeE implements DispatchResource {
     public void setDispatchable(boolean dispatchable) {
         this.dispatchable = dispatchable;
     }
+
+    @Override
+    public void allocate(int cores, int ram) {
+        this.cores = this.cores - cores;
+        this.memory = this.memory - memory;
+    }
 }

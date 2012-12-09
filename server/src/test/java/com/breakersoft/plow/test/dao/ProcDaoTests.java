@@ -19,9 +19,12 @@ import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.ProcDao;
+import com.breakersoft.plow.dispatcher.DispatchResult;
 import com.breakersoft.plow.dispatcher.DispatchService;
+import com.breakersoft.plow.dispatcher.NodeDispatcher;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
+import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
@@ -31,23 +34,20 @@ import com.breakersoft.plow.test.AbstractTest;
 public class ProcDaoTests extends AbstractTest {
 
     @Resource
-    NodeService nodeService;
-
-    @Resource
     DispatchDao dispatchDao;
 
     @Resource
-    JobService jobService;
+    DispatchService dispatchService;
 
     @Resource
-    DispatchService dispatchService;
+    NodeDispatcher nodeDispatcher;
 
     @Resource
     ProcDao procDao;;
 
     private Proc proc;
 
-    private Task task;
+    private DispatchableTask task;
 
     private DispatchNode dnode;
 
@@ -60,19 +60,9 @@ public class ProcDaoTests extends AbstractTest {
 
         JobLaunchEvent event = jobService.launch(getTestJobSpec());
         DispatchableJob  djob = dispatchDao.getDispatchableJob(event.getJob());
-    }
 
-    @Test
-    public void testCreate() {
-
-        // Check to ensure the procs/memory were subtracted from the host.
-        assertEquals(dnode.getIdleCores(),
-                simpleJdbcTemplate.queryForInt("SELECT int_idle_cores FROM node_dsp WHERE pk_node=?",
-                        dnode.getNodeId()));
-
-        assertEquals(dnode.getIdleRam(),
-                simpleJdbcTemplate.queryForInt("SELECT int_free_ram FROM node_dsp WHERE pk_node=?",
-                        dnode.getNodeId()));
+        task = dispatchService.getDispatchableTasks(djob.getJobId(),dnode).get(0);
+        proc = dispatchService.allocateProc(dnode, task);
 
     }
 

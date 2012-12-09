@@ -78,7 +78,8 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
         JdbcUtils.Insert("plow.layer",
                 "pk_layer", "pk_job", "str_name", "str_range",
                 "str_command", "str_tags", "int_chunk_size", "int_order",
-                "int_min_cores", "int_max_cores", "int_min_ram");
+                "int_min_cores", "int_max_cores", "int_min_ram",
+                "bool_threadable");
 
     @Override
     public Layer create(final Job job, final LayerSpecT layer, final int order) {
@@ -100,7 +101,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
                 ret.setInt(9, layer.getMinCores());
                 ret.setInt(10, layer.getMaxCores());
                 ret.setInt(11, layer.getMinRamMb());
-
+                ret.setBoolean(12, layer.isThreadable());
                 return ret;
             }
         });

@@ -79,15 +79,11 @@ public class ProcDispatcher {
         }
         catch (Exception e) {
             logger.warn("Unexpected task dipatching error, " + e);
-            dispatchService.unreserveTask(task);
             dispatchService.deallocateProc(proc, e.getMessage());
+            dispatchService.unreserveTask(task);
         }
 
         // Don't continue to dispatch.
         result.dispatch = false;
-
     }
-
-
-
 }
