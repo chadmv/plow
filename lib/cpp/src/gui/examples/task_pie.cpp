@@ -21,8 +21,6 @@ int main(int argc, char *argv[])
     w.setCentralWidget(&pie);
     w.show();
 
-    // User should hit ctrl/cmd + o to open a new log
-
     return a->exec();
 }
 

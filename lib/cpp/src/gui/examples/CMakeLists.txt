@@ -56,3 +56,20 @@ ENDIF()
 
 add_dependencies(taskpie plowgui)
 TARGET_LINK_LIBRARIES(taskpie plowgui ${QT_LIBRARIES})
+
+#
+# Tray Widget
+#
+set (tray_SOURCE plow_task_tray.cpp)
+set (QtApp_RCCS application.qrc)
+QT4_ADD_RESOURCES(QtApp_RCC_SRCS ${QtApp_RCCS})
+
+IF(APPLE)
+        ADD_EXECUTABLE(plowtray MACOSX_BUNDLE
+                ${tray_SOURCE})
+ELSEIF(UNIX)
+        ADD_EXECUTABLE(plowtray ${tray_SOURCE} ${QtApp_RCC_SRCS})
+ENDIF()
+
+add_dependencies(plowtray plowgui)
+TARGET_LINK_LIBRARIES(plowtray plowgui ${QT_LIBRARIES})
