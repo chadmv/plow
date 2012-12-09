@@ -293,7 +293,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "task.bool_reserved IS FALSE " +
             "ORDER BY " +
                 "task.int_task_order, task.int_layer_order ASC " +
-            "LIMIT ?";
+            "LIMIT 10";
 
     public static final RowMapper<DispatchableTask> DISPATCHABLE_TASK_MAPPER =
             new RowMapper<DispatchableTask>() {
@@ -321,7 +321,6 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 ps.setInt(3, resource.getIdleRam());
                 ps.setArray(4, conn.createArrayOf("text", resource.getTags().toArray()));
                 ps.setInt(5, TaskState.WAITING.ordinal());
-                ps.setInt(6, Defaults.DISPATCH_MAX_TASKS_PER_JOB);
                 return ps;
             }
         }, DISPATCHABLE_TASK_MAPPER);
