@@ -1,9 +1,7 @@
 
-#include <QtGui>
+#include <QApplication>
 #include <QVBoxLayout>
-
-#include "event.h"
-#include "common.h"
+#include <QMenu>
 
 #include "tray_widget.h"
 

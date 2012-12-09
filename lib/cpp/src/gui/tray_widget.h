@@ -6,7 +6,6 @@
 #include <QDialog>
 #include <QVBoxLayout>
 
-#include "plow/plow.h"
 #include "gui/job_board.h"
 
 namespace Plow {
