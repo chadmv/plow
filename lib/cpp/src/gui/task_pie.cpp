@@ -56,12 +56,12 @@ void TaskPieWidget::handleJobSelected(const QString& id)
 
     std::vector<LayerT> layers;
     getLayers(layers, job);
-    for (int r = 0; r < layers.size(); ++r)
-    {
+    // for (int r = 0; r < layers.size(); ++r)
+    // {
         
         // QString layerName = QString::fromStdString(layers[r].name);
         // std::cout << layers[r].name << std::endl;
-    }    
+    // }    
     
 
     // setJob(job);

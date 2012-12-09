@@ -14,6 +14,7 @@ SET(PLOW_GUI_SRCS_CXX
     simple_progressbar_widget.cpp
     logviewer.cpp
     task_pie.cpp
+    tray_widget.cpp
 )
 
 SET(PLOW_GUI_MOC_HDRS
@@ -28,6 +29,7 @@ SET(PLOW_GUI_MOC_HDRS
     simple_progressbar_widget.h
     logviewer.h
     task_pie.h
+    tray_widget.h
 )
 
 SET(PLOW_GUI_UI_FILES
