@@ -133,6 +133,7 @@ public class NodeDispatcher {
                 // stop dispatching the node because its likely another
                 // thread is working on this node.
                 result.dispatch = false;
+                dispatchService.unreserveTask(task);
                 return;
             }
 
@@ -148,16 +149,15 @@ public class NodeDispatcher {
             }
             else {
                 dispatchService.deallocateProc(proc, "Unable to start task.");
+                dispatchService.unreserveTask(task);
             }
         }
         catch (Exception e) {
             logger.warn("Unexpected task dipatching error, " + e);
             e.printStackTrace();
             dispatchService.deallocateProc(proc, e.getMessage());
-            result.dispatch = false;
-        }
-        finally {
             dispatchService.unreserveTask(task);
+            result.dispatch = false;
         }
     }
 }
