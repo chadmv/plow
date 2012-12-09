@@ -170,13 +170,14 @@ struct LayerT {
     3:string range,
     4:i32 chunk,
     5:set<string> tags,
-    6:i32 minCores,
-    7:i32 maxCores,
-    8:i32 minRamMb,
-    9:i32 runCores,
-    10:TaskTotalsT totals,
-    11:i32 maxRssMb,
-    12:i16 maxCpuPerc
+    6:bool threadable
+    7:i32 minCores,
+    8:i32 maxCores,
+    9:i32 minRamMb,
+    10:i32 runCores,
+    11:TaskTotalsT totals,
+    12:i32 maxRssMb,
+    13:i16 maxCpuPerc
 }
 
 struct TaskT {
@@ -239,8 +240,9 @@ struct LayerSpecT {
     6:i32 minCores = 1,
     7:i32 maxCores = 1,
     8:i32 minRamMb = 2048,
-    9:list<DependSpecT> depends,
-    10:list<TaskSpecT> tasks
+    9:bool threadable = false,
+    10:list<DependSpecT> depends,
+    11:list<TaskSpecT> tasks
 }
 
 struct JobSpecT {

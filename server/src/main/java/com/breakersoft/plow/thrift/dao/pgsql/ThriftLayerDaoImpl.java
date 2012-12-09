@@ -37,6 +37,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             layer.range = rs.getString("str_range");
             layer.setMaxRssMb(rs.getInt("int_max_rss"));
             layer.setMaxCpuPerc(rs.getShort("int_max_cpu_perc"));
+            layer.setThreadable(rs.getBoolean("bool_threadable"));
             layer.tags = new HashSet<String>(
                     Arrays.asList((String[])rs.getArray("str_tags").getArray()));
 
@@ -55,6 +56,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer.int_min_cores,"+
                 "layer.int_max_cores,"+
                 "layer.int_min_ram, " +
+                "layer.bool_threadable,"+
                 "layer_count.int_total, "+
                 "layer_count.int_succeeded,"+
                 "layer_count.int_running,"+

@@ -142,7 +142,8 @@ CREATE table plow.layer (
   int_order INTEGER NOT NULL,
   int_min_cores SMALLINT NOT NULL,
   int_max_cores SMALLINT NOT NULL,
-  int_min_ram INTEGER NOT NULL
+  int_min_ram INTEGER NOT NULL,
+  bool_threadable BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
 CREATE INDEX layer_pk_job_idx ON plow.layer (pk_job);
