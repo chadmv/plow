@@ -29,7 +29,7 @@ void TrayWidget::createTrayIcon()
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
-//    QIcon icon = QIcon("/home/aberg/git/plow/lib/cpp-build/src/gui/examples/plow_icon.svg");
+
     QIcon icon = QIcon(":images/plow_icon.svg");
     trayIcon->setIcon(icon);
     trayIcon->setToolTip("Plow System Tray");
@@ -37,6 +37,15 @@ void TrayWidget::createTrayIcon()
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 
+}
+
+void TrayWidget::showEvent(QShowEvent * event)
+{
+    if (!jobBoard)
+    {
+        jobBoard = new Plow::Gui::JobBoardWidget(this);
+        mainLayout->addWidget(jobBoard);
+    }
 }
 
 void TrayWidget::hideEvent(QHideEvent * event)
@@ -53,12 +62,8 @@ void TrayWidget::createActions()
 
 void TrayWidget::showJobBoard()
 {
-    if (!jobBoard)
-    {
-        jobBoard = new Plow::Gui::JobBoardWidget(this);
-        mainLayout->addWidget(jobBoard);
-    }
-    if (jobBoard->isVisible())
+
+    if (this->isVisible())
     {
         this->hide();
     }

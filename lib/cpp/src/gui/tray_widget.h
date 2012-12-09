@@ -22,6 +22,7 @@ private slots:
 
 protected:
     void hideEvent(QHideEvent * event);
+    void showEvent(QShowEvent * event);
 
 public:
     TrayWidget();
