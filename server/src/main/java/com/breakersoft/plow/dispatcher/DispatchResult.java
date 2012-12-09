@@ -28,11 +28,11 @@ public class DispatchResult {
 
     public boolean continueDispatching() {
 
-        if (resource.getIdleCores() - cores < 1) {
+        if (resource.getIdleCores() < 1) {
             return false;
         }
 
-        if (resource.getIdleRam() - ram <= Defaults.MEMORY_RESERVE_MB) {
+        if (resource.getIdleRam() <=  Defaults.MEMORY_RESERVE_MB) {
             return false;
         }
 
@@ -41,12 +41,10 @@ public class DispatchResult {
 
     public void dispatched(DispatchProc proc) {
         procs.add(proc);
-        cores+=proc.getIdleCores();
-        ram+=proc.getIdleRam();
+        resource.allocate(proc.getIdleCores(), proc.getIdleRam());
 
         logger.info("Dispatched {}, cores left: {} - ram left: {}",
                 new Object[] { proc.getHostname(), resource.getIdleCores() - cores,
                 resource.getIdleRam() - ram});
-
     }
 }
