@@ -50,11 +50,10 @@ public class NodeDaoTests extends AbstractTest {
 
     }
 
-    @Test(expected=ResourceAllocationException.class)
     public void allocateResourcesFailed() {
         Cluster cluster = clusterDao.create("test", "test");
         Node node = nodeDao.create(cluster, getTestNodePing());
-        nodeDao.allocateResources(node, 100, 1000000);
+        assertFalse(nodeDao.allocateResources(node, 100, 1000000));
     }
 
     @Test
