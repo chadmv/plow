@@ -49,9 +49,16 @@ public class ProcDispatcher {
         final List<DispatchableTask> tasks =
                 dispatchService.getDispatchableTasks(proc.getJobId(), proc);
 
+        if (tasks.isEmpty()) {
+            dispatchService.deallocateProc(proc, "No pending tasks for job");
+            return;
+        }
+
         for (DispatchableTask task: tasks) {
             dispatch(result, proc, task);
-            if (!result.continueDispatching()){
+            // Only continue if the task failed due to a
+            // reservation problem.
+            if (!result.continueDispatching()) {
                 return;
             }
         }
@@ -68,23 +75,25 @@ public class ProcDispatcher {
             if (dispatchService.startTask(proc.getHostname(), task)) {
                 RunTaskCommand command =
                         dispatchService.getRuntaskCommand(task);
-
                 RndClient client = new RndClient(proc.getHostname());
                 client.runProcess(command);
                 result.dispatched(proc);
+                // Don't continue to dispatch.
+                result.dispatch = false;
             }
             else {
-                dispatchService.deallocateProc(proc, "Unable to book task.");
-                dispatchService.unreserveTask(task);
+                cleanup(result, proc, task, "Unable to book task.");
             }
         }
         catch (Exception e) {
             logger.warn("Unexpected task dipatching error, " + e);
-            dispatchService.deallocateProc(proc, e.getMessage());
-            dispatchService.unreserveTask(task);
+            cleanup(result, proc, task, e.getMessage());
         }
+    }
 
-        // Don't continue to dispatch.
+    private void cleanup(DispatchResult result, DispatchProc proc, DispatchableTask task, String message) {
+        dispatchService.deallocateProc(proc, message);
+        dispatchService.unreserveTask(task);
         result.dispatch = false;
     }
 }
