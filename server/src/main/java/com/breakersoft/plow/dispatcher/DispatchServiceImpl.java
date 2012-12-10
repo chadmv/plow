@@ -146,8 +146,9 @@ public class DispatchServiceImpl implements DispatchService {
     @Override
     public DispatchProc allocateProc(DispatchNode node, DispatchableTask task) {
 
-        final Quota quota = quotaDao.getQuota(node, task);
+        DispatchProc proc = procDao.create(node, task);
 
+        final Quota quota = quotaDao.getQuota(node, task);
         if(!quotaDao.allocateResources(quota, task.minCores)) {
             logger.info("Failed to allocate resources from quota.");
             return null;
@@ -158,7 +159,6 @@ public class DispatchServiceImpl implements DispatchService {
             return null;
         }
 
-        DispatchProc proc = procDao.create(node, task);
         dispatchDao.incrementDispatchTotals(proc);
 
         // TODO: move to post transaction event.
@@ -177,15 +177,22 @@ public class DispatchServiceImpl implements DispatchService {
         logger.info("deallocating proc: {}, {}", proc.getProcId(), why);
 
         final Quota quota = quotaDao.getQuota(proc);
-        quotaDao.freeResources(quota, proc.getIdleCores());
-
         final Node node = nodeDao.get(proc.getNodeId());
-        nodeDao.freeResources(node, proc.getIdleCores(), proc.getIdleRam());
 
-        // Updates the dsp tbles.
-        dispatchDao.decrementDispatchTotals(proc);
+        // Updates tables
+        // proc
+        // quota
+        // node
+        // folder_dsp
+        // job_dsp
+        // layer_dsp
 
-        if (!procDao.delete(proc)) {
+        if (procDao.delete(proc)) {
+            quotaDao.freeResources(quota, proc.getIdleCores());
+            nodeDao.freeResources(node, proc.getIdleCores(), proc.getIdleRam());
+            dispatchDao.decrementDispatchTotals(proc);
+        }
+        else {
             logger.warn("{} was alredy unbooked.", proc.getProcId());
         }
 
