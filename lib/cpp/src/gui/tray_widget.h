@@ -18,6 +18,7 @@ class TrayWidget : public QDialog
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
+    void onWranglePlow();
 
 protected:
     void hideEvent(QHideEvent * event);
@@ -34,6 +35,7 @@ private:
     void createActions();
     void showJobBoard();
     QAction *quitAction;
+    QAction *wranglePlowAction;
     QVBoxLayout *mainLayout;
 };
 
