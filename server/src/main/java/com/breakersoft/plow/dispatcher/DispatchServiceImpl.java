@@ -20,6 +20,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
+import com.breakersoft.plow.dispatcher.domain.DispatchStats;
 import com.breakersoft.plow.dispatcher.domain.DispatchableFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
@@ -112,8 +113,10 @@ public class DispatchServiceImpl implements DispatchService {
     public boolean startTask(String hostname, DispatchableTask task) {
         if (taskDao.start(task, task.minCores, task.minRam)) {
             taskDao.resetTaskDispatchData(task, hostname);
+            DispatchStats.taskStartedCount.incrementAndGet();
             return true;
         }
+        DispatchStats.taskStartedFailureCount.incrementAndGet();
         return false;
     }
 
@@ -121,8 +124,10 @@ public class DispatchServiceImpl implements DispatchService {
     public boolean stopTask(Task task, TaskState state) {
         if (taskDao.stop(task, state)) {
             taskDao.clearLastLogLine(task);
+            DispatchStats.taskStoppedCount.incrementAndGet();
             return true;
         }
+        DispatchStats.taskStoppedFailureCount.incrementAndGet();
         return false;
     }
 
@@ -183,6 +188,7 @@ public class DispatchServiceImpl implements DispatchService {
         if (!procDao.delete(proc)) {
             logger.warn("{} was alredy unbooked.", proc.getProcId());
         }
+
         // TODO: most to post transaction event.
         eventManager.post(new ProcDeallocatedEvent(proc));
     }

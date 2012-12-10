@@ -15,6 +15,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchStats;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.rndaemon.RndClient;
@@ -47,6 +48,7 @@ public class NodeDispatcher {
      */
     public void book(DispatchNode node) {
         dispatchThreads.execute(new BookNodeCommand(node, this));
+        DispatchStats.totalDispatchCount.incrementAndGet();
     }
 
     /*
@@ -154,6 +156,7 @@ public class NodeDispatcher {
             }
         }
         catch (Exception e) {
+            DispatchStats.totalDispatchErrorCount.incrementAndGet();
             logger.warn("Unexpected task dipatching error, " + e);
             e.printStackTrace();
             dispatchService.deallocateProc(proc, e.getMessage());
