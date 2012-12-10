@@ -91,7 +91,7 @@ void SimpleProgressBarWidget::paintEvent(QPaintEvent * event)
 
     float progressFraction = 1-(m_job.totals.waitingTaskCount/(float)totalTasks);
     QString progressString;
-    progressString.sprintf("Progress: %.0f \%", progressFraction*100);
+    progressString.sprintf("Progress: %.0f %%", progressFraction*100);
     QFont font = painter.font();
     font.setPointSize(font.pointSize()-2);
     painter.setFont(font);
