@@ -47,6 +47,9 @@ public class NodeDispatcher {
      * @param node
      */
     public void book(DispatchNode node) {
+        if (!DispatchConfig.IS_ENABLED.get()) {
+            return;
+        }
         dispatchThreads.execute(new BookNodeCommand(node, this));
         DispatchStats.totalDispatchCount.incrementAndGet();
     }

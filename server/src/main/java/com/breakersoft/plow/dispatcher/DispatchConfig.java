@@ -1,5 +1,7 @@
 package com.breakersoft.plow.dispatcher;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class DispatchConfig {
 
     /*
@@ -14,4 +16,10 @@ public class DispatchConfig {
      * switches to the next job.
      */
     public static int MAX_CORES_PER_JOB = 4;
+
+    /*
+     * Set to true once dispatching should start to happen.
+     */
+    public static AtomicBoolean IS_ENABLED = new AtomicBoolean(false);
+
 }

@@ -83,6 +83,9 @@ public class JobBoard {
         logger.info("Prepopulated {} jobs.", jobIndex.size());
 
         eventManager.register(this);
+
+        // Enable the dispatcher.
+        DispatchConfig.IS_ENABLED.set(true);
     }
 
     public DispatchableJob getDispatchableJob(UUID id) {
