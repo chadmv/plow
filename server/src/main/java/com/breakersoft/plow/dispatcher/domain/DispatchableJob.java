@@ -3,10 +3,15 @@ package com.breakersoft.plow.dispatcher.domain;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+
 import com.breakersoft.plow.Job;
 import com.google.common.collect.ComparisonChain;
 
 public class DispatchableJob implements Job, Comparable<DispatchableJob> {
+
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(DispatchableJob.class);
 
     public DispatchableFolder folder;
 
@@ -17,8 +22,8 @@ public class DispatchableJob implements Job, Comparable<DispatchableJob> {
     public int minCores;
     public int maxCores;
     public volatile int runCores;
+    public volatile float tier = 0.0f;
     public boolean isDispatchable = true;
-    public float tier = 0.0f;
     public Set<String> tags;
 
     @Override
@@ -37,6 +42,7 @@ public class DispatchableJob implements Job, Comparable<DispatchableJob> {
         else {
             tier = runCores / (float) minCores;
         }
+        logger.info("Job:{} is running {} cores", jobId, runCores);
         return runCores;
     }
 
