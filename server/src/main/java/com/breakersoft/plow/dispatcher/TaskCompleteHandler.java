@@ -82,7 +82,7 @@ public class TaskCompleteHandler {
         }
         else if (jobService.isFinished(job)) {
             dispatchService.deallocateProc(proc,
-                    "Job no longer has pending frames: " + job.getJobId());
+                    "Job is finished " + job.getJobId());
             jobStateManager.shutdownJob(job);
         }
         else {
