@@ -11,12 +11,12 @@ public class DispatchProfile {
     /*
      * True if new jobs have been added recently.
      */
-    public boolean rapidTopologyChanges;
+    public boolean rapidTopologyChanges = false;
 
     /*
      * Add N more cores to every dispatch, increases as
      */
-    public int plusCores;
+    public int plusCores = 0;
 
     /*
      * Prefer more threads over more tasks. 0=tasks, 1=threads

@@ -13,7 +13,7 @@ public class DispatchResult {
             org.slf4j.LoggerFactory.getLogger(DispatchResult.class);
 
     public final DispatchResource resource;
-    public DispatchProfile profile;
+    public DispatchProfile profile = new DispatchProfile();
 
     public int cores = 0;
     public int ram = 0;
