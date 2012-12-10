@@ -26,9 +26,9 @@ def createLayerSpec(layer):
     lspec.name = layer.getName()
     lspec.tags =  layer.getArg("tags", ["unassigned"])
     lspec.chunk = layer.getArg("chunk", 1)
-    lspec.minCores = layer.getArg("min_cores", 1)
-    lspec.maxCores = layer.getArg("max_cores", 0)
-    lspec.minMemory = layer.getArg("min_ram", 2048)
+    lspec.minCores = layer.getArg("threads", 1)
+    lspec.maxCores = layer.getArg("max_threads", 0)
+    lspec.minRamMb = layer.getArg("ram", 512)
 
     return lspec
 
@@ -69,9 +69,9 @@ def serialize(runner):
                 # Merge in the tags for the other layer.  Probably not the best option.
                 task_layer.tags.update(layer.getArg("tags", set()))
                 # Use the highest values on any task.
-                task_layer.minCores = max(task_layer.minCores, task.getArg("min_cores", 1))
-                task_layer.maxCores = max(task_layer.maxCores, task.getArg("max_cores", 0))
-                task_layer.minMemory = max(task_layer.minMemory, task.getArg("min_mem"))
+                task_layer.minCores = max(task_layer.minCores, task.getArg("threads", 1))
+                task_layer.maxCores = max(task_layer.maxCores, task.getArg("max_threads", 0))
+                task_layer.minRamMb = max(task_layer.minRamMb, task.getArg("ram"))
         
             task_layer.command = [
                 "%s/plow_wrapper.sh" % os.path.dirname(__file__),

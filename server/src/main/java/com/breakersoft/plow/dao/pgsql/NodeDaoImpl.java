@@ -16,7 +16,6 @@ import com.breakersoft.plow.Node;
 import com.breakersoft.plow.NodeE;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.NodeDao;
-import com.breakersoft.plow.exceptions.ResourceAllocationException;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.util.JdbcUtils;
 

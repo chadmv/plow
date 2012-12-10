@@ -239,7 +239,7 @@ struct LayerSpecT {
     5:i32 chunk = 1,
     6:i32 minCores = 1,
     7:i32 maxCores = 1,
-    8:i32 minRamMb = 2048,
+    8:i32 minRamMb = 1024,
     9:bool threadable = false,
     10:list<DependSpecT> depends,
     11:list<TaskSpecT> tasks

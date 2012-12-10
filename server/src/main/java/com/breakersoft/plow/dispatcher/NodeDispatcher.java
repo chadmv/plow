@@ -115,7 +115,7 @@ public class NodeDispatcher {
 
         for (DispatchableTask task: tasks) {
             if (!result.canDispatch(task)) {
-                break;
+                continue;
             }
             dispatch(result, node, task);
         }
@@ -129,14 +129,14 @@ public class NodeDispatcher {
 
         DispatchProc proc = null;
         try {
-            // Allocate the proc from the node.
+            // Allocate the proc from the node.  This can throw if
+            // the task is already running some where.
             proc = dispatchService.allocateProc(node, task);
             if (proc == null) {
                 // The proc could not be allocated.  When this happens
                 // stop dispatching the node because its likely another
                 // thread is working on this node.
-                result.dispatch = false;
-                dispatchService.unreserveTask(task);
+                cleanup(result, proc, task, "Unable to allocate proc.");
                 return;
             }
 
@@ -151,17 +151,28 @@ public class NodeDispatcher {
                 result.dispatched(proc);
             }
             else {
-                dispatchService.deallocateProc(proc, "Unable to start task.");
-                dispatchService.unreserveTask(task);
+                cleanup(result, proc, task, "Unable to start task.");
             }
         }
         catch (Exception e) {
-            DispatchStats.totalDispatchErrorCount.incrementAndGet();
-            logger.warn("Unexpected task dipatching error, " + e);
+            cleanup(result, proc, task, e.getMessage());
             e.printStackTrace();
-            dispatchService.deallocateProc(proc, e.getMessage());
-            dispatchService.unreserveTask(task);
-            result.dispatch = false;
         }
+    }
+
+    /**
+     * Utility method for cleaning up failed dispatches.
+     *
+     * @param result
+     * @param proc
+     * @param task
+     * @param message
+     */
+    private void cleanup(DispatchResult result, DispatchProc proc, DispatchableTask task, String message) {
+        logger.warn("Failed to dispatch {}/{}, {}",
+                new Object[] {proc, task, message});
+        result.dispatch = false;
+        dispatchService.deallocateProc(proc, message);
+        dispatchService.unreserveTask(task);
     }
 }
