@@ -19,6 +19,7 @@ public class DispatchResult {
     public int ram = 0;
     public boolean dispatch = true;
     public boolean isTest = false;
+    public int maxProcs = 8;
     public int maxCores = DispatchConfig.MAX_CORES_PER_JOB;
 
     public List<DispatchProc> procs = Lists.newArrayList();
@@ -37,6 +38,10 @@ public class DispatchResult {
      * @return
      */
     public boolean continueDispatching() {
+
+        if (procs.size() >= maxProcs) {
+            return false;
+        }
 
         if (cores >= maxCores) {
             return false;
@@ -78,7 +83,7 @@ public class DispatchResult {
         resource.allocate(proc.getIdleCores(), proc.getIdleRam());
 
         logger.info("Dispatched {}, cores left: {} - ram left: {}",
-                new Object[] { proc.getHostname(), resource.getIdleCores() - cores,
-                resource.getIdleRam() - ram});
+                new Object[] { proc.getHostname(), resource.getIdleCores(),
+                resource.getIdleRam()});
     }
 }
