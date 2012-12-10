@@ -50,7 +50,7 @@ void TrayWidget::showEvent(QShowEvent * event)
 
 void TrayWidget::hideEvent(QHideEvent * event)
 {
-    delete jobBoard;
+    jobBoard->deleteLater();
     jobBoard = 0;
 }
 
