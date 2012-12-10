@@ -23,7 +23,9 @@ TrayWidget::TrayWidget()
 void TrayWidget::createTrayIcon()
 {
     trayIconMenu = new QMenu(this);
+    trayIconMenu->addAction(wranglePlowAction);
     trayIconMenu->addAction(quitAction);
+
 
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setContextMenu(trayIconMenu);
@@ -52,8 +54,16 @@ void TrayWidget::hideEvent(QHideEvent * event)
     jobBoard = 0;
 }
 
+void TrayWidget::onWranglePlow()
+{
+    qDebug("not implemented");
+}
+
 void TrayWidget::createActions()
 {
+    wranglePlowAction = new QAction(tr("&WranglePlow"), this);
+    connect(wranglePlowAction, SIGNAL(triggered()), this, SLOT(onWranglePlow()));
+
     quitAction = new QAction(tr("&Quit"), this);
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 }
