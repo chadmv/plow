@@ -50,7 +50,7 @@ public class ProcDispatcher {
                 dispatchService.getDispatchableTasks(proc.getJobId(), proc);
 
         if (tasks.isEmpty()) {
-            dispatchService.deallocateProc(proc, "No pending tasks for job");
+            dispatchService.deallocateProc(proc, "No pending tasks for job: " + proc.getJobId());
             return;
         }
 
