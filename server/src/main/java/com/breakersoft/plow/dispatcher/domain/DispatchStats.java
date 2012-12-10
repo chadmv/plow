@@ -17,6 +17,7 @@ public class DispatchStats {
 
     public static final AtomicLong procAllocCount = new AtomicLong(0L);
     public static final AtomicLong procAllocFailedCount = new AtomicLong(0L);
+    public static final AtomicLong procDeallocCount = new AtomicLong(0L);
     public static final AtomicLong rndCommFailedCount = new AtomicLong(0L);
 
 }
