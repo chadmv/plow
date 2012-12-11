@@ -334,7 +334,7 @@ TabbedLogCollection::TabbedLogCollection(QWidget *parent) :
 void TabbedLogCollection::addTask(const QString &taskId) {
     if (taskIndex.contains(taskId)) {
         for (int i=0; i < tabWidget->count(); ++i) {
-            if (qobject_cast<LogViewer*>(tabWidget->widget(i))->taskId() == taskId) {
+            if (static_cast<LogViewer*>(tabWidget->widget(i))->taskId() == taskId) {
                 tabWidget->setCurrentIndex(i);
                 break;
             }
@@ -359,7 +359,7 @@ void TabbedLogCollection::addTask(const QString &taskId) {
 }
 
 void TabbedLogCollection::closeTab(int index) {
-    LogViewer *logview = qobject_cast<LogViewer*>(tabWidget->widget(index));
+    LogViewer *logview = static_cast<LogViewer*>(tabWidget->widget(index));
     tabWidget->removeTab(index);
     taskIndex.remove(logview->taskId());
     delete logview;
@@ -374,7 +374,7 @@ void TabbedLogCollection::setInterval(int msec) {
     LogViewer *logview;
     m_interval = msec;
     for (int i=0; i < tabWidget->count(); ++i) {
-        logview = qobject_cast<LogViewer*>(tabWidget->widget(i));
+        logview = static_cast<LogViewer*>(tabWidget->widget(i));
         logview->setInterval(m_interval);
     }
 }
