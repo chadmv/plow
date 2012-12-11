@@ -56,6 +56,10 @@ class ResourceDelegate : public QItemDelegate
                const QStyleOptionViewItem &option,
                const QModelIndex &index) const;
 
+ private:
+    QColor COLOR_CRITICAL;
+    QColor COLOR_WARN;
+    QColor COLOR_OK;
 };
 
 }  // Gui

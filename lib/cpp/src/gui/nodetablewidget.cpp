@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QDebug>
 
+#include "common.h"
 #include "nodemodel.h"
 #include "nodetablewidget.h"
 
@@ -58,7 +59,11 @@ NodeTableWidget::NodeTableWidget(QWidget *parent)
 //
 ResourceDelegate::ResourceDelegate(QObject *parent)
     : QItemDelegate(parent)
-{}
+{
+    COLOR_CRITICAL = PlowStyle::TaskColors.at(TaskState::DEAD);
+    COLOR_WARN = PlowStyle::TaskColors.at(TaskState::RUNNING).lighter(115);
+    COLOR_OK = PlowStyle::TaskColors.at(TaskState::SUCCEEDED).lighter(115);
+}
 
 void ResourceDelegate::paint(QPainter *painter,
                              const QStyleOptionViewItem &option,
@@ -74,23 +79,24 @@ void ResourceDelegate::paint(QPainter *painter,
         opt.displayAlignment = Qt::AlignRight|Qt::AlignVCenter;
 
         QLinearGradient grad(opt.rect.topLeft(), opt.rect.topRight());
-        QColor darkGreen = QColor(42,175,32);
         QColor darkEnd = Qt::transparent;
         QColor end = darkEnd;
 
         if (ratio == 1.0) {
-            darkEnd = Qt::green;
+            darkEnd = COLOR_OK;
             end = darkEnd;
+
         } else if (ratio <= .05) {  // 5% ram warning
-            darkEnd = QColor(255,0,0,.5);
-            end = Qt::red;
+            darkEnd = COLOR_CRITICAL.darker(135);
+            end = COLOR_CRITICAL;
+
         } else if (ratio <= .15) {  // %15 ram warning
-            darkEnd = QColor(197,203,37,.5);
-            end = Qt::yellow;
+            darkEnd = COLOR_WARN.darker(135);
+            end = COLOR_WARN;
         }
-        grad.setColorAt(0.0, darkGreen);
-        grad.setColorAt(ratio, Qt::green);
-        grad.setColorAt(std::min(ratio + .01, 1.0), end);
+        grad.setColorAt(0.0, COLOR_OK.darker(135));
+        grad.setColorAt(ratio, COLOR_OK);
+        grad.setColorAt(qMin(ratio + .01, 1.0), end);
         grad.setColorAt(1.0, darkEnd);
 
         drawBackground(painter, opt, index);
