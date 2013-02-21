@@ -2,14 +2,14 @@
 
 # Python
 ########################################################################
-rm -rf ../python/plow/rpc
+rm -rf ../python/plow/core/rpc
 rm -rf ../python/plow/rndaemon/rpc
 
-thrift --gen py:new_style:utf8strings -out ../python/plow plow.thrift
-thrift --gen py:new_style:utf8strings -out ../python/plowapp/rndaemon rnd.thrift
+thrift --gen py:new_style:utf8strings -out ../python/plow/core plow.thrift
+thrift --gen py:new_style:utf8strings -out ../python/plow/rndaemon rnd.thrift
 
-thrift --gen py:new_style:utf8strings -out ../python/plow/rpc common.thrift
-thrift --gen py:new_style:utf8strings -out ../python/plowapp/rndaemon/rpc common.thrift
+thrift --gen py:new_style:utf8strings -out ../python/plow/core/rpc common.thrift
+thrift --gen py:new_style:utf8strings -out ../python/plow/rndaemon/rpc common.thrift
 
 cp plow__init__.py ../python/plow/__init__.py
 
