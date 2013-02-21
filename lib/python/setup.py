@@ -55,15 +55,14 @@ setup(
     install_requires=[
         'psutil>=0.6.1',
         'thrift>=0.9.0',
-        'argparse',
-        'PyYAML',
+        'argparse'
     ],
 
     # scripted functions that will get wrapped
     # into an entry point script
     entry_points={
         'console_scripts': [
-            'rndaemon = plowapp.rndaemon.main:main',
+            'rndaemon = plow.rndaemon.main:main',
         ],
     },
 
@@ -76,7 +75,7 @@ setup(
 
     include_package_data=True,
     package_data={
-        'plowapp': [
+        'plow': [
             'rndaemon/profile/*.dylib',
         ]
     },
