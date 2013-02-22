@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+import signal
+import sys
+
+from plow.gui.manifest import QtGui
+from plow.gui.main import launch
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    app = QtGui.QApplication(sys.argv)
+    win = launch("plow-wrangler")
+    win.show()
+    app.exec_()
+
