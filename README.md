@@ -26,11 +26,10 @@ http://www.java.com/en/download/index.jsp
 Client and Tools
 ----------------
 
-* Python 2.6 or 2.7
-* Qt 4.7+
+* Python 2.7
+* Qt 4.8
+* PySide 1.1.x
 * Thrift 0.9
-* Boost
-* Cmake
 
 Installing the Server
 =====================
