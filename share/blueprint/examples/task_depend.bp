@@ -1,5 +1,0 @@
-from blueprint.modules.shell import Shell
-
-Shell("layer_a", cmd=["sleep", "10"])
-Shell("layer_b", cmd=["sleep", "300"], dependOn=["layer_a"])
-

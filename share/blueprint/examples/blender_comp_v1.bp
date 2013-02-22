@@ -1,8 +1,0 @@
-import os
-
-from blueprint.modules.blender import Blender
-
-scene = os.environ["PLOW_ROOT"] + "/share/blueprint/examples/comp.blend"
-
-Blender("bty_comp", scene_file=scene)
-

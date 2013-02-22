@@ -1,5 +1,0 @@
-from blueprint.modules.shell import ShellCommand
-
-ShellCommand("cmd1", cmd=["/bin/ls"])
-ShellCommand("cmd2", depend=["cmd1"])
-

@@ -1,3 +1,0 @@
-from blueprint.modules.shell import Shell
-
-Shell("foo", cmd=["sleep", "10"])
