@@ -18,10 +18,9 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self, appname, layout=None):
         QtGui.QMainWindow.__init__(self, None)
         self.session = QtGui.QSessionManager(self)
+        self.panels = PanelManager(self)
         self.settings = QtCore.QSettings("plow", appname)
         self.workspace = WorkspaceManager(self)
-
-        self.__panels = [ ]
 
         # If the active panel supports a keyword search then this
         # should be enabled, otherwise disabled.
@@ -42,12 +41,7 @@ class MainWindow(QtGui.QMainWindow):
         menubar = QtGui.QMenuBar()
 
         # Setup menu bar
-        menu_panel = menubar.addMenu("Panels")
-        menu_panel.addAction("Job Watch")
-        menu_panel.addAction("Job Board")
-        menu_panel.addAction("Host Board")
-        menu_panel.addAction("Tasks")
-        menu_panel.addAction("Layers")
+        self.panels.addPanelCreationMenu(menubar)
 
         menu_window = menubar.addMenu("Window")
         menu_window.addAction("New Window")
@@ -55,10 +49,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setMenuBar(menubar)
         self.restoreApplicationState()
-
-        # Just for testing
-        w = RenderJobWatchPanel("My Jobs", self)
-        self.addPanel(w)
 
     def restoreApplicationState(self):
         geo = self.settings.value("main::geometry")
@@ -73,34 +63,79 @@ class MainWindow(QtGui.QMainWindow):
         self.settings.setValue("main::geometry", self.saveGeometry());
         self.settings.setValue("main::windowState", self.saveState());
 
-        for panel in self.__panels:
-            panel.save(self.settings)
-
-    def addPanel(self, panel):
-        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, panel)
-        self.__panels.append(panel)
-
     def panelClosed(self, panel):
         pass
 
+class PanelManager(QtCore.QObject):
+
+    def __init__(self, parent=None):
+        QtCore.QObject.__init__(self, parent)
+        self.__panel_types = { }
+        self.__panels = []
+
+        self.registerPanelType("Job Watch", RenderJobWatchPanel)
+
+    def registerPanelType(self, name, klass):
+        if self.__panel_types.has_key(name):
+            return
+        self.__panel_types[name] = klass
+
+    def addPanelCreationMenu(self, obj):
+        menu = obj.addMenu("Panels")
+        for ptype in self.__panel_types.keys():
+            menu.addAction(ptype)
+        menu.triggered.connect(self.__panelMenuTriggered)
+
+    def createPanel(self, klass, name):
+        p = klass(name, self.parent())
+        self.__panels.append(p)
+        self.parent().addDockWidget(QtCore.Qt.TopDockWidgetArea, p)
+        return p
+
+    def __panelMenuTriggered(self, action):
+        name = str(action.text())
+        self.createPanel(self.__panel_types[name], name)
 
 class WorkspaceManager(QtCore.QObject):
     
-    DefaultOptions = ["Wranger", "Systems", "Artist", "Analysis"]
+    DefaultOptions = ["Wrangler", "Systems", "Artist", "Analysis"]
 
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
+        # Fix later
+        self.__workspace = self.DefaultOptions[0]
 
     def addWorkspaceSelectionMenu(self, obj):
         menu = QtGui.QMenu(obj)
         [menu.addAction(s) for s in self.DefaultOptions]
-        
-        # To-Do make active workspace the button label.
-        action = QtGui.QToolButton(obj)
-        action.setText("Workspace")
-        action.setPopupMode(QtGui.QToolButton.InstantPopup)
-        action.setMenu(menu)
-        obj.addWidget(action)
+        # TODO add custom workspaces
+        menu.addSeparator()
+        menu.addAction("Reset")
+        menu.addAction("New Workspace")
+        menu.triggered.connect(self.__menuItemTriggered)
+
+        self.btn = QtGui.QToolButton(obj)
+        self.btn.setText(self.__workspace)
+        self.btn.setPopupMode(QtGui.QToolButton.InstantPopup)
+        self.btn.setMenu(menu)
+        obj.addWidget(self.btn)
+
+    def saveState(self, settings):
+        settings.setValue("main::workspace", self.__workspace)
+
+    def restoreState(self, settings):
+        # TODO: switch the workspace to whatever was active at shutdown
+        ws = settings.value("main::workspace")
+        if ws:
+            setWorkspace(ws)
+
+    def setWorkspace(self, name):
+        self.btn.setText(name)
+        # TODO
+        # re-layout all the dock widget
+
+    def __menuItemTriggered(self, action):
+        print action
 
 def launch(argv, name, layout=None):
     # Initialize the default configuration files if none exist
