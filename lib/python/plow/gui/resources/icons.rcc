@@ -3,6 +3,9 @@
     <file>checkbox.png</file>
     <file alias="down_arrow.png">down_arrow.png</file>
     <file>handle.png</file>
+    <file>close.png</file>
+    <file>float.png</file>
+    <file>search.png</file>
   </qresource>
 </RCC>
 

@@ -8,33 +8,44 @@ from plow.gui.manifest import QtCore, QtGui
 from base import Panel
 
 class RenderJobWatchPanel(Panel):
-	def __init__(self, parent=None):
-		Panel.__init__(self, parent)
 
-		# Parent will always be the main window
-		# So its possible to setup if the search bar
-		# should be enbled here.
+    def __init__(self, name="My Jobs", parent=None):
+        Panel.__init__(self, name, parent)
 
-		widget = RenderJobWatchWidget(self)
-		self.setWidget(widget)
-		self.setWindowTitle("Job Watcher")
+        # Parent will always be the main window
+        # So its possible to setup if the search bar
+        # should be enbled here.
+        self.setWidget(RenderJobWatchWidget(self))
+        self.setWindowTitle(name)
+        
+    def init(self):
+        # TODO
+        # button for sweep (remove finished)
+        # refresh button
+        # 
+        self.titleBarWidget().addAction(
+            QtGui.QIcon(":/search.png"), "Search", self.openSearchDialog)
 
-		# Might replace titlebar with custom toolbar which
-		# has the action icons for the widget
+    def openSearchDialog(self):
+        print "Open search dialog"
 
-		# TODO: should be icon bar,needs icons
-		toolbar = QtGui.QToolBar(self)
-		toolbar.addAction("Foo")
-		self.setTitleBarWidget(toolbar)
 
 class RenderJobWatchWidget(QtGui.QWidget):
-	def __init__(self, parent=None):
-		QtGui.QWidget.__init__(self, parent)
-		QtGui.QVBoxLayout(self)
 
-		self.__tree = QtGui.QTreeWidget(self)
-		self.__tree.setHeaderLabels(["Job", "Status"])
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        QtGui.QVBoxLayout(self)
 
-		self.layout().addWidget(self.__tree)
+        self.__tree = QtGui.QTreeWidget(self)
+        self.__tree.setHeaderLabels(["Job", "Status"])
+
+        self.layout().addWidget(self.__tree)
 
 
+class AutoPopulateConfigurationDialog(QtGui.QDialog):
+    """
+    A dialog box that lets you configure how the render job widget
+
+    """
+
+    pass
