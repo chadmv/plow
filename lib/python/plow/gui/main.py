@@ -21,6 +21,8 @@ class MainWindow(QtGui.QMainWindow):
         self.settings = QtCore.QSettings("plow", appname)
         self.workspace = WorkspaceManager(self)
 
+        self.__panels = [ ]
+
         # If the active panel supports a keyword search then this
         # should be enabled, otherwise disabled.
         self.textSearch = QtGui.QLineEdit()
@@ -31,23 +33,55 @@ class MainWindow(QtGui.QMainWindow):
 
         # Only has workspace and search
         self.toolbar_top = QtGui.QToolBar(self)
+        self.toolbar_top.setObjectName("Toolbar")
         self.toolbar_top.addWidget(spacer)
         self.workspace.addWorkspaceSelectionMenu(self.toolbar_top)
         self.toolbar_top.addWidget(self.textSearch)
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar_top)
 
-        self.loadSettings()
+        menubar = QtGui.QMenuBar()
+
+        # Setup menu bar
+        menu_panel = menubar.addMenu("Panels")
+        menu_panel.addAction("Job Watch")
+        menu_panel.addAction("Job Board")
+        menu_panel.addAction("Host Board")
+        menu_panel.addAction("Tasks")
+        menu_panel.addAction("Layers")
+
+        menu_window = menubar.addMenu("Window")
+        menu_window.addAction("New Window")
+        menu_window.addSeparator()
+
+        self.setMenuBar(menubar)
+        self.restoreApplicationState()
 
         # Just for testing
         w = RenderJobWatchPanel("My Jobs", self)
-        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, w)
+        self.addPanel(w)
 
-    def loadSettings(self):
-        size = self.settings.value("main::size") or DefaultConfig.Size
-        self.resize(size)
+    def restoreApplicationState(self):
+        geo = self.settings.value("main::geometry")
+        if geo:
+            self.restoreGeometry(geo)
+        
+        winstate = self.settings.value("main::windowState")
+        if winstate:
+            self.restoreState(winstate);
 
-    def saveSettings(self):
-        self.settings.setValue("main::size", self.size())
+    def saveApplicationState(self):
+        self.settings.setValue("main::geometry", self.saveGeometry());
+        self.settings.setValue("main::windowState", self.saveState());
+
+        for panel in self.__panels:
+            panel.save(self.settings)
+
+    def addPanel(self, panel):
+        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, panel)
+        self.__panels.append(panel)
+
+    def panelClosed(self, panel):
+        pass
 
 
 class WorkspaceManager(QtCore.QObject):
@@ -76,6 +110,6 @@ def launch(argv, name, layout=None):
     app.setStyleSheet(open(os.path.dirname(__file__) + "/resources/style.css").read())
 
     win = MainWindow(name, layout)
-    app.lastWindowClosed.connect(win.saveSettings)
+    app.lastWindowClosed.connect(win.saveApplicationState)
     win.show()
     app.exec_()

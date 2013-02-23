@@ -29,12 +29,18 @@ class RenderJobWatchPanel(Panel):
     def openSearchDialog(self):
         print "Open search dialog"
 
+    def restore(self):
+        pass
+
+    def save(self):
+        pass
+
 class RenderJobWatchWidget(QtGui.QWidget):
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         QtGui.QVBoxLayout(self)
-
+        self.__filters = []
         self.__tree = QtGui.QTreeWidget(self)
         self.__tree.setHeaderLabels(["Job", "Status"])
 
@@ -46,9 +52,36 @@ class RenderJobWatchWidget(QtGui.QWidget):
 
 
 
-class RenderJobWatchWidgetConfigDialog(QtGui.QDialog):
+class RenderJobWatchConfigDialog(QtGui.QDialog):
     """
     A dialog box that lets you configure how the render job widget.
     """
+    def __init__(self, parent=None):
+        QtGui.QDialog.__init__(self, parent)
+        layout = QtGui.QFormLayout(self)
 
-    pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

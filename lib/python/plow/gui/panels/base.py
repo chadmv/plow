@@ -14,10 +14,9 @@ class Panel(QtGui.QDockWidget):
 
         # Add the standard dock action buttons in.
         # TODO: hook up signals
-
-        self.name = name
-        # Todo: allow a double click / rename
-        self.label = QtGui.QLabel(name, self)
+        self.__label = QtGui.QLabel(self)
+        self.__name = None
+        self.setName(name)
 
         # Note: the widet in the panel adds more buttons
         # to this toolbar.
@@ -33,13 +32,16 @@ class Panel(QtGui.QDockWidget):
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
         toolbar.addWidget(spacer)
-        toolbar.addWidget(self.label)
+        toolbar.addWidget(self.__label)
 
     def setName(self, name):
         """
         Sets the panel's name, used to allow panels of the same type
         to have unique configurations.
         """
+        self.__name = name
+        self.__label.setText(name)
+        self.setObjectName("%s::%s" % (self.__class__.__name__, self.__name))
 
     def init(self):
         """
@@ -64,3 +66,11 @@ class Panel(QtGui.QDockWidget):
         Called when the application needs the panel to restore its configuration.
         """
         pass
+
+    def configKey(self, prop):
+        """
+        Return the settings key for the given property name.
+        """
+        return "panel::%s::%s" % (self.objectName(), prop)
+
+
