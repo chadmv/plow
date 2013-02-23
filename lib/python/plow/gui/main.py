@@ -3,6 +3,12 @@ import os
 
 from manifest import QtCore, QtGui
 from panels.watch import RenderJobWatchPanel
+from resources import icons
+
+class DefaultConfig(object):
+
+    # Default window size
+    Size = QtCore.QSize(800, 600)
 
 class MainWindow(QtGui.QMainWindow):
     """
@@ -30,9 +36,19 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar_top.addWidget(self.textSearch)
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar_top)
 
+        self.loadSettings()
+
         # Just for testing
-        w = RenderJobWatchPanel(self)
+        w = RenderJobWatchPanel("My Jobs", self)
         self.addDockWidget(QtCore.Qt.TopDockWidgetArea, w)
+
+    def loadSettings(self):
+        size = self.settings.value("main::size") or DefaultConfig.Size
+        self.resize(size)
+
+    def saveSettings(self):
+        self.settings.setValue("main::size", self.size())
+
 
 class WorkspaceManager(QtCore.QObject):
     
@@ -52,8 +68,6 @@ class WorkspaceManager(QtCore.QObject):
         action.setMenu(menu)
         obj.addWidget(action)
 
-
-
 def launch(argv, name, layout=None):
     # Initialize the default configuration files if none exist
 
@@ -62,5 +76,6 @@ def launch(argv, name, layout=None):
     app.setStyleSheet(open(os.path.dirname(__file__) + "/resources/style.css").read())
 
     win = MainWindow(name, layout)
+    app.lastWindowClosed.connect(win.saveSettings)
     win.show()
     app.exec_()
