@@ -1,7 +1,7 @@
 """MainWindow"""
+import os
 
 from manifest import QtCore, QtGui
-
 from panels.watch import RenderJobWatchPanel
 
 class MainWindow(QtGui.QMainWindow):
@@ -52,8 +52,15 @@ class WorkspaceManager(QtCore.QObject):
         action.setMenu(menu)
         obj.addWidget(action)
 
-def launch(name, layout=None):
+
+
+def launch(argv, name, layout=None):
     # Initialize the default configuration files if none exist
 
+    app = QtGui.QApplication(argv)
+    app.setStyle("plastique")
+    app.setStyleSheet(open(os.path.dirname(__file__) + "/resources/style.css").read())
+
     win = MainWindow(name, layout)
-    return win
+    win.show()
+    app.exec_()
