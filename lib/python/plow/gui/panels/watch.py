@@ -12,23 +12,22 @@ class RenderJobWatchPanel(Panel):
     def __init__(self, name="My Jobs", parent=None):
         Panel.__init__(self, name, parent)
 
-        # Parent will always be the main window
-        # So its possible to setup if the search bar
-        # should be enbled here.
         self.setWidget(RenderJobWatchWidget(self))
         self.setWindowTitle(name)
         
     def init(self):
         # TODO
-        # button for sweep (remove finished)
+        # sweep button (remove finished)
         # refresh button
+        # seperator
+        # kill button (multi-select)
+        # comment button (multi-select)
         # 
         self.titleBarWidget().addAction(
             QtGui.QIcon(":/search.png"), "Search", self.openSearchDialog)
 
     def openSearchDialog(self):
         print "Open search dialog"
-
 
 class RenderJobWatchWidget(QtGui.QWidget):
 
@@ -41,11 +40,15 @@ class RenderJobWatchWidget(QtGui.QWidget):
 
         self.layout().addWidget(self.__tree)
 
+    def refresh(self):
+        pass
 
-class AutoPopulateConfigurationDialog(QtGui.QDialog):
+
+
+
+class RenderJobWatchWidgetConfigDialog(QtGui.QDialog):
     """
-    A dialog box that lets you configure how the render job widget
-
+    A dialog box that lets you configure how the render job widget.
     """
 
     pass
