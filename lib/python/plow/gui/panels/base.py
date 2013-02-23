@@ -47,6 +47,12 @@ class Panel(QtGui.QDockWidget):
         """
         pass
 
+    def refresh(self):
+        """
+        Refresh the main widget.
+        """
+        pass
+
     def save(self, settings):
         """
         Called when the application needs the planel to save its configuration.
