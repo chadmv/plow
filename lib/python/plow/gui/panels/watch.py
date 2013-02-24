@@ -65,19 +65,30 @@ class RenderJobWatchConfigDialog(QtGui.QDialog):
     """
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
-        layout = QtGui.QFormLayout(self)
+        layout = QtGui.QVBoxLayout(self)
 
         self.checkboxLoadMine = QtGui.QCheckBox(self)
         self.listUsers = QtGui.QListWidget(self)
-        
-        layout.addRow("Load Mine:", self.checkboxLoadMine)
-        layout.addRow("Launched By:", self.listUsers)
+        self.listUsers.setMaximumHeight(50)
+        self.checkboxLoadErrors = QtGui.QCheckBox(self)
 
+        self.listProjects = QtGui.QListWidget(self)
+        self.listProjects.setMaximumHeight(50)
 
+        group_box1 = QtGui.QGroupBox("Load Jobs", self)
 
+        form_layout1 = QtGui.QFormLayout(group_box1)
+        form_layout1.addRow("Load Mine:", self.checkboxLoadMine)
+        form_layout1.addRow("Load User:", self.listUsers)
+        form_layout1.addRow("Load With Errors:", self.checkboxLoadErrors)
 
+        # move to project multi-select widget
+        group_box2 = QtGui.QGroupBox("Filters", self)
+        form_layout2 = QtGui.QFormLayout(group_box2)
+        form_layout2.addRow("For Projects:", self.listProjects)
 
-
+        layout.addWidget(group_box1)
+        layout.addWidget(group_box2)
 
 
 
