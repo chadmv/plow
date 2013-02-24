@@ -4,8 +4,11 @@ The render job watch panel allows you to
    2. individually add jobs you want to watch.
 """
 
+import plow.core
+
 from plow.gui.manifest import QtCore, QtGui
-from base import Panel
+from plow.gui.common.widgets import RadioBoxArray
+from plow.gui.panels import Panel
 
 class RenderJobWatchPanel(Panel):
 
@@ -25,9 +28,16 @@ class RenderJobWatchPanel(Panel):
         # 
         self.titleBarWidget().addAction(
             QtGui.QIcon(":/search.png"), "Search", self.openSearchDialog)
+        
+        self.titleBarWidget().addAction(
+            QtGui.QIcon(":/wrench.png"), "Configure", self.openConfigDialog)
 
     def openSearchDialog(self):
         print "Open search dialog"
+
+    def openConfigDialog(self):
+        d = RenderJobWatchConfigDialog()
+        d.exec_()
 
     def restore(self):
         pass
@@ -49,9 +59,6 @@ class RenderJobWatchWidget(QtGui.QWidget):
     def refresh(self):
         pass
 
-
-
-
 class RenderJobWatchConfigDialog(QtGui.QDialog):
     """
     A dialog box that lets you configure how the render job widget.
@@ -60,9 +67,11 @@ class RenderJobWatchConfigDialog(QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
         layout = QtGui.QFormLayout(self)
 
-
-
-
+        self.checkboxLoadMine = QtGui.QCheckBox(self)
+        self.listUsers = QtGui.QListWidget(self)
+        
+        layout.addRow("Load Mine:", self.checkboxLoadMine)
+        layout.addRow("Launched By:", self.listUsers)
 
 
 
