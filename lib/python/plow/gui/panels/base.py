@@ -21,7 +21,7 @@ class Panel(QtGui.QDockWidget):
         # Note: the widet in the panel adds more buttons
         # to this toolbar.
         toolbar = QtGui.QToolBar(self)
-        toolbar.setIconSize(QtCore.QSize(16, 16))
+        toolbar.setIconSize(QtCore.QSize(18, 18))
         toolbar.addAction(QtGui.QIcon(":/close.png"), "Close")
         toolbar.addAction(QtGui.QIcon(":/float.png"), "Float")
         toolbar.addSeparator()
