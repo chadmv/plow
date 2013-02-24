@@ -57,11 +57,15 @@ class MainWindow(QtGui.QMainWindow):
         
         winstate = self.settings.value("main::windowState")
         if winstate:
-            self.restoreState(winstate);
+            self.restoreState(winstate)
+
+        self.workspace.restoreState(self.settings)
 
     def saveApplicationState(self):
         self.settings.setValue("main::geometry", self.saveGeometry());
         self.settings.setValue("main::windowState", self.saveState());
+        
+        self.workspace.saveState(self.settings)
 
     def panelClosed(self, panel):
         pass
@@ -98,16 +102,17 @@ class PanelManager(QtCore.QObject):
 
 class WorkspaceManager(QtCore.QObject):
     
-    DefaultOptions = ["Wrangler", "Systems", "Artist", "Analysis"]
+    Defaults = ["Wrangler", "Systems", "Artist", "Production"]
 
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
         # Fix later
-        self.__workspace = self.DefaultOptions[0]
+        self.__active = self.Defaults[0]
+        self.__workspaces = list(self.Defaults)
 
     def addWorkspaceSelectionMenu(self, obj):
         menu = QtGui.QMenu(obj)
-        [menu.addAction(s) for s in self.DefaultOptions]
+        [menu.addAction(s) for s in self.__workspaces]
         # TODO add custom workspaces
         menu.addSeparator()
         menu.addAction("Reset")
@@ -115,27 +120,30 @@ class WorkspaceManager(QtCore.QObject):
         menu.triggered.connect(self.__menuItemTriggered)
 
         self.btn = QtGui.QToolButton(obj)
-        self.btn.setText(self.__workspace)
+        self.btn.setText(self.__active)
         self.btn.setPopupMode(QtGui.QToolButton.InstantPopup)
         self.btn.setMenu(menu)
         obj.addWidget(self.btn)
 
     def saveState(self, settings):
-        settings.setValue("main::workspace", self.__workspace)
+        settings.setValue("main::workspace", self.__active)
 
     def restoreState(self, settings):
         # TODO: switch the workspace to whatever was active at shutdown
         ws = settings.value("main::workspace")
         if ws:
-            setWorkspace(ws)
+            self.setWorkspace(ws)
 
     def setWorkspace(self, name):
         self.btn.setText(name)
+        self.__active = name
         # TODO
         # re-layout all the dock widget
 
     def __menuItemTriggered(self, action):
-        print action
+        name = action.text()
+        if name in self.__workspaces:
+            self.setWorkspace(name)
 
 def launch(argv, name, layout=None):
     # Initialize the default configuration files if none exist
