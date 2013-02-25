@@ -20,7 +20,9 @@ class MainWindow(QtGui.QMainWindow):
         self.session = QtGui.QSessionManager(self)
         self.settings = QtCore.QSettings("plow", appname)
         self.workspace = WorkspaceManager(self)
-        self.panels = PanelManager(self.settings, self)
+        self.panels = PanelManager(self)
+
+        print self.settings.fileName()
 
         # If the active panel supports a keyword search then this
         # should be enabled, otherwise disabled.
@@ -60,54 +62,67 @@ class MainWindow(QtGui.QMainWindow):
             self.restoreState(winstate)
 
         self.workspace.restoreState(self.settings)
+        self.panels.restoreState(self.settings)
 
     def saveApplicationState(self):
         self.settings.setValue("main::geometry", self.saveGeometry());
         self.settings.setValue("main::windowState", self.saveState());
         
         self.workspace.saveState(self.settings)
-        self.panels.savePanelStates(self.settings)
+        self.panels.saveState(self.settings)
 
 class PanelManager(QtCore.QObject):
 
-    def __init__(self, settings, parent=None):
+    def __init__(self, parent=None):
         QtCore.QObject.__init__(self, parent)
-        self.settings = settings
         self.__panel_types = { }
         self.__panels = []
 
-        self.registerPanelType("Job Watch", RenderJobWatchPanel)
+        self.registerPanelType("Render Watch", RenderJobWatchPanel)
 
-    def registerPanelType(self, name, klass):
-        if self.__panel_types.has_key(name):
+    def registerPanelType(self, ptype, klass):
+
+        if self.__panel_types.has_key(ptype):
             return
-        self.__panel_types[name] = klass
+        self.__panel_types[ptype] = klass
 
     def addPanelCreationMenu(self, obj):
         menu = obj.addMenu("Panels")
         for ptype in self.__panel_types.keys():
-            menu.addAction(ptype)
+            a = menu.addAction(ptype)
         menu.triggered.connect(self.__panelMenuTriggered)
 
-    def createPanel(self, klass, name):
-        p = klass(name, self.parent())
-        p.restore(self.settings)
+    def createPanel(self, ptype, name=None):
+        klass = self.__panel_types[ptype]
+        p = klass(name or ptype, self.parent())
+        p.restore(self.parent().settings)
         p.panelClosed.connect(self.__panelClosed)
         self.__panels.append(p)
         self.parent().addDockWidget(QtCore.Qt.TopDockWidgetArea, p)
         return p
 
-    def savePanelStates(self, settings):
+    def saveState(self, settings):
+        settings.setValue("main::openPanelNames", [p.name() for p in self.__panels])
+        settings.setValue("main::openPanelTypes", [p.type() for p in self.__panels])
         for panel in self.__panels:
             panel.save(settings)
+
+    def restoreState(self, settings):
+        panelNames = settings.value("main::openPanelNames")
+        panelTypes = settings.value("main::openPanelTypes")
+        if not panelNames:
+            return
+        for name, ptype in zip(panelNames, panelTypes):
+            p = self.createPanel(ptype, name)
+            self.parent().restoreDockWidget(p)
 
     def __panelClosed(self, panel):
         self.parent().removeDockWidget(panel)
         self.__panels.remove(panel)   
 
     def __panelMenuTriggered(self, action):
-        name = str(action.text())
-        self.createPanel(self.__panel_types[name], name)
+        ptype = str(action.text())
+        self.createPanel(ptype)
 
 class WorkspaceManager(QtCore.QObject):
     

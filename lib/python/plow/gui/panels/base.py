@@ -11,13 +11,14 @@ class Panel(QtGui.QDockWidget):
     The base class for all panels.
     """
 
-    def __init__(self, name, parent=None):
+    def __init__(self, name, ptype, parent=None):
         QtGui.QDockWidget.__init__(self, parent)
 
         # Add the standard dock action buttons in.
         # TODO: hook up signals
         self.__label = QtGui.QLabel(self)
         self.__name = None
+        self.__ptype = ptype
         self.setName(name)
 
         self.attrs = { }
@@ -42,6 +43,18 @@ class Panel(QtGui.QDockWidget):
 
         toolbar.addWidget(spacer)
         toolbar.addWidget(self.__label)
+
+    def type(self):
+        """
+        Return the type of panel.
+        """
+        return self.__ptype
+
+    def name(self):
+        """
+        Return the panel's name.
+        """
+        return self.__name
 
     def setName(self, name):
         """

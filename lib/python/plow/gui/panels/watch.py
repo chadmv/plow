@@ -12,8 +12,8 @@ from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox
 
 class RenderJobWatchPanel(Panel):
 
-    def __init__(self, name="My Jobs", parent=None):
-        Panel.__init__(self, name, parent)
+    def __init__(self, name="Render Watch", parent=None):
+        Panel.__init__(self, name, "Render Watch", parent)
 
         self.setWidget(RenderJobWatchWidget(self))
         self.setWindowTitle(name)
