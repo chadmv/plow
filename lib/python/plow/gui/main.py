@@ -18,9 +18,9 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self, appname, layout=None):
         QtGui.QMainWindow.__init__(self, None)
         self.session = QtGui.QSessionManager(self)
-        self.panels = PanelManager(self)
         self.settings = QtCore.QSettings("plow", appname)
         self.workspace = WorkspaceManager(self)
+        self.panels = PanelManager(self.settings, self)
 
         # If the active panel supports a keyword search then this
         # should be enabled, otherwise disabled.
@@ -66,14 +66,13 @@ class MainWindow(QtGui.QMainWindow):
         self.settings.setValue("main::windowState", self.saveState());
         
         self.workspace.saveState(self.settings)
-
-    def panelClosed(self, panel):
-        pass
+        self.panels.savePanelStates(self.settings)
 
 class PanelManager(QtCore.QObject):
 
-    def __init__(self, parent=None):
+    def __init__(self, settings, parent=None):
         QtCore.QObject.__init__(self, parent)
+        self.settings = settings
         self.__panel_types = { }
         self.__panels = []
 
@@ -92,9 +91,19 @@ class PanelManager(QtCore.QObject):
 
     def createPanel(self, klass, name):
         p = klass(name, self.parent())
+        p.restore(self.settings)
+        p.panelClosed.connect(self.__panelClosed)
         self.__panels.append(p)
         self.parent().addDockWidget(QtCore.Qt.TopDockWidgetArea, p)
         return p
+
+    def savePanelStates(self, settings):
+        for panel in self.__panels:
+            panel.save(settings)
+
+    def __panelClosed(self, panel):
+        self.parent().removeDockWidget(panel)
+        self.__panels.remove(panel)   
 
     def __panelMenuTriggered(self, action):
         name = str(action.text())

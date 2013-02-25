@@ -5,10 +5,12 @@ class PanelManager(QtCore.QObject):
     def __init__(self, parent):
         QtCore.QObject.__init__(self, parent)
 
+
 class Panel(QtGui.QDockWidget):
     """
     The base class for all panels.
     """
+
     def __init__(self, name, parent=None):
         QtGui.QDockWidget.__init__(self, parent)
 
@@ -18,12 +20,19 @@ class Panel(QtGui.QDockWidget):
         self.__name = None
         self.setName(name)
 
+        self.attrs = { }
+
         # Note: the widet in the panel adds more buttons
         # to this toolbar.
         toolbar = QtGui.QToolBar(self)
         toolbar.setIconSize(QtCore.QSize(18, 18))
-        toolbar.addAction(QtGui.QIcon(":/close.png"), "Close")
-        toolbar.addAction(QtGui.QIcon(":/float.png"), "Float")
+        toolbar.addAction(QtGui.QIcon(":/close.png"), "Close", self.__close)
+
+        float_action = QtGui.QAction(QtGui.QIcon(":/float.png"), "Float", self)
+        float_action.toggled.connect(self.__floatingChanged)
+        float_action.setCheckable(True)
+        toolbar.addAction(float_action)
+
         toolbar.addSeparator()
         self.setTitleBarWidget(toolbar)
         self.init()
@@ -59,18 +68,34 @@ class Panel(QtGui.QDockWidget):
         """
         Called when the application needs the planel to save its configuration.
         """
-        pass
+        for attr in self.attrs:
+            key = "panel::%s::%s" % (self.objectName(), attr)
+            settings.setValue(key, self.attrs[attr])
 
     def restore(self, settings):
         """
         Called when the application needs the panel to restore its configuration.
         """
-        pass
+        for attr in self.attrs.keys():
+            key = "panel::%s::%s" % (self.objectName(), attr)
+            if settings.contains(key):
+                self.attrs[attr] = settings.value(key)
+        print self.attrs
 
-    def configKey(self, prop):
-        """
-        Return the settings key for the given property name.
-        """
-        return "panel::%s::%s" % (self.objectName(), prop)
+    def setAttr(self, prop, value):
+        self.attrs[prop] = value
+
+    def getAttr(self, prop, default=None):
+        return self.attrs.get(prop)
+
+    def __close(self):
+        self.panelClosed.emit(self)
+
+    def __floatingChanged(self, value):
+        self.setFloating(value)
+
+Panel.panelClosed = QtCore.Signal(Panel)
+
+
 
 

@@ -7,8 +7,8 @@ The render job watch panel allows you to
 import plow.core
 
 from plow.gui.manifest import QtCore, QtGui
-from plow.gui.common.widgets import RadioBoxArray
 from plow.gui.panels import Panel
+from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox
 
 class RenderJobWatchPanel(Panel):
 
@@ -17,7 +17,11 @@ class RenderJobWatchPanel(Panel):
 
         self.setWidget(RenderJobWatchWidget(self))
         self.setWindowTitle(name)
-        
+
+        self.setAttr("loadMine", True)
+        self.setAttr("projects", [])
+        self.setAttr("allProjects", True)
+
     def init(self):
         # TODO
         # sweep button (remove finished)
@@ -36,14 +40,9 @@ class RenderJobWatchPanel(Panel):
         print "Open search dialog"
 
     def openConfigDialog(self):
-        d = RenderJobWatchConfigDialog()
-        d.exec_()
-
-    def restore(self):
-        pass
-
-    def save(self):
-        pass
+        d = RenderJobWatchConfigDialog(self.attrs)
+        if d.exec_():
+            self.attrs.update(d.getAttrs())
 
 class RenderJobWatchWidget(QtGui.QWidget):
 
@@ -63,19 +62,19 @@ class RenderJobWatchConfigDialog(QtGui.QDialog):
     """
     A dialog box that lets you configure how the render job widget.
     """
-    def __init__(self, parent=None):
+    def __init__(self, attrs, parent=None):
         QtGui.QDialog.__init__(self, parent)
         layout = QtGui.QVBoxLayout(self)
 
-        self.checkboxLoadMine = QtGui.QCheckBox(self)
+        self.checkboxLoadMine = BooleanCheckBox(bool(attrs["loadMine"]))
         self.listUsers = QtGui.QListWidget(self)
         self.listUsers.setMaximumHeight(50)
         self.checkboxLoadErrors = QtGui.QCheckBox(self)
 
-        self.listProjects = QtGui.QListWidget(self)
-        self.listProjects.setMaximumHeight(50)
+        self.listProjects = CheckableListBox("Projects", 
+            ["test1", "test2"], attrs["projects"], bool(attrs["allProjects"]), self)
 
-        group_box1 = QtGui.QGroupBox("Load Jobs", self)
+        group_box1 = QtGui.QGroupBox("Auto Load Jobs", self)
 
         form_layout1 = QtGui.QFormLayout(group_box1)
         form_layout1.addRow("Load Mine:", self.checkboxLoadMine)
@@ -87,11 +86,20 @@ class RenderJobWatchConfigDialog(QtGui.QDialog):
         form_layout2 = QtGui.QFormLayout(group_box2)
         form_layout2.addRow("For Projects:", self.listProjects)
 
+        buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel);
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+
         layout.addWidget(group_box1)
         layout.addWidget(group_box2)
+        layout.addWidget(buttons)
 
-
-
+    def getAttrs(self):
+        return {
+            "loadMine": self.checkboxLoadMine.isChecked(),
+            "projects": self.listProjects.getCheckedOptions(),
+            "allProjects": self.listProjects.isAllSelected()
+        }
 
 
 
