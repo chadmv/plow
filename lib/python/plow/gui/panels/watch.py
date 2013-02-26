@@ -4,7 +4,7 @@ The render job watch panel allows you to
    2. individually add jobs you want to watch.
 """
 
-import plow.core
+import plow.client
 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
