@@ -2,7 +2,9 @@ import os
 
 import rpc.ttypes as ttypes
 
-from client import Conn
+from conn import PlowConnection
+
+Conn = PlowConnection()
 
 __all__ = [
     "getJobs",

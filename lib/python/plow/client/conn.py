@@ -57,8 +57,6 @@ class PlowConnection(object):
         return (host, int(port))
 
 
-Conn = PlowConnection()
-
 
 
 
