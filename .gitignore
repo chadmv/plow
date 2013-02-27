@@ -2,6 +2,7 @@
 *.war
 *.jar
 *.pyc
+*.DS_Store
 server/target
 
 client/python/plow.egg-info
