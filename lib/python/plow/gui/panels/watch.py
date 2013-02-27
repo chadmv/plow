@@ -37,12 +37,12 @@ class RenderJobWatchPanel(Panel):
         # comment button (multi-select)
         # 
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/search.png"), "Search", self.openSearchDialog)
-        
-        self.titleBarWidget().addAction(
             QtGui.QIcon(":/wrench.png"), "Configure", self.openConfigDialog)
 
-    def openSearchDialog(self):
+        self.titleBarWidget().addAction(
+            QtGui.QIcon(":/load.png"), "Load", self.openLoadDialog)
+
+    def openLoadDialog(self):
         print "Open search dialog"
 
     def openConfigDialog(self):
