@@ -7,8 +7,6 @@ from plow.gui.constants import COLOR_TASK_STATE
 class JobProgressBar(QtGui.QWidget):
     # Left, top, right, bottom
     Margins = [5, 2, 10, 4]
-    LeftMargin = 5
-    RightMargin = 10;
 
     def __init__(self, totals, parent=None):
         QtGui.QWidget.__init__(self, parent)
