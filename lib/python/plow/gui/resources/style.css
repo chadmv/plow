@@ -9,19 +9,13 @@ QToolTip
 
 QWidget
 {
-    color: #b1b1b1;
+    color: #e1e1e1;
     background-color: #323232;
-}
-
-QWidget:item:hover
-{
-    background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #ca0619);
-    color: #000000;
 }
 
 QWidget:item:selected
 {
-    background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a);
+    background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #323232, stop: 1 #323232);
 }
 
 QMenuBar::item
