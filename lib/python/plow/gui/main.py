@@ -126,7 +126,7 @@ class WorkspaceManager(QtCore.QObject):
     def createPanel(self, ptype, name=None):
         klass = self.__panel_types[ptype]
         p = klass(name or ptype, self.parent())
-        p.restore(self.parent().settings)
+        p.restore(self.__settings)
         p.panelClosed.connect(self.__panelClosed)
         
         self.__panels.append(p)
