@@ -3,24 +3,28 @@ The render job watch panel allows you to
    1. setup filters to automatically load jobs. (defaults to loading your jobs)
    2. individually add jobs you want to watch.
 """
-
+import os
 import plow.client
 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox
+from plow.gui.common.job import JobProgressBar
+from plow.gui.constants import COLOR_JOB_STATE
+from plow.gui.util import formatMaxValue, formatDateTime
 
 class RenderJobWatchPanel(Panel):
 
     def __init__(self, name="Render Watch", parent=None):
         Panel.__init__(self, name, "Render Watch", parent)
 
-        self.setWidget(RenderJobWatchWidget(self))
-        self.setWindowTitle(name)
-
         self.setAttr("loadMine", True)
         self.setAttr("projects", [])
         self.setAttr("allProjects", True)
+
+        self.setWidget(RenderJobWatchWidget(self.attrs, self))
+        self.setWindowTitle(name)
+        self.widget().refresh()
 
     def init(self):
         # TODO
@@ -46,17 +50,53 @@ class RenderJobWatchPanel(Panel):
 
 class RenderJobWatchWidget(QtGui.QWidget):
 
-    def __init__(self, parent=None):
+    Header = ["Job", "State", "Run", "Wait", "Min", "Max", "Started", "Stopped", "Progress"]
+    Width = [400, 75, 60, 60, 60, 60, 100, 100, 250]
+
+    def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
         QtGui.QVBoxLayout(self)
-        self.__filters = []
+        self.attrs = attrs
+        self.__jobs = { }
+
         self.__tree = QtGui.QTreeWidget(self)
-        self.__tree.setHeaderLabels(["Job", "Status"])
+        self.__tree.setHeaderLabels(self.Header)
+        self.__tree.setColumnCount(len(self.Header))
+        self.__tree.setUniformRowHeights(True)
+
+        [self.__tree.setColumnWidth(i, v) for i, v in enumerate(self.Width)]
 
         self.layout().addWidget(self.__tree)
 
+
     def refresh(self):
-        pass
+        states = ("Running" , "Finished")
+        jobs = plow.client.getJobs(user=[os.environ["USER"]])
+        for job in jobs:
+            if not self.__jobs.has_key(job.id):
+                item = QtGui.QTreeWidgetItem([
+                    job.name,
+                    states[job.state-1],
+                    "%02d" % job.totals.runningTaskCount,
+                    "%02d" % job.totals.waitingTaskCount,
+                    "%02d" % job.minCores,
+                    formatMaxValue(job.maxCores),
+                    formatDateTime(job.startTime),
+                    formatDateTime(job.stopTime)])
+
+                item.setBackground(1, COLOR_JOB_STATE[job.state])
+
+                item.setData(0, QtCore.Qt.UserRole, job)
+                self.__tree.addTopLevelItem(item)
+                progress = JobProgressBar(job, self.__tree)
+                self.__tree.setItemWidget(item, len(self.Header)-1, progress);
+
+
+
+
+
+
+
 
 class RenderJobWatchConfigDialog(QtGui.QDialog):
     """
