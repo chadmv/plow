@@ -63,7 +63,6 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__tree.setHeaderLabels(self.Header)
         self.__tree.setColumnCount(len(self.Header))
         self.__tree.setUniformRowHeights(True)
-
         [self.__tree.setColumnWidth(i, v) for i, v in enumerate(self.Width)]
 
         self.layout().addWidget(self.__tree)
@@ -102,10 +101,6 @@ class RenderJobWatchWidget(QtGui.QWidget):
                 item.setText(5, formatMaxValue(job.maxCores))
                 item.setText(7, formatDateTime(job.stopTime))
                 self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
-
-
-
-
 
 class RenderJobWatchConfigDialog(QtGui.QDialog):
     """
@@ -149,16 +144,4 @@ class RenderJobWatchConfigDialog(QtGui.QDialog):
             "projects": self.listProjects.getCheckedOptions(),
             "allProjects": self.listProjects.isAllSelected()
         }
-
-
-
-
-
-
-
-
-
-
-
-
 
