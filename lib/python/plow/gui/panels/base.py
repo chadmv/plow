@@ -23,6 +23,8 @@ class Panel(QtGui.QDockWidget):
 
         self.attrs = { }
 
+        self.__refreshTimer = None
+
         # Note: the widet in the panel adds more buttons
         # to this toolbar.
         toolbar = QtGui.QToolBar(self)
@@ -43,6 +45,15 @@ class Panel(QtGui.QDockWidget):
 
         toolbar.addWidget(spacer)
         toolbar.addWidget(self.__label)
+
+    def setRefreshTime(self, value):
+        if self.__refreshTimer is None:
+            self.__refreshTimer = QtCore.QTimer(self)
+            self.__refreshTimer.timeout.connect(self.refresh)
+        if value < 1:
+            value = 1
+        self.__refreshTimer.stop()
+        self.__refreshTimer.start(value * 1000)
 
     def type(self):
         """
@@ -93,7 +104,6 @@ class Panel(QtGui.QDockWidget):
             key = "panel::%s::%s" % (self.objectName(), attr)
             if settings.contains(key):
                 self.attrs[attr] = settings.value(key)
-        print self.attrs
 
     def setAttr(self, prop, value):
         self.attrs[prop] = value
