@@ -1,6 +1,31 @@
 """Non-Plow specific widgets."""
 from plow.gui.manifest import QtGui, QtCore
 
+class SpinSliderWidget(QtGui.QWidget):
+    def __init__(self, minimum, maximum, value, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        layout = QtGui.QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        self.slider.setMaximum(maximum)
+        self.slider.setMinimum(minimum)
+        self.slider.setValue(value)
+
+        self.spin = QtGui.QSpinBox(self)
+        self.spin.setRange(minimum, maximum)
+        self.spin.setValue(value)
+
+        self.spin.valueChanged.connect(self.slider.setValue)
+        self.slider.valueChanged.connect(self.spin.setValue)
+
+        layout.addWidget(self.slider)
+        layout.addWidget(self.spin)
+
+    def value(self):
+        return self.slider.value()
+
+
 class BooleanCheckBox(QtGui.QCheckBox):
     def __init__(self, checked=True, parent=None):
         QtGui.QCheckBox.__init__(self, parent)
