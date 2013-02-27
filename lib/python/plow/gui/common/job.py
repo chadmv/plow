@@ -10,23 +10,26 @@ class JobProgressBar(QtGui.QWidget):
     LeftMargin = 5
     RightMargin = 10;
 
-    def __init__(self, job, parent=None):
+    def __init__(self, totals, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.__job = job
+        self.__totals = totals
+
+    def setTotals(self, totals):
+        self.__totals = totals
 
     def paintEvent(self, event):
 
         total_width = self.width()
         total_height = self.height()
-        total_tasks = float(self.__job.totals.totalTaskCount)
+        total_tasks = float(self.__totals.totalTaskCount)
 
         widths = [
-            self.__job.totals.waitingTaskCount / total_tasks,
-            self.__job.totals.runningTaskCount / total_tasks,
-            self.__job.totals.deadTaskCount / total_tasks,
-            self.__job.totals.eatenTaskCount / total_tasks,
-            self.__job.totals.dependTaskCount / total_tasks,
-            self.__job.totals.succeededTaskCount / total_tasks
+            self.__totals.waitingTaskCount / total_tasks,
+            self.__totals.runningTaskCount / total_tasks,
+            self.__totals.deadTaskCount / total_tasks,
+            self.__totals.eatenTaskCount / total_tasks,
+            self.__totals.dependTaskCount / total_tasks,
+            self.__totals.succeededTaskCount / total_tasks
         ]
 
         rects = [ QtCore.QRectF(self.Margins[0], self.Margins[1],

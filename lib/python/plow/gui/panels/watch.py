@@ -72,6 +72,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
     def refresh(self):
         states = ("Running" , "Finished")
         jobs = plow.client.getJobs(user=[os.environ["USER"]])
+        
         for job in jobs:
             if not self.__jobs.has_key(job.id):
                 item = QtGui.QTreeWidgetItem([
@@ -85,14 +86,22 @@ class RenderJobWatchWidget(QtGui.QWidget):
                     formatDateTime(job.stopTime)])
 
                 item.setBackground(1, COLOR_JOB_STATE[job.state])
-
-                item.setData(0, QtCore.Qt.UserRole, job)
+                item.setData(0, QtCore.Qt.UserRole, job.id)
                 self.__tree.addTopLevelItem(item)
-                progress = JobProgressBar(job, self.__tree)
+
+                progress = JobProgressBar(job.totals, self.__tree)
                 self.__tree.setItemWidget(item, len(self.Header)-1, progress);
+                self.__jobs[job.id] = item
 
-
-
+            else: 
+                item = self.__jobs[job.id]
+                item.setText(1, states[job.state-1])
+                item.setText(2, "%02d" % job.totals.runningTaskCount)
+                item.setText(3, "%02d" % job.totals.waitingTaskCount)
+                item.setText(4, "%02d" % job.minCores)
+                item.setText(5, formatMaxValue(job.maxCores))
+                item.setText(7, formatDateTime(job.stopTime))
+                self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
 
 
 
