@@ -2,7 +2,7 @@
 import os
 
 from manifest import QtCore, QtGui
-from panels.watch import RenderJobWatchPanel
+from panels import TaskPanel, RenderJobWatchPanel
 from resources import icons
 
 class DefaultConfig(object):
@@ -18,6 +18,11 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self, appname, workspace):
         QtGui.QMainWindow.__init__(self, None)
         self.__default_workspace = workspace
+        self.setDockOptions(self.AnimatedDocks | 
+                            self.AllowNestedDocks |
+                            self. AllowTabbedDocks |
+                            self.VerticalTabs)
+
         self.session = QtGui.QSessionManager(self)
         self.settings = QtCore.QSettings("plow", appname)
         self.workspace = WorkspaceManager(self)
@@ -123,14 +128,16 @@ class WorkspaceManager(QtCore.QObject):
         self.btn.setMenu(menu)
         obj.addWidget(self.btn)
 
-    def createPanel(self, ptype, name=None):
+    def createPanel(self, ptype, name=None, restore=True):
         klass = self.__panel_types[ptype]
         p = klass(name or ptype, self.parent())
         p.restore(self.__settings)
         p.panelClosed.connect(self.__panelClosed)
-        
         self.__panels.append(p)
-        self.parent().addDockWidget(QtCore.Qt.TopDockWidgetArea, p)
+        if restore:
+            self.parent().restoreDockWidget(p)
+        else:
+            self.parent().addDockWidget(QtCore.Qt.TopDockWidgetArea, p)
         return p
 
     def saveState(self, close=False):
@@ -152,7 +159,9 @@ class WorkspaceManager(QtCore.QObject):
         if name == self.__active:
             return
 
-        self.saveState(close=True)
+        if self.__settings:
+            self.saveState(close=True)
+
         self.__active = name
         self.__settings = QtCore.QSettings("plow", "ws_%s" % name)
         self.btn.setText(name)
@@ -165,7 +174,7 @@ class WorkspaceManager(QtCore.QObject):
         panelTypes = self.__settings.value("main::openPanelTypes")
         if panelNames:
             for name, ptype in zip(panelNames, panelTypes):
-                p = self.createPanel(ptype, name)
+                p = self.createPanel(ptype, name, True)
                 self.parent().restoreDockWidget(p)
                 p.show()
 
@@ -180,7 +189,7 @@ class WorkspaceManager(QtCore.QObject):
 
     def __panelMenuTriggered(self, action):
         ptype = str(action.text())
-        self.createPanel(ptype)
+        self.createPanel(ptype, None, False)
 
 def launch(argv, name, layout=None):
     # Initialize the default configuration files if none exist
