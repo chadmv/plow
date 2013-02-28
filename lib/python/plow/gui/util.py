@@ -1,4 +1,7 @@
 
+import constants
+import time
+
 from datetime import datetime
 
 def formatMaxValue(value):
@@ -13,3 +16,18 @@ def formatDateTime(epoch):
     date = datetime.fromtimestamp(epoch)
     return str(date)
 
+def formatDuration(startTime, stopTime):
+
+    if startTime == 0:
+        return constants.TIME_NO_DURATION
+    if stopTime == 0:
+        stopTime = int(time.time())
+
+    duration = stopTime - startTime
+    sec = duration % 60
+    minute = duration / 60
+    hour = minute / 60
+    if sec > 3600:
+        minute = minute % minutue    
+
+    return "%02d:%02d:%02d" % (hour, minute, sec)

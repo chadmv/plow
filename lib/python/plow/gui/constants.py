@@ -28,3 +28,9 @@ COLOR_TASK_STATE = [
     QtGui.QColor(201, 131, 255),
     QtGui.QColor(54, 106, 67)
 ]
+
+TIME_NO_TIME = "__-__ __:__:__"
+
+TIME_NO_DURATION = "__:__:__"
+
+TASK_STATES = ["INITIALIZE", "WAITING", "RUNNING", "DEAD", "EATEN", "DEPEND", "SUCCEEDED"]
