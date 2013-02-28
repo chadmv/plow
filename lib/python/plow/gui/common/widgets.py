@@ -59,7 +59,34 @@ class CheckableComboBox(QtGui.QWidget):
     """
     A combo box with selectable items.
     """
-    pass
+    def __init__(self, title, options, selected, icons=None, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        QtGui.QVBoxLayout(self)
+
+        self.__btn = QtGui.QPushButton(title)
+        self.__btn.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.__btn.setMaximumHeight(22)
+        self.__btn.setFlat(True)
+        self.__btn.setContentsMargins(0, 0, 0, 0)
+        self.__menu = QtGui.QMenu(self)
+        self.__btn.setMenu(self.__menu)
+
+        for i, opt in enumerate(options):
+            a = QtGui.QAction(self)
+            a.setText(opt)
+            a.setCheckable(True)
+            if opt in selected:
+                a.setChecked(True)
+            if icons:
+                try:
+                    a.setIcon(icons[i])
+                except IndexError:
+                    pass
+            self.__menu.addAction(a)
+
+        self.layout().addWidget(self.__btn)
+
+        self.__btn.toggled.connect(self.__btn.showMenu)
 
 class CheckableListBox(QtGui.QWidget):
     """
