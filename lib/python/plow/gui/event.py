@@ -12,7 +12,6 @@ class EventManager(object):
             cls.__Binds[name] = funcs
         else:
             funcs.append(function)
-        print cls.__Binds
 
     @classmethod
     def emit(cls, name, *args, **kwargs):
@@ -21,5 +20,4 @@ class EventManager(object):
             return
         for func in funcs:
             func(*args, **kwargs)
-        print funcs
 
