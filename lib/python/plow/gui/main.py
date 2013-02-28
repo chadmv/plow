@@ -95,6 +95,7 @@ class WorkspaceManager(QtCore.QObject):
         self.__workspaces = list(self.Defaults)
 
         self.registerPanelType("Render Watch", RenderJobWatchPanel)
+        self.registerPanelType("Tasks", TaskPanel)
 
     def activeWorkspace(self):
         return self.__active
