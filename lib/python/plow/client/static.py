@@ -22,6 +22,9 @@ __all__ = [
     "getNodes"
 ]
 
+def getPlowTime():
+    return Conn.service.getPlowTime()
+
 def getJobs(**kwargs):
     filt = ttypes.JobFilterT()
     for k, v in kwargs.items():
