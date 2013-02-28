@@ -12,6 +12,7 @@ from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox, SpinSlide
 from plow.gui.common.job import JobProgressBar
 from plow.gui.constants import COLOR_JOB_STATE
 from plow.gui.util import formatMaxValue, formatDateTime
+from plow.gui.event import EventManager
 
 class RenderJobWatchPanel(Panel):
 
@@ -70,6 +71,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__tree.setColumnCount(len(self.Header))
         self.__tree.setUniformRowHeights(True)
         [self.__tree.setColumnWidth(i, v) for i, v in enumerate(self.Width)]
+        self.__tree.itemDoubleClicked.connect(self.__itemDoubleClicked)
 
         self.layout().addWidget(self.__tree)
 
@@ -109,6 +111,10 @@ class RenderJobWatchWidget(QtGui.QWidget):
         item.setText(5, formatMaxValue(job.maxCores))
         item.setText(7, formatDateTime(job.stopTime))
         self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
+
+    def __itemDoubleClicked(self, item, col):
+        uid = item.data(0, QtCore.Qt.UserRole)
+        EventManager.emit("JOB_OF_INTEREST", uid)
 
 class RenderJobWatchConfigDialog(QtGui.QDialog):
     """
