@@ -92,11 +92,17 @@ class TaskModel(QtCore.QAbstractTableModel):
     def setJob(self, jobid):
         ## Clear out existing tasks.
         ## TODO make sure to emit right signals
-        self.__tasks = []
 
-        self.__tasks = plow.client.getTasks(jobId=jobid)
-        for i, task in enumerate(self.__tasks):
-            self.__index[task.id] = i;
+        try:
+            self.beginResetModel()
+            self.__tasks = []
+            self.__index.clear()
+
+            self.__tasks = plow.client.getTasks(jobId=jobid)
+            for i, task in enumerate(self.__tasks):
+                self.__index[task.id] = i;
+        finally:
+            self.endResetModel()
 
     def refresh(self):
         t = plow.client.getPlowTime()
