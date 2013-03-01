@@ -35,7 +35,6 @@ class TaskPanel(Panel):
         self.__state_filter = CheckableComboBox("Task States", TASK_STATES, [], None, self)
         self.__layer_filter = CheckableComboBox("Layers", [], [], None, self)
 
-
         self.titleBarWidget().addAction(
             QtGui.QIcon(":/wrench.png"), "Configure", self.openConfigDialog)
 
@@ -137,7 +136,7 @@ class TaskModel(QtCore.QAbstractTableModel):
             return COLOR_TASK_STATE[task.state]
         elif role == QtCore.Qt.ToolTipRole and col == 3:
             tip = "Allocated Cores: %d\nCurrent CPU Perc:%d\nMax CPU Perc:%d\nAllocated RAM:%dMB\nCurrent RSS:%dMB\nMaxRSS:%dMB"
-            return tip % (task.cores, task.cpuPerc, task.maxCpuPerc, task.ramMb, task.rssMb, task.MaxRssMb)
+            return tip % (task.cores, task.cpuPerc, task.maxCpuPerc, task.ramMb, task.rssMb, task.maxRssMb)
 
         return
 
