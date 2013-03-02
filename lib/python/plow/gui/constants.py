@@ -19,18 +19,25 @@ COLOR_JOB_STATE = [
     QtGui.QColor(37, 207, 44)
 ]
 
+ALPHA = 255
 COLOR_TASK_STATE = [
     GRAY,
-    QtGui.QColor(109, 137, 213),
-    QtGui.QColor(225, 225, 115),
-    QtGui.QColor(97, 50, 51),
-    QtGui.QColor(48, 25, 25),
-    QtGui.QColor(201, 131, 255),
-    QtGui.QColor(54, 106, 67)
+    QtGui.QColor(63, 79, 83),
+    QtGui.QColor(83, 80, 63),
+    QtGui.QColor(83, 80, 63),
+    QtGui.QColor(83, 63, 74),
+    QtGui.QColor(68, 63, 83),
+    QtGui.QColor(68, 83, 63)
 ]
 
 TIME_NO_TIME = "__-__ __:__:__"
 
 TIME_NO_DURATION = "__:__:__"
 
-TASK_STATES = ["INITIALIZE", "WAITING", "RUNNING", "DEAD", "EATEN", "DEPEND", "SUCCEEDED"]
+TASK_STATES = ["INITIALIZE", 
+               "WAITING",
+               "RUNNING",
+               "DEAD",
+               "EATEN",
+               "DEPEND",
+               "SUCCEEDED"]
