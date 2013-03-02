@@ -66,6 +66,7 @@ class TaskWidget(QtGui.QWidget):
         self.__table = QtGui.QTableView(self)
         self.__table.setSelectionBehavior(QtGui.QTableView.SelectRows);
         self.__table.horizontalHeader().setStretchLastSection(True)
+        self.__table.setAlternatingRowColors(True)
         self.__model = None
 
         self.layout().addWidget(self.__table)
