@@ -38,8 +38,7 @@ enum TaskState {
 enum NodeState {
     UP,
     DOWN,
-    REPAIR,    
-    REBOOT
+    REPAIR
 }
 
 enum LockState {
@@ -77,19 +76,30 @@ struct ProjectT {
     3:string title
 }
 
+struct ClusterCountsT {
+    1:required i32 nodes,
+    2:required i32 upNodes, 
+    3:required i32 downNodes,
+    4:required i32 repairNodes,
+    5:required i32 lockedNodes,
+    6:required i32 unlockedNodes,
+    7:required i32 cores,
+    8:required i32 upCores, 
+    9:required i32 downCores,
+    10:required i32 repairCores,
+    11:required i32 lockedCores,
+    12:required i32 unlockedCores,
+    13:required i32 runCores,
+    14:required i32 idleCores
+}
+
 struct ClusterT {
-    1:common.Guid id,
+    1:required common.Guid id,
     2:string name,
     3:string tag,
-    4:bool locked,
-    5:bool defaultCluster,
-    6:i32 totalHosts,
-    7:i32 downHosts,
-    8:i32 repairHosts,
-    9:i32 rebootHosts,
-    10:i32 totalCores,
-    11:i32 runCores,
-    12:i32 idleCores
+    4:bool isLocked,
+    5:bool isDefault,
+    6:ClusterCountsT total
 }
 
 struct QuotaT {
