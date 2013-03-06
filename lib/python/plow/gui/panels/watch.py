@@ -76,7 +76,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.layout().addWidget(self.__tree)
 
     def refresh(self):
-        jobs = plow.client.getJobs(user=[os.environ["USER"]])       
+        jobs = plow.client.get_jobs(user=[os.environ["USER"]])       
         for job in jobs:
             if not self.__jobs.has_key(job.id):
                 self.addJob(job)

@@ -99,15 +99,15 @@ class TaskModel(QtCore.QAbstractTableModel):
             self.__tasks = []
             self.__index.clear()
 
-            self.__tasks = plow.client.getTasks(jobId=jobid)
+            self.__tasks = plow.client.get_tasks(jobId=jobid)
             for i, task in enumerate(self.__tasks):
                 self.__index[task.id] = i;
         finally:
             self.endResetModel()
 
     def refresh(self):
-        t = plow.client.getPlowTime()
-        tasks = plow.client.getTasks(jobId=self.__job.id, lastUpdateTime=self.__lastUpdateTime)
+        t = plow.client.get_plow_time()
+        tasks = plow.client.get_tasks(jobId=self.__job.id, lastUpdateTime=self.__lastUpdateTime)
         self.__lastUpdateTime = t
 
         for task in tasks:
