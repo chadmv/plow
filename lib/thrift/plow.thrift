@@ -328,8 +328,12 @@ service RpcService {
     list<TaskT> getTasks(1:TaskFilterT filter) throws (1:PlowException e),
     string getTaskLogPath(1:common.Guid taskId) throws (1:PlowException e),
 
-    NodeT getNode(1:common.Guid nodeId) throws (1:PlowException e),
-    list<NodeT> getNodes(1:NodeFilterT filter) throws (1:PlowException e)
+    NodeT getNode(1:string name) throws (1:PlowException e),
+    list<NodeT> getNodes(1:NodeFilterT filter) throws (1:PlowException e),
+
+    ClusterT getCluster(1:string name) throws (1:PlowException e),
+    list<ClusterT> getClustersByTag(1:string tag) throws (1:PlowException e),
+    list<ClusterT> getClusters() throws (1:PlowException e),
 }
 
 

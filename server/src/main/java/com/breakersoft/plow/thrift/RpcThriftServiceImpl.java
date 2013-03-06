@@ -14,6 +14,7 @@ import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.ProjectService;
 import com.breakersoft.plow.service.StateManager;
+import com.breakersoft.plow.thrift.dao.ThriftClusterDao;
 import com.breakersoft.plow.thrift.dao.ThriftFolderDao;
 import com.breakersoft.plow.thrift.dao.ThriftJobBoardDao;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
@@ -53,6 +54,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     ThriftFolderDao thriftFolderDao;
+
+    @Autowired
+    ThriftClusterDao thriftClusterDao;
 
     @Autowired
     StateManager stateManager;
@@ -205,4 +209,20 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     public String getTaskLogPath(String id) throws PlowException, TException {
         return thriftTaskDao.getLogPath(UUID.fromString(id));
     }
+
+	@Override
+	public ClusterT getCluster(String arg0) throws PlowException, TException {
+		return thriftClusterDao.getCluster(arg0);
+	}
+
+	@Override
+	public List<ClusterT> getClusters() throws PlowException, TException {
+		return thriftClusterDao.getClusters();
+	}
+
+	@Override
+	public List<ClusterT> getClustersByTag(String arg0) throws PlowException,
+			TException {
+		return thriftClusterDao.getClusters(arg0);
+	}
 }
