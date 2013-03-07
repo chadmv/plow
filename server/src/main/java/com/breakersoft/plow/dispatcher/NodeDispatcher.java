@@ -69,7 +69,7 @@ public class NodeDispatcher {
         final List<DispatchProject> projects =
                 dispatchService.getSortedProjectList(node);
 
-        if(projects.isEmpty()) {
+        if (projects.isEmpty()) {
             logger.info("No dispatchable projects");
             return;
         }
