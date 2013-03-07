@@ -28,9 +28,11 @@ public class QuotaDaoTests extends AbstractTest {
     @Resource
     NodeService nodeService;
 
+    private final static String[] TAGS = new String[] {"test"};
+
     @Test
     public void testCreate() {
-        Cluster c = nodeService.createCluster("test", "test");
+        Cluster c = nodeService.createCluster("test", TAGS);
         Quota q1 = quotaDao.create(TEST_PROJECT, c, 10, 100);
         Quota q2 = quotaDao.get(q1.getQuotaId());
         assertEquals(q1, q2);
@@ -38,7 +40,7 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void testGet() {
-        Cluster c = nodeService.createCluster("test", "test");
+        Cluster c = nodeService.createCluster("test", TAGS);
         Quota q1 = quotaDao.create(TEST_PROJECT, c, 10, 100);
         Quota q2 = quotaDao.get(q1.getQuotaId());
         Quota q3 = quotaDao.get(q1.getQuotaId());
@@ -61,7 +63,7 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void allocateResources() {
-        Cluster c = nodeService.createCluster("test", "test");
+        Cluster c = nodeService.createCluster("test", TAGS);
         Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
 
         quotaDao.allocateResources(quota, 5);
@@ -72,7 +74,7 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void freeResources() {
-        Cluster c = nodeService.createCluster("test", "test");
+        Cluster c = nodeService.createCluster("test", TAGS);
         Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
 
         quotaDao.allocateResources(quota, 5);
