@@ -2,16 +2,19 @@ package com.breakersoft.plow.thrift;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
+import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.ProjectService;
 import com.breakersoft.plow.service.StateManager;
 import com.breakersoft.plow.thrift.dao.ThriftClusterDao;
@@ -33,6 +36,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     ProjectService projectService;
+
+    @Autowired
+    NodeService nodeService;
 
     @Autowired
     ThriftJobDao thriftJobDao;
@@ -224,5 +230,12 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 	public List<ClusterT> getClustersByTag(String arg0) throws PlowException,
 			TException {
 		return thriftClusterDao.getClusters(arg0);
+	}
+
+	@Override
+	public ClusterT createCluster(String name, Set<String> tags)
+			throws PlowException, TException {
+		final Cluster cluster = nodeService.createCluster(name, tags.toArray(new String[] {}));
+		return thriftClusterDao.getCluster(cluster.getClusterId().toString());
 	}
 }
