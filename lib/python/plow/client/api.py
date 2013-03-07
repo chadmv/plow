@@ -23,11 +23,17 @@ __all__ = [
     "get_nodes",
     "get_node",
     "get_clusters",
-    "get_cluster"
+    "get_cluster",
+    "create_cluster"
 ]
 
 def get_plow_time():
     return Conn.service.getPlowTime()
+
+# Clusters
+
+def create_cluster(name, tags):
+    return Conn.service.createCluster(name, tags)
 
 def get_cluster(name):
     return Conn.service.getCluster(name)
@@ -100,5 +106,3 @@ def get_nodes(**kwargs):
     for k, v in kwargs.items():
         setattr(filt, k, v)
     return Conn.service.getNodes(filt)
-
-

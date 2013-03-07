@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import unittest
+import uuid
 
 import manifest
 import plow.client
@@ -100,6 +101,11 @@ class ApiModuleTests(unittest.TestCase):
         c1 = plow.client.get_cluster("unassigned")
         c2 = plow.client.get_cluster(c1.id)
         self.assertEquals(c1, c2)
+
+    def test_create_cluster(self):
+        name = str(uuid.uuid4())
+        c = plow.client.create_cluster(name, ["linux", "himem"])
+        self.assertEquals(name, c.name)
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(ApiModuleTests)
