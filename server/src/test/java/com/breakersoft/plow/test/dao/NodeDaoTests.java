@@ -1,6 +1,7 @@
 package com.breakersoft.plow.test.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import javax.annotation.Resource;
 
@@ -11,7 +12,6 @@ import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.NodeDao;
-import com.breakersoft.plow.exceptions.ResourceAllocationException;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.test.AbstractTest;
 
@@ -23,10 +23,12 @@ public class NodeDaoTests extends AbstractTest {
     @Resource
     ClusterDao clusterDao;
 
+    private static final String[] TAGS = new String[] { "test" } ;
+
     @Test
     public void create() {
         Ping ping = getTestNodePing();
-        Cluster cluster = clusterDao.create("test", "test");
+        Cluster cluster = clusterDao.create("test", TAGS);
         Node node = nodeDao.create(cluster, ping);
         assertEquals(cluster.getClusterId(), node.getClusterId());
         assertEquals(ping.getHostname(), node.getName());
@@ -35,7 +37,7 @@ public class NodeDaoTests extends AbstractTest {
     @Test
     public void allocateResources() {
         Ping ping = getTestNodePing();
-        Cluster cluster = clusterDao.create("test", "test");
+        Cluster cluster = clusterDao.create("test", TAGS);
         Node node = nodeDao.create(cluster, ping);
         nodeDao.allocateResources(node, 1, 1024);
 
@@ -51,7 +53,7 @@ public class NodeDaoTests extends AbstractTest {
     }
 
     public void allocateResourcesFailed() {
-        Cluster cluster = clusterDao.create("test", "test");
+        Cluster cluster = clusterDao.create("test", TAGS);
         Node node = nodeDao.create(cluster, getTestNodePing());
         assertFalse(nodeDao.allocateResources(node, 100, 1000000));
     }
@@ -60,7 +62,7 @@ public class NodeDaoTests extends AbstractTest {
     public void freeResources() {
 
         Ping ping = getTestNodePing();
-        Cluster cluster = clusterDao.create("test", "test");
+        Cluster cluster = clusterDao.create("test", TAGS);
         Node node = nodeDao.create(cluster, ping);
         nodeDao.allocateResources(node, 1, 1024);
         nodeDao.freeResources(node, 1, 1024);

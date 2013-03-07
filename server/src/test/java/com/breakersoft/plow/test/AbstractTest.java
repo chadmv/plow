@@ -52,7 +52,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
     @Before
     public void initTestProject() {
         TEST_PROJECT = projectService.createProject("unittest", "Unit Test Project");
-        TEST_CLUSTER = nodeService.createCluster("unittest", "unittest");
+        TEST_CLUSTER = nodeService.createCluster("unittest", new String[] { "unassigned"});
         TEST_QUOTA = nodeService.createQuota(TEST_PROJECT, TEST_CLUSTER, 10, 15);
 
         nodeService.setDefaultCluster(TEST_CLUSTER);
@@ -80,7 +80,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         layer.setMinRamMb(1024);
         layer.setName("test_ls");
         layer.setRange("1-10");
-        layer.setTags(Sets.newHashSet("unittest"));
+        layer.setTags(Sets.newHashSet("unassigned"));
 
         jobspec.addToLayers(layer);
 

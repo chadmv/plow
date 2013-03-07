@@ -18,7 +18,7 @@ public interface NodeService {
     void updateNode(Node node, Ping ping);
     Quota createQuota(Project project, Cluster cluster, int size, int burst);
     Quota createQuota(Project project, String cluster, int size, int burst);
-    Cluster createCluster(String name, String tag);
+	Cluster createCluster(String name, String[] tags);
     Cluster getCluster(String name);
     Cluster getDefaultCluster();
     void setDefaultCluster(Cluster cluster);

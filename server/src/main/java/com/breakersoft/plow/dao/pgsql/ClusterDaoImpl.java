@@ -64,10 +64,10 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
             JdbcUtils.Insert("plow.cluster",
                     "pk_cluster",
                     "str_name",
-                    "str_tag");
+                    "str_tags");
 
     @Override
-    public Cluster create(final String name, final String tag) {
+    public Cluster create(final String name, final String[] tags) {
         final UUID id = UUID.randomUUID();
         jdbc.update(new PreparedStatementCreator() {
             @Override
@@ -75,7 +75,7 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
                 final PreparedStatement ret = conn.prepareStatement(INSERT);
                 ret.setObject(1, id);
                 ret.setString(2, name);
-                ret.setString(3, tag);
+                ret.setArray(3, conn.createArrayOf("text", tags));
                 return ret;
             }
         });

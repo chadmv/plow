@@ -96,7 +96,7 @@ struct ClusterCountsT {
 struct ClusterT {
     1:required common.Guid id,
     2:string name,
-    3:string tag,
+    3:set<string> tags,
     4:bool isLocked,
     5:bool isDefault,
     6:ClusterCountsT total
@@ -132,7 +132,7 @@ struct NodeT {
     3:string name,
     4:string clusterName,
     5:string ipaddr,
-    6:list<string> tags,
+    6:set<string> tags,
     7:NodeState state,
     8:LockState lockState,
     9:common.Timestamp createdTime,

@@ -12,6 +12,7 @@ import com.breakersoft.plow.thrift.ClusterCountsT;
 import com.breakersoft.plow.thrift.ClusterT;
 import com.breakersoft.plow.thrift.dao.ThriftClusterDao;
 import com.breakersoft.plow.util.PlowUtils;
+import com.google.common.collect.Sets;
 
 @Repository
 public class ThriftClusterDaoImpl extends AbstractDao implements ThriftClusterDao {
@@ -26,7 +27,8 @@ public class ThriftClusterDaoImpl extends AbstractDao implements ThriftClusterDa
         	cluster.name = rs.getString("str_name");
         	cluster.isDefault = rs.getBoolean("bool_default");
         	cluster.isLocked = rs.getBoolean("bool_locked");
-        	cluster.tag = rs.getString("str_tag");
+        	cluster.tags = Sets.newHashSet(
+        			(String[])rs.getArray("str_tags").getArray());
 
         	cluster.total = new ClusterCountsT();
         	cluster.total.setNodes(rs.getInt("node_total"));
@@ -52,7 +54,7 @@ public class ThriftClusterDaoImpl extends AbstractDao implements ThriftClusterDa
     	"SELECT " +
     		"cluster.pk_cluster,"+
     		"cluster.str_name,"+
-    		"cluster.str_tag,"+
+    		"cluster.str_tags,"+
     		"cluster.bool_locked,"+
     		"cluster.bool_default," +
     		"COALESCE(cluster_totals.node_total,0) AS node_total," +
@@ -91,7 +93,7 @@ public class ThriftClusterDaoImpl extends AbstractDao implements ThriftClusterDa
 		return jdbc.query(GET_CLUSTER, MAPPER);
 	}
 
-    private static final String GET_CLUSTERS_BY_TAG = GET_CLUSTER + "WHERE cluster.str_tag = ?";
+    private static final String GET_CLUSTERS_BY_TAG = GET_CLUSTER + "WHERE cluster.str_tags @> ARRAY[?]::text[]";
 
     @Override
 	public List<ClusterT> getClusters(String tag) {

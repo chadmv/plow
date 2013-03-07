@@ -232,7 +232,7 @@ CREATE INDEX task_order_idx ON plow.task(int_task_order, int_layer_order);
 ---
 --- Stores the ping data for a task.
 ---
-CREATE TABLE task_ping (
+CREATE TABLE plow.task_ping (
   pk_task UUID NOT NULL PRIMARY KEY,
   int_rss INTEGER DEFAULT 0 NOT NULL,
   int_max_rss INTEGER DEFAULT 0 NOT NULL,
@@ -280,13 +280,13 @@ CREATE INDEX depend_dependon_task_idx ON plow.depend (pk_dependon_task);
 CREATE TABLE plow.cluster (
   pk_cluster UUID NOT NULL PRIMARY KEY,
   str_name VARCHAR(128) NOT NULL,
-  str_tag VARCHAR(32) NOT NULL,
+  str_tags TEXT[],
   bool_locked BOOLEAN DEFAULT 'f' NOT NULL,
   bool_default BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
 CREATE UNIQUE INDEX cluster_str_name_uniq_idx ON plow.cluster (str_name);
-
+CREATE INDEX cluster_str_tag_gin_idx on plow.cluster USING GIN (str_tags);
 
 ----------------------------------------------------------
 
@@ -303,7 +303,7 @@ CREATE TABLE plow.node (
   int_lock_state SMALLINT NOT NULL DEFAULT 0,
   time_created BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
   time_updated BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
-  str_tags TEXT[] NOT NULL
+  str_tags TEXT[]
 ) WITHOUT OIDS;
 
 CREATE UNIQUE INDEX node_str_name_uniq_idx ON plow.node (str_name);
@@ -484,7 +484,7 @@ UPDATE plow.project SET pk_folder_default = '00000000-0000-0000-0000-00000000000
 ---
 --- Test Cluster
 ---
-INSERT INTO plow.cluster VALUES ('00000000-0000-0000-0000-000000000000', 'unassigned', 'unassigned', 'f', 't');
+INSERT INTO plow.cluster VALUES ('00000000-0000-0000-0000-000000000000', 'unassigned', '{"unassigned"}', 'f', 't');
 
 INSERT INTO plow.quota VALUES ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000','00000000-0000-0000-0000-000000000000', 10, 20, 0, 'f');
 

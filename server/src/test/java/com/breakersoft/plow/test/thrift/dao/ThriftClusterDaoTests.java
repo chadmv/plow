@@ -36,7 +36,7 @@ public class ThriftClusterDaoTests extends AbstractTest {
     	clusters.clear();
     	for (int i=0; i<10; i++) {
     		clusters.add(clusterDao.create(
-    				String.format("default%d", i), String.format("default%d", i)));
+    				String.format("default%d", i), new String[] { String.format("default%d", i) }));
     	}
     }
 

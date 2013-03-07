@@ -16,18 +16,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Proc;
-import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.NodeDispatcher;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
-import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.service.JobService;
-import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
 
 @RunWith(SpringJUnit4ClassRunner.class)

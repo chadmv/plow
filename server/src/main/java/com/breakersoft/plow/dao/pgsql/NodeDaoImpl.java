@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -54,10 +55,8 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     public Node create(final Cluster cluster, final Ping ping) {
 
         final UUID id = UUID.randomUUID();
-
-        final String clusterTag = jdbc.queryForObject(
-                "SELECT str_tag FROM plow.cluster WHERE pk_cluster=?",
-                String.class, cluster.getClusterId());
+        final List<String> tags = jdbc.queryForList("SELECT unnest(str_tags) " +
+        		"FROM plow.cluster WHERE pk_cluster=?", String.class, cluster.getClusterId());
 
         jdbc.update(new PreparedStatementCreator() {
             @Override
@@ -67,7 +66,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 ps.setObject(2, cluster.getClusterId());
                 ps.setString(3, ping.hostname);
                 ps.setString(4, ping.ipAddr);
-                ps.setArray(5, conn.createArrayOf("text", new String[] { clusterTag }));
+                ps.setArray(5, conn.createArrayOf("text", tags.toArray()));
                 return ps;
             }
         });
