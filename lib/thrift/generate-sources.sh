@@ -37,3 +37,16 @@ mv $OUT/common_*.h $EXP
 mv $OUT/plow_*.h $EXP
 
 rm $OUT/RpcService_server.skeleton.cpp
+
+# C
+########################################################################
+
+OUT="../c"
+EXP="../c"
+
+rm -rf $OUT
+mkdir $OUT
+
+thrift --gen c_glib --out $OUT common.thrift
+thrift --gen c_glib --out $OUT plow.thrift
+
