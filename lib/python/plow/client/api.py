@@ -24,7 +24,8 @@ __all__ = [
     "get_node",
     "get_clusters",
     "get_cluster",
-    "create_cluster"
+    "create_cluster",
+    "delete_cluster"
 ]
 
 def get_plow_time():
@@ -37,6 +38,9 @@ def create_cluster(name, tags):
 
 def get_cluster(name):
     return Conn.service.getCluster(name)
+
+def delete_cluster(cluster):
+    return Conn.service.deleteCluster(cluster.id)
 
 def get_clusters(tag=None):
     if tag:

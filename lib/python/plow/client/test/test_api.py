@@ -107,6 +107,15 @@ class ApiModuleTests(unittest.TestCase):
         c = plow.client.create_cluster(name, ["linux", "himem"])
         self.assertEquals(name, c.name)
 
+    def test_delete_cluster(self):
+        name = str(uuid.uuid4())
+        c = plow.client.create_cluster(name, ["linux", "himem"])
+        plow.client.delete_cluster(c)
+        try:
+            plow.client.get_cluster(name)
+        except Exception, e:
+            pass
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(ApiModuleTests)
     unittest.TextTestRunner(verbosity=2).run(suite)
