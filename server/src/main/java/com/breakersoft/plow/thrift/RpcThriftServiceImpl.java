@@ -238,4 +238,10 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 		final Cluster cluster = nodeService.createCluster(name, tags.toArray(new String[] {}));
 		return thriftClusterDao.getCluster(cluster.getClusterId().toString());
 	}
+
+	@Override
+	public boolean deleteCluster(String id) throws PlowException, TException {
+		final Cluster c = nodeService.getCluster(UUID.fromString(id));
+		return nodeService.deleteCluster(c);
+	}
 }

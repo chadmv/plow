@@ -1,6 +1,7 @@
 package com.breakersoft.plow.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,8 +74,18 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
+    public boolean deleteCluster(Cluster c) {
+        return clusterDao.delete(c);
+    }
+
+    @Override
     public Cluster getCluster(String name) {
         return clusterDao.getCluster(name);
+    }
+
+    @Override
+    public Cluster getCluster(UUID id) {
+        return clusterDao.getCluster(id);
     }
 
     @Override

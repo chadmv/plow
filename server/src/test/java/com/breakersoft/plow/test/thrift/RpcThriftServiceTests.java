@@ -30,4 +30,10 @@ public class RpcThriftServiceTests extends AbstractTest {
     	assertTrue(cluster.tags.contains("bang"));
     	assertTrue(cluster.tags.contains("bong"));
     }
+
+    @Test
+    public void testDeleteCluster() throws PlowException, TException {
+    	ClusterT cluster = rpcService.createCluster("bing", Sets.newHashSet("bang", "bong"));
+    	rpcService.deleteCluster(cluster.id);
+    }
 }

@@ -1,6 +1,7 @@
 package com.breakersoft.plow.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Job;
@@ -25,5 +26,7 @@ public interface NodeService {
 
     List<Proc> getProcs(Job job);
     boolean setProcUnbooked(Proc proc, boolean unbooked);
+	boolean deleteCluster(Cluster c);
+	Cluster getCluster(UUID id);
 
 }

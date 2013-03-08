@@ -15,4 +15,6 @@ public interface ClusterDao {
     Cluster getDefaultCluster();
 
 	Cluster create(String name, String[] tags);
+
+	boolean delete(Cluster c);
 }

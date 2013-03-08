@@ -105,4 +105,9 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
         jdbc.update("UPDATE cluster SET bool_default='t' WHERE pk_cluster=?", cluster.getClusterId());
     }
 
+    @Override
+    public boolean delete(Cluster c) {
+    	return jdbc.update("DELETE FROM plow.cluster WHERE pk_cluster=?", c.getClusterId()) == 1;
+    }
+
 }

@@ -296,7 +296,7 @@ CREATE INDEX cluster_str_tag_gin_idx on plow.cluster USING GIN (str_tags);
 
 CREATE TABLE plow.node (
   pk_node UUID NOT NULL PRIMARY KEY,
-  pk_cluster UUID NOT NULL,
+  pk_cluster UUID NOT NULL REFERENCES plow.cluster(pk_cluster),
   str_name VARCHAR(128) NOT NULL,
   str_ipaddr VARCHAR(15) NOT NULL,
   int_state SMALLINT NOT NULL DEFAULT 0,
