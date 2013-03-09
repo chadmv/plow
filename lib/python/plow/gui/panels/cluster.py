@@ -9,6 +9,9 @@ from plow.gui.util import formatPercentage
 from plow.gui.event import EventManager
 from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelegate
 
+IdRole = QtCore.Qt.UserRole
+ObjectRole = QtCore.Qt.UserRole + 1
+
 class ClusterPanel(Panel):
 
     def __init__(self, name="Clusters", parent=None):
@@ -28,8 +31,11 @@ class ClusterPanel(Panel):
         # comment button (multi-select)
         # 
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/wrench.png"), "Configure", self.openConfigDialog)
-
+            QtGui.QIcon(":/settings.png"), "Edit Selected Cluster Configuration", self.openConfigDialog)
+        self.titleBarWidget().addAction(
+            QtGui.QIcon(":/locked.png"), "Lock Selected Clusters", self.__handleClusterLock)
+        self.titleBarWidget().addAction(
+            QtGui.QIcon(":/unlocked.png"), "Unlock Selected Clusters", self.__handleClusterUnlock)
 
     def openLoadDialog(self):
         print "Open search dialog"
@@ -39,6 +45,20 @@ class ClusterPanel(Panel):
 
     def refresh(self):
         self.widget().refresh()
+
+    def __handleClusterLock(self):
+        try:
+            for cluster in self.widget().getSelectedClusters():
+                plow.client.lock_cluster(cluster, True)
+        finally:
+            self.refresh()
+
+    def __handleClusterUnlock(self):
+        try:
+            for cluster in self.widget().getSelectedClusters():
+                plow.client.lock_cluster(cluster, False)
+        finally:
+            self.refresh()
 
     def __handleJobOfInterestEvent(self, *args, **kwargs):
         self.widget().setJobId(args[0])
@@ -59,7 +79,9 @@ class ClusterWidget(QtGui.QWidget):
         self.__tree.setAlternatingRowColors(True)
         self.__tree.setUniformRowHeights(True)
         self.__tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
-        self.__tree.setAutoFillBackground(True)
+        self.__tree.setAutoFillBackground(False)
+        self.__tree.setSelectionMode(self.__tree.ExtendedSelection)
+        self.__tree.doubleClicked.connect(self.__itemDoubleClicked)
 
         self.__model = ClusterModel()
         self.__tree.setModel(self.__model)
@@ -69,7 +91,21 @@ class ClusterWidget(QtGui.QWidget):
 
         self.layout().addWidget(self.__tree)
 
+    def getSelectedClusters(self):
+        rows = self.__tree.selectionModel().selectedRows()
+        return [index.data(ObjectRole) for index in rows]
+
+    def refresh(self):
+        self.__model.refresh()
+
+    def __itemDoubleClicked(self, index):
+        uid = index.data(IdRole)
+        EventManager.emit("CLUSTER_OF_INTEREST", uid)
+
+
 class ClusterModel(QtCore.QAbstractTableModel):
+
+
     def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.__items = plow.client.get_clusters()
@@ -171,6 +207,10 @@ class ClusterModel(QtCore.QAbstractTableModel):
                     "Repair Nodes: %d" % cluster.total.repairNodes,
                     "Locked Nodes: %d" % cluster.total.lockedNodes,
                 ])
+        elif role == IdRole:
+            return cluster.id
+        elif role == ObjectRole:
+            return cluster
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
