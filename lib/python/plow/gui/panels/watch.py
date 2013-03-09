@@ -70,6 +70,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__tree.setHeaderLabels(self.Header)
         self.__tree.setColumnCount(len(self.Header))
         self.__tree.setUniformRowHeights(True)
+        self.__tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
         [self.__tree.setColumnWidth(i, v) for i, v in enumerate(self.Width)]
         self.__tree.itemDoubleClicked.connect(self.__itemDoubleClicked)
 
