@@ -2,7 +2,7 @@
 import os
 
 from manifest import QtCore, QtGui
-from panels import TaskPanel, RenderJobWatchPanel
+from panels import TaskPanel, RenderJobWatchPanel, ClusterPanel
 from resources import icons
 
 class DefaultConfig(object):
@@ -96,6 +96,7 @@ class WorkspaceManager(QtCore.QObject):
 
         self.registerPanelType("Render Watch", RenderJobWatchPanel)
         self.registerPanelType("Tasks", TaskPanel)
+        self.registerPanelType("Clusters", ClusterPanel)
 
     def activeWorkspace(self):
         return self.__active

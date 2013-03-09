@@ -4,6 +4,12 @@ import time
 
 from datetime import datetime
 
+def formatPercentage(value, total):
+    if total == 0:
+        return "0.00%"
+    else:
+        return "%0.2f%%" % (value / float(total))
+
 def formatMaxValue(value):
     if value == -1:
         return "-"
