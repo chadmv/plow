@@ -8,10 +8,23 @@ the user can see: running and finished.
 The job status is how the job is doin.
 
 """
-COLOR_JOB_STATUS_PAUSED = QtGui.QColor(85, 116, 213)
-COLOR_JOB_STATUS_ERRORS = QtGui.QColor(97, 39, 39)
+
+BLUE = QtGui.QColor(17, 103, 166)
+PURPLE = QtGui.QColor(166, 17, 125)
+RED = QtGui.QColor(166, 17, 34)
+ORANGE = QtGui.QColor(166, 85, 17)
+GREEN = QtGui.QColor(73, 166, 17)
 
 GRAY = QtGui.QColor(66, 66, 66)
+
+COLOR_JOB_STATUS_PAUSED = QtGui.QColor(63, 79, 83)
+COLOR_JOB_STATUS_ERRORS = QtGui.QColor(97, 39, 39)
+
+COLOR_CLUSTER_LOCKED = BLUE
+COLOR_CLUSTER_REPAIR = QtGui.QColor(83, 80, 63)
+COLOR_CLUSTER_DOWN = QtGui.QColor(83, 80, 63)
+
+
 
 COLOR_JOB_STATE = [
     GRAY,
