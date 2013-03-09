@@ -154,3 +154,41 @@ class RadioBoxArray(QtGui.QWidget):
             group_box_layout.addWidget(radio, row, item % cols)
 
         layout.addWidget(group_box)
+
+
+class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
+    """
+    A simple status bar, much like a heath meter, which 
+    is intended to show the ratio of two values.
+    """
+    # Left, top, right, bottom
+    Margins = [5, 4, 5, 4]
+
+    def __init__(self, parent=None):
+        QtGui.QStyledItemDelegate.__init__(self, parent)
+
+    def paint(self, painter, option, index):
+
+        if not index.isValid():
+            QtGui.QStyledItemDelegate.paint(self, painter, option, index)
+            return
+
+        ## Broken in PySide.
+        opt = QtGui.QStyleOptionViewItemV4(option)
+        self.initStyleOption(opt, index);
+
+        # Broken in pyside 1.1.2
+        #if opt.state & QtGui.QStyle.State_Selected:
+        #    painter.fillRect(opt.rect, opt.palette.highlight())
+
+        rect = opt.rect
+        rect.adjust(self.Margins[0], self.Margins[1], -self.Margins[2], -self.Margins[3])
+        
+        data = index.data()
+        if data[1] == 0:
+            painter.fillRect(rect, QtCore.Qt.darkRed)
+        else:
+            ratio = data[0] / float(data[1])
+            painter.fillRect(rect, QtCore.Qt.darkRed)
+            rect.setWidth(ratio * rect.width())
+            painter.fillRect(rect, QtCore.Qt.green)
