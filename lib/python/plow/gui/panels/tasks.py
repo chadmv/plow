@@ -35,9 +35,6 @@ class TaskPanel(Panel):
         self.__state_filter = CheckableComboBox("Task States", TASK_STATES, [], None, self)
         self.__layer_filter = CheckableComboBox("Layers", [], [], None, self)
 
-        self.titleBarWidget().addAction(
-            QtGui.QIcon(":/wrench.png"), "Configure", self.openConfigDialog)
-
         self.titleBarWidget().addWidget(self.__state_filter)    
         self.titleBarWidget().addWidget(self.__layer_filter)
 

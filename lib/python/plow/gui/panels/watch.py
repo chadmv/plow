@@ -38,9 +38,6 @@ class RenderJobWatchPanel(Panel):
         # comment button (multi-select)
         # 
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/wrench.png"), "Configure", self.openConfigDialog)
-
-        self.titleBarWidget().addAction(
             QtGui.QIcon(":/load.png"), "Load", self.openLoadDialog)
 
     def openLoadDialog(self):
