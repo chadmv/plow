@@ -56,4 +56,12 @@ public class ClusterDaoTests extends AbstractTest {
         Cluster c2 = clusterDao.getCluster("default");
         assertEquals(c1, c2);
     }
+
+    @Test
+    public void setClusterLocked() {
+        Cluster c1 = clusterDao.create("default", TAGS);
+        assertTrue(clusterDao.setClusterLocked(c1, true));
+        assertTrue(clusterDao.setClusterLocked(c1, false));
+        assertFalse(clusterDao.setClusterLocked(c1, false));
+    }
 }

@@ -99,6 +99,11 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
+    public boolean lockCluster(Cluster cluster, boolean value) {
+        return clusterDao.setClusterLocked(cluster, value);
+    }
+
+    @Override
     public List<Proc> getProcs(Job job) {
         return procDao.getProcs(job);
     }

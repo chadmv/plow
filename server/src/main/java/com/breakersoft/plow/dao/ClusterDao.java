@@ -17,4 +17,6 @@ public interface ClusterDao {
 	Cluster create(String name, String[] tags);
 
 	boolean delete(Cluster c);
+
+	boolean setClusterLocked(Cluster c, boolean value);
 }

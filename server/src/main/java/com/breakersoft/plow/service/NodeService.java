@@ -28,5 +28,6 @@ public interface NodeService {
     boolean setProcUnbooked(Proc proc, boolean unbooked);
 	boolean deleteCluster(Cluster c);
 	Cluster getCluster(UUID id);
+	boolean lockCluster(Cluster cluster, boolean value);
 
 }

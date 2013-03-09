@@ -244,4 +244,10 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 		final Cluster c = nodeService.getCluster(UUID.fromString(id));
 		return nodeService.deleteCluster(c);
 	}
+
+	@Override
+	public boolean lockCluster(String id, boolean value) throws TException {
+		final Cluster c = nodeService.getCluster(UUID.fromString(id));
+		return nodeService.lockCluster(c, value);
+	}
 }

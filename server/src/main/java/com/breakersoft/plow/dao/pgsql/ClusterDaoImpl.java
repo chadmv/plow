@@ -110,4 +110,9 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
     	return jdbc.update("DELETE FROM plow.cluster WHERE pk_cluster=?", c.getClusterId()) == 1;
     }
 
+    @Override
+    public boolean setClusterLocked(Cluster c, boolean value) {
+    	return jdbc.update("UPDATE plow.cluster SET bool_locked=? WHERE pk_cluster=? AND bool_locked=?",
+    			value, c.getClusterId(), !value) == 1;
+    }
 }
