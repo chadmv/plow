@@ -220,6 +220,10 @@ class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
     # Left, top, right, bottom
     Margins = [5, 4, 5, 4]
 
+    __PEN = QtGui.QColor(33, 33, 33)
+    __C1 = QtGui.QColor(177, 24, 0)
+    __C2 = QtGui.QColor(76, 115, 0)
+
     def __init__(self, parent=None):
         QtGui.QStyledItemDelegate.__init__(self, parent)
 
@@ -239,12 +243,24 @@ class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
 
         rect = opt.rect
         rect.adjust(self.Margins[0], self.Margins[1], -self.Margins[2], -self.Margins[3])
-        
         data = index.data()
+        
+        painter.save()
+        painter.setRenderHints(
+            painter.HighQualityAntialiasing |
+            painter.SmoothPixmapTransform |
+            painter.Antialiasing)
+
+        painter.setPen(self.__PEN)
+
         if data[1] == 0:
-            painter.fillRect(rect, QtCore.Qt.darkRed)
+            painter.setBrush(self.__C1)
+            painter.drawRoundedRect(rect, 3, 3)
         else:
             ratio = data[0] / float(data[1])
-            painter.fillRect(rect, QtGui.QColor(177, 24, 0))
+            painter.setBrush(self.__C1)
+            painter.drawRoundedRect(rect, 3, 3)
             rect.setWidth(ratio * rect.width())
-            painter.fillRect(rect, QtGui.QColor(76, 115, 0))
+            painter.setBrush(self.__C2)
+            painter.drawRoundedRect(rect, 3, 3)
+        painter.restore()
