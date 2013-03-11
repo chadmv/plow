@@ -26,7 +26,10 @@ __all__ = [
     "get_cluster",
     "create_cluster",
     "delete_cluster",
-    "lock_cluster"
+    "lock_cluster",
+    "set_cluster_name",
+    "set_cluster_tags",
+    "set_default_cluster"
 ]
 
 def get_plow_time():
@@ -51,6 +54,16 @@ def get_clusters(tag=None):
         return Conn.service.getClustersByTag(tag)
     else:
         return Conn.service.getClusters()
+
+def set_cluster_name(cluster, name):
+    Conn.service.setClusterName(cluster.id, name)
+
+def set_cluster_tags(cluster, tags):
+    Conn.service.setClusterTags(cluster.id, tags)
+
+def set_default_cluster(cluster):
+    Conn.service.setDefaultCluster(cluster)
+
 # Jobs
 
 def get_jobs(**kwargs):

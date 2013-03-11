@@ -2,6 +2,8 @@ package com.breakersoft.plow.test.dao;
 
 import static org.junit.Assert.*;
 
+import java.util.Set;
+
 import javax.annotation.Resource;
 
 import org.junit.Test;
@@ -16,6 +18,7 @@ import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
+import com.google.common.collect.Sets;
 
 public class QuotaDaoTests extends AbstractTest {
 
@@ -28,7 +31,7 @@ public class QuotaDaoTests extends AbstractTest {
     @Resource
     NodeService nodeService;
 
-    private final static String[] TAGS = new String[] {"test"};
+    private final static Set<String> TAGS = Sets.newHashSet("test");
 
     @Test
     public void testCreate() {

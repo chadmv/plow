@@ -235,7 +235,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 	@Override
 	public ClusterT createCluster(String name, Set<String> tags)
 			throws PlowException, TException {
-		final Cluster cluster = nodeService.createCluster(name, tags.toArray(new String[] {}));
+		final Cluster cluster = nodeService.createCluster(name, tags);
 		return thriftClusterDao.getCluster(cluster.getClusterId().toString());
 	}
 
@@ -249,5 +249,25 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 	public boolean lockCluster(String id, boolean value) throws TException {
 		final Cluster c = nodeService.getCluster(UUID.fromString(id));
 		return nodeService.lockCluster(c, value);
+	}
+
+	@Override
+	public void setClusterName(String id, String name) throws PlowException,
+			TException {
+		final Cluster c = nodeService.getCluster(UUID.fromString(id));
+		nodeService.setClusterName(c, name);
+	}
+
+	@Override
+	public void setClusterTags(String id, Set<String> tags)
+			throws PlowException, TException {
+		final Cluster c = nodeService.getCluster(UUID.fromString(id));
+		nodeService.setClusterTags(c, tags);
+	}
+
+	@Override
+	public void setDefaultCluster(String id) throws PlowException, TException {
+		final Cluster c = nodeService.getCluster(UUID.fromString(id));
+		nodeService.setDefaultCluster(c);
 	}
 }

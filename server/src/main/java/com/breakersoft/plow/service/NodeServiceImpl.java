@@ -1,6 +1,7 @@
 package com.breakersoft.plow.service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,8 +70,8 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public Cluster createCluster(String name, String[] tags) {
-        return clusterDao.create(name, tags);
+    public Cluster createCluster(String name, Set<String> tags) {
+        return clusterDao.create(name, tags.toArray(new String[] {}));
     }
 
     @Override
@@ -101,6 +102,16 @@ public class NodeServiceImpl implements NodeService {
     @Override
     public boolean lockCluster(Cluster cluster, boolean value) {
         return clusterDao.setClusterLocked(cluster, value);
+    }
+
+    @Override
+    public void setClusterName(Cluster cluster, String name) {
+    	clusterDao.setClusterName(cluster, name);
+    }
+
+    @Override
+    public void setClusterTags(Cluster cluster, Set<String> tags) {
+    	clusterDao.setClusterTags(cluster, tags.toArray(new String[] {}));
     }
 
     @Override

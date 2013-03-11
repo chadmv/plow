@@ -115,4 +115,30 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
     	return jdbc.update("UPDATE plow.cluster SET bool_locked=? WHERE pk_cluster=? AND bool_locked=?",
     			value, c.getClusterId(), !value) == 1;
     }
+
+    @Override
+    public void setClusterName(Cluster c, String name) {
+    	jdbc.update("UPDATE plow.cluster SET str_name=? WHERE pk_cluster=?", name, c.getClusterId());
+    }
+
+    private static final String UPDATE_TAGS =
+    	"UPDATE " +
+    		"plow.cluster "+
+    	"SET " +
+    		"str_tags=? " +
+    	"WHERE " +
+    		"pk_cluster=?";
+
+    @Override
+    public void setClusterTags(final Cluster c, final String[] tags) {
+    	jdbc.update(new PreparedStatementCreator() {
+    		@Override
+    		public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
+    			final PreparedStatement ret = conn.prepareStatement(UPDATE_TAGS);
+     			ret.setArray(1, conn.createArrayOf("text", tags));
+    			ret.setObject(2, c.getClusterId());
+    			return ret;
+    		}
+    	});
+    }
 }

@@ -52,7 +52,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
     @Before
     public void initTestProject() {
         TEST_PROJECT = projectService.createProject("unittest", "Unit Test Project");
-        TEST_CLUSTER = nodeService.createCluster("unittest", new String[] { "unassigned"});
+        TEST_CLUSTER = nodeService.createCluster("unittest", Sets.newHashSet("unassigned"));
         TEST_QUOTA = nodeService.createQuota(TEST_PROJECT, TEST_CLUSTER, 10, 15);
 
         nodeService.setDefaultCluster(TEST_CLUSTER);

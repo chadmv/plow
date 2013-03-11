@@ -336,8 +336,8 @@ service RpcService {
     list<ClusterT> getClusters() throws (1:PlowException e),
     ClusterT createCluster(1:string name, 2:set<string> tags) throws (1:PlowException e),
     bool deleteCluster(1:common.Guid id) throws (1:PlowException e),
-    bool lockCluster(1:common.Guid id, 2:bool locked),
+    bool lockCluster(1:common.Guid id, 2:bool locked) throws (1:PlowException e),
+    void setClusterTags(1:common.Guid id, 2:set<string> tags) throws (1:PlowException e),
+    void setClusterName(1:common.Guid id, 2: string name) throws (1:PlowException e),
+    void setDefaultCluster(1:common.Guid id) throws (1:PlowException e),
 }
-
-
-

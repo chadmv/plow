@@ -19,4 +19,8 @@ public interface ClusterDao {
 	boolean delete(Cluster c);
 
 	boolean setClusterLocked(Cluster c, boolean value);
+
+	void setClusterName(Cluster c, String name);
+
+	void setClusterTags(Cluster c, String[] tags);
 }
