@@ -62,7 +62,7 @@ def set_cluster_tags(cluster, tags):
     Conn.service.setClusterTags(cluster.id, tags)
 
 def set_default_cluster(cluster):
-    Conn.service.setDefaultCluster(cluster)
+    Conn.service.setDefaultCluster(cluster.id)
 
 # Jobs
 
