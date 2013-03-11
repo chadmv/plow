@@ -52,10 +52,6 @@ set password: abcdefg123
 Execute the sql file:
 
     $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-schema.sql
-    $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-triggers.sql
-    $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-functions.sql
-    $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-data.sql
-
 
 Generating the Thrift Bindings
 ------------------------------
@@ -78,6 +74,8 @@ mvn intall does this for you.
     > cd lib/java
     > mvn install
 
+If you make any changes to the thrift file, you should re-do this step.
+
 
 Install the Python Library and Tools
 ====================================
@@ -93,13 +91,7 @@ The latest Python client can be install from the source checkout using the follo
 
 You will still want to manually copy the `etc/*.cfg` files to either `/usr/local/etc/plow/` or `~/.plow/`
 
-
-Compiling the C++ Library
--------------------------
-
-    $ cd lib/cpp/build
-    $ cmake ../
-    $ make
+You can set the PYTHONPATH path environment variable for development.
 
 Starting the Server
 -------------------
