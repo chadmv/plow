@@ -10,6 +10,8 @@
     <file>config.png</file>
     <file>locked.png</file>
     <file>unlocked.png</file>
+    <file>minus.png</file>
+    <file>plus.png</file>
   </qresource>
 </RCC>
 
