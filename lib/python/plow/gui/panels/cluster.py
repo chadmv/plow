@@ -7,7 +7,7 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.util import formatPercentage
 from plow.gui.event import EventManager
-from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelegate
+from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelegate, ManagedListWidget, BooleanCheckBox
 
 IdRole = QtCore.Qt.UserRole
 ObjectRole = QtCore.Qt.UserRole + 1
@@ -31,7 +31,7 @@ class ClusterPanel(Panel):
         # comment button (multi-select)
         # 
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/settings.png"), "Edit Selected Cluster Configuration", self.openConfigDialog)
+            QtGui.QIcon(":/settings.png"), "Edit Selected Cluster Configuration", self.openSettingsDialog)
         self.titleBarWidget().addAction(
             QtGui.QIcon(":/locked.png"), "Lock Selected Clusters", self.__handleClusterLock)
         self.titleBarWidget().addAction(
@@ -40,8 +40,15 @@ class ClusterPanel(Panel):
     def openLoadDialog(self):
         print "Open search dialog"
 
-    def openConfigDialog(self):
-        pass
+    def openSettingsDialog(self):
+        try:
+            cluster = self.widget().getSelectedClusters()[0]
+            dialog = ClusterPropertiesDialog(cluster)
+            if dialog.exec_():
+                dialog.save()
+                self.refresh()
+        except IndexError:
+            pass
 
     def refresh(self):
         self.widget().refresh()
@@ -224,6 +231,41 @@ class ClusterWidgetConfigDialog(QtGui.QDialog):
     def __init__(self, attrs, parent=None):
         pass
 
+class ClusterPropertiesDialog(QtGui.QDialog):
+    """
+    Dialog box for editing the properties of a single cluster.
+    """
+    def __init__(self, cluster, parent=None):
+        QtGui.QDialog.__init__(self, parent)
+        QtGui.QFormLayout(self)
+        self.__cluster = cluster
 
+        self.txt_name = QtGui.QLineEdit(self.__cluster.name, self)
+        self.list_tags = ManagedListWidget(cluster.tags, self)
+        self.cb_locked = BooleanCheckBox(cluster.isLocked)
+        self.cb_default = BooleanCheckBox(cluster.isDefault)
 
+        buttons = QtGui.QDialogButtonBox(
+            QtGui.QDialogButtonBox.Ok | 
+            QtGui.QDialogButtonBox.Cancel);
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
 
+        self.layout().addRow("Name:", self.txt_name)
+        self.layout().addRow("Tags:", self.list_tags)
+        self.layout().addRow("Locked:", self.cb_locked)
+        self.layout().addRow("Default:", self.cb_default)
+        self.layout().addRow(buttons)
+
+    def save(self):
+        try:
+            c = self.__cluster
+            plow.client.set_cluster_name(c, str(self.txt_name.text()))
+            plow.client.set_cluster_tags(c, self.list_tags.getValues())
+            plow.client.lock_cluster(c, self.cb_locked.isChecked())
+            if self.cb_default.isChecked():
+                plow.client.set_default_cluster(c)
+        except Exception, e:
+            title = "Error Saving Cluster"
+            text = str(e)
+            QtGui.QMessageBox.critical(self, title, text)

@@ -155,6 +155,62 @@ class RadioBoxArray(QtGui.QWidget):
 
         layout.addWidget(group_box)
 
+class ManagedListWidget(QtGui.QWidget):
+    """
+    A list widget that lets you add/remove things.
+    """
+    def __init__(self, items, default=None, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        QtGui.QVBoxLayout(self)
+        self.setMaximumHeight(200)
+
+        self.list_widget = QtGui.QListWidget(self)
+        self.list_widget.itemDoubleClicked.connect(self.list_widget.editItem)
+        for item in items:
+            list_item = self.__newItem(item)
+            self.list_widget.addItem(list_item)
+        self.list_widget.sortItems()
+
+        self.btn_add = QtGui.QPushButton(QtGui.QIcon(":/plus.png"), "", self)
+        self.btn_add.setFlat(True)
+        self.btn_add.clicked.connect(self.addItem)
+        self.btn_sub = QtGui.QPushButton(QtGui.QIcon(":/minus.png"), "", self)
+        self.btn_sub.setFlat(True)
+        self.btn_sub.clicked.connect(self.removeItems)
+
+        layout_btn = QtGui.QHBoxLayout()
+        layout_btn.setContentsMargins(0, 0, 0, 0)
+        layout_btn.setSpacing(1)
+        layout_btn.addStretch()
+        layout_btn.addWidget(self.btn_add)
+        layout_btn.addWidget(self.btn_sub)
+
+        self.layout().addWidget(self.list_widget)
+        self.layout().addLayout(layout_btn)
+
+    def getValues(self):
+        result = []
+        for i in range(0, self.list_widget.count()):
+            result.append(str(self.list_widget.item(i).text()))
+        return result
+
+    def addItem(self):
+        item = self.__newItem("tag_name")
+        self.list_widget.addItem(item)
+        self.list_widget.editItem(item)
+
+    def removeItems(self):
+        for item in self.list_widget.selectedItems():
+            self.list_widget.takeItem(self.list_widget.row(item))
+
+    def __newItem(self, name):
+        list_item = QtGui.QListWidgetItem(name)
+        list_item.setFlags(
+                QtCore.Qt.ItemIsEditable | 
+                QtCore.Qt.ItemIsSelectable |
+                QtCore.Qt.ItemIsEnabled)
+        return list_item
+
 
 class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
     """
