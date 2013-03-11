@@ -245,6 +245,6 @@ class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
             painter.fillRect(rect, QtCore.Qt.darkRed)
         else:
             ratio = data[0] / float(data[1])
-            painter.fillRect(rect, QtCore.Qt.darkRed)
+            painter.fillRect(rect, QtGui.QColor(177, 24, 0))
             rect.setWidth(ratio * rect.width())
-            painter.fillRect(rect, QtCore.Qt.green)
+            painter.fillRect(rect, QtGui.QColor(76, 115, 0))

@@ -9,12 +9,12 @@ The job status is how the job is doin.
 
 """
 
-BLUE = QtGui.QColor(104, 161, 193)
+BLUE = QtGui.QColor(38, 98, 117)
 PURPLE = QtGui.QColor(175, 38, 193)
-RED = QtGui.QColor(193, 29, 4)
-ORANGE = QtGui.QColor(193, 91, 2)
-GREEN = QtGui.QColor(82, 193, 53)
-YELLOW = QtGui.QColor(193, 185, 38)
+RED = QtGui.QColor(177, 24, 0)
+ORANGE = QtGui.QColor(243, 115, 33)
+GREEN = QtGui.QColor(76, 115, 0)
+YELLOW = QtGui.QColor(202, 173, 0)
 GRAY = QtGui.QColor(66, 66, 66)
 
 COLOR_JOB_STATE = [
