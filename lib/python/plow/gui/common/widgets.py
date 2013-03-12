@@ -223,6 +223,7 @@ class FormWidgetLabel(QtGui.QWidget):
         self.__btn.setIcon(QtGui.QIcon(":/help.png"))
         self.__btn.setFocusPolicy(QtCore.Qt.NoFocus)
         self.__btn.clicked.connect(self.__show_popup)
+        self.__btn.setStyleSheet("QToolButton { border: 0px }")
  
         self.__label = QtGui.QLabel(text, self)
 
