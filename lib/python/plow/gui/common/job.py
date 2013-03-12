@@ -6,6 +6,8 @@ from plow.gui.constants import COLOR_TASK_STATE
 
 class JobProgressBar(QtGui.QWidget):
     # Left, top, right, bottom
+    __PEN = QtGui.QColor(33, 33, 33)
+
     Margins = [5, 2, 10, 4]
 
     def __init__(self, totals, parent=None):
@@ -35,15 +37,17 @@ class JobProgressBar(QtGui.QWidget):
 
         painter = QtGui.QPainter()
         painter.begin(self)
-        painter.setPen(QtCore.Qt.NoPen)
+        painter.setRenderHints(
+            painter.HighQualityAntialiasing |
+            painter.SmoothPixmapTransform |
+            painter.Antialiasing)
 
-        palette = QtGui.QPalette()
-        brush = QtGui.QBrush(QtCore.Qt.SolidPattern)
+        painter.setPen(self.__PEN)
 
         for i, rect in enumerate(rects):
             if i > 0:
                 rect.moveLeft(rects[i-1].right())
-            brush.setColor(COLOR_TASK_STATE[i + 1])
-            painter.fillRect(rect, brush)
+            painter.setBrush(COLOR_TASK_STATE[i + 1])
+            painter.drawRoundedRect(rect, 3, 3)
         
         painter.end();
