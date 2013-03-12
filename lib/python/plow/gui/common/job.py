@@ -1,7 +1,8 @@
 """Commonly used Job widgets."""
 
-from plow.gui.manifest import QtCore, QtGui
+import plow.client
 
+from plow.gui.manifest import QtCore, QtGui
 from plow.gui.constants import COLOR_TASK_STATE
 
 class JobProgressBar(QtGui.QWidget):
@@ -51,3 +52,37 @@ class JobProgressBar(QtGui.QWidget):
             painter.drawRoundedRect(rect, 3, 3)
         
         painter.end();
+
+
+class JobSelectionDialog(QtGui.QDialog):
+    def __init__(self, parent=None):
+        QtGui.QDialog.__init__(self, parent)
+        self.__jobs = plow.client.get_jobs()
+
+        self.__txt_filter = QtGui.QLineEdit(self)
+        self.__txt_filter.textChanged.connect(self.__filterChanged)
+        self.__list_jobs = QtGui.QListWidget(self)
+        self.__list_jobs.setSelectionMode(self.__list_jobs.ExtendedSelection)
+        self.__list_jobs.addItems([job.name for job in self.__jobs])
+        self.__list_jobs.sortItems()
+
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.__txt_filter)
+        layout.addWidget(self.__list_jobs)
+        self.setLayout(layout)
+
+    def __filterChanged(self, value):
+        if not value:
+            self.__list_jobs.clear()
+            self.__list_jobs.addItems([job.name for job in self.__jobs])
+        else:
+            new_items = [i.text() for i in self.__list_jobs.findItems(value, QtCore.Qt.MatchContains)]
+            self.__list_jobs.clear()
+            self.__list_jobs.addItems(new_items)
+        self.__list_jobs.sortItems()
+
+
+
+
+
+

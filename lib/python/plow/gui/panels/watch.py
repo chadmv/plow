@@ -9,7 +9,7 @@ import plow.client
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox, SpinSliderWidget
-from plow.gui.common.job import JobProgressBar
+from plow.gui.common.job import JobProgressBar, JobSelectionDialog
 from plow.gui.constants import COLOR_JOB_STATE
 from plow.gui.util import formatMaxValue, formatDateTime
 from plow.gui.event import EventManager
@@ -41,7 +41,10 @@ class RenderJobWatchPanel(Panel):
             QtGui.QIcon(":/load.png"), "Load", self.openLoadDialog)
 
     def openLoadDialog(self):
-        print "Open search dialog"
+        dialog = JobSelectionDialog()
+        if dialog.exec_():
+            print "foo"
+
 
     def openConfigDialog(self):
         d = RenderJobWatchConfigDialog(self.attrs)
