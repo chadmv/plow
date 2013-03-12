@@ -12,6 +12,7 @@
     <file>unlocked.png</file>
     <file>minus.png</file>
     <file>plus.png</file>
+    <file>help.png</file>
   </qresource>
 </RCC>
 

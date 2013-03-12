@@ -1,0 +1,15 @@
+---
+CLUSTER.NAME
+The custer name. All custers must have a unique name.
+---
+CLUSTER.TAGS
+All nodes in a cluster inherit the cluster tags.
+
+Cluster tags are used to match to particular layers to nodes during the dispatch process.  A layer must have the correct cluster tags to get procs.  
+---
+CLUSTER.LOCKED
+Nodes in locked clusters are not dispatched.
+---
+CLUSTER.DEFAULT
+The default cluster is where newly discovered nodes will congregate awaiting to be categorized into their permanent cluster.
+---
