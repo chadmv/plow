@@ -7,7 +7,7 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.util import formatPercentage
 from plow.gui.event import EventManager
-from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelegate, ManagedListWidget, BooleanCheckBox
+from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelegate, ManagedListWidget, BooleanCheckBox, FormWidgetLabel
 
 IdRole = QtCore.Qt.UserRole
 ObjectRole = QtCore.Qt.UserRole + 1
@@ -237,7 +237,6 @@ class ClusterPropertiesDialog(QtGui.QDialog):
     """
     def __init__(self, cluster, parent=None):
         QtGui.QDialog.__init__(self, parent)
-        QtGui.QFormLayout(self)
         self.__cluster = cluster
 
         self.txt_name = QtGui.QLineEdit(self.__cluster.name, self)
@@ -251,11 +250,14 @@ class ClusterPropertiesDialog(QtGui.QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
 
-        self.layout().addRow("Name:", self.txt_name)
-        self.layout().addRow("Tags:", self.list_tags)
-        self.layout().addRow("Locked:", self.cb_locked)
-        self.layout().addRow("Default:", self.cb_default)
-        self.layout().addRow(buttons)
+        layout = QtGui.QFormLayout()
+        layout.setLabelAlignment(QtCore.Qt.AlignLeft)
+        layout.addRow(FormWidgetLabel("Name", "cluster.name"), self.txt_name)
+        layout.addRow(FormWidgetLabel("Tags", "cluster.tags"), self.list_tags)
+        layout.addRow(FormWidgetLabel("Locked", "cluster.locked"), self.cb_locked)
+        layout.addRow(FormWidgetLabel("Default", "cluster.default"), self.cb_default)
+        layout.addRow(buttons)
+        self.setLayout(layout)
 
     def save(self):
         try:

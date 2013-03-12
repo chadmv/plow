@@ -1,5 +1,6 @@
 """Non-Plow specific widgets."""
 from plow.gui.manifest import QtGui, QtCore
+from plow.gui.common.help import getHelp, getHelpTextWidget
 
 class SpinSliderWidget(QtGui.QWidget):
     def __init__(self, minimum, maximum, value, parent=None):
@@ -211,6 +212,39 @@ class ManagedListWidget(QtGui.QWidget):
                 QtCore.Qt.ItemIsEnabled)
         return list_item
 
+
+class FormWidgetLabel(QtGui.QWidget):
+    def __init__(self, text, help, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        QtGui.QHBoxLayout(self)
+        self.__help = help
+
+        self.__btn = QtGui.QToolButton(self)
+        self.__btn.setIcon(QtGui.QIcon(":/help.png"))
+        self.__btn.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.__btn.clicked.connect(self.__show_popup)
+ 
+        self.__label = QtGui.QLabel(text, self)
+
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        self.layout().setSpacing(0)
+
+        self.layout().addWidget(self.__btn)
+        self.layout().addSpacing(5)
+        self.layout().addWidget(self.__label)
+        self.layout().addStretch()
+
+    def __show_popup(self):
+
+        frame = QtGui.QFrame(self, QtCore.Qt.Popup | QtCore.Qt.Window)
+        frame.resize(350, 200)
+        frame.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
+        frame.setLineWidth(2);
+        frame.move(QtGui.QCursor.pos())
+        
+        layout = QtGui.QVBoxLayout(frame)
+        layout.addWidget(getHelpTextWidget(self.__help))
+        frame.show()
 
 class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
     """
