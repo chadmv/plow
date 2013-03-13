@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Task;
@@ -15,16 +16,14 @@ import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dao.TaskDao;
+import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchStats;
-import com.breakersoft.plow.dispatcher.domain.DispatchableFolder;
-import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.EventManager;
-import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.event.ProcAllocatedEvent;
 import com.breakersoft.plow.event.ProcDeallocatedEvent;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
@@ -57,20 +56,19 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Override
     @Transactional(readOnly=true)
+
+    public List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node) {
+    	return dispatchDao.getDispatchJobs(project, node);
+    }
+
+    public DispatchJob getDispatchJob(UUID id) {
+    	return dispatchDao.getDispatchJob(id);
+    }
+
+    @Override
+    @Transactional(readOnly=true)
     public List<DispatchProject> getSortedProjectList(DispatchNode node) {
         return dispatchDao.getSortedProjectList(node);
-    }
-
-    @Override
-    @Transactional(readOnly=true)
-    public DispatchableJob getDispatchJob(JobLaunchEvent event) {
-        return dispatchDao.getDispatchableJob(event.getJob());
-    }
-
-    @Override
-    @Transactional(readOnly=true)
-    public List<DispatchableJob> getDispatchJobs() {
-        return dispatchDao.getDispatchableJobs();
     }
 
     @Override
@@ -78,19 +76,6 @@ public class DispatchServiceImpl implements DispatchService {
     public DispatchProc getDispatchProc(String id) {
         return dispatchDao.getDispatchProc(UUID.fromString(id));
     }
-
-    @Override
-    @Transactional(readOnly=true)
-    public DispatchableFolder getDispatchFolder(UUID folder) {
-        return dispatchDao.getDispatchableFolder(folder);
-    }
-
-    @Override
-    @Transactional(readOnly=true)
-    public List<DispatchableFolder> getDispatchFolders() {
-        return dispatchDao.getDispatchableFolders();
-    }
-
 
     @Override
     @Transactional(readOnly=true)
@@ -200,9 +185,9 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public List<DispatchableTask> getDispatchableTasks(UUID jobId,
+    public List<DispatchableTask> getDispatchableTasks(JobId job,
             DispatchResource resource) {
-        return dispatchDao.getDispatchableTasks(jobId, resource);
+        return dispatchDao.getDispatchableTasks(job, resource);
     }
 
     @Override

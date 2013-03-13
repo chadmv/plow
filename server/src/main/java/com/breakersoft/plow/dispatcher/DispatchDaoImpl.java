@@ -15,17 +15,16 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import com.breakersoft.plow.Job;
+import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
+import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
-import com.breakersoft.plow.dispatcher.domain.DispatchableFolder;
-import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.JobState;
@@ -37,56 +36,66 @@ import com.google.common.primitives.Floats;
 public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
 
 	private static final String BIG_DISPATCH_QUERY =
-		"SELECT " +
-			"job.pk_job " +
+		"SELECT DISTINCT " +
+			"job.pk_job, " +
+			"job_dsp.float_tier, "+
+			"folder_dsp.float_tier " +
 		"FROM " +
 			"plow.job," +
 			"plow.job_dsp, " +
-			"plow.folder_dsp " +
+			"plow.folder_dsp, " +
+			"plow.layer," +
+			"plow.layer_count " +
 		"WHERE " +
+			"job.pk_job = job_dsp.pk_job " +
+		"AND " +
 			"job.pk_folder = folder_dsp.pk_folder " +
 		"AND " +
-			"job.pk_job = job_dsp.pk_job " +
+			"job.pk_job = layer.pk_job " +
+		"AND " +
+			"layer.pk_layer = layer_count.pk_layer " +
+		"AND " +
+			"job.int_state  = ? " +
+		"AND " +
+			"bool_paused = 'f' " +
 		"AND " +
 			"job.pk_project = ? " +
 		"AND " +
-		"EXISTS (" +
-			"SELECT " +
-				"1 " +
-			"FROM " +
-				"plow.layer, " +
-				"plow.layer_count " +
-			"WHERE " +
-				"layer.pk_job = job.pk_job " +
-			"AND " +
-				"layer_count.int_waiting > 0 " +
-			"AND " +
-				"layer.str_tags && ? " +
-		") " +
+			"layer_count.int_waiting > 0 " +
+		"AND " +
+			"layer.str_tags && ? " +
 		"ORDER BY " +
 			"job_dsp.float_tier ASC, " +
 			"folder_dsp.float_tier ASC";
 
-    public static final RowMapper<UUID> UUID_MAPPER =
-            new RowMapper<UUID>() {
+    public static final RowMapper<DispatchJob> DISPATCH_JOB_MAPPER =
+            new RowMapper<DispatchJob>() {
         @Override
-        public UUID mapRow(ResultSet rs, int rowNum)
+        public DispatchJob mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
-        	return (UUID) rs.getObject(1);
+        	DispatchJob job = new DispatchJob();
+        	job.setJobId((UUID) rs.getObject(1));
+        	return job;
         }
     };
 
     @Override
-	public List<UUID> getDispatchableJobIds(final DispatchProject project, final DispatchNode node) {
+	public List<DispatchJob> getDispatchJobs(final DispatchProject project, final DispatchNode node) {
 		return jdbc.query(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                 final PreparedStatement ps = conn.prepareStatement(BIG_DISPATCH_QUERY);
-                ps.setObject(1, project.getProjectId());
-                ps.setArray(2, conn.createArrayOf("text", node.getTags().toArray()));
+                ps.setInt(1, JobState.RUNNING.ordinal());
+                ps.setObject(2, project.getProjectId());
+                ps.setArray(3, conn.createArrayOf("text", node.getTags().toArray()));
                 return ps;
             }
-        },UUID_MAPPER);
+        },DISPATCH_JOB_MAPPER);
+	}
+
+    @Override
+	public DispatchJob getDispatchJob(UUID id) {
+		return jdbc.queryForObject("SELECT pk_job FROM plow.job WHERE pk_job=?", DISPATCH_JOB_MAPPER, id);
 	}
 
     private static final String GET_DISPATCH_PROC =
@@ -216,88 +225,6 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         return result;
     }
 
-    public static final RowMapper<DispatchableFolder> DFOLDER_MAPPER = new RowMapper<DispatchableFolder>() {
-        @Override
-        public DispatchableFolder mapRow(ResultSet rs, int rowNum)
-                throws SQLException {
-            DispatchableFolder folder = new DispatchableFolder();
-            folder.folderId = ((UUID)rs.getObject("pk_folder"));
-            folder.isDispatchable = true;
-            folder.maxCores = rs.getInt("int_max_cores");
-            folder.minCores = rs.getInt("int_min_cores");
-            folder.incrementAndGetCores(rs.getInt("int_run_cores"));
-            return folder;
-        }
-    };
-
-    private static final String GET_DFOLDER =
-            "SELECT " +
-                "folder.pk_folder,"+
-                "folder.pk_project, " +
-                "folder_dsp.int_min_cores,"+
-                "folder_dsp.int_max_cores,"+
-                "folder_dsp.int_run_cores "+
-            "FROM " +
-                "plow.folder,"+
-                "plow.folder_dsp " +
-            "WHERE " +
-                "folder.pk_folder = folder_dsp.pk_folder ";
-
-    @Override
-    public DispatchableFolder getDispatchableFolder(UUID folder) {
-        return jdbc.queryForObject(GET_DFOLDER + " AND folder.pk_folder = ?",
-                DFOLDER_MAPPER, folder);
-    }
-
-    @Override
-    public List<DispatchableFolder> getDispatchableFolders() {
-        return jdbc.query(GET_DFOLDER, DFOLDER_MAPPER);
-    }
-
-    public static final RowMapper<DispatchableJob>DJOB_MAPPER =
-            new RowMapper<DispatchableJob>() {
-        @Override
-        public DispatchableJob mapRow(ResultSet rs, int rowNum)
-                throws SQLException {
-
-            DispatchableJob job = new DispatchableJob();
-            job.jobId = (UUID) rs.getObject("pk_job");
-            job.folderId = (UUID) rs.getObject("pk_folder");
-            job.projectId = (UUID) rs.getObject("pk_project");
-            job.minCores = rs.getInt("int_min_cores");
-            job.maxCores = rs.getInt("int_max_cores");
-            job.incrementAndGetCores(rs.getInt("int_run_cores"));
-            job.isDispatchable = true;
-            return job;
-        }
-    };
-
-    private static final String GET_DJOB =
-            "SELECT " +
-                "job.pk_job,"+
-                "job.pk_folder, " +
-                "job.pk_project, " +
-                "job_dsp.int_min_cores,"+
-                "job_dsp.int_max_cores,"+
-                "job_dsp.int_run_cores "+
-            "FROM " +
-                "plow.job,"+
-                "plow.job_dsp  " +
-            "WHERE " +
-                "job.pk_job = job_dsp.pk_job ";
-
-    @Override
-    public DispatchableJob getDispatchableJob(Job job) {
-        return jdbc.queryForObject(GET_DJOB + " AND job.pk_job = ?"
-                ,DJOB_MAPPER, job.getJobId());
-    }
-
-    @Override
-    public List<DispatchableJob> getDispatchableJobs() {
-        return jdbc.query(GET_DJOB + " AND job.int_state=?", DJOB_MAPPER,
-                JobState.RUNNING.ordinal());
-    }
-
     public static final RowMapper<DispatchTask>DTASK_MAPPER =
             new RowMapper<DispatchTask>() {
         @Override
@@ -362,12 +289,12 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     };
 
     @Override
-    public List<DispatchableTask> getDispatchableTasks(final UUID jobId, final DispatchResource resource) {
+    public List<DispatchableTask> getDispatchableTasks(final JobId job, final DispatchResource resource) {
         return jdbc.query(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                 final PreparedStatement ps = conn.prepareStatement(GET_DISPATCHABLE_TASKS);
-                ps.setObject(1, jobId);
+                ps.setObject(1, job.getJobId());
                 ps.setInt(2, resource.getIdleCores());
                 ps.setInt(3, resource.getIdleRam());
                 ps.setArray(4, conn.createArrayOf("text", resource.getTags().toArray()));

@@ -1,16 +1,14 @@
 package com.breakersoft.plow.dispatcher;
 
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.LayerE;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
-import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
 import com.breakersoft.plow.service.DependService;
 import com.breakersoft.plow.service.JobService;
@@ -33,9 +31,6 @@ public class TaskCompleteHandler {
     JobService jobService;
 
     @Autowired
-    JobBoard jobBoard;
-
-    @Autowired
     StateManager jobStateManager;
 
     @Autowired
@@ -44,9 +39,7 @@ public class TaskCompleteHandler {
     public void taskComplete(RunTaskResult result) {
 
         Task task = jobService.getTask(result.taskId);
-
-        DispatchableJob job = jobBoard.getDispatchableJob(
-                UUID.fromString(result.jobId));
+        Job job = jobService.getJob(result.jobId);
         DispatchProc proc = dispatchService.getDispatchProc(result.procId);
 
         TaskState newState;

@@ -1,17 +1,15 @@
 package com.breakersoft.plow.dispatcher;
 
 import java.util.List;
-import java.util.UUID;
 
+import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Task;
+import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
-import com.breakersoft.plow.dispatcher.domain.DispatchableFolder;
-import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
-import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.TaskState;
 
@@ -31,21 +29,15 @@ public interface DispatchService {
 
     boolean unreserveTask(Task task);
 
-    DispatchableJob getDispatchJob(JobLaunchEvent event);
-
-    List<DispatchableJob> getDispatchJobs();
-
     DispatchProc getDispatchProc(String id);
 
     void unassignProc(DispatchProc proc);
-
-    DispatchableFolder getDispatchFolder(UUID folder);
 
     boolean stopTask(Task task, TaskState state);
 
     // New stuff.
 
-    List<DispatchableTask> getDispatchableTasks(final UUID jobId, final DispatchResource resource);
+    List<DispatchableTask> getDispatchableTasks(JobId job, DispatchResource resource);
 
     void deallocateProc(DispatchProc proc, String why);
 
@@ -57,9 +49,5 @@ public interface DispatchService {
 
     void assignProc(DispatchProc proc, DispatchableTask task);
 
-    List<DispatchableFolder> getDispatchFolders();
-
-
-
-
+    List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node);
 }

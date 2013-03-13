@@ -2,9 +2,10 @@ package com.breakersoft.plow.dispatcher.domain;
 
 import java.util.Set;
 
+import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.ProcE;
 
-public class DispatchProc extends ProcE implements DispatchResource {
+public class DispatchProc extends ProcE implements DispatchResource, JobId {
 
     private int cores;
     private int memory;

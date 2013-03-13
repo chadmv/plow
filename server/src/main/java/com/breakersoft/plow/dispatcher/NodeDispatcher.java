@@ -9,13 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.breakersoft.plow.dispatcher.command.BookNodeCommand;
+import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
-import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
-import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.dispatcher.domain.DispatchStats;
+import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.rndaemon.RndClient;
@@ -29,9 +29,6 @@ public class NodeDispatcher {
 
     @Autowired
     EventManager eventManager;
-
-    @Autowired
-    private JobBoard jobBoard;
 
     @Autowired
     private DispatchService dispatchService;
@@ -88,17 +85,15 @@ public class NodeDispatcher {
 
     public void dispatch(DispatchResult result, DispatchNode node, DispatchProject project) {
 
-        // Return a list of jobs that can potentially take the node.
-        // Sorted in tier order.
-        final List<DispatchableJob> jobs =
-                jobBoard.getDispatchableJobs(node, project);
+        // Return a list of jobs IDs that have pending frames for the job/node.
+        final List<DispatchJob> jobs = dispatchService.getDispatchJobs(project, node);
 
         if (jobs.isEmpty()) {
             logger.info("No dispatchable jobs for project: {}", project.getProjectId());
             return;
         }
 
-        for (DispatchableJob job: jobs) {
+        for (DispatchJob job: jobs) {
             dispatch(result, node, job);
             if (!result.continueDispatching()) {
                 return;
@@ -106,10 +101,10 @@ public class NodeDispatcher {
         }
     }
 
-    public void dispatch(DispatchResult result, DispatchNode node, DispatchableJob job) {
+    public void dispatch(DispatchResult result, DispatchNode node, DispatchJob job) {
 
         final List<DispatchableTask> tasks =
-                dispatchService.getDispatchableTasks(job.jobId, node);
+                dispatchService.getDispatchableTasks(job, node);
 
         if (tasks.isEmpty()) {
             logger.info("No dispatchable tasks for job: {}", job.getJobId());

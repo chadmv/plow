@@ -1,6 +1,7 @@
 package com.breakersoft.plow.test.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.util.List;
 
@@ -9,7 +10,6 @@ import javax.annotation.Resource;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.FolderDao;
@@ -17,12 +17,11 @@ import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dispatcher.DispatchDao;
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.NodeDispatcher;
+import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
-import com.breakersoft.plow.dispatcher.domain.DispatchableFolder;
-import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
@@ -58,7 +57,7 @@ public class DispatcherDaoTests extends AbstractTest {
 
     DispatchNode node;
 
-    DispatchableJob job;
+    DispatchJob job;
 
     @Before
     public void before() {
@@ -66,29 +65,18 @@ public class DispatcherDaoTests extends AbstractTest {
                 nodeService.createNode(getTestNodePing()).getName());
 
         JobLaunchEvent event = jobService.launch(getTestJobSpec());
-        job = dispatchDao.getDispatchableJob(event.getJob());
+        job = new DispatchJob(event.getJob());
     }
 
     @Test
-    public void testGetDispatchFolder() {
-        Folder folder = folderDao.getDefaultFolder(TEST_PROJECT);
-        DispatchableFolder dfolder = dispatchDao.getDispatchableFolder(folder.getFolderId());
-    }
-
-
-    @Test
-    public void getDispatchableJobIds() {
+    public void getDispatchableJobs() {
     	List<DispatchProject> projects = dispatchDao.getSortedProjectList(node);
-    	dispatchDao.getDispatchableJobIds(projects.get(0), node);
+    	dispatchDao.getDispatchJobs(projects.get(0), node);
     }
 
     @Test
     public void testGetDispatchableJob() {
-        DispatchableJob djob = dispatchDao.getDispatchableJob(job);
-        assertTrue(djob.tier == 0);
-        djob.minCores = 100;
-        assertEquals(200, djob.incrementAndGetCores(200));
-        assertEquals(2, (int)djob.tier);
+        DispatchJob djob = dispatchDao.getDispatchJob(job.getJobId());
     }
 
     @Test
@@ -151,7 +139,7 @@ public class DispatcherDaoTests extends AbstractTest {
     public void testGetDispatchableTasks() {
 
         List<DispatchableTask> tasks =
-                dispatchService.getDispatchableTasks(job.getJobId(), node);
+                dispatchService.getDispatchableTasks(job, node);
 
         for (DispatchableTask task: tasks) {
             assertEquals(job.getJobId(), task.getJobId());

@@ -20,8 +20,8 @@ import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.DispatchDao;
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.NodeDispatcher;
+import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
-import com.breakersoft.plow.dispatcher.domain.DispatchableJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.test.AbstractTest;
@@ -55,9 +55,9 @@ public class ProcDaoTests extends AbstractTest {
         dnode = dispatchDao.getDispatchNode(node.getName());
 
         JobLaunchEvent event = jobService.launch(getTestJobSpec());
-        DispatchableJob  djob = dispatchDao.getDispatchableJob(event.getJob());
+        DispatchJob  djob = new DispatchJob(event.getJob());
 
-        task = dispatchService.getDispatchableTasks(djob.getJobId(),dnode).get(0);
+        task = dispatchService.getDispatchableTasks(djob,dnode).get(0);
         proc = dispatchService.allocateProc(dnode, task);
     }
 
