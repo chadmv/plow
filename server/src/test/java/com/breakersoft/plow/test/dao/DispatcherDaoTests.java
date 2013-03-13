@@ -12,9 +12,9 @@ import org.junit.Test;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.ClusterDao;
-import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dao.FolderDao;
 import com.breakersoft.plow.dao.QuotaDao;
+import com.breakersoft.plow.dispatcher.DispatchDao;
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.NodeDispatcher;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
@@ -73,6 +73,13 @@ public class DispatcherDaoTests extends AbstractTest {
     public void testGetDispatchFolder() {
         Folder folder = folderDao.getDefaultFolder(TEST_PROJECT);
         DispatchableFolder dfolder = dispatchDao.getDispatchableFolder(folder.getFolderId());
+    }
+
+
+    @Test
+    public void getDispatchableJobIds() {
+    	List<DispatchProject> projects = dispatchDao.getSortedProjectList(node);
+    	dispatchDao.getDispatchableJobIds(projects.get(0), node);
     }
 
     @Test

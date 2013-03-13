@@ -60,7 +60,7 @@ public class NodeDispatcher {
     public void dispatch(DispatchResult result, DispatchNode node) {
 
         //TODO: check to see if node is scheduled.
-        // This will modify the avg runtime of frames
+        // This will modify the javg runtime of frames
         // the node can target, and sets the backfill boolean
         // Or it may dispatch the node to a set location.
 

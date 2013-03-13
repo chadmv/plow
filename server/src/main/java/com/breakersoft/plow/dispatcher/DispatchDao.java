@@ -1,4 +1,4 @@
-package com.breakersoft.plow.dao;
+package com.breakersoft.plow.dispatcher;
 
 import java.util.List;
 import java.util.UUID;
@@ -6,7 +6,6 @@ import java.util.UUID;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Task;
-import com.breakersoft.plow.dispatcher.domain.DispatchFolder;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
@@ -46,4 +45,6 @@ public interface DispatchDao {
     DispatchableJob getDispatchableJob(Job job);
 
     List<DispatchableFolder> getDispatchableFolders();
+
+	List<UUID> getDispatchableJobIds(DispatchProject project, DispatchNode node);
 }

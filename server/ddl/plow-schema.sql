@@ -9,6 +9,7 @@
  */
 CREATE SCHEMA plow;
 CREATE LANGUAGE plpgsql;
+CREATE EXTENSION hstore;
 
 ---
 --- Return the current clock time in millis.
@@ -68,8 +69,11 @@ CREATE TABLE plow.folder_dsp (
   pk_folder UUID NOT NULL PRIMARY KEY,
   int_max_cores INTEGER NOT NULL DEFAULT -1,
   int_min_cores INTEGER NOT NULL DEFAULT 0,
-  int_run_cores INTEGER NOT NULL DEFAULT 0
+  int_run_cores INTEGER NOT NULL DEFAULT 0,
+  float_tier REAL NOT NULL DEFAULT 0.0
 ) WITHOUT OIDS;
+
+CREATE INDEX folder_dsp_float_tier_idx ON plow.folder_dsp (float_tier);
 
 ----------------------------------------------------------
 
@@ -102,8 +106,11 @@ CREATE TABLE plow.job_dsp (
   pk_job UUID NOT NULL PRIMARY KEY,
   int_max_cores INTEGER NOT NULL DEFAULT -1,
   int_min_cores INTEGER NOT NULL DEFAULT 0,
-  int_run_cores INTEGER NOT NULL DEFAULT 0
+  int_run_cores INTEGER NOT NULL DEFAULT 0,
+  float_tier REAL NOT NULL DEFAULT 0.0
 );
+
+CREATE INDEX job_dsp_float_tier_idx ON plow.job_dsp (float_tier);
 
 ---
 
@@ -117,6 +124,8 @@ CREATE TABLE plow.job_count (
   int_waiting INTEGER NOT NULL DEFAULT 0,
   int_depend INTEGER NOT NULL DEFAULT 0
 ) WITHOUT OIDS;
+
+CREATE INDEX job_count_int_waiting_idx ON plow.job_count (int_waiting);
 
 ---
 

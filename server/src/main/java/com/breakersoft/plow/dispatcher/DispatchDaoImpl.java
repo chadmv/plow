@@ -1,4 +1,4 @@
-package com.breakersoft.plow.dao.pgsql;
+package com.breakersoft.plow.dispatcher;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,7 +19,6 @@ import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
-import com.breakersoft.plow.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
@@ -36,6 +35,63 @@ import com.google.common.primitives.Floats;
 
 @Repository
 public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
+
+	private static final String BIG_DISPATCH_QUERY =
+		"SELECT " +
+			"job.pk_job " +
+		"FROM " +
+			"plow.job," +
+			"plow.job_dsp, " +
+			"plow.folder_dsp " +
+		"WHERE " +
+			"job.pk_folder = folder_dsp.pk_folder " +
+		"AND " +
+			"job.pk_job = job_dsp.pk_job " +
+		"AND " +
+			"job.pk_project = ? " +
+		"AND " +
+		"EXISTS (" +
+			"SELECT " +
+				"1 " +
+			"FROM " +
+				"plow.layer, " +
+				"plow.layer_count " +
+			"WHERE " +
+				"layer.pk_job = job.pk_job " +
+			"AND " +
+				"layer_count.int_waiting > 0 " +
+			"AND " +
+				"layer.str_tags && ? " +
+		") " +
+		"ORDER BY " +
+			"job_dsp.float_tier ASC, " +
+			"folder_dsp.float_tier ASC";
+
+    public static final RowMapper<UUID> UUID_MAPPER =
+            new RowMapper<UUID>() {
+        @Override
+        public UUID mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+        	return (UUID) rs.getObject(1);
+        }
+    };
+
+    @Override
+	public List<UUID> getDispatchableJobIds(final DispatchProject project, final DispatchNode node) {
+		return jdbc.query(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
+                final PreparedStatement ps = conn.prepareStatement(BIG_DISPATCH_QUERY);
+                ps.setObject(1, project.getProjectId());
+                ps.setArray(2, conn.createArrayOf("text", node.getTags().toArray()));
+                return ps;
+            }
+        },UUID_MAPPER);
+	}
+
+
+
+
 
     private static final String GET_DISPATCH_PROC =
             "SELECT " +
