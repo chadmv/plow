@@ -89,10 +89,6 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         },UUID_MAPPER);
 	}
 
-
-
-
-
     private static final String GET_DISPATCH_PROC =
             "SELECT " +
                 "proc.pk_proc,"+
