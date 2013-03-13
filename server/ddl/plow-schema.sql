@@ -379,6 +379,29 @@ CREATE INDEX proc_pk_job_idx ON plow.proc (pk_job);
 ----------------------------------------------------------
 
 ---
+--- plow.before_disp_update()
+---
+--- Handle setting the tier value on job_dsp and folder_dsp;
+---
+CREATE OR REPLACE FUNCTION plow.before_disp_update() RETURNS TRIGGER AS $$
+BEGIN
+	IF NEW.int_min_cores = 0 THEN
+		NEW.float_tier := 0;
+	ELSE
+		NEW.float_tier := NEW.int_run_cores / NEW.int_min_cores::real;
+	END IF;
+	RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_before_job_disp_update BEFORE UPDATE ON plow.job_dsp
+    FOR EACH ROW EXECUTE PROCEDURE plow.before_disp_update();
+
+CREATE TRIGGER trig_before_folder_disp_update BEFORE UPDATE ON plow.folder_dsp
+    FOR EACH ROW EXECUTE PROCEDURE plow.before_disp_update();
+
+---
 --- plow.after_task_state_change()
 ---
 --- Handle incrementing/decrementating the frame state counters.
@@ -471,7 +494,7 @@ AS
     SUM(int_lock_state * node_dsp.int_cores) AS core_locked_total
   FROM
     plow.node
-  INNER JOIN 
+  INNER JOIN
     plow.node_dsp ON node.pk_node = node_dsp.pk_node
   GROUP BY
     node.pk_cluster;
