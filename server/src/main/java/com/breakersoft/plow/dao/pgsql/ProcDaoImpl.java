@@ -57,8 +57,8 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
 
     private static final String GET_BY_FR = GET +"WHERE pk_task = ?";
     @Override
-    public Proc getProc(Task frame) {
-        return jdbc.queryForObject(GET_BY_FR, MAPPER, frame.getTaskId());
+    public Proc getProc(Task task) {
+        return jdbc.queryForObject(GET_BY_FR, MAPPER, task.getTaskId());
     }
 
     private static final String INSERT =
