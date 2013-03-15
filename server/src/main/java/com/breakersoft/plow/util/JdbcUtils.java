@@ -42,6 +42,16 @@ public final class JdbcUtils {
                 StringUtils.repeat("?",",", size));
     }
 
+    public static String In(String col, int size, String cast) {
+    	final String repeat = "?::" + cast;
+        return String.format("%s IN (%s)", col,
+                StringUtils.repeat(repeat,",", size));
+    }
+
+    public static final String limitOffset(int limit, int offset) {
+    	return String.format("LIMIT %d OFFSET %d", limit, offset);
+    }
+
     public static TaskTotalsT getTaskTotals(ResultSet rs) throws SQLException {
         TaskTotalsT t = new TaskTotalsT();
         t.setTotalTaskCount(rs.getInt("int_total"));
