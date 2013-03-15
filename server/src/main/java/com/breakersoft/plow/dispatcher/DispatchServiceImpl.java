@@ -177,7 +177,7 @@ public class DispatchServiceImpl implements DispatchService {
             dispatchDao.decrementDispatchTotals(proc);
         }
         else {
-            logger.warn("{} was alredy unbooked.", proc.getProcId());
+            logger.warn("{} was alredy deallocated.", proc.getProcId());
         }
 
         // TODO: most to post transaction event.

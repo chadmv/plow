@@ -10,6 +10,7 @@ public class DispatchProc extends ProcE implements DispatchResource, JobId {
     private int cores;
     private int memory;
     private boolean allocated;
+    private boolean unbooked;
     private Set<String> tags;
 
     public int getIdleCores() {
@@ -49,4 +50,12 @@ public class DispatchProc extends ProcE implements DispatchResource, JobId {
         this.cores = this.cores - cores;
         this.memory = this.memory - ram;
     }
+
+	public boolean isUnbooked() {
+		return unbooked;
+	}
+
+	public void setUnbooked(boolean unbooked) {
+		this.unbooked = unbooked;
+	}
 }
