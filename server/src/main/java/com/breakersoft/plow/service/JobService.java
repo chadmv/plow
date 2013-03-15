@@ -11,13 +11,13 @@ import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.rnd.thrift.RunningTask;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
+import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
 
 public interface JobService {
 
     Task getTask(String id);
 
-    boolean setTaskState(Task task, TaskState currentState, TaskState newState);
 
     boolean hasWaitingFrames(Job job);
 
@@ -50,4 +50,10 @@ public interface JobService {
     void updateRunningTasks(List<RunningTask> runningTasks);
 
     void updateMaxRssValues(List<RunningTask> runningTasks);
+
+	List<Task> getTasks(TaskFilterT filter);
+
+    boolean setTaskState(Task task, TaskState currentState, TaskState newState);
+
+	boolean setTaskState(Task task, TaskState state);
 }

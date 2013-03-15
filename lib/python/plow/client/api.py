@@ -29,7 +29,10 @@ __all__ = [
     "lock_cluster",
     "set_cluster_name",
     "set_cluster_tags",
-    "set_default_cluster"
+    "set_default_cluster",
+    "retry_tasks",
+    "kill_tasks",
+    "eat_tasks"
 ]
 
 def get_plow_time():
@@ -110,6 +113,24 @@ def add_layer_output(layer, path, attrs=None):
 
 def get_task(guid):
     return Conn.service.getTask(guid)
+
+def retry_tasks(**kwargs):
+    filt = ttypes.TaskFilterT()
+    for k, v in kwargs.items():
+        setattr(filt, k, v)
+    return Conn.service.retryTasks(filt)
+
+def kill_tasks(**kwargs):
+    filt = ttypes.TaskFilterT()
+    for k, v in kwargs.items():
+        setattr(filt, k, v)
+    return Conn.service.killTasks(filt)
+
+def eat_tasks(**kwargs):
+    filt = ttypes.TaskFilterT()
+    for k, v in kwargs.items():
+        setattr(filt, k, v)
+    return Conn.service.eatTasks(filt)
 
 def get_tasks(**kwargs):
     filt = ttypes.TaskFilterT()

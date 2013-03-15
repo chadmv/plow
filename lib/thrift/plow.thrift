@@ -274,12 +274,13 @@ struct JobFilterT {
 }
 
 struct TaskFilterT {
-    1:required common.Guid jobId,
+    1:common.Guid jobId,
     2:list<common.Guid> layerIds,
     3:list<TaskState> states,
     4:i32 limit = 0,
     5:i32 offset = 0,
-    6:i64 lastUpdateTime = 0
+    6:i64 lastUpdateTime = 0,
+    7:list<common.Guid> taskIds
 }
 
 struct NodeFilterT {
@@ -327,6 +328,9 @@ service RpcService {
     TaskT getTask(1:common.Guid taskId) throws (1:PlowException e),
     list<TaskT> getTasks(1:TaskFilterT filter) throws (1:PlowException e),
     string getTaskLogPath(1:common.Guid taskId) throws (1:PlowException e),
+    void retryTasks(1:TaskFilterT filter) throws (1:PlowException e),
+    void eatTasks(1:TaskFilterT filter) throws (1:PlowException e),
+    void killTasks(1:TaskFilterT filter) throws (1:PlowException e),
 
     NodeT getNode(1:string name) throws (1:PlowException e),
     list<NodeT> getNodes(1:NodeFilterT filter) throws (1:PlowException e),

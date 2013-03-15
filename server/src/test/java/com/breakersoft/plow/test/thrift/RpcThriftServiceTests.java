@@ -8,8 +8,10 @@ import org.junit.Test;
 
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.ClusterT;
+import com.breakersoft.plow.thrift.JobT;
 import com.breakersoft.plow.thrift.PlowException;
 import com.breakersoft.plow.thrift.RpcService;
+import com.breakersoft.plow.thrift.TaskFilterT;
 import com.google.common.collect.Sets;
 
 public class RpcThriftServiceTests extends AbstractTest {
@@ -19,7 +21,7 @@ public class RpcThriftServiceTests extends AbstractTest {
 
     @Test
     public void testLaunch() throws PlowException, TException {
-        rpcService.launch(getTestJobSpec());
+    	rpcService.launch(getTestJobSpec());
     }
 
     @Test
@@ -36,4 +38,17 @@ public class RpcThriftServiceTests extends AbstractTest {
     	ClusterT cluster = rpcService.createCluster("bing", Sets.newHashSet("bang", "bong"));
     	rpcService.deleteCluster(cluster.id);
     }
+
+    @Test
+    public void testRetryTasks() throws PlowException, TException, InterruptedException {
+
+    	JobT job = rpcService.launch(getTestJobSpec());
+    	TaskFilterT filter = new TaskFilterT();
+    	//filter.setJobId(job.id);
+
+    	rpcService.retryTasks(filter);
+    	Thread.sleep(2000);
+    }
+
+
 }

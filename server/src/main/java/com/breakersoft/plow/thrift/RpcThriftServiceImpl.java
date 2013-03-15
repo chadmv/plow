@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Project;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
@@ -269,5 +270,20 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 	public void setDefaultCluster(String id) throws PlowException, TException {
 		final Cluster c = nodeService.getCluster(UUID.fromString(id));
 		nodeService.setDefaultCluster(c);
+	}
+
+	@Override
+	public void retryTasks(TaskFilterT filter) throws PlowException, TException {
+		stateManager.retryTasks(filter);
+	}
+
+	@Override
+	public void eatTasks(TaskFilterT filter) throws PlowException, TException {
+		stateManager.eatTasks(filter);
+	}
+
+	@Override
+	public void killTasks(TaskFilterT filter) throws PlowException, TException {
+		stateManager.killTasks(filter);
 	}
 }
