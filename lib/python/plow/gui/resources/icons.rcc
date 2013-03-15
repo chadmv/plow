@@ -15,6 +15,7 @@
     <file>help.png</file>
     <file>retry.png</file>
     <file>kill.png</file>
+    <file>eat.png</file>
   </qresource>
 </RCC>
 
