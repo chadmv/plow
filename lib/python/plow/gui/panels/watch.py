@@ -11,7 +11,7 @@ from plow.gui.panels import Panel
 from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox, SpinSliderWidget
 from plow.gui.common.job import JobProgressBar, JobSelectionDialog, JobStateWidget
 from plow.gui.constants import COLOR_JOB_STATE
-from plow.gui.util import formatMaxValue, formatDateTime
+from plow.gui.util import formatMaxValue, formatDateTime, formatDuration
 from plow.gui.event import EventManager
 
 class RenderJobWatchPanel(Panel):
@@ -57,8 +57,8 @@ class RenderJobWatchPanel(Panel):
 
 class RenderJobWatchWidget(QtGui.QWidget):
 
-    Header = ["Job", "State", "Run", "Wait", "Min", "Max", "Started", "Stopped", "Progress"]
-    Width = [400, 75, 60, 60, 60, 60, 100, 100, 250]
+    Header = ["Job", "State", "Run", "Wait", "Min", "Max", "Duration", "Progress"]
+    Width = [400, 75, 60, 60, 60, 60, 100, 250]
 
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -92,8 +92,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
             "%02d" % job.totals.waitingTaskCount,
             "%02d" % job.minCores,
             formatMaxValue(job.maxCores),
-            formatDateTime(job.startTime),
-            formatDateTime(job.stopTime)])
+            formatDuration(job.startTime, job.stopTime)])
 
         item.setData(0, QtCore.Qt.UserRole, job.id)
         self.__tree.addTopLevelItem(item)
@@ -110,7 +109,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         item.setText(3, "%02d" % job.totals.waitingTaskCount)
         item.setText(4, "%02d" % job.minCores)
         item.setText(5, formatMaxValue(job.maxCores))
-        item.setText(7, formatDateTime(job.stopTime))
+        item.setText(6, formatDuration(job.startTime, job.stopTime))
         self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
         self.__tree.itemWidget(item, 1).setState(job.state, job.totals.deadTaskCount)
 
