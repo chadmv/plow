@@ -162,7 +162,6 @@ class TaskModel(QtCore.QAbstractTableModel):
         self.__lastUpdateTime = t
 
         for task in tasks:
-            print "updating"
             idx = self.__index[task.id]
             self.__tasks[idx] = task
             self.dataChanged.emit(self.index(idx,0), self.index(idx, len(TaskWidget.Header)-1))
