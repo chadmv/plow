@@ -9,7 +9,7 @@ import plow.client
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox, SpinSliderWidget
-from plow.gui.common.job import JobProgressBar, JobSelectionDialog
+from plow.gui.common.job import JobProgressBar, JobSelectionDialog, JobStateWidget
 from plow.gui.constants import COLOR_JOB_STATE
 from plow.gui.util import formatMaxValue, formatDateTime
 from plow.gui.event import EventManager
@@ -95,23 +95,24 @@ class RenderJobWatchWidget(QtGui.QWidget):
             formatDateTime(job.startTime),
             formatDateTime(job.stopTime)])
 
-        item.setBackground(1, COLOR_JOB_STATE[job.state])
         item.setData(0, QtCore.Qt.UserRole, job.id)
         self.__tree.addTopLevelItem(item)
 
         progress = JobProgressBar(job.totals, self.__tree)
         self.__tree.setItemWidget(item, len(self.Header)-1, progress);
+        self.__tree.setItemWidget(item, 1, JobStateWidget(job.state, self))
+
         self.__jobs[job.id] = item
 
     def updateJob(self, job):
         item = self.__jobs[job.id]
-        item.setText(1, plow.client.JobState._VALUES_TO_NAMES[job.state].lower())
         item.setText(2, "%02d" % job.totals.runningTaskCount)
         item.setText(3, "%02d" % job.totals.waitingTaskCount)
         item.setText(4, "%02d" % job.minCores)
         item.setText(5, formatMaxValue(job.maxCores))
         item.setText(7, formatDateTime(job.stopTime))
         self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
+        self.__tree.itemWidget(item, 1).setState(job.state)
 
     def __itemDoubleClicked(self, item, col):
         uid = item.data(0, QtCore.Qt.UserRole)

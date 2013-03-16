@@ -19,8 +19,8 @@ GRAY = QtGui.QColor(66, 66, 66)
 
 COLOR_JOB_STATE = [
     GRAY,
-    YELLOW.darker(),
-    GREEN.darker()
+    YELLOW,
+    GREEN,
 ]
 
 COLOR_TASK_STATE = [

@@ -3,7 +3,7 @@
 import plow.client
 
 from plow.gui.manifest import QtCore, QtGui
-from plow.gui.constants import COLOR_TASK_STATE
+from plow.gui.constants import COLOR_TASK_STATE, COLOR_JOB_STATE
 
 class JobProgressBar(QtGui.QWidget):
     # Left, top, right, bottom
@@ -58,7 +58,7 @@ class JobProgressBar(QtGui.QWidget):
                 rect.setLeft(move)
             move+=width
             painter.drawRoundedRect(rect, 3, 3)
-        painter.end();
+        painter.end()
 
 
 class JobSelectionDialog(QtGui.QDialog):
@@ -89,7 +89,35 @@ class JobSelectionDialog(QtGui.QDialog):
         self.__list_jobs.sortItems()
 
 
+class JobStateWidget(QtGui.QWidget):
+    """
+    A widget for displaying the job state.
+    """
+    def __init__(self, state, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        self.__state = state
 
+    def setState(self, state):
+        self.__state = state
 
+    def paintEvent(self, event):
 
+        total_width = self.width()
+        total_height = self.height()
 
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        painter.setRenderHints(
+            painter.HighQualityAntialiasing |
+            painter.SmoothPixmapTransform |
+            painter.Antialiasing)
+        
+        painter.setPen(COLOR_JOB_STATE[self.__state].darker())
+        painter.setBrush(COLOR_JOB_STATE[self.__state])
+
+        rect = QtCore.QRect(0, 0, total_width, total_height)
+        painter.drawRoundedRect(rect, 5, 5)
+        painter.setPen(QtCore.Qt.black)
+        painter.drawText(rect, QtCore.Qt.AlignCenter,
+            plow.client.JobState._VALUES_TO_NAMES[self.__state])
+        painter.end()
