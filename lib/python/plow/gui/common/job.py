@@ -3,7 +3,7 @@
 import plow.client
 
 from plow.gui.manifest import QtCore, QtGui
-from plow.gui.constants import COLOR_TASK_STATE, COLOR_JOB_STATE
+import plow.gui.constants as constants
 
 class JobProgressBar(QtGui.QWidget):
     # Left, top, right, bottom
@@ -36,7 +36,7 @@ class JobProgressBar(QtGui.QWidget):
         for i, v in enumerate(self.__values):
             if v == 0:
                 continue
-            bar.append((total_width * (v / total_tasks), COLOR_TASK_STATE[i + 1]))
+            bar.append((total_width * (v / total_tasks), constants.COLOR_TASK_STATE[i + 1]))
 
         painter = QtGui.QPainter()
         painter.begin(self)
@@ -93,12 +93,14 @@ class JobStateWidget(QtGui.QWidget):
     """
     A widget for displaying the job state.
     """
-    def __init__(self, state, parent=None):
+    def __init__(self, state, hasErrors, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.__state = state
+        self.__hasErrors = hasErrors
 
-    def setState(self, state):
+    def setState(self, state, hasErrors):
         self.__state = state
+        self.__hasErrors = hasErrors
 
     def paintEvent(self, event):
 
@@ -112,8 +114,12 @@ class JobStateWidget(QtGui.QWidget):
             painter.SmoothPixmapTransform |
             painter.Antialiasing)
         
-        painter.setPen(COLOR_JOB_STATE[self.__state].darker())
-        painter.setBrush(COLOR_JOB_STATE[self.__state])
+        if self.__hasErrors:
+            painter.setBrush(constants.RED)
+        else:
+            painter.setBrush(constants.COLOR_JOB_STATE[self.__state])
+        
+        painter.setPen(painter.brush().color().darker())
 
         rect = QtCore.QRect(0, 0, total_width, total_height)
         painter.drawRoundedRect(rect, 5, 5)

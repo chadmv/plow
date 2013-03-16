@@ -87,7 +87,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
     def addJob(self, job):
         item = QtGui.QTreeWidgetItem([
             job.name,
-            plow.client.JobState._VALUES_TO_NAMES[job.state].lower(),
+            "",
             "%02d" % job.totals.runningTaskCount,
             "%02d" % job.totals.waitingTaskCount,
             "%02d" % job.minCores,
@@ -100,7 +100,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
 
         progress = JobProgressBar(job.totals, self.__tree)
         self.__tree.setItemWidget(item, len(self.Header)-1, progress);
-        self.__tree.setItemWidget(item, 1, JobStateWidget(job.state, self))
+        self.__tree.setItemWidget(item, 1, JobStateWidget(job.state, job.totals.deadTaskCount, self))
 
         self.__jobs[job.id] = item
 
@@ -112,7 +112,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         item.setText(5, formatMaxValue(job.maxCores))
         item.setText(7, formatDateTime(job.stopTime))
         self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
-        self.__tree.itemWidget(item, 1).setState(job.state)
+        self.__tree.itemWidget(item, 1).setState(job.state, job.totals.deadTaskCount)
 
     def __itemDoubleClicked(self, item, col):
         uid = item.data(0, QtCore.Qt.UserRole)
