@@ -149,8 +149,9 @@ class RenderJobWatchSettingsDialog(QtGui.QDialog):
         self.listUsers = ManagedListWidget(attrs["users"], "name", self)
         self.checkboxLoadErrors = QtGui.QCheckBox(self)
 
-        self.listProjects = CheckableListBox("Projects", 
-            ["test1", "test2"], attrs["projects"], bool(attrs["allProjects"]), self)
+        projects = [project.name for project in plow.client.get_projects()]
+        self.listProjects = CheckableListBox("Projects", projects,
+            attrs["projects"], bool(attrs["allProjects"]), self)
 
         group_box1 = QtGui.QGroupBox("Auto Load Jobs", self)
 
