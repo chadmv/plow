@@ -38,20 +38,16 @@ mv $OUT/plow_*.h $EXP
 
 rm $OUT/RpcService_server.skeleton.cpp
 
-# C++
+# Cython
 ########################################################################
 
 OUT="../cython/src/core/rpc"
-EXP="../cython/src/export/plow"
 
 rm -rf $OUT
-mkdir $OUT
+mkdir -p $OUT
 
 thrift --gen cpp --out $OUT common.thrift
 thrift --gen cpp --out $OUT plow.thrift
-
-mv $OUT/common_*.h $EXP
-mv $OUT/plow_*.h $EXP
 
 rm $OUT/RpcService_server.skeleton.cpp
 
