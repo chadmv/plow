@@ -267,7 +267,7 @@ struct JobSpecT {
 }
 
 struct JobFilterT {
-    1:bool matchingOnly = true,
+    1:bool matchingOnly = false,
     2:optional list<string> project,
     3:optional list<string> user,
     4:optional string regex,
