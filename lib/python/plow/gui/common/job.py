@@ -72,6 +72,7 @@ class JobSelectionDialog(QtGui.QDialog):
         self.__list_jobs.setSelectionMode(self.__list_jobs.ExtendedSelection)
         self.__list_jobs.addItems([job.name for job in self.__jobs])
         self.__list_jobs.sortItems()
+        self.__list_jobs.itemDoubleClicked.connect(self.__itemDoubleClicked)
 
         self.__btns = QtGui.QDialogButtonBox(
             QtGui.QDialogButtonBox.Ok | 
@@ -85,6 +86,9 @@ class JobSelectionDialog(QtGui.QDialog):
         layout.addWidget(self.__list_jobs)
         layout.addWidget(self.__btns)
         self.setLayout(layout)
+
+    def __itemDoubleClicked(self, item):
+        self.accept()
 
     def __filterChanged(self, value):
         if not value:
