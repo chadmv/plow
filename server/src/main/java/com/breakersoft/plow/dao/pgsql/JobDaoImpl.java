@@ -18,8 +18,8 @@ import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.thrift.JobSpecT;
-import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.thrift.JobState;
+import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -143,7 +143,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
     @Override
     public boolean shutdown(Job job) {
         return jdbc.update("UPDATE plow.job SET int_state=?, " +
-                    "str_active_name=NULL, time_stopped=EXTRACT(EPOCH FROM NOW()) WHERE pk_job=? AND int_state=?",
+                    "str_active_name=NULL, time_stopped=plow.txTimeMillis() WHERE pk_job=? AND int_state=?",
                 JobState.FINISHED.ordinal(), job.getJobId(), JobState.RUNNING.ordinal()) == 1;
     }
 
