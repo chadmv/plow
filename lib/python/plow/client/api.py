@@ -7,6 +7,7 @@ from conn import PlowConnection
 Conn = PlowConnection()
 
 __all__ = [
+    "get_projects",
     "get_plow_time",
     "get_jobs",
     "get_active_job",
@@ -37,6 +38,10 @@ __all__ = [
 
 def get_plow_time():
     return Conn.service.getPlowTime()
+
+# Projects
+def get_projects():
+    return Conn.service.getProjects()
 
 # Clusters
 
