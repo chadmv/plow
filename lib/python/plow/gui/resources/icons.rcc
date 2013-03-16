@@ -16,6 +16,9 @@
     <file>retry.png</file>
     <file>kill.png</file>
     <file>eat.png</file>
+    <file>pause.png</file>
+    <file>resume.png</file>
+    <file>sweep.png</file>
   </qresource>
 </RCC>
 
