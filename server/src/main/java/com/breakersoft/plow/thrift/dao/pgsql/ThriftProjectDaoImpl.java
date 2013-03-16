@@ -2,6 +2,7 @@ package com.breakersoft.plow.thrift.dao.pgsql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.RowMapper;
@@ -43,6 +44,11 @@ public class ThriftProjectDaoImpl extends AbstractDao implements ThriftProjectDa
     @Override
     public ProjectT get(String name) {
         return jdbc.queryForObject(GET + " WHERE str_name=?", MAPPER, name);
+    }
+
+    @Override
+    public List<ProjectT> all() {
+        return jdbc.query(GET, MAPPER);
     }
 
     @Override

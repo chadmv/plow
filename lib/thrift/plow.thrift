@@ -267,10 +267,12 @@ struct JobSpecT {
 }
 
 struct JobFilterT {
-    1:list<string> project,
-    2:list<string> user,
-    3:string regex,
-    4:list<JobState> states
+    1:bool matchingOnly = false,
+    2:optional list<string> project,
+    3:optional list<string> user,
+    4:optional string regex,
+    5:optional list<JobState> states,
+    6:optional list<common.Guid> jobIds
 }
 
 struct TaskFilterT {

@@ -92,7 +92,7 @@ CREATE TABLE plow.job (
   int_uid INTEGER NOT NULL,
   int_state SMALLINT NOT NULL DEFAULT 0,
   bool_paused BOOLEAN NOT NULL DEFAULT 'f',
-  time_started BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
+  time_started BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   time_stopped BIGINT DEFAULT 0
 ) WITHOUT OIDS;
 
@@ -267,8 +267,8 @@ CREATE TABLE plow.depend (
     pk_dependon_layer UUID,
     pk_dependent_task UUID,
     pk_dependon_task UUID,
-    time_created BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
-    time_modified BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW())
+    time_created BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
+    time_modified BIGINT NOT NULL DEFAULT plow.txTimeMillis()
 );
 
 CREATE UNIQUE INDEX depend_uuid_sig_idx ON plow.depend (uuid_sig);
@@ -310,8 +310,8 @@ CREATE TABLE plow.node (
   str_ipaddr VARCHAR(15) NOT NULL,
   int_state SMALLINT NOT NULL DEFAULT 0,
   int_lock_state SMALLINT NOT NULL DEFAULT 0,
-  time_created BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
-  time_updated BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW()),
+  time_created BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
+  time_updated BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   str_tags TEXT[]
 ) WITHOUT OIDS;
 

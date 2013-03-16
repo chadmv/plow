@@ -171,8 +171,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Override
     public List<ProjectT> getProjects() throws PlowException, TException {
-        // TODO Auto-generated method stub
-        return null;
+    	return thriftProjectDao.all();
     }
 
     @Override

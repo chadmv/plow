@@ -132,6 +132,7 @@ class WorkspaceManager(QtCore.QObject):
         menu.triggered.connect(self.__menuItemTriggered)
 
         self.btn = QtGui.QToolButton(obj)
+        self.btn.setFocusPolicy(QtCore.Qt.NoFocus)
         self.btn.setText("")
         self.btn.setPopupMode(QtGui.QToolButton.InstantPopup)
         self.btn.setMenu(menu)

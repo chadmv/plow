@@ -98,6 +98,12 @@ class JobStateWidget(QtGui.QWidget):
         self.__state = state
         self.__hasErrors = hasErrors
 
+    def getState(self):
+        return self.__state
+
+    def hasErrors(self):
+        return self.__hasErrors
+
     def setState(self, state, hasErrors):
         self.__state = state
         self.__hasErrors = hasErrors
