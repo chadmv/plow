@@ -11,6 +11,7 @@ __all__ = [
     "get_plow_time",
     "get_jobs",
     "get_active_job",
+    "get_active_jobs",
     "get_job",
     "kill_job",
     "launch_job",
@@ -78,6 +79,11 @@ def get_jobs(**kwargs):
     filt = ttypes.JobFilterT()
     for k, v in kwargs.items():
         setattr(filt, k, v)
+    return Conn.service.getJobs(filt)
+
+def get_active_jobs():
+    filt = ttypes.JobFilterT()
+    filt.states = [ttypes.JobState.RUNNING]
     return Conn.service.getJobs(filt)
 
 def get_active_job(name):

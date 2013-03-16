@@ -64,7 +64,7 @@ class JobProgressBar(QtGui.QWidget):
 class JobSelectionDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
-        self.__jobs = plow.client.get_jobs()
+        self.__jobs = plow.client.get_active_jobs()
 
         self.__txt_filter = QtGui.QLineEdit(self)
         self.__txt_filter.textChanged.connect(self.__filterChanged)
