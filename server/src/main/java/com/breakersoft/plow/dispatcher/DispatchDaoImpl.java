@@ -105,6 +105,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "proc.pk_node,"+
                 "proc.int_cores,"+
                 "proc.int_ram, " +
+                "proc.bool_unbooked, " +
                 "node.str_tags,"+
                 "node.str_name AS node_name, " +
                 "task.str_name AS task_name, " +

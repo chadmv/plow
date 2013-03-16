@@ -13,6 +13,9 @@
     <file>minus.png</file>
     <file>plus.png</file>
     <file>help.png</file>
+    <file>retry.png</file>
+    <file>kill.png</file>
+    <file>eat.png</file>
   </qresource>
 </RCC>
 

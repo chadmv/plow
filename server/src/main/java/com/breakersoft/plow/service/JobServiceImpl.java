@@ -28,6 +28,7 @@ import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.LayerSpecT;
+import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskSpecT;
 import com.breakersoft.plow.thrift.TaskState;
 
@@ -227,6 +228,17 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean isJobPaused(Job job) {
         return jobDao.isPaused(job);
+    }
+
+    @Override
+    @Transactional(readOnly=true)
+    public List<Task> getTasks(TaskFilterT filter) {
+    	return taskDao.getTasks(filter);
+    }
+
+    @Override
+    public boolean setTaskState(Task task, TaskState state) {
+    	return taskDao.setTaskState(task, state);
     }
 
     @Override

@@ -20,6 +20,6 @@ public class DispatchConfig {
     /*
      * Set to true once dispatching should start to happen.
      */
-    public static AtomicBoolean IS_ENABLED = new AtomicBoolean(false);
+    public static AtomicBoolean IS_ENABLED = new AtomicBoolean(true);
 
 }

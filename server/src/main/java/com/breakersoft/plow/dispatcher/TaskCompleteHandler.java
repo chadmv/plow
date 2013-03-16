@@ -44,7 +44,7 @@ public class TaskCompleteHandler {
 
         TaskState newState;
         if (result.exitStatus == 0) {
-            newState =  TaskState.SUCCEEDED;
+            newState = TaskState.SUCCEEDED;
         }
         else {
             newState = TaskState.DEAD;
@@ -63,23 +63,24 @@ public class TaskCompleteHandler {
                 }
             }
         }
-        else {
-            // Task was already stopped somehow.
-            // might be a retry or
-            return;
+
+        if (proc.isUnbooked()) {
+            dispatchService.deallocateProc(proc, "Task was stopped");
         }
 
         if (jobService.isJobPaused(job)) {
             dispatchService.deallocateProc(proc,
                     "Job is paused: " + job.getJobId());
+            return;
         }
-        else if (jobService.isFinished(job)) {
+
+        if (jobService.isFinished(job)) {
             dispatchService.deallocateProc(proc,
                     "Job is finished " + job.getJobId());
             jobStateManager.shutdownJob(job);
+            return;
         }
-        else {
-            procDispatcher.book(proc);
-        }
+
+        procDispatcher.book(proc);
     }
 }

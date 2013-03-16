@@ -10,6 +10,7 @@ import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.rnd.thrift.Ping;
 
 public interface NodeService {
@@ -50,4 +51,5 @@ public interface NodeService {
 
 	List<Proc> getProcs(Job job);
     boolean setProcUnbooked(Proc proc, boolean unbooked);
+	Proc getProc(Task task);
 }

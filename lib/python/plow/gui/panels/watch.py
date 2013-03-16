@@ -46,8 +46,8 @@ class RenderJobWatchPanel(Panel):
             print "foo"
 
 
-    def openConfigDialog(self):
-        d = RenderJobWatchConfigDialog(self.attrs)
+    def _openPanelSettingsDialog(self):
+        d = RenderJobWatchSettingsDialog(self.attrs)
         if d.exec_():
             self.attrs.update(d.getAttrs())
             self.setRefreshTime(self.attrs["refreshSeconds"])
@@ -117,7 +117,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         uid = item.data(0, QtCore.Qt.UserRole)
         EventManager.emit("JOB_OF_INTEREST", uid)
 
-class RenderJobWatchConfigDialog(QtGui.QDialog):
+class RenderJobWatchSettingsDialog(QtGui.QDialog):
     """
     A dialog box that lets you configure how the render job widget.
     """

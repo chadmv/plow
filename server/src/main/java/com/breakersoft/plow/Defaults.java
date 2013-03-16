@@ -15,4 +15,6 @@ public final class Defaults {
     public static String FOLDER_DEFAULT_NAME = "jobs";
 
     public static int RND_CLIENT_SOCKET_TIMEOUT_MS = 5000;
+
+    public static int TASK_MAX_LIMIT = 1000;
 }

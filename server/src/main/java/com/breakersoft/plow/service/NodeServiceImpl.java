@@ -14,6 +14,7 @@ import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.ProcDao;
@@ -117,6 +118,12 @@ public class NodeServiceImpl implements NodeService {
     @Override
     public List<Proc> getProcs(Job job) {
         return procDao.getProcs(job);
+    }
+
+    @Override
+    @Transactional(readOnly=true)
+    public Proc getProc(Task task) {
+        return procDao.getProc(task);
     }
 
     @Override

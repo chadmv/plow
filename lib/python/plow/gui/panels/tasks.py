@@ -11,12 +11,16 @@ from plow.gui.event import EventManager
 from plow.gui.constants import COLOR_TASK_STATE, TASK_STATES
 from plow.gui.common.widgets import CheckableComboBox
 
+IdRole = QtCore.Qt.UserRole
+ObjectRole = QtCore.Qt.UserRole + 1
+
 class TaskPanel(Panel):
 
     def __init__(self, name="Tasks", parent=None):
         Panel.__init__(self, name, "Tasks", parent)
 
-        self.setAttr("refreshSeconds", 10)
+        self.setAttr("refreshSeconds", 5)
+        self.setRefreshTime(5)
 
         self.setWidget(TaskWidget(self.attrs, self))
         self.setWindowTitle(name)
@@ -65,21 +69,63 @@ class TaskWidget(QtGui.QWidget):
         self.__table.horizontalHeader().setStretchLastSection(True)
         self.__table.setAlternatingRowColors(True)
         self.__table.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
+        self.__table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.__table.customContextMenuRequested.connect(self.__showContextMenu)
 
+        self.__jobId = None
         self.__model = None
 
         self.layout().addWidget(self.__table)
+
+    def refresh(self):
+        if self.__model:
+            self.__model.refresh()
 
     def setJobId(self, jobid):
         new_model = False
         if not self.__model:
             self.__model = TaskModel(self)
             new_model = True
+        self.__jobId = jobid
         self.__model.setJob(jobid)
         self.__table.setModel(self.__model)
         if new_model:
             self.__table.setColumnWidth(0, self.Width[0])
+    
+    def __showContextMenu(self, pos):
+        menu = QtGui.QMenu()
+        menu.addAction(QtGui.QIcon(":/retry.png"), "Retry", self.retrySelected)
+        menu.addAction(QtGui.QIcon(":/kill.png"), "Kill", self.killSelected)
+        menu.addAction(QtGui.QIcon(":/eat.png"), "Eat", self.eatSelected)
+        menu.exec_(self.mapToGlobal(pos))
         
+    def retrySelected(self):
+        tasks = self.getSelectedTaskIds()
+        if tasks:
+            plow.client.retry_tasks(taskIds=tasks)
+            self.queueRefresh(1000)
+
+    def killSelected(self):
+        tasks = self.getSelectedTaskIds()
+        if tasks:
+            plow.client.kill_tasks(taskIds=tasks)
+            self.queueRefresh(1000)
+
+    def eatSelected(self):
+        tasks = self.getSelectedTaskIds()
+        if tasks:
+            plow.client.eat_tasks(taskIds=tasks)
+            self.queueRefresh(1000)
+
+    def getSelectedTaskIds(self):
+        ids = []
+        s_model = self.__table.selectionModel()
+        for row in s_model.selectedRows():
+            ids.append(row.data(IdRole))
+        return ids
+
+    def queueRefresh(self, ms):
+        QtCore.QTimer.singleShot(ms, self.refresh)
 
 
 class TaskModel(QtCore.QAbstractTableModel):
@@ -87,32 +133,39 @@ class TaskModel(QtCore.QAbstractTableModel):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.__tasks = []
         self.__index = { }
-        self.__lastUpdateTime = 0;
+        self.__jobId = None
+        self.__lastUpdateTime = 0
+
 
     def setJob(self, jobid):
         ## Clear out existing tasks.
         ## TODO make sure to emit right signals
-
         try:
             self.beginResetModel()
             self.__tasks = []
             self.__index.clear()
-
+            self.__jobId = jobid
             self.__tasks = plow.client.get_tasks(jobId=jobid)
             for i, task in enumerate(self.__tasks):
                 self.__index[task.id] = i;
+            self.__lastUpdateTime = plow.client.get_plow_time()
         finally:
             self.endResetModel()
 
+    def getJobId(self):
+        return self.__jobId
+
     def refresh(self):
+        if not self.__jobId:
+            return
         t = plow.client.get_plow_time()
-        tasks = plow.client.get_tasks(jobId=self.__job.id, lastUpdateTime=self.__lastUpdateTime)
+        tasks = plow.client.get_tasks(jobId=self.__jobId, lastUpdateTime=self.__lastUpdateTime)
         self.__lastUpdateTime = t
 
         for task in tasks:
             idx = self.__index[task.id]
             self.__tasks[idx] = task
-            self.dataChanged.emit(self.index(idx,0), self.index(idx, len(TaskView.Header)-1))
+            self.dataChanged.emit(self.index(idx,0), self.index(idx, len(TaskWidget.Header)-1))
 
     def rowCount(self, parent=None):
         return len(self.__tasks)
@@ -143,7 +196,10 @@ class TaskModel(QtCore.QAbstractTableModel):
         elif role == QtCore.Qt.ToolTipRole and col == 3:
             tip = "Allocated Cores: %d\nCurrent CPU Perc:%d\nMax CPU Perc:%d\nAllocated RAM:%dMB\nCurrent RSS:%dMB\nMaxRSS:%dMB"
             return tip % (task.cores, task.cpuPerc, task.maxCpuPerc, task.ramMb, task.rssMb, task.maxRssMb)
-
+        elif role == IdRole:
+            return task.id
+        elif role == ObjectRole:
+            return task
         return
 
     def headerData(self, section, orientation, role):

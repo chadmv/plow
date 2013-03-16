@@ -31,7 +31,7 @@ class ClusterPanel(Panel):
         # comment button (multi-select)
         # 
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/settings.png"), "Edit Selected Cluster Configuration", self.openSettingsDialog)
+            QtGui.QIcon(":/settings.png"), "Edit Selected Cluster Configuration", self.openClusterPropertiesDialog)
         self.titleBarWidget().addAction(
             QtGui.QIcon(":/locked.png"), "Lock Selected Clusters", self.__handleClusterLock)
         self.titleBarWidget().addAction(
@@ -40,7 +40,7 @@ class ClusterPanel(Panel):
     def openLoadDialog(self):
         print "Open search dialog"
 
-    def openSettingsDialog(self):
+    def openClusterPropertiesDialog(self):
         try:
             cluster = self.widget().getSelectedClusters()[0]
             dialog = ClusterPropertiesDialog(cluster)
