@@ -73,9 +73,17 @@ class JobSelectionDialog(QtGui.QDialog):
         self.__list_jobs.addItems([job.name for job in self.__jobs])
         self.__list_jobs.sortItems()
 
+        self.__btns = QtGui.QDialogButtonBox(
+            QtGui.QDialogButtonBox.Ok | 
+            QtGui.QDialogButtonBox.Cancel)
+
+        self.__btns.accepted.connect(self.accept)
+        self.__btns.rejected.connect(self.reject)
+
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.__txt_filter)
         layout.addWidget(self.__list_jobs)
+        layout.addWidget(self.__btns)
         self.setLayout(layout)
 
     def __filterChanged(self, value):
@@ -88,6 +96,12 @@ class JobSelectionDialog(QtGui.QDialog):
             self.__list_jobs.addItems(new_items)
         self.__list_jobs.sortItems()
 
+    def getSelectedJobs(self):
+        jobNames = [str(item.text()) for item in self.__list_jobs.selectedItems()]
+        if not jobNames:
+            return []
+        else:
+            return plow.client.get_jobs(matchingOnly=True, name=jobNames, states=[plow.JobState.RUNNING])
 
 class JobStateWidget(QtGui.QWidget):
     """
