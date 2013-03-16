@@ -10,7 +10,6 @@
 #include <iostream>
 #include <vector>
 
-#include "plow/plow.h"
 #include "client.h"
 
 using namespace apache::thrift;
