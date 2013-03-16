@@ -19,3 +19,5 @@ lib/cpp/src/gui/examples/*.app
 lib/python/etc
 *.user
 lib/python/__dist__
+*.so
+plow.cpp
