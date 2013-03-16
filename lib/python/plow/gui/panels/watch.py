@@ -146,6 +146,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
     def __updateExistingJobs(self):
         FINISHED = plow.client.JobState.FINISHED
         req = { }
+        req["matchingOnly"] = True
         req["jobIds"] = [jobId for jobId, item in self.__jobs.iteritems() 
             if self.__tree.itemWidget(item, 1).getState() != FINISHED]
         self.__updateJobs(plow.client.get_jobs(**req))
