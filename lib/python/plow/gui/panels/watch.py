@@ -93,6 +93,8 @@ class RenderJobWatchWidget(QtGui.QWidget):
             "%02d" % job.minCores,
             formatMaxValue(job.maxCores),
             formatDuration(job.startTime, job.stopTime)])
+        item.setToolTip(6, "Started: %s\nStopped:%s" % 
+            (formatDateTime(job.startTime), formatDateTime(job.stopTime)))
 
         item.setData(0, QtCore.Qt.UserRole, job.id)
         self.__tree.addTopLevelItem(item)
@@ -110,6 +112,8 @@ class RenderJobWatchWidget(QtGui.QWidget):
         item.setText(4, "%02d" % job.minCores)
         item.setText(5, formatMaxValue(job.maxCores))
         item.setText(6, formatDuration(job.startTime, job.stopTime))
+        item.setToolTip(6, "Started: %s\nStopped:%s" % 
+            (formatDateTime(job.startTime), formatDateTime(job.stopTime)))
         self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
         self.__tree.itemWidget(item, 1).setState(job.state, job.totals.deadTaskCount)
 
