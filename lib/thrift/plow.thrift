@@ -272,7 +272,8 @@ struct JobFilterT {
     3:optional list<string> user,
     4:optional string regex,
     5:optional list<JobState> states,
-    6:optional list<common.Guid> jobIds
+    6:optional list<common.Guid> jobIds,
+    7:optional list<string> name
 }
 
 struct TaskFilterT {
