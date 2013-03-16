@@ -137,11 +137,15 @@ class TaskModel(QtCore.QAbstractTableModel):
         self.__jobId = None
         self.__lastUpdateTime = 0
 
+        # A timer for refreshing seconds.
+        self.__timer = QtCore.QTimer(self)
+        self.__timer.timeout.connect(self.__durationRefreshTimer)
 
     def setJob(self, jobid):
         ## Clear out existing tasks.
         ## TODO make sure to emit right signals
         try:
+            self.__timer.stop()
             self.beginResetModel()
             self.__tasks = []
             self.__index.clear()
@@ -152,6 +156,7 @@ class TaskModel(QtCore.QAbstractTableModel):
             self.__lastUpdateTime = plow.client.get_plow_time()
         finally:
             self.endResetModel()
+            self.__timer.start(1000)
 
     def getJobId(self):
         return self.__jobId
@@ -207,6 +212,10 @@ class TaskModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
             return TaskWidget.Header[section]
 
+    def __durationRefreshTimer(self):
+        RUNNING = plow.client.TaskState.RUNNING
+        [self.dataChanged.emit(self.index(idx, 4),  self.index(idx, 4)) 
+            for idx, t in enumerate(self.__tasks) if t.state == RUNNING]
 
 class TaskWidgetConfigDialog(QtGui.QDialog):
     """
