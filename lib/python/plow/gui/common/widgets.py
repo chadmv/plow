@@ -160,9 +160,11 @@ class ManagedListWidget(QtGui.QWidget):
     """
     A list widget that lets you add/remove things.
     """
-    def __init__(self, items, default=None, parent=None):
+    def __init__(self, items, default="name", parent=None):
         QtGui.QWidget.__init__(self, parent)
         QtGui.QVBoxLayout(self)
+        self.__default = default
+
         self.setMaximumHeight(200)
 
         self.list_widget = QtGui.QListWidget(self)
@@ -196,7 +198,7 @@ class ManagedListWidget(QtGui.QWidget):
         return result
 
     def addItem(self):
-        item = self.__newItem("tag_name")
+        item = self.__newItem(self.__default)
         self.list_widget.addItem(item)
         self.list_widget.editItem(item)
 

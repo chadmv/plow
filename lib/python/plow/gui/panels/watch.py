@@ -8,7 +8,7 @@ import plow.client
 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
-from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox, SpinSliderWidget
+from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox, SpinSliderWidget, ManagedListWidget
 from plow.gui.common.job import JobProgressBar, JobSelectionDialog, JobStateWidget
 from plow.gui.constants import COLOR_JOB_STATE
 from plow.gui.util import formatMaxValue, formatDateTime, formatDuration
@@ -19,15 +19,15 @@ class RenderJobWatchPanel(Panel):
     def __init__(self, name="Render Watch", parent=None):
         Panel.__init__(self, name, "Render Watch", parent)
 
+        # Setup the default configuration
         self.setAttr("loadMine", True)
         self.setAttr("projects", [])
         self.setAttr("allProjects", True)
-        self.setAttr("refreshSeconds", 10)
+        self.setAttr("refreshSeconds", 5)
+        self.setAttr("users", [])
 
         self.setWidget(RenderJobWatchWidget(self.attrs, self))
         self.setWindowTitle(name)
-        self.refresh()
-        self.setRefreshTime(self.attrs["refreshSeconds"])
 
     def init(self):
         # TODO
@@ -44,7 +44,6 @@ class RenderJobWatchPanel(Panel):
         dialog = JobSelectionDialog()
         if dialog.exec_():
             print "foo"
-
 
     def _openPanelSettingsDialog(self):
         d = RenderJobWatchSettingsDialog(self.attrs)
@@ -77,7 +76,20 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.layout().addWidget(self.__tree)
 
     def refresh(self):
-        jobs = plow.client.get_jobs(user=[os.environ["USER"]])       
+
+        # build a job refresh request
+        req = { }
+        req["user"] = []
+        req["jobIds"] = self.__jobs.keys()
+        if self.attrs["loadMine"]:
+            req["user"].append(os.environ["USER"])
+        if self.attrs["users"]:
+            req["user"].extend(self.attrs["users"])
+        if self.attrs["projects"]:
+            req["projects"] = self.attrs["projects"]
+
+        print req
+        jobs = plow.client.get_jobs(**req)
         for job in jobs:
             if not self.__jobs.has_key(job.id):
                 self.addJob(job)
@@ -133,8 +145,7 @@ class RenderJobWatchSettingsDialog(QtGui.QDialog):
         self.sliderRefresh.slider.setTickInterval(5)
         self.sliderRefresh.slider.setTickPosition(QtGui.QSlider.TicksBelow)
         self.checkboxLoadMine = BooleanCheckBox(bool(attrs["loadMine"]))
-        self.listUsers = QtGui.QListWidget(self)
-        self.listUsers.setMaximumHeight(50)
+        self.listUsers = ManagedListWidget(attrs["users"], "name", self)
         self.checkboxLoadErrors = QtGui.QCheckBox(self)
 
         self.listProjects = CheckableListBox("Projects", 
@@ -162,9 +173,12 @@ class RenderJobWatchSettingsDialog(QtGui.QDialog):
         layout.addWidget(buttons)
 
     def getAttrs(self):
+
+
         return {
             "refreshSeconds": self.sliderRefresh.value(),
             "loadMine": self.checkboxLoadMine.isChecked(),
+            "users": self.listUsers.getValues(),
             "projects": self.listProjects.getCheckedOptions(),
             "allProjects": self.listProjects.isAllSelected()
         }
