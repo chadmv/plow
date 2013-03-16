@@ -40,6 +40,9 @@ class RenderJobWatchPanel(Panel):
         self.titleBarWidget().addAction(
             QtGui.QIcon(":/load.png"), "Load", self.openLoadDialog)
 
+        self.titleBarWidget().addAction(
+            QtGui.QIcon(":/sweep.png"), "Remove Finished Jobs", self.removeFinishedJobs)
+
     def openLoadDialog(self):
         dialog = JobSelectionDialog()
         if dialog.exec_():
@@ -50,6 +53,9 @@ class RenderJobWatchPanel(Panel):
         if d.exec_():
             self.attrs.update(d.getAttrs())
             self.setRefreshTime(self.attrs["refreshSeconds"])
+
+    def removeFinishedJobs(self):
+         self.widget().removeFinishedJobs()
 
     def refresh(self):
         self.widget().refresh()
@@ -72,30 +78,14 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
         [self.__tree.setColumnWidth(i, v) for i, v in enumerate(self.Width)]
         self.__tree.itemDoubleClicked.connect(self.__itemDoubleClicked)
+        self.__tree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.__tree.customContextMenuRequested.connect(self.__showContextMenu)
 
         self.layout().addWidget(self.__tree)
 
     def refresh(self):
-
-        # build a job refresh request
-        req = { }
-        req["matchingOnly"] = True
-        req["user"] = []
-        req["jobIds"] = self.__jobs.keys()
-        if self.attrs["loadMine"]:
-            req["user"].append(os.environ["USER"])
-        if self.attrs["users"]:
-            req["user"].extend(self.attrs["users"])
-        if self.attrs["projects"]:
-            req["projects"] = self.attrs["projects"]
-
-        print req
-        jobs = plow.client.get_jobs(**req)
-        for job in jobs:
-            if not self.__jobs.has_key(job.id):
-                self.addJob(job)
-            else:
-                self.updateJob(job)
+        self.__updateExistingJobs()
+        self.__findNewJobs()
 
     def addJob(self, job):
         item = QtGui.QTreeWidgetItem([
@@ -129,6 +119,49 @@ class RenderJobWatchWidget(QtGui.QWidget):
             (formatDateTime(job.startTime), formatDateTime(job.stopTime)))
         self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
         self.__tree.itemWidget(item, 1).setState(job.state, job.totals.deadTaskCount)
+
+    def removeFinishedJobs(self):
+        finished = []
+        for item in self.__jobs.itervalues():
+            if self.__tree.itemWidget(item, 1).getState() == plow.client.JobState.FINISHED:
+                finished.append(item)
+        [self.removeJobItem(item) for item in finished]
+
+    def removeJobItem(self, item):
+        jobid = str(item.data(0, QtCore.Qt.UserRole))
+        try:
+            del self.__jobs[jobid]
+        except Exception, e:
+            print e
+        idx = self.__tree.indexOfTopLevelItem(item)
+        self.__tree.takeTopLevelItem(idx)
+
+    def __updateJobs(self, jobs):
+        for job in jobs:
+            if not self.__jobs.has_key(job.id):
+                self.addJob(job)
+            else:
+                self.updateJob(job)
+
+    def __updateExistingJobs(self):
+        req = { }
+        req["jobIds"] = self.__jobs.keys()
+        self.__updateJobs(plow.client.get_jobs(**req))
+
+    def __findNewJobs(self):
+        req = { }
+        req["matchingOnly"] = True
+        req["user"] = []
+        if self.attrs["loadMine"]:
+            req["user"].append(os.environ["USER"])
+        if self.attrs["users"]:
+            req["user"].extend(self.attrs["users"])
+        if self.attrs["projects"]:
+            req["projects"] = self.attrs["projects"]
+        self.__updateJobs(plow.client.get_jobs(**req))
+
+    def __showContextMenu(self):
+        pas
 
     def __itemDoubleClicked(self, item, col):
         uid = item.data(0, QtCore.Qt.UserRole)
