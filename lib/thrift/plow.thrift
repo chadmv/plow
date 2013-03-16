@@ -270,7 +270,8 @@ struct JobFilterT {
     1:list<string> project,
     2:list<string> user,
     3:string regex,
-    4:list<JobState> states
+    4:list<JobState> states,
+    5:list<common.Guid> jobIds
 }
 
 struct TaskFilterT {
