@@ -20,7 +20,6 @@ class TaskPanel(Panel):
         Panel.__init__(self, name, "Tasks", parent)
 
         self.setAttr("refreshSeconds", 5)
-        self.setRefreshTime(5)
 
         self.setWidget(TaskWidget(self.attrs, self))
         self.setWindowTitle(name)
