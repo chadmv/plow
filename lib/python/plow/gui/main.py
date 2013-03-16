@@ -4,6 +4,7 @@ import os
 from manifest import QtCore, QtGui
 from panels import TaskPanel, RenderJobWatchPanel, ClusterPanel
 from resources import icons
+from event import EventManager
 
 class DefaultConfig(object):
 
@@ -98,6 +99,8 @@ class WorkspaceManager(QtCore.QObject):
         self.registerPanelType("Tasks", TaskPanel)
         self.registerPanelType("Clusters", ClusterPanel)
 
+        EventManager.bind("GLOBAL_REFRESH", self.refresh)
+
     def activeWorkspace(self):
         return self.__active
 
@@ -108,6 +111,10 @@ class WorkspaceManager(QtCore.QObject):
 
     def settings(self):
         return self.__settings
+
+    def refresh(self):
+        for panel in self.__panels:
+            panel.refresh()
 
     def addPanelCreationMenu(self, obj):
         menu = obj.addMenu("Panels")

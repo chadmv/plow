@@ -58,6 +58,7 @@ class TaskWidget(QtGui.QWidget):
 
     Header = ["Name", "State", "Node", "Resource", "Duration", "Log"]
     Width = [350]
+    Refresh = 1500
 
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -103,19 +104,19 @@ class TaskWidget(QtGui.QWidget):
         tasks = self.getSelectedTaskIds()
         if tasks:
             plow.client.retry_tasks(taskIds=tasks)
-            self.queueRefresh(1000)
+            self.queueRefresh(self.Refresh, True)
 
     def killSelected(self):
         tasks = self.getSelectedTaskIds()
         if tasks:
             plow.client.kill_tasks(taskIds=tasks)
-            self.queueRefresh(1000)
+            self.queueRefresh(self.Refresh, True)
 
     def eatSelected(self):
         tasks = self.getSelectedTaskIds()
         if tasks:
             plow.client.eat_tasks(taskIds=tasks)
-            self.queueRefresh(1000)
+            self.queueRefresh(self.Refresh, True)
 
     def getSelectedTaskIds(self):
         ids = []
@@ -124,9 +125,10 @@ class TaskWidget(QtGui.QWidget):
             ids.append(row.data(IdRole))
         return ids
 
-    def queueRefresh(self, ms):
+    def queueRefresh(self, ms, full=False):
         QtCore.QTimer.singleShot(ms, self.refresh)
-
+        if full:
+            EventManager.emit("GLOBAL_REFRESH")
 
 class TaskModel(QtCore.QAbstractTableModel):
     def __init__(self, parent=None):
