@@ -79,6 +79,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
 
         # build a job refresh request
         req = { }
+        req["matchingOnly"] = True
         req["user"] = []
         req["jobIds"] = self.__jobs.keys()
         if self.attrs["loadMine"]:
