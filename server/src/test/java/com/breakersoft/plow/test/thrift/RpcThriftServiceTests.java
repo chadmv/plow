@@ -40,6 +40,11 @@ public class RpcThriftServiceTests extends AbstractTest {
     }
 
     @Test
+    public void testGetProjects() throws PlowException, TException {
+    	rpcService.getProjects();
+    }
+
+    @Test
     public void testRetryTasks() throws PlowException, TException, InterruptedException {
 
     	JobT job = rpcService.launch(getTestJobSpec());
@@ -49,6 +54,4 @@ public class RpcThriftServiceTests extends AbstractTest {
     	rpcService.retryTasks(filter);
     	Thread.sleep(2000);
     }
-
-
 }
