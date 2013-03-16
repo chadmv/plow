@@ -23,15 +23,13 @@ def formatDateTime(epoch):
     return str(date)
 
 def formatDuration(startTime, stopTime):
-
+    """
+    Format a duration to hh:mm::ss
+    """
     if startTime == 0:
         return constants.TIME_NO_DURATION
     if stopTime == 0:
         stopTime = int(time.time()) * 1000
-
-    print startTime
-    print stopTime
-    print "----------"
     duration = (stopTime - startTime) / 1000
     m, s = divmod(duration, 60)
     h, m = divmod(m, 60)
