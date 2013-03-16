@@ -144,8 +144,10 @@ class RenderJobWatchWidget(QtGui.QWidget):
                 self.updateJob(job)
 
     def __updateExistingJobs(self):
+        FINISHED = plow.client.JobState.FINISHED
         req = { }
-        req["jobIds"] = self.__jobs.keys()
+        req["jobIds"] = [jobId for jobId, item in self.__jobs.iteritems() 
+            if self.__tree.itemWidget(item, 1).getState() != FINISHED]
         self.__updateJobs(plow.client.get_jobs(**req))
 
     def __findNewJobs(self):
@@ -161,7 +163,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__updateJobs(plow.client.get_jobs(**req))
 
     def __showContextMenu(self):
-        pas
+        pass
 
     def __itemDoubleClicked(self, item, col):
         uid = item.data(0, QtCore.Qt.UserRole)
