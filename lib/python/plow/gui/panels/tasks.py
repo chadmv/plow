@@ -19,8 +19,8 @@ class TaskPanel(Panel):
     def __init__(self, name="Tasks", parent=None):
         Panel.__init__(self, name, "Tasks", parent)
 
-        self.setAttr("refreshSeconds", 10)
-        self.setRefreshTime(10)
+        self.setAttr("refreshSeconds", 5)
+        self.setRefreshTime(5)
 
         self.setWidget(TaskWidget(self.attrs, self))
         self.setWindowTitle(name)
@@ -78,7 +78,8 @@ class TaskWidget(QtGui.QWidget):
         self.layout().addWidget(self.__table)
 
     def refresh(self):
-        self.__model.refresh()
+        if self.__model:
+            self.__model.refresh()
 
     def setJobId(self, jobid):
         new_model = False

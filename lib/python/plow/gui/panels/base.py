@@ -37,7 +37,7 @@ class Panel(QtGui.QDockWidget):
         toolbar.addAction(float_action)
 
         config_action = QtGui.QAction(QtGui.QIcon(":/config.png"), "Configure Panel", self)        
-        config_action.triggered.connect(self._openPanelConfigDialog)
+        config_action.triggered.connect(self._openPanelSettingsDialog)
         toolbar.addAction(config_action)
 
         toolbar.addSeparator()
@@ -115,7 +115,7 @@ class Panel(QtGui.QDockWidget):
     def getAttr(self, prop, default=None):
         return self.attrs.get(prop)
 
-    def _openPanelConfigDialog(self):
+    def _openPanelSettingsDialog(self):
         pass
 
     def __close(self):
