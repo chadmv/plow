@@ -56,9 +56,6 @@ cdef class Project:
         except:
             return results
 
-        # for foldT in folders:
-        #     results.append(initFolder(foldT))
-
         results = [initFolder(foldT) for foldT in folders]
         return results
 
@@ -93,9 +90,7 @@ def get_projects():
     except:
         return results
 
-    for projT in projects:
-        results.append(initProject(projT))
-
+    results = [initProject(projT) for projT in projects] 
     return results
 
 #######################
@@ -168,14 +163,43 @@ cdef class Folder:
             cdef JobT jobT
 
             if not self._jobs:
-                for jobT in self.folder.jobs:
-                    self._jobs.append(initJob(jobT))
+                self._jobs = [initJob(jobT) for jobT in self.folder.jobs]
 
             return self._jobs
 
 
-def get_folders(Project project):
-    return Project.get_folders(project)
+def get_folder(Guid& folderId):
+    cdef:
+        FolderT folderT
+        Folder folder 
+
+    getClient().proxy().getFolder(folderT, folderId)
+    folder = initFolder(folderT)
+    return folder
+
+def get_folders(Guid& projectId):
+    proj = get_project_by_id(projectId)
+    return Project.get_folders(proj)
+
+def create_folder(Guid& projectId, str name):
+    cdef: 
+        FolderT folderT 
+        Folder folder 
+
+    getClient().proxy().createFolder(folderT, projectId, name)
+    folder = initFolder(folderT)
+    return folder
+
+def get_job_board(Guid& projectId):
+    cdef: 
+        FolderT folderT 
+        vector[FolderT] folders
+        list ret
+
+    getClient().proxy().getJobBoard(folders, projectId)
+    ret = [initFolder(folderT) for folderT in folders]
+    return ret
+
 
 #######################
 # Jobs
@@ -267,14 +291,114 @@ cdef class Job:
         def __get__(self):
             return self._job.maxRssMb
 
+    def kill(self, str reason):
+        return kill_job(self.id, reason)
+
+    def pause(self, bint paused):
+        pause_job(self.id, paused)
+
+    # def get_outputs(self):
+    #     return get_job_outputs(self.id)
+
+
+# def get_job(Guid& id):
+#     pass
+
+# def get_active_job(str name):
+#     pass
+
+
+cdef class JobSpec:
+    def __init__(self):
+        raise NotImplementedError
+
+# def launch(JobSpec spec):
+#     pass
+
+
+cdef class JobFilter:
+    def __init__(self):
+        raise NotImplementedError
+
+# def get_jobs(JobFilter filter):
+#     pass
+
+
+cdef class Output:
+    def __init__(self):
+        raise NotImplementedError
+
+# def get_job_outputs(Guid& id):
+#     cdef:
+#         OutputT outT
+#         vector[OutputT] outputs
+#         list ret = []
+#
+#     getClient().proxy().getJobOutputs(outputs, id)
+#
+#     ret = [initOutput(outT) fot outT in outputs]
+#     return ret
+
+
+def kill_job(Guid& id, str reason):
+    cdef bint success
+    success = getClient().proxy().killJob(id, reason)
+    return success
+
+def pause_job(Guid& id, bint paused):
+    getClient().proxy().pauseJob(id, paused)
 
 #######################
 # Layers
 #
 
+# def get_layer_by_id(Guid& layerId):
+#     pass
+
+# def get_layer(Guid& jobId, str name):
+#     pass
+
+# def getLayers(Guid& jobId):
+#     pass
+
+# def add_layer_output(Guid& layerId, str path, Attrs& attrs):
+#     pass
+
+# def get_layer_outputs(Guid& layerId):
+#     pass
+
+
 #######################
 # Tasks
 #
+
+cdef class Task:
+    def __init__(self):
+        raise NotImplementedError
+
+# def get_task(Guid& taskId):
+#     pass
+
+# def get_tasks(TaskFilter filter):
+#     getClient().proxy().getTasks()
+
+def get_task_log_path(Guid& taskId):
+    cdef: 
+        string path
+        str ret
+    getClient().proxy().getTaskLogPath(path, taskId)
+    ret = path 
+    return ret
+
+# def retry_tasks(TaskFilter filter):
+#     pass
+
+# def eat_tasks(TaskFilter filter):
+#     pass
+
+# def kill_tasks(TaskFilter filter):
+#     pass
+
 
 cdef TaskTotals initTaskTotals(TaskTotalsT& t):
     cdef TaskTotals totals = TaskTotals()
@@ -316,8 +440,91 @@ cdef class TaskTotals:
     property depend:
         def __get__(self):
             return self._totals.dependTaskCount
+
                                                             
 #######################
 # Nodes
 #
+
+cdef class Node:
+    def __init__(self):
+        raise NotImplementedError
+
+# def get_node(str name):
+#     cdef: 
+#         NodeT nodeT
+#         Node node 
+
+#     getClient().proxy().getNode(nodeT, name)
+#     node = initNode(nodeT)
+#     return node
+
+# def get_nodes(NodeFilter filter):
+#     cdef:
+#         NodeFilterT filterT 
+#         NodeT nodeT
+#         vector[NodeT] nodes 
+#         list ret = []
+
+#     getClient().proxy().getNodes(nodes, filterT)
+#     ret = [initNode(nodeT) for nodeT in nodes]
+#     return ret
+
+
+#######################
+# Cluster
+#
+
+cdef class Cluster:
+    def __init__(self):
+        raise NotImplementedError
+
+# def get_cluster(str name):
+#     cdef: 
+#         ClusterT clusterT 
+#         Cluster cluster 
+#     getClient().proxy().getCluster(clusterT, name)
+#     cluster = initCluster(clusterT)
+#     return cluster
+
+# def get_clusters():
+#     cdef: 
+#         ClusterT clusterT 
+#         vector[ClusterT] clusters 
+#         list ret = [] 
+#     getClient().proxy().getClusters(clusters)
+#     ret = [initCluster(clusterT) for clusterT in clusters]
+#     return ret    
+
+# def get_clusters_by_tag(str tag):
+#     cdef: 
+#         ClusterT clusterT 
+#         vector[ClusterT] clusters 
+#         list ret = [] 
+#     getClient().proxy().getClusters(clusters, tag)
+#     ret = [initCluster(clusterT) for clusterT in clusters]
+#     return ret    
+
+# def create_cluster(str name, list tags):
+#     pass
+
+def delete_cluster(Guid& clusterId):
+    cdef bint ret
+    ret = getClient().proxy().deleteCluster(clusterId)
+    return ret
+
+def lock_cluster(Guid& clusterId, bint locked):
+    cdef bint ret
+    ret = getClient().proxy().lockCluster(clusterId, locked)
+    return ret
+
+def set_cluster_tags(Guid& clusterId, list tags):
+    pass
+
+def set_cluster_name(Guid& clusterId, str name):
+    getClient().proxy().setClusterName(clusterId, name)
+
+def set_default_cluster(Guid& clusterId):
+    getClient().proxy().setDefaultCluster(clusterId)
+
 
