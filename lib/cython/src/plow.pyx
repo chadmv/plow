@@ -5,7 +5,7 @@ from client cimport getClient
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 
-from datetime import datetime
+# from datetime import datetime
 
 #######################
 # General
@@ -13,8 +13,9 @@ from datetime import datetime
 def get_plow_time():
     cdef int epoch
     epoch = getClient().proxy().getPlowTime()
-    plowTime = datetime.fromtimestamp(epoch / 1000)
-    return plowTime
+    # plowTime = datetime.fromtimestamp(epoch / 1000)
+    # return plowTime
+    return epoch
 
 
 #######################
