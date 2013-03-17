@@ -37,6 +37,10 @@ cdef extern from "rpc/RpcService.h" namespace "Plow":
         void getClusters(vector[ClusterT]&) nogil except +
         void createCluster(ClusterT&, string&, set[string]&) nogil except +
         bint deleteCluster(Guid&) nogil except +
+        bint lockCluster(Guid&, bint locked) nogil except +
+        void setClusterTags(Guid&, set[string]&) nogil except +
+        void setClusterName(Guid&, string&) nogil except +
+        void setDefaultCluster(Guid&)
 
 
 cdef extern from "client.h" namespace "Plow":
