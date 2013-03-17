@@ -50,17 +50,18 @@ cdef class Project:
         cdef:
             vector[FolderT] folders
             FolderT foldT 
-            list results = []
+            list results
 
         try:
-            getClient().proxy().getFolders(folders, self.id)
+            getClient().proxy().getFolders(folders, self.project.id)
         except:
+            results = []
             return results
 
         results = [initFolder(foldT) for foldT in folders]
         return results
 
-def get_project_by_id(Guid& guid):
+cpdef get_project_by_id(Guid& guid):
     cdef: 
         ProjectT projT 
         Project project
@@ -70,7 +71,7 @@ def get_project_by_id(Guid& guid):
     return project
 
 
-def get_project_by_name(str name):
+def get_project_by_name(string name):
     cdef: 
         ProjectT projT 
         Project project
@@ -84,11 +85,12 @@ def get_projects():
     cdef:
         vector[ProjectT] projects 
         ProjectT projT
-        list results = []
+        list results
 
     try:
         getClient().proxy().getProjects(projects)
     except:
+        results = []
         return results
 
     results = [initProject(projT) for projT in projects] 
@@ -152,7 +154,7 @@ cdef class Folder:
         def __get__(self):
             cdef TaskTotalsT totals
 
-            if not self._totals:
+            if self._totals is None:
                 totals = self.folder.totals
                 result = initTaskTotals(totals)
                 self._totals = result
@@ -179,26 +181,23 @@ def get_folder(Guid& folderId):
     return folder
 
 def get_folders(Guid& projectId):
-    proj = get_project_by_id(projectId)
-    return Project.get_folders(proj)
+    cdef Project proj = get_project_by_id(projectId)
+    cdef list folders = Project.get_folders(proj)
+    return
 
-def create_folder(Guid& projectId, str name):
-    cdef: 
-        FolderT folderT 
-        Folder folder 
-
+def create_folder(Guid& projectId, string name):
+    cdef FolderT folderT 
     getClient().proxy().createFolder(folderT, projectId, name)
-    folder = initFolder(folderT)
+    cdef Folder folder = initFolder(folderT)
     return folder
 
 def get_job_board(Guid& projectId):
     cdef: 
         FolderT folderT 
         vector[FolderT] folders
-        list ret
 
     getClient().proxy().getJobBoard(folders, projectId)
-    ret = [initFolder(folderT) for folderT in folders]
+    cdef list ret = [initFolder(folderT) for folderT in folders]
     return ret
 
 
@@ -292,7 +291,7 @@ cdef class Job:
         def __get__(self):
             return self._job.maxRssMb
 
-    def kill(self, str reason):
+    def kill(self, string reason):
         return kill_job(self.id, reason)
 
     def pause(self, bint paused):
@@ -305,7 +304,7 @@ cdef class Job:
 # def get_job(Guid& id):
 #     pass
 
-# def get_active_job(str name):
+# def get_active_job(string name):
 #     pass
 
 
@@ -341,12 +340,12 @@ cdef class Output:
 #     return ret
 
 
-def kill_job(Guid& id, str reason):
+cpdef kill_job(Guid& id, string reason):
     cdef bint success
     success = getClient().proxy().killJob(id, reason)
     return success
 
-def pause_job(Guid& id, bint paused):
+cpdef pause_job(Guid& id, bint paused):
     getClient().proxy().pauseJob(id, paused)
 
 #######################
@@ -356,13 +355,13 @@ def pause_job(Guid& id, bint paused):
 # def get_layer_by_id(Guid& layerId):
 #     pass
 
-# def get_layer(Guid& jobId, str name):
+# def get_layer(Guid& jobId, string name):
 #     pass
 
 # def getLayers(Guid& jobId):
 #     pass
 
-# def add_layer_output(Guid& layerId, str path, Attrs& attrs):
+# def add_layer_output(Guid& layerId, string path, Attrs& attrs):
 #     pass
 
 # def get_layer_outputs(Guid& layerId):
@@ -386,10 +385,8 @@ cdef class Task:
 def get_task_log_path(Guid& taskId):
     cdef: 
         string path
-        str ret
     getClient().proxy().getTaskLogPath(path, taskId)
-    ret = path 
-    return ret
+    return path
 
 # def retry_tasks(TaskFilter filter):
 #     pass
@@ -451,7 +448,7 @@ cdef class Node:
     def __init__(self):
         raise NotImplementedError
 
-# def get_node(str name):
+# def get_node(string name):
 #     cdef: 
 #         NodeT nodeT
 #         Node node 
@@ -480,7 +477,7 @@ cdef class Cluster:
     def __init__(self):
         raise NotImplementedError
 
-# def get_cluster(str name):
+# def get_cluster(string name):
 #     cdef: 
 #         ClusterT clusterT 
 #         Cluster cluster 
@@ -497,7 +494,7 @@ cdef class Cluster:
 #     ret = [initCluster(clusterT) for clusterT in clusters]
 #     return ret    
 
-# def get_clusters_by_tag(str tag):
+# def get_clusters_by_tag(string tag):
 #     cdef: 
 #         ClusterT clusterT 
 #         vector[ClusterT] clusters 
@@ -522,7 +519,7 @@ def lock_cluster(Guid& clusterId, bint locked):
 def set_cluster_tags(Guid& clusterId, list tags):
     pass
 
-def set_cluster_name(Guid& clusterId, str name):
+def set_cluster_name(Guid& clusterId, string name):
     getClient().proxy().setClusterName(clusterId, name)
 
 def set_default_cluster(Guid& clusterId):
