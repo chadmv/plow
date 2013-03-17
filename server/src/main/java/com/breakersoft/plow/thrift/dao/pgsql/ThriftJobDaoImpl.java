@@ -95,6 +95,12 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             values.addAll(filter.user);
         }
 
+        if (filter.isSetName() && !filter.name.isEmpty()) {
+            clauses.add(JdbcUtils.In(
+                    "job.str_name", filter.name.size()));
+            values.addAll(filter.name);
+        }
+
         if (filter.isSetRegex() && !filter.regex.isEmpty()) {
             clauses.add("str_name ~ ?");
             values.add(filter.regex);

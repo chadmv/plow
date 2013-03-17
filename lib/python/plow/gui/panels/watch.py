@@ -46,7 +46,7 @@ class RenderJobWatchPanel(Panel):
     def openLoadDialog(self):
         dialog = JobSelectionDialog()
         if dialog.exec_():
-            print "foo"
+            [self.widget().addJob(job) for job in dialog.getSelectedJobs()]
 
     def _openPanelSettingsDialog(self):
         d = RenderJobWatchSettingsDialog(self.attrs)
@@ -88,6 +88,9 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__findNewJobs()
 
     def addJob(self, job):
+        if self.__jobs.has_key(job.id):
+            return False
+
         item = QtGui.QTreeWidgetItem([
             job.name,
             "",
@@ -107,6 +110,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__tree.setItemWidget(item, 1, JobStateWidget(job.state, job.totals.deadTaskCount, self))
 
         self.__jobs[job.id] = item
+        return True
 
     def updateJob(self, job):
         item = self.__jobs[job.id]
@@ -146,6 +150,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
     def __updateExistingJobs(self):
         FINISHED = plow.client.JobState.FINISHED
         req = { }
+        req["matchingOnly"] = True
         req["jobIds"] = [jobId for jobId, item in self.__jobs.iteritems() 
             if self.__tree.itemWidget(item, 1).getState() != FINISHED]
         self.__updateJobs(plow.client.get_jobs(**req))
