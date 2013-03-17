@@ -230,15 +230,19 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[DependSpecT] depends
 
     cdef cppclass JobFilterT:
+        bint matchinOnly
         vector[string] project 
         vector[string] user 
         string regex 
         vector[enum_type] states 
+        vector[Guid] jobIds
+        vector[string] name 
 
     cdef cppclass TaskFilterT:
         Guid jobId 
         vector[Guid] layerIds
         vector[enum_type] states 
+        vector[Guid] taskIds
         int limit 
         int offset 
         int lastUpdateTime
