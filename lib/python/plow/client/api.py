@@ -22,6 +22,7 @@ __all__ = [
     "get_layer_outputs",
     "get_task",
     "get_tasks",
+    "get_task_log_path",
     "get_nodes",
     "get_node",
     "get_clusters",
@@ -124,6 +125,9 @@ def add_layer_output(layer, path, attrs=None):
 
 def get_task(guid):
     return Conn.service.getTask(guid)
+
+def get_task_log_path(task):
+    return Conn.service.getTaskLogPath(task.id)
 
 def retry_tasks(**kwargs):
     filt = ttypes.TaskFilterT()
