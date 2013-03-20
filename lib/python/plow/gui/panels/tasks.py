@@ -71,6 +71,7 @@ class TaskWidget(QtGui.QWidget):
         self.__table.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
         self.__table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.__table.customContextMenuRequested.connect(self.__showContextMenu)
+        self.__table.doubleClicked.connect(self.__rowDoubleClicked)
 
         self.__jobId = None
         self.__model = None
@@ -99,6 +100,10 @@ class TaskWidget(QtGui.QWidget):
         menu.addAction(QtGui.QIcon(":/eat.png"), "Eat", self.eatSelected)
         menu.exec_(self.mapToGlobal(pos))
         
+    def __rowDoubleClicked(self, index):
+        uid = index.data(IdRole)
+        EventManager.emit("TASK_OF_INTEREST", uid, self.__jobId)
+
     def retrySelected(self):
         tasks = self.getSelectedTaskIds()
         if tasks:
