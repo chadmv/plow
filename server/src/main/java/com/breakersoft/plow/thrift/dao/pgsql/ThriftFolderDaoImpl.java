@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.AbstractDao;
@@ -16,6 +17,7 @@ import com.breakersoft.plow.thrift.dao.ThriftFolderDao;
 import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
+@Transactional(readOnly=true)
 public class ThriftFolderDaoImpl extends AbstractDao implements ThriftFolderDao {
 
     private static final  RowMapper<FolderT> MAPPER = new RowMapper<FolderT>() {

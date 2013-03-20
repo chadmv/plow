@@ -18,7 +18,7 @@ import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 import com.google.common.collect.Lists;
 
 @Repository
-@Transactional(readOnly = true)
+@Transactional(readOnly=true)
 public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
 
     public static final RowMapper<TaskT> MAPPER = new RowMapper<TaskT>() {

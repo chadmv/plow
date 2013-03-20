@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.thrift.ClusterCountsT;
@@ -15,6 +16,7 @@ import com.breakersoft.plow.util.PlowUtils;
 import com.google.common.collect.Sets;
 
 @Repository
+@Transactional(readOnly=true)
 public class ThriftClusterDaoImpl extends AbstractDao implements ThriftClusterDao {
 
     public static final RowMapper<ClusterT> MAPPER = new RowMapper<ClusterT>() {
