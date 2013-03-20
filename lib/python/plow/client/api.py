@@ -33,6 +33,11 @@ __all__ = [
     "set_cluster_name",
     "set_cluster_tags",
     "set_default_cluster",
+    "create_quota",
+    "get_quota",
+    "set_quota_size",
+    "set_quota_burst",
+    "set_quota_locked",
     "retry_tasks",
     "kill_tasks",
     "eat_tasks"
@@ -44,6 +49,23 @@ def get_plow_time():
 # Projects
 def get_projects():
     return Conn.service.getProjects()
+
+# Quotas
+
+def create_quota(project, cluster, size, burst):
+    return Conn.service.createQuota(project.id, cluter.id, size, burst)
+
+def get_quota(guid):
+    return Conn.service.getQuota(guid)
+
+def set_quota_size(quota, size):
+    Conn.service.setQuotaSize(quota.id, size)
+
+def set_quota_burst(quota, burst):
+    Conn.service.setQuotaBurst(quota.id, burst)
+
+def set_quota_locked(quota, locked):
+    Conn.service.setQuotaLocked(quota.id, locked)
 
 # Clusters
 

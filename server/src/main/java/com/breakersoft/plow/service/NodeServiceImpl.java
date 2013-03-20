@@ -71,6 +71,26 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
+    public Quota getQuota(UUID id) {
+    	return quotaDao.get(id);
+    }
+
+	@Override
+	public void setQuotaSize(Quota quota, int size) {
+		quotaDao.setSize(quota, size);
+	}
+
+	@Override
+	public void setQuotaBurst(Quota quota, int burst) {
+		quotaDao.setBurst(quota, burst);
+	}
+
+	@Override
+	public void setQuotaLocked(Quota quota, boolean locked) {
+		quotaDao.setLocked(quota, locked);
+	}
+
+    @Override
     public Cluster createCluster(String name, Set<String> tags) {
         return clusterDao.create(name, tags.toArray(new String[] {}));
     }

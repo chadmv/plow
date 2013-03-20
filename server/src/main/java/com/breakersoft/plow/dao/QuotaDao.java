@@ -23,4 +23,10 @@ public interface QuotaDao {
 
     Quota getQuota(Proc proc);
 
+	void setSize(Quota quota, int size);
+
+	void setBurst(Quota quota, int burst);
+
+	void setLocked(Quota quota, boolean locked);
+
 }

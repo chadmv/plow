@@ -152,4 +152,21 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
     public void freeResources(Quota quota, int cores) {
         jdbc.update(FREE_RESOURCE, cores, quota.getQuotaId());
     }
+
+    @Override
+    public void setSize(Quota quota, int size) {
+    	jdbc.update("UPDATE plow.quota SET int_size=? WHERE pk_quota=?", size, quota.getQuotaId());
+    }
+
+    @Override
+    public void setBurst(Quota quota, int burst) {
+    	jdbc.update("UPDATE plow.quota SET int_burst=? WHERE pk_quota=?", burst, quota.getQuotaId());
+    }
+
+    @Override
+    public void setLocked(Quota quota, boolean locked) {
+    	jdbc.update("UPDATE plow.quota SET bool_locked=? WHERE pk_quota=?", locked, quota.getQuotaId());
+    }
+
+
 }

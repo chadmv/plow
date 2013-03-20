@@ -30,6 +30,10 @@ public interface NodeService {
 
     Quota createQuota(Project project, Cluster cluster, int size, int burst);
     Quota createQuota(Project project, String cluster, int size, int burst);
+	Quota getQuota(UUID id);
+	void setQuotaSize(Quota quota, int size);
+	void setQuotaBurst(Quota quota, int burst);
+	void setQuotaLocked(Quota quota, boolean locked);
 
     /*
      * Clusters
@@ -52,4 +56,5 @@ public interface NodeService {
 	List<Proc> getProcs(Job job);
     boolean setProcUnbooked(Proc proc, boolean unbooked);
 	Proc getProc(Task task);
+
 }

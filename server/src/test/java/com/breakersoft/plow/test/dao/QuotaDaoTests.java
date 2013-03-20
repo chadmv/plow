@@ -42,6 +42,43 @@ public class QuotaDaoTests extends AbstractTest {
     }
 
     @Test
+    public void testSetSize() {
+        Cluster c = nodeService.createCluster("test", TAGS);
+        Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
+        quotaDao.setSize(quota, 1);
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT int_size FROM quota WHERE pk_quota=?",
+                        quota.getQuotaId()));
+    }
+
+    @Test
+    public void testSetBurst() {
+        Cluster c = nodeService.createCluster("test", TAGS);
+        Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
+        quotaDao.setBurst(quota, 1);
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT int_burst FROM quota WHERE pk_quota=?",
+                        quota.getQuotaId()));
+    }
+
+    @Test
+    public void testSetLocked() {
+        Cluster c = nodeService.createCluster("test", TAGS);
+        Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
+        quotaDao.setLocked(quota, true);
+        assertEquals(true,
+                simpleJdbcTemplate.queryForObject("SELECT bool_locked FROM quota WHERE pk_quota=?",
+                		Boolean.class,
+                        quota.getQuotaId()));
+
+        quotaDao.setLocked(quota, false);
+        assertEquals(false,
+                simpleJdbcTemplate.queryForObject("SELECT bool_locked FROM quota WHERE pk_quota=?",
+                		Boolean.class,
+                        quota.getQuotaId()));
+    }
+
+    @Test
     public void testGet() {
         Cluster c = nodeService.createCluster("test", TAGS);
         Quota q1 = quotaDao.create(TEST_PROJECT, c, 10, 100);

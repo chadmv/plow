@@ -106,12 +106,11 @@ struct QuotaT {
     1:common.Guid id,
     2:common.Guid clusterId,
     3:common.Guid projectId,
-    4:string clusterName,
-    5:string projectName
-    6:bool locked,
-    7:i32 totalCores,
-    8:i32 burstCores,
-    9:i32 freeCores,
+    4:string name,
+    5:bool isLocked,
+    6:i32 size,
+    7:i32 burst,
+    8:i32 runCores
 }
 
 struct NodeSystemT {
@@ -295,6 +294,11 @@ struct NodeFilterT {
     6:list<LockState> lockStates
 }
 
+struct QuotaFilterT {
+    1:optional list<common.Guid> project,
+    2:optional list<common.Guid> cluster
+}
+
 struct OutputT {
     1:string path,
     2:common.Attrs attrs
@@ -347,4 +351,11 @@ service RpcService {
     void setClusterTags(1:common.Guid id, 2:set<string> tags) throws (1:PlowException e),
     void setClusterName(1:common.Guid id, 2: string name) throws (1:PlowException e),
     void setDefaultCluster(1:common.Guid id) throws (1:PlowException e),
+
+    QuotaT getQuota(1:common.Guid id) throws (1:PlowException e),
+    list<QuotaT> getQuotas(1:QuotaFilterT filter) throws (1:PlowException e),
+    QuotaT createQuota(1:common.Guid projectId, 2:common.Guid clusterId, 3:i32 size, 4:i32 burst) throws (1:PlowException e),
+    void setQuotaSize(1:common.Guid id, 2:i32 size) throws (1:PlowException e),
+    void setQuotaBurst(1:common.Guid id, 2:i32 burst) throws (1:PlowException e),
+    void setQuotaLocked(1:common.Guid id, 2:bool locked) throws (1:PlowException e)
 }

@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Project;
-import com.breakersoft.plow.Task;
+import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
@@ -25,6 +25,7 @@ import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
 import com.breakersoft.plow.thrift.dao.ThriftProjectDao;
+import com.breakersoft.plow.thrift.dao.ThriftQuotaDao;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 
 @ThriftService
@@ -64,6 +65,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     ThriftClusterDao thriftClusterDao;
+
+    @Autowired
+    ThriftQuotaDao thriftQuotaDao;
 
     @Autowired
     StateManager stateManager;
@@ -284,5 +288,47 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 	@Override
 	public void killTasks(TaskFilterT filter) throws PlowException, TException {
 		stateManager.killTasks(filter);
+	}
+
+	@Override
+	public QuotaT getQuota(String arg0) throws PlowException, TException {
+		return thriftQuotaDao.getQuota(UUID.fromString(arg0));
+	}
+
+	@Override
+	public List<QuotaT> getQuotas(QuotaFilterT arg0) throws PlowException,
+			TException {
+		return thriftQuotaDao.getQuotas(arg0);
+	}
+
+	@Override
+	public QuotaT createQuota(String projId, String clusterId, int size, int burst)
+			throws PlowException, TException {
+		Project proj = projectService.getProject(UUID.fromString(projId));
+		Cluster clus = nodeService.getCluster(UUID.fromString(clusterId));
+		Quota quota = nodeService.createQuota(proj, clus, size, burst);
+		return thriftQuotaDao.getQuota(quota.getQuotaId());
+	}
+
+	@Override
+	public void setQuotaBurst(String id, int value) throws PlowException,
+			TException {
+		Quota quota = nodeService.getQuota(UUID.fromString(id));
+		nodeService.setQuotaBurst(quota, value);
+
+	}
+
+	@Override
+	public void setQuotaLocked(String id, boolean value) throws PlowException,
+			TException {
+		Quota quota = nodeService.getQuota(UUID.fromString(id));
+		nodeService.setQuotaLocked(quota, value);
+	}
+
+	@Override
+	public void setQuotaSize(String id, int value) throws PlowException,
+			TException {
+		Quota quota = nodeService.getQuota(UUID.fromString(id));
+		nodeService.setQuotaSize(quota, value);
 	}
 }

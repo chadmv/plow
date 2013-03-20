@@ -1,8 +1,9 @@
 package com.breakersoft.plow.util;
 
+import java.util.Collection;
 import java.util.UUID;
 
-public class PlowUtils {
+public final class PlowUtils {
 
 	public static boolean isUuid(String s) {
 		try {
@@ -13,5 +14,12 @@ public class PlowUtils {
 
 		}
 		return false;
+	}
+
+	public static boolean isValid(Collection<?> c) {
+		if (c == null) {
+			return false;
+		}
+		return !c.isEmpty();
 	}
 }
