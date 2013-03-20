@@ -19,7 +19,7 @@ import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
-@Transactional(readOnly = true)
+@Transactional(readOnly=true)
 public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
 
     public static final RowMapper<LayerT> MAPPER = new RowMapper<LayerT>() {

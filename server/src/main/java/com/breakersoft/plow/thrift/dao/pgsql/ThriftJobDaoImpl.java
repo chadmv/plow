@@ -21,7 +21,7 @@ import com.breakersoft.plow.util.JdbcUtils;
 import com.google.common.collect.Lists;
 
 @Repository
-@Transactional(readOnly = true)
+@Transactional(readOnly=true)
 public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
 
     public static final RowMapper<JobT> MAPPER = new RowMapper<JobT>() {

@@ -7,12 +7,14 @@ import java.util.UUID;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.thrift.ProjectT;
 import com.breakersoft.plow.thrift.dao.ThriftProjectDao;
 
 @Repository
+@Transactional(readOnly=true)
 public class ThriftProjectDaoImpl extends AbstractDao implements ThriftProjectDao {
 
     public static final RowMapper<ProjectT> MAPPER = new RowMapper<ProjectT>() {

@@ -19,7 +19,7 @@ import com.breakersoft.plow.thrift.NodeT;
 import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
 
 @Repository
-@Transactional(readOnly = true)
+@Transactional(readOnly=true)
 public class ThriftNodeDaoImpl extends AbstractDao implements ThriftNodeDao {
 
     public static final RowMapper<NodeT> MAPPER = new RowMapper<NodeT>() {
