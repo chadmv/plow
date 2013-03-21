@@ -35,6 +35,16 @@ public class NodeDaoTests extends AbstractTest {
     }
 
     @Test
+    public void update() {
+        Ping ping = getTestNodePing();
+        Cluster cluster = clusterDao.create("test", TAGS);
+        Node node = nodeDao.create(cluster, ping);
+        nodeDao.update(node, ping);
+        ping.isReboot = true;
+        nodeDao.update(node, ping);
+    }
+
+    @Test
     public void allocateResources() {
         Ping ping = getTestNodePing();
         Cluster cluster = clusterDao.create("test", TAGS);
