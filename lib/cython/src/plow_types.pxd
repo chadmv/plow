@@ -1,43 +1,50 @@
-from libcpp.set cimport set
 from libcpp.string cimport string
 from libcpp.vector cimport vector
+from libcpp.set cimport set
+from libcpp.map cimport map 
 
-from common_types cimport *
+
+
+cdef extern from "rpc/common_types.h" namespace "Plow":
+    ctypedef string Guid
+    ctypedef int Timestamp
+    ctypedef map[string, string] Attrs
+
+
 
 cdef extern from "rpc/plow_types.h" namespace "Plow":
 
-    ctypedef enum enum_type:
-        pass
+    ctypedef enum JobState_type "Plow::JobState::type":
+        JOBSTATE_INITIALIZE "Plow::JobState::INITIALIZE"
+        JOBSTATE_RUNNING "Plow::JobState::RUNNING"
+        JOBSTATE_FINISHED "Plow::JobState::FINISHED" 
 
-    ctypedef enum JobState_type:
-        pass
+    ctypedef enum TaskState_type "Plow::TaskState::type":
+        TASKSTATE_INITIALIZE "Plow::TaskState::INITIALIZE"
+        TASKSTATE_WAITING "Plow::TaskState::WAITING" 
+        TASKSTATE_RUNNING "Plow::TaskState::RUNNING"
+        TASKSTATE_DEAD "Plow::TaskState::DEAD"
+        TASKSTATE_EATEN "Plow::TaskState::EATEN"
+        TASKSTATE_DEPEND "Plow::TaskState::DEPEND"
+        TASKSTATE_SUCCEEDED "Plow::TaskState::SUCCEEDED"
 
-    struct JobState:
-        JobState_type type
+    ctypedef enum NodeState_type "Plow::NodeState::type":
+        NODESTATE_INITIALIZE "Plow::NodeState::UP"
+        NODESTATE_RUNNING "Plow::NodeState::DOWN"
+        NODESTATE_FINISHED "Plow::NodeState::REPAIR" 
 
-    ctypedef enum TaskState_type:
-        pass
+    ctypedef enum LockState_type "Plow::LockState::type":
+        LOCKSTATE_OPEN "Plow::LockState::OPEN"
+        LOCKSTATE_LOCKED "Plow::LockState::LOCKED"
 
-    struct TaskState:
-        TaskState_type type
+    ctypedef enum DependType_type "Plow::DependType::type":
+        JOB_ON_JOB"Plow::DependType::JOB_ON_JOB"
+        LAYER_ON_LAYER "Plow::DependType::LAYER_ON_LAYER"
+        LAYER_ON_TASK "Plow::DependType::LAYER_ON_TASK"
+        TASK_ON_LAYER "Plow::DependType::TASK_ON_LAYER"
+        TASK_ON_TASK "Plow::DependType::TASK_ON_TASK"
+        TASK_BY_TASK "Plow::DependType::TASK_BY_TASK"
 
-    ctypedef enum NodeState_type:
-        pass
-
-    struct NodeState:
-        NodeState_type type
-
-    ctypedef enum LockState_type:
-        pass
-
-    struct LockState:
-        LockState_type type
-
-    ctypedef enum DependType_type:
-        pass
-
-    struct DependType:
-        DependType_type type        
 
     cdef cppclass PlowException:
         int what
@@ -110,8 +117,8 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string clusterName
         string ipaddr
         set[string] tags
-        enum_type state
-        enum_type lockState
+        JobState_type state
+        LockState_type lockState
         Timestamp createdTime
         Timestamp updatedTime
         Timestamp bootTime
@@ -138,7 +145,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string name
         string username
         int uid
-        enum_type state
+        JobState_type state
         bint paused
         int minCores
         int maxCores
@@ -169,7 +176,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int number
         int dependCount
         int order
-        enum_type state
+        TaskState_type state
         int startTime
         int stopTime
         string lastNodeName
@@ -194,7 +201,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[JobT] jobs
 
     cdef cppclass DependSpecT:
-        enum_type type
+        DependType_type type
         string dependentJob
         string dependOnJob
         string dependentLayer
@@ -230,18 +237,18 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[DependSpecT] depends
 
     cdef cppclass JobFilterT:
-        bint matchinOnly
+        bint matchingOnly
         vector[string] project 
         vector[string] user 
         string regex 
-        vector[enum_type] states 
+        vector[JobState_type] states 
         vector[Guid] jobIds
         vector[string] name 
 
     cdef cppclass TaskFilterT:
         Guid jobId 
         vector[Guid] layerIds
-        vector[enum_type] states 
+        vector[TaskState_type] states 
         vector[Guid] taskIds
         int limit 
         int offset 
@@ -252,9 +259,12 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[Guid] clusterIds
         string regex
         vector[string] hostnames
-        vector[enum_type] states
-        vector[enum_type] lockStates
+        vector[NodeState_type] states
+        vector[LockState_type] lockStates
 
     cdef cppclass OutputT:
         string path 
         Attrs attrs
+
+
+

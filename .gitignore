@@ -21,3 +21,4 @@ lib/python/etc
 lib/python/__dist__
 *.so
 plow.cpp
+plow.html

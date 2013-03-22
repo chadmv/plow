@@ -67,8 +67,7 @@ setup(
     },
 
     # stand-alone scripts from the root bin
-    scripts= \
-        [p for p in glob.glob(os.path.join(BIN_DST_DIR, "*")) if not p.endswith('rndaemon')] 
+    scripts=[p for p in glob.glob(os.path.join(BIN_DST_DIR, "*")) if not p.endswith('rndaemon')],
 
     # TODO: Some tests need to be made runable without an independant server
     test_suite="tests.test_all",

@@ -5,7 +5,7 @@ from libcpp.set cimport set
 from plow_types cimport *
 
 
-cdef extern from "rpc/RpcService.h" namespace "Plow":
+cdef extern from "rpc/RpcService.h" namespace "Plow" nogil: 
     cdef cppclass RpcServiceClient:
         int getPlowTime() nogil except +
         void getProject(ProjectT&, Guid&) nogil except +
@@ -40,11 +40,11 @@ cdef extern from "rpc/RpcService.h" namespace "Plow":
         bint lockCluster(Guid&, bint locked) nogil except +
         void setClusterTags(Guid&, set[string]&) nogil except +
         void setClusterName(Guid&, string&) nogil except +
-        void setDefaultCluster(Guid&)
+        void setDefaultCluster(Guid&) nogil except +
 
 
 cdef extern from "client.h" namespace "Plow":
     cdef cppclass PlowClient:
-        RpcServiceClient proxy()
+        RpcServiceClient proxy() nogil
 
     cdef PlowClient* getClient() nogil except +
