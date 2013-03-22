@@ -18,4 +18,6 @@ public interface NodeDao {
 
     void freeResources(Node node, int cores, int memory);
 
+	void update(Node node, Ping ping);
+
 }

@@ -38,12 +38,6 @@ public class NodeServiceImpl implements NodeService {
     QuotaDao quotaDao;
 
     @Override
-    public boolean nodeExists(String hostname) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
     public Node createNode(Ping ping) {
         Cluster cluster = clusterDao.getDefaultCluster();
         return nodeDao.create(cluster, ping);

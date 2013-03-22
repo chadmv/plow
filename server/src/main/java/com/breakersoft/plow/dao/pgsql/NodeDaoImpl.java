@@ -97,6 +97,52 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
         return node;
     }
 
+    private static final String FULL_UPDATE =
+		JdbcUtils.Update("plow.node_sys",
+	        "pk_node",
+	        "int_phys_cores",
+	        "int_log_cores",
+	        "int_ram",
+	        "int_free_ram",
+	        "int_swap",
+	        "int_free_swap",
+	        "time_booted",
+	        "str_cpu_model",
+	        "str_platform");
+
+    private static final String UPDATE =
+		JdbcUtils.Update("plow.node_sys",
+	        "pk_node",
+	        "int_free_ram",
+	        "int_free_swap");
+
+    @Override
+    public void update(Node node, Ping ping) {
+
+    	jdbc.update("UPDATE plow.node SET " +
+    			"time_updated=plow.txTimeMillis() WHERE pk_node=?", node.getNodeId());
+
+    	if (ping.isReboot) {
+	        jdbc.update(FULL_UPDATE,
+	                ping.hw.physicalCpus,
+	                ping.hw.logicalCpus,
+	                ping.hw.totalRamMb,
+	                ping.hw.freeRamMb,
+	                ping.hw.totalSwapMb,
+	                ping.hw.freeSwapMb,
+	                ping.bootTime,
+	                ping.hw.cpuModel,
+	                ping.hw.platform,
+	                node.getNodeId());
+    	}
+    	else {
+	        jdbc.update(UPDATE,
+	                ping.hw.freeRamMb,
+	                ping.hw.freeSwapMb,
+	                node.getNodeId());
+    	}
+    }
+
     public static final RowMapper<Node> MAPPER = new RowMapper<Node>() {
         @Override
         public Node mapRow(ResultSet rs, int rowNum)

@@ -31,7 +31,7 @@ public final class JdbcUtils {
             sb.append("=?,");
         }
         sb.deleteCharAt(sb.length()-1);
-        sb.append("WHERE ");
+        sb.append(" WHERE ");
         sb.append(keyCol);
         sb.append("=?");
         return sb.toString();
