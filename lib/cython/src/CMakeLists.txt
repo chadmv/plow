@@ -16,7 +16,8 @@ set_source_files_properties(
   PROPERTIES CYTHON_IS_CXX TRUE )
 
 # Multi-file cython modules do not appear to be working at the moment.
-cython_add_module( plow plow.pyx ${src_files} )
+set(DYNAMIC_LOOKUP "TRUE")
+cython_add_module( plow DYNAMIC_LOOKUP plow.pyx ${src_files} )
 
 add_dependencies(plow Thrift)
 target_link_libraries(plow Thrift ${Boost_THREAD_LIBRARY})

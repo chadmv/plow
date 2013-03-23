@@ -21,9 +21,6 @@ find_package (Thrift REQUIRED)
 
 include( UseCython )
 
-set(EXTERNAL_INCLUDE_DIRS ${EXTERNAL_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
-
-
 add_custom_target( ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/ReplicatePythonSourceTree.cmake
   ${CMAKE_CURRENT_BINARY_DIR}
