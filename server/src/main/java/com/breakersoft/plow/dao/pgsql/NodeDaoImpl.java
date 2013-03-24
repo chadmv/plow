@@ -225,4 +225,10 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     public void freeResources(Node node, int cores, int memory) {
         jdbc.update(FREE_RESOURCES, cores, memory, node.getNodeId());
     }
+
+    @Override
+    public void setLocked(Node node, boolean locked) {
+    	jdbc.update("UPDATE plow.node SET bool_locked=? WHERE pk_node=?", locked, node.getNodeId());
+    }
+
 }

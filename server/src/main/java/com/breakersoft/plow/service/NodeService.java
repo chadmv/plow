@@ -21,6 +21,8 @@ public interface NodeService {
     Node createNode(Ping ping);
     Node getNode(String hostname);
     void updateNode(Node node, Ping ping);
+    void setNodeLocked(Node node, boolean locked);
+    Node getNode(UUID id);
 
     /*
      * Quotas

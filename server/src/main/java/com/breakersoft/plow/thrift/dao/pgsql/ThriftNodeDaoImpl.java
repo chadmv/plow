@@ -31,8 +31,7 @@ public class ThriftNodeDaoImpl extends AbstractDao implements ThriftNodeDao {
             NodeT node = new NodeT();
             node.setId(rs.getString("pk_node"));
             node.setName(rs.getString("str_name"));
-            node.setLockState(LockState.findByValue(
-                    rs.getInt("int_lock_state")));
+            node.setLocked(rs.getBoolean("bool_locked"));
             node.setState(NodeState.findByValue(
                     rs.getInt("int_state")));
 
@@ -75,7 +74,7 @@ public class ThriftNodeDaoImpl extends AbstractDao implements ThriftNodeDao {
                 "node.pk_cluster,"+
                 "node.str_name,"+
                 "node.int_state, "+
-                "node.int_lock_state,"+
+                "node.bool_locked,"+
                 "node.time_created,"+
                 "node.time_updated,"+
                 "node.str_tags,"+

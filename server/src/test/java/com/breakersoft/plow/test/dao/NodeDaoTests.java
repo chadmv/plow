@@ -18,7 +18,7 @@ import com.breakersoft.plow.test.AbstractTest;
 public class NodeDaoTests extends AbstractTest {
 
     @Resource
-    NodeDao nodeDao;;
+    NodeDao nodeDao;
 
     @Resource
     ClusterDao clusterDao;
@@ -32,6 +32,18 @@ public class NodeDaoTests extends AbstractTest {
         Node node = nodeDao.create(cluster, ping);
         assertEquals(cluster.getClusterId(), node.getClusterId());
         assertEquals(ping.getHostname(), node.getName());
+    }
+
+    @Test
+    public void lock() {
+        Ping ping = getTestNodePing();
+        Cluster cluster = clusterDao.create("test", TAGS);
+        Node node = nodeDao.create(cluster, ping);
+        nodeDao.setLocked(node, true);
+
+        boolean locked = jdbc().queryForObject(
+        		"SELECT bool_locked FROM plow.node WHERE pk_node=?", Boolean.class, node.getNodeId());
+        assertEquals(true, locked);
     }
 
     @Test

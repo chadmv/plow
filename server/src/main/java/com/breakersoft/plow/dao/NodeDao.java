@@ -20,4 +20,6 @@ public interface NodeDao {
 
 	void update(Node node, Ping ping);
 
+	void setLocked(Node node, boolean locked);
+
 }

@@ -144,4 +144,14 @@ public class NodeServiceImpl implements NodeService {
     public boolean setProcUnbooked(Proc proc, boolean unbooked) {
         return procDao.setProcUnbooked(proc, unbooked);
     }
+
+	@Override
+	public void setNodeLocked(Node node, boolean locked) {
+		nodeDao.setLocked(node, locked);
+	}
+
+	@Override
+	public Node getNode(UUID id) {
+		return nodeDao.get(id);
+	}
 }

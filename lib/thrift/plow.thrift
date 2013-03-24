@@ -41,11 +41,6 @@ enum NodeState {
     REPAIR
 }
 
-enum LockState {
-    OPEN,
-    LOCKED
-}
-
 enum DependType {
     JOB_ON_JOB,
     LAYER_ON_LAYER,
@@ -134,7 +129,7 @@ struct NodeT {
     5:string ipaddr,
     6:set<string> tags,
     7:NodeState state,
-    8:LockState lockState,
+    8:bool locked,
     9:common.Timestamp createdTime,
     10:common.Timestamp updatedTime,
     11:common.Timestamp bootTime,
@@ -292,7 +287,7 @@ struct NodeFilterT {
     3:string regex,
     4:list<string> hostnames,
     5:list<NodeState> states,
-    6:list<LockState> lockStates
+    6:optional bool locked
 }
 
 struct QuotaFilterT {
@@ -355,6 +350,7 @@ service RpcService {
 
     NodeT getNode(1:string name) throws (1:PlowException e),
     list<NodeT> getNodes(1:NodeFilterT filter) throws (1:PlowException e),
+    void setNodeLocked(1:common.Guid id, 2:bool locked) throws (1:PlowException e)
 
     ClusterT getCluster(1:string name) throws (1:PlowException e),
     list<ClusterT> getClustersByTag(1:string tag) throws (1:PlowException e),

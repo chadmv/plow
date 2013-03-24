@@ -13,6 +13,7 @@ import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
+import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.event.JobLaunchEvent;
@@ -427,5 +428,12 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 			TException {
 		Folder folder = projectService.getFolder(UUID.fromString(id));
 		projectService.setFolderName(folder, name);
+	}
+
+	@Override
+	public void setNodeLocked(String id, boolean value) throws PlowException,
+			TException {
+		Node node = nodeService.getNode(UUID.fromString(id));
+		nodeService.setNodeLocked(node, value);
 	}
 }
