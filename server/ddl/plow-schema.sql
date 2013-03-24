@@ -86,8 +86,8 @@ CREATE INDEX folder_dsp_float_tier_idx ON plow.folder_dsp (float_tier);
 
 CREATE TABLE plow.job (
   pk_job UUID NOT NULL PRIMARY KEY,
-  pk_project UUID NOT NULL REFERENCES plow.folder(pk_folder),
-  pk_folder UUID,
+  pk_project UUID NOT NULL REFERENCES plow.project(pk_project),
+  pk_folder UUID REFERENCES plow.folder(pk_folder),
   str_name VARCHAR(160) NOT NULL,
   str_active_name VARCHAR(160),
   str_username VARCHAR(100) NOT NULL,
