@@ -12,6 +12,7 @@ __all__ = [
     "get_project",
     "get_active_projects",
     "create_project",
+    "set_project_active",
     "get_plow_time",
     "get_jobs",
     "get_active_job",
@@ -64,14 +65,17 @@ def get_projects():
 def get_active_projects():
     return Conn.service.getActiveProjects()
 
-def get_project(identifer):
-    if is_uuid(identifer):
-        return Conn.service.getProject(identifer)
+def get_project(identifier):
+    if is_uuid(identifier):
+        return Conn.service.getProject(identifier)
     else:
         return Conn.service.getProjectByCode(identifier)
 
 def create_project(title, code):
     return Conn.service.createProject(title, code)
+
+def set_project_active(proj, active):
+    return Conn.service.setProjectActive(proj.id, active)
 
 # Quotas
 

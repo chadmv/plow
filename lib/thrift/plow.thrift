@@ -314,6 +314,7 @@ service RpcService {
     list<ProjectT> getProjects() throws (1:PlowException e),
     list<ProjectT> getActiveProjects() throws (1:PlowException e),
     ProjectT createProject(1:string title, 2:string code) throws (1:PlowException e),
+    void setProjectActive(1:common.Guid id, 2:bool active) throws (1:PlowException e),
 
     JobT launch(1:JobSpecT spec) throws (1:PlowException e),
     JobT getActiveJob(1:string name) throws (1:PlowException e),

@@ -379,4 +379,11 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 		jobService.setLayerThreadable(layer, threadable);
 
 	}
+
+	@Override
+	public void setProjectActive(String id, boolean value)
+			throws PlowException, TException {
+		Project project = projectService.getProject(UUID.fromString(id));
+		projectService.setProjectActive(project, value);
+	}
 }

@@ -54,4 +54,9 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> getProjects() {
         return projectDao.getAll();
     }
+
+	@Override
+	public void setProjectActive(Project project, boolean value) {
+		projectDao.setActive(project, value);
+	}
 }

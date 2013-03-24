@@ -16,4 +16,5 @@ public interface ProjectService {
 
     List<Project> getProjects();
 
+    void setProjectActive(Project project, boolean value);
 }
