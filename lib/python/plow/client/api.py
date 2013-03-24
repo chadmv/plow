@@ -43,6 +43,11 @@ __all__ = [
     "set_quota_size",
     "set_quota_burst",
     "set_quota_locked",
+    "set_layer_min_cores",
+    "set_layer_max_cores",
+    "set_layer_min_ram_mb",
+    "set_layer_threadable",
+    "set_layer_tags",
     "retry_tasks",
     "kill_tasks",
     "eat_tasks"
@@ -169,6 +174,21 @@ def add_layer_output(layer, path, attrs=None):
     if attrs is None:
         attrs = dict()
     Conn.service.addOutput(str(layer.id), str(path), attrs)
+
+def set_layer_min_cores(layer, cores):
+    Conn.service.setLayerMinCoresPerTask(layer.id, cores)
+
+def set_layer_max_cores(layer, cores):
+    Conn.service.setLayerMaxCoresPerTask(layer.id, cores)
+
+def set_layer_min_ram_mb(layer, ram):
+    Conn.service.setLayerMinRamPerTask(layer.id, ram)
+
+def set_layer_threadable(layer, enabled):
+    Conn.service.setLayerThreadable(layer.id, enabled)
+
+def set_layer_tags(layer, tags):
+    Conn.service.setLayerTags(layer.id, tags)
 
 # Tasks
 
