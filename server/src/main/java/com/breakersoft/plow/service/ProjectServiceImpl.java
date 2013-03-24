@@ -61,17 +61,17 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 
 	@Override
-	public void setMaxCores(Folder folder, int value) {
+	public void setFolderMaxCores(Folder folder, int value) {
 		folderDao.setMaxCores(folder, value);
 	}
 
 	@Override
-	public void setMinCores(Folder folder, int value) {
+	public void setFolderMinCores(Folder folder, int value) {
 		folderDao.setMinCores(folder, value);
 	}
 
 	@Override
-	public void setName(Folder folder, String name) {
+	public void setFolderName(Folder folder, String name) {
 		folderDao.setName(folder, name);
 	}
 

@@ -18,11 +18,11 @@ public interface ProjectService {
 
     void setProjectActive(Project project, boolean value);
 
-	void setMaxCores(Folder folder, int value);
+	void setFolderMaxCores(Folder folder, int value);
 
-	void setMinCores(Folder folder, int value);
+	void setFolderMinCores(Folder folder, int value);
 
-	void setName(Folder folder, String name);
+	void setFolderName(Folder folder, String name);
 
 	void deleteFolder(Folder folder);
 
