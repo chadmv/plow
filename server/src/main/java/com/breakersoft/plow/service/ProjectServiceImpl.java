@@ -74,4 +74,9 @@ public class ProjectServiceImpl implements ProjectService {
 	public void setName(Folder folder, String name) {
 		folderDao.setName(folder, name);
 	}
+
+	@Override
+	public void deleteFolder(Folder folder) {
+		folderDao.delete(folder);
+	}
 }

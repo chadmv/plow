@@ -110,4 +110,10 @@ public class FolderDaoImpl extends AbstractDao implements FolderDao {
     	jdbc.update("UPDATE plow.folder SET str_name=? WHERE pk_folder=?",
     			name, folder.getFolderId());
     }
+
+    @Override
+    public void delete(Folder folder) {
+    	jdbc.update("DELETE FROM plow.folder WHERE pk_folder=?", folder.getFolderId());
+    }
+
 }

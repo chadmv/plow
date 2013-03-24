@@ -18,4 +18,6 @@ public interface FolderDao {
 	void setMinCores(Folder folder, int value);
 
 	void setName(Folder folder, String name);
+
+	void delete(Folder folder);
 }

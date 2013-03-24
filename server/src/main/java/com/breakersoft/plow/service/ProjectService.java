@@ -23,4 +23,7 @@ public interface ProjectService {
 	void setMinCores(Folder folder, int value);
 
 	void setName(Folder folder, String name);
+
+	void deleteFolder(Folder folder);
+
 }
