@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Folder;
+import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.event.JobLaunchEvent;
@@ -330,5 +331,41 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 			TException {
 		Quota quota = nodeService.getQuota(UUID.fromString(id));
 		nodeService.setQuotaSize(quota, value);
+	}
+
+	@Override
+	public void setLayerMaxCoresPerTask(String id, int cores)
+			throws PlowException, TException {
+		Layer layer = jobService.getLayer(UUID.fromString(id));
+		jobService.setLayerMaxCores(layer, cores);
+	}
+
+	@Override
+	public void setLayerMinCoresPerTask(String id, int cores)
+			throws PlowException, TException {
+		Layer layer = jobService.getLayer(UUID.fromString(id));
+		jobService.setLayerMinCores(layer, cores);
+	}
+
+	@Override
+	public void setLayerMinRamPerTask(String id, int ram)
+			throws PlowException, TException {
+		Layer layer = jobService.getLayer(UUID.fromString(id));
+		jobService.setLayerMinRam(layer, ram);
+	}
+
+	@Override
+	public void setLayerTags(String id, Set<String> tags)
+			throws PlowException, TException {
+		Layer layer = jobService.getLayer(UUID.fromString(id));
+		jobService.setLayerTags(layer, tags);
+	}
+
+	@Override
+	public void setLayerThreadable(String id, boolean threadable)
+			throws PlowException, TException {
+		Layer layer = jobService.getLayer(UUID.fromString(id));
+		jobService.setLayerThreadable(layer, threadable);
+
 	}
 }

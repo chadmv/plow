@@ -1,9 +1,13 @@
 package com.breakersoft.plow.util;
 
+import java.sql.Array;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.jdbc.core.RowMapper;
 
 import com.breakersoft.plow.thrift.TaskTotalsT;
 
@@ -64,5 +68,16 @@ public final class JdbcUtils {
         return t;
     }
 
+    public static final Array toArray(Connection conn, Collection<String> col) throws SQLException {
+    	return conn.createArrayOf("text", col.toArray());
+    }
 
+    public static final RowMapper<String> STRING_MAPPER = new RowMapper<String>() {
+        @Override
+        public String mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+        	return rs.getString(1);
+        }
+    };
 }
+

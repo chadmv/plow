@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -274,4 +275,29 @@ public class JobServiceImpl implements JobService {
             taskDao.updateTaskDispatchData(task);
         }
     }
+
+	@Override
+	public void setLayerMinCores(Layer layer, int cores) {
+		layerDao.setMinCores(layer, cores);
+	}
+
+	@Override
+	public void setLayerMaxCores(Layer layer, int cores) {
+		layerDao.setMaxCores(layer, cores);
+	}
+
+	@Override
+	public void setLayerMinRam(Layer layer, int ram) {
+		layerDao.setMinRam(layer, ram);
+	}
+
+	@Override
+	public void setLayerTags(Layer layer, Set<String> tags) {
+		layerDao.setTags(layer, tags);
+	}
+
+	@Override
+	public void setLayerThreadable(Layer layer, boolean threadable) {
+		layerDao.setThreadable(layer, threadable);
+	}
 }

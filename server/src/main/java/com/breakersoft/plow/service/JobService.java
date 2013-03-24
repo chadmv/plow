@@ -2,6 +2,7 @@ package com.breakersoft.plow.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.breakersoft.plow.Job;
@@ -56,4 +57,13 @@ public interface JobService {
     boolean setTaskState(Task task, TaskState currentState, TaskState newState);
 
 	boolean setTaskState(Task task, TaskState state);
+
+	/*
+	 * Layers
+	 */
+	void setLayerMinCores(Layer layer, int cores);
+	void setLayerMaxCores(Layer layer, int cores);
+	void setLayerMinRam(Layer layer, int ram);
+	void setLayerTags(Layer layer, Set<String> tags);
+	void setLayerThreadable(Layer layer, boolean threadable);
 }

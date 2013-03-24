@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -175,5 +176,45 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
                 return ret;
             }
         });
+    }
+
+    @Override
+    public void setMinCores(Layer layer, int cores) {
+    	jdbc.update("UPDATE plow.layer SET int_min_cores=? WHERE pk_layer=?",
+    			cores, layer.getLayerId());
+    }
+
+    @Override
+    public void setMaxCores(Layer layer, int cores) {
+    	jdbc.update("UPDATE plow.layer SET int_max_cores=? WHERE pk_layer=?",
+    			cores, layer.getLayerId());
+    }
+
+    @Override
+    public void setMinRam(Layer layer, int memory) {
+    	jdbc.update("UPDATE plow.layer SET int_min_ram=? WHERE pk_layer=?",
+    			memory, layer.getLayerId());
+    }
+
+    @Override
+    public void setThreadable(Layer layer, boolean threadable) {
+    	jdbc.update("UPDATE plow.layer SET bool_threadable=? WHERE pk_layer=?",
+    			threadable, layer.getLayerId());
+    }
+
+    private static final String UPDATE_TAGS =
+    		"UPDATE plow.layer SET str_tags=? WHERE pk_layer=?";
+
+    @Override
+    public void setTags(final Layer layer, final Set<String> tags) {
+    	 jdbc.update(new PreparedStatementCreator() {
+             @Override
+             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
+                 final PreparedStatement ret = conn.prepareStatement(UPDATE_TAGS);
+                 ret.setObject(1, JdbcUtils.toArray(conn, tags));
+                 ret.setObject(2, layer.getLayerId());
+                 return ret;
+             }
+         });
     }
 }

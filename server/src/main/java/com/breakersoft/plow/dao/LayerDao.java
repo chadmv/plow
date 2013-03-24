@@ -1,6 +1,7 @@
 package com.breakersoft.plow.dao;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.breakersoft.plow.FrameRange;
@@ -27,4 +28,14 @@ public interface LayerDao {
     boolean updateMaxRssMb(UUID layerId, int value);
 
     boolean updateMaxCpuPerc(UUID layerId, int value);
+
+    void setMinCores(Layer layer, int cores);
+
+	void setMaxCores(Layer layer, int cores);
+
+	void setMinRam(Layer layer, int memory);
+
+	void setThreadable(Layer layer, boolean threadable);
+
+	void setTags(Layer layer, Set<String> tags);
 }
