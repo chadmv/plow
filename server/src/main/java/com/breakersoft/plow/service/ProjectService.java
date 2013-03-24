@@ -26,4 +26,6 @@ public interface ProjectService {
 
 	void deleteFolder(Folder folder);
 
+	Folder getFolder(UUID id);
+
 }

@@ -61,6 +61,11 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 
 	@Override
+    public Folder getFolder(UUID id) {
+    	return folderDao.get(id);
+    }
+
+	@Override
 	public void setFolderMaxCores(Folder folder, int value) {
 		folderDao.setMaxCores(folder, value);
 	}
