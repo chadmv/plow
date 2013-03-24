@@ -87,7 +87,7 @@ public class ProcDaoTests extends AbstractTest {
 
     @Test
     public void testProcsByJob() {
-        Job job = jobService.getJob(task.getJobId().toString());
+        Job job = jobService.getJob(task.getJobId());
         List<Proc> procs = procDao.getProcs(job);
         assertEquals(1, procs.size());
         assertEquals(proc.getProcId(), procs.get(0).getProcId());

@@ -1,5 +1,7 @@
 package com.breakersoft.plow.dispatcher;
 
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,7 +41,7 @@ public class TaskCompleteHandler {
     public void taskComplete(RunTaskResult result) {
 
         Task task = jobService.getTask(result.taskId);
-        Job job = jobService.getJob(result.jobId);
+        Job job = jobService.getJob(UUID.fromString(result.jobId));
         DispatchProc proc = dispatchService.getDispatchProc(result.procId);
 
         TaskState newState;
