@@ -17,15 +17,23 @@ cdef class Project:
 
     property id:
         def __get__(self):
-            return self.project.id
+            cdef Guid id_ = self.project.id
+            return id_
 
     property name:
         def __get__(self):
-            return self.project.name
+            cdef string code = self.project.code
+            return code
 
     property title:
         def __get__(self):
-            return self.project.title
+            cdef string title = self.project.title
+            return title
+
+    property isActive:
+        def __get__(self):
+            cdef bint val = self.project.isActive
+            return val
 
     def get_folders(self):
         cdef:
@@ -42,6 +50,9 @@ cdef class Project:
         results = [initFolder(foldT) for foldT in folders]
         return results
 
+    def set_active(self, bint active):
+        set_project_active(self.id, active)
+
 cpdef get_project_by_id(Guid& guid):
     cdef: 
         ProjectT projT 
@@ -52,12 +63,12 @@ cpdef get_project_by_id(Guid& guid):
     return project
 
 
-def get_project_by_name(string name):
+def get_project_by_code(string code):
     cdef: 
         ProjectT projT 
         Project project
 
-    getClient().proxy().getProjectByName(projT, name)
+    getClient().proxy().getProjectByCode(projT, code)
     project = initProject(projT)
     return project
 
@@ -76,5 +87,31 @@ def get_projects():
 
     results = [initProject(projT) for projT in projects] 
     return results
+
+def get_active_projects():
+    cdef:
+        vector[ProjectT] projects 
+        ProjectT projT
+        list results
+
+    try:
+        getClient().proxy().getActiveProjects(projects)
+    except:
+        results = []
+        return results
+
+    results = [initProject(projT) for projT in projects] 
+    return results    
+
+def create_project(string title, string code):
+    cdef ProjectT projT
+    cdef Project proj 
+    getClient().proxy().createProject(projT, title, code)
+    proj = initProject(projT)
+    return proj
+
+cpdef inline set_project_active(Guid& id, bint active):
+    getClient().proxy().setProjectActive(id, active)
+
 
  
