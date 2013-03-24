@@ -323,14 +323,20 @@ service RpcService {
     void pauseJob(1:common.Guid jobId, 2:bool paused) throws (1:PlowException e),
     list<JobT> getJobs(1:JobFilterT filter) throws (1:PlowException e),
     list<OutputT> getJobOutputs(1:common.Guid jobId) throws (1:PlowException e),
+    void setJobMinCores(1:common.Guid jobId, 2:i32 value) throws (1:PlowException e),
+    void setJobMaxCores(1:common.Guid jobId, 2:i32 value) throws (1:PlowException e),
 
     FolderT createFolder(1:string projectId, 2:string name) throws (1:PlowException e),
     FolderT getFolder(1:string id) throws (1:PlowException e),
     list<FolderT> getJobBoard(1:common.Guid project) throws (1:PlowException e),
     list<FolderT> getFolders(1:common.Guid project) throws (1:PlowException e),
+    void setFolderMinCores(1:common.Guid folderId, 2:i32 value) throws (1:PlowException e),
+    void setFolderMaxCores(1:common.Guid folderId, 2:i32 value) throws (1:PlowException e),
+    void setFolderName(1:common.Guid folderId, 2:string name) throws (1:PlowException e),
+    void deleteFolder(1:common.Guid folderId) throws (1:PlowException e),
+
     LayerT getLayerById(1:common.Guid layerId) throws (1:PlowException e),
     LayerT getLayer(1:common.Guid jobId, 2:string name) throws (1:PlowException e),
-
     list<LayerT> getLayers(1:common.Guid jobId) throws (1:PlowException e),
     void addOutput(1:common.Guid layerId, 2:string path, 3:common.Attrs attrs) throws (1:PlowException e)
     list<OutputT> getLayerOutputs(1:common.Guid layerId) throws (1:PlowException e),

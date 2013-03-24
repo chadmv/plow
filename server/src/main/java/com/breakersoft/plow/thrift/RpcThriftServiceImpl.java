@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Folder;
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
@@ -123,7 +124,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Override
     public boolean killJob(String jobId, String reason) throws PlowException, TException {
-        return stateManager.killJob(jobService.getJob(jobId), reason);
+        return stateManager.killJob(jobService.getJob(UUID.fromString(jobId)), reason);
     }
 
     @Override
@@ -140,7 +141,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     @Override
     public void pauseJob(String id, boolean value) throws PlowException,
             TException {
-        jobService.setJobPaused(jobService.getJob(id), value);
+        jobService.setJobPaused(jobService.getJob(UUID.fromString(id)), value);
     }
 
     @Override
@@ -385,5 +386,46 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 			throws PlowException, TException {
 		Project project = projectService.getProject(UUID.fromString(id));
 		projectService.setProjectActive(project, value);
+	}
+
+	@Override
+	public void setJobMaxCores(String id, int cores) throws PlowException,
+			TException {
+		Job job = jobService.getJob(UUID.fromString(id));
+		jobService.setJobMaxCores(job, cores);
+	}
+
+	@Override
+	public void setJobMinCores(String id, int cores) throws PlowException,
+			TException {
+		Job job = jobService.getJob(UUID.fromString(id));
+		jobService.setJobMinCores(job, cores);
+	}
+
+	@Override
+	public void deleteFolder(String id) throws PlowException, TException {
+		Folder folder = projectService.getFolder(UUID.fromString(id));
+		projectService.deleteFolder(folder);
+	}
+
+	@Override
+	public void setFolderMaxCores(String id, int cores) throws PlowException,
+			TException {
+		Folder folder = projectService.getFolder(UUID.fromString(id));
+		projectService.setFolderMaxCores(folder, cores);
+	}
+
+	@Override
+	public void setFolderMinCores(String id, int cores) throws PlowException,
+			TException {
+		Folder folder = projectService.getFolder(UUID.fromString(id));
+		projectService.setFolderMinCores(folder, cores);
+	}
+
+	@Override
+	public void setFolderName(String id, String name) throws PlowException,
+			TException {
+		Folder folder = projectService.getFolder(UUID.fromString(id));
+		projectService.setFolderName(folder, name);
 	}
 }
