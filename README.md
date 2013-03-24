@@ -46,7 +46,7 @@ Setting up Postgres
 Install Postgresql 9.2.
 
 Create a database called 'plow' for user 'plow'.
-set password: abcdefg123
+set password: plow
 (This is configurable in the plow-server-bin/resources/plow.properties )
 
 Execute the sql file:
