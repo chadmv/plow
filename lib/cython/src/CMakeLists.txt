@@ -1,6 +1,6 @@
 
 include_directories( 
-	${Thrift_INCLUDE_DIR}
+	${THRIFT_INCLUDES}
 	${Boost_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/core 
@@ -19,5 +19,5 @@ set_source_files_properties(
 set(DYNAMIC_LOOKUP "TRUE")
 cython_add_module( plow DYNAMIC_LOOKUP plow.pyx ${src_files} )
 
-add_dependencies(plow Thrift)
-target_link_libraries(plow Thrift ${Boost_THREAD_LIBRARY})
+add_dependencies(plow thrift)
+target_link_libraries(plow thrift ${Boost_THREAD_LIBRARY})
