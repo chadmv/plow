@@ -1,4 +1,5 @@
 import os
+import uuid
 
 import rpc.ttypes as ttypes
 
@@ -8,6 +9,9 @@ Conn = PlowConnection()
 
 __all__ = [
     "get_projects",
+    "get_project",
+    "get_active_projects",
+    "create_project",
     "get_plow_time",
     "get_jobs",
     "get_active_job",
@@ -43,12 +47,31 @@ __all__ = [
     "eat_tasks"
 ]
 
+def is_uuid(identifier):
+    try:
+        uuid.UUID(identifier)
+        return True
+    except ValueError:
+        return False
+
 def get_plow_time():
     return Conn.service.getPlowTime()
 
 # Projects
 def get_projects():
     return Conn.service.getProjects()
+
+def get_active_projects():
+    return Conn.service.getActiveProjects()
+
+def get_project(identifer):
+    if is_uuid(identifer):
+        return Conn.service.getProject(identifer)
+    else:
+        return Conn.service.getProjectByCode(identifier)
+
+def create_project(title, code):
+    return Conn.service.createProject(title, code)
 
 # Quotas
 
