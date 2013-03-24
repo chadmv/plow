@@ -1,6 +1,6 @@
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp.set cimport set
+from libcpp.set cimport set as c_set
 from libcpp.map cimport map 
 
 
@@ -61,8 +61,9 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
 
     cdef cppclass ProjectT:
         Guid id
-        string name
+        string code
         string title
+        bint isActive
 
     cdef cppclass ClusterCountsT:
         int nodes
@@ -83,7 +84,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
     cdef cppclass ClusterT:
         Guid id
         string name
-        set[string] tags
+        c_set[string] tags
         bint isLocked
         bint isDefault
         ClusterCountsT total
@@ -116,7 +117,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string name
         string clusterName
         string ipaddr
-        set[string] tags
+        c_set[string] tags
         JobState_type state
         LockState_type lockState
         Timestamp createdTime
@@ -160,7 +161,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string name
         string range
         int chunk
-        set[string] tags
+        c_set[string] tags
         bint threadable
         int minCores
         int maxCores
@@ -216,7 +217,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
     cdef cppclass LayerSpecT:
         string name
         vector[string] command
-        set[string] tags
+        c_set[string] tags
         string range
         int chunk
         int minCores
@@ -261,6 +262,10 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[string] hostnames
         vector[NodeState_type] states
         vector[LockState_type] lockStates
+
+    cdef cppclass QuotaFilterT:
+        vector[Guid] project
+        vector[Guid] cluster
 
     cdef cppclass OutputT:
         string path 

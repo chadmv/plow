@@ -72,7 +72,15 @@ cdef class JobSpec:
         s.logPath = self.logPath
         s.paused = self.paused 
         s.uid = self.uid
-        # s.layers = self.layers 
+
+        cdef:
+            LayerSpec aLayer
+            LayerSpecT specT
+
+        for aLayer in self.layers:
+            specT = aLayer.toLayerSpecT()
+            s.layers.push_back(specT)
+
         # s.depends = self.depends
 
         return s
