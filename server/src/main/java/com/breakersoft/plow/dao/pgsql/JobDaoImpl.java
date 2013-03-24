@@ -289,4 +289,16 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         }
         return false;
     }
+
+    @Override
+    public void setMaxCores(Job job, int value) {
+    	jdbc.update("UPDATE plow.job_dsp SET int_max_cores=? WHERE pk_job=?",
+    			value, job.getJobId());
+    }
+
+    @Override
+    public void setMinCores(Job job, int value) {
+    	jdbc.update("UPDATE plow.job_dsp SET int_min_cores=? WHERE pk_job=?",
+    			value, job.getJobId());
+    }
 }

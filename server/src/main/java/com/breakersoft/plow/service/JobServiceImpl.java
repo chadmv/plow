@@ -159,6 +159,15 @@ public class JobServiceImpl implements JobService {
         }
     }
 
+    @Override
+    public void setJobMinCores(Job job, int value) {
+    	jobDao.setMinCores(job, value);
+    }
+
+    @Override
+    public void setJobMaxCores(Job job, int value) {
+    	jobDao.setMaxCores(job, value);
+    }
 
     @Override
     public Job getJob(String id) {

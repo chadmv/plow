@@ -30,6 +30,30 @@ public class JobDaoTests extends AbstractTest {
     }
 
     @Test
+    public void testSetMinCores() {
+    	JobSpecT spec = getTestJobSpec();
+        JobLaunchEvent event = jobService.launch(spec);
+        jobDao.setMinCores(event.getJob(), 101);
+
+        int value = jdbc().queryForInt(
+                "SELECT int_min_cores FROM plow.job_dsp WHERE pk_job=?",
+                event.getJob().getJobId());
+        assertEquals(101, value);
+    }
+
+    @Test
+    public void testSetMaxCores() {
+    	JobSpecT spec = getTestJobSpec();
+        JobLaunchEvent event = jobService.launch(spec);
+        jobDao.setMaxCores(event.getJob(), 101);
+
+        int value = jdbc().queryForInt(
+                "SELECT int_max_cores FROM plow.job_dsp WHERE pk_job=?",
+                event.getJob().getJobId());
+        assertEquals(101, value);
+    }
+
+    @Test
     public void testGetByNameAndState() {
         JobSpecT spec = getTestJobSpec();
         Job jobA = jobDao.create(TEST_PROJECT, spec);

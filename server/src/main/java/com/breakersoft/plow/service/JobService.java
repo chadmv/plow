@@ -17,8 +17,11 @@ import com.breakersoft.plow.thrift.TaskState;
 
 public interface JobService {
 
-    Task getTask(String id);
+	void setJobMaxCores(Job job, int value);
 
+	void setJobMinCores(Job job, int value);
+
+	Task getTask(String id);
 
     boolean hasWaitingFrames(Job job);
 
