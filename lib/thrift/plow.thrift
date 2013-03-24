@@ -350,7 +350,9 @@ service RpcService {
 
     NodeT getNode(1:string name) throws (1:PlowException e),
     list<NodeT> getNodes(1:NodeFilterT filter) throws (1:PlowException e),
-    void setNodeLocked(1:common.Guid id, 2:bool locked) throws (1:PlowException e)
+    void setNodeLocked(1:common.Guid id, 2:bool locked) throws (1:PlowException e),
+    void setNodeCluster(1:common.Guid id, 2:common.Guid clusterId) throws (1:PlowException e),
+    void setNodeTags(1:common.Guid id, 2:set<string> tags) throws (1:PlowException e),
 
     ClusterT getCluster(1:string name) throws (1:PlowException e),
     list<ClusterT> getClustersByTag(1:string tag) throws (1:PlowException e),

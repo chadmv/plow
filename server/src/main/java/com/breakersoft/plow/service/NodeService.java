@@ -23,6 +23,9 @@ public interface NodeService {
     void updateNode(Node node, Ping ping);
     void setNodeLocked(Node node, boolean locked);
     Node getNode(UUID id);
+	boolean hasProcs(Node node);
+	void setNodeCluster(Node node, Cluster cluster);
+	void setTags(Node node, Set<String> tags);
 
     /*
      * Quotas
@@ -56,5 +59,4 @@ public interface NodeService {
 	List<Proc> getProcs(Job job);
     boolean setProcUnbooked(Proc proc, boolean unbooked);
 	Proc getProc(Task task);
-
 }

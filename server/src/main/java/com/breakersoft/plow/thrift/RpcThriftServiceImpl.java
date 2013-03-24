@@ -17,6 +17,7 @@ import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.event.JobLaunchEvent;
+import com.breakersoft.plow.exceptions.PlowWriteException;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.ProjectService;
@@ -435,5 +436,25 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 			TException {
 		Node node = nodeService.getNode(UUID.fromString(id));
 		nodeService.setNodeLocked(node, value);
+	}
+
+	@Override
+	public void setNodeCluster(String nodeId, String clusterId) throws PlowException,
+			TException {
+		Node node = nodeService.getNode(UUID.fromString(nodeId));
+		if (nodeService.hasProcs(node)) {
+			throw new PlowWriteException("You cannot move a Node with running procs.");
+		}
+
+		Cluster cluster = nodeService.getCluster(UUID.fromString(clusterId));
+		// isolation=Serializable.
+		nodeService.setNodeCluster(node, cluster);
+	}
+
+	@Override
+	public void setNodeTags(String id, Set<String> tags)
+			throws PlowException, TException {
+		Node node = nodeService.getNode(UUID.fromString(id));
+		nodeService.setTags(node, tags);
 	}
 }

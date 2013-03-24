@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -17,6 +18,7 @@ import com.breakersoft.plow.Node;
 import com.breakersoft.plow.NodeE;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.NodeDao;
+import com.breakersoft.plow.exceptions.PlowWriteException;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.util.JdbcUtils;
 
@@ -231,4 +233,34 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     	jdbc.update("UPDATE plow.node SET bool_locked=? WHERE pk_node=?", locked, node.getNodeId());
     }
 
+    @Override
+    public boolean hasProcs(Node node) {
+    	return jdbc.queryForInt("SELECT COUNT(1) FROM proc WHERE pk_node=?", node.getNodeId()) > 0;
+    }
+
+    @Override
+    public void setCluster(Node node, Cluster cluster) {
+    	// Raise exception if the node has running tasks.
+    	if (hasProcs(node)) {
+    		throw new PlowWriteException("You cannot move nodes while they have running procs");
+    	}
+    	jdbc.update("UPDATE plow.node SET pk_cluster=? WHERE pk_node=?",
+    			cluster.getClusterId(), node.getNodeId());
+    }
+
+    private static final String UPDATE_TAGS =
+    		"UPDATE plow.node SET str_tags=? WHERE pk_node=?";
+
+    @Override
+    public void setTags(final Node node, final Set<String> tags) {
+    	 jdbc.update(new PreparedStatementCreator() {
+             @Override
+             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
+                 final PreparedStatement ret = conn.prepareStatement(UPDATE_TAGS);
+                 ret.setObject(1, JdbcUtils.toArray(conn, tags));
+                 ret.setObject(2, node.getNodeId());
+                 return ret;
+             }
+         });
+    }
 }

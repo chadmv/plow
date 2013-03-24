@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Cluster;
@@ -153,5 +154,21 @@ public class NodeServiceImpl implements NodeService {
 	@Override
 	public Node getNode(UUID id) {
 		return nodeDao.get(id);
+	}
+
+	@Override
+	public boolean hasProcs(Node node) {
+		return nodeDao.hasProcs(node);
+	}
+
+	@Override
+	@Transactional(isolation=Isolation.SERIALIZABLE)
+	public void setNodeCluster(Node node, Cluster cluster) {
+		nodeDao.setCluster(node, cluster);
+	}
+
+	@Override
+	public void setTags(Node node, Set<String> tags) {
+		nodeDao.setTags(node, tags);
 	}
 }

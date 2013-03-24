@@ -1,5 +1,6 @@
 package com.breakersoft.plow.dao;
 
+import java.util.Set;
 import java.util.UUID;
 
 import com.breakersoft.plow.Cluster;
@@ -21,5 +22,11 @@ public interface NodeDao {
 	void update(Node node, Ping ping);
 
 	void setLocked(Node node, boolean locked);
+
+	void setCluster(Node node, Cluster cluster);
+
+	boolean hasProcs(Node node);
+
+	void setTags(Node node, Set<String> tags);
 
 }

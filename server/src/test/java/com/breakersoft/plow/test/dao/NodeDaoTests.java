@@ -2,6 +2,9 @@ package com.breakersoft.plow.test.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -14,6 +17,8 @@ import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.test.AbstractTest;
+import com.breakersoft.plow.util.JdbcUtils;
+import com.google.common.collect.Sets;
 
 public class NodeDaoTests extends AbstractTest {
 
@@ -44,6 +49,32 @@ public class NodeDaoTests extends AbstractTest {
         boolean locked = jdbc().queryForObject(
         		"SELECT bool_locked FROM plow.node WHERE pk_node=?", Boolean.class, node.getNodeId());
         assertEquals(true, locked);
+    }
+
+    @Test
+    public void setCluster() {
+        Ping ping = getTestNodePing();
+        Cluster cluster1 = clusterDao.create("test1", TAGS);
+        Cluster cluster2 = clusterDao.create("test2", TAGS);
+        Node node = nodeDao.create(cluster1, ping);
+        nodeDao.setCluster(node, cluster2);
+
+        Node copy = nodeDao.get(node.getNodeId());
+        assertEquals(cluster2.getClusterId(), copy.getClusterId());
+    }
+
+    @Test
+    public void setTags() {
+        Ping ping = getTestNodePing();
+        Cluster cluster1 = clusterDao.create("test1", TAGS);
+        Node node = nodeDao.create(cluster1, ping);
+        nodeDao.setTags(node, Sets.newHashSet("a1", "b2", "c3"));
+        List<String> tags = jdbc().query(
+                "SELECT unnest(str_tags) FROM plow.node WHERE pk_node=?", JdbcUtils.STRING_MAPPER, node.getNodeId());
+        assertEquals(3, tags.size());
+        assertTrue(tags.contains("a1"));
+        assertTrue(tags.contains("b2"));
+        assertTrue(tags.contains("c3"));
     }
 
     @Test
