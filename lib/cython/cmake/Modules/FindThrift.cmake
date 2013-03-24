@@ -1,43 +1,48 @@
-# - Find Thrift (a cross platform RPC lib/tool)
-# This module defines
-#  Thrift_VERSION, version string of ant if found
-#  Thrift_INCLUDE_DIR, where to find Thrift headers
-#  Thrift_LIBS, Thrift libraries
-#  Thrift_FOUND, If false, do not try to use ant
+# Find the Thrift includes and library
+#
+#  set THRIFT_FIND_REQUIRED to require the Thrift library
+#  otherwise, the user will be given a WITH_THRIFT option.
+# 
+#  THRIFT_INCLUDES     - all include dirs needed for Thrift
+#  THRIFT_LIBRARY      - where to find the Thrift library
+#  THRIFT_LIBRARIES    - all libraries needed for Thrift
+#  THRIFT_ENABLED      - true if Thrift is enabled
 
+INCLUDE(LintelFind)
 
-find_path(Thrift_INCLUDE_DIR Thrift.h PATHS
-  /usr/local/include/thrift
-  /opt/local/include/thrift
-)
+INCLUDE(FindPkgConfig)
 
-set(Thrift_LIB_PATHS /usr/local/lib /opt/local/lib)
+PKG_CHECK_MODULES(THRIFT thrift)
 
-find_library(Thrift_LIB NAMES thrift PATHS ${Thrift_LIB_PATHS})
+SET(THRIFT_INCLUDES ${THRIFT_INCLUDE_DIRS})
 
-if (Thrift_LIB AND Thrift_INCLUDE_DIR)
-  set(Thrift_FOUND TRUE)
-  set(Thrift_LIBS ${Thrift_LIB})
-else ()
-  set(Thrift_FOUND FALSE)
-  if (NOT LibEvent_LIBS OR NOT LibEvent_INCLUDE_DIR)
-    message(STATUS "libevent is required for thrift broker support")
-  endif ()
-endif ()
+IF(THRIFT_FOUND AND NOT EXISTS "/${THRIFT_LIBRARIES}")
+    MESSAGE("Translating ${THRIFT_LIBRARIES} library to full path")
+    IF("${THRIFT_LIBRARY_DIRS}" STREQUAL "") 
+        SET(THRIFT_LIBRARY_DIRS "/usr/lib;/usr/lib64")
+    ENDIF("${THRIFT_LIBRARY_DIRS}" STREQUAL "") 
 
-if (Thrift_FOUND)
-  if (NOT Thrift_FIND_QUIETLY)
-    message(STATUS "Found thrift lib: ${Thrift_LIBS}")
-    message(STATUS "Found thrift include: ${Thrift_INCLUDE_DIR}")
-    message(STATUS "    compiler: ${Thrift_VERSION}")
-  endif ()
-else ()
-  message(STATUS "Thrift compiler/libraries NOT found. "
-          "Thrift support will be disabled (${Thrift_RETURN}, "
-          "${Thrift_INCLUDE_DIR}, ${Thrift_LIB}, ${Thrift_NB_LIB})")
-endif ()
+    SET(tmp ${THRIFT_LIBRARIES})
+    SET(THRIFT_LIBRARIES THRIFT-NOTFOUND)
 
-mark_as_advanced(
-  Thrift_LIB
-  Thrift_INCLUDE_DIR
-)
+    # get full path to library, avoid cmake error
+    FIND_LIBRARY(THRIFT_LIBRARIES NAMES ${tmp}
+      PATHS ${THRIFT_LIBRARY_DIRS} NO_DEFAULT_PATH)
+
+    IF(NOT THRIFT_LIBRARIES)
+        MESSAGE(FATAL_ERROR "Internal, can't find thrift library under ${THRIFT_LIBRARY_DIRS}")
+    ENDIF(NOT THRIFT_LIBRARIES)
+    
+    MESSAGE("  --> ${THRIFT_LIBRARIES}")
+
+ENDIF(THRIFT_FOUND AND NOT EXISTS "/${THRIFT_LIBRARIES}")
+
+IF(THRIFT_FIND_REQUIRED)
+    IF(NOT THRIFT_FOUND)
+        MESSAGE(FATAL_ERROR "Unable to find thrift includes/libraries")
+    ENDIF(NOT THRIFT_FOUND)
+
+    LINTEL_FIND_PROGRAM(THRIFT thrift)
+ELSE(THRIFT_FIND_REQUIRED)
+    LINTEL_WITH_PROGRAM(THRIFT thrift)
+ENDIF(THRIFT_FIND_REQUIRED)

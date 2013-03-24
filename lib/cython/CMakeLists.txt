@@ -12,7 +12,6 @@ set(SOVERSION ${PLOW_CYTHON_VERSION_MAJOR})
 set(PLOW_CYTHON_VERSION "${PLOW_CYTHON_VERSION_MAJOR}.${PLOW_CYTHON_VERSION_MINOR}.${PLOW_CYTHON_VERSION_PATCH}")
 
 
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 find_package (PythonLibs 2.6 REQUIRED)
@@ -26,6 +25,9 @@ add_custom_target( ReplicatePythonSourceTree ALL ${CMAKE_COMMAND} -P
   ${CMAKE_CURRENT_BINARY_DIR}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
 
+# https://issues.apache.org/jira/browse/THRIFT-1326
+add_definitions(-DHAVE_INTTYPES_H=1)
+add_definitions(-DHAVE_NETINET_IN_H=1)
 
 # Process the CMakeLists.txt in the 'src' and 'bin' directory.
 add_subdirectory( src )
