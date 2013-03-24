@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
-import com.breakersoft.plow.thrift.LockState;
 import com.breakersoft.plow.thrift.NodeFilterT;
 import com.breakersoft.plow.thrift.NodeState;
 import com.breakersoft.plow.thrift.NodeSystemT;
