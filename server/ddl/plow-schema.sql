@@ -312,7 +312,7 @@ CREATE TABLE plow.node (
   str_name VARCHAR(128) NOT NULL,
   str_ipaddr VARCHAR(15) NOT NULL,
   int_state SMALLINT NOT NULL DEFAULT 0,
-  int_lock_state SMALLINT NOT NULL DEFAULT 0,
+  bool_locked BOOLEAN NOT NULL DEFAULT 'f',
   time_created BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   time_updated BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   str_tags TEXT[]
@@ -485,7 +485,7 @@ AS
   SELECT
     node.pk_cluster,
     SUM(1) AS node_total,
-    SUM(int_lock_state) AS node_locked_total,
+    SUM(bool_locked::integer) AS node_locked_total,
     SUM(CASE int_state WHEN 0 THEN 1 ELSE 0 END) AS node_up_total,
     SUM(CASE int_state WHEN 1 THEN 1 ELSE 0 END) AS node_down_total,
     SUM(CASE int_state WHEN 2 THEN 1 ELSE 0 END) AS node_repair_total,
@@ -494,7 +494,7 @@ AS
     SUM(CASE int_state WHEN 0 THEN node_dsp.int_cores ELSE 0 END) AS core_up_total,
     SUM(CASE int_state WHEN 1 THEN node_dsp.int_cores ELSE 0 END) AS core_down_total,
     SUM(CASE int_state WHEN 2 THEN node_dsp.int_cores ELSE 0 END) AS core_repair_total,
-    SUM(int_lock_state * node_dsp.int_cores) AS core_locked_total
+    SUM(bool_locked::integer * node_dsp.int_cores) AS core_locked_total
   FROM
     plow.node
   INNER JOIN
