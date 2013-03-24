@@ -170,8 +170,8 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Job getJob(String id) {
-        return jobDao.get(UUID.fromString(id));
+    public Job getJob(UUID id) {
+        return jobDao.get(id);
     }
 
     @Override

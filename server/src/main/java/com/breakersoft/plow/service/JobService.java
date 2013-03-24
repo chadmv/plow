@@ -17,56 +17,115 @@ import com.breakersoft.plow.thrift.TaskState;
 
 public interface JobService {
 
-	void setJobMaxCores(Job job, int value);
+	/*
+	 * Jobs
+	 */
 
-	void setJobMinCores(Job job, int value);
-
-	Task getTask(String id);
-
-    boolean hasWaitingFrames(Job job);
-
-    Job getJob(String id);
-
-    boolean isFinished(Job job);
-
-    Task getTask(Layer layer, int number);
-
-    Layer getLayer(Job job, String layer);
-
-    Layer getLayer(Job job, int idx);
-
-    boolean setJobState(Job job, JobState state);
-
+	/**
+	 * Launch a job spec.
+	 *
+	 * @param jobspec
+	 * @return
+	 */
     JobLaunchEvent launch(JobSpecT jobspec);
 
+    /**
+     * Shut down a job.
+     *
+     * @param job
+     * @return
+     */
     boolean shutdown(Job job);
 
-    boolean isLayerComplete(Layer layer);
+	/**
+	 * Set the maximum core value on a given job.  If a job reaches its maximum
+	 * cores it will no longer be dispatched new cores. If a job is well over
+	 * its maximum cores, then procs will fall off the job until its at or under
+	 * its maximum cores value.
+	 *
+	 * @param job
+	 * @param value
+	 */
+	void setJobMaxCores(Job job, int value);
 
+	/**
+	 * Set the minumum core value on a given job.  The minimum cores value controls
+	 * the overall priority of a job relative to other jobs.  Jobs with a higher
+	 * minumum cores get more procs.
+	 *
+	 * @param job
+	 * @param value
+	 */
+	void setJobMinCores(Job job, int value);
+
+	/**
+	 * Get a job using its unique UUID.
+	 * @param id
+	 * @return
+	 */
+	Job getJob(UUID id);
+
+	/**
+	 * Return true if a job has waiting frames.
+	 *
+	 * @param job
+	 * @return
+	 */
+    boolean hasWaitingFrames(Job job);
+
+    /**
+     * Set the state of a job and return true if the state
+     * actually changed.
+     *
+     * @param job
+     * @param state
+     * @return
+     */
+    boolean setJobState(Job job, JobState state);
+
+    /**
+     * Set job paused or unpaused.
+     *
+     * @param job
+     * @param value
+     */
     void setJobPaused(Job job, boolean value);
 
+    /**
+     * Return true if the job is paused.
+     *
+     * @param job
+     * @return
+     */
     boolean isJobPaused(Job job);
 
-    Layer getLayer(UUID id);
-
-    void addLayerOutput(Layer layer, String path, Map<String, String> attrs);
-
-    void updateRunningTasks(List<RunningTask> runningTasks);
-
-    void updateMaxRssValues(List<RunningTask> runningTasks);
-
-	List<Task> getTasks(TaskFilterT filter);
-
-    boolean setTaskState(Task task, TaskState currentState, TaskState newState);
-
-	boolean setTaskState(Task task, TaskState state);
 
 	/*
 	 * Layers
 	 */
-	void setLayerMinCores(Layer layer, int cores);
+
+    void setLayerMinCores(Layer layer, int cores);
 	void setLayerMaxCores(Layer layer, int cores);
 	void setLayerMinRam(Layer layer, int ram);
 	void setLayerTags(Layer layer, Set<String> tags);
 	void setLayerThreadable(Layer layer, boolean threadable);
+    Layer getLayer(Job job, String layer);
+    Layer getLayer(Job job, int idx);
+    boolean isLayerComplete(Layer layer);
+    Layer getLayer(UUID id);
+    void addLayerOutput(Layer layer, String path, Map<String, String> attrs);
+
+    /*
+     * Tasks
+     */
+
+
+	Task getTask(String id);
+    boolean isFinished(Job job);
+    Task getTask(Layer layer, int number);
+    void updateRunningTasks(List<RunningTask> runningTasks);
+    void updateMaxRssValues(List<RunningTask> runningTasks);
+	List<Task> getTasks(TaskFilterT filter);
+    boolean setTaskState(Task task, TaskState currentState, TaskState newState);
+	boolean setTaskState(Task task, TaskState state);
 }
