@@ -28,4 +28,17 @@ public class ProjectDaoTests extends AbstractTest {
         Project projectb = projectDao.get(projecta.getProjectId());
         assertEquals(TEST_PROJECT, projectb);
     }
+
+    @Test
+    public void testSetActive() {
+        Project project = projectDao.get("unittest");
+        projectDao.setActive(project, false);
+        boolean active = jdbc().queryForObject(
+                "SELECT bool_active FROM plow.project WHERE pk_project=?", Boolean.class, project.getProjectId());
+        assertFalse(active);
+        projectDao.setActive(project, true);
+        active = jdbc().queryForObject(
+                "SELECT bool_active FROM plow.project WHERE pk_project=?", Boolean.class, project.getProjectId());
+        assertTrue(active);
+    }
 }

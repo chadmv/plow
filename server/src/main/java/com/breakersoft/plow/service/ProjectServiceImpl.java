@@ -30,8 +30,8 @@ public class ProjectServiceImpl implements ProjectService {
     FolderDao folderDao;
 
     @Override
-    public Project createProject(String name, String title) {
-        Project project = projectDao.create(name, title);
+    public Project createProject(String title, String code) {
+        Project project = projectDao.create(title, code);
         Folder folder = createFolder(project, Defaults.FOLDER_DEFAULT_NAME);
         projectDao.setDefaultFolder(project, folder);
         eventManager.post(new ProjectCreatedEvent(project));

@@ -17,9 +17,9 @@ public class ThriftProjectDaoTests extends AbstractTest {
     ThriftProjectDao thriftProjectDao;
 
     @Test
-    public void testGetByName() {
+    public void testGetByCode() {
         ProjectT project = thriftProjectDao.get("unittest");
-        assertEquals("unittest", project.name);
+        assertEquals("unittest", project.code);
     }
 
     @Test
@@ -28,6 +28,17 @@ public class ThriftProjectDaoTests extends AbstractTest {
         ProjectT project_b = thriftProjectDao.get(UUID.fromString(project_a.id));
         assertEquals(project_a.id, project_b.id);
     }
+
+    @Test
+    public void testGetAll() {
+    	thriftProjectDao.all();
+    }
+
+    @Test
+    public void testGetActive() {
+    	thriftProjectDao.active();
+    }
+
 
     @Test
     public void getPlowtime() {

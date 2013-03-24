@@ -14,7 +14,7 @@ public interface ProjectDao {
      * @param title
      * @return
      */
-    Project create(String name, String title);
+    Project create(String title, String code);
 
     /**
      *
@@ -46,5 +46,11 @@ public interface ProjectDao {
      */
     List<Project> getAll();
 
-
+    /**
+     * Set the project active or inactive.
+     *
+     * @param project
+     * @param active
+     */
+	void setActive(Project project, boolean active);
 }

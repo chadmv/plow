@@ -40,9 +40,12 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE plow.project (
   pk_project UUID NOT NULL PRIMARY KEY,
   pk_folder_default UUID,
-  str_name VARCHAR(16) NOT NULL,
-  str_title VARCHAR(255) NOT NULL
+  str_code VARCHAR(16) NOT NULL,
+  str_title VARCHAR(255) NOT NULL,
+  bool_active BOOLEAN NOT NULL DEFAULT 't'
 ) WITHOUT OIDS;
+
+CREATE UNIQUE INDEX project_str_code_idx ON plow.project (str_code);
 
 ----------------------------------------------------------
 

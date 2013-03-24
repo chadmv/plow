@@ -169,6 +169,12 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
         return thriftLayerDao.getLayer(UUID.fromString(jobId), name);
     }
 
+	@Override
+	public ProjectT createProject(String title, String code) throws PlowException, TException {
+		Project project = projectService.createProject(title, code);
+		return thriftProjectDao.get(project.getProjectId());
+	}
+
     @Override
     public ProjectT getProject(String id) throws PlowException, TException {
         return thriftProjectDao.get(UUID.fromString(id));
@@ -199,10 +205,15 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public ProjectT getProjectByName(String name) throws PlowException,
+    public ProjectT getProjectByCode(String code) throws PlowException,
             TException {
-        return thriftProjectDao.get(name);
+        return thriftProjectDao.get(code);
     }
+
+	@Override
+	public List<ProjectT> getActiveProjects() throws PlowException, TException {
+		return thriftProjectDao.active();
+	}
 
     @Override
     public List<FolderT> getFolders(String projectId) throws PlowException,

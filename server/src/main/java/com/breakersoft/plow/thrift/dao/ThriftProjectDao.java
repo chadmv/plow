@@ -15,4 +15,6 @@ public interface ThriftProjectDao {
 
 	List<ProjectT> all();
 
+	List<ProjectT> active();
+
 }

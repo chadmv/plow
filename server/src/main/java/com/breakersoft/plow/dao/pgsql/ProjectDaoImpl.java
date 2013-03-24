@@ -23,7 +23,6 @@ public final class ProjectDaoImpl extends AbstractDao implements ProjectDao {
         @Override
         public Project mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
-
             ProjectE project = new ProjectE();
             project.setProjectId(UUID.fromString(rs.getString(1)));
             return project;
@@ -33,13 +32,13 @@ public final class ProjectDaoImpl extends AbstractDao implements ProjectDao {
     private static final String INSERT =
             JdbcUtils.Insert("plow.project",
                     "pk_project",
-                    "str_name",
+                    "str_code",
                     "str_title");
 
     @Override
-    public Project create(String name, String title) {
+    public Project create(String title, String code) {
         final UUID projectId = UUID.randomUUID();
-        jdbc.update(INSERT, projectId, name, title);
+        jdbc.update(INSERT, projectId, code, title);
 
         final ProjectE project = new ProjectE();
         project.setProjectId(projectId);
@@ -47,10 +46,10 @@ public final class ProjectDaoImpl extends AbstractDao implements ProjectDao {
     }
 
     @Override
-    public Project get(String name) {
+    public Project get(String code) {
         return jdbc.queryForObject(
-                "SELECT pk_project FROM plow.project WHERE str_name=?",
-                MAPPER, name);
+                "SELECT pk_project FROM plow.project WHERE str_code=?",
+                MAPPER, code);
     }
 
     @Override
@@ -71,5 +70,11 @@ public final class ProjectDaoImpl extends AbstractDao implements ProjectDao {
     public void setDefaultFolder(Project project, Folder folder) {
         jdbc.update("UPDATE plow.project SET pk_folder_default=? WHERE pk_project=?",
                 folder.getFolderId(), project.getProjectId());
+    }
+
+    @Override
+    public void setActive(Project project, boolean active) {
+        jdbc.update("UPDATE plow.project SET bool_active=? WHERE pk_project=?",
+        		active, project.getProjectId());
     }
 }

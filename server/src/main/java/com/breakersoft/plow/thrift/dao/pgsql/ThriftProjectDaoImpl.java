@@ -24,8 +24,9 @@ public class ThriftProjectDaoImpl extends AbstractDao implements ThriftProjectDa
                 throws SQLException {
             ProjectT project = new ProjectT();
             project.setId(rs.getString("pk_project"));
-            project.setName(rs.getString("str_name"));
+            project.setCode(rs.getString("str_code"));
             project.setTitle(rs.getString("str_title"));
+            project.setIsActive(rs.getBoolean("bool_active"));
             return project;
         }
     };
@@ -33,8 +34,9 @@ public class ThriftProjectDaoImpl extends AbstractDao implements ThriftProjectDa
     private static final String GET =
             "SELECT " +
                 "pk_project,"+
-                "str_name,"+
-                "str_title "+
+                "str_code,"+
+                "str_title, "+
+                "bool_active " +
             "FROM " +
                 "project ";
 
@@ -45,12 +47,17 @@ public class ThriftProjectDaoImpl extends AbstractDao implements ThriftProjectDa
 
     @Override
     public ProjectT get(String name) {
-        return jdbc.queryForObject(GET + " WHERE str_name=?", MAPPER, name);
+        return jdbc.queryForObject(GET + " WHERE str_code=?", MAPPER, name);
     }
 
     @Override
     public List<ProjectT> all() {
         return jdbc.query(GET, MAPPER);
+    }
+
+    @Override
+    public List<ProjectT> active() {
+        return jdbc.query(GET + "WHERE bool_active='t'", MAPPER);
     }
 
     @Override

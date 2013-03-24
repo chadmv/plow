@@ -39,7 +39,7 @@ public class ThriftQuotaDaoImpl  extends AbstractDao implements ThriftQuotaDao {
 			"quota.pk_quota,"+
 			"quota.pk_project,"+
 			"quota.pk_cluster,"+
-			"project.str_name || '.' || cluster.str_name AS str_name, "+
+			"project.str_code || '.' || cluster.str_name AS str_name, "+
 			"quota.int_burst,"+
 			"quota.int_size,"+
 			"quota.int_run_cores "+

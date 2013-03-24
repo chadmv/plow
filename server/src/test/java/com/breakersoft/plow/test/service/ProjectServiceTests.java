@@ -14,7 +14,6 @@ public class ProjectServiceTests extends AbstractTest {
 
     @Test
     public void createProject() {
-        projectService.createProject("lww",
-                "The Lion, The Witch, and The Wardrobe");
+        projectService.createProject("The Lion, The Witch, and The Wardrobe", "lww");
     }
 }
