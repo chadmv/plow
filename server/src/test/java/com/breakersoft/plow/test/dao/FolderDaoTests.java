@@ -33,4 +33,40 @@ public class FolderDaoTests extends AbstractTest {
         Folder folder2 = folderDao.getDefaultFolder(TEST_PROJECT);
         assertEquals(folder1, folder2);
     }
+
+    @Test
+    public void testSetMinCores() {
+        Folder folder1 = folderDao.createFolder(TEST_PROJECT, "foo");
+        folderDao.setMinCores(folder1, 101);
+
+        int value = jdbc().queryForInt(
+                "SELECT int_min_cores FROM plow.folder_dsp WHERE pk_folder=?",  folder1.getFolderId());
+        assertEquals(101, value);
+    }
+
+    @Test
+    public void testSetMaxCores() {
+        Folder folder1 = folderDao.createFolder(TEST_PROJECT, "foo");
+        folderDao.setMaxCores(folder1, 101);
+
+        int value = jdbc().queryForInt(
+                "SELECT int_max_cores FROM plow.folder_dsp WHERE pk_folder=?", folder1.getFolderId());
+        assertEquals(101, value);
+    }
+
+    @Test
+    public void testSetName() {
+        Folder folder1 = folderDao.createFolder(TEST_PROJECT, "foo");
+        folderDao.setName(folder1, "bar");
+        String name = jdbc().queryForObject(
+                "SELECT str_name FROM plow.folder WHERE pk_folder=?", String.class, folder1.getFolderId());
+        assertEquals("bar", name);
+    }
+
+    @Test
+    public void testSet() {
+        Folder folder1 = folderDao.createFolder(TEST_PROJECT, "foo");
+        Folder folder2 = folderDao.get(folder1.getFolderId());
+        assertEquals(folder1, folder2);
+    }
 }

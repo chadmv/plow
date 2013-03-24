@@ -17,4 +17,10 @@ public interface ProjectService {
     List<Project> getProjects();
 
     void setProjectActive(Project project, boolean value);
+
+	void setMaxCores(Folder folder, int value);
+
+	void setMinCores(Folder folder, int value);
+
+	void setName(Folder folder, String name);
 }

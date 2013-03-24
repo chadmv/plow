@@ -92,4 +92,22 @@ public class FolderDaoImpl extends AbstractDao implements FolderDao {
             order+=2;
         }
     }
+
+    @Override
+    public void setMaxCores(Folder folder, int value) {
+    	jdbc.update("UPDATE plow.folder_dsp SET int_max_cores=? WHERE pk_folder=?",
+    			value, folder.getFolderId());
+    }
+
+    @Override
+    public void setMinCores(Folder folder, int value) {
+    	jdbc.update("UPDATE plow.folder_dsp SET int_min_cores=? WHERE pk_folder=?",
+    			value, folder.getFolderId());
+    }
+
+    @Override
+    public void setName(Folder folder, String name) {
+    	jdbc.update("UPDATE plow.folder SET str_name=? WHERE pk_folder=?",
+    			name, folder.getFolderId());
+    }
 }

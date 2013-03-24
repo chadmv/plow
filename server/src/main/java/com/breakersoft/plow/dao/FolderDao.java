@@ -12,4 +12,10 @@ public interface FolderDao {
     Folder get(UUID id);
 
     Folder getDefaultFolder(Project project);
+
+	void setMaxCores(Folder folder, int value);
+
+	void setMinCores(Folder folder, int value);
+
+	void setName(Folder folder, String name);
 }
