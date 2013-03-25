@@ -119,7 +119,7 @@ def launch(**kwargs):
 #######################
 # Job
 #
-cdef Job initJob(JobT& j):
+cdef inline Job initJob(JobT& j):
     cdef Job job = Job()
     job.setJob(j)
     return job
@@ -214,6 +214,12 @@ cdef class Job:
     def get_outputs(self):
         return get_job_outputs(self.id)
 
+    def set_min_cores(self, int value):
+        set_job_min_cores(self.id, value)
+
+    def set_max_cores(self, int value):
+        set_job_max_cores(self.id, value)
+
 
 def get_job(Guid& id):
     cdef JobT jobT
@@ -256,14 +262,19 @@ def get_jobs(**kwargs):
     ret = [initJob(jobT) for jobT in jobs]
     return ret
 
-cpdef kill_job(Guid& id, string reason):
+cpdef bint kill_job(Guid& id, string reason):
     cdef bint success
     success = getClient().proxy().killJob(id, reason)
     return success
 
-cpdef pause_job(Guid& id, bint paused):
+cpdef inline pause_job(Guid& id, bint paused):
     getClient().proxy().pauseJob(id, paused)
 
+cpdef inline set_job_min_cores(id, value):
+    getClient().proxy().setJobMinCores(id, value)
+
+cpdef inline set_job_max_cores(id, value):
+    getClient().proxy().setJobMaxCores(id, value)
 
 #######################
 # Output

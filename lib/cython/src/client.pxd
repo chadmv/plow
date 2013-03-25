@@ -6,7 +6,9 @@ from plow_types cimport *
 
 
 cdef extern from "rpc/RpcService.h" namespace "Plow" nogil: 
+
     cdef cppclass RpcServiceClient:
+
         int getPlowTime() nogil except +
         void getProject(ProjectT&, Guid& id) nogil except +
         void getProjectByCode(ProjectT&, string& code) nogil except +
@@ -22,6 +24,8 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
         void pauseJob(Guid& jobId, bint paused) nogil except +
         void getJobs(vector[JobT]&, JobFilterT& filter) nogil except +
         void getJobOutputs(vector[OutputT]&,  Guid& jobId) nogil except +
+        void setJobMinCores(Guid& jobId, int value) nogil except +
+        void setJobMaxCores(Guid& jobId, int value) nogil except +
 
         void createFolder(FolderT&, string& projectId, string& name) nogil except +
         void getFolder(FolderT&, string& id) nogil except +
@@ -66,8 +70,11 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
         void setQuotaBurst( Guid& id, int burst) nogil except +
         void setQuotaLocked( Guid& id, bint locked) nogil except +
 
+
 cdef extern from "client.h" namespace "Plow":
     cdef cppclass PlowClient:
         RpcServiceClient proxy() nogil
 
     cdef PlowClient* getClient() nogil except +
+
+    
