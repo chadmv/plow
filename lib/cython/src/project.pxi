@@ -2,7 +2,7 @@
 #######################
 # Project
 #
-cdef Project initProject(ProjectT& p):
+cdef inline Project initProject(ProjectT& p):
     cdef Project project = Project()
     project.setProject(p)
     return project

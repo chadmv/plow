@@ -38,7 +38,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         LOCKSTATE_LOCKED "Plow::LockState::LOCKED"
 
     ctypedef enum DependType_type "Plow::DependType::type":
-        JOB_ON_JOB"Plow::DependType::JOB_ON_JOB"
+        JOB_ON_JOB "Plow::DependType::JOB_ON_JOB"
         LAYER_ON_LAYER "Plow::DependType::LAYER_ON_LAYER"
         LAYER_ON_TASK "Plow::DependType::LAYER_ON_TASK"
         TASK_ON_LAYER "Plow::DependType::TASK_ON_LAYER"
