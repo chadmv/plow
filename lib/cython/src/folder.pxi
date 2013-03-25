@@ -3,7 +3,7 @@
 # Folders
 #
 
-cdef Folder initFolder(FolderT& f):
+cdef inline Folder initFolder(FolderT& f):
     cdef Folder folder = Folder()
     folder.setFolder(f)
     return folder
@@ -36,6 +36,9 @@ cdef class Folder:
     property name:
         def __get__(self):
             return self.folder.name
+        def __set__(self, string name):
+            set_folder_name(self.id, name)
+            self.folder.name = name
 
     property minCores:
         def __get__(self):
@@ -73,6 +76,15 @@ cdef class Folder:
 
             return self._jobs
 
+    def set_min_cores(self, int value):
+        set_folder_min_cores(self.id, value)
+
+    def set_max_cores(self, int value):
+        set_folder_max_cores(self.id, value)
+
+    def delete(self):
+        delete_folder(self.id)
+
 
 def get_folder(Guid& folderId):
     cdef:
@@ -102,5 +114,17 @@ def get_job_board(Guid& projectId):
     getClient().proxy().getJobBoard(folders, projectId)
     cdef list ret = [initFolder(folderT) for folderT in folders]
     return ret
+
+cpdef inline set_folder_min_cores(Guid& id, int value):
+    getClient().proxy().setFolderMinCores(id, value)
+
+cpdef inline set_folder_max_cores(Guid& id, int value):
+    getClient().proxy().setFolderMaxCores(id, value)
+
+cpdef inline set_folder_name(Guid& id, string& name):
+    getClient().proxy().setFolderName(id, name)
+
+cpdef inline delete_folder(Guid& id):
+    getClient().proxy().deleteFolder(id)
 
 

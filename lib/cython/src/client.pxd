@@ -31,6 +31,10 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
         void getFolder(FolderT&, string& id) nogil except +
         void getJobBoard(vector[FolderT]&,  Guid& project) nogil except + 
         void getFolders(vector[FolderT]&, Guid& project) nogil except +
+        void setFolderMinCores(Guid& folderId, int value) nogil except +
+        void setFolderMaxCores(Guid& folderId, int value) nogil except +
+        void setFolderName(Guid& folderId, string& name) nogil except +
+        void deleteFolder(Guid& folderId) nogil except +
 
         void getLayerById(LayerT&,  Guid& layerId) nogil except +
         void getLayer(LayerT&,  Guid& jobID, string& name) nogil except +
