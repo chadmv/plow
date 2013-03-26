@@ -79,5 +79,18 @@ public final class JdbcUtils {
         	return rs.getString(1);
         }
     };
+
+    public static final RowMapper<Object[]> OBJECT_ARRAY_MAPPER = new RowMapper<Object[]>() {
+        @Override
+        public Object[] mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+        	final int count = rs.getMetaData().getColumnCount();
+        	Object[] result = new Object[rs.getMetaData().getColumnCount()];
+        	for (int i=0; i<count; i++) {
+        		result[i] = rs.getObject(i+1);
+        	}
+        	return result;
+        }
+    };
 }
 

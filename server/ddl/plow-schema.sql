@@ -382,6 +382,24 @@ CREATE INDEX proc_pk_job_idx ON plow.proc (pk_job);
 ----------------------------------------------------------
 
 ---
+--- Filter
+---
+
+CREATE TABLE plow.filter (
+  pk_filter UUID NOT NULL PRIMARY KEY,
+  pk_project UUID NOT NULL REFERENCES plow.project(pk_project),
+  str_name VARCHAR(128) NOT NULL,
+  int_order REAL NOT NULL DEFAULT -1,
+  bool_enabled BOOLEAN DEFAULT 't' NOT NULL
+) WITHOUT OIDS;
+
+CREATE INDEX filter_pk_project_idx ON plow.filter (pk_project);
+CREATE INDEX filter_int_order_idx ON plow.filter(int_order);
+
+----------------------------------------------------------
+
+
+---
 --- plow.before_disp_update()
 ---
 --- Handle setting the tier value on job_dsp and folder_dsp;
