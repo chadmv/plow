@@ -29,13 +29,9 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         TASKSTATE_SUCCEEDED "Plow::TaskState::SUCCEEDED"
 
     ctypedef enum NodeState_type "Plow::NodeState::type":
-        NODESTATE_INITIALIZE "Plow::NodeState::UP"
-        NODESTATE_RUNNING "Plow::NodeState::DOWN"
-        NODESTATE_FINISHED "Plow::NodeState::REPAIR" 
-
-    ctypedef enum LockState_type "Plow::LockState::type":
-        LOCKSTATE_OPEN "Plow::LockState::OPEN"
-        LOCKSTATE_LOCKED "Plow::LockState::LOCKED"
+        NODESTATE_UP "Plow::NodeState::UP"
+        NODESTATE_DOWN "Plow::NodeState::DOWN"
+        NODESTATE_REPAIR "Plow::NodeState::REPAIR" 
 
     ctypedef enum DependType_type "Plow::DependType::type":
         JOB_ON_JOB "Plow::DependType::JOB_ON_JOB"
@@ -118,8 +114,8 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string clusterName
         string ipaddr
         c_set[string] tags
-        JobState_type state
-        LockState_type lockState
+        NodeState_type state
+        bint locked
         Timestamp createdTime
         Timestamp updatedTime
         Timestamp bootTime
@@ -261,7 +257,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string regex
         vector[string] hostnames
         vector[NodeState_type] states
-        vector[LockState_type] lockStates
+        bint locked
 
     cdef cppclass QuotaFilterT:
         vector[Guid] project
