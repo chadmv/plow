@@ -81,7 +81,13 @@ cdef class JobSpec:
             specT = aLayer.toLayerSpecT()
             s.layers.push_back(specT)
 
-        # s.depends = self.depends
+        cdef:
+            DependSpec aDep
+            DependSpecT depT
+
+        for aDep in self.depends:
+            depT = aDep.toDependSpecT()
+            s.depends.push_back(depT)
 
         return s
 
@@ -253,12 +259,7 @@ def get_jobs(**kwargs):
         JobFilter filter = JobFilter(**kwargs)
         JobFilterT f = filter.value
 
-    try:
-        getClient().proxy().getJobs(jobs, f)
-    except RuntimeError:
-        ret = []
-        return ret 
-
+    getClient().proxy().getJobs(jobs, f)
     ret = [initJob(jobT) for jobT in jobs]
     return ret
 
