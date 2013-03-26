@@ -457,4 +457,63 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 		Node node = nodeService.getNode(UUID.fromString(id));
 		nodeService.setTags(node, tags);
 	}
+
+	@Override
+	public ActionT createAction(String arg0, ActionType arg1, String arg2)
+			throws PlowException, TException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public FilterT createFilter(String arg0) throws PlowException, TException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MatcherT createMatcher(String arg0, MatcherField arg1,
+			MatcherType arg2, String arg3) throws PlowException, TException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void decreaseFilterOrder(String arg0) throws PlowException,
+			TException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteAction(String arg0) throws PlowException, TException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteFilter(String arg0) throws PlowException, TException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteMatcher(String arg0) throws PlowException, TException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void increaseFilterOrder(String arg0) throws PlowException,
+			TException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setFilterName(String arg0, String arg1) throws PlowException,
+			TException {
+		// TODO Auto-generated method stub
+
+	}
 }

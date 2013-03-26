@@ -217,6 +217,51 @@ struct FolderT {
     8:optional list<JobT> jobs
 }
 
+enum MatcherType {
+    CONTAINS,
+    NOT_CONTAINS,
+    IS,
+    IS_NOT,
+    BEGINS_WITH,
+    ENDS_WITH
+}
+
+enum MatcherField {
+    JOB_NAME,
+    PROJECT_CODE,
+    USER,
+    ATTR
+}
+
+struct MatcherT {
+    1:common.Guid id,
+    2:MatcherType type,
+    3:MatcherField field,
+    4:string value
+}
+
+enum ActionType {
+    SET_FOLDER,
+    SET_MIN_CORES,
+    SET_MAX_CORES,
+    PAUSE,
+    STOP_PROCESSING
+}
+
+struct ActionT {
+    1:common.Guid id,
+    2:ActionType type,
+    3:optional string value
+}
+
+struct FilterT {
+    1:common.Guid id,
+    2:string name,
+    3:i32 order,
+    4:bool enabled,
+    5:optional list<MatcherT> matchers,
+    6:optional list<ActionT> actions
+}
 
 /**
 * DependSpecT describes a dependency launched with a JobSpec.
@@ -370,4 +415,15 @@ service RpcService {
     void setQuotaSize(1:common.Guid id, 2:i32 size) throws (1:PlowException e),
     void setQuotaBurst(1:common.Guid id, 2:i32 burst) throws (1:PlowException e),
     void setQuotaLocked(1:common.Guid id, 2:bool locked) throws (1:PlowException e)
+
+    FilterT createFilter(1:string name) throws (1:PlowException e),
+    void deleteFilter(1:common.Guid id) throws (1:PlowException e),
+    void setFilterName(1:common.Guid id, 2:string name) throws (1:PlowException e),
+    void setFilterOrder(1:common.Guid id, 2:i32 order) throws (1:PlowException e),
+    void increaseFilterOrder(1:common.Guid id) throws (1:PlowException e),
+    void decreaseFilterOrder(1:common.Guid id) throws (1:PlowException e),
+    MatcherT createMatcher(1:common.Guid filterId, 2:MatcherField field, 3:MatcherType type, 4:string value) throws (1:PlowException e),
+    ActionT createAction(1:common.Guid filterId, 2:ActionType type, 3:string value) throws (1:PlowException e),
+    void deleteMatcher(1:common.Guid id) throws (1:PlowException e),
+    void deleteAction(1:common.Guid id) throws (1:PlowException e),
 }
