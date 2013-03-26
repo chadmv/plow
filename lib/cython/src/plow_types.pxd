@@ -41,6 +41,47 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         TASK_ON_TASK "Plow::DependType::TASK_ON_TASK"
         TASK_BY_TASK "Plow::DependType::TASK_BY_TASK"
 
+    ctypedef enum MatcherType_type "Plow::MatcherType::type": 
+        MATCH_CONTAINS "Plow::MatcherType::CONTAINS"
+        MATCH_NOT_CONTAINS "Plow::MatcherType::NOT_CONTAINS"
+        MATCH_IS "Plow::MatcherType::IS"
+        MATCH_IS_NOT "Plow::MatcherType::IS_NOT"
+        MATCH_BEGINS_WITH "Plow::MatcherType::BEGINS_WITH"
+        MATCH_ENDS_WITH "Plow::MatcherType::ENDS_WITH"
+    
+    ctypedef enum MatcherField_type "Plow::MatcherField::type":
+        MATCH_JOB_NAME "Plow::MatcherField::JOB_NAME"
+        MATCH_PROJECT_CODE "Plow::MatcherField::PROJECT_CODE"
+        MATCH_USER "Plow::MatcherField::USER"
+        MATCH_ATTR "Plow::MatcherField::ATTR"
+    
+    cdef cppclass MatcherT:
+        Guid id
+        MatcherType_type type
+        MatcherField_type field
+        string value
+    
+    ctypedef enum ActionType_type "Plow::ActionType::type":
+        ACTION_SET_FOLDER "Plow::ActionType::SET_FOLDER"
+        ACTION_SET_MIN_CORES "Plow::ActionType::SET_MIN_CORES"
+        ACTION_SET_MAX_CORES "Plow::ActionType::SET_MAX_CORES"
+        ACTION_PAUSE "Plow::ActionType::PAUSE"
+        ACTION_STOP_PROCESSING "Plow::ActionType::STOP_PROCESSING"
+
+    cdef cppclass ActionT:
+        Guid id
+        ActionType_type type
+        string value
+    
+
+    cdef cppclass FilterT:
+        Guid id
+        string name
+        int order
+        bint enabled
+        vector[MatcherT] matchers
+        vector[ActionT] actions
+    
 
     cdef cppclass PlowException:
         int what
