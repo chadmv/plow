@@ -2,7 +2,7 @@
 
 
 #######################
-# Tasks
+# TaskSpec
 #
 
 cdef class TaskSpec:
@@ -36,6 +36,30 @@ cdef class TaskSpec:
 
         def __set__(self, val): self.depends = val
 
+
+#######################
+# TaskFilter
+#
+@cython.internal
+cdef class TaskFilter:
+
+    cdef TaskFilterT value
+
+    def __init__(self, **kwargs):
+        self.value.jobId = kwargs.get('jobId', '')
+        self.value.layerIds = kwargs.get('layerIds', [])
+        self.value.taskIds = kwargs.get('taskIds', [])
+        self.value.limit = kwargs.get('limit', 0)
+        self.value.offset = kwargs.get('offset', 0)
+        self.value.lastUpdateTime = kwargs.get('lastUpdateTime', 0)
+
+        cdef TaskState_type i
+        for i in kwargs.get('states', []):
+            self.value.states.push_back(i) 
+
+#######################
+# Task
+#
 
 cdef inline Task initTask(TaskT& t):
     cdef Task task = Task()
@@ -119,24 +143,48 @@ def get_task(Guid& taskId):
     task = initTask(taskT)
     return task
 
-# def get_tasks(TaskFilter filter):
-#     getClient().proxy().getTasks()
+def get_tasks(**kwargs):
+    cdef:
+        TaskT taskT
+        vector[TaskT] tasks 
+        list ret 
+        TaskFilter filter = TaskFilter(**kwargs)
+        TaskFilterT f = filter.value
+
+    getClient().proxy().getTasks(tasks, f)
+    ret = [initTask(taskT) for taskT in tasks]
+    return ret
 
 def get_task_log_path(Guid& taskId):
     cdef string path
     getClient().proxy().getTaskLogPath(path, taskId)
     return path
 
-# def retry_tasks(TaskFilter filter):
-#     pass
+def retry_tasks(**kwargs):
+    cdef:
+        TaskFilter filter = TaskFilter(**kwargs)
+        TaskFilterT f = filter.value
 
-# def eat_tasks(TaskFilter filter):
-#     pass
+    getClient().proxy().retryTasks(f)
 
-# def kill_tasks(TaskFilter filter):
-#     pass
+def eat_tasks(**kwargs):
+    cdef:
+        TaskFilter filter = TaskFilter(**kwargs)
+        TaskFilterT f = filter.value
+
+    getClient().proxy().eatTasks(f)
+
+def kill_tasks(**kwargs):
+    cdef:
+        TaskFilter filter = TaskFilter(**kwargs)
+        TaskFilterT f = filter.value
+
+    getClient().proxy().killTasks(f)
 
 
+#######################
+# TaskTotals
+#
 cdef TaskTotals initTaskTotals(TaskTotalsT& t):
     cdef TaskTotals totals = TaskTotals()
     totals.setTaskTotals(t)
@@ -151,32 +199,25 @@ cdef class TaskTotals:
         self._totals = t 
 
     property total:
-        def __get__(self):
-            return self._totals.totalTaskCount
+        def __get__(self): return self._totals.totalTaskCount
 
     property succeeded:
-        def __get__(self):
-            return self._totals.succeededTaskCount
+        def __get__(self): return self._totals.succeededTaskCount
 
     property running:
-        def __get__(self):
-            return self._totals.runningTaskCount
+        def __get__(self): return self._totals.runningTaskCount
 
     property dead:
-        def __get__(self):
-            return self._totals.deadTaskCount
+        def __get__(self): return self._totals.deadTaskCount
 
     property eaten:
-        def __get__(self):
-            return self._totals.eatenTaskCount
+        def __get__(self): return self._totals.eatenTaskCount
 
     property waiting:
-        def __get__(self):
-            return self._totals.waitingTaskCount
+        def __get__(self): return self._totals.waitingTaskCount
 
     property depend:
-        def __get__(self):
-            return self._totals.dependTaskCount
+        def __get__(self): return self._totals.dependTaskCount
 
                                 
                                 

@@ -52,6 +52,7 @@ cdef class Project:
 
     def set_active(self, bint active):
         set_project_active(self.id, active)
+        self.project.isActive = active
 
 cpdef get_project_by_id(Guid& guid):
     cdef: 
