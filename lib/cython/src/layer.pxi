@@ -148,6 +148,25 @@ cdef class Layer:
     def add_output(self, string path, Attrs& attrs):
         add_output(self.id, path, attrs)
 
+    def set_tags(self, c_set[string]& tags):
+        set_layer_tags(self.id, tags)
+        self._layer.tags = tags
+
+    def set_threadable(self, bint threadable):
+        set_layer_threadable(self.id, threadable)
+        self._layer.threadable = threadable
+
+    def set_min_cores_per_task(self, int minCores):
+        set_layer_min_cores_per_task(self.id, minCores)
+        self._layer.minCores = minCores
+
+    def set_max_cores_per_task(self, int maxCores):
+        set_layer_max_cores_per_task(self.id, maxCores)
+        self._layer.maxCores = maxCores
+
+    def set_min_ram_per_task(self, int minRam):
+        set_layer_min_ram_per_task(self.id, minRam)
+        self._layer.minRamMb = minRam
 
 def get_layer_by_id(Guid& layerId):
     cdef:
@@ -210,6 +229,19 @@ cpdef inline list get_layer_outputs(Guid& layerId):
     ret = [initOutput(outT) for outT in outputs]
     return ret
 
+cpdef inline set_layer_tags(Guid& guid, c_set[string]& tags):
+    getClient().proxy().setLayerTags(guid, tags)
 
+cpdef inline set_layer_min_cores_per_task(Guid& guid, int minCores):
+    getClient().proxy().setLayerMinRamPerTask(guid, minCores)
+
+cpdef inline set_layer_max_cores_per_task(Guid& guid, int maxCores):
+    getClient().proxy().setLayerMaxCoresPerTask(guid, maxCores)
+
+cpdef inline set_layer_min_ram_per_task(Guid& guid, int minRam):
+    getClient().proxy().setLayerMinRamPerTask(guid, minRam)
+
+cpdef inline set_layer_threadable(Guid& guid, bint threadable):
+    getClient().proxy().setLayerThreadable(guid, threadable)
 
 
