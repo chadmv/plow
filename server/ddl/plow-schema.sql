@@ -398,6 +398,21 @@ CREATE INDEX filter_int_order_idx ON plow.filter(int_order);
 
 ----------------------------------------------------------
 
+---
+--- Match
+---
+
+CREATE TABLE plow.matcher (
+  pk_matcher UUID NOT NULL PRIMARY KEY,
+  pk_filter UUID NOT NULL REFERENCES plow.filter(pk_filter),
+  int_field SMALLINT NOT NULL,
+  int_type SMALLINT NOT NULL,
+  int_order BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
+  str_value TEXT
+) WITHOUT OIDS;
+
+CREATE INDEX matcher_pk_filter_idx ON plow.matcher (pk_filter);
+CREATE INDEX matcher_int_order_idx ON plow.matcher (int_order);
 
 ---
 --- plow.before_disp_update()
