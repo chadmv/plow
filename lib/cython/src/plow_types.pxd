@@ -214,8 +214,8 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int dependCount
         int order
         TaskState_type state
-        int startTime
-        int stopTime
+        Timestamp startTime
+        Timestamp stopTime
         string lastNodeName
         string lastLogLine
         int retries
@@ -289,7 +289,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[Guid] taskIds
         int limit 
         int offset 
-        int lastUpdateTime
+        Timestamp lastUpdateTime
 
     cdef cppclass NodeFilterT:
         vector[Guid] hostIds
