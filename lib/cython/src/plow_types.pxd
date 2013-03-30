@@ -130,12 +130,11 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         Guid id
         Guid clusterId
         Guid projectId
-        string clusterName
-        string projectName
-        bint locked
-        int totalCores
-        int burstCores
-        int freeCores
+        string name
+        bint isLocked
+        int size
+        int burst
+        int runCores
 
     cdef cppclass NodeSystemT:
         int physicalCores

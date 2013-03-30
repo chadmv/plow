@@ -18,28 +18,17 @@ cdef class QuotaFilter:
 # Quote
 #
 
-cdef inline Quota initQuota(Quota& q):
+cdef inline Quota initQuota(QuotaT& q):
     cdef Quota quota = Quota()
     quota.setQuota(q)
     return quota
 
-"""
-    cdef cppclass QuotaT:
-        Guid id
-        Guid clusterId
-        Guid projectId
-        string clusterName
-        string projectName
-        bint locked
-        int totalCores
-        int burstCores
-        int freeCores
-        """
+
 cdef class Quota:
 
-    cdef Quota _quota
+    cdef QuotaT _quota
 
-    cdef setQuota(self, Quota& q):
+    cdef setQuota(self, QuotaT& q):
         self._quota = q
 
     property id:
@@ -51,23 +40,20 @@ cdef class Quota:
     property projectId:
         def __get__(self): return self._quota.projectId
 
-    property projectName:
-        def __get__(self): return self._quota.projectName
+    property name:
+        def __get__(self): return self._quota.name
 
-    property clusterName:
-        def __get__(self): return self._quota.clusterName
+    property isLocked:
+        def __get__(self): return self._quota.isLocked
 
-    property locked:
-        def __get__(self): return self._quota.locked
+    property size:
+        def __get__(self): return self._quota.size
 
-    property totalCores:
-        def __get__(self): return self._quota.totalCores
+    property burst:
+        def __get__(self): return self._quota.burst
 
-    property burstCores:
-        def __get__(self): return self._quota.burstCores
-
-    property freeCores:
-        def __get__(self): return self._quota.freeCores
+    property runCores:
+        def __get__(self): return self._quota.runCores
 
     def set_size(self, int size):
         set_quota_size(self.id, size)
@@ -79,7 +65,7 @@ cdef class Quota:
 
     def set_locked(self, bint locked):
         set_quota_locked(self.id, locked)
-        self._quota.locked = locked
+        self._quota.isLocked = locked
 
 
 def get_quota(Guid& id):
@@ -87,7 +73,7 @@ def get_quota(Guid& id):
         QuotaT qT
         Quota q 
 
-    getClient().proxy().getQuota(qT)
+    getClient().proxy().getQuota(qT, id)
     q = initQuota(qT)
     return q
 
