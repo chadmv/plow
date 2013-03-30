@@ -9,6 +9,7 @@ include "layer.pxi"
 include "task.pxi"
 include "node.pxi"
 include "cluster.pxi"
+include "filter.pxi"
 include "quota.pxi"
 
 # from datetime import datetime
