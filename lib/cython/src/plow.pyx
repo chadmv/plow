@@ -16,12 +16,20 @@ include "depend.pxi"
 #
 # Python imports
 #
+
 # from datetime import datetime
 import uuid
 
 
 
 def is_uuid(str identifier):
+    """
+    Test if a string is a valid UUID 
+
+    :param identifier: string to test 
+    :type identifier: str
+    :returns: bool - True if valid UUID
+    """
     cdef bint ret = False
     try:
         uuid.UUID(identifier)
@@ -33,7 +41,12 @@ def is_uuid(str identifier):
 
 
 def get_plow_time():
-    cdef int epoch
+    """
+    Get the Plow server time in msec since the epoch 
+
+    :returns: long - msec since epoch
+    """
+    cdef long epoch
     epoch = getClient().proxy().getPlowTime()
     # plowTime = datetime.fromtimestamp(epoch / 1000)
     # return plowTime

@@ -1,0 +1,2 @@
+graft build/sphinx/html
+graft build/sphinx/pdf

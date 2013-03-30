@@ -133,6 +133,23 @@ cdef class Task:
             cdef int aState = self._task.progress
             return aState
 
+    def get_log_path(self):
+        cdef string path 
+        path = get_task_log_path(self.id)
+        return path
+
+    def retry(self):
+        cdef list ids = [self.id]
+        retry_tasks(taskIds=ids)
+
+    def eat(self):
+        cdef list ids = [self.id]
+        eat_tasks(taskIds=ids)        
+
+    def kill(self):
+        cdef list ids = [self.id]
+        kill_tasks(taskIds=ids)  
+
 
 def get_task(Guid& taskId):
     cdef:
@@ -155,7 +172,7 @@ def get_tasks(**kwargs):
     ret = [initTask(taskT) for taskT in tasks]
     return ret
 
-def get_task_log_path(Guid& taskId):
+cpdef inline string get_task_log_path(Guid& taskId):
     cdef string path
     getClient().proxy().getTaskLogPath(path, taskId)
     return path

@@ -9,7 +9,14 @@ cdef inline Project initProject(ProjectT& p):
 
 
 cdef class Project:
+    """
+    A Project 
 
+    :var ``id``: str 
+    :var code: str 
+    :var title: str 
+    :var isActive: bool 
+    """
     cdef ProjectT project
 
     cdef setProject(self, ProjectT& proj):
@@ -20,7 +27,7 @@ cdef class Project:
             cdef Guid id_ = self.project.id
             return id_
 
-    property name:
+    property code:
         def __get__(self):
             cdef string code = self.project.code
             return code
@@ -36,6 +43,11 @@ cdef class Project:
             return val
 
     def get_folders(self):
+        """
+        Get the folders for this project 
+
+        :returns: list[:class:`plow.Folder`]
+        """
         cdef:
             vector[FolderT] folders
             FolderT foldT 
@@ -51,10 +63,21 @@ cdef class Project:
         return results
 
     def set_active(self, bint active):
+        """
+        Set the active state of the Project 
+
+        :param active: bool
+        """
         set_project_active(self.id, active)
         self.project.isActive = active
 
 cpdef get_project(Guid& guid):
+    """
+    Get a Project by id 
+
+    :param guid: str - project id 
+    :returns: :class:`plow.Project`
+    """
     cdef: 
         ProjectT projT 
         Project project
@@ -65,6 +88,12 @@ cpdef get_project(Guid& guid):
 
 
 def get_project_by_code(string code):
+    """
+    Look up a Project by its code
+
+    :param code: str 
+    :returns: :class:`plow.Project`
+    """
     cdef: 
         ProjectT projT 
         Project project
@@ -75,6 +104,11 @@ def get_project_by_code(string code):
 
 
 def get_projects():
+    """
+    Get a list of all Projects 
+
+    :returns: list[:class:`plow.Project`]
+    """
     cdef:
         vector[ProjectT] projects 
         ProjectT projT
@@ -90,6 +124,11 @@ def get_projects():
     return results
 
 def get_active_projects():
+    """
+    Return a list of only active Projects 
+
+    :returns: list[:class:`plow.Project`]
+    """
     cdef:
         vector[ProjectT] projects 
         ProjectT projT
@@ -105,6 +144,13 @@ def get_active_projects():
     return results    
 
 def create_project(string title, string code):
+    """
+    Create a new Project with a title and code 
+
+    :param title: str - A full project title  
+    :param code: str - A short code to indentify the project 
+    :returns: :class:`plow.Project`
+    """
     cdef ProjectT projT
     cdef Project proj 
     getClient().proxy().createProject(projT, title, code)
@@ -112,6 +158,12 @@ def create_project(string title, string code):
     return proj
 
 cpdef inline set_project_active(Guid& id, bint active):
+    """
+    Set a project to be active 
+
+    :param id: str - project id 
+    :param active: bool 
+    """
     getClient().proxy().setProjectActive(id, active)
 
 

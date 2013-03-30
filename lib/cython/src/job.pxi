@@ -5,10 +5,7 @@
 
 @cython.internal
 cdef class _JobState:
-    cdef:
-        readonly int INITIALIZE 
-        readonly int RUNNING 
-        readonly int FINISHED 
+    cdef readonly int INITIALIZE, RUNNING, FINISHED
 
     def __cinit__(self):
         self.INITIALIZE = JOBSTATE_INITIALIZE
@@ -24,7 +21,6 @@ JobState = _JobState()
 
 @cython.internal
 cdef class JobFilter:
-
     cdef JobFilterT value
 
     def __init__(self, **kwargs):
@@ -44,7 +40,19 @@ cdef class JobFilter:
 # JobSpec
 #
 cdef class JobSpec:
+    """
+    A JobSpec specifies the parameters for 
+    launching a job
 
+    :var name: str
+    :var project: :class:`plow.Project`.id
+    :var username: str - owner
+    :var logPath: str = path to logfile
+    :var paused: bool - if True, submit in a paused state 
+    :var uid: int - uid of owner 
+    :var layers: list[:class:`plow.LayerSpec`]
+    :var depends: list[:class:`plow.DependSpec`]
+    """
     cdef public string name, project, username, logPath
     cdef public bint paused
     cdef public int uid
@@ -100,6 +108,11 @@ cdef class JobSpec:
         def __set__(self, val): self.depends = val
 
     def launch(self):
+        """
+        Launch this spec and return the Job 
+
+        :returns: :class:`plow.Job`
+        """
         cdef:
             JobT job
             JobSpecT spec
@@ -122,7 +135,25 @@ cdef inline Job initJob(JobT& j):
 
 
 cdef class Job:
+    """
+    A Job 
 
+    :var id: str 
+    :var folderId: str 
+    :var name: str - name of the job 
+    :var username: str - name of job owner
+    :var uid: int - uid of job owner
+    :var state: :obj:`plow.JobState`
+    :var paused: bool
+    :var minCores: int 
+    :var maxCores: int 
+    :var runCores: int 
+    :var maxRssMb: int 
+    :var startTime: long - msec since epoch
+    :var stopTime: long - msec since epoch
+    :var totals: :class:`plow.TaskTotals`
+
+    """
     cdef:
         JobT _job 
         TaskTotals _totals
@@ -198,26 +229,58 @@ cdef class Job:
             return self._totals
 
     property maxRssMb:
-        def __get__(self):
-            return self._job.maxRssMb
+        def __get__(self): return self._job.maxRssMb
 
     def kill(self, string reason):
+        """
+        Kill the job 
+
+        :param reason: str - reason for killing
+        """
         return kill_job(self.id, reason)
 
     def pause(self, bint paused):
+        """
+        Set the pause state of the job
+
+        :param paused: bool
+        """
         pause_job(self.id, paused)
 
     def get_outputs(self):
+        """
+        Get a list of outputs 
+
+        :returns: list[:class:`.plowOutput`]
+        """
         return get_job_outputs(self.id)
 
     def set_min_cores(self, int value):
+        """
+        Set the minimum cores the job should use 
+
+        :param value: int 
+        """
         set_job_min_cores(self.id, value)
 
     def set_max_cores(self, int value):
+        """
+        Set the maximum cores the job should use 
+
+        :param value: int 
+        """
         set_job_max_cores(self.id, value)
 
 
 def launch_job(**kwargs):
+    """
+    Launch a job with a set of specs.
+    Parameters should be those available 
+    as attributes of :class:`plow.JobSpec`
+
+    :param **kwargs: :class:`plow.JobSpec` attributes
+    :returns: :class:`plow.Job`
+    """
     cdef:
         JobSpec spec 
         Job job 

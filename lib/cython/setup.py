@@ -50,11 +50,21 @@ plowmodule = Extension('plow',
                         )
 
 
+cmdclass = {'build_ext': build_ext}
+
+# Sphinx
+try:
+    from sphinx.setup_command import BuildDoc 
+    cmdclass['build_sphinx'] = BuildDoc
+except ImportError:
+    pass
+
+
 setup(name = 'plow',
       version = '0.1',
       author ='Justin Israel',
       author_email = 'justinisrael@gmail.com',
       description = 'Python client bindings for Plow server',
       ext_modules = [plowmodule],
-      cmdclass = {'build_ext': build_ext}
+      cmdclass = cmdclass
       )
