@@ -54,7 +54,7 @@ cdef class Project:
         set_project_active(self.id, active)
         self.project.isActive = active
 
-cpdef get_project_by_id(Guid& guid):
+cpdef get_project(Guid& guid):
     cdef: 
         ProjectT projT 
         Project project

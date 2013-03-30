@@ -77,7 +77,7 @@ def get_quota(Guid& id):
     q = initQuota(qT)
     return q
 
-def getQuotas(**kwargs):
+def get_quotas(**kwargs):
     cdef:
         QuotaT qT
         vector[QuotaT] quotas 

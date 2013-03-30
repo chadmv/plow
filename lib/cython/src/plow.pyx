@@ -13,7 +13,23 @@ include "filter.pxi"
 include "quota.pxi"
 include "depend.pxi"
 
+#
+# Python imports
+#
 # from datetime import datetime
+import uuid
+
+
+
+def is_uuid(str identifier):
+    cdef bint ret = False
+    try:
+        uuid.UUID(identifier)
+        ret = True
+    except ValueError:
+        pass
+
+    return ret 
 
 
 def get_plow_time():

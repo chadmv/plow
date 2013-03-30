@@ -112,16 +112,6 @@ cdef class JobSpec:
         return ret
 
 
-def launch(**kwargs):
-    cdef:
-        JobSpec spec 
-        Job job 
-
-    spec = JobSpec(**kwargs)
-    job = spec.launch()
-    return job
-
-
 #######################
 # Job
 #
@@ -227,6 +217,15 @@ cdef class Job:
         set_job_max_cores(self.id, value)
 
 
+def launch_job(**kwargs):
+    cdef:
+        JobSpec spec 
+        Job job 
+
+    spec = JobSpec(**kwargs)
+    job = spec.launch()
+    return job
+    
 def get_job(Guid& id):
     cdef JobT jobT
     cdef Job job

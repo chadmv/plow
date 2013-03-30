@@ -146,7 +146,7 @@ cdef class Layer:
         return get_layer_outputs(self.id)
 
     def add_output(self, string path, Attrs& attrs):
-        add_output(self.id, path, attrs)
+        add_layer_output(self.id, path, attrs)
 
     def set_tags(self, c_set[string]& tags):
         set_layer_tags(self.id, tags)
@@ -210,7 +210,7 @@ def get_layers(Guid& jobId):
     ret = [initLayer(layerT) for layerT in layers]
     return ret
 
-cpdef inline add_output(Guid& layerId, string path, Attrs& attrs):
+cpdef inline add_layer_output(Guid& layerId, string path, Attrs& attrs):
     getClient().proxy().addOutput(layerId, path, attrs)
 
 cpdef inline list get_layer_outputs(Guid& layerId):
