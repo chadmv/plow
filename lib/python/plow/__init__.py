@@ -1,1 +1,1 @@
-from client import JobState, TaskState, NodeState, LockState
+from client import JobState, TaskState, NodeState

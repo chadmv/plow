@@ -15,7 +15,7 @@ from setuptools import setup, find_packages
 ROOT = os.path.dirname(__file__)
 TEMP_BUILD_DIR = os.path.join(ROOT, '__dist__') 
 
-execfile(os.path.join(ROOT, 'plow/version.py'))
+execfile(os.path.join(ROOT, 'plow/client/version.py'))
 
 
 def get_data(*paths):
