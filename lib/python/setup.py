@@ -100,7 +100,7 @@ class CleanCommand(Command):
     user_options = [ ]
 
     def initialize_options(self):
-        self._clean_me = ['src/plow.cpp']
+        self._clean_me = []
         self._clean_trees = []
         for root, dirs, files in list(os.walk('plow')):
             for f in files:
@@ -166,17 +166,18 @@ def copy_dir(src, dst):
 #
 # Cython client extension
 #
-setup(
-    name="plow",
-    version=__version__,
-    ext_modules=[
-        dist_Extension('plow',
-                       [PLOW_SOURCE_MAIN_PYX] + PLOW_SOURCE_EXTRA,
-                       language="c++"
-                       )
-    ],
-    cmdclass=cmdclass
-)
+if use_cython:
+    setup(
+        name="plow",
+        version=__version__,
+        ext_modules=[
+            dist_Extension('plow',
+                           [PLOW_SOURCE_MAIN_PYX] + PLOW_SOURCE_EXTRA,
+                           language="c++"
+                           )
+        ],
+        cmdclass=cmdclass
+    )
 
 
 #
