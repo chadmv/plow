@@ -37,8 +37,45 @@ Installing the Server
 The plow server acts as the central brain for your render farm.  It contains the plow
 dispatcher and exposes a thrift API for interacting with jobs.
 
-For convinience a binary distributation of the server can be found here:
+The plow server code compiles to a Web Application Archive file, or WAR file.  This file
+must be hosted by within a Java application server. For convinience an executable 
+binary distribution with a current WAR can be found here:
+
 http://code.google.com/p/plow/downloads
+
+If your developing Plow, you will also need to compile your own WAR file at times.
+
+Steps for Compiling the Server
+------------------------------
+
+* Install the PostgreSQL Java Driver *
+
+For some reason this version isn't in Maven yet.   This will install the Postgres JDBC driver into
+your local Maven repository.
+
+    $ cd server/lib
+    $ ./pginstall.sh
+
+
+* Install the Thrift Bindings *
+
+Next step, must build the Plow thrift bindings for Java and install those in your local Maven repo.
+
+    $ cd client/thrift
+    $ ./generate-sources.sh
+    $ cd ../java
+    $ mvn install
+
+Now you can actually build the server.
+
+    $ cd server
+    $ mvn install
+
+This will create a file named plow.war.  Replace the plow.war file in the executable server package you
+downloaded and your now on the latest version.
+
+If the thrift files change at all, you have to re-generate + install the thrift bindings and recompile
+the server.
 
 Setting up Postgres
 -------------------
