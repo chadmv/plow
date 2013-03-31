@@ -4,7 +4,6 @@ from libcpp.set cimport set as c_set
 from libcpp.map cimport map 
 
 
-
 cdef extern from "rpc/common_types.h" namespace "Plow":
     ctypedef string Guid
     ctypedef int Timestamp

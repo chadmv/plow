@@ -1,2 +1,5 @@
 global-include *.dylib *.dat *.bp *.ini *.sh
+recursive-include src *
 graft __dist__
+graft build/sphinx/html
+graft build/sphinx/pdf

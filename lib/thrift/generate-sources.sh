@@ -2,14 +2,22 @@
 
 # Python
 ########################################################################
-rm -rf ../python/plow/client/rpc
-rm -rf ../python/plow/rndaemon/rpc
+OUT="../python/plow/rndaemon"
+rm -rf ${OUT}/rpc
+mkdir -p ${OUT}/rpc 
 
-thrift --gen py:new_style:utf8strings -out ../python/plow/client plow.thrift
-thrift --gen py:new_style:utf8strings -out ../python/plow/rndaemon rnd.thrift
+thrift --gen py:new_style:utf8strings -out $OUT rnd.thrift
+thrift --gen py:new_style:utf8strings -out ${OUT}/rpc common.thrift
 
-thrift --gen py:new_style:utf8strings -out ../python/plow/client/rpc common.thrift
-thrift --gen py:new_style:utf8strings -out ../python/plow/rndaemon/rpc common.thrift
+OUT="../python/src/core/rpc"
+
+rm -rf $OUT
+mkdir -p $OUT
+
+thrift --gen cpp --out $OUT common.thrift
+thrift --gen cpp --out $OUT plow.thrift
+
+rm $OUT/RpcService_server.skeleton.cpp
 
 cp plow__init__.py ../python/plow/client/__init__.py
 
@@ -38,17 +46,6 @@ mv $OUT/plow_*.h $EXP
 
 rm $OUT/RpcService_server.skeleton.cpp
 
-# Cython
-########################################################################
 
-OUT="../cython/src/core/rpc"
-
-rm -rf $OUT
-mkdir -p $OUT
-
-thrift --gen cpp --out $OUT common.thrift
-thrift --gen cpp --out $OUT plow.thrift
-
-rm $OUT/RpcService_server.skeleton.cpp
 
 

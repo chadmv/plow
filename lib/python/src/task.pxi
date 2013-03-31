@@ -1,4 +1,24 @@
 
+#######################
+# TaskState
+#
+
+@cython.internal
+cdef class _TaskState:
+    cdef:
+        readonly int INITIALIZE, WAITING, RUNNING
+        readonly int DEAD, EATEN, DEPEND, SUCCEEDED
+
+    def __cinit__(self):
+        self.INITIALIZE = TASKSTATE_INITIALIZE
+        self.WAITING = TASKSTATE_WAITING
+        self.RUNNING = TASKSTATE_RUNNING
+        self.DEAD = TASKSTATE_DEAD
+        self.EATEN = TASKSTATE_EATEN
+        self.DEPEND = TASKSTATE_DEPEND
+        self.SUCCEEDED = TASKSTATE_SUCCEEDED
+
+TaskState = _TaskState()
 
 
 #######################
