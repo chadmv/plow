@@ -48,7 +48,7 @@ If your developing Plow, you will also need to compile your own WAR file at time
 Steps for Compiling the Server
 ------------------------------
 
-* Install the PostgreSQL Java Driver *
+### Install the PostgreSQL Java Driver
 
 For some reason this version isn't in Maven yet.   This will install the Postgres JDBC driver into
 your local Maven repository.
@@ -57,7 +57,7 @@ your local Maven repository.
     $ ./pginstall.sh
 
 
-* Install the Thrift Bindings *
+### Install the Thrift Bindings
 
 Next step, must build the Plow thrift bindings for Java and install those in your local Maven repo.
 
@@ -65,6 +65,8 @@ Next step, must build the Plow thrift bindings for Java and install those in you
     $ ./generate-sources.sh
     $ cd ../java
     $ mvn install
+
+### Build the Server
 
 Now you can actually build the server.
 
