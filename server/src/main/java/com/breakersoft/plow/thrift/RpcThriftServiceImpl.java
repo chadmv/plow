@@ -516,4 +516,11 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void setFilterOrder(String arg0, int arg1) throws PlowException,
+			TException {
+		// TODO Auto-generated method stub
+
+	}
 }
