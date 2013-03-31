@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PyPlow'
+project = u'Plow'
 copyright = u'2013, Matthew Chambers, Justin Israel, Johan Aberg, Wan Bachtiar'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -183,7 +183,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Plow.tex', u'PyPlow Client Documentation',
+  ('index', 'Plow.tex', u'Plow Client Documentation',
    u'Matthew Chambers, Justin Israel, Johan Aberg, Wan Bachtiar', 'manual'),
 ]
 
@@ -213,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'plow', u'PyPlow Client Documentation',
+    ('index', 'plow', u'Plow Client Documentation',
      [u'Matthew Chambers, Justin Israel, Johan Aberg, Wan Bachtiar'], 1)
 ]
 
@@ -227,7 +227,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Plow', u'PyPlow Client Documentation',
+  ('index', 'Plow', u'Plow Client Documentation',
    u'Matthew Chambers, Justin Israel, Johan Aberg, Wan Bachtiar', 'Plow', 'One line description of project.',
    'Miscellaneous'),
 ]

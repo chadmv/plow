@@ -1,23 +1,148 @@
 #!/usr/bin/env python
 
-try:
-    from python.ez_setup import use_setuptools
-    use_setuptools()
-except:
-    pass
 
+#-----------------------------------------------------------------------------
+# Imports
+#-----------------------------------------------------------------------------
 import os
+import sys
 import glob
 import shutil
+from subprocess import Popen, PIPE
 
-from setuptools import setup, find_packages
+from distutils.core import setup, Command
+from distutils.extension import Extension as dist_Extension
+from distutils.sysconfig import get_config_vars
 
-ROOT = os.path.dirname(__file__)
-TEMP_BUILD_DIR = os.path.join(ROOT, '__dist__') 
+
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
 
 execfile(os.path.join(ROOT, 'plow/client/version.py'))
 
 
+#-----------------------------------------------------------------------------
+# Flags and Configuration
+#-----------------------------------------------------------------------------
+try:
+    from Cython.Distutils import build_ext
+except ImportError:
+    use_cython = False
+else:
+    use_cython = True
+
+
+cmdclass = {}
+
+# set dylib ext:
+if sys.platform.startswith('win'):
+    lib_ext = '.dll'
+elif sys.platform == 'darwin':
+    lib_ext = '.dylib'
+else:
+    lib_ext = '.so'
+
+
+# Fix for GCC issues on Linux
+opt = get_config_vars("OPT")[0].split()
+exclude = set(["-Wstrict-prototypes"])
+os.environ['OPT'] = " ".join(flag for flag in opt if flag not in exclude)
+
+PLOW_INCLUDES = [os.path.join(ROOT, p) for p in ('src/core', 'src/core/rpc')]
+PLOW_CPP = PLOW_INCLUDES
+
+
+# build source
+PLOW_SOURCE_MAIN_PYX = os.path.join(ROOT, "src", "plow.pyx")
+PLOW_SOURCE_MAIN_CPP = os.path.join(ROOT, "src", "plow.cpp")
+
+PLOW_SOURCE_EXTRA = []
+for p in PLOW_CPP:
+    PLOW_SOURCE_EXTRA += glob.glob(os.path.join(p, "*.cpp"))
+
+
+# build includes
+cflags = Popen(['pkg-config', '--cflags', 'thrift'], stdout=PIPE).communicate()[0].split()
+cflags = [p.rstrip("/thrift") for p in cflags]
+
+cflags.extend("-I%s" % p for p in PLOW_INCLUDES)
+
+
+# build libs
+ldflags = Popen(['pkg-config', '--libs', 'thrift'], stdout=PIPE).communicate()[0].split()
+
+
+#-----------------------------------------------------------------------------
+# Extra commands
+#-----------------------------------------------------------------------------
+if use_cython:
+
+    class CythonCommand(build_ext):
+        """Custom distutils command subclassed from Cython.Distutils.build_ext
+        to compile pyx->c++, and stop there. All this does is override the 
+        C++-compile method build_extension() with a no-op."""
+        
+        description = "Compile Cython sources to C++"
+        
+        def cython_sources(self, *args, **kwargs):
+            # self.force = 1
+            build_ext.cython_sources(self, *args, **kwargs)
+
+        def build_extension(self, ext):
+            pass
+
+    cmdclass['build_ext'] = CythonCommand
+
+
+class CleanCommand(Command):
+    """Custom distutils command to clean the .so and .pyc files."""
+
+    user_options = [ ]
+
+    def initialize_options(self):
+        self._clean_me = ['src/plow.cpp']
+        self._clean_trees = []
+        for root, dirs, files in list(os.walk('plow')):
+            for f in files:
+                if os.path.splitext(f)[-1] in ('.pyc', '.so', '.o', '.pyd'):
+                    self._clean_me.append(os.path.join(root, f))
+            for d in dirs:
+                if d == '__pycache__':
+                    self._clean_trees.append(os.path.join(root, d))
+        
+        for d in ('build', ):
+            if os.path.exists(d):
+                self._clean_trees.append(d)
+
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        for clean_me in self._clean_me:
+            try:
+                os.unlink(clean_me)
+            except Exception:
+                pass
+        for clean_tree in self._clean_trees:
+            try:
+                shutil.rmtree(clean_tree)
+            except Exception:
+                pass
+
+
+cmdclass['clean'] = CleanCommand
+
+
+# build docs
+try:
+    from sphinx.setup_command import BuildDoc 
+    cmdclass['build_sphinx'] = BuildDoc
+except ImportError:
+    pass
+
+
+# Utility functions
 def get_data(*paths):
     data = []
     for p in paths:
@@ -31,7 +156,46 @@ def copy_dir(src, dst):
     if os.path.isdir(src):
         if os.path.isdir(dst):
             shutil.rmtree(dst)
-        shutil.copytree(src, dst)    
+        shutil.copytree(src, dst) 
+
+
+#-----------------------------------------------------------------------------
+# Extensions
+#-----------------------------------------------------------------------------
+
+#
+# Cython client extension
+#
+setup(
+    name="plow",
+    version=__version__,
+    ext_modules=[
+        dist_Extension('plow',
+                       [PLOW_SOURCE_MAIN_PYX] + PLOW_SOURCE_EXTRA,
+                       language="c++"
+                       )
+    ],
+    cmdclass=cmdclass
+)
+
+
+#
+# Python packages
+#
+
+# setuptools imports are delayed until after distutils, 
+# because they monkey-patch stuff and break the cython
+# Extension class
+try:
+    from python.ez_setup import use_setuptools
+    use_setuptools()
+except:
+    pass
+
+from setuptools import setup, find_packages, Extension
+
+ROOT = os.path.dirname(__file__)
+TEMP_BUILD_DIR = os.path.join(ROOT, '__dist__')
 
 # manually graft in the parent etc/ directory so we can properly
 # dist it from here
@@ -44,19 +208,33 @@ BIN_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'bin')
 copy_dir(BIN_SRC_DIR, BIN_DST_DIR)
 
 
-setup(
+plowmodule = Extension('plow.client.plow',
+    [PLOW_SOURCE_MAIN_CPP] + PLOW_SOURCE_EXTRA,
+    language="c++",
+    libraries=["boost_thread-mt"], 
+    extra_compile_args=cflags,
+    extra_link_args=ldflags,
 
-    name="PyPlow",
+    # https://issues.apache.org/jira/browse/THRIFT-1326
+    define_macros=[
+        ("HAVE_NETINET_IN_H", 1),
+        ("HAVE_INTTYPES_H", 1)
+    ]
+)
+
+py_requirements = [open(os.path.join(ROOT, "requirements.txt")).read().split()]
+
+setup(
+    name="Plow",
     version=__version__,
 
-    # package_dir={'': 'python'},
     packages=find_packages(exclude=['tests', 'tests.*']),
 
-    install_requires=[
-        'psutil>=0.6.1',
-        'thrift>=0.9.0',
-        'argparse'
-    ],
+    install_requires=py_requirements,
+
+    zip_safe = False,
+
+    ext_modules = [plowmodule],
 
     # scripted functions that will get wrapped
     # into an entry point script
@@ -66,17 +244,23 @@ setup(
         ],
     },
 
-    # stand-alone scripts from the root bin
+    # # stand-alone scripts from the root bin
     scripts=[p for p in glob.glob(os.path.join(BIN_DST_DIR, "*")) if not p.endswith('rndaemon')],
 
-    # TODO: Some tests need to be made runable without an independant server
+    # # TODO: Some tests need to be made runable without an independant server
     test_suite="tests.test_all",
 
-    include_package_data=True,
+    # include_package_data=True,
     package_data={
+        '__dist__': ["*"],
+        'src': [
+            "*.cpp", "*.pxd", "*.h", "*.pxi", "*.pyx"
+        ],
         'plow': [
+            "*.dat", "*.bp", "*.ini", "*.sh",
+            # 'client/*.%s' % lib_ext,
             'rndaemon/profile/*.dylib',
-        ]
+        ],
     },
 
     data_files=[
