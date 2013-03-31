@@ -56,7 +56,6 @@ your local Maven repository.
     $ cd server/lib
     $ ./pginstall.sh
 
-
 ### Install the Thrift Bindings
 
 Next step, must build the Plow thrift bindings for Java and install those in your local Maven repo.
