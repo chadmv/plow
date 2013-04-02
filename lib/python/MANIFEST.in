@@ -1,5 +1,7 @@
-global-include *.dylib *.dat *.bp *.ini *.sh
-recursive-include src *
+global-include *.dylib *.dat *.bp *.ini *.sh 
+recursive-include src *.cpp *.h
+include *.txt *.py
 graft __dist__
 graft build/sphinx/html
-graft build/sphinx/pdf
+prune blueprint 
+prune fileseq

@@ -10,54 +10,54 @@ API Documentation
 General
 ===================
 
-.. autofunction:: plow.get_plow_time
-.. autofunction:: plow.is_uuid
+.. autofunction:: plow.client.get_plow_time
+.. autofunction:: plow.client.is_uuid
 
 .. _project:
 
 Project
 ===================
 
-.. autoclass:: plow.Project
+.. autoclass:: plow.client.Project
 
-.. autofunction:: plow.get_project
-.. autofunction:: plow.get_projects
-.. autofunction:: plow.get_project_by_code
-.. autofunction:: plow.get_active_projects
-.. autofunction:: plow.create_project
-.. autofunction:: plow.set_project_active
+.. autofunction:: plow.client.get_project
+.. autofunction:: plow.client.get_projects
+.. autofunction:: plow.client.get_project_by_code
+.. autofunction:: plow.client.get_active_projects
+.. autofunction:: plow.client.create_project
+.. autofunction:: plow.client.set_project_active
 
 .. _folder:
 
 Folder
 ===================
 
-.. autoclass:: plow.Folder
+.. autoclass:: plow.client.Folder
 
-.. autofunction:: plow.get_folder
-.. autofunction:: plow.get_folders
-.. autofunction:: plow.create_folder
-.. autofunction:: plow.get_job_board
-.. autofunction:: plow.set_folder_min_cores
-.. autofunction:: plow.set_folder_max_cores
-.. autofunction:: plow.set_folder_name
-.. autofunction:: plow.delete_folder
+.. autofunction:: plow.client.get_folder
+.. autofunction:: plow.client.get_folders
+.. autofunction:: plow.client.create_folder
+.. autofunction:: plow.client.get_job_board
+.. autofunction:: plow.client.set_folder_min_cores
+.. autofunction:: plow.client.set_folder_max_cores
+.. autofunction:: plow.client.set_folder_name
+.. autofunction:: plow.client.delete_folder
 
 .. _job:
 
 Job
 ===================
 
-.. data:: plow.JobState
+.. data:: plow.client.JobState
 
 	Constants representing the state of a Job 
 
-	.. data:: plow.JobState.INITIALIZE
-	.. data:: plow.JobState.RUNNING
-	.. data:: plow.JobState.FINISHED
+	.. data:: plow.client.JobState.INITIALIZE
+	.. data:: plow.client.JobState.RUNNING
+	.. data:: plow.client.JobState.FINISHED
 
-.. autoclass:: plow.Job
-.. autoclass:: plow.JobSpec
+.. autoclass:: plow.client.Job
+.. autoclass:: plow.client.JobSpec
 
 
 
@@ -84,18 +84,18 @@ Job
 Cluster
 ===================
 
-.. autoclass:: plow.Cluster
-.. autoclass:: plow.ClusterCounts
+.. autoclass:: plow.client.Cluster
+.. autoclass:: plow.client.ClusterCounts
 
-.. autofunction:: plow.get_cluster
-.. autofunction:: plow.get_clusters
-.. autofunction:: plow.get_clusters_by_tag
-.. autofunction:: plow.create_cluster
-.. autofunction:: plow.delete_cluster
-.. autofunction:: plow.lock_cluster
-.. autofunction:: plow.set_cluster_tags
-.. autofunction:: plow.set_cluster_name
-.. autofunction:: plow.set_default_cluster
+.. autofunction:: plow.client.get_cluster
+.. autofunction:: plow.client.get_clusters
+.. autofunction:: plow.client.get_clusters_by_tag
+.. autofunction:: plow.client.create_cluster
+.. autofunction:: plow.client.delete_cluster
+.. autofunction:: plow.client.lock_cluster
+.. autofunction:: plow.client.set_cluster_tags
+.. autofunction:: plow.client.set_cluster_name
+.. autofunction:: plow.client.set_default_cluster
 
 
 
