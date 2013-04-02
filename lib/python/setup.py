@@ -16,7 +16,7 @@ from distutils.sysconfig import get_config_vars
 
 
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(__file__)
 
 execfile(os.path.join(ROOT, 'plow/client/version.py'))
 
@@ -55,6 +55,9 @@ PLOW_CPP = PLOW_INCLUDES
 # build source
 PLOW_SOURCE_MAIN_PYX = os.path.join(ROOT, "src", "plow.pyx")
 PLOW_SOURCE_MAIN_CPP = os.path.join(ROOT, "src", "plow.cpp")
+
+if not os.path.exists(PLOW_SOURCE_MAIN_PYX):
+    use_cython = False
 
 PLOW_SOURCE_EXTRA = []
 for p in PLOW_CPP:
@@ -148,7 +151,7 @@ def get_data(*paths):
     for p in paths:
         if not p.startswith(ROOT):
             p = os.path.join(ROOT, p)
-        data.extend(glob.iglob(os.path.abspath(p)))
+        data.extend(glob.iglob(p))
     return data
 
 
@@ -254,12 +257,9 @@ setup(
     # include_package_data=True,
     package_data={
         '__dist__': ["*"],
-        'src': [
-            "*.cpp", "*.pxd", "*.h", "*.pxi", "*.pyx"
-        ],
+        'src': ["*.cpp", "*.h"],
         'plow': [
             "*.dat", "*.bp", "*.ini", "*.sh",
-            # 'client/*.%s' % lib_ext,
             'rndaemon/profile/*.dylib',
         ],
     },
