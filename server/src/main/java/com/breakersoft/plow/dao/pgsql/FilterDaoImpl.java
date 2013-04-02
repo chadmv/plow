@@ -75,7 +75,7 @@ public class FilterDaoImpl extends AbstractDao implements FilterDao {
 	}
 
 	@Override
-	public void setFilterName(Filter filter, String name) {
+	public void setName(Filter filter, String name) {
 		jdbc.update("UPDATE plow.filter SET str_name=? WHERE pk_filter=?", name, filter.getFilterId());
 	}
 

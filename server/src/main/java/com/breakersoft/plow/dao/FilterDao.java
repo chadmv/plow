@@ -23,5 +23,5 @@ public interface FilterDao {
 
 	Filter get(UUID id);
 
-	void setFilterName(Filter filter, String name);
+	void setName(Filter filter, String name);
 }
