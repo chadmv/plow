@@ -7,8 +7,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Filter;
+import com.breakersoft.plow.Matcher;
 import com.breakersoft.plow.Project;
+import com.breakersoft.plow.dao.ActionDao;
 import com.breakersoft.plow.dao.FilterDao;
+import com.breakersoft.plow.dao.MatcherDao;
+import com.breakersoft.plow.thrift.MatcherField;
+import com.breakersoft.plow.thrift.MatcherType;
 
 @Service
 @Transactional
@@ -16,6 +21,12 @@ public class FilterServiceImpl implements FilterService {
 
 	@Autowired
 	private FilterDao filterDao;
+
+	@Autowired
+	private MatcherDao matcherDao;
+
+	@Autowired
+	private ActionDao actionDao;
 
 	@Override
 	public Filter createFilter(Project project, String name) {
@@ -52,4 +63,21 @@ public class FilterServiceImpl implements FilterService {
 	public boolean deleteFilter(Filter filter) {
 		return filterDao.delete(filter);
 	}
+
+	@Override
+	public Matcher createMatcher(Filter filter, MatcherField field, MatcherType type, String value) {
+		return matcherDao.create(filter, field, type, value);
+	}
+
+	@Override
+	public boolean deleteMatcher(Matcher matcher) {
+		return matcherDao.delete(matcher);
+	}
+
+	@Override
+	@Transactional(readOnly=true)
+	public Matcher getMatcher(UUID id) {
+		return matcherDao.get(id);
+	}
+
 }

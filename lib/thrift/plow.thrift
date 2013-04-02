@@ -425,6 +425,8 @@ service RpcService {
     void increaseFilterOrder(1:common.Guid id) throws (1:PlowException e),
     void decreaseFilterOrder(1:common.Guid id) throws (1:PlowException e),
     MatcherT createMatcher(1:common.Guid filterId, 2:MatcherField field, 3:MatcherType type, 4:string value) throws (1:PlowException e),
+    MatcherT getMatcher(1:common.Guid matcherId) throws (1:PlowException e),
+    list<MatcherT> getMatchers(1:common.Guid filterId) throws (1:PlowException e),
     ActionT createAction(1:common.Guid filterId, 2:ActionType type, 3:string value) throws (1:PlowException e),
     void deleteMatcher(1:common.Guid id) throws (1:PlowException e),
     void deleteAction(1:common.Guid id) throws (1:PlowException e),

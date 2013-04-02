@@ -14,6 +14,7 @@ import com.breakersoft.plow.Filter;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
+import com.breakersoft.plow.Matcher;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
@@ -30,6 +31,7 @@ import com.breakersoft.plow.thrift.dao.ThriftFolderDao;
 import com.breakersoft.plow.thrift.dao.ThriftJobBoardDao;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
+import com.breakersoft.plow.thrift.dao.ThriftMatcherDao;
 import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
 import com.breakersoft.plow.thrift.dao.ThriftProjectDao;
 import com.breakersoft.plow.thrift.dao.ThriftQuotaDao;
@@ -81,6 +83,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     ThriftFilterDao thriftFilterDao;
+
+    @Autowired
+    ThriftMatcherDao thriftMatcherDao;
 
     @Autowired
     StateManager stateManager;
@@ -475,24 +480,35 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 	}
 
 	@Override
-	public MatcherT createMatcher(String arg0, MatcherField arg1,
-			MatcherType arg2, String arg3) throws PlowException, TException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-
-	@Override
 	public void deleteAction(String arg0) throws PlowException, TException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void deleteMatcher(String arg0) throws PlowException, TException {
-		// TODO Auto-generated method stub
+	public MatcherT createMatcher(String filterId, MatcherField field,
+			MatcherType type, String value) throws PlowException, TException {
+		Filter filter = filterService.getFilter(UUID.fromString(filterId));
+		Matcher matcher = filterService.createMatcher(filter, field, type, value);
+		return thriftMatcherDao.get(matcher.getMatcherId());
+	}
 
+	@Override
+	public void deleteMatcher(String matcherId) throws PlowException, TException {
+		Matcher matcher = filterService.getMatcher(UUID.fromString(matcherId));
+		filterService.deleteMatcher(matcher);
+	}
+
+	@Override
+	public MatcherT getMatcher(String matcherId) throws PlowException, TException {
+		return thriftMatcherDao.get(UUID.fromString(matcherId));
+	}
+
+	@Override
+	public List<MatcherT> getMatchers(String filterId) throws PlowException,
+			TException {
+		Filter filter = filterService.getFilter(UUID.fromString(filterId));
+		return thriftMatcherDao.getAll(filter);
 	}
 
 	@Override
