@@ -416,7 +416,9 @@ service RpcService {
     void setQuotaBurst(1:common.Guid id, 2:i32 burst) throws (1:PlowException e),
     void setQuotaLocked(1:common.Guid id, 2:bool locked) throws (1:PlowException e)
 
-    FilterT createFilter(1:string name) throws (1:PlowException e),
+    FilterT createFilter(1:common.Guid projectId, 2:string name) throws (1:PlowException e),
+    list<FilterT> getFilters(1:common.Guid projectId) throws (1:PlowException e),
+    FilterT getFilter(1:common.Guid filterId) throws (1:PlowException e),
     void deleteFilter(1:common.Guid id) throws (1:PlowException e),
     void setFilterName(1:common.Guid id, 2:string name) throws (1:PlowException e),
     void setFilterOrder(1:common.Guid id, 2:i32 order) throws (1:PlowException e),

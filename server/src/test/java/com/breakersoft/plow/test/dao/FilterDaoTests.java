@@ -35,7 +35,7 @@ public class FilterDaoTests extends AbstractTest {
 	@Test
 	public void testSetFilterName() {
 		Filter f = filterDao.create(TEST_PROJECT, "test");
-		filterDao.setFilterName(f, "biblo");
+		filterDao.setName(f, "biblo");
 		assertEquals("biblo",
 				jdbc().queryForObject("SELECT str_name FROM plow.filter WHERE pk_filter=?", String.class, f.getFilterId()));
 	}
