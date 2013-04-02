@@ -65,8 +65,8 @@ public class MatcherDaoImpl extends AbstractDao implements MatcherDao {
 	}
 
 	@Override
-	public void delete(Matcher matcher) {
-		jdbc.update("DELETE FROM matcher WHERE pk_matcher=?", matcher.getMatcherId());
+	public boolean delete(Matcher matcher) {
+		return jdbc.update("DELETE FROM matcher WHERE pk_matcher=?", matcher.getMatcherId()) == 1;
 	}
 
 	@Override

@@ -12,7 +12,7 @@ public interface MatcherDao {
 	Matcher create(Filter filter, MatcherField field, MatcherType type,
 			String value);
 
-	void delete(Matcher matcher);
+	boolean delete(Matcher matcher);
 
 	void setValue(Matcher matcher, String value);
 	void setField(Matcher matcher, MatcherField field);
