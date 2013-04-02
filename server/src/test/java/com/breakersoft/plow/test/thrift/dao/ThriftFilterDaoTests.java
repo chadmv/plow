@@ -25,7 +25,7 @@ public class ThriftFilterDaoTests extends AbstractTest {
 	private Filter filter2;
 
 	@Before
-	public void testCreate() {
+	public void init() {
 		filter1 = filterDao.create(TEST_PROJECT, "test1");
 		filter2 = filterDao.create(TEST_PROJECT, "test2");
 	}
