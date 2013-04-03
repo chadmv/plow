@@ -56,14 +56,14 @@ class ClusterPanel(Panel):
     def __handleClusterLock(self):
         try:
             for cluster in self.widget().getSelectedClusters():
-                plow.client.lock_cluster(cluster, True)
+                cluster.lock(True)
         finally:
             self.refresh()
 
     def __handleClusterUnlock(self):
         try:
             for cluster in self.widget().getSelectedClusters():
-                plow.client.lock_cluster(cluster, False)
+                cluster.lock(True)
         finally:
             self.refresh()
 
@@ -262,11 +262,11 @@ class ClusterPropertiesDialog(QtGui.QDialog):
     def save(self):
         try:
             c = self.__cluster
-            plow.client.set_cluster_name(c, str(self.txt_name.text()))
-            plow.client.set_cluster_tags(c, self.list_tags.getValues())
-            plow.client.lock_cluster(c, self.cb_locked.isChecked())
+            c.set_name(str(self.txt_name.text()))
+            c.set_tags(self.list_tags.getValues())
+            c.lock(self.cb_locked.isChecked())
             if self.cb_default.isChecked():
-                plow.client.set_default_cluster(c)
+                c.set_default()
         except Exception, e:
             title = "Error Saving Cluster"
             text = str(e)
