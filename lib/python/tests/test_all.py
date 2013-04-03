@@ -7,15 +7,6 @@ logging.basicConfig(level=logging.INFO)
 
 TESTS = []
 
-# blueprint tests
-TESTS += ['.'.join(['blueprint.test', p]) for p in (
-    'test_app',
-    'test_layer',
-    # 'test_modules',  # this depends on blender. can't include it
-    'test_taskrun',
-    )
-]
-
 # rndaemon tests
 TESTS += ['.'.join(['plowapp.rndaemon.test', p]) for p in (
     'test_profile',
