@@ -226,15 +226,27 @@ plowmodule = Extension('plow.client.plow',
     ]
 )
 
-py_requirements = [open(os.path.join(ROOT, "requirements.txt")).read().split()]
-
 setup(
     name="Plow",
     version=__version__,
 
     packages=find_packages(exclude=['tests', 'tests.*']),
 
-    install_requires=py_requirements,
+    dependency_links=[
+        'https://github.com/sqlboy/blueprint/tarball/master#egg=blueprint-0.1',
+        'https://github.com/sqlboy/fileseq/tarball/master#egg=fileseq-0.1',
+        'http://peak.telecommunity.com/snapshots/',
+
+    ],
+
+    install_requires=[
+        'thrift>=0.9.0',
+        'psutil>=0.6.1',
+        'argparse',
+        'PyYAML',
+        'blueprint==0.1',
+        'fileseq==0.1',
+    ],
 
     zip_safe = False,
 

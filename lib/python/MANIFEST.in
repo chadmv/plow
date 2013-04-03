@@ -3,5 +3,3 @@ recursive-include src *.cpp *.h
 include *.txt *.py
 graft __dist__
 graft build/sphinx/html
-prune blueprint 
-prune fileseq
