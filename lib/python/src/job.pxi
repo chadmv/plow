@@ -272,6 +272,16 @@ cdef class Job:
         """
         set_job_max_cores(self.id, value)
 
+    def get_layers(self):
+        """
+        Get the layers for this job 
+
+        :returns: list[:class:`.Layer`]
+        """
+        cdef list ret 
+        ret = get_layers(self.id)
+        return ret
+
 
 def launch_job(**kwargs):
     """
