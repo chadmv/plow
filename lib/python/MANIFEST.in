@@ -1,4 +1,4 @@
-global-include *.dylib *.dat *.bp *.ini *.sh 
+global-include *.dylib *.dat *.bp *.ini *.sh *.css *.rcc
 recursive-include src *.cpp *.h
 include *.txt *.py
 graft __dist__

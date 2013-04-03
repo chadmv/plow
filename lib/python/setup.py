@@ -170,17 +170,22 @@ def copy_dir(src, dst):
 # Cython client extension
 #
 if use_cython:
-    setup(
-        name="plow",
-        version=__version__,
-        ext_modules=[
-            dist_Extension('plow',
-                           [PLOW_SOURCE_MAIN_PYX] + PLOW_SOURCE_EXTRA,
-                           language="c++"
-                           )
-        ],
-        cmdclass=cmdclass
-    )
+
+    if "develop" in sys.argv[1:]:
+        pass
+
+    else:
+        setup(
+            name="plow",
+            version=__version__,
+            ext_modules=[
+                dist_Extension('plow',
+                               [PLOW_SOURCE_MAIN_PYX] + PLOW_SOURCE_EXTRA,
+                               language="c++"
+                               )
+            ],
+            cmdclass=cmdclass,
+        )
 
 
 #
@@ -273,6 +278,8 @@ setup(
         'plow': [
             "*.dat", "*.bp", "*.ini", "*.sh",
             'rndaemon/profile/*.dylib',
+            'gui/resources/*.css',
+            'gui/resources/icons.py'
         ],
     },
 
