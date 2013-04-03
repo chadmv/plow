@@ -13,6 +13,20 @@ General
 .. autofunction:: plow.client.get_plow_time
 .. autofunction:: plow.client.is_uuid
 
+.. data:: plow.client.DependType
+
+	Constants representing dependencies between types
+
+	.. data:: plow.client.DependType.JOB_ON_JOB
+	.. data:: plow.client.DependType.LAYER_ON_LAYER
+	.. data:: plow.client.DependType.LAYER_ON_TASK
+	.. data:: plow.client.DependType.TASK_ON_LAYER
+	.. data:: plow.client.DependType.TASK_ON_TASK
+	.. data:: plow.client.DependType.TASK_BY_TASK
+
+.. autoclass:: plow.client.DependSpec
+
+
 .. _project:
 
 Project
@@ -59,6 +73,15 @@ Job
 .. autoclass:: plow.client.Job
 .. autoclass:: plow.client.JobSpec
 
+.. autofunction:: plow.client.launch_job
+.. autofunction:: plow.client.get_active_job
+.. autofunction:: plow.client.get_job
+.. autofunction:: plow.client.kill_job
+.. autofunction:: plow.client.pause_job
+.. autofunction:: plow.client.get_jobs
+.. autofunction:: plow.client.get_job_outputs
+.. autofunction:: plow.client.set_job_min_cores
+.. autofunction:: plow.client.set_job_max_cores
 
 
 .. .. _task:

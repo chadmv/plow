@@ -290,6 +290,12 @@ def launch_job(**kwargs):
     return job
     
 def get_job(Guid& id):
+    """
+    Get a :class:`.Job`
+
+    :param id: str Job id
+    :returns: :class:`.Job`
+    """
     cdef JobT jobT
     cdef Job job
 
@@ -302,6 +308,12 @@ def get_job(Guid& id):
     return job
 
 def get_active_job(string name):
+    """
+    Get an active :class:`.Job`
+
+    :param id: str name
+    :returns: :class:`.Job`
+    """    
     cdef JobT jobT
     cdef Job job
 
@@ -314,6 +326,18 @@ def get_active_job(string name):
     return job
 
 def get_jobs(**kwargs):
+    """
+    Get a list of jobs matching a criteria.
+
+    :param matchingOnly: bool
+    :param regex: str regex pattern
+    :param project: list[str] of matching project
+    :param user: list[str] of matching user names
+    :param jobIds: list[str] of matching job ids
+    :param name: list[str] of matching job names
+
+    :returns: list[:class:`.Job`]
+    """
     cdef: 
         vector[JobT] jobs 
         JobT jobT
@@ -326,17 +350,42 @@ def get_jobs(**kwargs):
     return ret
 
 cpdef bint kill_job(Guid& id, string reason):
+    """
+    Kill a job
+
+    :param id: str Job id 
+    :param reason: str reason for killing the job 
+    :returns: bool success
+    """
     cdef bint success
     success = getClient().proxy().killJob(id, reason)
     return success
 
 cpdef inline pause_job(Guid& id, bint paused):
+    """
+    Set the pause state of a job
+
+    :param id: str Job id 
+    :param paused: bool pause state
+    """
     getClient().proxy().pauseJob(id, paused)
 
-cpdef inline set_job_min_cores(id, value):
+cpdef inline set_job_min_cores(Guid& id, int value):
+    """
+    Set the minimum number of cores a job should get 
+
+    :param id: str job id
+    :param value: int number of cores
+    """
     getClient().proxy().setJobMinCores(id, value)
 
-cpdef inline set_job_max_cores(id, value):
+cpdef inline set_job_max_cores(Guid& id, int value):
+    """
+    Set the maximum number of cores a job should get 
+
+    :param id: str job id
+    :param value: int number of cores
+    """
     getClient().proxy().setJobMaxCores(id, value)
 
 #######################
@@ -350,7 +399,12 @@ cdef Job initOutput(OutputT& o):
 
 
 cdef class Output:
+    """
+    Represents an output of a :class:`.Job`
 
+    :var path: str path 
+    :var attrs: dict attributes 
+    """
     cdef public string path 
     cdef dict attrs
 
@@ -367,6 +421,12 @@ cdef class Output:
 
 
 cpdef get_job_outputs(Guid& id):
+    """
+    Get the outputs of a :class:`.Job`
+
+    :param id: job id 
+    :returns: list[:class:`.Output`]
+    """
     cdef:
         OutputT outT
         vector[OutputT] outputs
