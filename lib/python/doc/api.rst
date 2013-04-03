@@ -1,5 +1,5 @@
 
-API Documentation
+Client API Documentation
 ************************
 
 .. contents::
