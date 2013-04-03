@@ -19,8 +19,9 @@ cdef class Folder:
     :var maxCores: int
     :var runCores: int
     :var order: int
-    :var totals: :class:`plow.TaskTotals`
-    :var jobs: list[:class:`plow.Job`]
+    :var totals: :class:`.TaskTotals`
+    :var jobs: list[:class:`.Job`]
+    
     """
     cdef:
         FolderT folder
@@ -115,7 +116,7 @@ def get_folder(Guid& folderId):
     Get a Folder by id 
 
     :param folderId: str 
-    :returns: :class:`plow.Folder`
+    :returns: :class:`.Folder`
     """
     cdef:
         FolderT folderT
@@ -129,8 +130,8 @@ def get_folders(Guid& projectId):
     """
     Get a list of Folders by project id 
 
-    :param projectId: :class:`plow.Project`.id  
-    :returns: list[:class:`plow.Folder`]
+    :param projectId: :class:`.Project`.id  
+    :returns: list[:class:`.Folder`]
     """
     cdef Project proj = get_project(projectId)
     cdef list folders = Project.get_folders(proj)
@@ -140,9 +141,9 @@ def create_folder(Guid& projectId, string name):
     """
     Create a folder 
 
-    :param projectId: :class:`plow.Project`.id 
+    :param projectId: :class:`.Project`.id 
     :param name: str - folder name 
-    :returns: :class:`plow.Folder`
+    :returns: :class:`.Folder`
     """
     cdef FolderT folderT 
     getClient().proxy().createFolder(folderT, projectId, name)
@@ -165,7 +166,7 @@ cpdef inline set_folder_min_cores(Guid& id, int value):
     """
     Set the minimum cores for a Folder 
 
-    :param id: :class:`plow.Folder`.id 
+    :param id: :class:`.Folder`.id 
     :param value: int - cores 
     """
     getClient().proxy().setFolderMinCores(id, value)
@@ -174,7 +175,7 @@ cpdef inline set_folder_max_cores(Guid& id, int value):
     """
     Set the maximum cores for a Folder 
 
-    :param id: :class:`plow.Folder`.id 
+    :param id: :class:`.Folder`.id 
     :param value: int - cores 
     """
     getClient().proxy().setFolderMaxCores(id, value)
@@ -183,7 +184,7 @@ cpdef inline set_folder_name(Guid& id, string& name):
     """
     Set the name for a Folder 
 
-    :param id: :class:`plow.Folder`.id 
+    :param id: :class:`.Folder`.id 
     :param name: str  
     """
     getClient().proxy().setFolderName(id, name)
@@ -192,7 +193,7 @@ cpdef inline delete_folder(Guid& id):
     """
     Delete a folder 
 
-    :param id: :class:`plow.Folder`.id
+    :param id: :class:`.Folder`.id
     """
     getClient().proxy().deleteFolder(id)
 

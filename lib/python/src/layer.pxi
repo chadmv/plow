@@ -6,7 +6,22 @@
 #
 
 cdef class LayerSpec:
+    """
+    Defines a new layer 
 
+    :var name: str
+    :var range: str 
+    :var chunk: int 
+    :var minCores: int 
+    :var maxCores: int 
+    :var minRamMb: int 
+    :var threadable: bool
+    :var command: list[str]
+    :var depends: list[:class:`.DependSpec`] 
+    :var tasks: list [:class:`.TaskSpec`]
+    :var tags: set(str)
+    
+    """
     cdef public string name, range
     cdef public int chunk, minCores, maxCores, minRamMb
     cdef public bint threadable
@@ -82,7 +97,23 @@ cdef inline Job initLayer(LayerT& l):
 
 
 cdef class Layer:
+    """
+    Represents an existing layer 
 
+    :var id: str
+    :var name: str
+    :var range: str
+    :var chunk: int
+    :var minCores: int
+    :var maxCores: int
+    :var runCores: int
+    :var minRamMb: int
+    :var maxRssMb: int
+    :var threadable: bool
+    :var totals: list[:class:`.TaskTotals`]
+    :var tags: set(str)
+    
+    """
     cdef:
         LayerT _layer 
         TaskTotals _totals
@@ -143,32 +174,54 @@ cdef class Layer:
         def __get__(self): return self._layer.tags
 
     def get_outputs(self):
+        """ :returns: list[:class:`.Output`] """
         return get_layer_outputs(self.id)
 
     def add_output(self, string path, Attrs& attrs):
+        """
+        Add an output to the layer 
+
+        :param path: str 
+        :param attrs: dict
+        """
         add_layer_output(self.id, path, attrs)
 
     def set_tags(self, c_set[string]& tags):
+        """
+        Set the tags for the layer 
+
+        :param tags: set(str)
+        """
         set_layer_tags(self.id, tags)
         self._layer.tags = tags
 
     def set_threadable(self, bint threadable):
+        """ :param threadable: bool """
         set_layer_threadable(self.id, threadable)
         self._layer.threadable = threadable
 
     def set_min_cores_per_task(self, int minCores):
+        """ :param minCores: int """
         set_layer_min_cores_per_task(self.id, minCores)
         self._layer.minCores = minCores
 
     def set_max_cores_per_task(self, int maxCores):
+        """ :param maxCores: int """
         set_layer_max_cores_per_task(self.id, maxCores)
         self._layer.maxCores = maxCores
 
     def set_min_ram_per_task(self, int minRam):
+        """ :param minRam: int """
         set_layer_min_ram_per_task(self.id, minRam)
         self._layer.minRamMb = minRam
 
 def get_layer_by_id(Guid& layerId):
+    """
+    Get a layer by its id 
+
+    :param layerId: str 
+    :returns: :class:`.Layer`
+    """
     cdef:
         LayerT layerT 
         Layer layer
@@ -182,6 +235,12 @@ def get_layer_by_id(Guid& layerId):
     return layer
 
 def get_layer(Guid& jobId, string name):
+    """
+    Get layer by its name
+
+    :param name: str 
+    :returns: :class:`.Layer`
+    """
     cdef:
         LayerT layerT 
         Layer layer
@@ -195,6 +254,12 @@ def get_layer(Guid& jobId, string name):
     return layer
 
 def get_layers(Guid& jobId):
+    """
+    Get layers by a job id 
+
+    :param jobId: str :class:`.Job` id
+    :returns: list[:class:`.Layer`]
+    """
     cdef:
         LayerT layerT 
         Layer layer
@@ -211,9 +276,22 @@ def get_layers(Guid& jobId):
     return ret
 
 cpdef inline add_layer_output(Guid& layerId, string path, Attrs& attrs):
+    """
+    A an output to a layer 
+
+    :param layerId: str :class:`.Layer` id
+    :param path: str 
+    :param attrs: dict
+    """
     getClient().proxy().addOutput(layerId, path, attrs)
 
 cpdef inline list get_layer_outputs(Guid& layerId):
+    """
+    Get the outputs for a layer 
+
+    :param layerId: str :class:`.Layer` id 
+    :returns: list[:class:`.Layer`]
+    """
     cdef:
         vector[OutputT] outputs
         OutputT outT 
@@ -230,18 +308,38 @@ cpdef inline list get_layer_outputs(Guid& layerId):
     return ret
 
 cpdef inline set_layer_tags(Guid& guid, c_set[string]& tags):
+    """ 
+    :param guid: str :class:`.Layer` id
+    :param tags: set(str) 
+    """
     getClient().proxy().setLayerTags(guid, tags)
 
 cpdef inline set_layer_min_cores_per_task(Guid& guid, int minCores):
+    """ 
+    :param guid: str :class:`.Layer` id
+    :param minCores: int 
+    """
     getClient().proxy().setLayerMinRamPerTask(guid, minCores)
 
 cpdef inline set_layer_max_cores_per_task(Guid& guid, int maxCores):
+    """ 
+    :param guid: str :class:`.Layer` id
+    :param maxCores: int 
+    """
     getClient().proxy().setLayerMaxCoresPerTask(guid, maxCores)
 
 cpdef inline set_layer_min_ram_per_task(Guid& guid, int minRam):
+    """ 
+    :param guid: str :class:`.Layer` id
+    :param minRam: int 
+    """
     getClient().proxy().setLayerMinRamPerTask(guid, minRam)
 
 cpdef inline set_layer_threadable(Guid& guid, bint threadable):
+    """ 
+    :param guid: str :class:`.Layer` id
+    :param threadable: bool
+    """
     getClient().proxy().setLayerThreadable(guid, threadable)
 
 

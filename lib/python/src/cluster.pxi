@@ -26,6 +26,7 @@ cdef class ClusterCounts:
     :var unlockedCores: int
     :var runCores: int
     :var idleCores: int
+
     """
     cdef:
         readonly int nodes, upNodes, downNodes, repairNodes
@@ -71,6 +72,7 @@ cdef class Cluster:
     :var isDefault: bool
     :var tags: set[str]
     :var total: :class:`plow.ClusterCounts` 
+    
     """
     cdef: 
         ClusterT _cluster

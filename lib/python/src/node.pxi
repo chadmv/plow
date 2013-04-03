@@ -55,7 +55,21 @@ cdef inline NodeSystem initNodeSystem(NodeSystemT t):
     return system
 
 cdef class NodeSystem:
+    """
+    Defines properties of the hardware specs of a Node
+    at a sampled moment in time
 
+    :var cpuModel: str 
+    :var platform: str 
+    :var physicalCores: int 
+    :var logicalCores: int 
+    :var totalRamMb: int 
+    :var freeRamMb: int 
+    :var totalSwapMb: int 
+    :var freeSwapMb: int 
+    :var load: list[int] 
+
+    """
     cdef readonly string cpuModel, platform
     cdef readonly int physicalCores, logicalCores, totalRamMb
     cdef readonly int freeRamMb, totalSwapMb, freeSwapMb
@@ -76,7 +90,28 @@ cdef inline Node initNode(NodeT& n):
 
 
 cdef class Node:
+    """
+    Represents an existing Node (system)
+    that can perform tasks
 
+    :var id: str
+    :var name: str
+    :var clusterId: str
+    :var clusterName: str
+    :var ipaddr: str
+    :var locked: bool
+    :var createdTime: msec epoch timestamp
+    :var updatedTime: msec epoch timestamp
+    :var bootTime: msec epoch timestamp
+    :var totalCores: int
+    :var idleCores: int
+    :var totalRamMb: int
+    :var freeRamMb: int
+    :var tags: set(str)
+    :var state: :class:`.NodeState`
+    :var system: :class:`.NodeSystem`
+
+    """
     cdef NodeT _node
 
     def __repr__(self):
@@ -137,16 +172,37 @@ cdef class Node:
             return s
 
     def set_locked(self, bint locked):
+        """
+        Set the lock state of the node 
+
+        :param locked: bool 
+        """
         set_node_locked(self.id, locked)
 
     def set_cluster(self, Guid& clusterId):
+        """
+        Assign the node to a cluster 
+
+        :param clusterId: str :class:`.Cluster` id 
+        """
         set_node_cluster(self.id, clusterId)
 
     def set_tags(self, c_set[string]& tags):
+        """
+        Set the tags for the node 
+
+        :param tags: set(str)
+        """
         set_node_tags(self.id, tags)
 
 
 def get_node(string name):
+    """
+    Get a node by name 
+
+    :param name: str 
+    :returns: :class:`.Node`
+    """
     cdef: 
         NodeT nodeT
         Node node 
@@ -156,6 +212,16 @@ def get_node(string name):
     return node
 
 def get_nodes(**kwargs):
+    """
+    Get nodes matching keyword filter parameters
+
+    :param hostIds: list[str :class:`.Node` id]
+    :param clusterIds: list[str :class:`.Cluster` id]
+    :param regex: str 
+    :param hostnames: list[str]
+    :param locked: bool
+    :returns: list[:class:`.Node`]
+    """
     cdef:
         NodeT nodeT
         vector[NodeT] nodes 
@@ -168,12 +234,30 @@ def get_nodes(**kwargs):
     return ret
 
 cpdef inline set_node_locked(Guid& id, bint locked):
+    """
+    Set the lock state of the node 
+
+    :param id: :class:`.Node` id
+    :param locked: bool 
+    """
     getClient().proxy().setNodeLocked(id, locked)
 
 cpdef inline set_node_cluster(Guid& id, Guid& clusterId):
+    """
+    Assign the node to a cluster
+
+    :param id: :class:`.Node` id
+    :param clusterId: str :class:`.Cluster` id
+    """
     getClient().proxy().setNodeCluster(id, clusterId)
 
 cpdef inline set_node_tags(Guid& id, c_set[string]& tags):
+    """
+    Set the tags for the node 
+
+    :param id: :class:`.Node` id
+    :param tags: set(str) 
+    """
     getClient().proxy().setNodeTags(id, tags)
 
 

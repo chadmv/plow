@@ -16,6 +16,7 @@ cdef class Project:
     :var code: str 
     :var title: str 
     :var isActive: bool 
+    
     """
     cdef ProjectT project
 
@@ -46,7 +47,7 @@ cdef class Project:
         """
         Get the folders for this project 
 
-        :returns: list[:class:`plow.Folder`]
+        :returns: list[:class:`.Folder`]
         """
         cdef:
             vector[FolderT] folders
@@ -76,7 +77,7 @@ cpdef get_project(Guid& guid):
     Get a Project by id 
 
     :param guid: str - project id 
-    :returns: :class:`plow.Project`
+    :returns: :class:`.Project`
     """
     cdef: 
         ProjectT projT 
@@ -92,7 +93,7 @@ def get_project_by_code(string code):
     Look up a Project by its code
 
     :param code: str 
-    :returns: :class:`plow.Project`
+    :returns: :class:`.Project`
     """
     cdef: 
         ProjectT projT 
@@ -107,7 +108,7 @@ def get_projects():
     """
     Get a list of all Projects 
 
-    :returns: list[:class:`plow.Project`]
+    :returns: list[:class:`.Project`]
     """
     cdef:
         vector[ProjectT] projects 
@@ -127,7 +128,7 @@ def get_active_projects():
     """
     Return a list of only active Projects 
 
-    :returns: list[:class:`plow.Project`]
+    :returns: list[:class:`.Project`]
     """
     cdef:
         vector[ProjectT] projects 
@@ -149,7 +150,7 @@ def create_project(string title, string code):
 
     :param title: str - A full project title  
     :param code: str - A short code to indentify the project 
-    :returns: :class:`plow.Project`
+    :returns: :class:`.Project`
     """
     cdef ProjectT projT
     cdef Project proj 

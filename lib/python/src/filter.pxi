@@ -49,7 +49,16 @@ cdef inline Matcher initMatcher(MatcherT& m):
 
 
 cdef class Matcher:
+    """
+    A matcher is a combination of a type 
+    a field and a value
 
+    :var id: str 
+    :var type: :data:`.MatcherType`
+    :var field: :data:`.MatcherField`
+    :var value: str
+
+    """
     cdef MatcherT matcher
 
     cdef setMatcher(self, MatcherT& m):
@@ -70,6 +79,11 @@ cdef class Matcher:
     property value:
         def __get__(self): return self.matcher.value
         def __set__(self, string val): self.matcher.value = val
+
+# void createMatcher(MatcherT&, Guid& filterId, MatcherField_type field, MatcherType_type type, string& value) nogil except +
+# void getMatcher(MatcherT&, Guid& matcherId) nogil except +
+# void getMatchers(vector[MatcherT]&, Guid& filterId) nogil except +
+# void deleteMatcher(Guid& id) nogil except +
 
 
  #######################
@@ -103,7 +117,13 @@ cdef inline Action initAction(ActionT& a):
 
 
 cdef class Action:
+    """
+    An Action is represents a type and a value 
 
+    :var type: :data:`.ActionType`
+    :var value: str
+
+    """
     cdef ActionT action
 
     cdef setAction(self, ActionT& a):
@@ -121,6 +141,9 @@ cdef class Action:
         def __get__(self): return self.action.value
         def __set__(self, string val): self.action.value = val
 
+# void createAction(ActionT&, Guid& filterId, ActionType_type type, string& value) nogil except +
+# void deleteAction(Guid& id) nogil except +
+
 
 #######################
 # Filter
@@ -132,7 +155,16 @@ cdef inline Filter initFilter(FilterT& a):
 
 
 cdef class Filter:
+    """
+    A filter combines matcher and actions instances
 
+    :var id: str 
+    :var name: str
+    :var order: int 
+    :var enabled: bool
+    :var matchers: list[:class:`.Matcher`]
+    :var actions: list[:class:`.Action`]
+    """
     cdef FilterT _filter
 
     def __init__(self, **kwargs):
@@ -154,5 +186,14 @@ cdef class Filter:
         
     cdef setFilter(self, FilterT& a):
         self._filter = a
+
+# void createFilter(FilterT&, Guid& projectId, string& name) nogil except +
+# void getFilters(vector[FilterT]&, Guid& projectId) nogil except +
+# void getFilter(FilterT&, Guid& filterId) nogil except +
+# void deleteFilter(Guid& id) nogil except +
+# void setFilterName(Guid& id, string& name) nogil except +
+# void setFilterOrder(Guid& id, int order) nogil except +
+# void increaseFilterOrder(Guid& id) nogil except +
+# void decreaseFilterOrder(Guid& id) nogil except +
 
 

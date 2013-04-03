@@ -45,13 +45,14 @@ cdef class JobSpec:
     launching a job
 
     :var name: str
-    :var project: :class:`plow.Project`.id
+    :var project: :class:`.Project`.id
     :var username: str - owner
-    :var logPath: str = path to logfile
-    :var paused: bool - if True, submit in a paused state 
+    :var logPath: str - path to logfile
+    :var paused: bool ; if True, submit in a paused state 
     :var uid: int - uid of owner 
-    :var layers: list[:class:`plow.LayerSpec`]
-    :var depends: list[:class:`plow.DependSpec`]
+    :var layers: list[:class:`.LayerSpec`]
+    :var depends: list[:class:`.DependSpec`]
+
     """
     cdef public string name, project, username, logPath
     cdef public bint paused
@@ -111,7 +112,7 @@ cdef class JobSpec:
         """
         Launch this spec and return the Job 
 
-        :returns: :class:`plow.Job`
+        :returns: :class:`.Job`
         """
         cdef:
             JobT job
@@ -143,7 +144,7 @@ cdef class Job:
     :var name: str - name of the job 
     :var username: str - name of job owner
     :var uid: int - uid of job owner
-    :var state: :obj:`plow.JobState`
+    :var state: :obj:`.JobState`
     :var paused: bool
     :var minCores: int 
     :var maxCores: int 
@@ -151,7 +152,7 @@ cdef class Job:
     :var maxRssMb: int 
     :var startTime: long - msec since epoch
     :var stopTime: long - msec since epoch
-    :var totals: :class:`plow.TaskTotals`
+    :var totals: :class:`.TaskTotals`
 
     """
     cdef:
@@ -275,11 +276,18 @@ cdef class Job:
 def launch_job(**kwargs):
     """
     Launch a job with a set of specs.
-    Parameters should be those available 
-    as attributes of :class:`plow.JobSpec`
+    Keyword parameters mirror those defined  
+    as attributes of :class:`.JobSpec`
 
-    :param **kwargs: :class:`plow.JobSpec` attributes
-    :returns: :class:`plow.Job`
+    :param name: str
+    :param project: str :class:`.Project`.id
+    :param username: str owner
+    :param logPath: str path to logfile
+    :param paused: bool ; if True, submit in a paused state 
+    :param uid: int uid of owner 
+    :param layers: list[:class:`.LayerSpec`]
+    :param depends: list[:class:`.DependSpec`]
+    :returns: :class:`.Job`
     """
     cdef:
         JobSpec spec 
@@ -404,6 +412,7 @@ cdef class Output:
 
     :var path: str path 
     :var attrs: dict attributes 
+    
     """
     cdef public string path 
     cdef dict attrs

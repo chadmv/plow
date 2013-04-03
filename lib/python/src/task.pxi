@@ -26,7 +26,13 @@ TaskState = _TaskState()
 #
 
 cdef class TaskSpec:
+    """
+    Defines a task specification
 
+    :var name: string name 
+    :var depends: list[:class:`.DependSpec`] 
+
+    """
     cdef public string name
     cdef list depends
 
@@ -45,6 +51,7 @@ cdef class TaskSpec:
         cdef: 
             DependSpecT specT
             DependSpec spec
+
         for spec in self.depends:
             specT = spec.toDependSpecT()
             s.depends.push_back(specT) 
@@ -53,7 +60,6 @@ cdef class TaskSpec:
 
     property depends:
         def __get__(self): return self.depends
-
         def __set__(self, val): self.depends = val
 
 
@@ -88,7 +94,29 @@ cdef inline Task initTask(TaskT& t):
 
 
 cdef class Task:
+    """
+    Represents an existing Task
 
+    :var id: str 
+    :var name: str 
+    :var number: int 
+    :var dependCount: int  
+    :var order: int 
+    :var startTime: msec epoch timestamp
+    :var stopTime: msec epoch timestamp
+    :var lastNodeName: str 
+    :var lastLogLine: str 
+    :var retries: int 
+    :var cores: int 
+    :var ramMb: int 
+    :var rssMb: int 
+    :var maxRssMb: int 
+    :var cpuPerc: int 
+    :var maxCpuPerc: int 
+    :var progress: int 
+    :var state: :data:`.TaskState`
+
+    """
     cdef TaskT _task 
 
     def __repr__(self):
@@ -154,24 +182,45 @@ cdef class Task:
             return aState
 
     def get_log_path(self):
+        """
+        Get the log path for the task 
+
+        :returns: string path 
+        """
         cdef string path 
         path = get_task_log_path(self.id)
         return path
 
     def retry(self):
+        """
+        Retry the task 
+        """
         cdef list ids = [self.id]
         retry_tasks(taskIds=ids)
 
     def eat(self):
+        """
+        Eats the task. This is different than a kill, 
+        indicating that the work should simply be "completed"
+        """
         cdef list ids = [self.id]
         eat_tasks(taskIds=ids)        
 
     def kill(self):
+        """
+        Kill the task 
+        """
         cdef list ids = [self.id]
         kill_tasks(taskIds=ids)  
 
 
 def get_task(Guid& taskId):
+    """
+    Get a task by id 
+
+    :param taskId: str 
+    :returns: :class:`.Task`
+    """
     cdef:
         TaskT taskT 
         Task task 
@@ -181,6 +230,19 @@ def get_task(Guid& taskId):
     return task
 
 def get_tasks(**kwargs):
+    """
+    Get a list of tasks by providing various 
+    filtering parameters. 
+
+    :param jobId: str :class:`.Job` id 
+    :param layerIds: list of :class:`.Layer` ids 
+    :param taskIds: list of :class:`.Task` ids 
+    :param limit: int 
+    :param offset: int 
+    :param lastUpdateTime: msec epoch timestamp 
+
+    :returns: list[:class:`.Task`]
+    """
     cdef:
         TaskT taskT
         vector[TaskT] tasks 
@@ -193,11 +255,28 @@ def get_tasks(**kwargs):
     return ret
 
 cpdef inline string get_task_log_path(Guid& taskId):
+    """
+    Get a log path by task id 
+
+    :param taskId: str 
+    :returns: str log path
+    """
     cdef string path
     getClient().proxy().getTaskLogPath(path, taskId)
     return path
 
 def retry_tasks(**kwargs):
+    """
+    Retry tasks matching various keyword filter params 
+
+    :param jobId: str :class:`.Job` id 
+    :param layerIds: list of :class:`.Layer` ids 
+    :param taskIds: list of :class:`.Task` ids 
+    :param limit: int 
+    :param offset: int 
+    :param lastUpdateTime: msec epoch timestamp 
+
+    """
     cdef:
         TaskFilter filter = TaskFilter(**kwargs)
         TaskFilterT f = filter.value
@@ -205,6 +284,16 @@ def retry_tasks(**kwargs):
     getClient().proxy().retryTasks(f)
 
 def eat_tasks(**kwargs):
+    """
+    Eat tasks matching various keyword filter params 
+
+    :param jobId: str :class:`.Job` id 
+    :param layerIds: list of :class:`.Layer` ids 
+    :param taskIds: list of :class:`.Task` ids 
+    :param limit: int 
+    :param offset: int 
+    :param lastUpdateTime: msec epoch timestamp 
+    """
     cdef:
         TaskFilter filter = TaskFilter(**kwargs)
         TaskFilterT f = filter.value
@@ -212,6 +301,16 @@ def eat_tasks(**kwargs):
     getClient().proxy().eatTasks(f)
 
 def kill_tasks(**kwargs):
+    """
+    Kill tasks matching various filter params 
+
+    :param jobId: str :class:`.Job` id 
+    :param layerIds: list of :class:`.Layer` ids 
+    :param taskIds: list of :class:`.Task` ids 
+    :param limit: int 
+    :param offset: int 
+    :param lastUpdateTime: msec epoch timestamp 
+    """
     cdef:
         TaskFilter filter = TaskFilter(**kwargs)
         TaskFilterT f = filter.value
@@ -229,7 +328,18 @@ cdef TaskTotals initTaskTotals(TaskTotalsT& t):
 
 
 cdef class TaskTotals:
+    """
+    Data structure representing counts for a task
 
+    :var total: int
+    :var succeeded: int
+    :var running: int
+    :var dead: int
+    :var eaten: int
+    :var waiting: int
+    :var depend: int  
+      
+    """
     cdef TaskTotalsT _totals
 
     cdef setTaskTotals(self, TaskTotalsT& t):
