@@ -6,7 +6,7 @@ echo "Setting PLOW_ROOT: "$CWD
 export PLOW_ROOT=$CWD
 
 # Set python library path
-export PYTHONPATH="$PLOW_ROOT/lib/python"
+export PYTHONPATH="$PYTHONPATH:$PLOW_ROOT/lib/python"
 
 # Append plow executable path
 export PATH="$PATH:$PLOW_ROOT/bin"
