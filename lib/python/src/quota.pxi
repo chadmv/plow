@@ -106,8 +106,8 @@ def get_quotas(**kwargs):
     """
     Get quotas matching various keyword filter params
 
-    :param project: list[str :class:`.Project` id]
-    :param cluster: list[str :class:`.Cluster` id]
+    :param project: list[:class:`.Project`]
+    :param cluster: list[:class:`.Cluster`]
     :returns: list[:class:`.Quota`]
     """
     cdef:
@@ -117,16 +117,23 @@ def get_quotas(**kwargs):
         QuotaFilter filter = QuotaFilter(**kwargs)
         QuotaFilterT f = filter.value
 
+    cdef str name 
+    for name in ('project', 'cluster'):
+        try:
+            kwargs[name] = [p.id for p in kwargs[name]]
+        except:
+            pass
+
     getClient().proxy().getQuotas(quotas, f)
     ret = [initQuota(qT) for qT in quotas]
     return ret
 
-def create_quota(Guid& projectId,  Guid& clusterId, int size, int burst):
+def create_quota(Project project,  Cluster cluster, int size, int burst):
     """
     Create a quota for a project and cluster 
 
-    :param projectId: The target :class:`.Project` id 
-    :param clusterId: The target :class:`.Cluster` id 
+    :param project: The target :class:`.Project` 
+    :param cluster: The target :class:`.Cluster` 
     :param size: int 
     :param burst: int 
     :return: :class:`.Quota`
@@ -135,35 +142,35 @@ def create_quota(Guid& projectId,  Guid& clusterId, int size, int burst):
         QuotaT qT
         Quota q 
 
-    getClient().proxy().createQuota(qT, projectId, clusterId, size, burst)
+    getClient().proxy().createQuota(qT, project.id, cluster.id, size, burst)
     q = initQuota(qT)
     return q
 
 
-cpdef inline set_quota_size( Guid& id, int size):
+def set_quota_size(Cluster cluster, int size):
     """
     Set the quota size 
 
-    :param id: :class:`.Quota` id 
+    :param cluster: :class:`.Quota` 
     :param size: int 
     """
-    getClient().proxy().setQuotaSize(id, size)
+    getClient().proxy().setQuotaSize(cluster.id, size)
 
-cpdef inline set_quota_burst( Guid& id, int burst):
+def set_quota_burst(Cluster cluster, int burst):
     """
     Set the quota burst 
 
-    :param id: :class:`.Quota` id 
+    :param cluster: :class:`.Quota` 
     :param burst: int 
     """
-    getClient().proxy().setQuotaBurst(id, burst)
+    getClient().proxy().setQuotaBurst(cluster.id, burst)
 
-cpdef inline set_quota_locked( Guid& id, bint locked):
+def set_quota_locked(Cluster cluster, bint locked):
     """
     Set the lock state of the quota
 
-    :param id: :class:`.Quota` id 
+    :param cluster: :class:`.Quota` 
     :param locked: bool 
     """
-    getClient().proxy().setQuotaLocked(id, locked)
+    getClient().proxy().setQuotaLocked(cluster.id, locked)
 

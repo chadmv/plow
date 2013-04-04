@@ -234,10 +234,11 @@ def get_layer_by_id(Guid& layerId):
     layer = initLayer(layerT)
     return layer
 
-def get_layer(Guid& jobId, string name):
+def get_layer(Job job, string name):
     """
     Get layer by its name
 
+    :param job: :class:`.Job`
     :param name: str 
     :returns: :class:`.Layer`
     """
@@ -246,18 +247,18 @@ def get_layer(Guid& jobId, string name):
         Layer layer
 
     try:
-        getClient().proxy().getLayerById(layerT, name)
+        getClient().proxy().getLayer(layerT, job.id, name)
     except RuntimeError:
         return None 
 
     layer = initLayer(layerT)
     return layer
 
-def get_layers(Guid& jobId):
+def get_layers(Job job):
     """
     Get layers by a job id 
 
-    :param jobId: str :class:`.Job` id
+    :param job: :class:`.Job`
     :returns: list[:class:`.Layer`]
     """
     cdef:
@@ -267,7 +268,7 @@ def get_layers(Guid& jobId):
         list ret
 
     try:
-        getClient().proxy().getLayers(layers, jobId)
+        getClient().proxy().getLayers(layers, job.id)
     except RuntimeError:
         ret = []
         return ret
@@ -275,21 +276,21 @@ def get_layers(Guid& jobId):
     ret = [initLayer(layerT) for layerT in layers]
     return ret
 
-cpdef inline add_layer_output(Guid& layerId, string path, Attrs& attrs):
+def add_layer_output(Layer layer, string path, Attrs& attrs):
     """
     A an output to a layer 
 
-    :param layerId: str :class:`.Layer` id
+    :param layer: :class:`.Layer`
     :param path: str 
     :param attrs: dict
     """
-    getClient().proxy().addOutput(layerId, path, attrs)
+    getClient().proxy().addOutput(layer.id, path, attrs)
 
-cpdef inline list get_layer_outputs(Guid& layerId):
+def get_layer_outputs(Layer layer):
     """
     Get the outputs for a layer 
 
-    :param layerId: str :class:`.Layer` id 
+    :param layer: :class:`.Layer`
     :returns: list[:class:`.Layer`]
     """
     cdef:
@@ -299,7 +300,7 @@ cpdef inline list get_layer_outputs(Guid& layerId):
         list ret 
 
     try:
-        getClient().proxy().getLayerOutputs(outputs, layerId)
+        getClient().proxy().getLayerOutputs(outputs, layer.id)
     except RuntimeError:
         ret = []
         return ret 
@@ -307,39 +308,39 @@ cpdef inline list get_layer_outputs(Guid& layerId):
     ret = [initOutput(outT) for outT in outputs]
     return ret
 
-cpdef inline set_layer_tags(Guid& guid, c_set[string]& tags):
+def set_layer_tags(Layer layer, c_set[string]& tags):
     """ 
-    :param guid: str :class:`.Layer` id
+    :param layer: :class:`.Layer`
     :param tags: set(str) 
     """
-    getClient().proxy().setLayerTags(guid, tags)
+    getClient().proxy().setLayerTags(layer.id, tags)
 
-cpdef inline set_layer_min_cores_per_task(Guid& guid, int minCores):
+def set_layer_min_cores_per_task(Layer layer, int minCores):
     """ 
-    :param guid: str :class:`.Layer` id
+    :param layer: :class:`.Layer`
     :param minCores: int 
     """
-    getClient().proxy().setLayerMinRamPerTask(guid, minCores)
+    getClient().proxy().setLayerMinRamPerTask(layer.id, minCores)
 
-cpdef inline set_layer_max_cores_per_task(Guid& guid, int maxCores):
+def set_layer_max_cores_per_task(Layer layer, int maxCores):
     """ 
-    :param guid: str :class:`.Layer` id
+    :param layer: :class:`.Layer`
     :param maxCores: int 
     """
-    getClient().proxy().setLayerMaxCoresPerTask(guid, maxCores)
+    getClient().proxy().setLayerMaxCoresPerTask(layer.id, maxCores)
 
-cpdef inline set_layer_min_ram_per_task(Guid& guid, int minRam):
+def set_layer_min_ram_per_task(Layer layer, int minRam):
     """ 
-    :param guid: str :class:`.Layer` id
+    :param layer: :class:`.Layer`
     :param minRam: int 
     """
-    getClient().proxy().setLayerMinRamPerTask(guid, minRam)
+    getClient().proxy().setLayerMinRamPerTask(layer.id, minRam)
 
-cpdef inline set_layer_threadable(Guid& guid, bint threadable):
+def set_layer_threadable(Layer layer, bint threadable):
     """ 
-    :param guid: str :class:`.Layer` id
+    :param layer: :class:`.Layer`
     :param threadable: bool
     """
-    getClient().proxy().setLayerThreadable(guid, threadable)
+    getClient().proxy().setLayerThreadable(layer.id, threadable)
 
 

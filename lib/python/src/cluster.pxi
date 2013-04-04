@@ -216,55 +216,55 @@ def create_cluster(str name, c_set[string] tags):
     cluster = initCluster(clusterT)
     return cluster
 
-cpdef inline bint delete_cluster(Guid& clusterId):
+def delete_cluster(Cluster cluster):
     """
     Delete a Cluster 
 
-    :param clusterId: str - guid of Cluster to delete 
+    :param cluster: :class:`.Cluster`
     :returns: bool - True if deleted
     """
     cdef bint ret
-    ret = getClient().proxy().deleteCluster(clusterId)
+    ret = getClient().proxy().deleteCluster(cluster.id)
     return ret
 
-cpdef inline bint lock_cluster(Guid& clusterId, bint locked):
+def lock_cluster(Cluster cluster, bint locked):
     """
     Lock a Cluster 
 
-    :param clusterId: str - guid of Cluster to lock 
+    :param cluster: :class:`.Cluster`
     :param locked: bool - True to lock / False to unlock 
     :returns: bool - locked
     """
     cdef bint ret
-    ret = getClient().proxy().lockCluster(clusterId, locked)
+    ret = getClient().proxy().lockCluster(cluster.id, locked)
     return ret
 
-cpdef inline set_cluster_tags(Guid& clusterId, c_set[string] tags):
+def set_cluster_tags(Cluster cluster, c_set[string] tags):
     """
     Set the tags for a Cluster 
 
-    :param clusterId: str - guid of Cluster  
+    :param cluster: :class:`.Cluster`
     :param tags: set - A set of tags for the Cluster 
     """
-    getClient().proxy().setClusterTags(clusterId, tags)
+    getClient().proxy().setClusterTags(cluster.id, tags)
 
-cpdef inline set_cluster_name(Guid& clusterId, string name):
+def set_cluster_name(Cluster cluster, string name):
     """
     Set a name for a Cluster 
 
-    :param clusterId: str - guid of Cluster  
+    :param cluster: :class:`.Cluster`
     :param name: str - Cluster name
     """
-    getClient().proxy().setClusterName(clusterId, name)
+    getClient().proxy().setClusterName(cluster.id, name)
 
-cpdef inline set_default_cluster(Guid& clusterId):
+def set_default_cluster(Cluster cluster):
     """
     Set a given Cluster to be the default Cluster
 
-    :param clusterId: str - guid of Cluster to be default 
+    :param cluster: :class:`.Cluster`
     :returns: bool - True if deleted
     """
-    getClient().proxy().setDefaultCluster(clusterId)
+    getClient().proxy().setDefaultCluster(cluster.id)
 
 
 

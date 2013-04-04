@@ -158,14 +158,14 @@ def create_project(string title, string code):
     proj = initProject(projT)
     return proj
 
-cpdef inline set_project_active(Guid& id, bint active):
+def set_project_active(Project project, bint active):
     """
     Set a project to be active 
 
-    :param id: str - project id 
+    :param project: :class:`.Project`
     :param active: bool 
     """
-    getClient().proxy().setProjectActive(id, active)
+    getClient().proxy().setProjectActive(project.id, active)
 
 
  

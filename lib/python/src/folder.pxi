@@ -126,75 +126,78 @@ def get_folder(Guid& folderId):
     folder = initFolder(folderT)
     return folder
 
-def get_folders(Guid& projectId):
+def get_folders(Project project):
     """
     Get a list of Folders by project id 
 
-    :param projectId: :class:`.Project`.id  
+    :param project: :class:`.Project`
     :returns: list[:class:`.Folder`]
     """
-    cdef Project proj = get_project(projectId)
+    cdef Project proj = get_project(project.id)
     cdef list folders = Project.get_folders(proj)
     return
 
-def create_folder(Guid& projectId, string name):
+def create_folder(Project project, string name):
     """
     Create a folder 
 
-    :param projectId: :class:`.Project`.id 
+    :param project: :class:`.Project`
     :param name: str - folder name 
     :returns: :class:`.Folder`
     """
     cdef FolderT folderT 
-    getClient().proxy().createFolder(folderT, projectId, name)
+    getClient().proxy().createFolder(folderT, project.id, name)
     cdef Folder folder = initFolder(folderT)
     return folder
 
-def get_job_board(Guid& projectId):
+def get_job_board(Project project):
     """
     TODO
+
+    :param project: :class:`.Project`
+    :returns: list[:class:`.Folder`]
     """
     cdef: 
         FolderT folderT 
         vector[FolderT] folders
 
-    getClient().proxy().getJobBoard(folders, projectId)
+    getClient().proxy().getJobBoard(folders, project.id)
     cdef list ret = [initFolder(folderT) for folderT in folders]
     return ret
 
-cpdef inline set_folder_min_cores(Guid& id, int value):
+def set_folder_min_cores(Folder folder, int value):
     """
     Set the minimum cores for a Folder 
 
-    :param id: :class:`.Folder`.id 
+    :param folder: :class:`.Folder`
     :param value: int - cores 
     """
-    getClient().proxy().setFolderMinCores(id, value)
+    getClient().proxy().setFolderMinCores(folder.id, value)
 
-cpdef inline set_folder_max_cores(Guid& id, int value):
+def set_folder_max_cores(Folder folder, int value):
     """
     Set the maximum cores for a Folder 
 
-    :param id: :class:`.Folder`.id 
+    :param folder: :class:`.Folder`
     :param value: int - cores 
     """
-    getClient().proxy().setFolderMaxCores(id, value)
+    getClient().proxy().setFolderMaxCores(folder.id, value)
 
-cpdef inline set_folder_name(Guid& id, string& name):
+def set_folder_name(Folder folder, string& name):
     """
     Set the name for a Folder 
 
-    :param id: :class:`.Folder`.id 
+    :param folder: :class:`.Folder`
     :param name: str  
     """
-    getClient().proxy().setFolderName(id, name)
+    getClient().proxy().setFolderName(folder.id, name)
 
-cpdef inline delete_folder(Guid& id):
+def delete_folder(Folder folder):
     """
     Delete a folder 
 
-    :param id: :class:`.Folder`.id
+    :param folder: :class:`.Folder`
     """
-    getClient().proxy().deleteFolder(id)
+    getClient().proxy().deleteFolder(folder.id)
 
 

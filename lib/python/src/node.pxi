@@ -216,7 +216,7 @@ def get_nodes(**kwargs):
     Get nodes matching keyword filter parameters
 
     :param hostIds: list[str :class:`.Node` id]
-    :param clusterIds: list[str :class:`.Cluster` id]
+    :param cluster: list[str :class:`.Cluster`]
     :param regex: str 
     :param hostnames: list[str]
     :param locked: bool
@@ -229,35 +229,40 @@ def get_nodes(**kwargs):
         NodeFilter filter = NodeFilter(**kwargs)
         NodeFilterT f = filter.value
 
+    try:
+        kwargs['cluster'] = [c.id for c in kwargs['cluster']]
+    except:
+        pass
+
     getClient().proxy().getNodes(nodes, f)
     ret = [initNode(nodeT) for nodeT in nodes]
     return ret
 
-cpdef inline set_node_locked(Guid& id, bint locked):
+def set_node_locked(Node node, bint locked):
     """
     Set the lock state of the node 
 
-    :param id: :class:`.Node` id
+    :param node: :class:`.Node`
     :param locked: bool 
     """
-    getClient().proxy().setNodeLocked(id, locked)
+    getClient().proxy().setNodeLocked(node.id, locked)
 
-cpdef inline set_node_cluster(Guid& id, Guid& clusterId):
+def set_node_cluster(Node node, Cluster cluster):
     """
     Assign the node to a cluster
 
-    :param id: :class:`.Node` id
-    :param clusterId: str :class:`.Cluster` id
+    :param node: :class:`.Node`
+    :param cluster: :class:`.Cluster`
     """
-    getClient().proxy().setNodeCluster(id, clusterId)
+    getClient().proxy().setNodeCluster(node.id, cluster.id)
 
-cpdef inline set_node_tags(Guid& id, c_set[string]& tags):
+def set_node_tags(Node node, c_set[string]& tags):
     """
     Set the tags for the node 
 
-    :param id: :class:`.Node` id
+    :param node: :class:`.Node`
     :param tags: set(str) 
     """
-    getClient().proxy().setNodeTags(id, tags)
+    getClient().proxy().setNodeTags(node.id, tags)
 
 

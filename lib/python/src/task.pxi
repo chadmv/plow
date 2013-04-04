@@ -234,9 +234,9 @@ def get_tasks(**kwargs):
     Get a list of tasks by providing various 
     filtering parameters. 
 
-    :param jobId: str :class:`.Job` id 
-    :param layerIds: list of :class:`.Layer` ids 
-    :param taskIds: list of :class:`.Task` ids 
+    :param job: :class:`.Job` 
+    :param layers: list of :class:`.Layer` 
+    :param tasks: list of :class:`.Task`  
     :param limit: int 
     :param offset: int 
     :param lastUpdateTime: msec epoch timestamp 
@@ -250,28 +250,40 @@ def get_tasks(**kwargs):
         TaskFilter filter = TaskFilter(**kwargs)
         TaskFilterT f = filter.value
 
+    cdef str name 
+    for name in ('layers', 'tasks'):
+        try:
+            kwargs[name] = [p.id for p in kwargs[name]]
+        except:
+            pass
+
+    try:
+        kwargs['job'] = kwargs['job'].id
+    except:
+        pass
+
     getClient().proxy().getTasks(tasks, f)
     ret = [initTask(taskT) for taskT in tasks]
     return ret
 
-cpdef inline string get_task_log_path(Guid& taskId):
+def get_task_log_path(Task task):
     """
-    Get a log path by task id 
+    Get a log path by task 
 
-    :param taskId: str 
+    :param task: :class:`.Task`
     :returns: str log path
     """
     cdef string path
-    getClient().proxy().getTaskLogPath(path, taskId)
+    getClient().proxy().getTaskLogPath(path, task.id)
     return path
 
 def retry_tasks(**kwargs):
     """
     Retry tasks matching various keyword filter params 
 
-    :param jobId: str :class:`.Job` id 
-    :param layerIds: list of :class:`.Layer` ids 
-    :param taskIds: list of :class:`.Task` ids 
+    :param job: :class:`.Job` 
+    :param layer: list of :class:`.Layer` 
+    :param task: list of :class:`.Task` 
     :param limit: int 
     :param offset: int 
     :param lastUpdateTime: msec epoch timestamp 
@@ -280,6 +292,18 @@ def retry_tasks(**kwargs):
     cdef:
         TaskFilter filter = TaskFilter(**kwargs)
         TaskFilterT f = filter.value
+
+    cdef str name 
+    for name in ('layers', 'tasks'):
+        try:
+            kwargs[name] = [p.id for p in kwargs[name]]
+        except:
+            pass
+
+    try:
+        kwargs['job'] = kwargs['job'].id
+    except:
+        pass
 
     getClient().proxy().retryTasks(f)
 
@@ -287,9 +311,9 @@ def eat_tasks(**kwargs):
     """
     Eat tasks matching various keyword filter params 
 
-    :param jobId: str :class:`.Job` id 
-    :param layerIds: list of :class:`.Layer` ids 
-    :param taskIds: list of :class:`.Task` ids 
+    :param job: :class:`.Job` 
+    :param layer: list of :class:`.Layer` 
+    :param task: list of :class:`.Task` 
     :param limit: int 
     :param offset: int 
     :param lastUpdateTime: msec epoch timestamp 
@@ -297,6 +321,18 @@ def eat_tasks(**kwargs):
     cdef:
         TaskFilter filter = TaskFilter(**kwargs)
         TaskFilterT f = filter.value
+
+    cdef str name 
+    for name in ('layers', 'tasks'):
+        try:
+            kwargs[name] = [p.id for p in kwargs[name]]
+        except:
+            pass
+
+    try:
+        kwargs['job'] = kwargs['job'].id
+    except:
+        pass
 
     getClient().proxy().eatTasks(f)
 
@@ -304,9 +340,9 @@ def kill_tasks(**kwargs):
     """
     Kill tasks matching various filter params 
 
-    :param jobId: str :class:`.Job` id 
-    :param layerIds: list of :class:`.Layer` ids 
-    :param taskIds: list of :class:`.Task` ids 
+    :param job: :class:`.Job` 
+    :param layer: list of :class:`.Layer` 
+    :param task: list of :class:`.Task` 
     :param limit: int 
     :param offset: int 
     :param lastUpdateTime: msec epoch timestamp 
@@ -314,6 +350,18 @@ def kill_tasks(**kwargs):
     cdef:
         TaskFilter filter = TaskFilter(**kwargs)
         TaskFilterT f = filter.value
+
+    cdef str name 
+    for name in ('layers', 'tasks'):
+        try:
+            kwargs[name] = [p.id for p in kwargs[name]]
+        except:
+            pass
+
+    try:
+        kwargs['job'] = kwargs['job'].id
+    except:
+        pass
 
     getClient().proxy().killTasks(f)
 

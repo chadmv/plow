@@ -303,6 +303,11 @@ def launch_job(**kwargs):
         JobSpec spec 
         Job job 
 
+    try:
+        kwargs['project'] = kwargs['project'].id 
+    except:
+        pass 
+
     spec = JobSpec(**kwargs)
     job = spec.launch()
     return job
@@ -367,44 +372,44 @@ def get_jobs(**kwargs):
     ret = [initJob(jobT) for jobT in jobs]
     return ret
 
-cpdef bint kill_job(Guid& id, string reason):
+def kill_job(Job job, string reason):
     """
     Kill a job
 
-    :param id: str Job id 
+    :param job: :class:`.Job`
     :param reason: str reason for killing the job 
     :returns: bool success
     """
     cdef bint success
-    success = getClient().proxy().killJob(id, reason)
+    success = getClient().proxy().killJob(job.id, reason)
     return success
 
-cpdef inline pause_job(Guid& id, bint paused):
+def pause_job(Job job, bint paused):
     """
     Set the pause state of a job
 
-    :param id: str Job id 
+    :param job: :class:`.Job`
     :param paused: bool pause state
     """
-    getClient().proxy().pauseJob(id, paused)
+    getClient().proxy().pauseJob(job.id, paused)
 
-cpdef inline set_job_min_cores(Guid& id, int value):
+def set_job_min_cores(Job job, int value):
     """
     Set the minimum number of cores a job should get 
 
-    :param id: str job id
+    :param job: :class:`.Job`
     :param value: int number of cores
     """
-    getClient().proxy().setJobMinCores(id, value)
+    getClient().proxy().setJobMinCores(job.id, value)
 
-cpdef inline set_job_max_cores(Guid& id, int value):
+def set_job_max_cores(Job job, int value):
     """
     Set the maximum number of cores a job should get 
 
-    :param id: str job id
+    :param job: :class:`.Job`
     :param value: int number of cores
     """
-    getClient().proxy().setJobMaxCores(id, value)
+    getClient().proxy().setJobMaxCores(job.id, value)
 
 #######################
 # Output
@@ -439,11 +444,11 @@ cdef class Output:
         def __get__(self): return self.attrs
 
 
-cpdef get_job_outputs(Guid& id):
+def get_job_outputs(Job job):
     """
     Get the outputs of a :class:`.Job`
 
-    :param id: job id 
+    :param job: :class:`.Job`
     :returns: list[:class:`.Output`]
     """
     cdef:
@@ -451,7 +456,7 @@ cpdef get_job_outputs(Guid& id):
         vector[OutputT] outputs
         list ret = []
 
-    getClient().proxy().getJobOutputs(outputs, id)
+    getClient().proxy().getJobOutputs(outputs, job.id)
 
     ret = [initOutput(outT) for outT in outputs]
     return ret
