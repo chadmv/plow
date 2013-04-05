@@ -14,7 +14,7 @@
       <groupId>org.apache.thrift</groupId>
       <artifactId>libthrift</artifactId>
       <version>0.9.0</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
     </dependency>
     <!-- Logging -->
     <dependency>
