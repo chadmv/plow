@@ -13,6 +13,7 @@ import com.breakersoft.plow.dao.ActionDao;
 import com.breakersoft.plow.dao.FilterDao;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.ActionType;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 public class ActionDaoTests extends AbstractTest {
 
@@ -30,10 +31,17 @@ public class ActionDaoTests extends AbstractTest {
 	}
 
 	@Test
-	public void testCreate() {
+	public void testCreateAndGet() {
 		Action a1 = actionDao.create(filter, ActionType.PAUSE, "True");
-		Action a2 = actionDao.getAction(a1.getActionId());
+		Action a2 = actionDao.get(a1.getActionId());
 		assertEquals(a1, a2);
 		assertEquals(a2.getFilterId(), filter.getFilterId());
+	}
+
+	@Test(expected=EmptyResultDataAccessException.class)
+	public void testDelete() {
+		Action a1 = actionDao.create(filter, ActionType.PAUSE, "True");
+		actionDao.delete(a1);
+		actionDao.get(a1.getActionId());
 	}
 }

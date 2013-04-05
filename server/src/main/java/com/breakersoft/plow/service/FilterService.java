@@ -2,9 +2,11 @@ package com.breakersoft.plow.service;
 
 import java.util.UUID;
 
+import com.breakersoft.plow.Action;
 import com.breakersoft.plow.Filter;
 import com.breakersoft.plow.Matcher;
 import com.breakersoft.plow.Project;
+import com.breakersoft.plow.thrift.ActionType;
 import com.breakersoft.plow.thrift.MatcherField;
 import com.breakersoft.plow.thrift.MatcherType;
 
@@ -33,5 +35,15 @@ public interface FilterService {
 	Matcher getMatcher(UUID id);
 
 	boolean deleteMatcher(Matcher matcher);
+
+	/*
+	 * Actions
+	 */
+
+	Action getAction(UUID id);
+
+	Action createAction(Filter filter, ActionType type, String value);
+
+	void deleteAction(Action action);
 
 }

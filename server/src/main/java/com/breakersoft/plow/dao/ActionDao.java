@@ -10,6 +10,8 @@ public interface ActionDao {
 
 	Action create(Filter filter, ActionType type, String value);
 
-	Action getAction(UUID id);
+	Action get(UUID id);
+
+	void delete(Action action);
 
 }

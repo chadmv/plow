@@ -58,8 +58,12 @@ public class ActionDaoImpl extends AbstractDao implements ActionDao {
     		"action.pk_action=?";
 
 	@Override
-	public Action getAction(UUID id) {
+	public Action get(UUID id) {
 		return jdbc.queryForObject(GET, MAPPER, id);
 	}
 
+	@Override
+	public void delete(Action action) {
+		jdbc.update("DELETE FROM plow.action WHERE pk_action=?", action.getActionId());
+	}
 }

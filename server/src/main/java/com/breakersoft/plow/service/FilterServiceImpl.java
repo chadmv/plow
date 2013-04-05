@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.breakersoft.plow.Action;
 import com.breakersoft.plow.Filter;
 import com.breakersoft.plow.Matcher;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.ActionDao;
 import com.breakersoft.plow.dao.FilterDao;
 import com.breakersoft.plow.dao.MatcherDao;
+import com.breakersoft.plow.thrift.ActionType;
 import com.breakersoft.plow.thrift.MatcherField;
 import com.breakersoft.plow.thrift.MatcherType;
 
@@ -80,4 +82,19 @@ public class FilterServiceImpl implements FilterService {
 		return matcherDao.get(id);
 	}
 
+	@Override
+	@Transactional(readOnly=true)
+	public Action getAction(UUID id) {
+		return actionDao.get(id);
+	}
+
+	@Override
+	public Action createAction(Filter filter, ActionType type, String value) {
+		return actionDao.create(filter, type, value);
+	}
+
+	@Override
+	public void deleteAction(Action action) {
+		actionDao.delete(action);
+	}
 }

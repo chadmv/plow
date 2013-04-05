@@ -9,6 +9,7 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.breakersoft.plow.Action;
 import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Filter;
 import com.breakersoft.plow.Folder;
@@ -25,6 +26,7 @@ import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.ProjectService;
 import com.breakersoft.plow.service.StateManager;
+import com.breakersoft.plow.thrift.dao.ThriftActionDao;
 import com.breakersoft.plow.thrift.dao.ThriftClusterDao;
 import com.breakersoft.plow.thrift.dao.ThriftFilterDao;
 import com.breakersoft.plow.thrift.dao.ThriftFolderDao;
@@ -86,6 +88,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     ThriftMatcherDao thriftMatcherDao;
+
+    @Autowired
+    ThriftActionDao thriftActionDao;
 
     @Autowired
     StateManager stateManager;
@@ -473,16 +478,29 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 	}
 
 	@Override
-	public ActionT createAction(String arg0, ActionType arg1, String arg2)
+	public ActionT createAction(String filterId, ActionType type, String value)
 			throws PlowException, TException {
-		// TODO Auto-generated method stub
-		return null;
+		Filter filter = filterService.getFilter(UUID.fromString(filterId));
+		Action action = filterService.createAction(filter, type, value);
+		return thriftActionDao.get(action.getActionId());
 	}
 
 	@Override
-	public void deleteAction(String arg0) throws PlowException, TException {
-		// TODO Auto-generated method stub
+	public void deleteAction(String id) throws PlowException, TException {
+		final Action action = filterService.getAction(UUID.fromString(id));
+		filterService.deleteAction(action);
+	}
 
+	@Override
+	public ActionT getAction(String id) throws PlowException, TException {
+		return thriftActionDao.get(UUID.fromString(id));
+	}
+
+	@Override
+	public List<ActionT> getActions(String filterId) throws PlowException,
+			TException {
+		Filter filter = filterService.getFilter(UUID.fromString(filterId));
+		return thriftActionDao.getAll(filter);
 	}
 
 	@Override
