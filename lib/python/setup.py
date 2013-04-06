@@ -71,7 +71,7 @@ if not os.path.exists(os.path.join(ROOT, "src/core/rpc")):
 
 
 # boost
-BOOST_PYTHON = 'boost_python-mt'
+BOOST_PYTHON = 'boost_thread-mt'
 BOOST_LIB = os.getenv("BOOST_LIBRARY_PATH", "")
 
 # Check for thrift
