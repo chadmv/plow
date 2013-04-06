@@ -1,6 +1,7 @@
 package com.breakersoft.plow.http;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +39,22 @@ public class RestController {
     private ThriftJobDao thriftJobDao;
 
 	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
-	public void jobs(HttpServletRequest request, HttpServletResponse response) throws IOException, TException {
+	public void jobs(HttpServletRequest request, HttpServletResponse response)
+			throws IOException, TException {
+		// TODO: implement filtering via query string.
+		serializeOut(response, thriftJobDao.getJobs(new JobFilterT()));
+	}
+
+	/**
+	 * Serialize a list TBase objects out through an HttpServletResponse.
+	 *
+	 * @param response
+	 * @param items
+	 * @throws IOException
+	 * @throws TException
+	 */
+	private void serializeOut(HttpServletResponse response, List<?> items) throws IOException, TException {
+
 		final TSerializer serializer = new TSerializer(new TSimpleJSONProtocol.Factory());
 		final ServletOutputStream stream = response.getOutputStream();
 		response.setContentType("application/json");
@@ -47,5 +63,6 @@ public class RestController {
 			stream.print(serializer.toString(o));
 		}
 		stream.print("]");
+		stream.flush();
 	}
 }
