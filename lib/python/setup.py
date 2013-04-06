@@ -8,7 +8,10 @@ import os
 import sys
 import glob
 import shutil
+
+import subprocess
 from subprocess import Popen, PIPE
+from ctypes.util import find_library
 
 from distutils.core import setup, Command
 from distutils.extension import Extension as dist_Extension
@@ -16,14 +19,28 @@ from distutils.sysconfig import get_config_vars
 
 
 
+#-----------------------------------------------------------------------------
+# Setup variables and pre-checks
+#-----------------------------------------------------------------------------
+
 ROOT = os.path.dirname(__file__)
 
+# Source files
+PLOW_SOURCE_MAIN_PYX = os.path.join(ROOT, "src", "plow.pyx")
+PLOW_SOURCE_MAIN_CPP = os.path.join(ROOT, "src", "plow.cpp")
+
+PLOW_INCLUDES = [os.path.join(ROOT, p) for p in ('src/core', 'src/core/rpc')]
+PLOW_CPP = PLOW_INCLUDES
+
+PLOW_SOURCE_EXTRA = []
+for p in PLOW_CPP:
+    PLOW_SOURCE_EXTRA += glob.glob(os.path.join(p, "*.cpp"))
+
+# Version
 execfile(os.path.join(ROOT, 'plow/client/version.py'))
 
 
-#-----------------------------------------------------------------------------
-# Flags and Configuration
-#-----------------------------------------------------------------------------
+# Check for cython
 try:
     from Cython.Distutils import build_ext
 except ImportError:
@@ -32,7 +49,75 @@ else:
     use_cython = True
 
 
-cmdclass = {}
+if not os.path.exists(PLOW_SOURCE_MAIN_PYX):
+    use_cython = False
+
+if not use_cython and not os.path.exists(PLOW_SOURCE_MAIN_CPP):
+    print "Error: Cython is not installed and the generated {0} source " \
+          "file does not exist. \nNeed cython installed to continue.".format(PLOW_SOURCE_MAIN_CPP)
+    sys.exit(1)
+
+# Check for thrift generated sources
+if not os.path.exists(os.path.join(ROOT, "src/core/rpc")):
+    gen_dir = os.path.join(ROOT, "../thrift")
+    gen_cmd = "cd {0} && ./generate-sources.sh".format(gen_dir)
+    print gen_cmd
+    ret = subprocess.call(gen_cmd, shell=True)
+    if ret != 0:
+        print "Error: Missing the plow/client/core/rpc source file location.\n" \
+              "Tried to generate, but Thrift command failed: {0}\n" \
+              "Is Thrift installed?".format(gen_cmd)
+        sys.exit(1)
+
+
+# boost
+BOOST_PYTHON = 'boost_python-mt'
+BOOST_LIB = os.getenv("BOOST_LIBRARY_PATH", "")
+
+# Check for thrift
+THRIFT_LIB = os.getenv("THRIFT_LIBRARY_PATH", "")
+if THRIFT_LIB:
+    ldflags = ["-L{0}".format(THRIFT_LIB)]
+else:
+    try:
+        p = Popen(['pkg-config', '--libs', 'thrift'], stdout=PIPE)
+    except:
+        ret = 1
+    else:
+        ret = p.wait()
+    if ret != 0:
+        thrift_lib = find_library("thrift")
+        if thrift_lib:
+            ldflags = ["-L{0}".format(os.path.dirname(thrift_lib)), "-lthrift"]
+        else:
+            print "Error: Failed to locate thrift lib and THRIFT_LIBRARY_PATH is not set."
+            sys.exit(1)
+    else:
+        ldflags = p.communicate()[0].split()
+
+# build includes
+THRIFT_INCLUDE = os.getenv("THRIFT_INCLUDES_PATH", "")
+if THRIFT_INCLUDE:
+    cflags = ["-I{0}".format(THRIFT_INCLUDE)]
+else:
+    try:
+        p = Popen(['pkg-config', '--cflags', 'thrift'], stdout=PIPE)
+        ret = p.wait()
+    except:
+        ret = 1
+    else:
+        ret = p.wait()
+    if ret != 0:
+        print "Error: Failed to locate thrift include dir and THRIFT_INCLUDES_PATH is not set."
+        sys.exit(1)
+    else:
+        cflags = p.communicate()[0].split()
+        cflags = [p.rstrip("/thrift") for p in cflags]
+
+
+# Plow includes
+cflags.extend("-I%s" % p for p in PLOW_INCLUDES)
+
 
 # set dylib ext:
 if sys.platform.startswith('win'):
@@ -48,36 +133,14 @@ opt = get_config_vars("OPT")[0].split()
 exclude = set(["-Wstrict-prototypes"])
 os.environ['OPT'] = " ".join(flag for flag in opt if flag not in exclude)
 
-PLOW_INCLUDES = [os.path.join(ROOT, p) for p in ('src/core', 'src/core/rpc')]
-PLOW_CPP = PLOW_INCLUDES
-
-
-# build source
-PLOW_SOURCE_MAIN_PYX = os.path.join(ROOT, "src", "plow.pyx")
-PLOW_SOURCE_MAIN_CPP = os.path.join(ROOT, "src", "plow.cpp")
-
-if not os.path.exists(PLOW_SOURCE_MAIN_PYX):
-    use_cython = False
-
-PLOW_SOURCE_EXTRA = []
-for p in PLOW_CPP:
-    PLOW_SOURCE_EXTRA += glob.glob(os.path.join(p, "*.cpp"))
-
-
-# build includes
-cflags = Popen(['pkg-config', '--cflags', 'thrift'], stdout=PIPE).communicate()[0].split()
-cflags = [p.rstrip("/thrift") for p in cflags]
-
-cflags.extend("-I%s" % p for p in PLOW_INCLUDES)
-
-
-# build libs
-ldflags = Popen(['pkg-config', '--libs', 'thrift'], stdout=PIPE).communicate()[0].split()
 
 
 #-----------------------------------------------------------------------------
 # Extra commands
 #-----------------------------------------------------------------------------
+
+cmdclass = {}
+
 if use_cython:
 
     class CythonCommand(build_ext):
@@ -220,7 +283,7 @@ copy_dir(BIN_SRC_DIR, BIN_DST_DIR)
 plowmodule = Extension('plow.client.plow',
     [PLOW_SOURCE_MAIN_CPP] + PLOW_SOURCE_EXTRA,
     language="c++",
-    libraries=["boost_thread-mt"], 
+    libraries=[BOOST_PYTHON], 
     extra_compile_args=cflags,
     extra_link_args=ldflags,
 
@@ -317,4 +380,8 @@ setup(
     ],
 
 )
+
+# clean up
+shutil.rmtree(TEMP_BUILD_DIR, ignore_errors=True)
+
 
