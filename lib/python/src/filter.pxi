@@ -66,24 +66,83 @@ cdef class Matcher:
 
     property id:
         def __get__(self): return self.matcher.id
-        def __set__(self, Guid val): self.matcher.id = val
 
     property type:
         def __get__(self): return self.matcher.type
-        def __set__(self, int val): self.matcher.type = <MatcherType_type>val
 
     property field:
         def __get__(self): return self.matcher.field
-        def __set__(self, int val): self.matcher.field = <MatcherField_type>val
 
     property value:
         def __get__(self): return self.matcher.value
-        def __set__(self, string val): self.matcher.value = val
 
-# void createMatcher(MatcherT&, Guid& filterId, MatcherField_type field, MatcherType_type type, string& value) nogil except +
-# void getMatcher(MatcherT&, Guid& matcherId) nogil except +
-# void getMatchers(vector[MatcherT]&, Guid& filterId) nogil except +
-# void deleteMatcher(Guid& id) nogil except +
+    def refresh(self):
+        """
+        Refresh the attributes from the server
+        """
+        getClient().proxy().getMatcher(self.matcher, self.matcher.id)
+
+    def delete(self):
+        """ Delete the matcher  """
+        delete_matcher(self)
+
+
+def create_matcher(Filter filter, int field, int typ, string& value):
+    """
+    Create a Matcher 
+
+    :param filter: :class:`.Filter`
+    :param field: :data:`.MatcherField` value
+    :param typ: :data:`.MatcherType` value 
+    :param value: str value for the matcher
+    :returns: :class:`.Matcher`
+    """
+    cdef:
+        MatcherT matcher 
+        Matcher ret 
+
+    getClient().proxy().createMatcher(matcher, filter.id, <MatcherField_type>field, <MatcherType_type>typ, value)
+    ret = initMatcher(matcher)
+    return ret
+
+cpdef inline get_matcher(Guid& matcherId):
+    """
+    Get a matcher by id
+
+    :param id: str :class:`.Filter` id
+    :returns: :class:`.Matcher`
+    """
+    cdef:
+        MatcherT matcher 
+        Matcher ret 
+
+    getClient().proxy().getMatcher(matcher, matcherId)
+    ret = initMatcher(matcher)
+    return ret
+
+def get_matchers(Filter filter):
+    """
+    Get a list of Matchers by a filter
+
+    :param filter: :class:`.Filter`
+    :returns: list[:class:`.Matcher`]
+    """
+    cdef:
+        MatcherT m
+        vector[MatcherT] matchers
+        list ret
+
+    getClient().proxy().getMatchers(matchers, filter.id)
+    ret = [initMatcher(m) for m in matchers]
+    return ret        
+
+cpdef inline delete_matcher(Matcher matcher):
+    """
+    Delete a Matcher 
+
+    :param matcher: :class:`.Matcher`
+    """
+    getClient().proxy().deleteMatcher(matcher.id)
 
 
  #######################
@@ -120,6 +179,7 @@ cdef class Action:
     """
     An Action is represents a type and a value 
 
+    :var id: str 
     :var type: :data:`.ActionType`
     :var value: str
 
@@ -131,18 +191,78 @@ cdef class Action:
 
     property id:
         def __get__(self): return self.action.id
-        def __set__(self, Guid val): self.action.id = val
 
     property type:
         def __get__(self): return self.action.type
-        def __set__(self, int val): self.action.type = <ActionType_type>val
 
     property value:
         def __get__(self): return self.action.value
-        def __set__(self, string val): self.action.value = val
 
-# void createAction(ActionT&, Guid& filterId, ActionType_type type, string& value) nogil except +
-# void deleteAction(Guid& id) nogil except +
+    def refresh(self):
+        """
+        Refresh the attributes from the server
+        """
+        getClient().proxy().getAction(self.action, self.action.id)
+
+    def delete(self):
+        """Delete the action"""
+        delete_action(self)
+
+def create_action(Filter filter, int typ, string& value):
+    """
+    Create an action 
+
+    :param filter: :class:`.Filter`
+    :param typ: :data:`.ActionType` value
+    :param value: str 
+    :returns: :class:`.Action`
+    """
+    cdef:
+        ActionT action 
+        Action ret 
+
+    getClient().proxy().createAction(action, filter.id, <ActionType_type>typ, value)
+    ret = initAction(action)
+    return ret
+
+cpdef inline get_action(Guid& actionId):
+    """
+    Get an action by id 
+
+    :param actionId: str :class:`.Action` id
+    :returns: :class:`.Action`
+    """
+    cdef:
+        ActionT action 
+        Action ret 
+
+    getClient().proxy().getAction(action, actionId)
+    ret = initAction(action)
+    return ret
+
+def get_actions(Filter filter):
+    """
+    Get a list of actions from a filter 
+
+    :param filter: :class:`.Filter` 
+    :returns: list[:class:`.Action`]
+    """    
+    cdef:
+        ActionT a
+        vector[ActionT] actions
+        list ret
+
+    getClient().proxy().getActions(actions, filter.id)
+    ret = [initAction(a) for a in actions]
+    return ret        
+
+cpdef inline delete_action(Action action):
+    """
+    Delete an action 
+
+    :param action: :class:`.Action`
+    """
+    getClient().proxy().deleteAction(action.id)
 
 
 #######################
@@ -164,8 +284,11 @@ cdef class Filter:
     :var enabled: bool
     :var matchers: list[:class:`.Matcher`]
     :var actions: list[:class:`.Action`]
+
     """
-    cdef FilterT _filter
+    cdef:
+        FilterT _filter
+        list _matchers, _actions
 
     def __init__(self, **kwargs):
         self._filter.id = kwargs.get('id', '')
@@ -187,13 +310,159 @@ cdef class Filter:
     cdef setFilter(self, FilterT& a):
         self._filter = a
 
-# void createFilter(FilterT&, Guid& projectId, string& name) nogil except +
-# void getFilters(vector[FilterT]&, Guid& projectId) nogil except +
-# void getFilter(FilterT&, Guid& filterId) nogil except +
-# void deleteFilter(Guid& id) nogil except +
-# void setFilterName(Guid& id, string& name) nogil except +
-# void setFilterOrder(Guid& id, int order) nogil except +
-# void increaseFilterOrder(Guid& id) nogil except +
-# void decreaseFilterOrder(Guid& id) nogil except +
+    property id:
+        def __get__(self): return self._filter.id
 
+    property name:
+        def __get__(self): return self._filter.name
+
+    property order:
+        def __get__(self): return self._filter.order
+
+    property enabled:
+        def __get__(self): return self._filter.enabled
+
+    property matchers:
+        def __get__(self): 
+            cdef MatcherT m
+            if not self._matchers:
+                self._matchers = [initMatcher(m) for m in self._filter.matchers]
+            return self._matchers
+
+    property actions:
+        def __get__(self): 
+            cdef ActionT a 
+            if not self._actions:
+                self._actions = [initAction(a) for a in self._filter.actions]
+            return self._actions
+
+    def refresh(self):
+        """
+        Refresh the attributes from the server
+        """
+        getClient().proxy().getFilter(self._filter, self._filter.id)
+
+    def delete(self):
+        """
+        Delete this filter 
+        """
+        delete_filter(self)
+
+    def set_name(self, string& name):
+        """
+        Set the filter name 
+
+        :param name: str 
+        """
+        set_filter_name(self, name)
+        self._action.name = name
+
+    def set_order(self, int order):
+        """
+        Set the order 
+
+        :param order: int 
+        """
+        set_filter_order(self, order)
+        self._action.order = order
+
+    def increase_order(self):
+        """ Increase the order """
+        increase_filter_order(self)
+        self.refresh()
+
+    def decrease_filter_order(self):
+        """ Decrease the order """
+        decrease_filter_order(self)
+        self.refresh()
+
+
+def create_filter(Project project, string& name):
+    """
+    Create a filter for a project 
+
+    :param project: :class:`.Project`
+    :param name: str
+    :returns: :class:`.Filter`
+    """
+    cdef:
+        FilterT filterT
+        Filter ret 
+
+    getClient().proxy().createFilter(filterT, project.id, name)
+    ret = initFilter(filterT)
+    return ret
+
+def get_filters(Project project):
+    """
+    Get a list of filters for a project 
+
+    :param project: :class:`.Project`
+    :returns: list[:class:`.Filter`]
+    """
+    cdef:
+        FilterT f
+        vector[FilterT] filters 
+        list ret 
+
+    getClient().proxy().getFilters(filters, project.id)
+    ret = [initFilter(f) for f in filters]
+
+cpdef inline get_filter(Guid& filterId):
+    """
+    Get a filter by id 
+
+    :param filterId: str :class:`.Filter`.id
+    :returns: :class:`.Filter`
+    """
+    cdef:
+        FilterT filt 
+        Filter ret 
+
+    getClient().proxy().getFilter(filt, filterId)
+    ret = initFilter(filt)
+    return ret
+
+cpdef inline delete_filter(Filter filt):
+    """
+    Delete a filter
+
+    :param filt: :class:`.Filter`
+    """
+    getClient().proxy().deleteFilter(filt.id)
+
+cpdef inline set_filter_name(Filter filt, string& name):
+    """
+    Set a filter name 
+
+    :param filt: :class:`.Filter`
+    :param name: str 
+    """    
+    getClient().proxy().setFilterName(filt.id, name)
+    filt.name = name
+
+cpdef inline set_filter_order(Filter filt, int order):
+    """
+    Set the filter order
+
+    :param filt: :class:`.Filter`
+    :param order: int
+    """    
+    getClient().proxy().setFilterOrder(filt.id, order)
+
+cpdef inline increase_filter_order(Filter filt):
+    """
+    Increase the filter order
+
+    :param filt: :class:`.Filter`
+    """    
+    getClient().proxy().increaseFilterOrder(filt.id)
+
+cpdef inline decrease_filter_order(Filter filt):
+    """
+    Decrease the filter order
+
+    :param filt: :class:`.Filter`
+    """    
+    getClient().proxy().decreaseFilterOrder(filt.id) 
 

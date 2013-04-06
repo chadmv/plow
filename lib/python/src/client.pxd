@@ -78,21 +78,24 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
         void setQuotaBurst( Guid& id, int burst) nogil except +
         void setQuotaLocked( Guid& id, bint locked) nogil except +
 
-        # void createFilter(FilterT&, Guid& projectId, string& name) nogil except +
-        # void getFilters(vector[FilterT]&, Guid& projectId) nogil except +
-        # void getFilter(FilterT&, Guid& filterId) nogil except +
-        # void deleteFilter(Guid& id) nogil except +
-        # void setFilterName(Guid& id, string& name) nogil except +
-        # void setFilterOrder(Guid& id, int order) nogil except +
-        # void increaseFilterOrder(Guid& id) nogil except +
-        # void decreaseFilterOrder(Guid& id) nogil except +
+        void createFilter(FilterT&, Guid& projectId, string& name) nogil except +
+        void getFilters(vector[FilterT]&, Guid& projectId) nogil except +
+        void getFilter(FilterT&, Guid& filterId) nogil except +
+        void deleteFilter(Guid& id) nogil except +
+        void setFilterName(Guid& id, string& name) nogil except +
+        void setFilterOrder(Guid& id, int order) nogil except +
+        void increaseFilterOrder(Guid& id) nogil except +
+        void decreaseFilterOrder(Guid& id) nogil except +
 
-        # void createMatcher(MatcherT&, Guid& filterId, MatcherField_type field, MatcherType_type type, string& value) nogil except +
-        # void getMatcher(MatcherT&, Guid& matcherId) nogil except +
-        # void getMatchers(vector[MatcherT]&, Guid& filterId) nogil except +
-        # void createAction(ActionT&, Guid& filterId, ActionType_type type, string& value) nogil except +
-        # void deleteMatcher(Guid& id) nogil except +
-        # void deleteAction(Guid& id) nogil except +
+        void createMatcher(MatcherT&, Guid& filterId, MatcherField_type field, MatcherType_type type, string& value) nogil except +
+        void getMatcher(MatcherT&, Guid& matcherId) nogil except +
+        void getMatchers(vector[MatcherT]&, Guid& filterId) nogil except +
+        void deleteMatcher(Guid& id) nogil except +
+
+        void createAction(ActionT&, Guid& filterId, ActionType_type type, string& value) nogil except +
+        void deleteAction(Guid& id) nogil except +
+        void getActions(vector[ActionT]&, Guid& filterId) nogil except +
+        void getAction(ActionT&, Guid& actionId) nogil except +
 
 
 cdef extern from "client.h" namespace "Plow":

@@ -217,6 +217,10 @@ Filtering / Matching / Actions
     .. data:: plow.client.NodeState.ATTR
 
 .. autoclass:: plow.client.Matcher
+.. autofunction:: plow.client.create_matcher
+.. autofunction:: plow.client.get_matcher
+.. autofunction:: plow.client.get_matchers
+.. autofunction:: plow.client.delete_matcher
 
 .. data:: plow.client.ActionType
 
@@ -229,6 +233,18 @@ Filtering / Matching / Actions
     .. data:: plow.client.ActionType.STOP_PROCESSING
 
 .. autoclass:: plow.client.Action
+.. autofunction:: plow.client.create_action
+.. autofunction:: plow.client.get_action
+.. autofunction:: plow.client.get_actions
+.. autofunction:: plow.client.delete_action
 
 .. autoclass:: plow.client.Filter
+.. autofunction:: plow.client.create_filter
+.. autofunction:: plow.client.get_filters
+.. autofunction:: plow.client.get_filter
+.. autofunction:: plow.client.delete_filter
+.. autofunction:: plow.client.set_filter_name
+.. autofunction:: plow.client.set_filter_order
+.. autofunction:: plow.client.increase_filter_order
+.. autofunction:: plow.client.decrease_filter_order
 
