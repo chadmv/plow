@@ -238,7 +238,7 @@ cdef class Job:
 
         :param reason: str - reason for killing
         """
-        return kill_job(self.id, reason)
+        return kill_job(self, reason)
 
     def pause(self, bint paused):
         """
@@ -246,7 +246,7 @@ cdef class Job:
 
         :param paused: bool
         """
-        pause_job(self.id, paused)
+        pause_job(self, paused)
 
     def get_outputs(self):
         """
@@ -254,7 +254,7 @@ cdef class Job:
 
         :returns: list[:class:`.plowOutput`]
         """
-        return get_job_outputs(self.id)
+        return get_job_outputs(self)
 
     def set_min_cores(self, int value):
         """
@@ -262,7 +262,7 @@ cdef class Job:
 
         :param value: int 
         """
-        set_job_min_cores(self.id, value)
+        set_job_min_cores(self, value)
 
     def set_max_cores(self, int value):
         """
@@ -270,7 +270,7 @@ cdef class Job:
 
         :param value: int 
         """
-        set_job_max_cores(self.id, value)
+        set_job_max_cores(self, value)
 
     def get_layers(self):
         """
@@ -279,7 +279,7 @@ cdef class Job:
         :returns: list[:class:`.Layer`]
         """
         cdef list ret 
-        ret = get_layers(self.id)
+        ret = get_layers(self)
         return ret
 
 

@@ -175,7 +175,7 @@ cdef class Layer:
 
     def get_outputs(self):
         """ :returns: list[:class:`.Output`] """
-        return get_layer_outputs(self.id)
+        return get_layer_outputs(self)
 
     def add_output(self, string path, Attrs& attrs):
         """
@@ -184,7 +184,7 @@ cdef class Layer:
         :param path: str 
         :param attrs: dict
         """
-        add_layer_output(self.id, path, attrs)
+        add_layer_output(self, path, attrs)
 
     def set_tags(self, c_set[string]& tags):
         """
@@ -192,27 +192,27 @@ cdef class Layer:
 
         :param tags: set(str)
         """
-        set_layer_tags(self.id, tags)
+        set_layer_tags(self, tags)
         self._layer.tags = tags
 
     def set_threadable(self, bint threadable):
         """ :param threadable: bool """
-        set_layer_threadable(self.id, threadable)
+        set_layer_threadable(self, threadable)
         self._layer.threadable = threadable
 
     def set_min_cores_per_task(self, int minCores):
         """ :param minCores: int """
-        set_layer_min_cores_per_task(self.id, minCores)
+        set_layer_min_cores_per_task(self, minCores)
         self._layer.minCores = minCores
 
     def set_max_cores_per_task(self, int maxCores):
         """ :param maxCores: int """
-        set_layer_max_cores_per_task(self.id, maxCores)
+        set_layer_max_cores_per_task(self, maxCores)
         self._layer.maxCores = maxCores
 
     def set_min_ram_per_task(self, int minRam):
         """ :param minRam: int """
-        set_layer_min_ram_per_task(self.id, minRam)
+        set_layer_min_ram_per_task(self, minRam)
         self._layer.minRamMb = minRam
 
 def get_layer_by_id(Guid& layerId):

@@ -118,7 +118,7 @@ cdef class Cluster:
         :returns: bool - was deleted
         """
         cdef bint ret 
-        ret = delete_cluster(self.id)
+        ret = delete_cluster(self)
         return ret
 
     def lock(self, bint locked):
@@ -129,7 +129,7 @@ cdef class Cluster:
         :returns: bool - locked
         """
         cdef bint ret 
-        ret = lock_cluster(self.id, locked)
+        ret = lock_cluster(self, locked)
         return ret
 
     def set_tags(self, c_set[string] tags):
@@ -138,7 +138,7 @@ cdef class Cluster:
 
         :param tags: set - a set of string tags 
         """
-        set_cluster_tags(self.id, tags)
+        set_cluster_tags(self, tags)
         self._cluster.tags = tags
 
     def set_name(self, string name):
@@ -147,14 +147,14 @@ cdef class Cluster:
 
         :param name: str - name
         """
-        set_cluster_name(self.id, name)
+        set_cluster_name(self, name)
         self._cluster.name = name
 
     def set_default(self):
         """
         Set this cluster to be the default cluster 
         """
-        set_default_cluster(self.id)
+        set_default_cluster(self)
         self._cluster.isDefault = True
 
 

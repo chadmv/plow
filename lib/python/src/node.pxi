@@ -177,7 +177,7 @@ cdef class Node:
 
         :param locked: bool 
         """
-        set_node_locked(self.id, locked)
+        set_node_locked(self, locked)
 
     def set_cluster(self, Guid& clusterId):
         """
@@ -185,7 +185,7 @@ cdef class Node:
 
         :param clusterId: str :class:`.Cluster` id 
         """
-        set_node_cluster(self.id, clusterId)
+        set_node_cluster(self, clusterId)
 
     def set_tags(self, c_set[string]& tags):
         """
@@ -193,7 +193,7 @@ cdef class Node:
 
         :param tags: set(str)
         """
-        set_node_tags(self.id, tags)
+        set_node_tags(self, tags)
 
 
 def get_node(string name):

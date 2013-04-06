@@ -94,7 +94,7 @@ cdef class Folder:
 
         :param value: int - cores 
         """        
-        set_folder_min_cores(self.id, value)
+        set_folder_min_cores(self, value)
 
     def set_max_cores(self, int value):
         """
@@ -102,13 +102,13 @@ cdef class Folder:
 
         :param value: int - cores 
         """     
-        set_folder_max_cores(self.id, value)
+        set_folder_max_cores(self, value)
 
     def delete(self):
         """
         Delete this Folder 
         """
-        delete_folder(self.id)
+        delete_folder(self)
 
 
 def get_folder(Guid& folderId):

@@ -69,12 +69,12 @@ cdef class Quota:
 
     def set_size(self, int size):
         """ :param size: int """
-        set_quota_size(self.id, size)
+        set_quota_size(self, size)
         self._quota.size = size
 
     def set_burst(self, int burst):
         """ :param burst: int """
-        set_quota_burst(self.id, burst)
+        set_quota_burst(self, burst)
         self._quota.burst = burst
 
     def set_locked(self, bint locked):
@@ -83,7 +83,7 @@ cdef class Quota:
 
         :param locked: bool
         """
-        set_quota_locked(self.id, locked)
+        set_quota_locked(self, locked)
         self._quota.isLocked = locked
 
 

@@ -69,7 +69,7 @@ cdef class Project:
 
         :param active: bool
         """
-        set_project_active(self.id, active)
+        set_project_active(self, active)
         self.project.isActive = active
 
 cpdef get_project(Guid& guid):
