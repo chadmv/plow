@@ -232,6 +232,14 @@ cdef class Job:
     property maxRssMb:
         def __get__(self): return self._job.maxRssMb
 
+
+    cpdef refresh(self):
+        """
+        Refresh the attributes from the server
+        """
+        getClient().proxy().getJob(self._job, self._job.id)
+
+
     def kill(self, string reason):
         """
         Kill the job 
@@ -312,7 +320,7 @@ def launch_job(**kwargs):
     job = spec.launch()
     return job
     
-def get_job(Guid& id):
+cpdef inline get_job(Guid& id):
     """
     Get a :class:`.Job`
 
@@ -372,7 +380,7 @@ def get_jobs(**kwargs):
     ret = [initJob(jobT) for jobT in jobs]
     return ret
 
-def kill_job(Job job, string reason):
+cpdef inline kill_job(Job job, string reason):
     """
     Kill a job
 
@@ -384,7 +392,7 @@ def kill_job(Job job, string reason):
     success = getClient().proxy().killJob(job.id, reason)
     return success
 
-def pause_job(Job job, bint paused):
+cpdef inline pause_job(Job job, bint paused):
     """
     Set the pause state of a job
 
@@ -393,7 +401,7 @@ def pause_job(Job job, bint paused):
     """
     getClient().proxy().pauseJob(job.id, paused)
 
-def set_job_min_cores(Job job, int value):
+cpdef inline set_job_min_cores(Job job, int value):
     """
     Set the minimum number of cores a job should get 
 
@@ -402,7 +410,7 @@ def set_job_min_cores(Job job, int value):
     """
     getClient().proxy().setJobMinCores(job.id, value)
 
-def set_job_max_cores(Job job, int value):
+cpdef inline set_job_max_cores(Job job, int value):
     """
     Set the maximum number of cores a job should get 
 
@@ -415,7 +423,7 @@ def set_job_max_cores(Job job, int value):
 # Output
 #
 
-cdef Job initOutput(OutputT& o):
+cdef Output initOutput(OutputT& o):
     cdef Output out = Output()
     out.setOutput(o)
     return out
@@ -444,7 +452,7 @@ cdef class Output:
         def __get__(self): return self.attrs
 
 
-def get_job_outputs(Job job):
+cpdef inline get_job_outputs(Job job):
     """
     Get the outputs of a :class:`.Job`
 

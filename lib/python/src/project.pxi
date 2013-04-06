@@ -43,6 +43,12 @@ cdef class Project:
             cdef bint val = self.project.isActive
             return val
 
+    cpdef refresh(self):
+        """
+        Refresh the attributes from the server
+        """
+        getClient().proxy().getProject(self.project, self.project.id)
+
     def get_folders(self):
         """
         Get the folders for this project 
@@ -72,7 +78,7 @@ cdef class Project:
         set_project_active(self, active)
         self.project.isActive = active
 
-cpdef get_project(Guid& guid):
+cpdef inline get_project(Guid& guid):
     """
     Get a Project by id 
 
@@ -88,7 +94,7 @@ cpdef get_project(Guid& guid):
     return project
 
 
-def get_project_by_code(string code):
+cpdef inline get_project_by_code(string code):
     """
     Look up a Project by its code
 
@@ -158,7 +164,7 @@ def create_project(string title, string code):
     proj = initProject(projT)
     return proj
 
-def set_project_active(Project project, bint active):
+cpdef inline set_project_active(Project project, bint active):
     """
     Set a project to be active 
 

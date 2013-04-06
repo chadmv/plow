@@ -111,6 +111,12 @@ cdef class Cluster:
                 self._total = initClusterCounts(self._cluster.total)
             return self._total
 
+    cpdef refresh(self):
+        """
+        Refresh the attributes from the server
+        """
+        getClient().proxy().getCluster(self._cluster, self._cluster.name)
+
     def delete(self):
         """
         Delete the cluster
@@ -130,6 +136,7 @@ cdef class Cluster:
         """
         cdef bint ret 
         ret = lock_cluster(self, locked)
+        self._cluster.isLocked = locked
         return ret
 
     def set_tags(self, c_set[string] tags):
@@ -158,7 +165,7 @@ cdef class Cluster:
         self._cluster.isDefault = True
 
 
-def get_cluster(string name):
+cpdef inline get_cluster(string name):
     """
     Return a Cluster by name 
 
@@ -216,7 +223,7 @@ def create_cluster(str name, c_set[string] tags):
     cluster = initCluster(clusterT)
     return cluster
 
-def delete_cluster(Cluster cluster):
+cpdef inline delete_cluster(Cluster cluster):
     """
     Delete a Cluster 
 
@@ -227,7 +234,7 @@ def delete_cluster(Cluster cluster):
     ret = getClient().proxy().deleteCluster(cluster.id)
     return ret
 
-def lock_cluster(Cluster cluster, bint locked):
+cpdef inline lock_cluster(Cluster cluster, bint locked):
     """
     Lock a Cluster 
 
@@ -239,7 +246,7 @@ def lock_cluster(Cluster cluster, bint locked):
     ret = getClient().proxy().lockCluster(cluster.id, locked)
     return ret
 
-def set_cluster_tags(Cluster cluster, c_set[string] tags):
+cpdef inline set_cluster_tags(Cluster cluster, c_set[string] tags):
     """
     Set the tags for a Cluster 
 
@@ -248,7 +255,7 @@ def set_cluster_tags(Cluster cluster, c_set[string] tags):
     """
     getClient().proxy().setClusterTags(cluster.id, tags)
 
-def set_cluster_name(Cluster cluster, string name):
+cpdef inline set_cluster_name(Cluster cluster, string name):
     """
     Set a name for a Cluster 
 
@@ -257,7 +264,7 @@ def set_cluster_name(Cluster cluster, string name):
     """
     getClient().proxy().setClusterName(cluster.id, name)
 
-def set_default_cluster(Cluster cluster):
+cpdef inline set_default_cluster(Cluster cluster):
     """
     Set a given Cluster to be the default Cluster
 

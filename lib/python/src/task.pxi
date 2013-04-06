@@ -181,6 +181,12 @@ cdef class Task:
             cdef int aState = self._task.progress
             return aState
 
+    cpdef refresh(self):
+        """
+        Refresh the attributes from the server
+        """
+        getClient().proxy().getTask(self._task, self._task.id)
+
     def get_log_path(self):
         """
         Get the log path for the task 
@@ -214,7 +220,7 @@ cdef class Task:
         kill_tasks(taskIds=ids)  
 
 
-def get_task(Guid& taskId):
+cpdef inline get_task(Guid& taskId):
     """
     Get a task by id 
 
@@ -266,7 +272,7 @@ def get_tasks(**kwargs):
     ret = [initTask(taskT) for taskT in tasks]
     return ret
 
-def get_task_log_path(Task task):
+cpdef inline get_task_log_path(Task task):
     """
     Get a log path by task 
 
