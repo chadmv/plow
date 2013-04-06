@@ -29,6 +29,11 @@ thrift -gen java:java5 --out ../java/src/main/java common.thrift
 thrift -gen java:java5 -out ../java/src/main/java plow.thrift
 thrift -gen java:java5 -out ../java/src/main/java rnd.thrift
 
+# Javascript
+########################################################################
+# Don't need common
+thrift -gen js:jquery -out ../js plow.thrift
+
 # C++
 ########################################################################
 
