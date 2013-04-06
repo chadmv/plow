@@ -58,26 +58,36 @@ if not use_cython and not os.path.exists(PLOW_SOURCE_MAIN_CPP):
     sys.exit(1)
 
 # Check for thrift generated sources
-if not os.path.exists(os.path.join(ROOT, "src/core/rpc")):
-    gen_dir = os.path.join(ROOT, "../thrift")
-    gen_cmd = "cd {0} && ./generate-sources.sh".format(gen_dir)
-    print gen_cmd
-    ret = subprocess.call(gen_cmd, shell=True)
-    if ret != 0:
-        print "Error: Missing the plow/client/core/rpc source file location.\n" \
-              "Tried to generate, but Thrift command failed: {0}\n" \
-              "Is Thrift installed?".format(gen_cmd)
-        sys.exit(1)
+gen_dir = os.path.join(ROOT, "../thrift")
+gen_cmd = "cd {0} && ./generate-sources.sh".format(gen_dir)
+print "Re-generating Thrift python client bindings"
+ret = subprocess.call(gen_cmd, shell=True)
+if ret != 0 and not os.path.exists(os.path.join(ROOT, "src/core/rpc")):
+    print "Error: Missing the plow/client/core/rpc source file location.\n" \
+          "Tried to generate, but Thrift command failed: {0}\n" \
+          "Is Thrift installed?".format(gen_cmd)
+    sys.exit(1)
 
+
+ldflags = []
+cflags = []
 
 # boost
-BOOST_PYTHON = 'boost_python-mt'
+BOOST_PYTHON = 'boost_thread-mt'
 BOOST_LIB = os.getenv("BOOST_LIBRARY_PATH", "")
+
+if not BOOST_LIB:
+    boost_lib = find_library(BOOST_PYTHON)
+    if boost_lib:
+        BOOST_LIB = os.path.dirname(boost_lib)
+
+if BOOST_LIB:
+    ldflags.append("-L{0}".format(BOOST_LIB))
 
 # Check for thrift
 THRIFT_LIB = os.getenv("THRIFT_LIBRARY_PATH", "")
 if THRIFT_LIB:
-    ldflags = ["-L{0}".format(THRIFT_LIB)]
+    ldflags.append("-L{0}".format(THRIFT_LIB))
 else:
     try:
         p = Popen(['pkg-config', '--libs', 'thrift'], stdout=PIPE)
@@ -88,17 +98,17 @@ else:
     if ret != 0:
         thrift_lib = find_library("thrift")
         if thrift_lib:
-            ldflags = ["-L{0}".format(os.path.dirname(thrift_lib)), "-lthrift"]
+            ldflags.extend(["-L{0}".format(os.path.dirname(thrift_lib)), "-lthrift"])
         else:
             print "Error: Failed to locate thrift lib and THRIFT_LIBRARY_PATH is not set."
             sys.exit(1)
     else:
-        ldflags = p.communicate()[0].split()
+        ldflags.extend(p.communicate()[0].split())
 
 # build includes
 THRIFT_INCLUDE = os.getenv("THRIFT_INCLUDES_PATH", "")
 if THRIFT_INCLUDE:
-    cflags = ["-I{0}".format(THRIFT_INCLUDE)]
+    cflags.append("-I{0}".format(THRIFT_INCLUDE))
 else:
     try:
         p = Popen(['pkg-config', '--cflags', 'thrift'], stdout=PIPE)
@@ -111,8 +121,7 @@ else:
         print "Error: Failed to locate thrift include dir and THRIFT_INCLUDES_PATH is not set."
         sys.exit(1)
     else:
-        cflags = p.communicate()[0].split()
-        cflags = [p.rstrip("/thrift") for p in cflags]
+        cflags.extend(p.rstrip("/thrift") for p in p.communicate()[0].split())
 
 
 # Plow includes
@@ -244,7 +253,7 @@ if use_cython:
             ext_modules=[
                 dist_Extension('plow',
                                [PLOW_SOURCE_MAIN_PYX] + PLOW_SOURCE_EXTRA,
-                               language="c++"
+                               language="c++",
                                )
             ],
             cmdclass=cmdclass,

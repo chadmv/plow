@@ -181,6 +181,12 @@ cdef class Task:
             cdef int aState = self._task.progress
             return aState
 
+    cpdef refresh(self):
+        """
+        Refresh the attributes from the server
+        """
+        getClient().proxy().getTask(self._task, self._task.id)
+
     def get_log_path(self):
         """
         Get the log path for the task 
@@ -188,14 +194,14 @@ cdef class Task:
         :returns: string path 
         """
         cdef string path 
-        path = get_task_log_path(self.id)
+        path = get_task_log_path(self)
         return path
 
     def retry(self):
         """
         Retry the task 
         """
-        cdef list ids = [self.id]
+        cdef list ids = [self]
         retry_tasks(taskIds=ids)
 
     def eat(self):
@@ -203,18 +209,18 @@ cdef class Task:
         Eats the task. This is different than a kill, 
         indicating that the work should simply be "completed"
         """
-        cdef list ids = [self.id]
+        cdef list ids = [self]
         eat_tasks(taskIds=ids)        
 
     def kill(self):
         """
         Kill the task 
         """
-        cdef list ids = [self.id]
+        cdef list ids = [self]
         kill_tasks(taskIds=ids)  
 
 
-def get_task(Guid& taskId):
+cpdef inline get_task(Guid& taskId):
     """
     Get a task by id 
 
@@ -266,7 +272,7 @@ def get_tasks(**kwargs):
     ret = [initTask(taskT) for taskT in tasks]
     return ret
 
-def get_task_log_path(Task task):
+cpdef inline get_task_log_path(Task task):
     """
     Get a log path by task 
 

@@ -67,14 +67,20 @@ cdef class Quota:
     property runCores:
         def __get__(self): return self._quota.runCores
 
+    cpdef refresh(self):
+        """
+        Refresh the attributes from the server
+        """
+        getClient().proxy().getQuota(self._quota, self._quota.id)
+
     def set_size(self, int size):
         """ :param size: int """
-        set_quota_size(self.id, size)
+        set_quota_size(self, size)
         self._quota.size = size
 
     def set_burst(self, int burst):
         """ :param burst: int """
-        set_quota_burst(self.id, burst)
+        set_quota_burst(self, burst)
         self._quota.burst = burst
 
     def set_locked(self, bint locked):
@@ -83,11 +89,11 @@ cdef class Quota:
 
         :param locked: bool
         """
-        set_quota_locked(self.id, locked)
+        set_quota_locked(self, locked)
         self._quota.isLocked = locked
 
 
-def get_quota(Guid& id):
+cpdef inline get_quota(Guid& id):
     """
     Get a quota by id 
 
@@ -147,7 +153,7 @@ def create_quota(Project project,  Cluster cluster, int size, int burst):
     return q
 
 
-def set_quota_size(Cluster cluster, int size):
+cpdef inline set_quota_size(Cluster cluster, int size):
     """
     Set the quota size 
 
@@ -156,7 +162,7 @@ def set_quota_size(Cluster cluster, int size):
     """
     getClient().proxy().setQuotaSize(cluster.id, size)
 
-def set_quota_burst(Cluster cluster, int burst):
+cpdef inline set_quota_burst(Cluster cluster, int burst):
     """
     Set the quota burst 
 
@@ -165,7 +171,7 @@ def set_quota_burst(Cluster cluster, int burst):
     """
     getClient().proxy().setQuotaBurst(cluster.id, burst)
 
-def set_quota_locked(Cluster cluster, bint locked):
+cpdef inline set_quota_locked(Cluster cluster, bint locked):
     """
     Set the lock state of the quota
 

@@ -88,13 +88,19 @@ cdef class Folder:
 
             return self._jobs
 
+    cpdef refresh(self):
+        """
+        Refresh the attributes from the server
+        """
+        getClient().proxy().getFolder(self.folder, self.folder.id)
+
     def set_min_cores(self, int value):
         """
         Set the minimum cores  
 
         :param value: int - cores 
         """        
-        set_folder_min_cores(self.id, value)
+        set_folder_min_cores(self, value)
 
     def set_max_cores(self, int value):
         """
@@ -102,16 +108,16 @@ cdef class Folder:
 
         :param value: int - cores 
         """     
-        set_folder_max_cores(self.id, value)
+        set_folder_max_cores(self, value)
 
     def delete(self):
         """
         Delete this Folder 
         """
-        delete_folder(self.id)
+        delete_folder(self)
 
 
-def get_folder(Guid& folderId):
+cpdef inline get_folder(Guid& folderId):
     """
     Get a Folder by id 
 
@@ -165,7 +171,7 @@ def get_job_board(Project project):
     cdef list ret = [initFolder(folderT) for folderT in folders]
     return ret
 
-def set_folder_min_cores(Folder folder, int value):
+cpdef inline set_folder_min_cores(Folder folder, int value):
     """
     Set the minimum cores for a Folder 
 
@@ -174,7 +180,7 @@ def set_folder_min_cores(Folder folder, int value):
     """
     getClient().proxy().setFolderMinCores(folder.id, value)
 
-def set_folder_max_cores(Folder folder, int value):
+cpdef inline set_folder_max_cores(Folder folder, int value):
     """
     Set the maximum cores for a Folder 
 
@@ -183,7 +189,7 @@ def set_folder_max_cores(Folder folder, int value):
     """
     getClient().proxy().setFolderMaxCores(folder.id, value)
 
-def set_folder_name(Folder folder, string& name):
+cpdef inline set_folder_name(Folder folder, string& name):
     """
     Set the name for a Folder 
 
@@ -192,7 +198,7 @@ def set_folder_name(Folder folder, string& name):
     """
     getClient().proxy().setFolderName(folder.id, name)
 
-def delete_folder(Folder folder):
+cpdef inline delete_folder(Folder folder):
     """
     Delete a folder 
 
