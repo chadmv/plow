@@ -291,33 +291,14 @@ cdef class Job:
         return ret
 
 
-def launch_job(**kwargs):
+def launch_job(JobSpec spec):
     """
-    Launch a job with a set of specs.
-    Keyword parameters mirror those defined  
-    as attributes of :class:`.JobSpec`
+    Launch a job with a JobSpec.
 
-    :param name: str
-    :param project: str :class:`.Project`.id
-    :param username: str owner
-    :param logPath: str path to logfile
-    :param paused: bool ; if True, submit in a paused state 
-    :param uid: int uid of owner 
-    :param layers: list[:class:`.LayerSpec`]
-    :param depends: list[:class:`.DependSpec`]
+    :param spec: :class:`.JobSpec`
     :returns: :class:`.Job`
     """
-    cdef:
-        JobSpec spec 
-        Job job 
-
-    try:
-        kwargs['project'] = kwargs['project'].id 
-    except:
-        pass 
-
-    spec = JobSpec(**kwargs)
-    job = spec.launch()
+    cdef Job job = spec.launch()
     return job
     
 cpdef inline get_job(Guid& id):
