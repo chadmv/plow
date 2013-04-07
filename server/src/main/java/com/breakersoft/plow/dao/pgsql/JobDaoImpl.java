@@ -16,6 +16,7 @@ import com.breakersoft.plow.JobE;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.JobDao;
+import com.breakersoft.plow.exceptions.InvalidBlueprintException;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.TaskState;
@@ -172,8 +173,14 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         Map<Integer, Integer> jobRollup = Maps.newHashMap();
         Map<String, List<Integer>> layerRollup = Maps.newHashMap();
 
-        for (Map<String, Object> entry:
-            jdbc.queryForList(GET_FRAME_STATUS_COUNTS, job.getJobId())) {
+        List<Map<String, Object>> taskCounts = jdbc.queryForList(
+        		GET_FRAME_STATUS_COUNTS, job.getJobId());
+
+        if (taskCounts.isEmpty()) {
+        	throw new InvalidBlueprintException("The job contains no tasks.");
+        }
+
+        for (Map<String, Object> entry: taskCounts) {
 
             String layerId = entry.get("pk_layer").toString();
             int state = (Integer) entry.get("int_state");
