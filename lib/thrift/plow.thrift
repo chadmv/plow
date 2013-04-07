@@ -285,7 +285,7 @@ struct LayerSpecT {
     1:string name,
     2:list<string> command,
     3:set<string> tags,
-    4:optional string range,
+    4:string range,
     5:i32 chunk = 1,
     6:i32 minCores = 1,
     7:i32 maxCores = 1,
