@@ -284,9 +284,9 @@ ETC_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../../etc'))
 ETC_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'etc')
 copy_dir(ETC_SRC_DIR, ETC_DST_DIR)
 
-BIN_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../../bin'))
-BIN_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'bin')
-copy_dir(BIN_SRC_DIR, BIN_DST_DIR)
+# BIN_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../../bin'))
+# BIN_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'bin')
+# copy_dir(BIN_SRC_DIR, BIN_DST_DIR)
 
 
 plowmodule = Extension('plow.client.plow',
@@ -335,10 +335,13 @@ setup(
         'console_scripts': [
             'rndaemon = plow.rndaemon.main:main',
         ],
+        'gui_scripts': [
+            'plow-wrangler = plow.gui.main:main'
+        ]
     },
 
     # # stand-alone scripts from the root bin
-    scripts=[p for p in glob.glob(os.path.join(BIN_DST_DIR, "*")) if not p.endswith('rndaemon')],
+    # scripts=[p for p in glob.glob(os.path.join(BIN_DST_DIR, "*")) if not p.endswith('rndaemon')],
 
     # # TODO: Some tests need to be made runable without an independant server
     test_suite="tests.test_all",

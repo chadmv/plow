@@ -212,3 +212,14 @@ def launch(argv, name, layout=None):
     app.lastWindowClosed.connect(win.saveApplicationState)
     win.show()
     app.exec_()
+
+
+def main():
+    import signal
+    import sys
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    launch(sys.argv, "Plow Wrangle", "Wrangler")
+
+if __name__ == "__main__":
+    main()
+
