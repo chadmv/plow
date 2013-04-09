@@ -22,11 +22,12 @@ cdef class LayerSpec:
     :var tags: set(str)
 
     """
-    cdef public string name, range
+    cdef public string name
     cdef public int chunk, minCores, maxCores, minRamMb
     cdef public bint threadable
     cdef list command, depends, tasks 
     cdef set tags
+    cdef string range
     cdef _LayerSpecT__isset __isset
 
     def __init__(self, **kwargs):
@@ -57,6 +58,7 @@ cdef class LayerSpec:
         s.threadable = self.threadable
         s.command = self.command
         s.tags = self.tags
+        s.__isset = self.__isset
 
         cdef: 
             DependSpecT dSpecT
