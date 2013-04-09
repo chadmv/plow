@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ import com.breakersoft.plow.dao.ProjectDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
+import com.breakersoft.plow.exceptions.InvalidBlueprintException;
 import com.breakersoft.plow.rnd.thrift.RunningTask;
 import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.JobSpecT;
@@ -37,6 +39,9 @@ import com.breakersoft.plow.thrift.TaskState;
 @Service
 @Transactional
 public class JobServiceImpl implements JobService {
+
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(JobServiceImpl.class);
 
     @Autowired
     JobDao jobDao;
@@ -105,6 +110,7 @@ public class JobServiceImpl implements JobService {
             Layer layer = layerDao.create(job, blayer, layerOrder);
 
             if (blayer.isSetRange()) {
+                logger.info("Creating layer {}, range: {}", blayer.name, blayer.range);
                 int frameOrder = 0;
                 FrameSet frameSet = new FrameSet(blayer.getRange());
                 for (int frameNum: frameSet) {
@@ -118,6 +124,10 @@ public class JobServiceImpl implements JobService {
                 for (TaskSpecT task: blayer.getTasks()) {
                     taskDao.create(layer, task.getName(), 0, taskOrder, layerOrder);
                 }
+            }
+            else {
+                throw new InvalidBlueprintException(
+                        "Layer {} cannot be launched, has no range or tasks.");
             }
             layerOrder++;
         }
@@ -161,12 +171,12 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void setJobMinCores(Job job, int value) {
-    	jobDao.setMinCores(job, value);
+        jobDao.setMinCores(job, value);
     }
 
     @Override
     public void setJobMaxCores(Job job, int value) {
-    	jobDao.setMaxCores(job, value);
+        jobDao.setMaxCores(job, value);
     }
 
     @Override
@@ -243,12 +253,12 @@ public class JobServiceImpl implements JobService {
     @Override
     @Transactional(readOnly=true)
     public List<Task> getTasks(TaskFilterT filter) {
-    	return taskDao.getTasks(filter);
+        return taskDao.getTasks(filter);
     }
 
     @Override
     public boolean setTaskState(Task task, TaskState state) {
-    	return taskDao.setTaskState(task, state);
+        return taskDao.setTaskState(task, state);
     }
 
     @Override
@@ -285,28 +295,28 @@ public class JobServiceImpl implements JobService {
         }
     }
 
-	@Override
-	public void setLayerMinCores(Layer layer, int cores) {
-		layerDao.setMinCores(layer, cores);
-	}
+    @Override
+    public void setLayerMinCores(Layer layer, int cores) {
+        layerDao.setMinCores(layer, cores);
+    }
 
-	@Override
-	public void setLayerMaxCores(Layer layer, int cores) {
-		layerDao.setMaxCores(layer, cores);
-	}
+    @Override
+    public void setLayerMaxCores(Layer layer, int cores) {
+        layerDao.setMaxCores(layer, cores);
+    }
 
-	@Override
-	public void setLayerMinRam(Layer layer, int ram) {
-		layerDao.setMinRam(layer, ram);
-	}
+    @Override
+    public void setLayerMinRam(Layer layer, int ram) {
+        layerDao.setMinRam(layer, ram);
+    }
 
-	@Override
-	public void setLayerTags(Layer layer, Set<String> tags) {
-		layerDao.setTags(layer, tags);
-	}
+    @Override
+    public void setLayerTags(Layer layer, Set<String> tags) {
+        layerDao.setTags(layer, tags);
+    }
 
-	@Override
-	public void setLayerThreadable(Layer layer, boolean threadable) {
-		layerDao.setThreadable(layer, threadable);
-	}
+    @Override
+    public void setLayerThreadable(Layer layer, boolean threadable) {
+        layerDao.setThreadable(layer, threadable);
+    }
 }
