@@ -20,13 +20,14 @@ cdef class LayerSpec:
     :var depends: list[:class:`.DependSpec`] 
     :var tasks: list [:class:`.TaskSpec`]
     :var tags: set(str)
-    
+
     """
     cdef public string name, range
     cdef public int chunk, minCores, maxCores, minRamMb
     cdef public bint threadable
     cdef list command, depends, tasks 
     cdef set tags
+    cdef LayerSpecT__isset __isset
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
@@ -72,6 +73,12 @@ cdef class LayerSpec:
             s.tasks.push_back(tSpecT) 
 
         return s
+
+    property range:
+        def __get__(self): return self.range
+        def __set__(self, val): 
+            self.range = val
+            __isset.range = True
 
     property command:
         def __get__(self): return self.command

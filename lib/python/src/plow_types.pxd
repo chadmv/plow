@@ -249,6 +249,9 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string name 
         vector[DependSpecT] depends 
 
+    cdef struct _LayerSpecT__isset:
+        bint range
+
     cdef cppclass LayerSpecT:
         string name
         vector[string] command
