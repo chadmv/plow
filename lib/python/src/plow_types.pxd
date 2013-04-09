@@ -264,6 +264,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         bint threadable
         vector[DependSpecT] depends
         vector[TaskSpecT] tasks
+        _LayerSpecT__isset __isset
 
     cdef cppclass JobSpecT:
         string name

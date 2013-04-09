@@ -78,7 +78,7 @@ cdef class LayerSpec:
         def __get__(self): return self.range
         def __set__(self, val): 
             self.range = val
-            __isset.range = True
+            self.__isset.range = True
 
     property command:
         def __get__(self): return self.command
