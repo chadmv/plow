@@ -27,7 +27,7 @@ cdef class LayerSpec:
     cdef public bint threadable
     cdef list command, depends, tasks 
     cdef set tags
-    cdef LayerSpecT__isset __isset
+    cdef _LayerSpecT__isset __isset
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
