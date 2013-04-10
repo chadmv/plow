@@ -290,6 +290,16 @@ cdef class Job:
         ret = get_layers(self)
         return ret
 
+    def get_tasks(self):
+        """
+        Get a list of tasks for this job 
+
+        :returns: list[:class:`.Task`]
+        """
+        cdef list ret 
+        ret = get_tasks(job=self)
+        return ret
+
 
 def launch_job(JobSpec spec):
     """

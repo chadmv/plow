@@ -99,7 +99,7 @@ cdef class LayerSpec:
         def __set__(self, val): self.tags = val
 
 
-cdef inline Job initLayer(LayerT& l):
+cdef inline Layer initLayer(LayerT& l):
     cdef Layer layer = Layer()
     layer.setLayer(l)
     return layer

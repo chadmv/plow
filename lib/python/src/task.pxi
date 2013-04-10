@@ -72,9 +72,9 @@ cdef class TaskFilter:
     cdef TaskFilterT value
 
     def __init__(self, **kwargs):
-        self.value.jobId = kwargs.get('jobId', '')
-        self.value.layerIds = kwargs.get('layerIds', [])
-        self.value.taskIds = kwargs.get('taskIds', [])
+        self.value.jobId = kwargs.get('job', '')
+        self.value.layerIds = kwargs.get('layers', [])
+        self.value.taskIds = kwargs.get('tasks', [])
         self.value.limit = kwargs.get('limit', 0)
         self.value.offset = kwargs.get('offset', 0)
         self.value.lastUpdateTime = kwargs.get('lastUpdateTime', 0)
@@ -253,8 +253,8 @@ def get_tasks(**kwargs):
         TaskT taskT
         vector[TaskT] tasks 
         list ret 
-        TaskFilter filter = TaskFilter(**kwargs)
-        TaskFilterT f = filter.value
+        TaskFilter filt 
+        TaskFilterT f
 
     cdef str name 
     for name in ('layers', 'tasks'):
@@ -267,6 +267,9 @@ def get_tasks(**kwargs):
         kwargs['job'] = kwargs['job'].id
     except:
         pass
+
+    filt = TaskFilter(**kwargs)
+    f = filt.value
 
     getClient().proxy().getTasks(tasks, f)
     ret = [initTask(taskT) for taskT in tasks]
