@@ -164,6 +164,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                    @Override
                    public Map<String, String> mapRow(ResultSet rs, int rowNum)
                            throws SQLException {
+                       @SuppressWarnings("unchecked")
                        Map<String,String> result = (Map<String, String>) rs.getObject("attrs");
                        return result;
                    }
