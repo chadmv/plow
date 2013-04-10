@@ -588,4 +588,59 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
         Job job = jobService.getJob(UUID.fromString(jobId));
         jobService.setJobAttrs(job, attrs);
     }
+
+    @Override
+    public boolean dropDepend(String arg0) throws PlowException, TException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public List<DependT> getDependsOnJob(String arg0) throws PlowException,
+            TException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<DependT> getDependsOnLayer(String arg0) throws PlowException,
+            TException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<DependT> getDependsOnTask(String arg0) throws PlowException,
+            TException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<DependT> getJobDependsOn(String arg0) throws PlowException,
+            TException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<DependT> getLayerDependsOn(String arg0) throws PlowException,
+            TException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<DependT> getTaskDependsOn(String arg0) throws PlowException,
+            TException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean reactivateDepend(String arg0) throws PlowException,
+            TException {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

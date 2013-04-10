@@ -57,6 +57,17 @@ exception PlowException {
     2: string why
 }
 
+struct DependT {
+    1:required common.Guid id,
+    2:required DependType type,
+    3:string dependentJob,
+    4:string dependOnJob,
+    5:string dependentLayer,
+    6:string dependOnLayer,
+    7:string dependentTask,
+    8:string dependOnTask
+}
+
 struct TaskTotalsT {
     1:i32 totalTaskCount = 0,
     2:i32 succeededTaskCount = 0,
@@ -370,6 +381,8 @@ service RpcService {
     void setJobMinCores(1:common.Guid jobId, 2:i32 value) throws (1:PlowException e),
     void setJobMaxCores(1:common.Guid jobId, 2:i32 value) throws (1:PlowException e),
     void setJobAttrs(1:common.Guid jobId, 2:Attrs attrs) throws (1:PlowException e),
+    list<DependT> getDependsOnJob(1:common.Guid jobId) throws (1:PlowException e),
+    list<DependT> getJobDependsOn(1:common.Guid jobId) throws (1:PlowException e),
 
     FolderT createFolder(1:string projectId, 2:string name) throws (1:PlowException e),
     FolderT getFolder(1:string id) throws (1:PlowException e),
@@ -390,6 +403,8 @@ service RpcService {
     void setLayerMaxCoresPerTask(1:common.Guid guid, 2:i32 minCores) throws (1:PlowException e),
     void setLayerMinRamPerTask(1:common.Guid guid, 2:i32 minCores) throws (1:PlowException e),
     void setLayerThreadable(1:common.Guid guid, 2:bool threadable) throws (1:PlowException e),
+    list<DependT> getDependsOnLayer(1:common.Guid layerId) throws (1:PlowException e),
+    list<DependT> getLayerDependsOn(1:common.Guid layerId) throws (1:PlowException e),
 
     TaskT getTask(1:common.Guid taskId) throws (1:PlowException e),
     list<TaskT> getTasks(1:TaskFilterT filter) throws (1:PlowException e),
@@ -397,6 +412,11 @@ service RpcService {
     void retryTasks(1:TaskFilterT filter) throws (1:PlowException e),
     void eatTasks(1:TaskFilterT filter) throws (1:PlowException e),
     void killTasks(1:TaskFilterT filter) throws (1:PlowException e),
+    list<DependT> getDependsOnTask(1:common.Guid taskId) throws (1:PlowException e),
+    list<DependT> getTaskDependsOn(1:common.Guid taskId) throws (1:PlowException e),
+
+    bool dropDepend(1:common.Guid dependId) throws (1:PlowException e),
+    bool reactivateDepend(1:common.Guid dependId) throws (1:PlowException e),
 
     NodeT getNode(1:string name) throws (1:PlowException e),
     list<NodeT> getNodes(1:NodeFilterT filter) throws (1:PlowException e),
