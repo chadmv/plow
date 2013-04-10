@@ -96,7 +96,8 @@ CREATE TABLE plow.job (
   int_state SMALLINT NOT NULL DEFAULT 0,
   bool_paused BOOLEAN NOT NULL DEFAULT 'f',
   time_started BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
-  time_stopped BIGINT DEFAULT 0
+  time_stopped BIGINT DEFAULT 0,
+  attrs hstore
 ) WITHOUT OIDS;
 
 CREATE UNIQUE INDEX job_str_active_name_uniq_idx ON plow.job (str_active_name);

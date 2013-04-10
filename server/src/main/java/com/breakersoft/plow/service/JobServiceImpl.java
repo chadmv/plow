@@ -185,6 +185,11 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public void setJobAttrs(Job job, Map<String,String> attrs) {
+        jobDao.setAttrs(job, attrs);
+    }
+
+    @Override
     public boolean hasWaitingFrames(Job job) {
         return jobDao.hasWaitingFrames(job);
     }

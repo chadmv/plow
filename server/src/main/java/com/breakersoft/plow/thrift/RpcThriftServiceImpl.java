@@ -191,11 +191,11 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
         return thriftLayerDao.getLayer(UUID.fromString(jobId), name);
     }
 
-	@Override
-	public ProjectT createProject(String title, String code) throws PlowException, TException {
-		Project project = projectService.createProject(title, code);
-		return thriftProjectDao.get(project.getProjectId());
-	}
+    @Override
+    public ProjectT createProject(String title, String code) throws PlowException, TException {
+        Project project = projectService.createProject(title, code);
+        return thriftProjectDao.get(project.getProjectId());
+    }
 
     @Override
     public ProjectT getProject(String id) throws PlowException, TException {
@@ -204,7 +204,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Override
     public List<ProjectT> getProjects() throws PlowException, TException {
-    	return thriftProjectDao.all();
+        return thriftProjectDao.all();
     }
 
     @Override
@@ -232,10 +232,10 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
         return thriftProjectDao.get(code);
     }
 
-	@Override
-	public List<ProjectT> getActiveProjects() throws PlowException, TException {
-		return thriftProjectDao.active();
-	}
+    @Override
+    public List<ProjectT> getActiveProjects() throws PlowException, TException {
+        return thriftProjectDao.active();
+    }
 
     @Override
     public List<FolderT> getFolders(String projectId) throws PlowException,
@@ -254,331 +254,338 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
         return thriftTaskDao.getLogPath(UUID.fromString(id));
     }
 
-	@Override
-	public ClusterT getCluster(String arg0) throws PlowException, TException {
-		return thriftClusterDao.getCluster(arg0);
-	}
+    @Override
+    public ClusterT getCluster(String arg0) throws PlowException, TException {
+        return thriftClusterDao.getCluster(arg0);
+    }
 
-	@Override
-	public List<ClusterT> getClusters() throws PlowException, TException {
-		return thriftClusterDao.getClusters();
-	}
+    @Override
+    public List<ClusterT> getClusters() throws PlowException, TException {
+        return thriftClusterDao.getClusters();
+    }
 
-	@Override
-	public List<ClusterT> getClustersByTag(String arg0) throws PlowException,
-			TException {
-		return thriftClusterDao.getClusters(arg0);
-	}
+    @Override
+    public List<ClusterT> getClustersByTag(String arg0) throws PlowException,
+            TException {
+        return thriftClusterDao.getClusters(arg0);
+    }
 
-	@Override
-	public ClusterT createCluster(String name, Set<String> tags)
-			throws PlowException, TException {
-		final Cluster cluster = nodeService.createCluster(name, tags);
-		return thriftClusterDao.getCluster(cluster.getClusterId().toString());
-	}
+    @Override
+    public ClusterT createCluster(String name, Set<String> tags)
+            throws PlowException, TException {
+        final Cluster cluster = nodeService.createCluster(name, tags);
+        return thriftClusterDao.getCluster(cluster.getClusterId().toString());
+    }
 
-	@Override
-	public boolean deleteCluster(String id) throws PlowException, TException {
-		final Cluster c = nodeService.getCluster(UUID.fromString(id));
-		return nodeService.deleteCluster(c);
-	}
+    @Override
+    public boolean deleteCluster(String id) throws PlowException, TException {
+        final Cluster c = nodeService.getCluster(UUID.fromString(id));
+        return nodeService.deleteCluster(c);
+    }
 
-	@Override
-	public boolean lockCluster(String id, boolean value) throws TException {
-		final Cluster c = nodeService.getCluster(UUID.fromString(id));
-		return nodeService.lockCluster(c, value);
-	}
+    @Override
+    public boolean lockCluster(String id, boolean value) throws TException {
+        final Cluster c = nodeService.getCluster(UUID.fromString(id));
+        return nodeService.lockCluster(c, value);
+    }
 
-	@Override
-	public void setClusterName(String id, String name) throws PlowException,
-			TException {
-		final Cluster c = nodeService.getCluster(UUID.fromString(id));
-		nodeService.setClusterName(c, name);
-	}
+    @Override
+    public void setClusterName(String id, String name) throws PlowException,
+            TException {
+        final Cluster c = nodeService.getCluster(UUID.fromString(id));
+        nodeService.setClusterName(c, name);
+    }
 
-	@Override
-	public void setClusterTags(String id, Set<String> tags)
-			throws PlowException, TException {
-		final Cluster c = nodeService.getCluster(UUID.fromString(id));
-		nodeService.setClusterTags(c, tags);
-	}
+    @Override
+    public void setClusterTags(String id, Set<String> tags)
+            throws PlowException, TException {
+        final Cluster c = nodeService.getCluster(UUID.fromString(id));
+        nodeService.setClusterTags(c, tags);
+    }
 
-	@Override
-	public void setDefaultCluster(String id) throws PlowException, TException {
-		final Cluster c = nodeService.getCluster(UUID.fromString(id));
-		nodeService.setDefaultCluster(c);
-	}
+    @Override
+    public void setDefaultCluster(String id) throws PlowException, TException {
+        final Cluster c = nodeService.getCluster(UUID.fromString(id));
+        nodeService.setDefaultCluster(c);
+    }
 
-	@Override
-	public void retryTasks(TaskFilterT filter) throws PlowException, TException {
-		stateManager.retryTasks(filter);
-	}
+    @Override
+    public void retryTasks(TaskFilterT filter) throws PlowException, TException {
+        stateManager.retryTasks(filter);
+    }
 
-	@Override
-	public void eatTasks(TaskFilterT filter) throws PlowException, TException {
-		stateManager.eatTasks(filter);
-	}
+    @Override
+    public void eatTasks(TaskFilterT filter) throws PlowException, TException {
+        stateManager.eatTasks(filter);
+    }
 
-	@Override
-	public void killTasks(TaskFilterT filter) throws PlowException, TException {
-		stateManager.killTasks(filter);
-	}
+    @Override
+    public void killTasks(TaskFilterT filter) throws PlowException, TException {
+        stateManager.killTasks(filter);
+    }
 
-	@Override
-	public QuotaT getQuota(String arg0) throws PlowException, TException {
-		return thriftQuotaDao.getQuota(UUID.fromString(arg0));
-	}
+    @Override
+    public QuotaT getQuota(String arg0) throws PlowException, TException {
+        return thriftQuotaDao.getQuota(UUID.fromString(arg0));
+    }
 
-	@Override
-	public List<QuotaT> getQuotas(QuotaFilterT arg0) throws PlowException,
-			TException {
-		return thriftQuotaDao.getQuotas(arg0);
-	}
+    @Override
+    public List<QuotaT> getQuotas(QuotaFilterT arg0) throws PlowException,
+            TException {
+        return thriftQuotaDao.getQuotas(arg0);
+    }
 
-	@Override
-	public QuotaT createQuota(String projId, String clusterId, int size, int burst)
-			throws PlowException, TException {
-		Project proj = projectService.getProject(UUID.fromString(projId));
-		Cluster clus = nodeService.getCluster(UUID.fromString(clusterId));
-		Quota quota = nodeService.createQuota(proj, clus, size, burst);
-		return thriftQuotaDao.getQuota(quota.getQuotaId());
-	}
+    @Override
+    public QuotaT createQuota(String projId, String clusterId, int size, int burst)
+            throws PlowException, TException {
+        Project proj = projectService.getProject(UUID.fromString(projId));
+        Cluster clus = nodeService.getCluster(UUID.fromString(clusterId));
+        Quota quota = nodeService.createQuota(proj, clus, size, burst);
+        return thriftQuotaDao.getQuota(quota.getQuotaId());
+    }
 
-	@Override
-	public void setQuotaBurst(String id, int value) throws PlowException,
-			TException {
-		Quota quota = nodeService.getQuota(UUID.fromString(id));
-		nodeService.setQuotaBurst(quota, value);
+    @Override
+    public void setQuotaBurst(String id, int value) throws PlowException,
+            TException {
+        Quota quota = nodeService.getQuota(UUID.fromString(id));
+        nodeService.setQuotaBurst(quota, value);
 
-	}
+    }
 
-	@Override
-	public void setQuotaLocked(String id, boolean value) throws PlowException,
-			TException {
-		Quota quota = nodeService.getQuota(UUID.fromString(id));
-		nodeService.setQuotaLocked(quota, value);
-	}
+    @Override
+    public void setQuotaLocked(String id, boolean value) throws PlowException,
+            TException {
+        Quota quota = nodeService.getQuota(UUID.fromString(id));
+        nodeService.setQuotaLocked(quota, value);
+    }
 
-	@Override
-	public void setQuotaSize(String id, int value) throws PlowException,
-			TException {
-		Quota quota = nodeService.getQuota(UUID.fromString(id));
-		nodeService.setQuotaSize(quota, value);
-	}
+    @Override
+    public void setQuotaSize(String id, int value) throws PlowException,
+            TException {
+        Quota quota = nodeService.getQuota(UUID.fromString(id));
+        nodeService.setQuotaSize(quota, value);
+    }
 
-	@Override
-	public void setLayerMaxCoresPerTask(String id, int cores)
-			throws PlowException, TException {
-		Layer layer = jobService.getLayer(UUID.fromString(id));
-		jobService.setLayerMaxCores(layer, cores);
-	}
+    @Override
+    public void setLayerMaxCoresPerTask(String id, int cores)
+            throws PlowException, TException {
+        Layer layer = jobService.getLayer(UUID.fromString(id));
+        jobService.setLayerMaxCores(layer, cores);
+    }
 
-	@Override
-	public void setLayerMinCoresPerTask(String id, int cores)
-			throws PlowException, TException {
-		Layer layer = jobService.getLayer(UUID.fromString(id));
-		jobService.setLayerMinCores(layer, cores);
-	}
+    @Override
+    public void setLayerMinCoresPerTask(String id, int cores)
+            throws PlowException, TException {
+        Layer layer = jobService.getLayer(UUID.fromString(id));
+        jobService.setLayerMinCores(layer, cores);
+    }
 
-	@Override
-	public void setLayerMinRamPerTask(String id, int ram)
-			throws PlowException, TException {
-		Layer layer = jobService.getLayer(UUID.fromString(id));
-		jobService.setLayerMinRam(layer, ram);
-	}
+    @Override
+    public void setLayerMinRamPerTask(String id, int ram)
+            throws PlowException, TException {
+        Layer layer = jobService.getLayer(UUID.fromString(id));
+        jobService.setLayerMinRam(layer, ram);
+    }
 
-	@Override
-	public void setLayerTags(String id, Set<String> tags)
-			throws PlowException, TException {
-		Layer layer = jobService.getLayer(UUID.fromString(id));
-		jobService.setLayerTags(layer, tags);
-	}
+    @Override
+    public void setLayerTags(String id, Set<String> tags)
+            throws PlowException, TException {
+        Layer layer = jobService.getLayer(UUID.fromString(id));
+        jobService.setLayerTags(layer, tags);
+    }
 
-	@Override
-	public void setLayerThreadable(String id, boolean threadable)
-			throws PlowException, TException {
-		Layer layer = jobService.getLayer(UUID.fromString(id));
-		jobService.setLayerThreadable(layer, threadable);
+    @Override
+    public void setLayerThreadable(String id, boolean threadable)
+            throws PlowException, TException {
+        Layer layer = jobService.getLayer(UUID.fromString(id));
+        jobService.setLayerThreadable(layer, threadable);
 
-	}
+    }
 
-	@Override
-	public void setProjectActive(String id, boolean value)
-			throws PlowException, TException {
-		Project project = projectService.getProject(UUID.fromString(id));
-		projectService.setProjectActive(project, value);
-	}
+    @Override
+    public void setProjectActive(String id, boolean value)
+            throws PlowException, TException {
+        Project project = projectService.getProject(UUID.fromString(id));
+        projectService.setProjectActive(project, value);
+    }
 
-	@Override
-	public void setJobMaxCores(String id, int cores) throws PlowException,
-			TException {
-		Job job = jobService.getJob(UUID.fromString(id));
-		jobService.setJobMaxCores(job, cores);
-	}
+    @Override
+    public void setJobMaxCores(String id, int cores) throws PlowException,
+            TException {
+        Job job = jobService.getJob(UUID.fromString(id));
+        jobService.setJobMaxCores(job, cores);
+    }
 
-	@Override
-	public void setJobMinCores(String id, int cores) throws PlowException,
-			TException {
-		Job job = jobService.getJob(UUID.fromString(id));
-		jobService.setJobMinCores(job, cores);
-	}
+    @Override
+    public void setJobMinCores(String id, int cores) throws PlowException,
+            TException {
+        Job job = jobService.getJob(UUID.fromString(id));
+        jobService.setJobMinCores(job, cores);
+    }
 
-	@Override
-	public void deleteFolder(String id) throws PlowException, TException {
-		Folder folder = projectService.getFolder(UUID.fromString(id));
-		projectService.deleteFolder(folder);
-	}
+    @Override
+    public void deleteFolder(String id) throws PlowException, TException {
+        Folder folder = projectService.getFolder(UUID.fromString(id));
+        projectService.deleteFolder(folder);
+    }
 
-	@Override
-	public void setFolderMaxCores(String id, int cores) throws PlowException,
-			TException {
-		Folder folder = projectService.getFolder(UUID.fromString(id));
-		projectService.setFolderMaxCores(folder, cores);
-	}
+    @Override
+    public void setFolderMaxCores(String id, int cores) throws PlowException,
+            TException {
+        Folder folder = projectService.getFolder(UUID.fromString(id));
+        projectService.setFolderMaxCores(folder, cores);
+    }
 
-	@Override
-	public void setFolderMinCores(String id, int cores) throws PlowException,
-			TException {
-		Folder folder = projectService.getFolder(UUID.fromString(id));
-		projectService.setFolderMinCores(folder, cores);
-	}
+    @Override
+    public void setFolderMinCores(String id, int cores) throws PlowException,
+            TException {
+        Folder folder = projectService.getFolder(UUID.fromString(id));
+        projectService.setFolderMinCores(folder, cores);
+    }
 
-	@Override
-	public void setFolderName(String id, String name) throws PlowException,
-			TException {
-		Folder folder = projectService.getFolder(UUID.fromString(id));
-		projectService.setFolderName(folder, name);
-	}
+    @Override
+    public void setFolderName(String id, String name) throws PlowException,
+            TException {
+        Folder folder = projectService.getFolder(UUID.fromString(id));
+        projectService.setFolderName(folder, name);
+    }
 
-	@Override
-	public void setNodeLocked(String id, boolean value) throws PlowException,
-			TException {
-		Node node = nodeService.getNode(UUID.fromString(id));
-		nodeService.setNodeLocked(node, value);
-	}
+    @Override
+    public void setNodeLocked(String id, boolean value) throws PlowException,
+            TException {
+        Node node = nodeService.getNode(UUID.fromString(id));
+        nodeService.setNodeLocked(node, value);
+    }
 
-	@Override
-	public void setNodeCluster(String nodeId, String clusterId) throws PlowException,
-			TException {
-		Node node = nodeService.getNode(UUID.fromString(nodeId));
-		if (nodeService.hasProcs(node)) {
-			throw new PlowWriteException("You cannot move a Node with running procs.");
-		}
+    @Override
+    public void setNodeCluster(String nodeId, String clusterId) throws PlowException,
+            TException {
+        Node node = nodeService.getNode(UUID.fromString(nodeId));
+        if (nodeService.hasProcs(node)) {
+            throw new PlowWriteException("You cannot move a Node with running procs.");
+        }
 
-		Cluster cluster = nodeService.getCluster(UUID.fromString(clusterId));
-		// isolation=Serializable.
-		nodeService.setNodeCluster(node, cluster);
-	}
+        Cluster cluster = nodeService.getCluster(UUID.fromString(clusterId));
+        // isolation=Serializable.
+        nodeService.setNodeCluster(node, cluster);
+    }
 
-	@Override
-	public void setNodeTags(String id, Set<String> tags)
-			throws PlowException, TException {
-		Node node = nodeService.getNode(UUID.fromString(id));
-		nodeService.setTags(node, tags);
-	}
+    @Override
+    public void setNodeTags(String id, Set<String> tags)
+            throws PlowException, TException {
+        Node node = nodeService.getNode(UUID.fromString(id));
+        nodeService.setTags(node, tags);
+    }
 
-	@Override
-	public ActionT createAction(String filterId, ActionType type, String value)
-			throws PlowException, TException {
-		Filter filter = filterService.getFilter(UUID.fromString(filterId));
-		Action action = filterService.createAction(filter, type, value);
-		return thriftActionDao.get(action.getActionId());
-	}
+    @Override
+    public ActionT createAction(String filterId, ActionType type, String value)
+            throws PlowException, TException {
+        Filter filter = filterService.getFilter(UUID.fromString(filterId));
+        Action action = filterService.createAction(filter, type, value);
+        return thriftActionDao.get(action.getActionId());
+    }
 
-	@Override
-	public void deleteAction(String id) throws PlowException, TException {
-		final Action action = filterService.getAction(UUID.fromString(id));
-		filterService.deleteAction(action);
-	}
+    @Override
+    public void deleteAction(String id) throws PlowException, TException {
+        final Action action = filterService.getAction(UUID.fromString(id));
+        filterService.deleteAction(action);
+    }
 
-	@Override
-	public ActionT getAction(String id) throws PlowException, TException {
-		return thriftActionDao.get(UUID.fromString(id));
-	}
+    @Override
+    public ActionT getAction(String id) throws PlowException, TException {
+        return thriftActionDao.get(UUID.fromString(id));
+    }
 
-	@Override
-	public List<ActionT> getActions(String filterId) throws PlowException,
-			TException {
-		Filter filter = filterService.getFilter(UUID.fromString(filterId));
-		return thriftActionDao.getAll(filter);
-	}
+    @Override
+    public List<ActionT> getActions(String filterId) throws PlowException,
+            TException {
+        Filter filter = filterService.getFilter(UUID.fromString(filterId));
+        return thriftActionDao.getAll(filter);
+    }
 
-	@Override
-	public MatcherT createMatcher(String filterId, MatcherField field,
-			MatcherType type, String value) throws PlowException, TException {
-		Filter filter = filterService.getFilter(UUID.fromString(filterId));
-		Matcher matcher = filterService.createMatcher(filter, field, type, value);
-		return thriftMatcherDao.get(matcher.getMatcherId());
-	}
+    @Override
+    public MatcherT createMatcher(String filterId, MatcherField field,
+            MatcherType type, String value) throws PlowException, TException {
+        Filter filter = filterService.getFilter(UUID.fromString(filterId));
+        Matcher matcher = filterService.createMatcher(filter, field, type, value);
+        return thriftMatcherDao.get(matcher.getMatcherId());
+    }
 
-	@Override
-	public void deleteMatcher(String matcherId) throws PlowException, TException {
-		Matcher matcher = filterService.getMatcher(UUID.fromString(matcherId));
-		filterService.deleteMatcher(matcher);
-	}
+    @Override
+    public void deleteMatcher(String matcherId) throws PlowException, TException {
+        Matcher matcher = filterService.getMatcher(UUID.fromString(matcherId));
+        filterService.deleteMatcher(matcher);
+    }
 
-	@Override
-	public MatcherT getMatcher(String matcherId) throws PlowException, TException {
-		return thriftMatcherDao.get(UUID.fromString(matcherId));
-	}
+    @Override
+    public MatcherT getMatcher(String matcherId) throws PlowException, TException {
+        return thriftMatcherDao.get(UUID.fromString(matcherId));
+    }
 
-	@Override
-	public List<MatcherT> getMatchers(String filterId) throws PlowException,
-			TException {
-		Filter filter = filterService.getFilter(UUID.fromString(filterId));
-		return thriftMatcherDao.getAll(filter);
-	}
+    @Override
+    public List<MatcherT> getMatchers(String filterId) throws PlowException,
+            TException {
+        Filter filter = filterService.getFilter(UUID.fromString(filterId));
+        return thriftMatcherDao.getAll(filter);
+    }
 
-	@Override
-	public FilterT createFilter(String projectId, String name) throws PlowException, TException {
-		Project project = projectService.getProject(UUID.fromString(projectId));
-		Filter filter = filterService.createFilter(project, name);
-		return thriftFilterDao.get(filter.getFilterId());
-	}
+    @Override
+    public FilterT createFilter(String projectId, String name) throws PlowException, TException {
+        Project project = projectService.getProject(UUID.fromString(projectId));
+        Filter filter = filterService.createFilter(project, name);
+        return thriftFilterDao.get(filter.getFilterId());
+    }
 
-	@Override
-	public void deleteFilter(String filterId) throws PlowException, TException {
-		Filter filter = filterService.getFilter(UUID.fromString(filterId));
-		filterService.deleteFilter(filter);
-	}
+    @Override
+    public void deleteFilter(String filterId) throws PlowException, TException {
+        Filter filter = filterService.getFilter(UUID.fromString(filterId));
+        filterService.deleteFilter(filter);
+    }
 
-	@Override
-	public void decreaseFilterOrder(String filterId) throws PlowException,
-			TException {
-		Filter filter = filterService.getFilter(UUID.fromString(filterId));
-		filterService.decreaseFilterOrder(filter);
-	}
+    @Override
+    public void decreaseFilterOrder(String filterId) throws PlowException,
+            TException {
+        Filter filter = filterService.getFilter(UUID.fromString(filterId));
+        filterService.decreaseFilterOrder(filter);
+    }
 
-	@Override
-	public void increaseFilterOrder(String filterId) throws PlowException,
-			TException {
-		Filter filter = filterService.getFilter(UUID.fromString(filterId));
-		filterService.increaseFilterOrder(filter);
-	}
+    @Override
+    public void increaseFilterOrder(String filterId) throws PlowException,
+            TException {
+        Filter filter = filterService.getFilter(UUID.fromString(filterId));
+        filterService.increaseFilterOrder(filter);
+    }
 
-	@Override
-	public void setFilterName(String filterId, String name) throws PlowException,
-			TException {
-		Filter filter = filterService.getFilter(UUID.fromString(filterId));
-		filterService.setFilterName(filter, name);
-	}
+    @Override
+    public void setFilterName(String filterId, String name) throws PlowException,
+            TException {
+        Filter filter = filterService.getFilter(UUID.fromString(filterId));
+        filterService.setFilterName(filter, name);
+    }
 
-	@Override
-	public void setFilterOrder(String filterId, int order) throws PlowException,
-			TException {
-		Filter filter = filterService.getFilter(UUID.fromString(filterId));
-		filterService.setFilterOrder(filter, order);
-	}
+    @Override
+    public void setFilterOrder(String filterId, int order) throws PlowException,
+            TException {
+        Filter filter = filterService.getFilter(UUID.fromString(filterId));
+        filterService.setFilterOrder(filter, order);
+    }
 
-	@Override
-	public List<FilterT> getFilters(String projectId) throws PlowException,
-			TException {
-		Project project = projectService.getProject(UUID.fromString(projectId));
-		return thriftFilterDao.getAll(project);
-	}
+    @Override
+    public List<FilterT> getFilters(String projectId) throws PlowException,
+            TException {
+        Project project = projectService.getProject(UUID.fromString(projectId));
+        return thriftFilterDao.getAll(project);
+    }
 
-	@Override
-	public FilterT getFilter(String filterId) throws PlowException, TException {
-		return thriftFilterDao.get(UUID.fromString(filterId));
-	}
+    @Override
+    public FilterT getFilter(String filterId) throws PlowException, TException {
+        return thriftFilterDao.get(UUID.fromString(filterId));
+    }
+
+    @Override
+    public void setJobAttrs(String jobId, Map<String, String> attrs) throws PlowException,
+            TException {
+        Job job = jobService.getJob(UUID.fromString(jobId));
+        jobService.setJobAttrs(job, attrs);
+    }
 }

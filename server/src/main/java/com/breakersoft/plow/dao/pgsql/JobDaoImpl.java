@@ -1,11 +1,14 @@
 package com.breakersoft.plow.dao.pgsql;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
@@ -94,25 +97,31 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         JdbcUtils.Insert("plow.job",
                 "pk_job", "pk_project", "str_name", "str_active_name",
                 "str_username", "int_uid", "int_state", "bool_paused",
-                "str_log_path")
+                "str_log_path", "attrs")
     };
 
     @Override
-    public Job create(Project project, JobSpecT jobSpec) {
+    public Job create(final Project project, final JobSpecT spec) {
 
         final UUID jobId = UUID.randomUUID();
-        jdbc.update(
-                INSERT[0],
-                jobId,
-                project.getProjectId(),
-                jobSpec.getName(),
-                jobSpec.getName(),
-                jobSpec.username,
-                jobSpec.getUid(),
-                JobState.INITIALIZE.ordinal(),
-                jobSpec.isPaused(),
-                String.format("%s/%s",
-                        jobSpec.logPath, jobSpec.name));
+
+        jdbc.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
+                final PreparedStatement ret = conn.prepareStatement(INSERT[0]);
+                ret.setObject(1, jobId);
+                ret.setObject(2, project.getProjectId());
+                ret.setString(3, spec.getName());
+                ret.setString(4, spec.getName());
+                ret.setString(5, spec.username);
+                ret.setInt(6, spec.getUid());
+                ret.setInt(7, JobState.INITIALIZE.ordinal());
+                ret.setBoolean(8, spec.isPaused());
+                ret.setString(9, String.format("%s/%s", spec.logPath, spec.name));
+                ret.setObject(10, spec.attrs);
+                return ret;
+            }
+        });
 
         jdbc.update("INSERT INTO plow.job_count (pk_job) VALUES (?)", jobId);
         jdbc.update("INSERT INTO plow.job_dsp (pk_job) VALUES (?)", jobId);
@@ -123,6 +132,43 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         job.setProjectId(project.getProjectId());
         job.setFolderId(null); // Don't know folder yet
         return job;
+    }
+
+    private static final String UPDATE_ATTRS =
+        "UPDATE " +
+            "plow.job " +
+        "SET " +
+            "attrs = ? " +
+        "WHERE " +
+            "pk_job=?";
+
+    @Override
+    public void setAttrs(final Job job, final Map<String,String> attrs) {
+        jdbc.update(new PreparedStatementCreator() {
+             @Override
+             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
+                 final PreparedStatement ret = conn.prepareStatement(UPDATE_ATTRS);
+                 ret.setObject(1, attrs);
+                 ret.setObject(2, job.getJobId());
+                 return ret;
+             }
+         });
+    }
+
+    @Override
+    public Map<String,String> getAttrs(final Job job) {
+        return jdbc.queryForObject(
+                "SELECT attrs FROM plow.job WHERE job.pk_job=?",
+                new RowMapper<Map<String,String>>() {
+
+                   @Override
+                   public Map<String, String> mapRow(ResultSet rs, int rowNum)
+                           throws SQLException {
+                       Map<String,String> result = (Map<String, String>) rs.getObject("attrs");
+                       return result;
+                   }
+
+        }, job.getJobId());
     }
 
     @Override
@@ -174,10 +220,10 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         Map<String, List<Integer>> layerRollup = Maps.newHashMap();
 
         List<Map<String, Object>> taskCounts = jdbc.queryForList(
-        		GET_FRAME_STATUS_COUNTS, job.getJobId());
+                GET_FRAME_STATUS_COUNTS, job.getJobId());
 
         if (taskCounts.isEmpty()) {
-        	throw new InvalidBlueprintException("The job contains no tasks.");
+            throw new InvalidBlueprintException("The job contains no tasks.");
         }
 
         for (Map<String, Object> entry: taskCounts) {
@@ -299,13 +345,13 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
 
     @Override
     public void setMaxCores(Job job, int value) {
-    	jdbc.update("UPDATE plow.job_dsp SET int_max_cores=? WHERE pk_job=?",
-    			value, job.getJobId());
+        jdbc.update("UPDATE plow.job_dsp SET int_max_cores=? WHERE pk_job=?",
+                value, job.getJobId());
     }
 
     @Override
     public void setMinCores(Job job, int value) {
-    	jdbc.update("UPDATE plow.job_dsp SET int_min_cores=? WHERE pk_job=?",
-    			value, job.getJobId());
+        jdbc.update("UPDATE plow.job_dsp SET int_min_cores=? WHERE pk_job=?",
+                value, job.getJobId());
     }
 }

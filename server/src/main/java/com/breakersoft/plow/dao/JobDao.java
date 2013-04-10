@@ -1,5 +1,6 @@
 package com.breakersoft.plow.dao;
 
+import java.util.Map;
 import java.util.UUID;
 
 import com.breakersoft.plow.Folder;
@@ -42,7 +43,11 @@ public interface JobDao {
 
     boolean updateMaxRssMb(UUID jobId, int value);
 
-	void setMaxCores(Job job, int value);
+    void setMaxCores(Job job, int value);
 
-	void setMinCores(Job job, int value);
+    void setMinCores(Job job, int value);
+
+    void setAttrs(Job job, Map<String, String> attrs);
+
+    Map<String, String> getAttrs(Job job);
 }

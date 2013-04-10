@@ -17,16 +17,16 @@ import com.breakersoft.plow.thrift.TaskState;
 
 public interface JobService {
 
-	/*
-	 * Jobs
-	 */
+    /*
+     * Jobs
+     */
 
-	/**
-	 * Launch a job spec.
-	 *
-	 * @param jobspec
-	 * @return
-	 */
+    /**
+     * Launch a job spec.
+     *
+     * @param jobspec
+     * @return
+     */
     JobLaunchEvent launch(JobSpecT jobspec);
 
     /**
@@ -37,40 +37,40 @@ public interface JobService {
      */
     boolean shutdown(Job job);
 
-	/**
-	 * Set the maximum core value on a given job.  If a job reaches its maximum
-	 * cores it will no longer be dispatched new cores. If a job is well over
-	 * its maximum cores, then procs will fall off the job until its at or under
-	 * its maximum cores value.
-	 *
-	 * @param job
-	 * @param value
-	 */
-	void setJobMaxCores(Job job, int value);
+    /**
+     * Set the maximum core value on a given job.  If a job reaches its maximum
+     * cores it will no longer be dispatched new cores. If a job is well over
+     * its maximum cores, then procs will fall off the job until its at or under
+     * its maximum cores value.
+     *
+     * @param job
+     * @param value
+     */
+    void setJobMaxCores(Job job, int value);
 
-	/**
-	 * Set the minumum core value on a given job.  The minimum cores value controls
-	 * the overall priority of a job relative to other jobs.  Jobs with a higher
-	 * minumum cores get more procs.
-	 *
-	 * @param job
-	 * @param value
-	 */
-	void setJobMinCores(Job job, int value);
+    /**
+     * Set the minumum core value on a given job.  The minimum cores value controls
+     * the overall priority of a job relative to other jobs.  Jobs with a higher
+     * minumum cores get more procs.
+     *
+     * @param job
+     * @param value
+     */
+    void setJobMinCores(Job job, int value);
 
-	/**
-	 * Get a job using its unique UUID.
-	 * @param id
-	 * @return
-	 */
-	Job getJob(UUID id);
+    /**
+     * Get a job using its unique UUID.
+     * @param id
+     * @return
+     */
+    Job getJob(UUID id);
 
-	/**
-	 * Return true if a job has waiting frames.
-	 *
-	 * @param job
-	 * @return
-	 */
+    /**
+     * Return true if a job has waiting frames.
+     *
+     * @param job
+     * @return
+     */
     boolean hasWaitingFrames(Job job);
 
     /**
@@ -99,16 +99,23 @@ public interface JobService {
      */
     boolean isJobPaused(Job job);
 
+    /**
+     * Set the arbitrary attrs on a job.
+     *
+     * @param job
+     * @param attrs
+     */
+    void setJobAttrs(Job job, Map<String, String> attrs);
 
-	/*
-	 * Layers
-	 */
+    /*
+     * Layers
+     */
 
     void setLayerMinCores(Layer layer, int cores);
-	void setLayerMaxCores(Layer layer, int cores);
-	void setLayerMinRam(Layer layer, int ram);
-	void setLayerTags(Layer layer, Set<String> tags);
-	void setLayerThreadable(Layer layer, boolean threadable);
+    void setLayerMaxCores(Layer layer, int cores);
+    void setLayerMinRam(Layer layer, int ram);
+    void setLayerTags(Layer layer, Set<String> tags);
+    void setLayerThreadable(Layer layer, boolean threadable);
     Layer getLayer(Job job, String layer);
     Layer getLayer(Job job, int idx);
     boolean isLayerComplete(Layer layer);
@@ -120,12 +127,12 @@ public interface JobService {
      */
 
 
-	Task getTask(String id);
+    Task getTask(String id);
     boolean isFinished(Job job);
     Task getTask(Layer layer, int number);
     void updateRunningTasks(List<RunningTask> runningTasks);
     void updateMaxRssValues(List<RunningTask> runningTasks);
-	List<Task> getTasks(TaskFilterT filter);
+    List<Task> getTasks(TaskFilterT filter);
     boolean setTaskState(Task task, TaskState currentState, TaskState newState);
-	boolean setTaskState(Task task, TaskState state);
+    boolean setTaskState(Task task, TaskState state);
 }

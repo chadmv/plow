@@ -7,6 +7,8 @@ namespace java com.breakersoft.plow.thrift
 namespace py rpc
 namespace cpp Plow
 
+typedef map<string,string> Attrs
+
 /**
 * Job State Enum
 **/
@@ -166,7 +168,8 @@ struct JobT {
     11:common.Timestamp startTime,
     12:common.Timestamp stopTime,
     13:TaskTotalsT totals,
-    14:i32 maxRssMb
+    14:i32 maxRssMb,
+    15:Attrs attrs
 }
 
 struct LayerT {
@@ -303,7 +306,8 @@ struct JobSpecT {
     5:i32 uid,
     6:string logPath
     7:list<LayerSpecT> layers,
-    8:list<DependSpecT> depends
+    8:list<DependSpecT> depends,
+    9:Attrs attrs
 }
 
 struct JobFilterT {
@@ -365,6 +369,7 @@ service RpcService {
     list<OutputT> getJobOutputs(1:common.Guid jobId) throws (1:PlowException e),
     void setJobMinCores(1:common.Guid jobId, 2:i32 value) throws (1:PlowException e),
     void setJobMaxCores(1:common.Guid jobId, 2:i32 value) throws (1:PlowException e),
+    void setJobAttrs(1:common.Guid jobId, 2:Attrs attrs) throws (1:PlowException e),
 
     FolderT createFolder(1:string projectId, 2:string name) throws (1:PlowException e),
     FolderT getFolder(1:string id) throws (1:PlowException e),

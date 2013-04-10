@@ -2,6 +2,8 @@ package com.breakersoft.plow.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Map;
+
 import javax.annotation.Resource;
 
 import org.junit.Before;
@@ -25,6 +27,7 @@ import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.LayerSpecT;
 import com.breakersoft.plow.thrift.TaskSpecT;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 @Transactional
@@ -96,6 +99,37 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         jobspec.setPaused(false);
         jobspec.setProject("unittest");
         jobspec.setLogPath("/tmp/plow/unittests/" + name);
+
+        LayerSpecT layer = new LayerSpecT();
+        layer.setChunk(1);
+        layer.setCommand(Lists.newArrayList("echo", "%{TASK}" ));
+        layer.setMaxCores(8);
+        layer.setMinCores(1);
+        layer.setMinRamMb(1024);
+        layer.setName("random_tasks");
+        layer.setTags(Sets.newHashSet("unittest"));
+
+        jobspec.addToLayers(layer);
+
+        TaskSpecT task = new TaskSpecT();
+        task.name = "task1";
+        task.depends = Lists.newArrayList();
+
+        layer.addToTasks(task);
+
+        return jobspec;
+    }
+
+    public JobSpecT getTestJobSpecWithAttrs(String name, Map<String,String> attrs) {
+
+        JobSpecT jobspec = new JobSpecT();
+        jobspec.setName(name);
+        jobspec.setUid(100);
+        jobspec.setUsername("stella");
+        jobspec.setPaused(false);
+        jobspec.setProject("unittest");
+        jobspec.setLogPath("/tmp/plow/unittests/" + name);
+        jobspec.attrs = attrs;
 
         LayerSpecT layer = new LayerSpecT();
         layer.setChunk(1);

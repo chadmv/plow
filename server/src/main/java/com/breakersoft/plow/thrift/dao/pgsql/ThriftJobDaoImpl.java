@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -43,6 +44,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             job.state = JobState.findByValue(rs.getInt("int_state"));
             job.setMaxRssMb(rs.getInt("int_max_rss"));
             job.setTotals(JdbcUtils.getTaskTotals(rs));
+            job.setAttrs((Map<String, String>) rs.getObject("attrs"));
             return job;
         }
     };
@@ -58,6 +60,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             "job.int_state,"+
             "job.time_started,"+
             "job.time_stopped,"+
+            "job.attrs,"+
             "job_dsp.int_max_cores,"+
             "job_dsp.int_min_cores,"+
             "job_dsp.int_run_cores, " +
@@ -116,23 +119,23 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
         }
 
         if (filter.isSetJobIds() && !filter.jobIds.isEmpty()) {
-        	clauses.add(JdbcUtils.In(
-        			"job.pk_job", filter.jobIds.size(), "uuid"));
-        	values.addAll(filter.jobIds);
+            clauses.add(JdbcUtils.In(
+                    "job.pk_job", filter.jobIds.size(), "uuid"));
+            values.addAll(filter.jobIds);
         }
 
         final StringBuilder sb = new StringBuilder(512);
         sb.append(GET);
-    	if (!values.isEmpty()) {
-    		sb.append(" WHERE " );
-    		sb.append(StringUtils.join(clauses, " AND "));
-    	}
-
-        if (filter.matchingOnly && values.isEmpty()) {
-        	return new ArrayList<JobT>(0);
+        if (!values.isEmpty()) {
+            sb.append(" WHERE " );
+            sb.append(StringUtils.join(clauses, " AND "));
         }
 
-		return jdbc.query(sb.toString(), MAPPER, values.toArray());
+        if (filter.matchingOnly && values.isEmpty()) {
+            return new ArrayList<JobT>(0);
+        }
+
+        return jdbc.query(sb.toString(), MAPPER, values.toArray());
     }
 
     private static final String GET_BY_ID =
