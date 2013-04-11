@@ -35,8 +35,10 @@ cdef class DependSpec:
     """
     cdef public string dependentJob, dependOnJob, dependentLayer
     cdef public string dependOnLayer, dependentTask, dependOnTask
+    cdef public DependType_type type
 
     def __init__(self, **kwargs):
+        self.type = kwargs.get('type', 0)
         self.dependentJob = kwargs.get('dependentJob', '')
         self.dependOnJob = kwargs.get('dependOnJob', '')
         self.dependentLayer = kwargs.get('dependentLayer', '')
@@ -47,6 +49,7 @@ cdef class DependSpec:
     cdef DependSpecT toDependSpecT(self):
         cdef DependSpecT s
 
+        s.type = self.type
         s.dependentJob = self.dependentJob
         s.dependOnJob = self.dependOnJob
         s.dependentLayer = self.dependentLayer
