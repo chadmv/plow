@@ -97,6 +97,15 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
         void getActions(vector[ActionT]&, Guid& filterId) nogil except +
         void getAction(ActionT&, Guid& actionId) nogil except +
 
+        void getDependsOnJob(vector[DependT]&, Guid& jobId) nogil except +
+        void getJobDependsOn(vector[DependT]&, Guid& jobId) nogil except +
+        void getDependsOnLayer(vector[DependT]&, Guid& layerId) nogil except +
+        void getLayerDependsOn(vector[DependT]&, Guid& layerId) nogil except +
+        void getDependsOnTask(vector[DependT]&, Guid& taskId) nogil except +
+        void getTaskDependsOn(vector[DependT]&, Guid& taskId) nogil except +
+        bint dropDepend(Guid& dependId) nogil except +
+        bint reactivateDepend(Guid& dependId) nogil except +
+
 
 cdef extern from "client.h" namespace "Plow":
     cdef cppclass PlowClient:
