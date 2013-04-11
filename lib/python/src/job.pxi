@@ -300,6 +300,25 @@ cdef class Job:
         ret = get_tasks(job=self)
         return ret
 
+    def get_depends(self):
+        """
+        Get a list of depends that others have 
+        on this job
+
+        :returns: list[:class:`.Depend`]
+        """
+        cdef list ret = get_depends_on_job(self)
+        return ret 
+
+    def get_depends_on(self):
+        """
+        Get a list of depends this job has on others
+
+        :returns: list[:class:`.Depend`]
+        """
+        cdef list ret = get_job_depends_on(self)
+        return ret
+
 
 def launch_job(JobSpec spec):
     """
