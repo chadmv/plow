@@ -230,6 +230,25 @@ cdef class Layer:
         set_layer_min_ram_per_task(self, minRam)
         self._layer.minRamMb = minRam
 
+    def get_depends(self):
+        """
+        Get a list of depends that others have 
+        on this layer
+
+        :returns: list[:class:`.Depend`]
+        """
+        cdef list ret = get_depends_on_layer(self)
+        return ret 
+
+    def get_depends_on(self):
+        """
+        Get a list of depends this layer has on others
+
+        :returns: list[:class:`.Depend`]
+        """
+        cdef list ret = get_layer_depends_on(self)
+        return ret
+
 cpdef inline get_layer_by_id(Guid& layerId):
     """
     Get a layer by its id 
