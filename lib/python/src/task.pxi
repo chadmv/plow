@@ -219,6 +219,25 @@ cdef class Task:
         cdef list ids = [self]
         kill_tasks(taskIds=ids)  
 
+    def get_depends(self):
+        """
+        Get a list of depends that others have 
+        on this task
+
+        :returns: list[:class:`.Depend`]
+        """
+        cdef list ret = get_depends_on_task(self)
+        return ret 
+
+    def get_depends_on(self):
+        """
+        Get a list of depends this task has on others
+
+        :returns: list[:class:`.Depend`]
+        """
+        cdef list ret = get_task_depends_on(self)
+        return ret
+
 
 cpdef inline get_task(Guid& taskId):
     """
