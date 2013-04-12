@@ -67,6 +67,8 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobLaunchEvent launch(JobSpecT jobspec) {
 
+        logger.info("launching job spec: {} ", jobspec);
+
         final Project project = projectDao.get(jobspec.getProject());
         final Job job = jobDao.create(project, jobspec);
         final Folder folder = filterJob(job, project);
@@ -120,8 +122,10 @@ public class JobServiceImpl implements JobService {
                 }
             }
             else if (blayer.isSetTasks()) {
+                logger.info("Creating tasks in layer: {}", blayer.name);
                 int taskOrder = 0;
                 for (TaskSpecT task: blayer.getTasks()) {
+                    logger.info("Creating task: {}", task.getName());
                     taskDao.create(layer, task.getName(), 0, taskOrder, layerOrder);
                 }
             }
@@ -134,6 +138,8 @@ public class JobServiceImpl implements JobService {
     }
 
     private void createDependencies(Job job, JobSpecT jspec) {
+
+        logger.info("Setting up dependencies in job {}", jspec.name);
 
         for (LayerSpecT layer: jspec.getLayers()) {
             if (!layer.isSetDepends()) {
