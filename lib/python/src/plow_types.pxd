@@ -236,6 +236,14 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         TaskTotalsT totals
         vector[JobT] jobs
 
+    cdef struct _DependSpecT__isset:
+        bint dependentJob
+        bint dependOnJob
+        bint dependentLayer
+        bint dependOnLayer
+        bint dependentTask
+        bint dependOnTask
+        
     cdef cppclass DependSpecT:
         DependType_type type
         string dependentJob
@@ -244,6 +252,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string dependOnLayer
         string dependentTask
         string dependOnTask
+        _DependSpecT__isset __isset
 
     cdef cppclass DependT:
         Guid id        

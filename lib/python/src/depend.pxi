@@ -42,9 +42,10 @@ cdef class DependSpec:
     :var dependOnTask: str
     
     """
-    cdef public string dependentJob, dependOnJob, dependentLayer
-    cdef public string dependOnLayer, dependentTask, dependOnTask
     cdef public DependType_type type
+    cdef string dependentJob, dependOnJob, dependentLayer
+    cdef string dependOnLayer, dependentTask, dependOnTask
+    cdef _DependSpecT__isset __isset
 
     def __init__(self, **kwargs):
         self.type = kwargs.get('type', 0)
@@ -65,8 +66,46 @@ cdef class DependSpec:
         s.dependOnLayer = self.dependOnLayer
         s.dependentTask = self.dependentTask
         s.dependOnTask = self.dependOnTask
+        s.__isset = self.__isset
 
         return s
+
+    property dependentJob:
+        def __get__(self): return self.dependentJob
+        def __set__(self, val): 
+            self.dependentJob = val
+            self.__isset.dependentJob = True
+
+    property dependOnJob:
+        def __get__(self): return self.dependOnJob
+        def __set__(self, val): 
+            self.dependOnJob = val
+            self.__isset.dependOnJob = True
+
+    property dependentLayer:
+        def __get__(self): return self.dependentLayer
+        def __set__(self, val): 
+            self.dependentLayer = val
+            self.__isset.dependentLayer = True
+
+    property dependOnLayer:
+        def __get__(self): return self.dependOnLayer
+        def __set__(self, val): 
+            self.dependOnLayer = val
+            self.__isset.dependOnLayer = True
+
+    property dependentTask:
+        def __get__(self): return self.dependentTask
+        def __set__(self, val): 
+            self.dependentTask = val
+            self.__isset.dependentTask = True
+
+    property dependOnTask:
+        def __get__(self): return self.dependOnTask
+        def __set__(self, val): 
+            self.dependOnTask = val
+            self.__isset.dependOnTask = True
+
 
 #######################
 # Depend
