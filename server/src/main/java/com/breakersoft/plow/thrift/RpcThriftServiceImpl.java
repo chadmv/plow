@@ -97,11 +97,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Override
     public JobT launch(JobSpecT spec) throws PlowException, TException {
-
-        logger.info("launchung job: {} ", spec);
-
         JobLaunchEvent event =  jobService.launch(spec);
-
         JobT result = new JobT();
         result.id = event.getJob().getJobId().toString();
         result.name = event.getJobSpec().getName();
