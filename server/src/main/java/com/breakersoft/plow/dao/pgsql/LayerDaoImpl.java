@@ -39,6 +39,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
             LayerE layer = new LayerE();
             layer.setLayerId(UUID.fromString(rs.getString(1)));
             layer.setJobId(UUID.fromString(rs.getString(2)));
+            layer.setName(rs.getString(3));
             return layer;
         }
     };
@@ -46,7 +47,8 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
     private static final String GET =
             "SELECT " +
                 "pk_layer,"+
-                "pk_job " +
+                "pk_job, " +
+                "str_name " +
             "FROM " +
                 "plow.layer ";
 
@@ -180,34 +182,34 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
 
     @Override
     public void setMinCores(Layer layer, int cores) {
-    	jdbc.update("UPDATE plow.layer SET int_min_cores=? WHERE pk_layer=?",
-    			cores, layer.getLayerId());
+        jdbc.update("UPDATE plow.layer SET int_min_cores=? WHERE pk_layer=?",
+                cores, layer.getLayerId());
     }
 
     @Override
     public void setMaxCores(Layer layer, int cores) {
-    	jdbc.update("UPDATE plow.layer SET int_max_cores=? WHERE pk_layer=?",
-    			cores, layer.getLayerId());
+        jdbc.update("UPDATE plow.layer SET int_max_cores=? WHERE pk_layer=?",
+                cores, layer.getLayerId());
     }
 
     @Override
     public void setMinRam(Layer layer, int memory) {
-    	jdbc.update("UPDATE plow.layer SET int_min_ram=? WHERE pk_layer=?",
-    			memory, layer.getLayerId());
+        jdbc.update("UPDATE plow.layer SET int_min_ram=? WHERE pk_layer=?",
+                memory, layer.getLayerId());
     }
 
     @Override
     public void setThreadable(Layer layer, boolean threadable) {
-    	jdbc.update("UPDATE plow.layer SET bool_threadable=? WHERE pk_layer=?",
-    			threadable, layer.getLayerId());
+        jdbc.update("UPDATE plow.layer SET bool_threadable=? WHERE pk_layer=?",
+                threadable, layer.getLayerId());
     }
 
     private static final String UPDATE_TAGS =
-    		"UPDATE plow.layer SET str_tags=? WHERE pk_layer=?";
+            "UPDATE plow.layer SET str_tags=? WHERE pk_layer=?";
 
     @Override
     public void setTags(final Layer layer, final Set<String> tags) {
-    	 jdbc.update(new PreparedStatementCreator() {
+         jdbc.update(new PreparedStatementCreator() {
              @Override
              public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                  final PreparedStatement ret = conn.prepareStatement(UPDATE_TAGS);

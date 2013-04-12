@@ -6,7 +6,16 @@ public class TaskE implements Task {
 
     private UUID jobId;
     private UUID layerId;
-    private UUID frameId;
+    private UUID taskId;
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     @Override
     public UUID getLayerId() {
@@ -15,7 +24,7 @@ public class TaskE implements Task {
 
     @Override
     public UUID getTaskId() {
-        return frameId;
+        return taskId;
     }
 
     @Override
@@ -31,11 +40,11 @@ public class TaskE implements Task {
     }
 
     public void setTaskId(UUID frameId) {
-        this.frameId = frameId;
+        this.taskId = frameId;
     }
 
     public int hashCode() {
-        return frameId.hashCode();
+        return taskId.hashCode();
     }
 
     public boolean equals(Object obj) {
@@ -47,6 +56,6 @@ public class TaskE implements Task {
             return false;
 
         Task other = (Task) obj;
-        return frameId.equals(other.getTaskId());
+        return taskId.equals(other.getTaskId());
     }
 }

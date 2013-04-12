@@ -7,5 +7,6 @@ public interface Task {
     public UUID getJobId();
     public UUID getLayerId();
     public UUID getTaskId();
+    public String getName();
 
 }

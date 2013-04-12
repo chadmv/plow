@@ -11,6 +11,7 @@ public class DispatchableTask implements Task {
     public UUID jobId;
     public int minCores;
     public int minRam;
+    public String name;
 
     @Override
     public UUID getJobId() {
@@ -25,5 +26,10 @@ public class DispatchableTask implements Task {
     @Override
     public UUID getTaskId() {
         return taskId;
+    }
+
+    @Override
+    public String name() {
+        return name;
     }
 }

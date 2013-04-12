@@ -6,4 +6,5 @@ public interface Job {
     public UUID getJobId();
     public UUID getProjectId();
     public UUID getFolderId();
+    public String getName();
 }

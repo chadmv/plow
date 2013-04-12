@@ -33,11 +33,12 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         @Override
         public Task mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
-            TaskE frame = new TaskE();
-            frame.setTaskId(UUID.fromString(rs.getString(1)));
-            frame.setLayerId(UUID.fromString(rs.getString(2)));
-            frame.setJobId((UUID) rs.getObject(3));
-            return frame;
+            TaskE task = new TaskE();
+            task.setTaskId(UUID.fromString(rs.getString(1)));
+            task.setLayerId(UUID.fromString(rs.getString(2)));
+            task.setJobId((UUID) rs.getObject(3));
+            task.setName(rs.getString(4));
+            return task;
         }
     };
 
@@ -45,7 +46,8 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
             "SELECT " +
                 "task.pk_task,"+
                 "task.pk_layer, " +
-                "task.pk_job " +
+                "task.pk_job, " +
+                "task.str_name " +
             "FROM " +
                 "plow.layer, " +
                 "plow.task " +
@@ -249,28 +251,28 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
 
     @Override
     public boolean setTaskState(Task task, TaskState newState) {
-    	return jdbc.update("UPDATE plow.task SET int_state=?, bool_reserved='f', " +
-    			"time_updated = txTimeMillis() WHERE task.pk_task=?",
-    			newState.ordinal(), task.getTaskId()) == 1;
+        return jdbc.update("UPDATE plow.task SET int_state=?, bool_reserved='f', " +
+                "time_updated = txTimeMillis() WHERE task.pk_task=?",
+                newState.ordinal(), task.getTaskId()) == 1;
     }
 
     @Override
     public boolean setTaskState(Task task, TaskState newState, TaskState oldState) {
-    	return jdbc.update("UPDATE plow.task SET int_state=?, bool_reserved='f', " +
-    			"time_updated = txTimeMillis() WHERE task.pk_task=? AND int_state=?",
-    			newState.ordinal(), task.getTaskId(), oldState.ordinal()) == 1;
+        return jdbc.update("UPDATE plow.task SET int_state=?, bool_reserved='f', " +
+                "time_updated = txTimeMillis() WHERE task.pk_task=? AND int_state=?",
+                newState.ordinal(), task.getTaskId(), oldState.ordinal()) == 1;
     }
 
     @Override
     public List<Task> getTasks(TaskFilterT filter) {
 
-    	final List<String> where = Lists.newArrayList();
+        final List<String> where = Lists.newArrayList();
         final List<Object> values = Lists.newArrayList();
 
         boolean idsIsSet = false;
 
         if (filter.isSetJobId()) {
-        	idsIsSet = true;
+            idsIsSet = true;
             where.add("task.pk_job = ?::uuid");
             values.add(filter.jobId);
         }
@@ -281,22 +283,22 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         }
 
         if (filter.isSetStates()) {
-        	where.add(JdbcUtils.In("task.int_state", filter.states.size()));
-        	for (TaskState state: filter.states) {
-        		values.add(state.ordinal());
-        	}
+            where.add(JdbcUtils.In("task.int_state", filter.states.size()));
+            for (TaskState state: filter.states) {
+                values.add(state.ordinal());
+            }
         }
 
         if (filter.isSetLayerIds()) {
-        	idsIsSet = true;
-        	where.add(JdbcUtils.In("task.pk_layer", filter.layerIds.size(), "uuid"));
-        	values.addAll(filter.layerIds);
+            idsIsSet = true;
+            where.add(JdbcUtils.In("task.pk_layer", filter.layerIds.size(), "uuid"));
+            values.addAll(filter.layerIds);
         }
 
         if (filter.isSetTaskIds()) {
-        	idsIsSet = true;
-        	where.add(JdbcUtils.In("task.pk_task", filter.taskIds.size(), "uuid"));
-        	values.addAll(filter.taskIds);
+            idsIsSet = true;
+            where.add(JdbcUtils.In("task.pk_task", filter.taskIds.size(), "uuid"));
+            values.addAll(filter.taskIds);
         }
 
         if (!idsIsSet) {
@@ -313,15 +315,15 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         int offset = 0;
 
         if (filter.isSetLimit()) {
-        	if (filter.limit > 0 && filter.limit < Defaults.TASK_MAX_LIMIT) {
-        		limit = filter.limit;
-        	}
+            if (filter.limit > 0 && filter.limit < Defaults.TASK_MAX_LIMIT) {
+                limit = filter.limit;
+            }
         }
 
         if (filter.isSetOffset()) {
-        	if (offset > 0) {
-        		offset = filter.offset;
-        	}
+            if (offset > 0) {
+                offset = filter.offset;
+            }
         }
 
         sb.append(JdbcUtils.limitOffset(limit, offset));

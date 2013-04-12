@@ -39,6 +39,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
             job.setJobId((UUID) rs.getObject(1));
             job.setProjectId((UUID) rs.getObject(2));
             job.setFolderId((UUID) rs.getObject(3));
+            job.setName(rs.getString(4));
             return job;
         }
     };
@@ -47,7 +48,8 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
             "SELECT " +
                 "pk_job,"+
                 "pk_project, " +
-                "pk_folder " +
+                "pk_folder, " +
+                "str_name " +
             "FROM " +
                 "plow.job ";
 

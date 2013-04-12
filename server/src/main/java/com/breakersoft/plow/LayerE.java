@@ -6,6 +6,7 @@ public class LayerE implements Layer {
 
     private UUID layerId;
     private UUID jobId;
+    private String name;
 
     public LayerE() { }
 
@@ -26,6 +27,16 @@ public class LayerE implements Layer {
     public void setJobId(UUID jobId) {
         this.jobId = jobId;
     }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public int hashCode() {
         return layerId.hashCode();
     }
