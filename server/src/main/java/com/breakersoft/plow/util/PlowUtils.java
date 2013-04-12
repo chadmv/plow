@@ -22,4 +22,19 @@ public final class PlowUtils {
         }
         return !c.isEmpty();
     }
+
+    /**
+     * Return true if the str is not null and not empty.
+     * @param str
+     * @return
+     */
+    public static String checkEmpty(String str) {
+        if (str == null) {
+            throw new NullPointerException("Expecting not null string");
+        }
+        if (str.isEmpty()) {
+            throw new IllegalArgumentException("Expecting non-empty string.");
+        }
+        return str;
+    }
 }
