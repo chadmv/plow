@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.thrift.TException;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.Action;
@@ -41,8 +40,6 @@ import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 
 @ThriftService
 public class RpcThriftServiceImpl implements RpcService.Iface {
-
-    private Logger logger = org.slf4j.LoggerFactory.getLogger(RpcThriftServiceImpl.class);
 
     @Autowired
     JobService jobService;
