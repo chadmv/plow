@@ -51,6 +51,10 @@ public class JobE implements Job {
         this.name = name;
     }
 
+    public String toString() {
+        return String.format("%s [%s]", name, jobId);
+    }
+
     public boolean equals(Object obj) {
         if (obj == null)
             return false;

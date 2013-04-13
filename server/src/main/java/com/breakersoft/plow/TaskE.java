@@ -47,6 +47,10 @@ public class TaskE implements Task {
         return taskId.hashCode();
     }
 
+    public String toString() {
+        return String.format("%s [%s]", name, taskId);
+    }
+
     public boolean equals(Object obj) {
         if (obj == null)
             return false;

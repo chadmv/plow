@@ -40,6 +40,11 @@ public class LayerE implements Layer {
     public int hashCode() {
         return layerId.hashCode();
     }
+
+    public String toString() {
+        return String.format("%s [%s]", name, layerId);
+    }
+
     public boolean equals(Object obj) {
         if (obj == null)
             return false;
