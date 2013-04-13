@@ -97,6 +97,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         task.setTaskId(id);
         task.setLayerId(layer.getLayerId());
         task.setJobId(layer.getJobId());
+        task.setName(name);
         return task;
     }
 

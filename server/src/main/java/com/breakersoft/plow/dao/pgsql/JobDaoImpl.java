@@ -133,6 +133,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         job.setJobId(jobId);
         job.setProjectId(project.getProjectId());
         job.setFolderId(null); // Don't know folder yet
+        job.setName(spec.getName());
         return job;
     }
 

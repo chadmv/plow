@@ -116,6 +116,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
         final LayerE result = new LayerE();
         result.setLayerId(id);
         result.setJobId(job.getJobId());
+        result.setName(layer.getName());
         return result;
     }
 
