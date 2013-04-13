@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 import org.junit.Test;
 
 import com.breakersoft.plow.Depend;
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.DependDao;
@@ -110,7 +111,9 @@ public class DependDaoTests extends AbstractTest {
         dspec.dependOnLayer = dependOnLayer.getLayerId().toString();
 
         Depend depend = dependDao.createLayerOnLayer(
-                dependentLayer, dependOnLayer);
+                event1.getJob(), dependentLayer, event2.getJob(), dependOnLayer);
+
+
         assertEquals(dspec.type, depend.getType());
         assertEquals(dspec.dependentJob, depend.getDependentJobId().toString());
         assertEquals(dspec.dependOnJob, depend.getDependOnJobId().toString());
@@ -127,12 +130,12 @@ public class DependDaoTests extends AbstractTest {
         JobLaunchEvent event1 = jobService.launch(spec1);
         JobLaunchEvent event2 = jobService.launch(spec2);
 
-        Layer dependentLayer =
-                jobService.getLayer(event1.getJob(), 0);
-        Layer dependOnLayer =
-                jobService.getLayer(event2.getJob(), 0);
-        Task dependOnTask =
-                jobService.getTask(dependOnLayer, 1);
+        Job dependentJob = event1.getJob();
+        Layer dependentLayer = jobService.getLayer(event1.getJob(), 0);
+
+        Job dependOnJob = event1.getJob();
+        Layer dependOnLayer = jobService.getLayer(event2.getJob(), 0);
+        Task dependOnTask = jobService.getTask(dependOnLayer, 1);
 
         DependSpecT dspec = new DependSpecT();
         dspec.type = DependType.LAYER_ON_TASK;
@@ -143,7 +146,7 @@ public class DependDaoTests extends AbstractTest {
         dspec.dependOnTask = dependOnTask.getTaskId().toString();
 
         Depend depend = dependDao.createLayerOnTask(
-                dependentLayer, dependOnTask);
+                dependentJob, dependentLayer, dependOnJob, dependOnLayer, dependOnTask);
         assertEquals(dspec.type, depend.getType());
         assertEquals(dspec.dependentJob, depend.getDependentJobId().toString());
         assertEquals(dspec.dependOnJob, depend.getDependOnJobId().toString());
@@ -161,12 +164,13 @@ public class DependDaoTests extends AbstractTest {
         JobLaunchEvent event1 = jobService.launch(spec1);
         JobLaunchEvent event2 = jobService.launch(spec2);
 
-        Layer dependentLayer =
-                jobService.getLayer(event1.getJob(), 0);
-        Layer dependOnLayer =
-                jobService.getLayer(event2.getJob(), 0);
-        Task dependentTask =
-                jobService.getTask(dependentLayer, 1);
+        Job dependentJob = event1.getJob();
+        Layer dependentLayer = jobService.getLayer(dependentJob, 0);
+        Task dependentTask = jobService.getTask(dependentLayer, 1);
+
+        Job dependOnJob = event2.getJob();
+        Layer dependOnLayer = jobService.getLayer(dependOnJob, 0);
+
 
         DependSpecT dspec = new DependSpecT();
         dspec.type = DependType.TASK_ON_LAYER;
@@ -177,7 +181,7 @@ public class DependDaoTests extends AbstractTest {
         dspec.dependentTask = dependentTask.getTaskId().toString();
 
         Depend depend = dependDao.createTaskOnLayer(
-                dependentTask, dependOnLayer);
+                dependentJob, dependentLayer, dependentTask, dependOnJob, dependOnLayer);
         assertEquals(dspec.type, depend.getType());
         assertEquals(dspec.dependentJob, depend.getDependentJobId().toString());
         assertEquals(dspec.dependOnJob, depend.getDependOnJobId().toString());
@@ -195,14 +199,13 @@ public class DependDaoTests extends AbstractTest {
         JobLaunchEvent event1 = jobService.launch(spec1);
         JobLaunchEvent event2 = jobService.launch(spec2);
 
-        Layer dependentLayer =
-                jobService.getLayer(event1.getJob(), 0);
-        Layer dependOnLayer =
-                jobService.getLayer(event2.getJob(), 0);
-        Task dependentTask =
-                jobService.getTask(dependentLayer, 1);
-        Task dependOnTask =
-                jobService.getTask(dependOnLayer, 1);
+        Job dependentJob = event1.getJob();
+        Layer dependentLayer = jobService.getLayer(dependentJob, 0);
+        Task dependentTask = jobService.getTask(dependentLayer, 1);
+
+        Job dependOnJob = event2.getJob();
+        Layer dependOnLayer = jobService.getLayer(dependOnJob, 0);
+        Task dependOnTask = jobService.getTask(dependOnLayer, 1);
 
         DependSpecT dspec = new DependSpecT();
         dspec.type = DependType.TASK_ON_TASK;
@@ -214,7 +217,7 @@ public class DependDaoTests extends AbstractTest {
         dspec.dependOnTask = dependOnTask.getTaskId().toString();
 
         Depend depend = dependDao.createTaskOnTask(
-                dependentTask, dependOnTask);
+                dependentJob, dependentLayer, dependentTask, dependOnJob, dependOnLayer, dependOnTask);
         assertEquals(dspec.type, depend.getType());
         assertEquals(dspec.dependentJob, depend.getDependentJobId().toString());
         assertEquals(dspec.dependOnJob, depend.getDependOnJobId().toString());

@@ -60,12 +60,18 @@ exception PlowException {
 struct DependT {
     1:required common.Guid id,
     2:required DependType type,
-    3:string dependentJob,
-    4:string dependOnJob,
-    5:string dependentLayer,
-    6:string dependOnLayer,
-    7:string dependentTask,
-    8:string dependOnTask
+    3:string dependentJobId,
+    4:string dependOnJobId,
+    5:optional string dependentLayerId,
+    6:optional string dependOnLayerId,
+    7:optional string dependentTaskId,
+    8:optional string dependOnTaskId,
+    9:string dependentJobName,
+    10:string dependOnJobName,
+    11:optional string dependentLayerId,
+    12:optional string dependOnLayerId,
+    13:optional string dependentTaskId,
+    14:optional string dependOnTaskId,
 }
 
 struct TaskTotalsT {

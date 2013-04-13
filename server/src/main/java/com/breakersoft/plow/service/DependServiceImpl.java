@@ -1,5 +1,7 @@
 package com.breakersoft.plow.service;
 
+import static com.breakersoft.plow.util.PlowUtils.checkEmpty;
+
 import java.util.List;
 import java.util.Set;
 
@@ -7,7 +9,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import static com.breakersoft.plow.util.PlowUtils.checkEmpty;
 
 import com.breakersoft.plow.Depend;
 import com.breakersoft.plow.FrameRange;
@@ -19,7 +20,6 @@ import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.thrift.DependSpecT;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 @Service
@@ -54,60 +54,50 @@ public class DependServiceImpl implements DependService {
         switch(spec.getType()) {
 
         case JOB_ON_JOB:
-            dependentJob = jobDao.getByActiveNameOrId(
-                    checkEmpty(spec.dependentJob));
-            dependOnJob = jobDao.getByActiveNameOrId(
-                    checkEmpty(spec.dependOnJob));
+            dependentJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependentJob));
+            dependOnJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependOnJob));
             depend = dependDao.createJobOnJob(dependentJob, dependOnJob);
             break;
 
         case LAYER_ON_LAYER:
-            dependentJob = jobDao.getByActiveNameOrId(
-                    checkEmpty(spec.dependentJob));
-            dependOnJob = jobDao.getByActiveNameOrId(
-                    checkEmpty(spec.dependOnJob));
-            dependentLayer = layerDao.get(dependentJob,
-                    checkEmpty(spec.dependentLayer));
-            dependOnLayer = layerDao.get(dependOnJob,
-                    checkEmpty(spec.dependOnLayer));
-            depend = dependDao.createLayerOnLayer(dependentLayer, dependOnLayer);
+            dependentJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependentJob));
+            dependOnJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependOnJob));
+            dependentLayer = layerDao.get(dependentJob,checkEmpty(spec.dependentLayer));
+            dependOnLayer = layerDao.get(dependOnJob,checkEmpty(spec.dependOnLayer));
+            depend = dependDao.createLayerOnLayer(
+                    dependentJob, dependentLayer, dependentJob, dependOnLayer);
             break;
 
         case LAYER_ON_TASK:
             logger.info(spec.dependentJob);
-            dependentJob = jobDao.getByActiveNameOrId(
-                    checkEmpty(spec.dependentJob));
-            dependentLayer = layerDao.get(dependentJob,
-                    checkEmpty(spec.dependentLayer));
-            dependOnJob = jobDao.getByActiveNameOrId(
-                    checkEmpty(spec.dependOnJob));
-            dependOnTask = taskDao.getByNameOrId(dependOnJob,
-                    checkEmpty(spec.dependOnTask));
-            depend = dependDao.createLayerOnTask(dependentLayer, dependOnTask);
+            dependentJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependentJob));
+            dependentLayer = layerDao.get(dependentJob, checkEmpty(spec.dependentLayer));
+            dependOnJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependOnJob));
+            dependOnTask = taskDao.getByNameOrId(dependOnJob, checkEmpty(spec.dependOnTask));
+            dependOnLayer = layerDao.get(dependOnTask.getLayerId());
+            depend = dependDao.createLayerOnTask(dependentJob, dependentLayer,
+                    dependOnJob, dependOnLayer, dependOnTask);
             break;
 
         case TASK_ON_LAYER:
-            dependentJob = jobDao.getByActiveNameOrId(
-                    checkEmpty(spec.dependentJob));
-            dependentTask = taskDao.getByNameOrId(dependentJob,
-                    checkEmpty(spec.dependentTask));
-            dependOnJob = jobDao.getByActiveNameOrId(
-                    checkEmpty(spec.dependOnJob));
-            dependOnLayer = layerDao.get(dependOnJob,
-                    checkEmpty(spec.dependOnLayer));
-            depend = dependDao.createTaskOnLayer(dependentTask, dependOnLayer);
+            dependentJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependentJob));
+            dependentTask = taskDao.getByNameOrId(dependentJob, checkEmpty(spec.dependentTask));
+            dependentLayer = layerDao.get(dependentTask.getLayerId());
+            dependOnJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependOnJob));
+            dependOnLayer = layerDao.get(dependOnJob, checkEmpty(spec.dependOnLayer));
+            depend = dependDao.createTaskOnLayer(
+                    dependentJob, dependentLayer, dependentTask, dependOnJob, dependOnLayer);
             break;
 
         case TASK_ON_TASK:
-            dependentJob = jobDao.getByActiveNameOrId(
-                    checkEmpty(spec.dependentJob));
-            dependentTask = taskDao.getByNameOrId(dependentJob,
-                    checkEmpty(spec.dependentTask));
-            dependOnJob = jobDao.getByActiveNameOrId(
-                    checkEmpty(spec.dependOnJob));
-            dependOnTask = taskDao.getByNameOrId(dependOnJob,
-                    checkEmpty(spec.dependOnTask));
-            depend = dependDao.createTaskOnTask(dependentTask, dependOnTask);
+            dependentJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependentJob));
+            dependentTask = taskDao.getByNameOrId(dependentJob,checkEmpty(spec.dependentTask));
+            dependentLayer = layerDao.get(dependentTask.getLayerId());
+            dependOnJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependOnJob));
+            dependOnTask = taskDao.getByNameOrId(dependOnJob,checkEmpty(spec.dependOnTask));
+            dependOnLayer = layerDao.get(dependOnTask.getLayerId());
+            depend = dependDao.createTaskOnTask(dependentJob, dependentLayer, dependentTask,
+                    dependOnJob, dependOnLayer, dependOnTask);
             break;
 
         case TASK_BY_TASK:
@@ -119,7 +109,8 @@ public class DependServiceImpl implements DependService {
                     checkEmpty(spec.dependentLayer));
             dependOnLayer = layerDao.get(dependOnJob,
                     checkEmpty(spec.dependOnLayer));
-            createTaskByTask(dependentLayer, dependOnLayer);
+
+            createTaskByTask(dependentJob, dependentLayer, dependOnJob, dependOnLayer);
             break;
         }
 
@@ -156,7 +147,7 @@ public class DependServiceImpl implements DependService {
         return dependDao.getOnTaskDepends(task);
     }
 
-    private void createTaskByTask(Layer dependentLayer, Layer dependOnLayer) {
+    private void createTaskByTask(Job dependentJob, Layer dependentLayer, Job dependOnJob, Layer dependOnLayer) {
 
         /*
          * Task by task depends requires both layers to actually
@@ -176,7 +167,7 @@ public class DependServiceImpl implements DependService {
                 dependOnTaskNumbers.add(onTaskNum);
             }
 
-            //TODO: handle chunking.
+            //TODO: handle chunks
             //TODO: handle the care where the layer is chunked to 1 frame.
 
             if (dependOnTaskNumbers.isEmpty()) {
@@ -186,7 +177,9 @@ public class DependServiceImpl implements DependService {
             Task dependentTask = taskDao.get(dependentLayer, depTaskNum);
             for (int taskNum: dependOnTaskNumbers) {
                 Task dependOnTask = taskDao.get(dependOnLayer, taskNum);
-                Depend dep = dependDao.createTaskOnTask(dependentTask, dependOnTask);
+                Depend dep = dependDao.createTaskOnTask(
+                        dependentJob, dependentLayer, dependentTask,
+                        dependOnJob, dependOnLayer, dependOnTask);
                 dependDao.incrementDependCounts(dep);
             }
         }

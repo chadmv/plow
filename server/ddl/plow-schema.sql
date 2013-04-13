@@ -271,6 +271,12 @@ CREATE TABLE plow.depend (
     pk_dependon_layer UUID,
     pk_dependent_task UUID,
     pk_dependon_task UUID,
+    str_dependent_job_name TEXT NOT NULL,
+    str_dependon_job_name TEXT NOT NULL,
+    str_dependent_layer_name TEXT,
+    str_dependon_layer_name TEXT,
+    str_dependent_task_name TEXT,
+    str_dependon_task_name TEXT,
     time_created BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
     time_modified BIGINT NOT NULL DEFAULT plow.txTimeMillis()
 );
