@@ -8,22 +8,27 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
+import com.breakersoft.plow.service.DependServiceImpl;
 import com.breakersoft.plow.thrift.JobFilterT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.JobT;
 import com.breakersoft.plow.thrift.OutputT;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.util.JdbcUtils;
+import com.breakersoft.plow.util.PlowUtils;
 import com.google.common.collect.Lists;
 
 @Repository
 @Transactional(readOnly=true)
 public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DependServiceImpl.class);
 
     public static final RowMapper<JobT> MAPPER = new RowMapper<JobT>() {
 
@@ -86,39 +91,38 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
         final List<String> clauses = Lists.newArrayListWithExpectedSize(6);
         final List<Object> values = Lists.newArrayList();
 
-        if (filter.isSetProject() && !filter.project.isEmpty()) {
+        if (PlowUtils.isValid(filter.project)) {
             clauses.add(JdbcUtils.In(
                     "project.str_name", filter.project.size()));
             values.addAll(filter.project);
         }
 
-        if (filter.isSetUser() && !filter.user.isEmpty()) {
+        if (PlowUtils.isValid(filter.user)) {
             clauses.add(JdbcUtils.In(
                     "job.str_username", filter.user.size()));
             values.addAll(filter.user);
         }
 
-        if (filter.isSetName() && !filter.name.isEmpty()) {
+        if (PlowUtils.isValid(filter.name)) {
             clauses.add(JdbcUtils.In(
                     "job.str_name", filter.name.size()));
             values.addAll(filter.name);
         }
 
-        if (filter.isSetRegex() && !filter.regex.isEmpty()) {
+        if (PlowUtils.isValid(filter.regex)) {
             clauses.add("str_name ~ ?");
             values.add(filter.regex);
         }
 
-        if (filter.isSetStates() && !filter.states.isEmpty()) {
+        if (PlowUtils.isValid(filter.states)) {
             clauses.add(JdbcUtils.In(
                     "job.int_state", filter.states.size()));
             for (JobState state: filter.states) {
                 values.add(state.ordinal());
             }
-
         }
 
-        if (filter.isSetJobIds() && !filter.jobIds.isEmpty()) {
+        if (PlowUtils.isValid(filter.jobIds)) {
             clauses.add(JdbcUtils.In(
                     "job.pk_job", filter.jobIds.size(), "uuid"));
             values.addAll(filter.jobIds);
@@ -130,6 +134,8 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             sb.append(" WHERE " );
             sb.append(StringUtils.join(clauses, " AND "));
         }
+
+        logger.info(sb.toString());
 
         if (filter.matchingOnly && values.isEmpty()) {
             return new ArrayList<JobT>(0);

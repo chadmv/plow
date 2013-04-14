@@ -15,6 +15,7 @@ import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.thrift.TaskT;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
+import com.breakersoft.plow.util.PlowUtils;
 import com.google.common.collect.Lists;
 
 @Repository
@@ -104,7 +105,7 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
         List<String> where = Lists.newArrayList();
         List<Object> values = Lists.newArrayList();
 
-        if (filter.isSetJobId()) {
+        if (PlowUtils.isValid(filter.jobId)) {
             where.add("task.pk_job = ? ");
             values.add(UUID.fromString(filter.jobId));
         }
