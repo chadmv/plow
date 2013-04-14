@@ -59,14 +59,15 @@ if not use_cython and not os.path.exists(PLOW_SOURCE_MAIN_CPP):
 
 # Check for thrift generated sources
 gen_dir = os.path.join(ROOT, "../thrift")
-gen_cmd = "cd {0} && ./generate-sources.sh".format(gen_dir)
-print "Re-generating Thrift python client bindings"
-ret = subprocess.call(gen_cmd, shell=True)
-if ret != 0 and not os.path.exists(os.path.join(ROOT, "src/core/rpc")):
-    print "Error: Missing the plow/client/core/rpc source file location.\n" \
-          "Tried to generate, but Thrift command failed: {0}\n" \
-          "Is Thrift installed?".format(gen_cmd)
-    sys.exit(1)
+if os.path.exists(gen_dir):
+    gen_cmd = "cd {0} && ./generate-sources.sh".format(gen_dir)
+    print "Re-generating Thrift python client bindings"
+    ret = subprocess.call(gen_cmd, shell=True)
+    if ret != 0 and not os.path.exists(os.path.join(ROOT, "src/core/rpc")):
+        print "Error: Missing the plow/client/core/rpc source file location.\n" \
+              "Tried to generate, but Thrift command failed: {0}\n" \
+              "Is Thrift installed?".format(gen_cmd)
+        sys.exit(1)
 
 
 ldflags = []
@@ -257,6 +258,10 @@ if use_cython:
                                )
             ],
             cmdclass=cmdclass,
+            author='Matt Chambers & Justin Israel',
+            author_email='justinisrael@gmail.com',
+            url='https://github.com/sqlboy/plow/',
+
         )
 
 
@@ -363,11 +368,13 @@ setup(
     ],
 
     # Meta-stuff
+    author='Matt Chambers & Justin Israel',
+    author_email='justinisrael@gmail.com',
+    url='https://github.com/sqlboy/plow/',
     description='Python client for the Plow render farm',
     # long_description=get_description(),
     keywords=['render', 'renderfarm', 'management', 'queue', 'plow', 'visualfx',
                 'vfx', 'visual', 'fx', 'maya', 'blender', 'nuke', '3dsmax', 'houdini'],
-    url='https://github.com/sqlboy/plow/',
     platforms='POSIX / MacOS',
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -394,6 +401,6 @@ setup(
 )
 
 # clean up
-shutil.rmtree(TEMP_BUILD_DIR, ignore_errors=True)
+# shutil.rmtree(TEMP_BUILD_DIR, ignore_errors=True)
 
 
