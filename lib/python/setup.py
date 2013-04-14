@@ -17,7 +17,7 @@ from distutils.core import setup, Command
 from distutils.extension import Extension as dist_Extension
 from distutils.sysconfig import get_config_vars
 
-
+import doc.conf
 
 #-----------------------------------------------------------------------------
 # Setup variables and pre-checks
@@ -37,8 +37,7 @@ for p in PLOW_CPP:
     PLOW_SOURCE_EXTRA += glob.glob(os.path.join(p, "*.cpp"))
 
 # Version
-execfile(os.path.join(ROOT, 'plow/client/version.py'))
-
+__version__ = doc.conf.release
 
 # Check for cython
 try:
@@ -242,27 +241,23 @@ def copy_dir(src, dst):
 #
 # Cython client extension
 #
+script_args = set(sys.argv[1:])
+for name in ('develop', 'sdist', 'build_sphinx', 'upload'):
+    if name in script_args:
+        use_cython = False
+
 if use_cython:
-
-    if "develop" in sys.argv[1:]:
-        pass
-
-    else:
-        setup(
-            name="plow",
-            version=__version__,
-            ext_modules=[
-                dist_Extension('plow',
-                               [PLOW_SOURCE_MAIN_PYX] + PLOW_SOURCE_EXTRA,
-                               language="c++",
-                               )
-            ],
-            cmdclass=cmdclass,
-            author='Matt Chambers & Justin Israel',
-            author_email='justinisrael@gmail.com',
-            url='https://github.com/sqlboy/plow/',
-
-        )
+    setup(
+        name="plow",
+        version=__version__,
+        ext_modules=[
+            dist_Extension('plow',
+                           [PLOW_SOURCE_MAIN_PYX] + PLOW_SOURCE_EXTRA,
+                           language="c++",
+                           )
+        ],
+        cmdclass=cmdclass,
+    )
 
 
 #
@@ -309,7 +304,7 @@ plowmodule = Extension('plow.client.plow',
 )
 
 setup(
-    name="Plow",
+    name="plow",
     version=__version__,
 
     packages=find_packages(exclude=['tests', 'tests.*']),
@@ -322,7 +317,6 @@ setup(
     ],
 
     install_requires=[
-        'thrift>=0.9.0',
         'psutil>=0.6.1',
         'argparse',
         'PyYAML',
