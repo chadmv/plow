@@ -72,16 +72,36 @@ cdef class TaskFilter:
     cdef TaskFilterT value
 
     def __init__(self, **kwargs):
-        self.value.jobId = kwargs.get('job', '')
-        self.value.layerIds = kwargs.get('layers', [])
-        self.value.taskIds = kwargs.get('tasks', [])
-        self.value.limit = kwargs.get('limit', 0)
-        self.value.offset = kwargs.get('offset', 0)
-        self.value.lastUpdateTime = kwargs.get('lastUpdateTime', 0)
+        if 'jobId' in kwargs:
+            self.value.jobId = kwargs['jobId']
+            self.value.__isset.jobId = True
+
+        if 'layerIds' in kwargs:
+            self.value.layerIds = kwargs['layerIds']
+            self.value.__isset.layerIds = True
+
+        if 'taskIds' in kwargs:
+            self.value.taskIds = kwargs['taskIds']
+            self.value.__isset.taskIds = True
+
+        if 'limit' in kwargs:
+            self.value.limit = kwargs['limit']
+            self.value.__isset.limit = True
+
+        if 'offset' in kwargs:
+            self.value.offset = kwargs['offset']
+            self.value.__isset.offset = True
+
+        if 'lastUpdateTime' in kwargs:
+            self.value.lastUpdateTime = kwargs['lastUpdateTime']
+            self.value.__isset.lastUpdateTime = True
 
         cdef TaskState_type i
-        for i in kwargs.get('states', []):
-            self.value.states.push_back(i) 
+        if 'states' in kwargs:
+            for i in kwargs.get('states', []):
+                self.value.states.push_back(i) 
+            self.value.__isset.states = True
+
 
 #######################
 # Task
@@ -199,7 +219,7 @@ cdef class Task:
         """
         Retry the task 
         """
-        cdef list ids = [self]
+        cdef list ids = [self.id]
         retry_tasks(taskIds=ids)
 
     def eat(self):
@@ -207,14 +227,14 @@ cdef class Task:
         Eats the task. This is different than a kill, 
         indicating that the work should simply be "completed"
         """
-        cdef list ids = [self]
+        cdef list ids = [self.id]
         eat_tasks(taskIds=ids)        
 
     def kill(self):
         """
         Kill the task 
         """
-        cdef list ids = [self]
+        cdef list ids = [self.id]
         kill_tasks(taskIds=ids)  
 
     def get_depends(self):
@@ -237,7 +257,26 @@ cdef class Task:
         return ret
 
 
-cpdef inline get_task(Guid& taskId):
+cdef inline TaskFilterT dict_to_taskFilter(dict d):
+    cdef:
+        TaskFilter filt 
+        TaskFilterT f
+
+    if 'tasks' in d:
+        d['taskIds'] = [p.id for p in d.pop('tasks')]
+
+    if 'layers' in d:
+        d['layerIds'] = [p.id for p in d.pop('layers')]
+
+    if 'job' in d:
+        d['jobId'] = d.pop('job').id
+
+    filt = TaskFilter(**d)
+    f = filt.value   
+
+    return f 
+
+cpdef inline Task get_task(Guid& taskId):
     """
     Get a task by id 
 
@@ -259,7 +298,7 @@ def get_tasks(**kwargs):
 
     :param job: :class:`.Job` 
     :param layers: list of :class:`.Layer` 
-    :param tasks: list of :class:`.Task`  
+    :param taskIds: list of str :class:`.Task` id's 
     :param limit: int 
     :param offset: int 
     :param lastUpdateTime: msec epoch timestamp 
@@ -269,30 +308,16 @@ def get_tasks(**kwargs):
     cdef:
         TaskT taskT
         vector[TaskT] tasks 
-        list ret 
-        TaskFilter filt 
         TaskFilterT f
+        list ret 
 
-    cdef str name 
-    for name in ('layers', 'tasks'):
-        try:
-            kwargs[name] = [p.id for p in kwargs[name]]
-        except:
-            pass
-
-    try:
-        kwargs['job'] = kwargs['job'].id
-    except:
-        pass
-
-    filt = TaskFilter(**kwargs)
-    f = filt.value
+    f = dict_to_taskFilter(kwargs)
 
     getClient().proxy().getTasks(tasks, f)
     ret = [initTask(taskT) for taskT in tasks]
     return ret
 
-cpdef inline get_task_log_path(Task task):
+cpdef inline string get_task_log_path(Task task):
     """
     Get a log path by task 
 
@@ -315,22 +340,7 @@ def retry_tasks(**kwargs):
     :param lastUpdateTime: msec epoch timestamp 
 
     """
-    cdef:
-        TaskFilter filter = TaskFilter(**kwargs)
-        TaskFilterT f = filter.value
-
-    cdef str name 
-    for name in ('layers', 'tasks'):
-        try:
-            kwargs[name] = [p.id for p in kwargs[name]]
-        except:
-            pass
-
-    try:
-        kwargs['job'] = kwargs['job'].id
-    except:
-        pass
-
+    cdef TaskFilterT f = dict_to_taskFilter(kwargs)
     getClient().proxy().retryTasks(f)
 
 def eat_tasks(**kwargs):
@@ -344,22 +354,7 @@ def eat_tasks(**kwargs):
     :param offset: int 
     :param lastUpdateTime: msec epoch timestamp 
     """
-    cdef:
-        TaskFilter filter = TaskFilter(**kwargs)
-        TaskFilterT f = filter.value
-
-    cdef str name 
-    for name in ('layers', 'tasks'):
-        try:
-            kwargs[name] = [p.id for p in kwargs[name]]
-        except:
-            pass
-
-    try:
-        kwargs['job'] = kwargs['job'].id
-    except:
-        pass
-
+    cdef TaskFilterT f = dict_to_taskFilter(kwargs)
     getClient().proxy().eatTasks(f)
 
 def kill_tasks(**kwargs):
@@ -373,22 +368,7 @@ def kill_tasks(**kwargs):
     :param offset: int 
     :param lastUpdateTime: msec epoch timestamp 
     """
-    cdef:
-        TaskFilter filter = TaskFilter(**kwargs)
-        TaskFilterT f = filter.value
-
-    cdef str name 
-    for name in ('layers', 'tasks'):
-        try:
-            kwargs[name] = [p.id for p in kwargs[name]]
-        except:
-            pass
-
-    try:
-        kwargs['job'] = kwargs['job'].id
-    except:
-        pass
-
+    cdef TaskFilterT f = dict_to_taskFilter(kwargs)
     getClient().proxy().killTasks(f)
 
 

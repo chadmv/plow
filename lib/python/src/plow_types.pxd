@@ -313,6 +313,15 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[Guid] jobIds
         vector[string] name 
 
+    cdef struct _TaskFilterT__isset:
+        bint jobId
+        bint layerIds
+        bint states
+        bint limit
+        bint offset
+        bint lastUpdateTime
+        bint taskIds
+
     cdef cppclass TaskFilterT:
         Guid jobId 
         vector[Guid] layerIds
@@ -321,6 +330,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int limit 
         int offset 
         Timestamp lastUpdateTime
+        _TaskFilterT__isset __isset
 
     cdef cppclass NodeFilterT:
         vector[Guid] hostIds
