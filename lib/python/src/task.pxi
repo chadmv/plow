@@ -177,9 +177,7 @@ cdef class Task:
         def __get__(self): return self._task.progress
 
     property state:
-        def __get__(self): 
-            cdef int aState = self._task.progress
-            return aState
+        def __get__(self): return self._task.state
 
     cpdef refresh(self):
         """
