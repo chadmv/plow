@@ -257,12 +257,12 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
     cdef cppclass DependT:
         Guid id        
         DependType_type type
-        string dependentJob
-        string dependOnJob
-        string dependentLayer
-        string dependOnLayer
-        string dependentTask
-        string dependOnTask
+        string dependentJobId
+        string dependOnJobId
+        string dependentLayerId
+        string dependOnLayerId
+        string dependentTaskId
+        string dependOnTaskId
 
     cdef cppclass TaskSpecT:
         string name 

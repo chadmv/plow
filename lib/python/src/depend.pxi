@@ -123,12 +123,12 @@ cdef class Depend:
     
     :var id: str 
     :var type: :data:`DependType`
-    :var dependentJob: str
-    :var dependOnJob: str
-    :var dependentLayer: str
-    :var dependOnLayer: str
-    :var dependentTask: str
-    :var dependOnTask: str
+    :var dependentJobId: str
+    :var dependOnJobId: str
+    :var dependentLayerId: str
+    :var dependOnLayerId: str
+    :var dependentTaskId: str
+    :var dependOnTaskId: str
 
     """
     cdef DependT _depend
@@ -142,23 +142,23 @@ cdef class Depend:
     property type:
         def __get__(self): return self._depend.type
 
-    property dependentJob:
-        def __get__(self): return self._depend.dependentJob
+    property dependentJobId:
+        def __get__(self): return self._depend.dependentJobId
 
-    property dependOnJob:
-        def __get__(self): return self._depend.dependOnJob
+    property dependOnJobId:
+        def __get__(self): return self._depend.dependOnJobId
 
-    property dependentLayer:
-        def __get__(self): return self._depend.dependentLayer
+    property dependentLayerId:
+        def __get__(self): return self._depend.dependentLayerId
 
-    property dependOnLayer:
-        def __get__(self): return self._depend.dependOnLayer
+    property dependOnLayerId:
+        def __get__(self): return self._depend.dependOnLayerId
 
-    property dependentTask:
-        def __get__(self): return self._depend.dependentTask
+    property dependentTaskId:
+        def __get__(self): return self._depend.dependentTaskId
 
-    property dependOnTask:
-        def __get__(self): return self._depend.dependOnTask
+    property dependOnTaskId:
+        def __get__(self): return self._depend.dependOnTaskId
 
     def drop(self):
         """
