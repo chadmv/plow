@@ -5,7 +5,6 @@ import static com.breakersoft.plow.util.PlowUtils.checkEmpty;
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +24,6 @@ import com.google.common.collect.Sets;
 @Service
 @Transactional
 public class DependServiceImpl implements DependService {
-
-    private Logger logger = org.slf4j.LoggerFactory.getLogger(DependServiceImpl.class);
 
     @Autowired
     JobDao jobDao;
