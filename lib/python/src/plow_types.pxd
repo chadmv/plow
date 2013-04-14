@@ -238,7 +238,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
 
     cdef struct _DependSpecT__isset:
         bint dependentJob
-        bint dependOnJob
+        bint dependOnJob        
         bint dependentLayer
         bint dependOnLayer
         bint dependentTask
@@ -257,12 +257,21 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
     cdef cppclass DependT:
         Guid id        
         DependType_type type
+        bint active 
+        Timestamp createdTime
+        Timestamp modifiedTime
         string dependentJobId
         string dependOnJobId
         string dependentLayerId
         string dependOnLayerId
         string dependentTaskId
         string dependOnTaskId
+        string dependentJobName
+        string dependOnJobName
+        string dependentLayerName
+        string dependOnLayerName
+        string dependentTaskName
+        string dependOnTaskName
 
     cdef cppclass TaskSpecT:
         string name 

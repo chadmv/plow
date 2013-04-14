@@ -33,7 +33,7 @@ cdef class DependSpec:
 
     Specify the dependency between two types
     
-    :var type: :data:`DependType`
+    :var type: :data:`.DependType`
     :var dependentJob: str
     :var dependOnJob: str
     :var dependentLayer: str
@@ -49,12 +49,30 @@ cdef class DependSpec:
 
     def __init__(self, **kwargs):
         self.type = kwargs.get('type', 0)
-        self.dependentJob = kwargs.get('dependentJob', '')
-        self.dependOnJob = kwargs.get('dependOnJob', '')
-        self.dependentLayer = kwargs.get('dependentLayer', '')
-        self.dependOnLayer = kwargs.get('dependOnLayer', '')
-        self.dependentTask = kwargs.get('dependentTask', '')
-        self.dependOnTask = kwargs.get('dependOnTask', '')
+
+        if 'dependentJob' in kwargs:
+            self.dependentJob = kwargs['dependentJob']
+            self.__isset.dependentJob = True
+
+        if 'dependOnJob' in kwargs:
+            self.dependOnJob = kwargs['dependOnJob']
+            self.__isset.dependOnJob = True
+
+        if 'dependentLayer' in kwargs:
+            self.dependentLayer = kwargs['dependentLayer']
+            self.__isset.dependentLayer = True
+
+        if 'dependOnLayer' in kwargs:
+            self.dependOnLayer = kwargs['dependOnLayer']
+            self.__isset.dependOnLayer = True
+
+        if 'dependentTask' in kwargs:
+            self.dependentTask = kwargs['dependentTask']
+            self.__isset.dependentTask = True
+
+        if 'dependOnTask' in kwargs:
+            self.dependOnTask = kwargs['dependOnTask']
+            self.__isset.dependOnTask = True
 
     cdef DependSpecT toDependSpecT(self):
         cdef DependSpecT s
@@ -123,12 +141,21 @@ cdef class Depend:
     
     :var id: str 
     :var type: :data:`DependType`
-    :var dependentJobId: str
-    :var dependOnJobId: str
-    :var dependentLayerId: str
-    :var dependOnLayerId: str
-    :var dependentTaskId: str
-    :var dependOnTaskId: str
+    :var active: bool
+    :var createdTime: long 
+    :var modifiedTime: long
+    :var dependentJobId: Guid
+    :var dependOnJobId: Guid
+    :var dependentLayerId: Guid
+    :var dependOnLayerId: Guid
+    :var dependentTaskId: Guid
+    :var dependOnTaskId: Guid
+    :var dependentJobName: str
+    :var dependOnJobName: str
+    :var dependentLayerName: str
+    :var dependOnLayerName: str
+    :var dependentTaskName: str
+    :var dependOnTaskName: str
 
     """
     cdef DependT _depend
@@ -141,6 +168,15 @@ cdef class Depend:
 
     property type:
         def __get__(self): return self._depend.type
+    
+    property active:
+        def __get__(self): return self._depend.active
+
+    property createdTime:
+        def __get__(self): return self._depend.createdTime
+
+    property modifiedTime:
+        def __get__(self): return self._depend.modifiedTime
 
     property dependentJobId:
         def __get__(self): return self._depend.dependentJobId
@@ -160,6 +196,24 @@ cdef class Depend:
     property dependOnTaskId:
         def __get__(self): return self._depend.dependOnTaskId
 
+    property dependentJobName:
+        def __get__(self): return self._depend.dependentJobName
+
+    property dependOnJobName:
+        def __get__(self): return self._depend.dependOnJobName
+
+    property dependentLayerName:
+        def __get__(self): return self._depend.dependentLayerName
+
+    property dependOnLayerName:
+        def __get__(self): return self._depend.dependOnLayerName
+
+    property dependentTaskName:
+        def __get__(self): return self._depend.dependentTaskName
+
+    property dependOnTaskName:
+        def __get__(self): return self._depend.dependOnTaskName
+
     def drop(self):
         """
         Drop the dependency
@@ -168,6 +222,8 @@ cdef class Depend:
         """
         cdef bint ret 
         ret = drop_depend(self)
+        if ret:
+            self.active = False
         return ret
 
     def reactivate(self):
@@ -178,6 +234,8 @@ cdef class Depend:
         """
         cdef bint ret 
         ret = reactivate_depend(self)
+        if ret:
+            self.active = True
         return ret        
 
 
