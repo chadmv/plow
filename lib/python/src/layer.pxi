@@ -32,7 +32,6 @@ cdef class LayerSpec:
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
-        self.range = kwargs.get('range', '')
         self.chunk = kwargs.get('chunk', 0)
         self.minCores = kwargs.get('minCores', 0)
         self.maxCores = kwargs.get('maxCores', 0)
@@ -42,6 +41,11 @@ cdef class LayerSpec:
         self.depends = kwargs.get('depends', [])
         self.tasks = kwargs.get('tasks', [])
         self.tags = kwargs.get('tags', set())
+
+        if 'range' in kwargs:
+            self.range = kwargs.get('range', '')
+            self.__isset.range = True
+
 
     def __repr__(self):
         return "<LayerSpec: %s>" % self.name
@@ -58,6 +62,7 @@ cdef class LayerSpec:
         s.threadable = self.threadable
         s.command = self.command
         s.tags = self.tags
+        
         s.__isset = self.__isset
 
         cdef: 
