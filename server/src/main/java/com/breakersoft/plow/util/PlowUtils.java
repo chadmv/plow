@@ -23,6 +23,13 @@ public final class PlowUtils {
         return !c.isEmpty();
     }
 
+    public static boolean isValid(String s) {
+        if (s == null) {
+            return false;
+        }
+        return !s.isEmpty();
+    }
+
     /**
      * Return true if the str is not null and not empty.
      * @param str
