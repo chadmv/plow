@@ -1,5 +1,10 @@
 global-include *.dylib *.dat *.bp *.ini *.sh *.css *.rcc
 recursive-include src *.cpp *.h
-include *.txt *.py
+include *.txt LICENSE.TXT *.py
 graft __dist__
-graft build/sphinx/html
+graft doc
+
+prune doc/_build
+prune doc/_static
+prune doc/_templates
+recursive-exclude src *.pyx *.pxi *.pxd
