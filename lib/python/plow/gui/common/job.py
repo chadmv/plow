@@ -18,19 +18,19 @@ class JobProgressBar(QtGui.QWidget):
     def setTotals(self, totals):
         self.__totals = totals
         self.__values =  [
-            totals.waitingTaskCount,
-            totals.runningTaskCount,
-            totals.deadTaskCount, 
-            totals.eatenTaskCount,
-            totals.dependTaskCount,
-            totals.succeededTaskCount
+            totals.waiting,
+            totals.running,
+            totals.dead, 
+            totals.eaten,
+            totals.depend,
+            totals.succeeded
         ]
 
     def paintEvent(self, event):
 
         total_width = self.width() - self.Margins[2]
         total_height = self.height() - self.Margins[3]
-        total_tasks = float(self.__totals.totalTaskCount)
+        total_tasks = float(self.__totals.total)
 
         bar = []
         for i, v in enumerate(self.__values):
@@ -148,6 +148,5 @@ class JobStateWidget(QtGui.QWidget):
         rect = QtCore.QRect(0, 0, total_width, total_height)
         painter.drawRoundedRect(rect, 5, 5)
         painter.setPen(QtCore.Qt.black)
-        painter.drawText(rect, QtCore.Qt.AlignCenter,
-            plow.client.JobState._VALUES_TO_NAMES[self.__state])
+        painter.drawText(rect, QtCore.Qt.AlignCenter, constants.JOB_STATES[self.__state])
         painter.end()

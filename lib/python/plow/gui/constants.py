@@ -44,3 +44,7 @@ TASK_STATES = ["INITIALIZE",
                "EATEN",
                "DEPEND",
                "SUCCEEDED"]
+
+JOB_STATES = ["INITIALIZE", 
+              "RUNNING",
+              "FINISHED"]

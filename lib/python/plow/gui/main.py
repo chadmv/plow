@@ -26,6 +26,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.session = QtGui.QSessionManager(self)
         self.settings = QtCore.QSettings("plow", appname)
+        print self.settings.fileName()
         self.workspace = WorkspaceManager(self)
 
         # If the active panel supports a keyword search then this

@@ -94,8 +94,8 @@ class RenderJobWatchWidget(QtGui.QWidget):
         item = QtGui.QTreeWidgetItem([
             job.name,
             "",
-            "%02d" % job.totals.runningTaskCount,
-            "%02d" % job.totals.waitingTaskCount,
+            "%02d" % job.totals.running,
+            "%02d" % job.totals.waiting,
             "%02d" % job.minCores,
             formatMaxValue(job.maxCores),
             formatDuration(job.startTime, job.stopTime)])
@@ -107,22 +107,22 @@ class RenderJobWatchWidget(QtGui.QWidget):
 
         progress = JobProgressBar(job.totals, self.__tree)
         self.__tree.setItemWidget(item, len(self.Header)-1, progress);
-        self.__tree.setItemWidget(item, 1, JobStateWidget(job.state, job.totals.deadTaskCount, self))
+        self.__tree.setItemWidget(item, 1, JobStateWidget(job.state, job.totals.dead, self))
 
         self.__jobs[job.id] = item
         return True
 
     def updateJob(self, job):
         item = self.__jobs[job.id]
-        item.setText(2, "%02d" % job.totals.runningTaskCount)
-        item.setText(3, "%02d" % job.totals.waitingTaskCount)
+        item.setText(2, "%02d" % job.totals.running)
+        item.setText(3, "%02d" % job.totals.waiting)
         item.setText(4, "%02d" % job.minCores)
         item.setText(5, formatMaxValue(job.maxCores))
         item.setText(6, formatDuration(job.startTime, job.stopTime))
         item.setToolTip(6, "Started: %s\nStopped:%s" % 
             (formatDateTime(job.startTime), formatDateTime(job.stopTime)))
         self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
-        self.__tree.itemWidget(item, 1).setState(job.state, job.totals.deadTaskCount)
+        self.__tree.itemWidget(item, 1).setState(job.state, job.totals.dead)
 
     def removeFinishedJobs(self):
         finished = []

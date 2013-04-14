@@ -155,7 +155,7 @@ class TaskModel(QtCore.QAbstractTableModel):
             self.__tasks = []
             self.__index.clear()
             self.__jobId = jobid
-            self.__tasks = plow.client.get_tasks(jobId=jobid)
+            self.__tasks = plow.client.get_tasks(job=jobid)
             for i, task in enumerate(self.__tasks):
                 self.__index[task.id] = i;
             self.__lastUpdateTime = plow.client.get_plow_time()
@@ -170,7 +170,7 @@ class TaskModel(QtCore.QAbstractTableModel):
         if not self.__jobId:
             return
         t = plow.client.get_plow_time()
-        tasks = plow.client.get_tasks(jobId=self.__jobId, lastUpdateTime=self.__lastUpdateTime)
+        tasks = plow.client.get_tasks(job=self.__jobId, lastUpdateTime=self.__lastUpdateTime)
         self.__lastUpdateTime = t
 
         for task in tasks:
@@ -193,7 +193,7 @@ class TaskModel(QtCore.QAbstractTableModel):
             if col == 0:
                 return task.name
             elif col == 1:
-                return TaskState._VALUES_TO_NAMES[task.state]
+                return TASK_STATES[task.state]
             elif col == 2:
                 return task.lastNodeName
             elif col == 3:
