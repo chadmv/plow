@@ -40,6 +40,12 @@ public class DependServiceImpl implements DependService {
     @Autowired
     DependDao dependDao;
 
+    public Depend createDepend(Job job, DependSpecT spec) {
+        spec.dependentJob = job.getName();
+        spec.dependOnJob = job.getName();
+        return createDepend(spec);
+    }
+
     public Depend createDepend(DependSpecT spec) {
 
         Job dependentJob;
@@ -69,7 +75,6 @@ public class DependServiceImpl implements DependService {
             break;
 
         case LAYER_ON_TASK:
-            logger.info(spec.dependentJob);
             dependentJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependentJob));
             dependentLayer = layerDao.get(dependentJob, checkEmpty(spec.dependentLayer));
             dependOnJob = jobDao.getByActiveNameOrId(checkEmpty(spec.dependOnJob));

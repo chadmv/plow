@@ -146,16 +146,7 @@ public class JobServiceImpl implements JobService {
                 continue;
             }
             for (DependSpecT depend: layer.getDepends()) {
-                // Fill in job IDs
-                if (!depend.isSetDependentJob()) {
-                    depend.setDependentJob(job.getJobId().toString());
-                }
-
-                if (!depend.isSetDependOnJob()) {
-                    depend.setDependOnJob(job.getJobId().toString());
-                }
-
-                dependService.createDepend(depend);
+                dependService.createDepend(job, depend);
             }
         }
 

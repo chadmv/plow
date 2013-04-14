@@ -10,7 +10,9 @@ import com.breakersoft.plow.thrift.DependSpecT;
 
 public interface DependService {
 
-    public Depend createDepend(DependSpecT spec);
+    Depend createDepend(Job job, DependSpecT spec);
+
+    Depend createDepend(DependSpecT spec);
 
     List<Depend> getOnJobDepends(Job job);
 
