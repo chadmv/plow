@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +26,6 @@ import com.google.common.collect.Maps;
 @Repository
 @Transactional(readOnly=true)
 public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao {
-
-    private Logger logger = org.slf4j.LoggerFactory.getLogger(ThriftJobBoardImpl.class);
 
     private static final String GET_JOBS =
         "SELECT " +

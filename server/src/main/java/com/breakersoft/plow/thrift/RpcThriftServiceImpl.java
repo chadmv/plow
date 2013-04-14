@@ -27,6 +27,7 @@ import com.breakersoft.plow.service.ProjectService;
 import com.breakersoft.plow.service.StateManager;
 import com.breakersoft.plow.thrift.dao.ThriftActionDao;
 import com.breakersoft.plow.thrift.dao.ThriftClusterDao;
+import com.breakersoft.plow.thrift.dao.ThriftDependDao;
 import com.breakersoft.plow.thrift.dao.ThriftFilterDao;
 import com.breakersoft.plow.thrift.dao.ThriftFolderDao;
 import com.breakersoft.plow.thrift.dao.ThriftJobBoardDao;
@@ -88,6 +89,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     ThriftActionDao thriftActionDao;
+
+    @Autowired
+    ThriftDependDao thriftDependDao;
 
     @Autowired
     StateManager stateManager;
@@ -589,45 +593,38 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public List<DependT> getDependsOnJob(String arg0) throws PlowException,
+    public List<DependT> getDependsOnJob(String jobId) throws PlowException,
             TException {
-        // TODO Auto-generated method stub
-        return null;
+        return thriftDependDao.getWhatJobDependsOn(UUID.fromString(jobId));
     }
 
     @Override
-    public List<DependT> getDependsOnLayer(String arg0) throws PlowException,
+    public List<DependT> getDependsOnLayer(String layerId) throws PlowException,
             TException {
-        // TODO Auto-generated method stub
-        return null;
+        return thriftDependDao.getWhatDependsOnLayer(UUID.fromString(layerId));
     }
 
     @Override
-    public List<DependT> getDependsOnTask(String arg0) throws PlowException,
+    public List<DependT> getDependsOnTask(String taskId) throws PlowException,
             TException {
-        // TODO Auto-generated method stub
-        return null;
+        return thriftDependDao.getWhatDependsOnTask(UUID.fromString(taskId));
     }
 
     @Override
-    public List<DependT> getJobDependsOn(String arg0) throws PlowException,
+    public List<DependT> getTaskDependsOn(String taskId) throws PlowException,
             TException {
-        // TODO Auto-generated method stub
-        return null;
+        return thriftDependDao.getWhatTaskDependsOn(UUID.fromString(taskId));
+    }
+    @Override
+    public List<DependT> getJobDependsOn(String jobId) throws PlowException,
+            TException {
+        return thriftDependDao.getWhatJobDependsOn(UUID.fromString(jobId));
     }
 
     @Override
-    public List<DependT> getLayerDependsOn(String arg0) throws PlowException,
+    public List<DependT> getLayerDependsOn(String layerId) throws PlowException,
             TException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<DependT> getTaskDependsOn(String arg0) throws PlowException,
-            TException {
-        // TODO Auto-generated method stub
-        return null;
+        return thriftDependDao.getWhatLayerDependsOn(UUID.fromString(layerId));
     }
 
     @Override
