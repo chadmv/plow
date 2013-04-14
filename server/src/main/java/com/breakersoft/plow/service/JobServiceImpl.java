@@ -152,16 +152,7 @@ public class JobServiceImpl implements JobService {
 
         if (jspec.isSetDepends()) {
             for (DependSpecT depend: jspec.getDepends()) {
-
-                if (!depend.isSetDependentJob()) {
-                    depend.setDependentJob(job.getJobId().toString());
-                }
-
-                if (!depend.isSetDependOnJob()) {
-                    depend.setDependOnJob(job.getJobId().toString());
-                }
-
-                dependService.createDepend(depend);
+                dependService.createDepend(job, depend);
             }
         }
     }
