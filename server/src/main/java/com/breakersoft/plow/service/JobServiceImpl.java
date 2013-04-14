@@ -86,6 +86,8 @@ public class JobServiceImpl implements JobService {
         JobLaunchEvent event = new JobLaunchEvent(job, folder, jobspec);
         eventManager.post(event);
 
+        logger.info("Job {} launch success", job.getName());
+
         return event;
     }
 
