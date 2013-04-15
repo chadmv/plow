@@ -106,7 +106,6 @@ class TaskWidget(QtGui.QWidget):
 
     def retrySelected(self):
         tasks = self.getSelectedTaskIds()
-        print tasks
         if tasks:
             plow.client.retry_tasks(taskIds=tasks)
             self.queueRefresh(self.Refresh, True)
