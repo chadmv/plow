@@ -139,9 +139,8 @@ cdef class Layer:
         return "<Layer: %s>" % self.name
 
     cdef setLayer(self, LayerT& l):
-        cdef TaskTotalsT totals = self._layer.totals
         self._layer = l
-        self._totals = initTaskTotals(totals)
+        self._totals = initTaskTotals(self._layer.totals)
 
     property id:
         def __get__(self): return self._layer.id
@@ -175,12 +174,8 @@ cdef class Layer:
 
     property totals:
         def __get__(self):
-            cdef TaskTotalsT totals
-
-            if not self._totals:
-                totals = self._layer.totals
-                result = initTaskTotals(totals)
-                self._totals = result
+            if self._totals is None:
+                self._totals = initTaskTotals(self._layer.totals)
 
             return self._totals
 

@@ -36,10 +36,9 @@ cdef class Folder:
         return "<Folder: %s>" % self.name
 
     cdef setFolder(self, FolderT& f):
-        cdef TaskTotalsT totals = self.folder.totals
         self.folder = f
         self._jobs = []
-        self._totals = initTaskTotals(totals)
+        self._totals = initTaskTotals(self.folder.totals)
 
     property id:
         def __get__(self):
@@ -70,12 +69,8 @@ cdef class Folder:
 
     property totals:
         def __get__(self):
-            cdef TaskTotalsT totals
-
             if self._totals is None:
-                totals = self.folder.totals
-                result = initTaskTotals(totals)
-                self._totals = result
+                self._totals = initTaskTotals(self.folder.totals)
 
             return self._totals
 

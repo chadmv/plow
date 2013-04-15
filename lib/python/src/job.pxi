@@ -166,9 +166,8 @@ cdef class Job:
         return "<Job: %s>" % self.name
 
     cdef setJob(self, JobT& j):
-        cdef TaskTotalsT totals = self._job.totals
         self._job = j
-        self._totals = initTaskTotals(totals)
+        self._totals = initTaskTotals(self._job.totals)
 
     property id:
         def __get__(self):
@@ -220,12 +219,8 @@ cdef class Job:
 
     property totals:
         def __get__(self):
-            cdef TaskTotalsT totals
-
-            if not self._totals:
-                totals = self._job.totals
-                result = initTaskTotals(totals)
-                self._totals = result
+            if self._totals is None:
+                self._totals = initTaskTotals(self._job.totals)
 
             return self._totals
 
