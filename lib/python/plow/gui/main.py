@@ -2,7 +2,7 @@
 import os
 
 from manifest import QtCore, QtGui
-from panels import TaskPanel, RenderJobWatchPanel, ClusterPanel
+from panels import *
 from resources import icons
 from event import EventManager
 
@@ -96,9 +96,11 @@ class WorkspaceManager(QtCore.QObject):
         self.__panels = []
         self.__workspaces = list(self.Defaults)
 
+        # TODO: a more official way to register panels.
         self.registerPanelType("Render Watch", RenderJobWatchPanel)
         self.registerPanelType("Tasks", TaskPanel)
         self.registerPanelType("Clusters", ClusterPanel)
+        self.registerPanelType("Logs", LogsPanel)
 
         EventManager.bind("GLOBAL_REFRESH", self.refresh)
 
