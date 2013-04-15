@@ -35,10 +35,12 @@ class TabbedLogVieweWidget(QtGui.QWidget):
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        self.__tasks = set()
+        self.__tasks = { }
 
         self.__txt_search = QtGui.QLineEdit(self)
         self.__tabs = QtGui.QTabWidget(self)
+        self.__tabs.setTabsClosable(True)
+        self.__tabs.tabCloseRequested.connect(self.closeTab)
 
         self.__btn_find = QtGui.QPushButton("Find", self)
         self.__btn_find_prev = QtGui.QPushButton("Find Prev", self)
@@ -56,11 +58,25 @@ class TabbedLogVieweWidget(QtGui.QWidget):
         self.setLayout(layout)
 
     def addTask(self, job, task):
-        if task.id in self.__tasks:
-            return
-        i = self.__tabs.addTab(LogViewerWidget(job, task, {}, self), task.name)
-        self.__tabs.setTabToolTip(i, plow.client.get_task_log_path(task))
-        self.__tasks.add(task.id)
+        index = self.__tasks.get(task.id, None)
+        if index is not None:
+            self.__tabs.setCurrentIndex(index)
+        else:
+            index = self.__tabs.addTab(LogViewerWidget(job, task, {}, self), task.name)
+            self.__tabs.setTabToolTip(index, plow.client.get_task_log_path(task))
+            self.__tabs.setCurrentIndex(index)
+            self.__tasks[task.id] = index
+            
+    def closeTab(self, index):
+        taskId = None
+        for k, v in self.__tasks.iteritems():
+            if v == index:
+                taskId = k
+                break
+        if taskId:
+            del self.__tasks[taskId]
+        self.__tabs.removeTab(index)
+
 
 class LogViewerWidget(QtGui.QWidget):
     def __init__(self, job, task, attrs, parent=None):
