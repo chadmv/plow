@@ -21,6 +21,7 @@ import com.breakersoft.plow.rnd.thrift.RunningTask;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.util.JdbcUtils;
+import com.breakersoft.plow.util.PlowUtils;
 import com.google.common.collect.Lists;
 
 @Repository
@@ -272,7 +273,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
 
         boolean idsIsSet = false;
 
-        if (filter.isSetJobId()) {
+        if (PlowUtils.isValid(filter.jobId)) {
             idsIsSet = true;
             where.add("task.pk_job = ?::uuid");
             values.add(filter.jobId);
@@ -283,20 +284,20 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
             values.add(filter.getLastUpdateTime());
         }
 
-        if (filter.isSetStates()) {
+        if (PlowUtils.isValid(filter.states)) {
             where.add(JdbcUtils.In("task.int_state", filter.states.size()));
             for (TaskState state: filter.states) {
                 values.add(state.ordinal());
             }
         }
 
-        if (filter.isSetLayerIds()) {
+        if (PlowUtils.isValid(filter.layerIds)) {
             idsIsSet = true;
             where.add(JdbcUtils.In("task.pk_layer", filter.layerIds.size(), "uuid"));
             values.addAll(filter.layerIds);
         }
 
-        if (filter.isSetTaskIds()) {
+        if (PlowUtils.isValid(filter.taskIds)) {
             idsIsSet = true;
             where.add(JdbcUtils.In("task.pk_task", filter.taskIds.size(), "uuid"));
             values.addAll(filter.taskIds);
