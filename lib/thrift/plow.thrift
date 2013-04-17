@@ -251,7 +251,6 @@ enum MatcherType {
 
 enum MatcherField {
     JOB_NAME,
-    PROJECT_CODE,
     USER,
     ATTR
 }
@@ -260,7 +259,8 @@ struct MatcherT {
     1:common.Guid id,
     2:MatcherType type,
     3:MatcherField field,
-    4:string value
+    4:string value,
+    5:optional string attr
 }
 
 enum ActionType {
@@ -458,7 +458,8 @@ service RpcService {
     void setFilterOrder(1:common.Guid id, 2:i32 order) throws (1:PlowException e),
     void increaseFilterOrder(1:common.Guid id) throws (1:PlowException e),
     void decreaseFilterOrder(1:common.Guid id) throws (1:PlowException e),
-    MatcherT createMatcher(1:common.Guid filterId, 2:MatcherField field, 3:MatcherType type, 4:string value) throws (1:PlowException e),
+    MatcherT createFieldMatcher(1:common.Guid filterId, 2:MatcherField field, 3:MatcherType type, 4:string value) throws (1:PlowException e),
+    MatcherT createAttrMatcher(1:common.Guid filterId, 2:MatcherType type, 3:string attr, 4:string value) throws (1:PlowException e),
     MatcherT getMatcher(1:common.Guid matcherId) throws (1:PlowException e),
     list<MatcherT> getMatchers(1:common.Guid filterId) throws (1:PlowException e),
     void deleteMatcher(1:common.Guid id) throws (1:PlowException e),

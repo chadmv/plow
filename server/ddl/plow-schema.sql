@@ -415,7 +415,8 @@ CREATE TABLE plow.matcher (
   int_field SMALLINT NOT NULL,
   int_type SMALLINT NOT NULL,
   int_order BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
-  str_value TEXT
+  str_value TEXT,
+  str_attr TEXT
 ) WITHOUT OIDS;
 
 CREATE INDEX matcher_pk_filter_idx ON plow.matcher (pk_filter);

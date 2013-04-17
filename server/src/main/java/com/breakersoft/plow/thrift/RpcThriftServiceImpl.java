@@ -501,14 +501,6 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public MatcherT createMatcher(String filterId, MatcherField field,
-            MatcherType type, String value) throws PlowException, TException {
-        Filter filter = filterService.getFilter(UUID.fromString(filterId));
-        Matcher matcher = filterService.createMatcher(filter, field, type, value);
-        return thriftMatcherDao.get(matcher.getMatcherId());
-    }
-
-    @Override
     public void deleteMatcher(String matcherId) throws PlowException, TException {
         Matcher matcher = filterService.getMatcher(UUID.fromString(matcherId));
         filterService.deleteMatcher(matcher);
@@ -632,5 +624,20 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
             TException {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public MatcherT createAttrMatcher(String arg0, MatcherType arg1,
+            String arg2, String arg3) throws PlowException, TException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public MatcherT createFieldMatcher(String filterId, MatcherField field,
+            MatcherType type, String value) throws PlowException, TException {
+        Filter filter = filterService.getFilter(UUID.fromString(filterId));
+        Matcher matcher = filterService.createMatcher(filter, field, type, value);
+        return thriftMatcherDao.get(matcher.getMatcherId());
     }
 }
