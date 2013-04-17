@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.JobE;
@@ -103,7 +104,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
     };
 
     @Override
-    public Job create(final Project project, final JobSpecT spec) {
+    public FilterableJob create(final Project project, final JobSpecT spec) {
 
         final UUID jobId = UUID.randomUUID();
 
@@ -129,11 +130,13 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         jdbc.update("INSERT INTO plow.job_dsp (pk_job) VALUES (?)", jobId);
         jdbc.update("INSERT INTO plow.job_ping (pk_job) VALUES (?)", jobId);
 
-        final JobE job = new JobE();
+        final FilterableJob job = new FilterableJob();
         job.setJobId(jobId);
         job.setProjectId(project.getProjectId());
         job.setFolderId(null); // Don't know folder yet
         job.setName(spec.getName());
+        job.username = spec.username;
+        job.attrs = spec.attrs;
         return job;
     }
 

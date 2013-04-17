@@ -3,6 +3,7 @@ package com.breakersoft.plow.dao;
 import java.util.Map;
 import java.util.UUID;
 
+import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Project;
@@ -11,7 +12,7 @@ import com.breakersoft.plow.thrift.JobState;
 
 public interface JobDao {
 
-    Job create(Project project, JobSpecT blueprint);
+    FilterableJob create(Project project, JobSpecT blueprint);
 
     Job get(String name, JobState state);
 
