@@ -4,27 +4,26 @@ import java.util.UUID;
 
 public class MatcherE implements Matcher {
 
-	private UUID filterId;
-	private UUID matcherId;
+    private UUID filterId;
+    private UUID matcherId;
 
-	public void setFilterId(UUID filterId) {
-		this.filterId = filterId;
-	}
+    public void setFilterId(UUID filterId) {
+        this.filterId = filterId;
+    }
 
-	public void setMatcherId(UUID matcherId) {
-		this.matcherId = matcherId;
-	}
+    public void setMatcherId(UUID matcherId) {
+        this.matcherId = matcherId;
+    }
 
-	@Override
-	public UUID getFilterId() {
-		return filterId;
-	}
+    @Override
+    public UUID getFilterId() {
+        return filterId;
+    }
 
-	@Override
-	public UUID getMatcherId() {
-		return matcherId;
-	}
-
+    @Override
+    public UUID getMatcherId() {
+        return matcherId;
+    }
 
     public boolean equals(Object obj) {
         if (obj == null)
