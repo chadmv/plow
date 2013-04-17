@@ -31,6 +31,11 @@ Client and Tools
 * PySide 1.1.x
 * Thrift 0.9
 
+Plow has an API for job submission, but the Blueprint library makes this much easier.
+
+* Blueprint https://github.com/sqlboy/blueprint
+
+
 Installing the Server
 =====================
 
@@ -157,10 +162,4 @@ The daemon will first look for an optional config file explicitely set with the 
 
 Otherwise, it will search for: `/usr/local/etc/rndaemon.cfg`, `$PLOW_ROOT/etc/plow/rndaemon.cfg`, and then `~/.plow/rndaemon.cfg`
 
-Launching the Test Job
-----------------------
-
-Plow includes the blueprint module for job launching and description.
-
-    > bluerun $PLOW_ROOT/share/blueprint/examples/script.bp 1-100 -debug
 
