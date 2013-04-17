@@ -70,10 +70,11 @@ Next step, must build the Plow thrift bindings for Java and install those in you
 Now you can actually build the server.
 
     $ cd server
-    $ mvn install
+    $ mvn package
 
-This will create a file named plow.war.  Replace the plow.war file in the executable server package you
-downloaded and your now on the latest version.
+This will create a file named target/plow.war.  Replace the plow.war file in the executable server package you
+downloaded and your now on the latest version.  You can also copy plow.war into dist/webapps and run
+start it using dist/start-plow.sh.
 
 If the thrift files change at all, you have to re-generate + install the thrift bindings and recompile
 the server.
@@ -90,30 +91,6 @@ set password: plow
 Execute the sql file:
 
     $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-schema.sql
-
-Generating the Thrift Bindings
-------------------------------
-
-Plow uses Apache Thrift for client/server communication.  You can download thrift from here.
-
-http://thrift.apache.org
-
-You must generate the thrift bindings for anything to work.
-To generate the bindings code for all languages:
-
-    > cd lib/thrift
-    > ./generate-sources.sh
-
-You can skip the next step if your using the plow server binary release.
-
-For Java, you then need to compile these sources and install the plow-bindings JAR into your local maven repo.  Running
-mvn intall does this for you.
-
-    > cd lib/java
-    > mvn install
-
-If you make any changes to the thrift file, you should re-do this step.
-
 
 Install the Python Library and Tools
 ====================================
