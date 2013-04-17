@@ -113,13 +113,13 @@ Starting the Server
 
     > tar -zxvf plow-server-bin-0.0.5-alpha.tar.gz
     > cd plow-server-bin-0.0.5-alpha
-    > ./plow.sh
+    > ./start-plow.sh
 
     If Java7 is not in your path, plow will pick it up if the JAVA_HOME env var is set.  On Mac, this will
     be something like this:
 
     > export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.7.0_10.jdk/Contents/Home"
-    > ./plow.sh
+    > ./start-plow.sh
 
 
 Running the Tools
