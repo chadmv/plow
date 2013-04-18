@@ -242,9 +242,10 @@ def copy_dir(src, dst):
 # Cython client extension
 #
 script_args = set(sys.argv[1:])
-for name in ('develop', 'sdist', 'build_sphinx', 'upload'):
+for name in ('develop', 'sdist', 'build_sphinx', 'upload', 'bdist'):
     if name in script_args:
         use_cython = False
+        break
 
 if use_cython:
     setup(
