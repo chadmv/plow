@@ -50,7 +50,6 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
     
     ctypedef enum MatcherField_type "Plow::MatcherField::type":
         MATCH_JOB_NAME "Plow::MatcherField::JOB_NAME"
-        MATCH_PROJECT_CODE "Plow::MatcherField::PROJECT_CODE"
         MATCH_USER "Plow::MatcherField::USER"
         MATCH_ATTR "Plow::MatcherField::ATTR"
     
@@ -59,6 +58,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         MatcherType_type type
         MatcherField_type field
         string value
+        string attr
     
     ctypedef enum ActionType_type "Plow::ActionType::type":
         ACTION_SET_FOLDER "Plow::ActionType::SET_FOLDER"

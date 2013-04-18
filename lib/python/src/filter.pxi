@@ -26,11 +26,10 @@ MatcherType = _MatcherType()
 
 @cython.internal
 cdef class _MatcherField:
-    cdef readonly int JOB_NAME, PROJECT_CODE, USER, ATTR
+    cdef readonly int JOB_NAME, USER, ATTR
 
     def __cinit__(self):
         self.JOB_NAME = MATCH_JOB_NAME
-        self.PROJECT_CODE = MATCH_PROJECT_CODE
         self.USER = MATCH_USER
         self.ATTR = MATCH_ATTR
 
@@ -76,6 +75,9 @@ cdef class Matcher:
     property value:
         def __get__(self): return self.matcher.value
 
+    property attr:
+        def __get__(self): return self.matcher.attr
+
     def refresh(self):
         """
         Refresh the attributes from the server
@@ -87,9 +89,9 @@ cdef class Matcher:
         delete_matcher(self)
 
 
-def create_matcher(Filter filter, int field, int typ, string& value):
+def create_field_matcher(Filter filter, int field, int typ, string& value):
     """
-    Create a Matcher 
+    Create a field Matcher 
 
     :param filter: :class:`.Filter`
     :param field: :data:`.MatcherField` value
@@ -101,7 +103,33 @@ def create_matcher(Filter filter, int field, int typ, string& value):
         MatcherT matcher 
         Matcher ret 
 
-    getClient().proxy().createMatcher(matcher, filter.id, <MatcherField_type>field, <MatcherType_type>typ, value)
+    getClient().proxy().createFieldMatcher(matcher, 
+                                           filter.id, 
+                                           <MatcherField_type>field, 
+                                           <MatcherType_type>typ, 
+                                           value )
+    ret = initMatcher(matcher)
+    return ret
+
+def create_attr_matcher(Filter filter, int typ, string& attr, string& value):
+    """
+    Create an attribute Matcher 
+
+    :param filter: :class:`.Filter`
+    :param typ: :data:`.MatcherType` value 
+    :param attr: str attr for the matcher
+    :param value: str value for the matcher
+    :returns: :class:`.Matcher`
+    """
+    cdef:
+        MatcherT matcher 
+        Matcher ret 
+
+    getClient().proxy().createAttrMatcher(matcher, 
+                                          filter.id, 
+                                          <MatcherType_type>typ, 
+                                          attr,
+                                          value )
     ret = initMatcher(matcher)
     return ret
 
