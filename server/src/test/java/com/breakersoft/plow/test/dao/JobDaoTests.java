@@ -61,7 +61,7 @@ public class JobDaoTests extends AbstractTest {
         Job jobA = jobDao.create(TEST_PROJECT, spec);
         Job jobB = jobDao.get(spec.getName(), JobState.INITIALIZE);
 
-        assertEquals(jobA, jobB);
+        assertEquals(jobA.getJobId(), jobB.getJobId());
         assertEquals(jobA.getProjectId(), jobB.getProjectId());
     }
 
@@ -71,7 +71,7 @@ public class JobDaoTests extends AbstractTest {
         Job jobA = jobDao.create(TEST_PROJECT, spec);
         Job jobB = jobDao.get(jobA.getJobId());
 
-        assertEquals(jobA, jobB);
+        assertEquals(jobA.getJobId(), jobB.getJobId());
         assertEquals(jobA.getProjectId(), jobB.getProjectId());
     }
 
@@ -81,7 +81,7 @@ public class JobDaoTests extends AbstractTest {
         Job jobA = jobDao.create(TEST_PROJECT, spec);
         Job jobB = jobDao.getActive(jobA.getJobId());
 
-        assertEquals(jobA, jobB);
+        assertEquals(jobA.getJobId(), jobB.getJobId());
         assertEquals(jobA.getProjectId(), jobB.getProjectId());
     }
 
@@ -91,7 +91,7 @@ public class JobDaoTests extends AbstractTest {
         Job jobA = jobDao.create(TEST_PROJECT, spec);
         Job jobB = jobDao.getActive(spec.getName());
 
-        assertEquals(jobA, jobB);
+        assertEquals(jobA.getJobId(), jobB.getJobId());
         assertEquals(jobA.getProjectId(), jobB.getProjectId());
     }
 
@@ -102,8 +102,8 @@ public class JobDaoTests extends AbstractTest {
         Job jobB = jobDao.get(jobA.getJobId());
         Job jobC = jobDao.getByActiveNameOrId(spec.getName());
 
-        assertEquals(jobA, jobB);
-        assertEquals(jobA, jobC);
+        assertEquals(jobA.getJobId(), jobB.getJobId());
+        assertEquals(jobA.getJobId(), jobC.getJobId());
         assertEquals(jobA.getProjectId(), jobB.getProjectId());
     }
 
