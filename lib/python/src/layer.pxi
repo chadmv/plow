@@ -20,6 +20,7 @@ cdef class LayerSpec:
     :var depends: list[:class:`.DependSpec`] 
     :var tasks: list [:class:`.TaskSpec`]
     :var tags: set(str)
+    :var env: dict
 
     """
     cdef public string name
@@ -28,6 +29,7 @@ cdef class LayerSpec:
     cdef list command, depends, tasks 
     cdef set tags
     cdef string range
+    cdef dict env
     cdef _LayerSpecT__isset __isset
 
     def __init__(self, **kwargs):
@@ -41,6 +43,7 @@ cdef class LayerSpec:
         self.depends = kwargs.get('depends', [])
         self.tasks = kwargs.get('tasks', [])
         self.tags = kwargs.get('tags', set())
+        self.env = kwargs.get('env', {})
 
         if 'range' in kwargs:
             self.range = kwargs.get('range', '')
@@ -62,6 +65,7 @@ cdef class LayerSpec:
         s.threadable = self.threadable
         s.command = self.command
         s.tags = self.tags
+        s.env = self.env
         
         s.__isset = self.__isset
 
@@ -102,6 +106,10 @@ cdef class LayerSpec:
     property tags:
         def __get__(self): return self.tags
         def __set__(self, val): self.tags = val
+
+    property env:
+        def __get__(self): return self.env
+        def __set__(self, val): self.env = val
 
 
 cdef inline Layer initLayer(LayerT& l):

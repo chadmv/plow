@@ -52,12 +52,15 @@ cdef class JobSpec:
     :var uid: int - uid of owner 
     :var layers: list[:class:`.LayerSpec`]
     :var depends: list[:class:`.DependSpec`]
+    :var attrs: dict
+    :var env: dict
 
     """
     cdef public string name, project, username, logPath
     cdef public bint paused
     cdef public int uid
     cdef list layers, depends
+    cdef dict attrs, env
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
@@ -68,6 +71,8 @@ cdef class JobSpec:
         self.uid = kwargs.get('uid', 0)
         self.layers = kwargs.get('layers', []) 
         self.depends = kwargs.get('depends', [])
+        self.attrs = kwargs.get('attrs', {})
+        self.env = kwargs.get('env', {})
 
     def __repr__(self):
         return "<JobSpec: %s, %s>" % (self.name, self.project)
@@ -81,6 +86,8 @@ cdef class JobSpec:
         s.logPath = self.logPath
         s.paused = self.paused 
         s.uid = self.uid
+        s.attrs = self.attrs
+        s.env = self.env
 
         cdef:
             LayerSpec aLayer
@@ -107,6 +114,14 @@ cdef class JobSpec:
     property depends:
         def __get__(self): return self.depends
         def __set__(self, val): self.depends = val
+
+    property attrs:
+        def __get__(self): return self.attrs
+        def __set__(self, val): self.attrs = val
+
+    property env:
+        def __get__(self): return self.env
+        def __set__(self, val): self.env = val
 
     def launch(self):
         """
