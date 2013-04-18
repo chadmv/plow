@@ -292,6 +292,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         bint threadable
         vector[DependSpecT] depends
         vector[TaskSpecT] tasks
+        Attrs env
         _LayerSpecT__isset __isset
 
     cdef cppclass JobSpecT:
@@ -303,6 +304,8 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string logPath
         vector[LayerSpecT] layers
         vector[DependSpecT] depends
+        Attrs attrs 
+        Attrs env
 
     cdef cppclass JobFilterT:
         bint matchingOnly
