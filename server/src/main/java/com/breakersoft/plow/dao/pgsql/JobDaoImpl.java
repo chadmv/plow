@@ -100,7 +100,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         JdbcUtils.Insert("plow.job",
                 "pk_job", "pk_project", "str_name", "str_active_name",
                 "str_username", "int_uid", "int_state", "bool_paused",
-                "str_log_path", "attrs")
+                "str_log_path", "hstore_attrs", "hstore_env")
     };
 
     @Override
@@ -122,6 +122,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 ret.setBoolean(8, spec.isPaused());
                 ret.setString(9, String.format("%s/%s", spec.logPath, spec.name));
                 ret.setObject(10, spec.attrs);
+                ret.setObject(11, spec.env);
                 return ret;
             }
         });
@@ -144,7 +145,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         "UPDATE " +
             "plow.job " +
         "SET " +
-            "attrs = ? " +
+            "hstore_attrs = ? " +
         "WHERE " +
             "pk_job=?";
 
@@ -164,14 +165,14 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
     @Override
     public Map<String,String> getAttrs(final Job job) {
         return jdbc.queryForObject(
-                "SELECT attrs FROM plow.job WHERE job.pk_job=?",
+                "SELECT hstore_attrs FROM plow.job WHERE job.pk_job=?",
                 new RowMapper<Map<String,String>>() {
 
                    @Override
                    public Map<String, String> mapRow(ResultSet rs, int rowNum)
                            throws SQLException {
                        @SuppressWarnings("unchecked")
-                       Map<String,String> result = (Map<String, String>) rs.getObject("attrs");
+                       Map<String,String> result = (Map<String, String>) rs.getObject(1);
                        return result;
                    }
 

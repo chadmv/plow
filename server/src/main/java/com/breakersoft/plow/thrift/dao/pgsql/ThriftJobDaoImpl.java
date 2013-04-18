@@ -49,7 +49,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             job.state = JobState.findByValue(rs.getInt("int_state"));
             job.setMaxRssMb(rs.getInt("int_max_rss"));
             job.setTotals(JdbcUtils.getTaskTotals(rs));
-            job.setAttrs((Map<String, String>) rs.getObject("attrs"));
+            job.setAttrs((Map<String, String>) rs.getObject("hstore_attrs"));
             return job;
         }
     };
@@ -65,7 +65,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             "job.int_state,"+
             "job.time_started,"+
             "job.time_stopped,"+
-            "job.attrs,"+
+            "job.hstore_attrs,"+
             "job_dsp.int_max_cores,"+
             "job_dsp.int_min_cores,"+
             "job_dsp.int_run_cores, " +
