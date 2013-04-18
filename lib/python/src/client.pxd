@@ -87,7 +87,9 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
         void increaseFilterOrder(Guid& id) nogil except +
         void decreaseFilterOrder(Guid& id) nogil except +
 
-        void createMatcher(MatcherT&, Guid& filterId, MatcherField_type field, MatcherType_type type, string& value) nogil except +
+        void createFieldMatcher(MatcherT&, Guid& filterId, MatcherField_type field, MatcherType_type type, string& value) nogil except +
+        void createAttrMatcher(MatcherT&, Guid& filterId, MatcherType_type type, string& attr, string& value) nogil except +
+
         void getMatcher(MatcherT&, Guid& matcherId) nogil except +
         void getMatchers(vector[MatcherT]&, Guid& filterId) nogil except +
         void deleteMatcher(Guid& id) nogil except +
