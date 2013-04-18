@@ -52,7 +52,7 @@ public class JobE implements Job {
     }
 
     public String toString() {
-        return String.format("%s [%s]", name, jobId);
+        return String.format("Job: %s [%s]", name, jobId);
     }
 
     public boolean equals(Object obj) {
