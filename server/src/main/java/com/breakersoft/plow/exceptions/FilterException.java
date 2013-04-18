@@ -2,6 +2,11 @@ package com.breakersoft.plow.exceptions;
 
 public class FilterException extends PlowException {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 3298894054287767217L;
+
     public FilterException() {
         // TODO Auto-generated constructor stub
     }

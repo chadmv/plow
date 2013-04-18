@@ -2,7 +2,6 @@ package com.breakersoft.plow.event;
 
 import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
-import com.breakersoft.plow.Job;
 import com.breakersoft.plow.thrift.JobSpecT;
 
 public class JobLaunchEvent implements Event {
