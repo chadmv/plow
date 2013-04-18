@@ -35,53 +35,57 @@ import com.google.common.primitives.Floats;
 @Repository
 public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
 
-	private static final String BIG_DISPATCH_QUERY =
-		"SELECT DISTINCT " +
-			"job.pk_job, " +
-			"job_dsp.float_tier, "+
-			"folder_dsp.float_tier " +
-		"FROM " +
-			"plow.job," +
-			"plow.job_dsp, " +
-			"plow.folder_dsp, " +
-			"plow.layer," +
-			"plow.layer_count " +
-		"WHERE " +
-			"job.pk_job = job_dsp.pk_job " +
-		"AND " +
-			"job.pk_folder = folder_dsp.pk_folder " +
-		"AND " +
-			"job.pk_job = layer.pk_job " +
-		"AND " +
-			"layer.pk_layer = layer_count.pk_layer " +
-		"AND " +
-			"job.int_state  = ? " +
-		"AND " +
-			"bool_paused = 'f' " +
-		"AND " +
-			"job.pk_project = ? " +
-		"AND " +
-			"layer_count.int_waiting > 0 " +
-		"AND " +
-			"layer.str_tags && ? " +
-		"ORDER BY " +
-			"job_dsp.float_tier ASC, " +
-			"folder_dsp.float_tier ASC";
+    private static final String BIG_DISPATCH_QUERY =
+        "SELECT DISTINCT " +
+            "job.pk_job, " +
+            "job_dsp.float_tier, "+
+            "folder_dsp.float_tier " +
+        "FROM " +
+            "plow.job," +
+            "plow.job_dsp, " +
+            "plow.folder_dsp, " +
+            "plow.layer," +
+            "plow.layer_count " +
+        "WHERE " +
+            "job.pk_job = job_dsp.pk_job " +
+        "AND " +
+            "job.pk_folder = folder_dsp.pk_folder " +
+        "AND " +
+            "job.pk_job = layer.pk_job " +
+        "AND " +
+            "layer.pk_layer = layer_count.pk_layer " +
+        "AND " +
+            "job.int_state  = ? " +
+        "AND " +
+            "bool_paused = 'f' " +
+        "AND " +
+            "job.pk_project = ? " +
+        "AND " +
+            "layer_count.int_waiting > 0 " +
+        "AND " +
+            "layer.str_tags && ? " +
+        "AND " +
+            "(job_dsp.int_max_cores < job_dsp.int_run_cores OR job_dsp.int_max_cores = -1 )" +
+        "AND " +
+            "(folder_dsp.int_max_cores < folder_dsp.int_run_cores OR folder_dsp.int_max_cores = -1 ) " +
+        "ORDER BY " +
+            "job_dsp.float_tier ASC, " +
+            "folder_dsp.float_tier ASC";
 
     public static final RowMapper<DispatchJob> DISPATCH_JOB_MAPPER =
             new RowMapper<DispatchJob>() {
         @Override
         public DispatchJob mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
-        	DispatchJob job = new DispatchJob();
-        	job.setJobId((UUID) rs.getObject(1));
-        	return job;
+            DispatchJob job = new DispatchJob();
+            job.setJobId((UUID) rs.getObject(1));
+            return job;
         }
     };
 
     @Override
-	public List<DispatchJob> getDispatchJobs(final DispatchProject project, final DispatchNode node) {
-		return jdbc.query(new PreparedStatementCreator() {
+    public List<DispatchJob> getDispatchJobs(final DispatchProject project, final DispatchNode node) {
+        return jdbc.query(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                 final PreparedStatement ps = conn.prepareStatement(BIG_DISPATCH_QUERY);
@@ -91,12 +95,12 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 return ps;
             }
         },DISPATCH_JOB_MAPPER);
-	}
+    }
 
     @Override
-	public DispatchJob getDispatchJob(UUID id) {
-		return jdbc.queryForObject("SELECT pk_job FROM plow.job WHERE pk_job=?", DISPATCH_JOB_MAPPER, id);
-	}
+    public DispatchJob getDispatchJob(UUID id) {
+        return jdbc.queryForObject("SELECT pk_job FROM plow.job WHERE pk_job=?", DISPATCH_JOB_MAPPER, id);
+    }
 
     private static final String GET_DISPATCH_PROC =
             "SELECT " +
@@ -379,20 +383,20 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     }
 
     private static final String INC_FOLDER_DSP =
-    	"UPDATE " +
-    		"plow.folder_dsp " +
-    	"SET " +
-    	 	"int_run_cores = int_run_cores + ? " +
-    	 "WHERE " +
-    	 	"pk_folder = (SELECT pk_folder FROM job WHERE pk_job=?)";
+        "UPDATE " +
+            "plow.folder_dsp " +
+        "SET " +
+             "int_run_cores = int_run_cores + ? " +
+         "WHERE " +
+             "pk_folder = (SELECT pk_folder FROM job WHERE pk_job=?)";
 
     private static final String INC_JOB_DSP =
-    	"UPDATE " +
-    		"plow.job_dsp " +
-    	"SET " +
-    	 	"int_run_cores = int_run_cores + ?  " +
-    	 "WHERE " +
-    	 	"pk_job = ?";
+        "UPDATE " +
+            "plow.job_dsp " +
+        "SET " +
+             "int_run_cores = int_run_cores + ?  " +
+         "WHERE " +
+             "pk_job = ?";
 
     @Override
     public void incrementDispatchTotals(DispatchProc proc) {
@@ -405,20 +409,20 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     }
 
     private static final String DEC_FOLDER_DSP =
-    	"UPDATE " +
-    		"plow.folder_dsp " +
-    	"SET " +
-    	 	"int_run_cores = int_run_cores - ? " +
-    	 "WHERE " +
-    	 	"pk_folder = (SELECT pk_folder FROM job WHERE pk_job=?)";
+        "UPDATE " +
+            "plow.folder_dsp " +
+        "SET " +
+             "int_run_cores = int_run_cores - ? " +
+         "WHERE " +
+             "pk_folder = (SELECT pk_folder FROM job WHERE pk_job=?)";
 
-	private static final String DEC_JOB_DSP =
-    	"UPDATE " +
-    		"plow.job_dsp " +
-    	"SET " +
-    	 	"int_run_cores = int_run_cores - ? " +
-    	 "WHERE " +
-    	 	"pk_job = ?";
+    private static final String DEC_JOB_DSP =
+        "UPDATE " +
+            "plow.job_dsp " +
+        "SET " +
+             "int_run_cores = int_run_cores - ? " +
+         "WHERE " +
+             "pk_job = ?";
 
     @Override
     public void decrementDispatchTotals(DispatchProc proc) {
