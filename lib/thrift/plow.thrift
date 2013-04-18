@@ -315,7 +315,8 @@ struct LayerSpecT {
     8:i32 minRamMb = 1024,
     9:bool threadable = false,
     10:list<DependSpecT> depends,
-    11:list<TaskSpecT> tasks
+    11:list<TaskSpecT> tasks,
+    12:Attrs env
 }
 
 struct JobSpecT {
@@ -327,7 +328,8 @@ struct JobSpecT {
     6:string logPath
     7:list<LayerSpecT> layers,
     8:list<DependSpecT> depends,
-    9:Attrs attrs
+    9:Attrs attrs,
+    10:Attrs env
 }
 
 struct JobFilterT {
