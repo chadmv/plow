@@ -12,10 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.FrameSet;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
+import com.breakersoft.plow.MatcherFull;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.FolderDao;
@@ -64,13 +66,16 @@ public class JobServiceImpl implements JobService {
     @Autowired
     DependService dependService;
 
+    @Autowired
+    FilterService filterService;
+
     @Override
     public JobLaunchEvent launch(JobSpecT jobspec) {
 
         logger.info("launching job spec: {} ", jobspec);
 
         final Project project = projectDao.get(jobspec.getProject());
-        final Job job = jobDao.create(project, jobspec);
+        final FilterableJob job = jobDao.create(project, jobspec);
         final Folder folder = filterJob(job, project);
 
         createJobTopology(job, project, jobspec);
@@ -86,7 +91,7 @@ public class JobServiceImpl implements JobService {
         JobLaunchEvent event = new JobLaunchEvent(job, folder, jobspec);
         eventManager.post(event);
 
-        logger.info("Job {} launch success", job.getName());
+        logger.info("{} launch success", job.getName());
 
         return event;
     }
@@ -99,10 +104,16 @@ public class JobServiceImpl implements JobService {
         return false;
     }
 
-    private Folder filterJob(Job job, Project project) {
+    private Folder filterJob(FilterableJob job, Project project) {
         // TODO: fully implement
+
+        // First put it in the default folder.
         Folder folder = folderDao.getDefaultFolder(project);
         jobDao.updateFolder(job, folder);
+
+        List<MatcherFull> matchers = filterService.getMatchers(job);
+        filterService.filterJob(matchers, job);
+
         return folder;
     }
 

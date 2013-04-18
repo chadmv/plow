@@ -1,10 +1,15 @@
 package com.breakersoft.plow.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.breakersoft.plow.Action;
+import com.breakersoft.plow.ActionFull;
 import com.breakersoft.plow.Filter;
+import com.breakersoft.plow.FilterableJob;
+import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Matcher;
+import com.breakersoft.plow.MatcherFull;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.thrift.ActionType;
 import com.breakersoft.plow.thrift.MatcherField;
@@ -12,38 +17,45 @@ import com.breakersoft.plow.thrift.MatcherType;
 
 public interface FilterService {
 
-	Filter createFilter(Project project, String name);
+    Filter createFilter(Project project, String name);
 
-	Filter getFilter(UUID id);
+    Filter getFilter(UUID id);
 
-	void setFilterName(Filter filter, String name);
+    void setFilterName(Filter filter, String name);
 
-	void setFilterOrder(Filter filter, int order);
+    void setFilterOrder(Filter filter, int order);
 
-	void increaseFilterOrder(Filter filter);
+    void increaseFilterOrder(Filter filter);
 
-	void decreaseFilterOrder(Filter filter);
+    void decreaseFilterOrder(Filter filter);
 
-	boolean deleteFilter(Filter filter);
+    boolean deleteFilter(Filter filter);
 
-	/*
-	 * Matchers
-	 */
-	Matcher createMatcher(Filter filter, MatcherField field, MatcherType type,
-			String value);
+    void filterJob(List<MatcherFull> matchers, FilterableJob job);
 
-	Matcher getMatcher(UUID id);
+    /*
+     * Matchers
+     */
+    Matcher createMatcher(Filter filter, MatcherField field, MatcherType type,
+            String value);
 
-	boolean deleteMatcher(Matcher matcher);
+    Matcher getMatcher(UUID id);
 
-	/*
-	 * Actions
-	 */
+    boolean deleteMatcher(Matcher matcher);
 
-	Action getAction(UUID id);
+    List<MatcherFull> getMatchers(Project project);
 
-	Action createAction(Filter filter, ActionType type, String value);
+    boolean matchJob(MatcherFull matcher, FilterableJob job);
 
-	void deleteAction(Action action);
+    /*
+     * Actions
+     */
 
+    Action getAction(UUID id);
+
+    Action createAction(Filter filter, ActionType type, String value);
+
+    void deleteAction(Action action);
+
+    void applyAction(ActionFull action, Job job);
 }
