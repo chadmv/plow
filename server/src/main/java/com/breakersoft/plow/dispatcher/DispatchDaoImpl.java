@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -315,6 +316,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "job.str_username," +
             "job.str_log_path, " +
             "job.str_active_name AS job_name, " +
+            "job.hstore_env AS job_env, " +
             "layer.str_command, " +
             "layer.str_name AS layer_name, " +
             "task.int_number, " +
@@ -361,6 +363,11 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             }
 
             task.env = Maps.newHashMap();
+            Map<String,String> job_env = (Map<String, String>) rs.getObject("job_env");
+            if (job_env != null) {
+                task.env.putAll(job_env);
+            }
+
             task.env.put("PLOW_TASK_ID", rs.getString("pk_task"));
             task.env.put("PLOW_JOB_ID", rs.getString("pk_job"));
             task.env.put("PLOW_PROC_ID", rs.getString("pk_proc"));
