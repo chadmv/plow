@@ -6,6 +6,7 @@ public class FolderE implements Folder {
 
     private UUID projectId;
     private UUID folderId;
+    private String name;
 
     @Override
     public UUID getFolderId() {
@@ -25,9 +26,22 @@ public class FolderE implements Folder {
         this.projectId = projectId;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String toString() {
+        return String.format("Folder: %s [%s]", name, folderId);
+    }
+
     public int hashCode() {
         return folderId.hashCode();
     }
+
     public boolean equals(Object obj) {
         if (obj == null)
             return false;

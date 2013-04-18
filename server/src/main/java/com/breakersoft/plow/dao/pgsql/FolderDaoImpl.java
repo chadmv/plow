@@ -25,6 +25,7 @@ public class FolderDaoImpl extends AbstractDao implements FolderDao {
             FolderE folder = new FolderE();
             folder.setFolderId((UUID)rs.getObject(1));
             folder.setProjectId((UUID)rs.getObject(2));
+            folder.setName(rs.getString(3));
             return folder;
         }
     };
@@ -32,7 +33,8 @@ public class FolderDaoImpl extends AbstractDao implements FolderDao {
     private static final String GET =
             "SELECT " +
                 "pk_folder,"+
-                "pk_project " +
+                "pk_project, " +
+                "str_name " +
             "FROM " +
                 "plow.folder " +
             "WHERE " +
@@ -46,7 +48,8 @@ public class FolderDaoImpl extends AbstractDao implements FolderDao {
     private static final String GET_DEFAULT =
             "SELECT " +
                 "folder.pk_folder, "+
-                "folder.pk_project " +
+                "folder.pk_project," +
+                "folder.str_name " +
             "FROM " +
                 "plow.folder, " +
                 "plow.project " +
@@ -95,25 +98,25 @@ public class FolderDaoImpl extends AbstractDao implements FolderDao {
 
     @Override
     public void setMaxCores(Folder folder, int value) {
-    	jdbc.update("UPDATE plow.folder_dsp SET int_max_cores=? WHERE pk_folder=?",
-    			value, folder.getFolderId());
+        jdbc.update("UPDATE plow.folder_dsp SET int_max_cores=? WHERE pk_folder=?",
+                value, folder.getFolderId());
     }
 
     @Override
     public void setMinCores(Folder folder, int value) {
-    	jdbc.update("UPDATE plow.folder_dsp SET int_min_cores=? WHERE pk_folder=?",
-    			value, folder.getFolderId());
+        jdbc.update("UPDATE plow.folder_dsp SET int_min_cores=? WHERE pk_folder=?",
+                value, folder.getFolderId());
     }
 
     @Override
     public void setName(Folder folder, String name) {
-    	jdbc.update("UPDATE plow.folder SET str_name=? WHERE pk_folder=?",
-    			name, folder.getFolderId());
+        jdbc.update("UPDATE plow.folder SET str_name=? WHERE pk_folder=?",
+                name, folder.getFolderId());
     }
 
     @Override
     public void delete(Folder folder) {
-    	jdbc.update("DELETE FROM plow.folder WHERE pk_folder=?", folder.getFolderId());
+        jdbc.update("DELETE FROM plow.folder WHERE pk_folder=?", folder.getFolderId());
     }
 
 }
