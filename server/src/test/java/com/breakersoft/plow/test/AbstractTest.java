@@ -84,7 +84,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         layer.setName("test_ls");
         layer.setRange("1-10");
         layer.setTags(Sets.newHashSet("unassigned"));
-
+        layer.env = Maps.newHashMap();
         jobspec.addToLayers(layer);
 
         return jobspec;

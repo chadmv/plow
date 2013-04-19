@@ -319,6 +319,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "job.hstore_env AS job_env, " +
             "layer.str_command, " +
             "layer.str_name AS layer_name, " +
+            "layer.hstore_env AS layer_env, " +
             "task.int_number, " +
             "task.pk_task,"+
             "task.pk_layer,"+
@@ -366,6 +367,11 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             Map<String,String> job_env = (Map<String, String>) rs.getObject("job_env");
             if (job_env != null) {
                 task.env.putAll(job_env);
+            }
+
+            Map<String,String> layer_env = (Map<String, String>) rs.getObject("layer_env");
+            if (layer_env != null) {
+                task.env.putAll(layer_env);
             }
 
             task.env.put("PLOW_TASK_ID", rs.getString("pk_task"));
