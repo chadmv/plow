@@ -220,7 +220,7 @@ class LogViewerWidget(QtGui.QWidget):
 
         logPath = task.get_log_path()
         if not os.path.exists(logPath):
-            LOGGER.warn("Failed to open log file: '%s'", logpath)
+            LOGGER.warn("Failed to open log file: '%s'", logPath)
             return
 
         self.__task = task
