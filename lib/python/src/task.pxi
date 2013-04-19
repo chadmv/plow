@@ -325,7 +325,15 @@ cpdef inline string get_task_log_path(Task task):
     :returns: str log path
     """
     cdef string path
-    getClient().proxy().getTaskLogPath(path, task.id)
+
+    if not task.id:
+        return path
+
+    try:
+        getClient().proxy().getTaskLogPath(path, task.id)
+    except RuntimeError:
+        return path
+
     return path
 
 def retry_tasks(**kwargs):
