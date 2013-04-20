@@ -13,7 +13,7 @@ Contents:
 
    getting_started
    api
-   rndaemon
+   .. rndaemon
    deps
 
 
