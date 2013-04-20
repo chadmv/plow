@@ -68,8 +68,9 @@ class TabbedLogVieweWidget(QtGui.QWidget):
         if index is not None:
             self.__tabs.setCurrentIndex(index)
         else:
-            index = self.__tabs.addTab(LogViewerWidget(job, task, {}, self), task.name)
-            self.__tabs.setTabToolTip(index, plow.client.get_task_log_path(task))
+            viewer = LogViewerWidget(job, task, {}, self)
+            index = self.__tabs.addTab(viewer, task.name)
+            self.__tabs.setTabToolTip(index, viewer.logPath)
             self.__tabs.setCurrentIndex(index)
             self.__tasks[task.id] = index
             
@@ -187,7 +188,7 @@ class LogViewerWidget(QtGui.QWidget):
 
     @property 
     def logPath(self):
-        pass 
+        return self.__log_file.fileName() 
 
     @property 
     def taskId(self):
