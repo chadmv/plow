@@ -2,6 +2,9 @@
   <qresource>
     <file>checkbox.png</file>
     <file alias="down_arrow.png">down_arrow.png</file>
+    <file alias="up_arrow.png">up_arrow_16.png</file>
+    <file alias="left_arrow.png">left_arrow_16.png</file>
+    <file alias="right_arrow.png">right_arrow_16.png</file>
     <file>handle.png</file>
     <file>close.png</file>
     <file>float.png</file>

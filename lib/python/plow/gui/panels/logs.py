@@ -113,14 +113,13 @@ class LogViewerWidget(QtGui.QWidget):
         self.__chk_tail = QtGui.QAction("Tail log", self)
         self.__chk_tail.setCheckable(True)
 
-        style = QtGui.qApp.style()
+        self.__findPrevBtn = prev = QtGui.QAction(self)
+        prev.setToolTip("Find Previous Match")
+        prev.setIcon(QtGui.QIcon(":/left_arrow.png"))
 
-        self.__findPrevBtn = QtGui.QAction(self)
-        self.__findPrevBtn.setToolTip("Find Previous Match")
-        self.__findPrevBtn.setIcon(style.standardIcon(style.SP_ArrowLeft))
-        self.__findNextBtn = QtGui.QAction(self)
-        self.__findNextBtn.setToolTip("Find Next Match")
-        self.__findNextBtn.setIcon(style.standardIcon(style.SP_ArrowRight))
+        self.__findNextBtn = nxt = QtGui.QAction(self)
+        nxt.setToolTip("Find Next Match")
+        nxt.setIcon(QtGui.QIcon(":/right_arrow.png"))
 
         self.__jobNameLabel = label = QtGui.QLabel(self)
         label.setIndent(10)
