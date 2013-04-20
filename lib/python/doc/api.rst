@@ -212,12 +212,12 @@ Filtering / Matching / Actions
     Constants field types to match against 
 
     .. data:: plow.client.NodeState.JOB_NAME
-    .. data:: plow.client.NodeState.PROJECT_CODE
     .. data:: plow.client.NodeState.USER
     .. data:: plow.client.NodeState.ATTR
 
 .. autoclass:: plow.client.Matcher
-.. autofunction:: plow.client.create_matcher
+.. autofunction:: plow.client.create_field_matcher
+.. autofunction:: plow.client.create_attr_matcher
 .. autofunction:: plow.client.get_matcher
 .. autofunction:: plow.client.get_matchers
 .. autofunction:: plow.client.delete_matcher
