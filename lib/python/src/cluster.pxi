@@ -246,7 +246,7 @@ cpdef inline bint lock_cluster(Cluster cluster, bint locked):
     ret = getClient().proxy().lockCluster(cluster.id, locked)
     return ret
 
-cpdef inline set_cluster_tags(Cluster cluster, c_set[string] tags) except? -1:
+cpdef inline set_cluster_tags(Cluster cluster, c_set[string] tags):
     """
     Set the tags for a Cluster 
 
@@ -255,7 +255,7 @@ cpdef inline set_cluster_tags(Cluster cluster, c_set[string] tags) except? -1:
     """
     getClient().proxy().setClusterTags(cluster.id, tags)
 
-cpdef inline set_cluster_name(Cluster cluster, string name) except? -1:
+cpdef inline set_cluster_name(Cluster cluster, string name):
     """
     Set a name for a Cluster 
 
@@ -264,7 +264,7 @@ cpdef inline set_cluster_name(Cluster cluster, string name) except? -1:
     """
     getClient().proxy().setClusterName(cluster.id, name)
 
-cpdef inline set_default_cluster(Cluster cluster) except? -1:
+cpdef inline set_default_cluster(Cluster cluster):
     """
     Set a given Cluster to be the default Cluster
 

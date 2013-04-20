@@ -244,7 +244,7 @@ def get_nodes(**kwargs):
     ret = [initNode(nodeT) for nodeT in nodes]
     return ret
 
-cpdef inline set_node_locked(Node node, bint locked) except? -1:
+cpdef inline set_node_locked(Node node, bint locked):
     """
     Set the lock state of the node 
 
@@ -253,7 +253,7 @@ cpdef inline set_node_locked(Node node, bint locked) except? -1:
     """
     getClient().proxy().setNodeLocked(node.id, locked)
 
-cpdef inline set_node_cluster(Node node, Cluster cluster) except? -1:
+cpdef inline set_node_cluster(Node node, Cluster cluster):
     """
     Assign the node to a cluster
 
@@ -262,7 +262,7 @@ cpdef inline set_node_cluster(Node node, Cluster cluster) except? -1:
     """
     getClient().proxy().setNodeCluster(node.id, cluster.id)
 
-cpdef inline set_node_tags(Node node, c_set[string]& tags) except? -1:
+cpdef inline set_node_tags(Node node, c_set[string]& tags):
     """
     Set the tags for the node 
 

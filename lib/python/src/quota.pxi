@@ -153,7 +153,7 @@ def create_quota(Project project,  Cluster cluster, int size, int burst):
     return q
 
 
-cpdef inline set_quota_size(Cluster cluster, int size) except? -1:
+cpdef inline set_quota_size(Cluster cluster, int size):
     """
     Set the quota size 
 
@@ -162,7 +162,7 @@ cpdef inline set_quota_size(Cluster cluster, int size) except? -1:
     """
     getClient().proxy().setQuotaSize(cluster.id, size)
 
-cpdef inline set_quota_burst(Cluster cluster, int burst) except? -1:
+cpdef inline set_quota_burst(Cluster cluster, int burst):
     """
     Set the quota burst 
 
@@ -171,7 +171,7 @@ cpdef inline set_quota_burst(Cluster cluster, int burst) except? -1:
     """
     getClient().proxy().setQuotaBurst(cluster.id, burst)
 
-cpdef inline set_quota_locked(Cluster cluster, bint locked) except? -1:
+cpdef inline set_quota_locked(Cluster cluster, bint locked):
     """
     Set the lock state of the quota
 
