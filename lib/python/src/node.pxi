@@ -1,3 +1,5 @@
+import re 
+
 
 #######################
 # NodeState
@@ -43,7 +45,7 @@ cdef class NodeFilter:
 #
 cdef inline NodeSystem initNodeSystem(NodeSystemT t):
     cdef NodeSystem system = NodeSystem()
-    system.cpuModel = t.cpuModel
+    system.cpuModel = re.sub(r' +', ' ', t.cpuModel)
     system.platform = t.platform
     system.physicalCores = t.physicalCores
     system.logicalCores = t.logicalCores
