@@ -13,17 +13,30 @@ import subprocess
 from subprocess import Popen, PIPE
 from ctypes.util import find_library
 
-from distutils.core import setup, Command
-from distutils.extension import Extension as dist_Extension
+
+try:
+    from python.ez_setup import use_setuptools
+    use_setuptools()
+except:
+    pass
+
 from distutils.sysconfig import get_config_vars
+from setuptools import setup, find_packages, Extension, Command
 
 import doc.conf
 
 #-----------------------------------------------------------------------------
 # Setup variables and pre-checks
 #-----------------------------------------------------------------------------
+__version__ = doc.conf.release
+
 
 ROOT = os.path.dirname(__file__)
+sys.path.append(os.path.join(ROOT, 'fake_pyrex'))
+
+TEMP_BUILD_DIR = os.path.join(ROOT, '__dist__')
+ETC_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../../etc'))
+ETC_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'etc')
 
 # Source files
 PLOW_SOURCE_MAIN_PYX = os.path.join(ROOT, "src", "plow.pyx")
@@ -36,8 +49,6 @@ PLOW_SOURCE_EXTRA = []
 for p in PLOW_CPP:
     PLOW_SOURCE_EXTRA += glob.glob(os.path.join(p, "*.cpp"))
 
-# Version
-__version__ = doc.conf.release
 
 # Check for cython
 try:
@@ -46,7 +57,6 @@ except ImportError:
     use_cython = False
 else:
     use_cython = True
-
 
 if not os.path.exists(PLOW_SOURCE_MAIN_PYX):
     use_cython = False
@@ -128,15 +138,6 @@ else:
 cflags.extend("-I%s" % p for p in PLOW_INCLUDES)
 
 
-# set dylib ext:
-if sys.platform.startswith('win'):
-    lib_ext = '.dll'
-elif sys.platform == 'darwin':
-    lib_ext = '.dylib'
-else:
-    lib_ext = '.so'
-
-
 # Fix for GCC issues on Linux
 opt = get_config_vars("OPT")[0].split()
 exclude = set(["-Wstrict-prototypes"])
@@ -147,28 +148,6 @@ os.environ['OPT'] = " ".join(flag for flag in opt if flag not in exclude)
 #-----------------------------------------------------------------------------
 # Extra commands
 #-----------------------------------------------------------------------------
-
-cmdclass = {}
-
-if use_cython:
-
-    class CythonCommand(build_ext):
-        """Custom distutils command subclassed from Cython.Distutils.build_ext
-        to compile pyx->c++, and stop there. All this does is override the 
-        C++-compile method build_extension() with a no-op."""
-        
-        description = "Compile Cython sources to C++"
-        
-        def cython_sources(self, *args, **kwargs):
-            # self.force = 1
-            build_ext.cython_sources(self, *args, **kwargs)
-
-        def build_extension(self, ext):
-            pass
-
-    cmdclass['build_ext'] = CythonCommand
-
-
 class CleanCommand(Command):
     """Custom distutils command to clean the .so and .pyc files."""
 
@@ -205,9 +184,10 @@ class CleanCommand(Command):
             except Exception:
                 pass
 
-
-cmdclass['clean'] = CleanCommand
-
+cmdclass = {
+    'build_ext': build_ext,
+    'clean': CleanCommand,
+}
 
 # build docs
 try:
@@ -234,64 +214,24 @@ def copy_dir(src, dst):
         shutil.copytree(src, dst) 
 
 
-#-----------------------------------------------------------------------------
-# Extensions
-#-----------------------------------------------------------------------------
-
-#
-# Cython client extension
-#
-script_args = set(sys.argv[1:])
-for name in ('develop', 'sdist', 'build_sphinx', 'upload', 'bdist'):
-    if name in script_args:
-        use_cython = False
-        break
-
-if use_cython:
-    setup(
-        name="plow",
-        version=__version__,
-        ext_modules=[
-            dist_Extension('plow',
-                           [PLOW_SOURCE_MAIN_PYX] + PLOW_SOURCE_EXTRA,
-                           language="c++",
-                           )
-        ],
-        cmdclass=cmdclass,
-    )
-
 
 #
 # Python packages
 #
 
-# setuptools imports are delayed until after distutils, 
-# because they monkey-patch stuff and break the cython
-# Extension class
-try:
-    from python.ez_setup import use_setuptools
-    use_setuptools()
-except:
-    pass
-
-from setuptools import setup, find_packages, Extension
-
-ROOT = os.path.dirname(__file__)
-TEMP_BUILD_DIR = os.path.join(ROOT, '__dist__')
-
 # manually graft in the parent etc/ directory so we can properly
 # dist it from here
-ETC_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../../etc'))
-ETC_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'etc')
 copy_dir(ETC_SRC_DIR, ETC_DST_DIR)
 
-# BIN_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../../bin'))
-# BIN_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'bin')
-# copy_dir(BIN_SRC_DIR, BIN_DST_DIR)
+
+if use_cython:
+    PLOW_SOURCE_MAIN = PLOW_SOURCE_MAIN_PYX
+else:
+    PLOW_SOURCE_MAIN = PLOW_SOURCE_MAIN_CPP
 
 
 plowmodule = Extension('plow.client.plow',
-    [PLOW_SOURCE_MAIN_CPP] + PLOW_SOURCE_EXTRA,
+    [PLOW_SOURCE_MAIN] + PLOW_SOURCE_EXTRA,
     language="c++",
     libraries=[BOOST_PYTHON], 
     extra_compile_args=cflags,
@@ -328,6 +268,7 @@ setup(
     zip_safe = False,
 
     ext_modules = [plowmodule],
+    cmdclass=cmdclass,
 
     # scripted functions that will get wrapped
     # into an entry point script
@@ -394,8 +335,5 @@ setup(
     ],
 
 )
-
-# clean up
-# shutil.rmtree(TEMP_BUILD_DIR, ignore_errors=True)
 
 
