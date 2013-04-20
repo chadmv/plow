@@ -165,7 +165,7 @@ cdef class Cluster:
         self._cluster.isDefault = True
 
 
-cpdef inline get_cluster(string name):
+cpdef inline Cluster get_cluster(string name):
     """
     Return a Cluster by name 
 
@@ -223,7 +223,7 @@ def create_cluster(str name, c_set[string] tags):
     cluster = initCluster(clusterT)
     return cluster
 
-cpdef inline delete_cluster(Cluster cluster):
+cpdef inline bint delete_cluster(Cluster cluster):
     """
     Delete a Cluster 
 
@@ -234,7 +234,7 @@ cpdef inline delete_cluster(Cluster cluster):
     ret = getClient().proxy().deleteCluster(cluster.id)
     return ret
 
-cpdef inline lock_cluster(Cluster cluster, bint locked):
+cpdef inline bint lock_cluster(Cluster cluster, bint locked):
     """
     Lock a Cluster 
 
@@ -246,7 +246,7 @@ cpdef inline lock_cluster(Cluster cluster, bint locked):
     ret = getClient().proxy().lockCluster(cluster.id, locked)
     return ret
 
-cpdef inline set_cluster_tags(Cluster cluster, c_set[string] tags):
+cpdef inline set_cluster_tags(Cluster cluster, c_set[string] tags) except? -1:
     """
     Set the tags for a Cluster 
 
@@ -255,7 +255,7 @@ cpdef inline set_cluster_tags(Cluster cluster, c_set[string] tags):
     """
     getClient().proxy().setClusterTags(cluster.id, tags)
 
-cpdef inline set_cluster_name(Cluster cluster, string name):
+cpdef inline set_cluster_name(Cluster cluster, string name) except? -1:
     """
     Set a name for a Cluster 
 
@@ -264,7 +264,7 @@ cpdef inline set_cluster_name(Cluster cluster, string name):
     """
     getClient().proxy().setClusterName(cluster.id, name)
 
-cpdef inline set_default_cluster(Cluster cluster):
+cpdef inline set_default_cluster(Cluster cluster) except? -1:
     """
     Set a given Cluster to be the default Cluster
 

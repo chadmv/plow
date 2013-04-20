@@ -202,7 +202,7 @@ cdef class Node:
         set_node_tags(self, tags)
 
 
-cpdef inline get_node(string name):
+cpdef inline Node get_node(string name):
     """
     Get a node by name 
 
@@ -244,7 +244,7 @@ def get_nodes(**kwargs):
     ret = [initNode(nodeT) for nodeT in nodes]
     return ret
 
-cpdef inline set_node_locked(Node node, bint locked):
+cpdef inline set_node_locked(Node node, bint locked) except? -1:
     """
     Set the lock state of the node 
 
@@ -253,7 +253,7 @@ cpdef inline set_node_locked(Node node, bint locked):
     """
     getClient().proxy().setNodeLocked(node.id, locked)
 
-cpdef inline set_node_cluster(Node node, Cluster cluster):
+cpdef inline set_node_cluster(Node node, Cluster cluster) except? -1:
     """
     Assign the node to a cluster
 
@@ -262,7 +262,7 @@ cpdef inline set_node_cluster(Node node, Cluster cluster):
     """
     getClient().proxy().setNodeCluster(node.id, cluster.id)
 
-cpdef inline set_node_tags(Node node, c_set[string]& tags):
+cpdef inline set_node_tags(Node node, c_set[string]& tags) except? -1:
     """
     Set the tags for the node 
 

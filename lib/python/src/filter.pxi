@@ -133,7 +133,7 @@ def create_attr_matcher(Filter filter, int typ, string& attr, string& value):
     ret = initMatcher(matcher)
     return ret
 
-cpdef inline get_matcher(Guid& matcherId):
+cpdef inline Matcher get_matcher(Guid& matcherId):
     """
     Get a matcher by id
 
@@ -164,7 +164,7 @@ def get_matchers(Filter filter):
     ret = [initMatcher(m) for m in matchers]
     return ret        
 
-cpdef inline delete_matcher(Matcher matcher):
+cpdef inline delete_matcher(Matcher matcher) except? -1:
     """
     Delete a Matcher 
 
@@ -253,7 +253,7 @@ def create_action(Filter filter, int typ, string& value):
     ret = initAction(action)
     return ret
 
-cpdef inline get_action(Guid& actionId):
+cpdef inline Action get_action(Guid& actionId):
     """
     Get an action by id 
 
@@ -284,7 +284,7 @@ def get_actions(Filter filter):
     ret = [initAction(a) for a in actions]
     return ret        
 
-cpdef inline delete_action(Action action):
+cpdef inline delete_action(Action action) except? -1:
     """
     Delete an action 
 
@@ -436,7 +436,7 @@ def get_filters(Project project):
     getClient().proxy().getFilters(filters, project.id)
     ret = [initFilter(f) for f in filters]
 
-cpdef inline get_filter(Guid& filterId):
+cpdef inline Filter get_filter(Guid& filterId):
     """
     Get a filter by id 
 
@@ -451,7 +451,7 @@ cpdef inline get_filter(Guid& filterId):
     ret = initFilter(filt)
     return ret
 
-cpdef inline delete_filter(Filter filt):
+cpdef inline delete_filter(Filter& filt) except? -1:
     """
     Delete a filter
 
@@ -459,7 +459,7 @@ cpdef inline delete_filter(Filter filt):
     """
     getClient().proxy().deleteFilter(filt.id)
 
-cpdef inline set_filter_name(Filter filt, string& name):
+cpdef inline set_filter_name(Filter& filt, string& name) except? -1:
     """
     Set a filter name 
 
@@ -469,7 +469,7 @@ cpdef inline set_filter_name(Filter filt, string& name):
     getClient().proxy().setFilterName(filt.id, name)
     filt.name = name
 
-cpdef inline set_filter_order(Filter filt, int order):
+cpdef inline set_filter_order(Filter filt, int order) except? -1:
     """
     Set the filter order
 
@@ -478,7 +478,7 @@ cpdef inline set_filter_order(Filter filt, int order):
     """    
     getClient().proxy().setFilterOrder(filt.id, order)
 
-cpdef inline increase_filter_order(Filter filt):
+cpdef inline increase_filter_order(Filter& filt) except? -1:
     """
     Increase the filter order
 
@@ -486,7 +486,7 @@ cpdef inline increase_filter_order(Filter filt):
     """    
     getClient().proxy().increaseFilterOrder(filt.id)
 
-cpdef inline decrease_filter_order(Filter filt):
+cpdef inline decrease_filter_order(Filter& filt) except? -1:
     """
     Decrease the filter order
 

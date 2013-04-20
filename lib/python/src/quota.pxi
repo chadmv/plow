@@ -93,7 +93,7 @@ cdef class Quota:
         self._quota.isLocked = locked
 
 
-cpdef inline get_quota(Guid& id):
+cpdef inline Quota get_quota(Guid& id):
     """
     Get a quota by id 
 
@@ -153,7 +153,7 @@ def create_quota(Project project,  Cluster cluster, int size, int burst):
     return q
 
 
-cpdef inline set_quota_size(Cluster cluster, int size):
+cpdef inline set_quota_size(Cluster cluster, int size) except? -1:
     """
     Set the quota size 
 
@@ -162,7 +162,7 @@ cpdef inline set_quota_size(Cluster cluster, int size):
     """
     getClient().proxy().setQuotaSize(cluster.id, size)
 
-cpdef inline set_quota_burst(Cluster cluster, int burst):
+cpdef inline set_quota_burst(Cluster cluster, int burst) except? -1:
     """
     Set the quota burst 
 
@@ -171,7 +171,7 @@ cpdef inline set_quota_burst(Cluster cluster, int burst):
     """
     getClient().proxy().setQuotaBurst(cluster.id, burst)
 
-cpdef inline set_quota_locked(Cluster cluster, bint locked):
+cpdef inline set_quota_locked(Cluster cluster, bint locked) except? -1:
     """
     Set the lock state of the quota
 
