@@ -100,6 +100,7 @@ class WorkspaceManager(QtCore.QObject):
         self.registerPanelType("Render Watch", RenderJobWatchPanel)
         self.registerPanelType("Tasks", TaskPanel)
         self.registerPanelType("Clusters", ClusterPanel)
+        self.registerPanelType("Nodes", NodePanel)
         self.registerPanelType("Logs", LogsPanel)
 
         EventManager.bind("GLOBAL_REFRESH", self.refresh)
