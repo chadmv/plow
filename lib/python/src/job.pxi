@@ -369,7 +369,7 @@ def get_active_job(string name):
     cdef Job job
 
     try:
-        getClient().proxy().getJob(jobT, name)
+        getClient().proxy().getActiveJob(jobT, name)
     except RuntimeError:
         return None 
 
