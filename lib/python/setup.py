@@ -148,6 +148,11 @@ os.environ['OPT'] = " ".join(flag for flag in opt if flag not in exclude)
 #-----------------------------------------------------------------------------
 # Extra commands
 #-----------------------------------------------------------------------------
+cmdclass = {}
+
+if use_cython:
+    cmdclass['build_ext'] = build_ext
+
 class CleanCommand(Command):
     """Custom distutils command to clean the .so and .pyc files."""
 
@@ -184,10 +189,7 @@ class CleanCommand(Command):
             except Exception:
                 pass
 
-cmdclass = {
-    'build_ext': build_ext,
-    'clean': CleanCommand,
-}
+cmdclass['clean'] =  CleanCommand
 
 # build docs
 try:
