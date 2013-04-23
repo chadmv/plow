@@ -11,7 +11,14 @@ class JobProgressFormWidget(FormWidget):
         FormWidget.__init__(self, parent)
         self.setWidget(JobProgressBar(value, parent))
 
+class JobStateFormWidget(FormWidget):
+    def __init__(self, value, parent=None):
+        FormWidget.__init__(self, parent)
+        self.setWidget(JobStateWidget(value, False, parent))
+        self._widget.setMinimumWidth(100)
+
 FormWidgetFactory.register("jobProgressBar", JobProgressFormWidget)
+FormWidgetFactory.register("jobState", JobStateFormWidget)
 
 class JobProgressBar(QtGui.QWidget):
     # Left, top, right, bottom
@@ -124,10 +131,12 @@ class JobStateWidget(QtGui.QWidget):
     """
     A widget for displaying the job state.
     """
-    def __init__(self, state, hasErrors, parent=None):
+    def __init__(self, state, hasErrors=False, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.__state = state
         self.__hasErrors = hasErrors
+        self.setSizePolicy(QtGui.QSizePolicy.Minimum,
+            QtGui.QSizePolicy.Preferred)
 
     def getState(self):
         return self.__state
