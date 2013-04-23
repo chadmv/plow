@@ -47,20 +47,8 @@ class TabbedLogVieweWidget(QtGui.QWidget):
         self.__tabs.setTabsClosable(True)
         self.__tabs.tabCloseRequested.connect(self.closeTab)
 
-        # self.__txt_search = QtGui.QLineEdit(self)
-        # self.__btn_find = QtGui.QPushButton("Find", self)
-        # self.__btn_find_prev = QtGui.QPushButton("Find Prev", self)
-        # self.__btn_find_all = QtGui.QPushButton("Find All", self)
-
-        # low_layout = QtGui.QHBoxLayout()
-        # low_layout.addWidget(self.__txt_search)
-        # low_layout.addWidget(self.__btn_find)
-        # low_layout.addWidget(self.__btn_find_prev)
-        # low_layout.addWidget(self.__btn_find_all)
-
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.__tabs)
-        # layout.addLayout(low_layout)
         self.setLayout(layout)
 
     def addTask(self, job, task):
