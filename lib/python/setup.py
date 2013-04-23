@@ -276,16 +276,11 @@ setup(
 
     packages=find_packages(exclude=['tests', 'tests.*']),
 
-    dependency_links=[
-        'https://github.com/sqlboy/fileseq/tarball/master#egg=fileseq-0.1',
-        'http://peak.telecommunity.com/snapshots/',
-    ],
-
     install_requires=[
         'psutil>=0.6.1',
         'argparse',
         'PyYAML',
-        'plow-blueprint',
+        'plow-blueprint>=0.1.1',
         'fileseq>=0.1',
     ],
 
