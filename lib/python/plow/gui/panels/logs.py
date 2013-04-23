@@ -32,9 +32,8 @@ class LogsPanel(Panel):
     def __handleTaskOfInterestEvent(self, *args, **kwargs):
         task = plow.client.get_task(args[0])
         job = plow.client.get_job(args[1])
-
         self.widget().addTask(job, task)
-
+        self.raise_()
 
 class TabbedLogVieweWidget(QtGui.QWidget):
     def __init__(self, attrs, parent=None):
