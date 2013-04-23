@@ -31,56 +31,75 @@ class PropertiesPanel(Panel):
         job = pc.get_job(args[0])
 
         widgets = [ {
-            "title": "Job",
-            "children": [
-                {
-                    "title": "Name",
-                    "widget": "text",
-                    "value": job.name,
-                    "readOnly": True
-                },
-                {
-                    "title": "Progress",
-                    "widget": "jobProgressBar",
-                    "value": job.totals
-                },
-                {
-                    "title": "Min Cores",
-                    "value": job.minCores,
-                    "readOnly": True,
-                },
-                {
-                    "title": "Totals",
-                    "children": [
-                        {
-                            "title": "Running",
-                            "value": job.totals.running,
-                            "readOnly": True,
-                        },
-                        {
-                            "title": "Succeeded",
-                            "value": job.totals.succeeded,
-                            "readOnly": True,
-                        },
-                        {
-                            "title": "Depend",
-                            "value": job.totals.depend,
-                            "readOnly": True,
-                        },
-                        {
-                            "title": "Dead",
-                            "value": job.totals.dead,
-                            "readOnly": True,       
-                        },
-                                        {
-                            "title": "Waiting",
-                            "value": job.totals.waiting,
-                            "readOnly": True,
-                        }
-                    ]
-                }
-            ]
-        }]
+                "title": "Job Status",
+                "children": [
+                    {
+                        "title": "Name",
+                        "widget": "text",
+                        "value": job.name,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "State",
+                        "widget": "jobState",
+                        "value": job.state
+                    },
+                    {
+                        "title": "Progress",
+                        "widget": "jobProgressBar",
+                        "value": job.totals
+                    }
+                ]
+            },
+            {
+                "title": "Core Totals",
+                "children": [
+                    {
+                        "title": "Min Cores",
+                        "value": job.minCores,
+                    },
+                    {
+                        "title": "Max Cores",
+                        "value": job.maxCores,
+                    },
+                    {
+                        "title": "Run Cores",
+                        "value": job.runCores,
+                        "readOnly": True,
+                    }
+                ]
+            },
+            {
+                "title": "Task Totals",
+                "children": [
+                    {
+                        "title": "Running",
+                        "value": job.totals.running,
+                        "readOnly": True,
+                    },
+                    {
+                        "title": "Succeeded",
+                        "value": job.totals.succeeded,
+                        "readOnly": True,
+                    },
+                    {
+                        "title": "Depend",
+                        "value": job.totals.depend,
+                        "readOnly": True,
+                    },
+                    {
+                        "title": "Dead",
+                        "value": job.totals.dead,
+                        "readOnly": True,       
+                    },
+                                    {
+                        "title": "Waiting",
+                        "value": job.totals.waiting,
+                        "readOnly": True,
+                    }
+                ]
+            }
+        ]
 
         form = PlowForm(widgets)
         self.widget().setWidget(form)
