@@ -13,14 +13,14 @@ class FormWidget(QtGui.QWidget):
 
     def __init__(self, value, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        QtGui.QGridLayout(self)
-        self.layout().setSpacing(0)
-        self.layout().setContentsMargins(0, 0, 0, 0)
+        layout = QtGui.QGridLayout(self)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
         self._widget = None
 
         self.__status = QtGui.QLabel(self)
         self.__status.setContentsMargins(5, 0, 0, 0)
-        self.layout().addWidget(self.__status, 0, 1)
+        layout.addWidget(self.__status, 0, 1)
 
         if not FormWidget.__LOCKED_PIX:
             FormWidget.__LOCKED_PIX = QtGui.QPixmap(":/locked.png")
@@ -46,6 +46,7 @@ class Text(FormWidget):
     def __init__(self, text, parent=None):
         FormWidget.__init__(self, parent)
         self.setWidget(QtGui.QLineEdit(text, self))
+        self._widget.setFocusPolicy(QtCore.Qt.NoFocus)
 
     def _setReadOnly(self, value):
         self._widget.setReadOnly(value)
@@ -56,6 +57,7 @@ class Number(FormWidget):
         widget = QtGui.QSpinBox(self)
         widget.setValue(value)
         self.setWidget(widget)
+        self._widget.setFocusPolicy(QtCore.Qt.NoFocus)
 
     def _setReadOnly(self, value):
         self._widget.setReadOnly(value)
