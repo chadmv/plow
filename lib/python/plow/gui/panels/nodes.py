@@ -60,6 +60,7 @@ class NodeWidget(QtGui.QWidget):
         view.setAlternatingRowColors(True)
         view.setAutoFillBackground(False)
         view.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
+        view.horizontalHeader().setStretchLastSection(True)
 
         layout.addWidget(view)
 
