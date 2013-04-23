@@ -1,6 +1,0 @@
-psutil>=0.6.1
-argparse
-PyYAML
-git+git://github.com/sqlboy/blueprint.git
-git+git://github.com/sqlboy/fileseq.git
-
