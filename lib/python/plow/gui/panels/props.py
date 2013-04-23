@@ -58,6 +58,11 @@ class PropertiesPanel(Panel):
                         "widget": "text",
                         "value": ",".join(node.tags),
                         "readOnly": True
+                    },
+                    {
+                        "title": "Locked",
+                        "widget": "lockToggle",
+                        "value": node.locked,
                     }
                 ]
             },
