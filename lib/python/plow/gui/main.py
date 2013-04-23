@@ -102,6 +102,7 @@ class WorkspaceManager(QtCore.QObject):
         self.registerPanelType("Clusters", ClusterPanel)
         self.registerPanelType("Nodes", NodePanel)
         self.registerPanelType("Logs", LogsPanel)
+        self.registerPanelType("Properties", PropertiesPanel)
 
         EventManager.bind("GLOBAL_REFRESH", self.refresh)
 

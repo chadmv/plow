@@ -1,9 +1,17 @@
 """Commonly used Job widgets."""
 
 import plow.client
+import plow.gui.constants as constants
 
 from plow.gui.manifest import QtCore, QtGui
-import plow.gui.constants as constants
+from plow.gui.form import FormWidget, FormWidgetFactory
+
+class JobProgressFormWidget(FormWidget):
+    def __init__(self, value, parent=None):
+        FormWidget.__init__(self, parent)
+        self.setWidget(JobProgressBar(value, parent))
+
+FormWidgetFactory.register("jobProgressBar", JobProgressFormWidget)
 
 class JobProgressBar(QtGui.QWidget):
     # Left, top, right, bottom
