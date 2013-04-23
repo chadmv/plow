@@ -1,8 +1,10 @@
 from plow.gui.manifest import QtCore, QtGui
+from plow.gui.util import formatDateTime, formatDuration
 
 __all__ = [
     "Text",
     "Number",
+    "DateTime"
 ]
 
 class FormWidget(QtGui.QWidget):
@@ -61,3 +63,13 @@ class Number(FormWidget):
 
     def _setReadOnly(self, value):
         self._widget.setReadOnly(value)
+
+class DateTime(FormWidget):
+    def __init__(self, value, parent=None):
+        FormWidget.__init__(self, parent)
+        self.setWidget(QtGui.QLabel(formatDateTime(value), self))
+
+class Duration(FormWidget):
+    def __init__(self, times, parent=None):
+        FormWidget.__init__(self, parent)
+        self.setWidget(QtGui.QLabel(formatDuration(times[0], times[1]), self))

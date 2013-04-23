@@ -8,7 +8,9 @@ class FormWidgetFactory(object):
 
     Map = {
         "text": fwidgets.Text,
-        "number": fwidgets.Number
+        "number": fwidgets.Number,
+        "datetime": fwidgets.DateTime,
+        "duration": fwidgets.Duration
     }
 
     @classmethod

@@ -48,7 +48,23 @@ class PropertiesPanel(Panel):
                         "title": "Progress",
                         "widget": "jobProgressBar",
                         "value": job.totals
-                    }
+                    },
+                    {
+                        "title": "Start Time",
+                        "widget": "datetime",
+                        "value": job.startTime
+                    },
+                    {
+                        "title": "Stop Time",
+                        "widget": "datetime",
+                        "value": job.stopTime
+                    },
+                    {
+                        "title": "Duration",
+                        "widget": "duration",
+                        "value": [job.startTime, job.stopTime]
+                    },
+
                 ]
             },
             {
