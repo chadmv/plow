@@ -116,9 +116,10 @@ class PlowFormGroup(QtGui.QWidget):
     """
     def __init__(self, title, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        QtGui.QVBoxLayout(self)
+        layout = QtGui.QVBoxLayout(self)
         self.setMouseTracking(True)
-        self.layout().setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(0, 0, 0, 0)
+
         self.setStyleSheet("margin: 0px; padding: 0px;")
 
         self.__formWidget = QtGui.QWidget(self)
@@ -127,9 +128,9 @@ class PlowFormGroup(QtGui.QWidget):
 
         if title:
             self.__header = PlowFormGroupHeader(title, self)
-            self.layout().addWidget(self.__header)
+            layout.addWidget(self.__header)
 
-        self.layout().addWidget(self.__formWidget)
+        layout.addWidget(self.__formWidget)
 
     def addFormWidget(self, child):
         w = FormWidgetFactory.create(child, self)
