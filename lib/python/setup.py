@@ -20,8 +20,10 @@ try:
 except:
     pass
 
-from distutils.sysconfig import get_config_vars
 from setuptools import setup, find_packages, Extension, Command
+from setuptools.command.install import install as _install
+from distutils.sysconfig import get_config_vars
+from distutils import log
 
 import doc.conf
 
@@ -31,18 +33,18 @@ import doc.conf
 __version__ = doc.conf.release
 
 
-ROOT = os.path.dirname(__file__)
-sys.path.append(os.path.join(ROOT, 'fake_pyrex'))
+sys.path.append('fake_pyrex')
 
-TEMP_BUILD_DIR = os.path.join(ROOT, '__dist__')
-ETC_SRC_DIR = os.path.abspath(os.path.join(ROOT, '../../etc'))
+TEMP_BUILD_DIR = '__dist__'
+ETC_SRC_DIR = os.path.abspath('../../etc')
 ETC_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'etc')
+ETC_INSTALL_DIR = "/usr/local/etc/plow"
 
 # Source files
-PLOW_SOURCE_MAIN_PYX = os.path.join(ROOT, "src", "plow.pyx")
-PLOW_SOURCE_MAIN_CPP = os.path.join(ROOT, "src", "plow.cpp")
+PLOW_SOURCE_MAIN_PYX = os.path.join("src", "plow.pyx")
+PLOW_SOURCE_MAIN_CPP = os.path.join("src", "plow.cpp")
 
-PLOW_INCLUDES = [os.path.join(ROOT, p) for p in ('src/core', 'src/core/rpc')]
+PLOW_INCLUDES = ['src/core', 'src/core/rpc']
 PLOW_CPP = PLOW_INCLUDES
 
 PLOW_SOURCE_EXTRA = []
@@ -67,12 +69,12 @@ if not use_cython and not os.path.exists(PLOW_SOURCE_MAIN_CPP):
     sys.exit(1)
 
 # Check for thrift generated sources
-gen_dir = os.path.join(ROOT, "../thrift")
+gen_dir = "../thrift"
 if os.path.exists(gen_dir):
     gen_cmd = "cd {0} && ./generate-sources.sh".format(gen_dir)
     print "Re-generating Thrift python client bindings"
     ret = subprocess.call(gen_cmd, shell=True)
-    if ret != 0 and not os.path.exists(os.path.join(ROOT, "src/core/rpc")):
+    if ret != 0 and not os.path.exists("src/core/rpc"):
         print "Error: Missing the plow/client/core/rpc source file location.\n" \
               "Tried to generate, but Thrift command failed: {0}\n" \
               "Is Thrift installed?".format(gen_cmd)
@@ -173,7 +175,6 @@ class CleanCommand(Command):
             if os.path.exists(d):
                 self._clean_trees.append(d)
 
-
     def finalize_options(self):
         pass
 
@@ -189,7 +190,34 @@ class CleanCommand(Command):
             except Exception:
                 pass
 
-cmdclass['clean'] =  CleanCommand
+
+class InstallCommand(_install):
+
+    def run(self):
+        _install.run(self)
+
+        self.announce("Running post-install", log.INFO)
+
+        src_paths = set()
+        exist_paths = set()
+        src = os.path.join(ETC_DST_DIR, "plow")
+        dst = ETC_INSTALL_DIR
+
+        if not os.path.exists(dst):
+            os.makedirs(dst)
+
+        for name in os.listdir(src):
+            src_path = os.path.join(src, name)
+            dst_path = os.path.join(dst, name)
+
+            if not os.path.exists(dst_path):
+                self.copy_file(src_path, dst_path)  
+            else:
+                self.announce("{0} already exists".format(dst_path), log.INFO)
+
+
+cmdclass['clean'] = CleanCommand
+cmdclass['install'] = InstallCommand
 
 # build docs
 try:
@@ -203,8 +231,6 @@ except ImportError:
 def get_data(*paths):
     data = []
     for p in paths:
-        if not p.startswith(ROOT):
-            p = os.path.join(ROOT, p)
         data.extend(glob.iglob(p))
     return data
 
@@ -214,8 +240,6 @@ def copy_dir(src, dst):
         if os.path.isdir(dst):
             shutil.rmtree(dst)
         shutil.copytree(src, dst) 
-
-
 
 #
 # Python packages
@@ -253,18 +277,16 @@ setup(
     packages=find_packages(exclude=['tests', 'tests.*']),
 
     dependency_links=[
-        'https://github.com/sqlboy/blueprint/tarball/master#egg=blueprint-0.1',
         'https://github.com/sqlboy/fileseq/tarball/master#egg=fileseq-0.1',
         'http://peak.telecommunity.com/snapshots/',
-
     ],
 
     install_requires=[
         'psutil>=0.6.1',
         'argparse',
         'PyYAML',
-        'blueprint==0.1',
-        'fileseq==0.1',
+        'plow-blueprint',
+        'fileseq>=0.1',
     ],
 
     zip_safe = False,
@@ -272,26 +294,15 @@ setup(
     ext_modules = [plowmodule],
     cmdclass=cmdclass,
 
-    # scripted functions that will get wrapped
-    # into an entry point script
-    entry_points={
-        'console_scripts': [
-            'rndaemon = plow.rndaemon.main:main',
-        ],
-        'gui_scripts': [
-            'plow-wrangler = plow.gui.main:main'
-        ]
-    },
-
     # # stand-alone scripts from the root bin
-    # scripts=[p for p in glob.glob(os.path.join(BIN_DST_DIR, "*")) if not p.endswith('rndaemon')],
+    scripts=glob.glob("bin/*"),
 
     # # TODO: Some tests need to be made runable without an independant server
     test_suite="tests.test_all",
 
     # include_package_data=True,
     package_data={
-        '__dist__': ["*"],
+        # '__dist__': ["*"],
         'src': ["*.cpp", "*.h"],
         'plow': [
             "*.dat", "*.bp", "*.ini", "*.sh",
@@ -300,10 +311,6 @@ setup(
             'gui/resources/icons.py'
         ],
     },
-
-    data_files=[
-        ("/usr/local/etc/plow", get_data(os.path.join(TEMP_BUILD_DIR, 'etc/plow/*.cfg'))),
-    ],
 
     # Meta-stuff
     author='Matt Chambers & Justin Israel',
@@ -337,5 +344,4 @@ setup(
     ],
 
 )
-
 
