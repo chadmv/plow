@@ -14,7 +14,11 @@ class JobProgressBar(QtGui.QWidget):
     def __init__(self, totals, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.setTotals(totals)
+        self.setSizePolicy(QtGui.QSizePolicy.Expanding,
+            QtGui.QSizePolicy.Preferred)
 
+        ## Missing ability to detect size
+    
     def setTotals(self, totals):
         self.__totals = totals
         self.__values =  [
@@ -59,6 +63,7 @@ class JobProgressBar(QtGui.QWidget):
             move+=width
             painter.drawRoundedRect(rect, 3, 3)
         painter.end()
+        event.accept()
 
 
 class JobSelectionDialog(QtGui.QDialog):
