@@ -16,6 +16,7 @@ class PropertiesPanel(Panel):
         self.setWindowTitle(name)
 
         EventManager.bind("JOB_OF_INTEREST", self.__handleJobOfInterestEvent)
+        EventManager.bind("NODE_OF_INTEREST", self.__handleNodeOfInterestEvent)
 
     def init(self):
         pass
@@ -25,6 +26,62 @@ class PropertiesPanel(Panel):
 
     def refresh(self):
         self.widget().refresh()
+
+    def __handleNodeOfInterestEvent(self, *args, **kwargs):
+
+        node = pc.get_node(args[0])
+
+        widgets = [ 
+            {
+                "title": "Node",
+                "children": [
+                    {
+                        "title": "Name",
+                        "widget": "text",
+                        "value": node.name,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Cluster",
+                        "widget": "text",
+                        "value": node.clusterName,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "IP Addr",
+                        "widget": "text",
+                        "value": node.ipaddr,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Tags",
+                        "widget": "text",
+                        "value": ",".join(node.tags),
+                        "readOnly": True
+                    }
+                ]
+            },
+            {
+                "title": "System",
+                "children": [
+                    {
+                        "title": "CPU Model",
+                        "widget": "text",
+                        "value": node.system.cpuModel,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Platform",
+                        "widget": "text",
+                        "value": node.system.platform,
+                        "readOnly": True
+                    },
+                ]
+            }
+        ]
+
+        form = PlowForm(widgets)
+        self.widget().setWidget(form)
 
     def __handleJobOfInterestEvent(self, *args, **kwargs):
 
