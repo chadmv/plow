@@ -24,24 +24,16 @@ cdef class Project:
         self.project = proj
 
     property id:
-        def __get__(self):
-            cdef Guid id_ = self.project.id
-            return id_
+        def __get__(self): return self.project.id
 
     property code:
-        def __get__(self):
-            cdef string code = self.project.code
-            return code
+        def __get__(self): return self.project.code
 
     property title:
-        def __get__(self):
-            cdef string title = self.project.title
-            return title
+        def __get__(self): return self.project.title
 
     property isActive:
-        def __get__(self):
-            cdef bint val = self.project.isActive
-            return val
+        def __get__(self): return self.project.isActive
 
     cpdef refresh(self):
         """

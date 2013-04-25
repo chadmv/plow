@@ -185,70 +185,54 @@ cdef class Job:
         self._totals = initTaskTotals(self._job.totals)
 
     property id:
-        def __get__(self):
-            return self._job.id
+        def __get__(self): return self._job.id
 
     property folderId:
-        def __get__(self):
-            return self._job.folderId
+        def __get__(self): return self._job.folderId
 
     property name:
-        def __get__(self):
-            return self._job.name
+        def __get__(self): return self._job.name
 
     property username:
-        def __get__(self):
-            return self._job.username
+        def __get__(self): return self._job.username
 
     property uid:
-        def __get__(self):
-            return self._job.uid
+        def __get__(self): return self._job.uid
 
     property state:
-        def __get__(self):
-            return self._job.state
+        def __get__(self): return self._job.state
 
     property paused:
-        def __get__(self):
-            return self._job.paused
+        def __get__(self): return self._job.paused
 
     property minCores:
-        def __get__(self):
-            return self._job.minCores
+        def __get__(self): return self._job.minCores
 
     property maxCores:
-        def __get__(self):
-            return self._job.maxCores
+        def __get__(self): return self._job.maxCores
 
     property runCores:
-        def __get__(self):
-            return self._job.runCores
+        def __get__(self): return self._job.runCores
 
     property startTime:
-        def __get__(self):
-            return self._job.startTime
+        def __get__(self): return self._job.startTime
 
     property stopTime:
-        def __get__(self):
-            return self._job.stopTime
+        def __get__(self): return self._job.stopTime
 
     property totals:
-        def __get__(self):
-            if self._totals is None:
-                self._totals = initTaskTotals(self._job.totals)
-
-            return self._totals
+        def __get__(self): return self._totals
 
     property maxRssMb:
         def __get__(self): return self._job.maxRssMb
-
 
     cpdef refresh(self):
         """
         Refresh the attributes from the server
         """
-        getClient().proxy().getJob(self._job, self._job.id)
-
+        cdef JobT job 
+        getClient().proxy().getJob(job, self._job.id)
+        self.setJob(job)
 
     def kill(self, string reason):
         """

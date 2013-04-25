@@ -181,11 +181,7 @@ cdef class Layer:
         def __get__(self): return self._layer.threadable
 
     property totals:
-        def __get__(self):
-            if self._totals is None:
-                self._totals = initTaskTotals(self._layer.totals)
-
-            return self._totals
+        def __get__(self): return self._totals
 
     property tags:
         def __get__(self): return self._layer.tags
@@ -194,7 +190,9 @@ cdef class Layer:
         """
         Refresh the attributes from the server
         """
-        getClient().proxy().getLayerById(self._layer, self._layer.id)
+        cdef LayerT layer 
+        getClient().proxy().getLayerById(layer, self._layer.id)
+        self.setLayer(layer)
 
     def get_outputs(self):
         """ :returns: list[:class:`.Output`] """

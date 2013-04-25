@@ -86,7 +86,7 @@ cdef class Cluster:
 
     cdef setCluster(self, ClusterT& c):
         self._cluster = c
-        self._total = None
+        self._total = initClusterCounts(self._cluster.total)
 
     property id:
         def __get__(self): 
@@ -105,17 +105,15 @@ cdef class Cluster:
         def __get__(self): return self._cluster.tags
 
     property total:
-        def __get__(self): 
-            cdef ClusterCounts c    
-            if self._total is None:
-                self._total = initClusterCounts(self._cluster.total)
-            return self._total
+        def __get__(self): return self._total
 
     cpdef refresh(self):
         """
         Refresh the attributes from the server
         """
-        getClient().proxy().getCluster(self._cluster, self._cluster.name)
+        cdef ClusterT cluster
+        getClient().proxy().getCluster(cluster, self._cluster.name)
+        self.setCluster(cluster)
 
     def delete(self):
         """

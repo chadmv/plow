@@ -41,38 +41,28 @@ cdef class Folder:
         self._totals = initTaskTotals(self.folder.totals)
 
     property id:
-        def __get__(self):
-            return self.folder.id
+        def __get__(self): return self.folder.id
 
     property name:
-        def __get__(self):
-            return self.folder.name
+        def __get__(self): return self.folder.name
         def __set__(self, string name):
             set_folder_name(self.id, name)
             self.folder.name = name
 
     property minCores:
-        def __get__(self):
-            return self.folder.minCores
+        def __get__(self): return self.folder.minCores
 
     property maxCores:
-        def __get__(self):
-            return self.folder.maxCores
+        def __get__(self): return self.folder.maxCores
 
     property runCores:
-        def __get__(self):
-            return self.folder.runCores
+        def __get__(self): return self.folder.runCores
 
     property order:
-        def __get__(self):
-            return self.folder.order
+        def __get__(self): return self.folder.order
 
     property totals:
-        def __get__(self):
-            if self._totals is None:
-                self._totals = initTaskTotals(self.folder.totals)
-
-            return self._totals
+        def __get__(self): return self._totals
 
     property jobs:
         def __get__(self):
@@ -87,7 +77,9 @@ cdef class Folder:
         """
         Refresh the attributes from the server
         """
-        getClient().proxy().getFolder(self.folder, self.folder.id)
+        cdef FolderT folder
+        getClient().proxy().getFolder(folder, self.folder.id)
+        self.setFolder(folder)
 
     def set_min_cores(self, int value):
         """

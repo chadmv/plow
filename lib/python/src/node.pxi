@@ -115,12 +115,17 @@ cdef class Node:
 
     """
     cdef NodeT _node
+    cdef NodeSystem _system
+
+    def __init__(self):
+        self._system = None
 
     def __repr__(self):
         return "<Node: %s>" % self.name
 
     cdef setNode(self, NodeT& n):
         self._node = n
+        self._system = initNodeSystem(self._node.system)
 
     property id:
         def __get__(self): return self._node.id
@@ -168,16 +173,15 @@ cdef class Node:
         def __get__(self): return self._node.state
 
     property system:
-        def __get__(self): 
-            cdef NodeSystem s
-            s = initNodeSystem(self._node.system)
-            return s
+        def __get__(self): return self._system
 
     cpdef refresh(self):
         """
         Refresh the attributes from the server
         """
-        getClient().proxy().getNode(self._node, self._node.name)
+        cdef NodeT node 
+        getClient().proxy().getNode(node, self._node.name)
+        self.setNode(node)
 
     def set_locked(self, bint locked):
         """
