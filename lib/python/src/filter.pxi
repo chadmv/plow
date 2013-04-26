@@ -82,7 +82,9 @@ cdef class Matcher:
         """
         Refresh the attributes from the server
         """
-        getClient().proxy().getMatcher(self.matcher, self.matcher.id)
+        cdef MatcherT matcher 
+        getClient().proxy().getMatcher(matcher, self.matcher.id)
+        self.setMatcher(matcher)
 
     def delete(self):
         """ Delete the matcher  """
@@ -230,7 +232,9 @@ cdef class Action:
         """
         Refresh the attributes from the server
         """
-        getClient().proxy().getAction(self.action, self.action.id)
+        cdef ActionT action
+        getClient().proxy().getAction(action, self.action.id)
+        self.setAction(action)
 
     def delete(self):
         """Delete the action"""
@@ -324,19 +328,16 @@ cdef class Filter:
         self._filter.order = kwargs.get('order', 0)
         self._filter.enabled = kwargs.get('enabled', False)
 
-        cdef Matcher m
-        for m in kwargs.get('matchers', []):
-            self._filter.matchers.push_back(m.matcher) 
-
-        cdef Action a
-        for a in kwargs.get('actions', []):
-            self._filter.actions.push_back(a.action) 
+        self._actions = []
+        self._matchers = []
 
     def __repr__(self):
         return "<Filter: %s>" % self.name
         
     cdef setFilter(self, FilterT& a):
         self._filter = a
+        self._actions = []
+        self._matchers = []
 
     property id:
         def __get__(self): return self._filter.id
@@ -368,7 +369,9 @@ cdef class Filter:
         """
         Refresh the attributes from the server
         """
-        getClient().proxy().getFilter(self._filter, self._filter.id)
+        cdef FilterT filt
+        getClient().proxy().getFilter(filt, self._filter.id)
+        self.setFilter(filt)
 
     def delete(self):
         """
