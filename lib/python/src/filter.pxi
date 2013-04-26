@@ -435,6 +435,7 @@ def get_filters(Project project):
 
     getClient().proxy().getFilters(filters, project.id)
     ret = [initFilter(f) for f in filters]
+    return ret
 
 cpdef inline Filter get_filter(Guid& filterId):
     """
