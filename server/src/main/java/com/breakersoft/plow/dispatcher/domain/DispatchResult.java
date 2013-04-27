@@ -40,22 +40,27 @@ public class DispatchResult {
     public boolean continueDispatching() {
 
         if (procs.size() >= maxProcs) {
+            logger.info("Stopped dispatching by procs/maxprocs {} >= {}", procs.size(), maxProcs);
             return false;
         }
 
         if (cores >= maxCores) {
-            return false;
+            logger.info("Stopped dispatching by cores/maxcores {} >= {}", cores, maxCores);
         }
 
         if (procs.size() >= DispatchConfig.MAX_PROCS_PER_JOB) {
+            logger.info("Stopped dispatching by procs/max_per_job {} >= {}",
+                    procs.size(), DispatchConfig.MAX_PROCS_PER_JOB);
             return false;
         }
 
         if (resource.getIdleCores() < 1) {
+            logger.info("Stopped dispatching resource cores {} < 1", resource.getIdleCores());
             return false;
         }
 
         if (resource.getIdleRam() <=  0) {
+            logger.info("Stopped dispatching resource ram {} <=0", resource.getIdleRam());
             return false;
         }
 
@@ -65,22 +70,24 @@ public class DispatchResult {
     public boolean canDispatch(DispatchableTask task) {
 
         if (resource.getIdleCores() < task.minCores) {
+            logger.info("Stopped dispatching by cores {} < {}", resource.getIdleCores(), task.minCores);
             return false;
         }
 
         if (resource.getIdleRam() < task.minRam) {
+            logger.info("Stopped dispatching by ram {} < {}", resource.getIdleRam(), task.minRam);
             return false;
         }
 
         return true;
     }
 
-    public void dispatched(DispatchProc proc) {
-        cores+=proc.getIdleCores();
-        ram+=proc.getIdleRam();
+    public void dispatched(DispatchProc proc, DispatchableTask task) {
+        // Here is why all ram gets eaten up.
+        cores+=task.minCores;
+        ram+=task.minRam;
 
         procs.add(proc);
-        resource.allocate(proc.getIdleCores(), proc.getIdleRam());
 
         logger.info("Dispatched {}, cores left: {} - ram left: {}",
                 new Object[] { proc.getHostname(), resource.getIdleCores(),

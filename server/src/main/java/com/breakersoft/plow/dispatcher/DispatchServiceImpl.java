@@ -24,7 +24,6 @@ import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchStats;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.EventManager;
-import com.breakersoft.plow.event.ProcDeallocatedEvent;
 import com.breakersoft.plow.exceptions.PlowDispatcherException;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.TaskState;
@@ -151,6 +150,7 @@ public class DispatchServiceImpl implements DispatchService {
             quotaDao.allocate(node, task, task.minCores);
             DispatchProc proc = procDao.create(node, task);
             dispatchDao.incrementDispatchTotals(proc);
+            node.allocate(task.minCores, task.minRam);
             return proc;
 
         } catch (Exception e) {

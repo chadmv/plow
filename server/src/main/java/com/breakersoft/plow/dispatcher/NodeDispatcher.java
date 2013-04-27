@@ -56,6 +56,8 @@ public class NodeDispatcher {
      */
     public void dispatch(DispatchResult result, DispatchNode node) {
 
+        logger.info("Dispatching: {}", node);
+
         //TODO: check to see if node is scheduled.
         // This will modify the javg runtime of frames
         // the node can target, and sets the backfill boolean
@@ -139,7 +141,7 @@ public class NodeDispatcher {
                     RndClient client = new RndClient(node.getName());
                     client.runProcess(command);
                 }
-                result.dispatched(proc);
+                result.dispatched(proc, task);
             }
             else {
                 cleanup(result, proc, task, "Unable to start task.");

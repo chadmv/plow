@@ -54,9 +54,13 @@ public class DispatchNode extends NodeE implements DispatchResource {
         this.dispatchable = dispatchable;
     }
 
+    public String toString() {
+        return String.format("Node: %s [%s] cores:%d mem:%d", getName(), getNodeId(), cores, memory);
+    }
+
     @Override
     public void allocate(int cores, int ram) {
         this.cores = this.cores - cores;
-        this.memory = this.memory - memory;
+        this.memory = this.memory - ram;
     }
 }
