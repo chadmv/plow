@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.breakersoft.plow.dispatcher.command.BookProcCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
-import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.rndaemon.RndClient;
 
@@ -33,7 +33,7 @@ public class ProcDispatcher {
     private DispatchService dispatchService;
 
     // Threads for dispatching.
-    private ExecutorService dispatchThreads = Executors.newFixedThreadPool(8);
+    private ExecutorService dispatchThreads = Executors.newFixedThreadPool(16);
 
 
     public ProcDispatcher() {
@@ -46,7 +46,7 @@ public class ProcDispatcher {
 
     public void dispatch(DispatchResult result, DispatchProc proc) {
 
-        final List<DispatchableTask> tasks =
+        final List<DispatchTask> tasks =
                 dispatchService.getDispatchableTasks(proc, proc);
 
         if (tasks.isEmpty()) {
@@ -54,7 +54,7 @@ public class ProcDispatcher {
             return;
         }
 
-        for (DispatchableTask task: tasks) {
+        for (DispatchTask task: tasks) {
             dispatch(result, proc, task);
             // Only continue if the task failed due to a
             // reservation problem.
@@ -62,13 +62,9 @@ public class ProcDispatcher {
                 break;
             }
         }
-
-        if (result.continueDispatching()) {
-            dispatchService.deallocateProc(proc, "Unable to find next frame.");
-        }
     }
 
-    public void dispatch(DispatchResult result, DispatchProc proc, DispatchableTask task) {
+    public void dispatch(DispatchResult result, DispatchProc proc, DispatchTask task) {
 
         if (!dispatchService.reserveTask(task)) {
             return;
@@ -95,7 +91,7 @@ public class ProcDispatcher {
         }
     }
 
-    private void cleanup(DispatchResult result, DispatchProc proc, DispatchableTask task, String message) {
+    private void cleanup(DispatchResult result, DispatchProc proc, DispatchTask task, String message) {
         dispatchService.deallocateProc(proc, message);
         dispatchService.unreserveTask(task);
         result.dispatch = false;
