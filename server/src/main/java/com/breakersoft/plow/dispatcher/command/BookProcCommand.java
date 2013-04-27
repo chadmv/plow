@@ -17,7 +17,6 @@ public class BookProcCommand implements Runnable {
     @Override
     public void run() {
          final DispatchResult result = new DispatchResult(proc);
-         result.maxProcs = 1;
          dispatcher.dispatch(result, proc);
     }
 }
