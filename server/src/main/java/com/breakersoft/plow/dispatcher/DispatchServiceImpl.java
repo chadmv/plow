@@ -172,14 +172,6 @@ public class DispatchServiceImpl implements DispatchService {
         final Quota quota = quotaDao.getQuota(proc);
         final Node node = nodeDao.get(proc.getNodeId());
 
-        // Updates tables
-        // proc
-        // quota
-        // node
-        // folder_dsp
-        // job_dsp
-        // layer_dsp
-
         if (procDao.delete(proc)) {
             quotaDao.free(quota, proc.getIdleCores());
             nodeDao.free(node, proc.getIdleCores(), proc.getIdleRam());
@@ -188,9 +180,6 @@ public class DispatchServiceImpl implements DispatchService {
         else {
             logger.warn("{} was alredy deallocated.", proc.getProcId());
         }
-
-        // TODO: most to post transaction event.
-        eventManager.post(new ProcDeallocatedEvent(proc));
     }
 
     @Override
