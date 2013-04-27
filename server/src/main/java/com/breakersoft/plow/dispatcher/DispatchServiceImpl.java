@@ -24,8 +24,8 @@ import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchStats;
 import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.event.EventManager;
-import com.breakersoft.plow.event.ProcAllocatedEvent;
 import com.breakersoft.plow.event.ProcDeallocatedEvent;
+import com.breakersoft.plow.exceptions.PlowDispatcherException;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.TaskState;
 
@@ -58,11 +58,11 @@ public class DispatchServiceImpl implements DispatchService {
     @Transactional(readOnly=true)
 
     public List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node) {
-    	return dispatchDao.getDispatchJobs(project, node);
+        return dispatchDao.getDispatchJobs(project, node);
     }
 
     public DispatchJob getDispatchJob(UUID id) {
-    	return dispatchDao.getDispatchJob(id);
+        return dispatchDao.getDispatchJob(id);
     }
 
     @Override
@@ -130,25 +130,26 @@ public class DispatchServiceImpl implements DispatchService {
     @Override
     public DispatchProc allocateProc(DispatchNode node, DispatchableTask task) {
 
-        DispatchProc proc = procDao.create(node, task);
+        logger.info("Allocating proc on {}", node);
 
-        final Quota quota = quotaDao.getQuota(node, task);
-        if(!quotaDao.allocateResources(quota, task.minCores)) {
-            logger.info("Failed to allocate resources from quota.");
-            return null;
+        // Fast quota check
+        if(!quotaDao.check(node, task, task.minCores)) {
+              throw new PlowDispatcherException(
+                      "Failed to allocatae a proc from " + node.getName() + ", failed quota check.");
         }
 
-        if (!nodeDao.allocateResources(node, task.minCores, task.minRam)) {
-            logger.info("Failed to allocate resource from node: " + node.getName());
-            return null;
+        try {
+            nodeDao.allocate(node, task.minCores, task.minRam);
+            quotaDao.allocate(node, task, task.minCores);
+            DispatchProc proc = procDao.create(node, task);
+            dispatchDao.incrementDispatchTotals(proc);
+            return proc;
+
+        } catch (Exception e) {
+            throw new PlowDispatcherException(
+                    "Failed to allocatae a proc from " + node.getName() + "," + e, e);
         }
 
-        dispatchDao.incrementDispatchTotals(proc);
-
-        // TODO: move to post transaction event.
-        eventManager.post(new ProcAllocatedEvent(proc));
-
-        return proc;
     }
 
     @Override
@@ -158,7 +159,7 @@ public class DispatchServiceImpl implements DispatchService {
             return;
         }
 
-        logger.info("deallocating proc: {}, {}", proc.getProcId(), why);
+        logger.info("deallocating {}, {}", proc, why);
 
         final Quota quota = quotaDao.getQuota(proc);
         final Node node = nodeDao.get(proc.getNodeId());
@@ -172,7 +173,7 @@ public class DispatchServiceImpl implements DispatchService {
         // layer_dsp
 
         if (procDao.delete(proc)) {
-            quotaDao.freeResources(quota, proc.getIdleCores());
+            quotaDao.free(quota, proc.getIdleCores());
             nodeDao.freeResources(node, proc.getIdleCores(), proc.getIdleRam());
             dispatchDao.decrementDispatchTotals(proc);
         }
