@@ -22,7 +22,7 @@ def formatMaxValue(value):
 def formatDateTime(epoch):
     if not epoch:
         return "-"
-    date = datetime.fromtimestamp(epoch / 1000)
+    date = datetime.fromtimestamp(epoch / 1000).strftime("%Y-%m-%d %H:%M:%S")
     return str(date)
 
 def formatDuration(startTime, stopTime):
