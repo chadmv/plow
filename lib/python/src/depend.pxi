@@ -173,10 +173,10 @@ cdef class Depend:
         def __get__(self): return self._depend.active
 
     property createdTime:
-        def __get__(self): return self._depend.createdTime
+        def __get__(self): return long(self._depend.createdTime)
 
     property modifiedTime:
-        def __get__(self): return self._depend.modifiedTime
+        def __get__(self): return long(self._depend.modifiedTime)
 
     property dependentJobId:
         def __get__(self): return self._depend.dependentJobId

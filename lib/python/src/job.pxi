@@ -215,10 +215,10 @@ cdef class Job:
         def __get__(self): return self._job.runCores
 
     property startTime:
-        def __get__(self): return self._job.startTime
+        def __get__(self): return long(self._job.startTime)
 
     property stopTime:
-        def __get__(self): return self._job.stopTime
+        def __get__(self): return long(self._job.stopTime)
 
     property totals:
         def __get__(self): return self._totals

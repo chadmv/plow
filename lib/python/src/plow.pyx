@@ -47,7 +47,7 @@ def get_plow_time():
     :returns: long - msec since epoch
     """
     cdef long epoch
-    epoch = getClient().proxy().getPlowTime()
+    epoch = long(getClient().proxy().getPlowTime())
     # plowTime = datetime.fromtimestamp(epoch / 1000)
     # return plowTime
     return epoch

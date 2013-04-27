@@ -102,9 +102,9 @@ cdef class Node:
     :var clusterName: str
     :var ipaddr: str
     :var locked: bool
-    :var createdTime: msec epoch timestamp
-    :var updatedTime: msec epoch timestamp
-    :var bootTime: msec epoch timestamp
+    :var createdTime: long msec epoch timestamp
+    :var updatedTime: long msec epoch timestamp
+    :var bootTime: long msec epoch timestamp
     :var totalCores: int
     :var idleCores: int
     :var totalRamMb: int
@@ -146,13 +146,13 @@ cdef class Node:
         def __get__(self): return self._node.locked
 
     property createdTime:
-        def __get__(self): return self._node.createdTime
+        def __get__(self): return long(self._node.createdTime)
 
     property updatedTime:
-        def __get__(self): return self._node.updatedTime
+        def __get__(self): return long(self._node.updatedTime)
 
     property bootTime:
-        def __get__(self): return self._node.bootTime
+        def __get__(self): return long(self._node.bootTime)
 
     property totalCores:
         def __get__(self): return self._node.totalCores

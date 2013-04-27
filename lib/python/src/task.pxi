@@ -122,8 +122,8 @@ cdef class Task:
     :var number: int 
     :var dependCount: int  
     :var order: int 
-    :var startTime: msec epoch timestamp
-    :var stopTime: msec epoch timestamp
+    :var startTime: long msec epoch timestamp
+    :var stopTime: long msec epoch timestamp
     :var lastNodeName: str 
     :var lastLogLine: str 
     :var retries: int 
@@ -161,10 +161,10 @@ cdef class Task:
         def __get__(self): return self._task.order
 
     property startTime:
-        def __get__(self): return self._task.startTime
+        def __get__(self): return long(self._task.startTime)
 
     property stopTime:
-        def __get__(self): return self._task.stopTime
+        def __get__(self): return long(self._task.stopTime)
 
     property lastNodeName:
         def __get__(self): return self._task.lastNodeName
@@ -301,7 +301,7 @@ def get_tasks(**kwargs):
     :param taskIds: list of str :class:`.Task` id's 
     :param limit: int 
     :param offset: int 
-    :param lastUpdateTime: msec epoch timestamp 
+    :param lastUpdateTime: long msec epoch timestamp 
 
     :returns: list[:class:`.Task`]
     """
@@ -345,7 +345,7 @@ def retry_tasks(**kwargs):
     :param task: list of :class:`.Task` 
     :param limit: int 
     :param offset: int 
-    :param lastUpdateTime: msec epoch timestamp 
+    :param lastUpdateTime: long msec epoch timestamp 
 
     """
     cdef TaskFilterT f = dict_to_taskFilter(kwargs)
@@ -360,7 +360,7 @@ def eat_tasks(**kwargs):
     :param task: list of :class:`.Task` 
     :param limit: int 
     :param offset: int 
-    :param lastUpdateTime: msec epoch timestamp 
+    :param lastUpdateTime: long msec epoch timestamp 
     """
     cdef TaskFilterT f = dict_to_taskFilter(kwargs)
     getClient().proxy().eatTasks(f)
@@ -374,7 +374,7 @@ def kill_tasks(**kwargs):
     :param task: list of :class:`.Task` 
     :param limit: int 
     :param offset: int 
-    :param lastUpdateTime: msec epoch timestamp 
+    :param lastUpdateTime: long msec epoch timestamp 
     """
     cdef TaskFilterT f = dict_to_taskFilter(kwargs)
     getClient().proxy().killTasks(f)
