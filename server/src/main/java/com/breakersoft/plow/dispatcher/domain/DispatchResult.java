@@ -67,7 +67,7 @@ public class DispatchResult {
         return dispatch;
     }
 
-    public boolean canDispatch(DispatchableTask task) {
+    public boolean canDispatch(DispatchTask task) {
 
         if (resource.getIdleCores() < task.minCores) {
             logger.info("Stopped dispatching by cores {} < {}", resource.getIdleCores(), task.minCores);
@@ -82,7 +82,7 @@ public class DispatchResult {
         return true;
     }
 
-    public void dispatched(DispatchProc proc, DispatchableTask task) {
+    public void dispatched(DispatchProc proc, DispatchTask task) {
         // Here is why all ram gets eaten up.
         cores+=task.minCores;
         ram+=task.minRam;

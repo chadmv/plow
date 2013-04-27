@@ -27,7 +27,6 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
-import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.TaskState;
@@ -245,26 +244,6 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         return result;
     }
 
-    public static final RowMapper<DispatchTask>DTASK_MAPPER =
-            new RowMapper<DispatchTask>() {
-        @Override
-        public DispatchTask mapRow(ResultSet rs, int rowNum)
-                throws SQLException {
-
-            DispatchTask frame = new DispatchTask();
-            frame.setTaskId((UUID)rs.getObject("pk_task"));
-            frame.setLayerId((UUID) rs.getObject("pk_layer"));
-            frame.setJobId((UUID) rs.getObject("pk_job"));
-            frame.setName(rs.getString("str_name"));
-            frame.setMinCores(rs.getInt("int_min_cores"));
-            frame.setMinMemory(rs.getInt("int_min_ram"));
-            frame.setTags(new HashSet<String>(
-                    Arrays.asList((String[])rs.getArray("str_tags").getArray())));
-            frame.setName(rs.getString("str_name"));
-            return frame;
-        }
-    };
-
     private static final String GET_DISPATCHABLE_TASKS =
             "SELECT " +
                 "task.pk_task,"+
@@ -295,12 +274,12 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "task.int_task_order, task.int_layer_order ASC " +
             "LIMIT 10";
 
-    public static final RowMapper<DispatchableTask> DISPATCHABLE_TASK_MAPPER =
-            new RowMapper<DispatchableTask>() {
+    public static final RowMapper<DispatchTask> DISPATCHABLE_TASK_MAPPER =
+            new RowMapper<DispatchTask>() {
         @Override
-        public DispatchableTask mapRow(ResultSet rs, int rowNum)
+        public DispatchTask mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
-            DispatchableTask task = new DispatchableTask();
+            DispatchTask task = new DispatchTask();
             task.projectId = (UUID) rs.getObject("pk_project");
             task.taskId = (UUID) rs.getObject("pk_task");
             task.layerId = (UUID) rs.getObject("pk_layer");
@@ -312,7 +291,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     };
 
     @Override
-    public List<DispatchableTask> getDispatchableTasks(final JobId job, final DispatchResource resource) {
+    public List<DispatchTask> getDispatchableTasks(final JobId job, final DispatchResource resource) {
         return jdbc.query(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {

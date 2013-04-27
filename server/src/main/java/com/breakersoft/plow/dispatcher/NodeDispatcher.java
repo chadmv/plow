@@ -15,7 +15,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchStats;
-import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.rndaemon.RndClient;
@@ -105,7 +105,7 @@ public class NodeDispatcher {
 
     public void dispatch(DispatchResult result, DispatchNode node, DispatchJob job) {
 
-        final List<DispatchableTask> tasks =
+        final List<DispatchTask> tasks =
                 dispatchService.getDispatchableTasks(job, node);
 
         if (tasks.isEmpty()) {
@@ -113,7 +113,7 @@ public class NodeDispatcher {
             return;
         }
 
-        for (DispatchableTask task: tasks) {
+        for (DispatchTask task: tasks) {
             if (!result.canDispatch(task)) {
                 continue;
             }
@@ -121,7 +121,7 @@ public class NodeDispatcher {
         }
     }
 
-    public void dispatch(DispatchResult result, DispatchNode node, DispatchableTask task) {
+    public void dispatch(DispatchResult result, DispatchNode node, DispatchTask task) {
 
         if (!dispatchService.reserveTask(task)) {
             return;
@@ -161,7 +161,7 @@ public class NodeDispatcher {
      * @param task
      * @param message
      */
-    private void cleanup(DispatchResult result, DispatchProc proc, DispatchableTask task, String message) {
+    private void cleanup(DispatchResult result, DispatchProc proc, DispatchTask task, String message) {
         logger.warn("Failed to dispatch {}/{}, {}",
                 new Object[] {proc, task, message});
         result.dispatch = false;

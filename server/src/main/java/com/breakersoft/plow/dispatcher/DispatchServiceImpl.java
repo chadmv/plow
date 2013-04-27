@@ -22,7 +22,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchStats;
-import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.exceptions.PlowDispatcherException;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
@@ -99,7 +99,7 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public boolean startTask(String hostname, DispatchableTask task) {
+    public boolean startTask(String hostname, DispatchTask task) {
         if (taskDao.start(task, task.minCores, task.minRam)) {
             logger.info("Started {}", task);
             taskDao.resetTaskDispatchData(task, hostname);
@@ -129,13 +129,13 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public void assignProc(DispatchProc proc, DispatchableTask task) {
+    public void assignProc(DispatchProc proc, DispatchTask task) {
         procDao.assign(proc, task);
         proc.setTaskId(task.getTaskId());
     }
 
     @Override
-    public DispatchProc allocateProc(DispatchNode node, DispatchableTask task) {
+    public DispatchProc allocateProc(DispatchNode node, DispatchTask task) {
 
         logger.info("Allocating proc on {}", node);
 
@@ -182,7 +182,7 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public List<DispatchableTask> getDispatchableTasks(JobId job,
+    public List<DispatchTask> getDispatchableTasks(JobId job,
             DispatchResource resource) {
         return dispatchDao.getDispatchableTasks(job, resource);
     }

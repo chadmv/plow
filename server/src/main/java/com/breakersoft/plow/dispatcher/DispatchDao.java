@@ -11,7 +11,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
-import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 
 /**
@@ -28,7 +28,7 @@ public interface DispatchDao {
 
     DispatchProc getDispatchProc(UUID id);
 
-    List<DispatchableTask> getDispatchableTasks(JobId job, DispatchResource resource);
+    List<DispatchTask> getDispatchableTasks(JobId job, DispatchResource resource);
 
     void decrementDispatchTotals(DispatchProc proc);
 

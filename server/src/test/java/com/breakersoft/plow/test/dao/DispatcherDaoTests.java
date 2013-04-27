@@ -26,7 +26,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
-import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.service.JobService;
@@ -145,10 +145,10 @@ public class DispatcherDaoTests extends AbstractTest {
     @Test
     public void testGetDispatchableTasks() {
 
-        List<DispatchableTask> tasks =
+        List<DispatchTask> tasks =
                 dispatchService.getDispatchableTasks(job, node);
 
-        for (DispatchableTask task: tasks) {
+        for (DispatchTask task: tasks) {
             assertEquals(job.getJobId(), task.getJobId());
         }
     }

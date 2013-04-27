@@ -9,7 +9,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
-import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.TaskState;
 
@@ -43,7 +43,7 @@ public interface DispatchService {
 
     // New stuff.
 
-    List<DispatchableTask> getDispatchableTasks(JobId job, DispatchResource resource);
+    List<DispatchTask> getDispatchableTasks(JobId job, DispatchResource resource);
 
     /**
      * Removes the proc from the proc table and updates proc counts.
@@ -53,15 +53,15 @@ public interface DispatchService {
      */
     void deallocateProc(DispatchProc proc, String why);
 
-    DispatchProc allocateProc(DispatchNode node, DispatchableTask task);
+    DispatchProc allocateProc(DispatchNode node, DispatchTask task);
 
     List<DispatchProc> getOrphanProcs();
 
     RunTaskCommand getRuntaskCommand(Task task);
 
-    boolean startTask(String hostname, DispatchableTask task);
+    boolean startTask(String hostname, DispatchTask task);
 
-    void assignProc(DispatchProc proc, DispatchableTask task);
+    void assignProc(DispatchProc proc, DispatchTask task);
 
     List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node);
 

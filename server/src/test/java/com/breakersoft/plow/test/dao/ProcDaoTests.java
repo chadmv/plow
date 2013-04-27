@@ -23,7 +23,7 @@ import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.NodeDispatcher;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
-import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.test.AbstractTest;
 
@@ -44,7 +44,7 @@ public class ProcDaoTests extends AbstractTest {
 
     private Proc proc;
 
-    private DispatchableTask task;
+    private DispatchTask task;
 
     private DispatchNode dnode;
 

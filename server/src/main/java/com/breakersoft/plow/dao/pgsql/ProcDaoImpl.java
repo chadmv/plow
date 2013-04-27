@@ -16,7 +16,7 @@ import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
-import com.breakersoft.plow.dispatcher.domain.DispatchableTask;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
@@ -73,7 +73,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                     "int_ram");
 
     @Override
-    public DispatchProc create(DispatchNode node, DispatchableTask task) {
+    public DispatchProc create(DispatchNode node, DispatchTask task) {
 
         DispatchProc proc = new DispatchProc();
         proc.setProcId(UUID.randomUUID());
