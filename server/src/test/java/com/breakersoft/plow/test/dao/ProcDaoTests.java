@@ -96,27 +96,6 @@ public class ProcDaoTests extends AbstractTest {
 
     }
 
-    @Test
-    public void testGetOrphanedProcs() {
-
-        List<Proc> procs = procDao.getOrphanedProcs();
-        assertEquals(0, procs.size());
-
-        Job job = jobService.getJob(task.getJobId());
-        procs = procDao.getProcs(job);
-
-        for (Proc proc: procs) {
-            this.jdbc().update(
-                    "UPDATE plow.proc SET pk_task=NULL, time_updated = ? WHERE pk_proc=?",
-                    System.currentTimeMillis() - Defaults.PROC_ORPHANED_SECONDS * 1001,
-                    proc.getProcId());
-        }
-
-        procs = procDao.getOrphanedProcs();
-        assertEquals(1, procs.size());
-    }
-
-
     public void testSetProcUnbooked() {
 
     }

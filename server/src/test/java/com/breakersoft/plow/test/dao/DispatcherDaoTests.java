@@ -10,9 +10,13 @@ import javax.annotation.Resource;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.breakersoft.plow.Defaults;
+import com.breakersoft.plow.Job;
+import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.FolderDao;
+import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dispatcher.DispatchDao;
 import com.breakersoft.plow.dispatcher.DispatchService;
@@ -45,6 +49,9 @@ public class DispatcherDaoTests extends AbstractTest {
 
     @Resource
     QuotaDao quotaDao;
+
+    @Resource
+    ProcDao procDao;
 
     @Resource
     JobService jobService;
@@ -145,4 +152,24 @@ public class DispatcherDaoTests extends AbstractTest {
             assertEquals(job.getJobId(), task.getJobId());
         }
     }
+
+    @Test
+    public void testGetOrphanedProcs() {
+
+        List<DispatchProc> procs = dispatchDao.getOrphanProcs();
+        assertEquals(0, procs.size());
+
+
+        List<Proc> runningProcs = procDao.getProcs(job);
+
+        for (Proc proc: runningProcs) {
+            this.jdbc().update(
+                    "UPDATE plow.proc SET pk_task=NULL, time_updated = ? WHERE pk_proc=?",
+                    System.currentTimeMillis() - Defaults.PROC_ORPHANED_SECONDS * 1001,
+                    proc.getProcId());
+        }
+
+        procs = dispatchDao.getOrphanProcs();
+        assertEquals(0, procs.size());
+     }
 }

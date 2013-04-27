@@ -118,7 +118,7 @@ public class NodeDaoTests extends AbstractTest {
         Cluster cluster = clusterDao.create("test", TAGS);
         Node node = nodeDao.create(cluster, ping);
         nodeDao.allocate(node, 1, 1024);
-        nodeDao.freeResources(node, 1, 1024);
+        nodeDao.free(node, 1, 1024);
 
         assertEquals(ping.hw.physicalCpus,
                 simpleJdbcTemplate.queryForInt("SELECT int_idle_cores FROM node_dsp WHERE pk_node=?",
