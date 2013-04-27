@@ -1,8 +1,11 @@
 
-import constants
+import os
 import time
-
 from datetime import datetime
+
+import constants
+from manifest import QtGui
+
 
 def formatPercentage(value, total):
     if total == 0:
@@ -19,7 +22,7 @@ def formatMaxValue(value):
 def formatDateTime(epoch):
     if not epoch:
         return "-"
-    date = datetime.fromtimestamp(epoch / 1000)
+    date = datetime.fromtimestamp(epoch / 1000).strftime("%Y-%m-%d %H:%M:%S")
     return str(date)
 
 def formatDuration(startTime, stopTime):
@@ -34,3 +37,9 @@ def formatDuration(startTime, stopTime):
     m, s = divmod(duration, 60)
     h, m = divmod(m, 60)
     return "%02d:%02d:%02d" % (h, m, s)
+
+
+def loadTheme():
+    QtGui.QApplication.setStyle("plastique")
+    path = os.path.join(os.path.dirname(__file__) , "resources/style.css")
+    QtGui.qApp.setStyleSheet(open(path).read())

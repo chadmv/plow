@@ -5,6 +5,7 @@ from manifest import QtCore, QtGui
 from panels import *
 from resources import icons
 from event import EventManager
+from util import loadTheme 
 
 class DefaultConfig(object):
 
@@ -18,6 +19,9 @@ class MainWindow(QtGui.QMainWindow):
     """
     def __init__(self, appname, workspace):
         QtGui.QMainWindow.__init__(self, None)
+
+        self.resize(1024,800)
+
         self.__default_workspace = workspace
         self.setDockOptions(self.AnimatedDocks | 
                             self.AllowNestedDocks |
@@ -210,12 +214,12 @@ def launch(argv, name, layout=None):
     # Initialize the default configuration files if none exist
 
     app = QtGui.QApplication(argv)
-    app.setStyle("plastique")
-    app.setStyleSheet(open(os.path.dirname(__file__) + "/resources/style.css").read())
+    loadTheme()
 
     win = MainWindow(name, layout)
     app.lastWindowClosed.connect(win.saveApplicationState)
     win.show()
+    win.raise_()
     app.exec_()
 
 
