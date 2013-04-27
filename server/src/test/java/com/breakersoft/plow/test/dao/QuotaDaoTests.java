@@ -1,6 +1,8 @@
 package com.breakersoft.plow.test.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
@@ -39,6 +41,16 @@ public class QuotaDaoTests extends AbstractTest {
         Quota q1 = quotaDao.create(TEST_PROJECT, c, 10, 100);
         Quota q2 = quotaDao.get(q1.getQuotaId());
         assertEquals(q1, q2);
+    }
+
+    @Test
+    public void testCheck() {
+        Cluster c = nodeService.createCluster("test", TAGS);
+        quotaDao.create(TEST_PROJECT, c, 10, 100);
+        assertTrue(quotaDao.check(c, TEST_PROJECT, 99));
+        assertFalse(quotaDao.check(c, TEST_PROJECT, 100));
+        assertFalse(quotaDao.check(c, TEST_PROJECT, 101));
+        assertTrue(quotaDao.check(c, TEST_PROJECT, 0));
     }
 
     @Test
