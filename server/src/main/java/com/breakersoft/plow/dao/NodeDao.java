@@ -17,7 +17,7 @@ public interface NodeDao {
 
     void allocate(Node node, int cores, int memory);
 
-    void freeResources(Node node, int cores, int memory);
+    void free(Node node, int cores, int memory);
 
     void update(Node node, Ping ping);
 

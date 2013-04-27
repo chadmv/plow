@@ -217,7 +217,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "node_dsp.pk_node = ? ";
 
     @Override
-    public void freeResources(Node node, int cores, int memory) {
+    public void free(Node node, int cores, int memory) {
         jdbc.update(FREE_RESOURCES, cores, memory, node.getNodeId());
     }
 
