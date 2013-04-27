@@ -15,7 +15,7 @@ public interface NodeDao {
 
     Node get(UUID id);
 
-    void allocateResources(Node node, int cores, int memory);
+    void allocate(Node node, int cores, int memory);
 
     void freeResources(Node node, int cores, int memory);
 

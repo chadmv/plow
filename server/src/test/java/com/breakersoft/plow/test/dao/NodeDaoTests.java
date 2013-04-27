@@ -92,7 +92,7 @@ public class NodeDaoTests extends AbstractTest {
         Ping ping = getTestNodePing();
         Cluster cluster = clusterDao.create("test", TAGS);
         Node node = nodeDao.create(cluster, ping);
-        nodeDao.allocateResources(node, 1, 1024);
+        nodeDao.allocate(node, 1, 1024);
 
         // Check to ensure the procs/memory were subtracted from the host.
         assertEquals(ping.hw.physicalCpus - 1,
@@ -108,7 +108,7 @@ public class NodeDaoTests extends AbstractTest {
     public void allocateResourcesFailed() {
         Cluster cluster = clusterDao.create("test", TAGS);
         Node node = nodeDao.create(cluster, getTestNodePing());
-        nodeDao.allocateResources(node, 100, 1000000);
+        nodeDao.allocate(node, 100, 1000000);
     }
 
     @Test
@@ -117,7 +117,7 @@ public class NodeDaoTests extends AbstractTest {
         Ping ping = getTestNodePing();
         Cluster cluster = clusterDao.create("test", TAGS);
         Node node = nodeDao.create(cluster, ping);
-        nodeDao.allocateResources(node, 1, 1024);
+        nodeDao.allocate(node, 1, 1024);
         nodeDao.freeResources(node, 1, 1024);
 
         assertEquals(ping.hw.physicalCpus,

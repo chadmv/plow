@@ -201,7 +201,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "node_dsp.pk_node = ? ";
 
     @Override
-    public void allocateResources(Node node, int cores, int memory) {
+    public void allocate(Node node, int cores, int memory) {
         // Check constraints will throw.
         jdbc.update(ALLOCATE_RESOURCES,
                 cores, memory, node.getNodeId());
