@@ -127,7 +127,8 @@ public interface JobService {
      */
 
 
-    Task getTask(String id);
+
+    Task getTask(UUID id);
     boolean isFinished(Job job);
     Task getTask(Layer layer, int number);
     void updateRunningTasks(List<RunningTask> runningTasks);
@@ -135,4 +136,5 @@ public interface JobService {
     List<Task> getTasks(TaskFilterT filter);
     boolean setTaskState(Task task, TaskState currentState, TaskState newState);
     boolean setTaskState(Task task, TaskState state);
+
 }

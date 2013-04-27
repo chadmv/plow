@@ -40,7 +40,7 @@ public class TaskCompleteHandler {
 
     public void taskComplete(RunTaskResult result) {
 
-        Task task = jobService.getTask(result.taskId);
+        Task task = jobService.getTask(UUID.fromString(result.taskId));
         Job job = jobService.getJob(UUID.fromString(result.jobId));
         DispatchProc proc = dispatchService.getDispatchProc(result.procId);
 

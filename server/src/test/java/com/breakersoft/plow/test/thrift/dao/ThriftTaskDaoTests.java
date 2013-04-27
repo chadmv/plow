@@ -58,7 +58,7 @@ public class ThriftTaskDaoTests extends AbstractTest {
         @SuppressWarnings("deprecation")
         UUID id = simpleJdbcTemplate.queryForObject(
                 "SELECT pk_task FROM task LIMIT 1", UUID.class);
-        Task t = jobService.getTask(id.toString());
+        Task t = jobService.getTask(id);
         jobService.setTaskState(t, TaskState.WAITING, TaskState.EATEN);
 
         TaskFilterT filter = new TaskFilterT();

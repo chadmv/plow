@@ -201,8 +201,8 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Task getTask(String id) {
-        return taskDao.get(UUID.fromString(id));
+    public Task getTask(UUID id) {
+        return taskDao.get(id);
     }
 
     @Override

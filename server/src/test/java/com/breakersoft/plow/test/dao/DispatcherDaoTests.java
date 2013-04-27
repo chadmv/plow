@@ -133,7 +133,7 @@ public class DispatcherDaoTests extends AbstractTest {
         assertFalse(result.procs.isEmpty());
 
         DispatchProc proc = result.procs.get(0);
-        Task t = jobService.getTask(proc.getTaskId().toString());
+        Task t = jobService.getTask(proc.getTaskId());
 
         RunTaskCommand command = dispatchDao.getRunTaskCommand(t);
         assertEquals(command.jobId, t.getJobId().toString());

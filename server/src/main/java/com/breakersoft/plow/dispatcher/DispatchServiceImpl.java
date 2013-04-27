@@ -102,6 +102,7 @@ public class DispatchServiceImpl implements DispatchService {
     @Override
     public boolean startTask(String hostname, DispatchableTask task) {
         if (taskDao.start(task, task.minCores, task.minRam)) {
+            logger.info("Started {}", task);
             taskDao.resetTaskDispatchData(task, hostname);
             DispatchStats.taskStartedCount.incrementAndGet();
             return true;
@@ -113,6 +114,7 @@ public class DispatchServiceImpl implements DispatchService {
     @Override
     public boolean stopTask(Task task, TaskState state) {
         if (taskDao.stop(task, state)) {
+            logger.info("Stopping {}, new state: ", task, state.toString());
             taskDao.clearLastLogLine(task);
             DispatchStats.taskStoppedCount.incrementAndGet();
             return true;
