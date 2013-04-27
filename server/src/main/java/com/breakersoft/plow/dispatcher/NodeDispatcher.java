@@ -19,10 +19,11 @@ import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.rndaemon.RndClient;
+import com.breakersoft.plow.thrift.TaskState;
 
 
 @Component
-public class NodeDispatcher {
+public class NodeDispatcher implements Dispatcher<DispatchNode>{
 
     private static final Logger logger =
             org.slf4j.LoggerFactory.getLogger(NodeDispatcher.class);
@@ -144,28 +145,24 @@ public class NodeDispatcher {
                 result.dispatched(proc, task);
             }
             else {
-                cleanup(result, proc, task, "Unable to start task.");
+                /*
+                 * Not sure how this could happen, as the task need to be
+                 * reserved before it can be started, so don't cleanup
+                 * the task.
+                 */
+                dispatchFailed(result, proc, null, "Critical, unable to start reserved task.");
             }
         }
         catch (Exception e) {
             logger.warn("Failed to dispatch node " + node.getName() + "," + e, e);
-            cleanup(result, proc, task, e.getMessage());
+            dispatchFailed(result, proc, task, e.getMessage());
         }
     }
 
-    /**
-     * Utility method for cleaning up failed dispatches.
-     *
-     * @param result
-     * @param proc
-     * @param task
-     * @param message
-     */
-    private void cleanup(DispatchResult result, DispatchProc proc, DispatchTask task, String message) {
-        logger.warn("Failed to dispatch {}/{}, {}",
-                new Object[] {proc, task, message});
+    public void dispatchFailed(DispatchResult result, DispatchProc proc, DispatchTask task, String message) {
+        logger.info("Unable to dispatch {}/{}, {}", new Object[] {proc, task, message});
         result.dispatch = false;
         dispatchService.deallocateProc(proc, message);
-        dispatchService.unreserveTask(task);
+        dispatchService.stopTask(task, TaskState.WAITING);
     }
 }

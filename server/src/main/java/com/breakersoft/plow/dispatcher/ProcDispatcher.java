@@ -9,11 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.breakersoft.plow.dispatcher.command.BookProcCommand;
+import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.rndaemon.RndClient;
+import com.breakersoft.plow.thrift.TaskState;
 
 /**
  *
@@ -24,7 +27,7 @@ import com.breakersoft.plow.rndaemon.RndClient;
  *
  */
 @Component
-public class ProcDispatcher {
+public class ProcDispatcher implements Dispatcher<DispatchProc> {
 
     private static final Logger logger =
             org.slf4j.LoggerFactory.getLogger(ProcDispatcher.class);
@@ -48,11 +51,6 @@ public class ProcDispatcher {
 
         final List<DispatchTask> tasks =
                 dispatchService.getDispatchableTasks(proc, proc);
-
-        if (tasks.isEmpty()) {
-            dispatchService.deallocateProc(proc, "No pending tasks for job: " + proc.getJobId());
-            return;
-        }
 
         for (DispatchTask task: tasks) {
             dispatch(result, proc, task);
@@ -82,18 +80,42 @@ public class ProcDispatcher {
                 result.dispatch = false;
             }
             else {
-                cleanup(result, proc, task, "Unable to book task, was already booked?");
+                /*
+                 * We had reserved the task but were somehow unable to start it,
+                 */
+                dispatchFailed(result, proc, null, "Critical, unable to start reserved task.");
             }
         }
         catch (Exception e) {
-            logger.warn("Unexpected task dipatching error, " + e);
-            cleanup(result, proc, task, e.getMessage());
+            logger.warn("Unexpected task dipatching error, " + e, e);
+            dispatchFailed(result, proc, task, e.getMessage());
         }
     }
 
-    private void cleanup(DispatchResult result, DispatchProc proc, DispatchTask task, String message) {
-        dispatchService.deallocateProc(proc, message);
-        dispatchService.unreserveTask(task);
+    @Override
+    public void dispatch(DispatchResult result, DispatchProc resource,
+            DispatchProject project) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void dispatch(DispatchResult result, DispatchProc resource,
+            DispatchJob job) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void dispatchFailed(DispatchResult result, DispatchProc resource,
+            DispatchTask task, String message) {
+
+        logger.info("Unable to dispatch {}/{}, {}", new Object[] {resource, task, message});
+
+        dispatchService.deallocateProc(resource, message);
+        if (task != null) {
+            dispatchService.stopTask(task, TaskState.WAITING);
+        }
         result.dispatch = false;
     }
 }

@@ -18,5 +18,11 @@ public class BookProcCommand implements Runnable {
     public void run() {
          final DispatchResult result = new DispatchResult(proc);
          dispatcher.dispatch(result, proc);
+
+         // If no proc was booked
+         if (result.procs.isEmpty()) {
+            dispatcher.dispatchFailed(result, proc, null, "No tasks to dipsatch.");
+         }
+
     }
 }

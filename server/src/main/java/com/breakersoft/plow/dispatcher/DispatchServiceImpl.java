@@ -146,9 +146,9 @@ public class DispatchServiceImpl implements DispatchService {
         }
 
         try {
+            DispatchProc proc = procDao.create(node, task);
             nodeDao.allocate(node, task.minCores, task.minRam);
             quotaDao.allocate(node, task, task.minCores);
-            DispatchProc proc = procDao.create(node, task);
             dispatchDao.incrementDispatchTotals(proc);
             return proc;
 
