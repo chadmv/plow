@@ -70,8 +70,8 @@ public class DispatcherDaoTests extends AbstractTest {
 
     @Test
     public void getDispatchableJobs() {
-    	List<DispatchProject> projects = dispatchDao.getSortedProjectList(node);
-    	dispatchDao.getDispatchJobs(projects.get(0), node);
+        List<DispatchProject> projects = dispatchDao.getSortedProjectList(node);
+        dispatchDao.getDispatchJobs(projects.get(0), node);
     }
 
     @Test
