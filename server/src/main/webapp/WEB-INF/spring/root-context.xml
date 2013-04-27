@@ -62,8 +62,11 @@
 
   <task:scheduler id="crondScheduler" pool-size="4"/>
   <task:scheduled-tasks scheduler="crondScheduler">
-    <!-- Run the orphan proc checker every 30 seconds. -->
-    <task:scheduled ref="orphanProcChecker" method="execute" fixed-delay="30000" initial-delay="30000"/>
+    <!--
+        Run the orphan proc checker every 30 seconds, after 2 min startup delay
+        that allows all nodes to ping in after server downtime.
+     -->
+    <task:scheduled ref="orphanProcChecker" method="execute" fixed-delay="30000" initial-delay="120000"/>
   </task:scheduled-tasks>
 
 </beans>

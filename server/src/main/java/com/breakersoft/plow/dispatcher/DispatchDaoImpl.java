@@ -153,7 +153,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     }
 
     private static final String GET_ORPHAN_DISPATCH_PROCS =
-            GET_DISPATCH_PROC +  "WHERE proc.pk_task IS NULL AND plow.txTimeMillis() - proc.time_updated > ? LIMIT 100";
+            GET_DISPATCH_PROC +  "WHERE plow.txTimeMillis() - proc.time_updated > ? LIMIT 100";
 
     @Override
     public List<DispatchProc> getOrphanProcs() {
