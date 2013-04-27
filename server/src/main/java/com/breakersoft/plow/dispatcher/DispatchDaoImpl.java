@@ -153,11 +153,11 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     }
 
     private static final String GET_ORPHAN_DISPATCH_PROCS =
-            GET_DISPATCH_PROC +  "WHERE plow.txTimeMillis() - proc.time_updated > ? LIMIT 100";
+            GET_DISPATCH_PROC +  "WHERE plow.currentTimeMillis() - proc.time_updated > ? LIMIT 100";
 
     @Override
     public List<DispatchProc> getOrphanProcs() {
-        return jdbc.query(GET_ORPHAN_DISPATCH_PROCS, DPROC_MAPPER, Defaults.PROC_ORPHANED_SECONDS);
+        return jdbc.query(GET_ORPHAN_DISPATCH_PROCS, DPROC_MAPPER, Defaults.PROC_ORPHAN_CHECK_MILLIS);
     }
 
     public static final RowMapper<DispatchNode> DNODE_MAPPER = new RowMapper<DispatchNode>() {

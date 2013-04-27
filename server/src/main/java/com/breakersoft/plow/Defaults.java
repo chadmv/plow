@@ -18,5 +18,5 @@ public final class Defaults {
 
     public static int TASK_MAX_LIMIT = 1000;
 
-    public static int PROC_ORPHANED_SECONDS = 300;
+    public static int PROC_ORPHAN_CHECK_MILLIS = 300000;
 }

@@ -165,7 +165,7 @@ public class DispatcherDaoTests extends AbstractTest {
         for (Proc proc: runningProcs) {
             this.jdbc().update(
                     "UPDATE plow.proc SET pk_task=NULL, time_updated = ? WHERE pk_proc=?",
-                    System.currentTimeMillis() - Defaults.PROC_ORPHANED_SECONDS * 1001,
+                    System.currentTimeMillis() - Defaults.PROC_ORPHAN_CHECK_MILLIS + 1000,
                     proc.getProcId());
         }
 
