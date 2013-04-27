@@ -191,13 +191,13 @@ cdef class Node:
         """
         set_node_locked(self, locked)
 
-    def set_cluster(self, Guid& clusterId):
+    def set_cluster(self, Cluster cluster):
         """
         Assign the node to a cluster 
 
-        :param clusterId: str :class:`.Cluster` id 
+        :param cluster: str :class:`.Cluster`
         """
-        set_node_cluster(self, clusterId)
+        set_node_cluster(self, cluster)
 
     def set_tags(self, c_set[string]& tags):
         """
