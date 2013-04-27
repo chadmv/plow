@@ -16,6 +16,10 @@ public class DispatchProc extends ProcE implements DispatchResource, JobId {
     private boolean unbooked;
     private Set<String> tags;
 
+    public String toString() {
+        return String.format("Proc: %d/%d [%s] on host: %s", cores, memory, getProcId(), getHostname());
+    }
+
     public int getIdleCores() {
         return cores;
     }

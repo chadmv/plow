@@ -34,4 +34,8 @@ public class NodeE implements Node {
     public void setClusterId(UUID id) {
         this.clusterId = id;
     }
+
+    public String toString() {
+        return String.format("Node: %s [%s]", name, nodeId);
+    }
 }
