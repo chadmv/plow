@@ -66,8 +66,8 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
             JdbcUtils.Insert("plow.proc",
                     "pk_proc",
                     "pk_node",
-                    "pk_cluster,",
-                    "pk_quota,"+
+                    "pk_cluster",
+                    "pk_quota",
                     "pk_task",
                     "pk_job",
                     "int_cores",
