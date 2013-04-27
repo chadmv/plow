@@ -150,7 +150,6 @@ public class DispatchServiceImpl implements DispatchService {
             quotaDao.allocate(node, task, task.minCores);
             DispatchProc proc = procDao.create(node, task);
             dispatchDao.incrementDispatchTotals(proc);
-            node.allocate(task.minCores, task.minRam);
             return proc;
 
         } catch (Exception e) {

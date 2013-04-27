@@ -88,6 +88,7 @@ public class DispatchResult {
         ram+=task.minRam;
 
         procs.add(proc);
+        resource.allocate(task.minCores, task.minRam);
 
         logger.info("Dispatched {}, cores left: {} - ram left: {}",
                 new Object[] { proc.getHostname(), resource.getIdleCores(),
