@@ -130,13 +130,6 @@ public class NodeDispatcher {
             // Allocate the proc from the node.  This can throw if
             // the task is already running some where.
             proc = dispatchService.allocateProc(node, task);
-            if (proc == null) {
-                // The proc could not be allocated.  When this happens
-                // stop dispatching the node because its likely another
-                // thread is working on this node.
-                cleanup(result, proc, task, "Unable to allocate proc.");
-                return;
-            }
 
             if (dispatchService.startTask(node.getName(), task)) {
                 RunTaskCommand command =
@@ -153,8 +146,8 @@ public class NodeDispatcher {
             }
         }
         catch (Exception e) {
+            logger.warn("Failed to dispatch node " + node.getName() + "," + e, e);
             cleanup(result, proc, task, e.getMessage());
-            e.printStackTrace();
         }
     }
 
