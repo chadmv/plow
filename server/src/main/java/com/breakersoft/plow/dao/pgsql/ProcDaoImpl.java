@@ -94,7 +94,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
         // In case we allow moving nodes while cores are running.
         UUID clusterId = jdbc.queryForObject("SELECT pk_cluster FROM plow.node WHERE pk_node=?", UUID.class, node.getNodeId());
         UUID quotaId = jdbc.queryForObject(
-                "SELECT pk_quota FROM plow.quota WHERE quota.pk_project = job.pk_project AND quota.pk_project=? AND quota.pk_cluster = ?",
+                "SELECT pk_quota FROM plow.quota WHERE quota.pk_project=? AND quota.pk_cluster = ?",
                 UUID.class, task.getProjectId(), clusterId);
 
         proc.setClusterId(clusterId);
