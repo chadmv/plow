@@ -19,7 +19,7 @@ class LogsPanel(Panel):
         self.setWindowTitle(name)
 
         EventManager.bind("TASK_OF_INTEREST", self.__handleTaskOfInterestEvent)
-
+        
     def init(self):
         pass
 
@@ -40,7 +40,7 @@ class TabbedLogVieweWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
 
         self.__tasks = {}
-        self.__interval = 15000
+        self.__interval = 1000
 
         self.__tabs = QtGui.QTabWidget(self)
         self.__tabs.setTabsClosable(True)
@@ -56,6 +56,7 @@ class TabbedLogVieweWidget(QtGui.QWidget):
             self.__tabs.setCurrentIndex(index)
         else:
             viewer = LogViewerWidget(job, task, {}, self)
+            viewer.setInterval(self.__interval)
             index = self.__tabs.addTab(viewer, task.name)
             self.__tabs.setTabToolTip(index, viewer.logPath)
             self.__tabs.setCurrentIndex(index)
@@ -350,7 +351,7 @@ class FileWatcher(QtCore.QObject):
     def checkFiles(self):
         if not self.__files:
             return 
-
+        print "checkFiles"
         info = QtCore.QFileInfo()
 
         for path, mtime in self.__files.iteritems():
