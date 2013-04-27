@@ -45,6 +45,12 @@ public interface DispatchService {
 
     List<DispatchableTask> getDispatchableTasks(JobId job, DispatchResource resource);
 
+    /**
+     * Removes the proc from the proc table and updates proc counts.
+     *
+     * @param proc
+     * @param why
+     */
     void deallocateProc(DispatchProc proc, String why);
 
     DispatchProc allocateProc(DispatchNode node, DispatchableTask task);
