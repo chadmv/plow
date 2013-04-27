@@ -148,7 +148,7 @@ CREATE TABLE plow.job_ping (
 CREATE table plow.layer (
   pk_layer UUID NOT NULL PRIMARY KEY,
   pk_job UUID NOT NULL,
-  str_name VARCHAR(200) NOT NULL,
+  str_name TEXT NOT NULL,
   str_range TEXT,
   str_command TEXT[] NOT NULL,
   str_tags TEXT[] NOT NULL,
@@ -381,7 +381,9 @@ CREATE TABLE plow.proc (
   int_cores SMALLINT NOT NULL,
   int_ram INTEGER NOT NULL,
   bool_unbooked BOOLEAN DEFAULT 'f' NOT NULL,
-  bool_backfill BOOLEAN DEFAULT 'f' NOT NULL
+  bool_backfill BOOLEAN DEFAULT 'f' NOT NULL,
+  time_created BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
+  time_updated BIGINT NOT NULL DEFAULT plow.txTimeMillis()
 ) WITHOUT OIDS;
 
 CREATE INDEX proc_pk_node_idx ON plow.proc (pk_node);

@@ -102,7 +102,8 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
         "UPDATE " +
             "plow.proc " +
         "SET " +
-            "pk_task = ? " +
+            "pk_task = ?, " +
+            "time_updatde = plow.txTimeMillis() " +
         "WHERE " +
             "pk_proc = ?";
 

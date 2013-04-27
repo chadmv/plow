@@ -31,6 +31,12 @@ public interface DispatchService {
 
     DispatchProc getDispatchProc(String id);
 
+    /**
+     * Unassigns the task from the proc. The proc is still assigned to
+     * the job, and folder/job/layer counts are not changed.
+     *
+     * @param proc
+     */
     void unassignProc(DispatchProc proc);
 
     boolean stopTask(Task task, TaskState state);
