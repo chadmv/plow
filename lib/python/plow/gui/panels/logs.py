@@ -351,7 +351,7 @@ class FileWatcher(QtCore.QObject):
     def checkFiles(self):
         if not self.__files:
             return 
-        print "checkFiles"
+
         info = QtCore.QFileInfo()
 
         for path, mtime in self.__files.iteritems():
