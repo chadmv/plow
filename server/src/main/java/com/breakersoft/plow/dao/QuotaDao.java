@@ -17,16 +17,18 @@ public interface QuotaDao {
 
     Quota getQuota(Node node, Task task);
 
-    boolean allocateResources(Quota quota, int cores);
-
-    void freeResources(Quota quota, int cores);
+    void free(Quota quota, int cores);
 
     Quota getQuota(Proc proc);
 
-	void setSize(Quota quota, int size);
+    void setSize(Quota quota, int size);
 
-	void setBurst(Quota quota, int burst);
+    void setBurst(Quota quota, int burst);
 
-	void setLocked(Quota quota, boolean locked);
+    void setLocked(Quota quota, boolean locked);
+
+    void allocate(Cluster cluster, Project project, int cores);
+
+    boolean check(Cluster cluster, Project project, int cores);
 
 }

@@ -351,8 +351,8 @@ CREATE TABLE plow.node_dsp (
   pk_node UUID NOT NULL PRIMARY KEY,
   int_cores SMALLINT NOT NULL,
   int_ram INTEGER NOT NULL,
-  int_idle_cores SMALLINT NOT NULL,
-  int_free_ram INTEGER NOT NULL
+  int_idle_cores SMALLINT NOT NULL CHECK (int_idle_cores >= 0),
+  int_free_ram INTEGER NOT NULL CHECK (int_free_ram >= 0)
 ) WITHOUT OIDS;
 
 ---
@@ -363,9 +363,13 @@ CREATE TABLE plow.quota (
   pk_project UUID NOT NULL,
   int_size INTEGER NOT NULL,
   int_burst INTEGER NOT NULL,
-  int_run_cores INTEGER DEFAULT 0 NOT NULL,
+  int_run_cores INTEGER DEFAULT 0 NOT NULL CHECK (int_run_cores <= int_burst),
   bool_locked BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
+
+CREATE UNIQUE INDEX quota_project_cluster_uniq_idx ON plow.quota (pk_project, pk_cluster);
+CREATE INDEX quota_cluster_idx ON plow.quota (pk_cluster);
+
 
 ----------------------------------------------------------
 
@@ -376,6 +380,8 @@ CREATE TABLE plow.quota (
 CREATE TABLE plow.proc (
   pk_proc UUID NOT NULL PRIMARY KEY,
   pk_node UUID NOT NULL,
+  pk_cluster UUID NOT NULL,
+  pk_quota UUID NOT NULL,
   pk_job UUID NOT NULL,
   pk_task UUID,
   int_cores SMALLINT NOT NULL,
@@ -441,7 +447,6 @@ CREATE TABLE plow.action (
 CREATE INDEX action_pk_filter_idx ON plow.action (pk_filter);
 
 ----------------------------------------------------------
-
 
 ---
 --- plow.before_disp_update()

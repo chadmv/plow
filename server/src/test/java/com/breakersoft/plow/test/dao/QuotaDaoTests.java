@@ -68,13 +68,13 @@ public class QuotaDaoTests extends AbstractTest {
         quotaDao.setLocked(quota, true);
         assertEquals(true,
                 simpleJdbcTemplate.queryForObject("SELECT bool_locked FROM quota WHERE pk_quota=?",
-                		Boolean.class,
+                        Boolean.class,
                         quota.getQuotaId()));
 
         quotaDao.setLocked(quota, false);
         assertEquals(false,
                 simpleJdbcTemplate.queryForObject("SELECT bool_locked FROM quota WHERE pk_quota=?",
-                		Boolean.class,
+                        Boolean.class,
                         quota.getQuotaId()));
     }
 
@@ -106,7 +106,7 @@ public class QuotaDaoTests extends AbstractTest {
         Cluster c = nodeService.createCluster("test", TAGS);
         Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
 
-        quotaDao.allocateResources(quota, 5);
+        quotaDao.allocate(c, TEST_PROJECT, 5);
         assertEquals(5,
                 simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
@@ -117,22 +117,22 @@ public class QuotaDaoTests extends AbstractTest {
         Cluster c = nodeService.createCluster("test", TAGS);
         Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
 
-        quotaDao.allocateResources(quota, 5);
+        quotaDao.allocate(c, TEST_PROJECT, 5);
         assertEquals(5,
                 simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
 
-        quotaDao.freeResources(quota, 1);
+        quotaDao.free(quota, 1);
         assertEquals(4,
                 simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
 
-        quotaDao.allocateResources(quota, 6);
+        quotaDao.allocate(c, TEST_PROJECT, 6);
         assertEquals(10,
                 simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
 
-        quotaDao.freeResources(quota, 10);
+        quotaDao.free(quota, 10);
         assertEquals(0,
                 simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));

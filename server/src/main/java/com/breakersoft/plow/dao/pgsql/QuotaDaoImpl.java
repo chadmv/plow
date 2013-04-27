@@ -17,7 +17,6 @@ import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.util.JdbcUtils;
-import com.google.common.base.Preconditions;
 
 @Repository
 public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
@@ -124,20 +123,20 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
                 proc.getJobId(), proc.getNodeId());
     }
 
-    private static final String ALLOCATE_RESOURCE =
+    private static final String ALLOCATE_RESOURCES =
             "UPDATE " +
                 "plow.quota " +
             "SET " +
                 "int_run_cores = int_run_cores + ? " +
             "WHERE " +
-                "quota.pk_quota = ? " +
+                "quota.pk_project = ? " +
             "AND " +
-                "int_burst > int_run_cores + ?";
+                "quota.pk_cluster = ? ";
 
     @Override
-    public boolean allocateResources(Quota quota, int cores) {
-        Preconditions.checkNotNull(quota);
-        return jdbc.update(ALLOCATE_RESOURCE, cores, quota.getQuotaId(), cores) == 1;
+    public void allocate(Cluster cluster, Project project, int cores) {
+        // Relies on check constraint to throw.
+        jdbc.update(ALLOCATE_RESOURCES, cores, project.getProjectId(), cluster.getClusterId());
     }
 
     private static final String FREE_RESOURCE =
@@ -149,23 +148,40 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
                 "quota.pk_quota = ?";
 
     @Override
-    public void freeResources(Quota quota, int cores) {
+    public void free(Quota quota, int cores) {
         jdbc.update(FREE_RESOURCE, cores, quota.getQuotaId());
+    }
+
+    private static final String QUOTA_CHECK =
+        "SELECT " +
+            "COUNT(1) " +
+        "FROM " +
+            "plow.quota " +
+        "WHERE " +
+            "quota.pk_project = ? " +
+        "AND " +
+            "quota.pk_cluster = ? " +
+        "AND " +
+            "int_run_cores + ? < int_burst ";
+
+    @Override
+    public boolean check(Cluster cluster, Project project, int cores) {
+        return jdbc.queryForInt(QUOTA_CHECK, cluster.getClusterId(), project.getProjectId(), cores) == 1;
     }
 
     @Override
     public void setSize(Quota quota, int size) {
-    	jdbc.update("UPDATE plow.quota SET int_size=? WHERE pk_quota=?", size, quota.getQuotaId());
+        jdbc.update("UPDATE plow.quota SET int_size=? WHERE pk_quota=?", size, quota.getQuotaId());
     }
 
     @Override
     public void setBurst(Quota quota, int burst) {
-    	jdbc.update("UPDATE plow.quota SET int_burst=? WHERE pk_quota=?", burst, quota.getQuotaId());
+        jdbc.update("UPDATE plow.quota SET int_burst=? WHERE pk_quota=?", burst, quota.getQuotaId());
     }
 
     @Override
     public void setLocked(Quota quota, boolean locked) {
-    	jdbc.update("UPDATE plow.quota SET bool_locked=? WHERE pk_quota=?", locked, quota.getQuotaId());
+        jdbc.update("UPDATE plow.quota SET bool_locked=? WHERE pk_quota=?", locked, quota.getQuotaId());
     }
 
 
