@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 
 import com.breakersoft.plow.Job;
@@ -40,9 +41,18 @@ public class TaskCompleteHandler {
 
     public void taskComplete(RunTaskResult result) {
 
-        Task task = jobService.getTask(UUID.fromString(result.taskId));
-        Job job = jobService.getJob(UUID.fromString(result.jobId));
-        DispatchProc proc = dispatchService.getDispatchProc(result.procId);
+        Task task = null;
+        Job job = null;
+        DispatchProc proc = null;
+        try {
+            task = jobService.getTask(UUID.fromString(result.taskId));
+            job = jobService.getJob(UUID.fromString(result.jobId));
+            proc = dispatchService.getDispatchProc(result.procId);
+        }
+        catch (EmptyResultDataAccessException e) {
+            logger.error("Bad task complete ping Job:" + result.jobId + ", Task: " + result.taskId, e);
+            return;
+        }
 
         TaskState newState;
         if (result.exitStatus == 0) {
