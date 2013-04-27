@@ -8,8 +8,6 @@ import java.util.UUID;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import com.breakersoft.plow.Defaults;
-import com.breakersoft.plow.Job;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.ProcE;
