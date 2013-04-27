@@ -3,7 +3,7 @@ package com.breakersoft.plow.dao;
 import java.util.List;
 import java.util.UUID;
 
-import com.breakersoft.plow.Job;
+import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
@@ -18,14 +18,13 @@ public interface ProcDao {
 
     boolean delete(Proc proc);
 
-    List<Proc> getProcs(Job job);
+    List<Proc> getProcs(JobId job);
 
     boolean setProcUnbooked(Proc proc, boolean unbooked);
 
     DispatchProc create(DispatchNode node, DispatchableTask task);
 
-    void update(DispatchProc proc, DispatchableTask task);
+    void unassign(Proc proc);
 
-    List<Proc> getOrphanedProcs();
-
+    void assign(Proc proc, Task task);
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.ProcE;
 import com.breakersoft.plow.Task;
@@ -93,7 +94,8 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
         // In case we allow moving nodes while cores are running.
         UUID clusterId = jdbc.queryForObject("SELECT pk_cluster FROM plow.node WHERE pk_node=?", UUID.class, node.getNodeId());
         UUID quotaId = jdbc.queryForObject(
-                "SELECT pk_quota FROM plow.quota, plow.job WHERE quota.pk_project = job.pk_project AND quota.pk_cluster = ?", UUID.class, clusterId);
+                "SELECT pk_quota FROM plow.quota, plow.job WHERE quota.pk_project = job.pk_project AND quota.pk_project=? AND quota.pk_cluster = ?",
+                UUID.class, task.getProjectId(), clusterId);
 
         proc.setClusterId(clusterId);
         proc.setQuotaId(quotaId);
@@ -117,19 +119,19 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
             "plow.proc " +
         "SET " +
             "pk_task = ?, " +
-            "time_updatde = plow.txTimeMillis() " +
+            "time_updated = plow.txTimeMillis() " +
         "WHERE " +
             "pk_proc = ?";
 
+
     @Override
-    public void update(DispatchProc proc, DispatchableTask task) {
-        if (task == null) {
-            jdbc.update(UPDATE, null, proc.getProcId());
-        }
-        else {
-            jdbc.update(UPDATE,
-                task.getTaskId(), proc.getProcId());
-        }
+    public void unassign(Proc proc) {
+        jdbc.update(UPDATE, null, proc.getProcId());
+    }
+
+    public void assign(Proc proc, Task task) {
+         jdbc.update(UPDATE,
+                 task.getTaskId(), proc.getProcId());
     }
 
     @Override
@@ -139,7 +141,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
     }
 
     @Override
-    public List<Proc> getProcs(Job job) {
+    public List<Proc> getProcs(JobId job) {
         return jdbc.query(GET +
                 " WHERE proc.pk_job=? ORDER BY proc.pk_proc", MAPPER, job.getJobId());
     }
@@ -149,11 +151,5 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
         return jdbc.update(
                 "UPDATE plow.proc SET bool_unbooked=? WHERE proc.pk_proc=?",
                 unbooked, proc.getProcId()) == 1;
-    }
-
-    @Override
-    public List<Proc> getOrphanedProcs() {
-        return jdbc.query(GET + " WHERE proc.pk_task IS NULL AND plow.txTimeMillis() - proc.time_updated > ? LIMIT 100",
-                MAPPER, Defaults.PROC_ORPHANED_SECONDS * 1000);
     }
 }

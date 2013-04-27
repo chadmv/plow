@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Task;
@@ -108,6 +109,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "proc.pk_proc,"+
                 "proc.pk_task,"+
                 "proc.pk_node,"+
+                "proc.pk_quota,"+
+                "proc.pk_cluster,"+
                 "proc.int_cores,"+
                 "proc.int_ram, " +
                 "proc.bool_unbooked, " +
@@ -118,9 +121,10 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "FROM " +
                 "proc " +
             "INNER JOIN node ON proc.pk_node = node.pk_node " +
-            "INNER JOIN task ON proc.pk_task = task.pk_task " +
-            "WHERE " +
-                "pk_proc = ?";
+            "INNER JOIN task ON proc.pk_task = task.pk_task ";
+
+    private static final String GET_DISPATCH_PROC_BY_ID =
+            GET_DISPATCH_PROC + " WHERE proc.pk_proc=?";
 
     public static final RowMapper<DispatchProc> DPROC_MAPPER = new RowMapper<DispatchProc>() {
         @Override
@@ -131,6 +135,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             proc.setTaskId((UUID) rs.getObject("pk_task"));
             proc.setNodeId((UUID) rs.getObject("pk_node"));
             proc.setJobId((UUID) rs.getObject("pk_job"));
+            proc.setClusterId((UUID) rs.getObject("pk_cluster"));
+            proc.setQuotaId((UUID) rs.getObject("pk_quota"));
             proc.setCores(rs.getInt("int_cores"));
             proc.setMemory(rs.getInt("int_ram"));
             proc.setHostname(rs.getString("node_name"));
@@ -143,7 +149,15 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
 
     @Override
     public DispatchProc getDispatchProc(UUID id) {
-        return jdbc.queryForObject(GET_DISPATCH_PROC, DPROC_MAPPER, id);
+        return jdbc.queryForObject(GET_DISPATCH_PROC_BY_ID, DPROC_MAPPER, id);
+    }
+
+    private static final String GET_ORPHAN_DISPATCH_PROCS =
+            GET_DISPATCH_PROC +  "WHERE proc.pk_task IS NULL AND plow.txTimeMillis() - proc.time_updated > ? LIMIT 100";
+
+    @Override
+    public List<DispatchProc> getOrphanProcs() {
+        return jdbc.query(GET_ORPHAN_DISPATCH_PROCS, DPROC_MAPPER, Defaults.PROC_ORPHANED_SECONDS);
     }
 
     public static final RowMapper<DispatchNode> DNODE_MAPPER = new RowMapper<DispatchNode>() {

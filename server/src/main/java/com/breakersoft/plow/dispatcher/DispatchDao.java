@@ -36,7 +36,9 @@ public interface DispatchDao {
 
     RunTaskCommand getRunTaskCommand(Task task);
 
-	List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node);
+    List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node);
 
-	DispatchJob getDispatchJob(UUID id);
+    DispatchJob getDispatchJob(UUID id);
+
+    List<DispatchProc> getOrphanProcs();
 }

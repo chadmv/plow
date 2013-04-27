@@ -55,6 +55,8 @@ public interface DispatchService {
 
     DispatchProc allocateProc(DispatchNode node, DispatchableTask task);
 
+    List<DispatchProc> getOrphanProcs();
+
     RunTaskCommand getRuntaskCommand(Task task);
 
     boolean startTask(String hostname, DispatchableTask task);
@@ -62,4 +64,7 @@ public interface DispatchService {
     void assignProc(DispatchProc proc, DispatchableTask task);
 
     List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node);
+
+
+
 }

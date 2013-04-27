@@ -94,6 +94,12 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
+    @Transactional(readOnly=true)
+    public List<DispatchProc> getOrphanProcs() {
+        return dispatchDao.getOrphanProcs();
+    }
+
+    @Override
     public boolean startTask(String hostname, DispatchableTask task) {
         if (taskDao.start(task, task.minCores, task.minRam)) {
             taskDao.resetTaskDispatchData(task, hostname);
@@ -117,13 +123,13 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Override
     public void unassignProc(DispatchProc proc) {
-        procDao.update(proc, null);
+        procDao.unassign(proc);
         proc.setTaskId(null);
     }
 
     @Override
     public void assignProc(DispatchProc proc, DispatchableTask task) {
-        procDao.update(proc, task);
+        procDao.assign(proc, task);
         proc.setTaskId(task.getTaskId());
     }
 
@@ -174,7 +180,7 @@ public class DispatchServiceImpl implements DispatchService {
 
         if (procDao.delete(proc)) {
             quotaDao.free(quota, proc.getIdleCores());
-            nodeDao.freeResources(node, proc.getIdleCores(), proc.getIdleRam());
+            nodeDao.free(node, proc.getIdleCores(), proc.getIdleRam());
             dispatchDao.decrementDispatchTotals(proc);
         }
         else {
