@@ -58,7 +58,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
 
         final UUID id = UUID.randomUUID();
         final List<String> tags = jdbc.queryForList("SELECT unnest(str_tags) " +
-        		"FROM plow.cluster WHERE pk_cluster=?", String.class, cluster.getClusterId());
+                "FROM plow.cluster WHERE pk_cluster=?", String.class, cluster.getClusterId());
 
         jdbc.update(new PreparedStatementCreator() {
             @Override
@@ -100,49 +100,49 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     }
 
     private static final String FULL_UPDATE =
-		JdbcUtils.Update("plow.node_sys",
-	        "pk_node",
-	        "int_phys_cores",
-	        "int_log_cores",
-	        "int_ram",
-	        "int_free_ram",
-	        "int_swap",
-	        "int_free_swap",
-	        "time_booted",
-	        "str_cpu_model",
-	        "str_platform");
+        JdbcUtils.Update("plow.node_sys",
+            "pk_node",
+            "int_phys_cores",
+            "int_log_cores",
+            "int_ram",
+            "int_free_ram",
+            "int_swap",
+            "int_free_swap",
+            "time_booted",
+            "str_cpu_model",
+            "str_platform");
 
     private static final String UPDATE =
-		JdbcUtils.Update("plow.node_sys",
-	        "pk_node",
-	        "int_free_ram",
-	        "int_free_swap");
+        JdbcUtils.Update("plow.node_sys",
+            "pk_node",
+            "int_free_ram",
+            "int_free_swap");
 
     @Override
     public void update(Node node, Ping ping) {
 
-    	jdbc.update("UPDATE plow.node SET " +
-    			"time_updated=plow.txTimeMillis() WHERE pk_node=?", node.getNodeId());
+        jdbc.update("UPDATE plow.node SET " +
+                "time_updated=plow.txTimeMillis() WHERE pk_node=?", node.getNodeId());
 
-    	if (ping.isReboot) {
-	        jdbc.update(FULL_UPDATE,
-	                ping.hw.physicalCpus,
-	                ping.hw.logicalCpus,
-	                ping.hw.totalRamMb,
-	                ping.hw.freeRamMb,
-	                ping.hw.totalSwapMb,
-	                ping.hw.freeSwapMb,
-	                ping.bootTime,
-	                ping.hw.cpuModel,
-	                ping.hw.platform,
-	                node.getNodeId());
-    	}
-    	else {
-	        jdbc.update(UPDATE,
-	                ping.hw.freeRamMb,
-	                ping.hw.freeSwapMb,
-	                node.getNodeId());
-    	}
+        if (ping.isReboot) {
+            jdbc.update(FULL_UPDATE,
+                    ping.hw.physicalCpus,
+                    ping.hw.logicalCpus,
+                    ping.hw.totalRamMb,
+                    ping.hw.freeRamMb,
+                    ping.hw.totalSwapMb,
+                    ping.hw.freeSwapMb,
+                    ping.bootTime,
+                    ping.hw.cpuModel,
+                    ping.hw.platform,
+                    node.getNodeId());
+        }
+        else {
+            jdbc.update(UPDATE,
+                    ping.hw.freeRamMb,
+                    ping.hw.freeSwapMb,
+                    node.getNodeId());
+        }
     }
 
     public static final RowMapper<Node> MAPPER = new RowMapper<Node>() {
@@ -198,20 +198,13 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "int_idle_cores = int_idle_cores - ?," +
                 "int_free_ram = int_free_ram - ? " +
             "WHERE " +
-                "node_dsp.int_idle_cores >= ? " +
-            "AND " +
-                "node_dsp.int_free_ram >= ? " +
-            "AND " +
                 "node_dsp.pk_node = ? ";
 
     @Override
-    public boolean allocateResources(Node node, int cores, int memory) {
-        if (jdbc.update(ALLOCATE_RESOURCES,
-                cores, memory, cores, memory, node.getNodeId()) == 1) {
-            return true;
-        }
-
-        return false;
+    public void allocateResources(Node node, int cores, int memory) {
+        // Check constraints will throw.
+        jdbc.update(ALLOCATE_RESOURCES,
+                cores, memory, node.getNodeId());
     }
 
     private static final String FREE_RESOURCES =
@@ -230,30 +223,30 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
 
     @Override
     public void setLocked(Node node, boolean locked) {
-    	jdbc.update("UPDATE plow.node SET bool_locked=? WHERE pk_node=?", locked, node.getNodeId());
+        jdbc.update("UPDATE plow.node SET bool_locked=? WHERE pk_node=?", locked, node.getNodeId());
     }
 
     @Override
     public boolean hasProcs(Node node) {
-    	return jdbc.queryForInt("SELECT COUNT(1) FROM proc WHERE pk_node=?", node.getNodeId()) > 0;
+        return jdbc.queryForInt("SELECT COUNT(1) FROM proc WHERE pk_node=?", node.getNodeId()) > 0;
     }
 
     @Override
     public void setCluster(Node node, Cluster cluster) {
-    	// Raise exception if the node has running tasks.
-    	if (hasProcs(node)) {
-    		throw new PlowWriteException("You cannot move nodes while they have running procs");
-    	}
-    	jdbc.update("UPDATE plow.node SET pk_cluster=? WHERE pk_node=?",
-    			cluster.getClusterId(), node.getNodeId());
+        // Raise exception if the node has running tasks.
+        if (hasProcs(node)) {
+            throw new PlowWriteException("You cannot move nodes while they have running procs");
+        }
+        jdbc.update("UPDATE plow.node SET pk_cluster=? WHERE pk_node=?",
+                cluster.getClusterId(), node.getNodeId());
     }
 
     private static final String UPDATE_TAGS =
-    		"UPDATE plow.node SET str_tags=? WHERE pk_node=?";
+            "UPDATE plow.node SET str_tags=? WHERE pk_node=?";
 
     @Override
     public void setTags(final Node node, final Set<String> tags) {
-    	 jdbc.update(new PreparedStatementCreator() {
+         jdbc.update(new PreparedStatementCreator() {
              @Override
              public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                  final PreparedStatement ret = conn.prepareStatement(UPDATE_TAGS);

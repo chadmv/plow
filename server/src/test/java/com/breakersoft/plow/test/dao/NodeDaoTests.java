@@ -47,7 +47,7 @@ public class NodeDaoTests extends AbstractTest {
         nodeDao.setLocked(node, true);
 
         boolean locked = jdbc().queryForObject(
-        		"SELECT bool_locked FROM plow.node WHERE pk_node=?", Boolean.class, node.getNodeId());
+                "SELECT bool_locked FROM plow.node WHERE pk_node=?", Boolean.class, node.getNodeId());
         assertEquals(true, locked);
     }
 
@@ -108,7 +108,7 @@ public class NodeDaoTests extends AbstractTest {
     public void allocateResourcesFailed() {
         Cluster cluster = clusterDao.create("test", TAGS);
         Node node = nodeDao.create(cluster, getTestNodePing());
-        assertFalse(nodeDao.allocateResources(node, 100, 1000000));
+        nodeDao.allocateResources(node, 100, 1000000);
     }
 
     @Test

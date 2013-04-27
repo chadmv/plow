@@ -15,18 +15,18 @@ public interface NodeDao {
 
     Node get(UUID id);
 
-    boolean allocateResources(Node node, int cores, int memory);
+    void allocateResources(Node node, int cores, int memory);
 
     void freeResources(Node node, int cores, int memory);
 
-	void update(Node node, Ping ping);
+    void update(Node node, Ping ping);
 
-	void setLocked(Node node, boolean locked);
+    void setLocked(Node node, boolean locked);
 
-	void setCluster(Node node, Cluster cluster);
+    void setCluster(Node node, Cluster cluster);
 
-	boolean hasProcs(Node node);
+    boolean hasProcs(Node node);
 
-	void setTags(Node node, Set<String> tags);
+    void setTags(Node node, Set<String> tags);
 
 }
