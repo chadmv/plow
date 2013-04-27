@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -192,8 +193,15 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
 
     @Override
     public boolean reserve(Task task) {
-        return jdbc.update("UPDATE plow.task SET bool_reserved='t' " +
-                "WHERE pk_task=? AND bool_reserved='f'", task.getTaskId()) == 1;
+        try {
+            jdbc.queryForObject("SELECT task.pk_task FROM plow.task WHERE pk_task=? AND bool_reserved='f' FOR UPDATE NOWAIT",
+                    String.class, task.getTaskId());
+            return jdbc.update("UPDATE plow.task SET bool_reserved='t' " +
+                    "WHERE pk_task=? AND bool_reserved='f'", task.getTaskId()) == 1;
+        } catch (DataAccessException e) {
+            logger.info("Failed to lock task.", e);
+            return false;
+        }
     }
 
     @Override
