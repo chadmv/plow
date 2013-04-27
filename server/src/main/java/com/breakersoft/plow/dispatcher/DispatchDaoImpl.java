@@ -257,12 +257,14 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "task.pk_layer,"+
                 "task.pk_job,"+
                 "layer.int_min_cores,"+
-                "layer.int_min_ram  " +
+                "layer.int_min_ram,  " +
+                "job.pk_project " +
             "FROM " +
                 "plow.layer " +
                     "INNER JOIN " +
-                "plow.task " +
-                    "ON layer.pk_layer = task.pk_layer " +
+                "plow.task ON layer.pk_layer = task.pk_layer " +
+                    "INNER JOIN " +
+                "plow.job ON layer.pk_job = job.pk_job " +
             "WHERE " +
                 "layer.pk_job = ? " +
             "AND " +
@@ -285,6 +287,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         public DispatchableTask mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
             DispatchableTask task = new DispatchableTask();
+            task.projectId = (UUID) rs.getObject("pk_project");
             task.taskId = (UUID) rs.getObject("pk_task");
             task.layerId = (UUID) rs.getObject("pk_layer");
             task.jobId = (UUID) rs.getObject("pk_job");
