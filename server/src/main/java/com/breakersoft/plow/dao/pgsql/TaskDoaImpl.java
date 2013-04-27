@@ -198,8 +198,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                     String.class, task.getTaskId());
             return jdbc.update("UPDATE plow.task SET bool_reserved='t' " +
                     "WHERE pk_task=? AND bool_reserved='f'", task.getTaskId()) == 1;
-        } catch (DataAccessException e) {
-            logger.info("Failed to lock task.", e);
+        } catch (Exception e) {
             return false;
         }
     }
