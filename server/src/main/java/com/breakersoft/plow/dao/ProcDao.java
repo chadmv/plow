@@ -26,4 +26,6 @@ public interface ProcDao {
 
     void update(DispatchProc proc, DispatchableTask task);
 
+    List<Proc> getOrphanedProcs();
+
 }

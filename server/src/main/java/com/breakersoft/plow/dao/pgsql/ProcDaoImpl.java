@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.ProcE;
@@ -65,6 +66,8 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
             JdbcUtils.Insert("plow.proc",
                     "pk_proc",
                     "pk_node",
+                    "pk_cluster,",
+                    "pk_quota,"+
                     "pk_task",
                     "pk_job",
                     "int_cores",
@@ -86,9 +89,20 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
         proc.setCores(task.minCores);
         proc.setMemory(task.minRam);
 
+        // Requery for these in case they have changed.
+        // In case we allow moving nodes while cores are running.
+        UUID clusterId = jdbc.queryForObject("SELECT pk_cluster FROM plow.node WHERE pk_node=?", UUID.class, node.getNodeId());
+        UUID quotaId = jdbc.queryForObject(
+                "SELECT pk_quota FROM plow.quota, plow.job WHERE quota.pk_project = job.pk_project AND quota.pk_cluster = ?", UUID.class, clusterId);
+
+        proc.setClusterId(clusterId);
+        proc.setQuotaId(quotaId);
+
         jdbc.update(INSERT,
                 proc.getProcId(),
                 node.getNodeId(),
+                clusterId,
+                quotaId,
                 task.taskId,
                 task.jobId,
                 task.minCores,
@@ -135,5 +149,11 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
         return jdbc.update(
                 "UPDATE plow.proc SET bool_unbooked=? WHERE proc.pk_proc=?",
                 unbooked, proc.getProcId()) == 1;
+    }
+
+    @Override
+    public List<Proc> getOrphanedProcs() {
+        return jdbc.query(GET + " WHERE proc.pk_task IS NULL AND plow.txTimeMillis() - proc.time_updated > ? LIMIT 100",
+                MAPPER, Defaults.PROC_ORPHANED_SECONDS * 1000);
     }
 }

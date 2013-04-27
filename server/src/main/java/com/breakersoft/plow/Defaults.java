@@ -17,4 +17,7 @@ public final class Defaults {
     public static int RND_CLIENT_SOCKET_TIMEOUT_MS = 5000;
 
     public static int TASK_MAX_LIMIT = 1000;
+
+
+    public static int PROC_ORPHANED_SECONDS = 300;
 }

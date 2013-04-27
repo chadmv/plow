@@ -1,12 +1,15 @@
 package com.breakersoft.plow.dispatcher.domain;
 
 import java.util.Set;
+import java.util.UUID;
 
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.ProcE;
 
 public class DispatchProc extends ProcE implements DispatchResource, JobId {
 
+    private UUID clusterId;
+    private UUID quotaId;
     private int cores;
     private int memory;
     private boolean allocated;
@@ -51,11 +54,27 @@ public class DispatchProc extends ProcE implements DispatchResource, JobId {
         this.memory = this.memory - ram;
     }
 
-	public boolean isUnbooked() {
-		return unbooked;
-	}
+    public boolean isUnbooked() {
+        return unbooked;
+    }
 
-	public void setUnbooked(boolean unbooked) {
-		this.unbooked = unbooked;
-	}
+    public void setUnbooked(boolean unbooked) {
+        this.unbooked = unbooked;
+    }
+
+    public UUID getClusterId() {
+        return clusterId;
+    }
+
+    public void setClusterId(UUID clusterId) {
+        this.clusterId = clusterId;
+    }
+
+    public UUID getQuotaId() {
+        return quotaId;
+    }
+
+    public void setQuotaId(UUID quotaId) {
+        this.quotaId = quotaId;
+    }
 }
