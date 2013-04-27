@@ -59,8 +59,12 @@ public class ProcDispatcher {
             // Only continue if the task failed due to a
             // reservation problem.
             if (!result.continueDispatching()) {
-                return;
+                break;
             }
+        }
+
+        if (result.continueDispatching()) {
+            dispatchService.deallocateProc(proc, "Unable to find next frame.");
         }
     }
 
@@ -77,12 +81,12 @@ public class ProcDispatcher {
                         dispatchService.getRuntaskCommand(task);
                 RndClient client = new RndClient(proc.getHostname());
                 client.runProcess(command);
-                result.dispatched(proc);
+                result.dispatched(proc, task);
                 // Don't continue to dispatch.
                 result.dispatch = false;
             }
             else {
-                cleanup(result, proc, task, "Unable to book task.");
+                cleanup(result, proc, task, "Unable to book task, was already booked?");
             }
         }
         catch (Exception e) {
