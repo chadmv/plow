@@ -8,6 +8,3 @@ include_directories(
 )
 
 SUBDIRS(core)
-SUBDIRS(gui)
-SUBDIRS(tools/wrangleplow)
-SUBDIRS(tools/spade)

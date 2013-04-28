@@ -19,11 +19,6 @@ void getProjectById(ProjectT& project, const Guid& id)
     getClient()->proxy().getProject(project, id);
 }
 
-void getProjectByName(ProjectT& project, const std::string& name)
-{
-    getClient()->proxy().getProjectByName(project, name);
-}
-
 void createFolder(FolderT& folder, const ProjectT& project, const std::string& name)
 {
     getClient()->proxy().createFolder(folder, project.id, name);

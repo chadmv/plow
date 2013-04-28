@@ -16,7 +16,6 @@ set(PLOW_NAMESPACE Plow)
 
 find_package(Boost COMPONENTS REQUIRED thread program_options)
 find_package(Thrift REQUIRED)
-find_package(Qt4 REQUIRED)
 
 set(EXTERNAL_INCLUDE_DIRS ${EXTERNAL_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 
