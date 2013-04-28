@@ -251,6 +251,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "task.pk_job,"+
                 "layer.int_min_cores,"+
                 "layer.int_min_ram,  " +
+                "task.str_name," +
                 "job.pk_project " +
             "FROM " +
                 "plow.layer " +
@@ -286,6 +287,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             task.jobId = (UUID) rs.getObject("pk_job");
             task.minCores = rs.getInt("int_min_cores");
             task.minRam = rs.getInt("int_min_ram");
+            task.name = rs.getString("str_name");
             return task;
         }
     };
@@ -389,56 +391,5 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     public RunTaskCommand getRunTaskCommand(Task task) {
         return jdbc.queryForObject(
                 GET_RUN_TASK, RUN_TASK_MAPPER, task.getTaskId());
-    }
-
-    private static final String INC_FOLDER_DSP =
-        "UPDATE " +
-            "plow.folder_dsp " +
-        "SET " +
-             "int_run_cores = int_run_cores + ? " +
-         "WHERE " +
-             "pk_folder = (SELECT pk_folder FROM job WHERE pk_job=?)";
-
-    private static final String INC_JOB_DSP =
-        "UPDATE " +
-            "plow.job_dsp " +
-        "SET " +
-             "int_run_cores = int_run_cores + ?  " +
-         "WHERE " +
-             "pk_job = ?";
-
-    @Override
-    public void incrementDispatchTotals(DispatchProc proc) {
-
-        jdbc.update(INC_FOLDER_DSP, proc.getIdleCores(), proc.getJobId());
-        jdbc.update(INC_JOB_DSP, proc.getIdleCores(), proc.getJobId());
-        jdbc.update("UPDATE layer_dsp SET int_run_cores=int_run_cores+? WHERE pk_layer=(" +
-                    "SELECT pk_layer FROM plow.task WHERE pk_task=?)",
-                proc.getIdleCores(), proc.getTaskId());
-    }
-
-    private static final String DEC_FOLDER_DSP =
-        "UPDATE " +
-            "plow.folder_dsp " +
-        "SET " +
-             "int_run_cores = int_run_cores - ? " +
-         "WHERE " +
-             "pk_folder = (SELECT pk_folder FROM job WHERE pk_job=?)";
-
-    private static final String DEC_JOB_DSP =
-        "UPDATE " +
-            "plow.job_dsp " +
-        "SET " +
-             "int_run_cores = int_run_cores - ? " +
-         "WHERE " +
-             "pk_job = ?";
-
-    @Override
-    public void decrementDispatchTotals(DispatchProc proc) {
-        jdbc.update(DEC_FOLDER_DSP, proc.getIdleCores(), proc.getJobId());
-        jdbc.update(DEC_JOB_DSP, proc.getIdleCores(), proc.getJobId());
-        jdbc.update("UPDATE layer_dsp SET int_run_cores=int_run_cores-? WHERE pk_layer=(" +
-                "SELECT pk_layer FROM plow.task WHERE pk_task=?)",
-            proc.getIdleCores(), proc.getTaskId());
     }
 }

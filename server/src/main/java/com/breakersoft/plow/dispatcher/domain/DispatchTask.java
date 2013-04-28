@@ -39,4 +39,9 @@ public class DispatchTask implements Task, Project {
     public String getName() {
         return name;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Task %s [%s]", name, taskId);
+    }
 }

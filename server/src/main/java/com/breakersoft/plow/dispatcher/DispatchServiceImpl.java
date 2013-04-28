@@ -146,11 +146,7 @@ public class DispatchServiceImpl implements DispatchService {
         }
 
         try {
-            DispatchProc proc = procDao.create(node, task);
-            nodeDao.allocate(node, task.minCores, task.minRam);
-            quotaDao.allocate(node, task, task.minCores);
-            dispatchDao.incrementDispatchTotals(proc);
-            return proc;
+            return procDao.create(node, task);
 
         } catch (Exception e) {
             throw new PlowDispatcherException(
@@ -168,16 +164,8 @@ public class DispatchServiceImpl implements DispatchService {
 
         logger.info("deallocating {}, {}", proc, why);
 
-        final Quota quota = quotaDao.getQuota(proc);
-        final Node node = nodeDao.get(proc.getNodeId());
-
-        if (procDao.delete(proc)) {
-            quotaDao.free(quota, proc.getIdleCores());
-            nodeDao.free(node, proc.getIdleCores(), proc.getIdleRam());
-            dispatchDao.decrementDispatchTotals(proc);
-        }
-        else {
-            logger.warn("{} was alredy deallocated.", proc.getProcId());
+        if (!procDao.delete(proc)) {
+            logger.warn("{} was alredy deallocated.", proc);
         }
     }
 

@@ -150,7 +150,7 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
                  * reserved before it can be started, so don't cleanup
                  * the task.
                  */
-                dispatchFailed(result, proc, null, "Critical, unable to start reserved task.");
+                dispatchFailed(result, proc, null, "Critical, was able to reserve task but not start it.");
             }
         }
         catch (Exception e) {

@@ -448,6 +448,40 @@ CREATE INDEX action_pk_filter_idx ON plow.action (pk_filter);
 
 ----------------------------------------------------------
 
+CREATE OR REPLACE FUNCTION plow.after_proc_insert() RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE plow.quota SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_quota=NEW.pk_quota;
+  UPDATE plow.node_dsp SET int_idle_cores = int_idle_cores - NEW.int_cores WHERE pk_node=NEW.pk_node;
+  UPDATE plow.folder_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_folder=
+    (SELECT pk_folder FROM job WHERE pk_job=NEW.pk_job);
+  UPDATE plow.job_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_job=NEW.pk_job;
+  UPDATE plow.layer_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_layer=
+    (SELECT pk_layer FROM task WHERE pk_task=NEW.pk_task);
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_after_proc_insert AFTER INSERT ON plow.proc
+    FOR EACH ROW EXECUTE PROCEDURE plow.after_proc_insert();
+
+CREATE OR REPLACE FUNCTION plow.after_proc_delete() RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE plow.quota SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_quota=OLD.pk_quota;
+  UPDATE plow.node_dsp SET int_idle_cores = int_idle_cores + OLD.int_cores WHERE pk_node=OLD.pk_node;
+  UPDATE plow.folder_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_folder=
+    (SELECT pk_folder FROM job WHERE pk_job=OLD.pk_job);
+  UPDATE plow.job_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_job=OLD.pk_job;
+  UPDATE plow.layer_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_layer=
+    (SELECT pk_layer FROM task WHERE pk_task=OLD.pk_task);
+  RETURN OLD;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_after_proc_delete AFTER DELETE ON plow.proc
+    FOR EACH ROW EXECUTE PROCEDURE plow.after_proc_delete();
+
 ---
 --- plow.before_disp_update()
 ---

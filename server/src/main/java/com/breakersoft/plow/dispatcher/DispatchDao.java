@@ -30,10 +30,6 @@ public interface DispatchDao {
 
     List<DispatchTask> getDispatchableTasks(JobId job, DispatchResource resource);
 
-    void decrementDispatchTotals(DispatchProc proc);
-
-    void incrementDispatchTotals(DispatchProc proc);
-
     RunTaskCommand getRunTaskCommand(Task task);
 
     List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node);
