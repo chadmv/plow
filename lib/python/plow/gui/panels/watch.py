@@ -159,6 +159,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         req = { }
         req["matchingOnly"] = True
         req["user"] = []
+        req["states"] = [plow.client.JobState.RUNNING]
         if self.attrs["loadMine"]:
             req["user"].append(os.environ["USER"])
         if self.attrs["users"]:
