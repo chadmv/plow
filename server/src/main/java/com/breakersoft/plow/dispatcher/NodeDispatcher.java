@@ -34,11 +34,9 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
     @Autowired
     private DispatchService dispatchService;
 
-    private ExecutorService dispatchThreads = Executors.newFixedThreadPool(4);
+    private final ExecutorService dispatchThreads = Executors.newFixedThreadPool(8);
 
-    public NodeDispatcher() {
-
-    }
+    public NodeDispatcher() { }
 
     /**
      * Queues node to be dispatched.
