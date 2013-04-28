@@ -97,7 +97,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     StateManager stateManager;
 
     @Override
-    public JobT launch(JobSpecT spec) throws PlowException, TException {
+    public JobT launch(JobSpecT spec) throws PlowException {
         JobLaunchEvent event =  jobService.launch(spec);
         JobT result = new JobT();
         result.id = event.getJob().getJobId().toString();
@@ -106,47 +106,47 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public JobT getActiveJob(String name) throws PlowException, TException {
+    public JobT getActiveJob(String name) throws PlowException {
         return thriftJobDao.getRunningJob(name);
     }
 
     @Override
-    public JobT getJob(String jobId) throws PlowException, TException {
+    public JobT getJob(String jobId) throws PlowException {
         return thriftJobDao.getJob(jobId);
     }
 
     @Override
-    public LayerT getLayerById(String id) throws PlowException, TException {
+    public LayerT getLayerById(String id) throws PlowException {
         return thriftLayerDao.getLayer(UUID.fromString(id));
     }
 
     @Override
-    public List<LayerT> getLayers(String jobId) throws PlowException, TException {
+    public List<LayerT> getLayers(String jobId) throws PlowException {
         return thriftLayerDao.getLayers(UUID.fromString(jobId));
     }
 
     @Override
-    public TaskT getTask(String id) throws PlowException, TException {
+    public TaskT getTask(String id) throws PlowException {
         return thriftTaskDao.getTask(UUID.fromString(id));
     }
 
     @Override
-    public List<TaskT> getTasks(TaskFilterT filter) throws PlowException, TException {
+    public List<TaskT> getTasks(TaskFilterT filter) throws PlowException {
         return thriftTaskDao.getTasks(filter);
     }
 
     @Override
-    public List<JobT> getJobs(JobFilterT filter) throws PlowException, TException {
+    public List<JobT> getJobs(JobFilterT filter) throws PlowException {
         return thriftJobDao.getJobs(filter);
     }
 
     @Override
-    public boolean killJob(String jobId, String reason) throws PlowException, TException {
+    public boolean killJob(String jobId, String reason) throws PlowException {
         return stateManager.killJob(jobService.getJob(UUID.fromString(jobId)), reason);
     }
 
     @Override
-    public NodeT getNode(String id) throws PlowException, TException {
+    public NodeT getNode(String id) throws PlowException {
         return thriftNodeDao.getNode(UUID.fromString(id));
     }
 
@@ -175,8 +175,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public void addOutput(String layerId, String path, Map<String,String> attrs)
-            throws PlowException, TException {
+    public void addOutput(String layerId, String path, Map<String,String> attrs) throws PlowException {
         jobService.addLayerOutput(
                 jobService.getLayer(UUID.fromString(layerId)),
                 path, attrs);
@@ -189,152 +188,142 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public ProjectT createProject(String title, String code) throws PlowException, TException {
+    public ProjectT createProject(String title, String code) throws PlowException {
         Project project = projectService.createProject(title, code);
         return thriftProjectDao.get(project.getProjectId());
     }
 
     @Override
-    public ProjectT getProject(String id) throws PlowException, TException {
+    public ProjectT getProject(String id) throws PlowException {
         return thriftProjectDao.get(UUID.fromString(id));
     }
 
     @Override
-    public List<ProjectT> getProjects() throws PlowException, TException {
+    public List<ProjectT> getProjects() throws PlowException {
         return thriftProjectDao.all();
     }
 
     @Override
-    public FolderT getFolder(String id) throws PlowException, TException {
+    public FolderT getFolder(String id) throws PlowException {
         return thriftFolderDao.get(UUID.fromString(id));
     }
 
     @Override
-    public List<FolderT> getJobBoard(String project) throws PlowException,
-            TException {
+    public List<FolderT> getJobBoard(String project) throws PlowException {
         return thriftJobBoardDao.getJobBoard(UUID.fromString(project));
     }
 
     @Override
-    public FolderT createFolder(String projectId, String name) throws PlowException,
-            TException {
+    public FolderT createFolder(String projectId, String name) throws PlowException {
         Project project = projectService.getProject(UUID.fromString(projectId));
         Folder folder = projectService.createFolder(project, name);
         return thriftFolderDao.get(folder.getFolderId());
     }
 
     @Override
-    public ProjectT getProjectByCode(String code) throws PlowException,
-            TException {
+    public ProjectT getProjectByCode(String code) throws PlowException {
         return thriftProjectDao.get(code);
     }
 
     @Override
-    public List<ProjectT> getActiveProjects() throws PlowException, TException {
+    public List<ProjectT> getActiveProjects() throws PlowException {
         return thriftProjectDao.active();
     }
 
     @Override
-    public List<FolderT> getFolders(String projectId) throws PlowException,
-            TException {
+    public List<FolderT> getFolders(String projectId) throws PlowException {
         Project project = projectService.getProject(UUID.fromString(projectId));
         return thriftFolderDao.getFolders(project);
     }
 
     @Override
-    public long getPlowTime() throws PlowException, TException {
+    public long getPlowTime() throws PlowException {
         return thriftProjectDao.getPlowTime();
     }
 
     @Override
-    public String getTaskLogPath(String id) throws PlowException, TException {
+    public String getTaskLogPath(String id) throws PlowException {
         return thriftTaskDao.getLogPath(UUID.fromString(id));
     }
 
     @Override
-    public ClusterT getCluster(String arg0) throws PlowException, TException {
+    public ClusterT getCluster(String arg0) throws PlowException {
         return thriftClusterDao.getCluster(arg0);
     }
 
     @Override
-    public List<ClusterT> getClusters() throws PlowException, TException {
+    public List<ClusterT> getClusters() throws PlowException {
         return thriftClusterDao.getClusters();
     }
 
     @Override
-    public List<ClusterT> getClustersByTag(String arg0) throws PlowException,
-            TException {
+    public List<ClusterT> getClustersByTag(String arg0) throws PlowException {
         return thriftClusterDao.getClusters(arg0);
     }
 
     @Override
-    public ClusterT createCluster(String name, Set<String> tags)
-            throws PlowException, TException {
+    public ClusterT createCluster(String name, Set<String> tags) throws PlowException {
         final Cluster cluster = nodeService.createCluster(name, tags);
         return thriftClusterDao.getCluster(cluster.getClusterId().toString());
     }
 
     @Override
-    public boolean deleteCluster(String id) throws PlowException, TException {
+    public boolean deleteCluster(String id) throws PlowException {
         final Cluster c = nodeService.getCluster(UUID.fromString(id));
         return nodeService.deleteCluster(c);
     }
 
     @Override
-    public boolean lockCluster(String id, boolean value) throws TException {
+    public boolean lockCluster(String id, boolean value) throws PlowException {
         final Cluster c = nodeService.getCluster(UUID.fromString(id));
         return nodeService.lockCluster(c, value);
     }
 
     @Override
-    public void setClusterName(String id, String name) throws PlowException,
-            TException {
+    public void setClusterName(String id, String name) throws PlowException {
         final Cluster c = nodeService.getCluster(UUID.fromString(id));
         nodeService.setClusterName(c, name);
     }
 
     @Override
-    public void setClusterTags(String id, Set<String> tags)
-            throws PlowException, TException {
+    public void setClusterTags(String id, Set<String> tags) throws PlowException {
         final Cluster c = nodeService.getCluster(UUID.fromString(id));
         nodeService.setClusterTags(c, tags);
     }
 
     @Override
-    public void setDefaultCluster(String id) throws PlowException, TException {
+    public void setDefaultCluster(String id) throws PlowException {
         final Cluster c = nodeService.getCluster(UUID.fromString(id));
         nodeService.setDefaultCluster(c);
     }
 
     @Override
-    public void retryTasks(TaskFilterT filter) throws PlowException, TException {
+    public void retryTasks(TaskFilterT filter) throws PlowException {
         stateManager.retryTasks(filter);
     }
 
     @Override
-    public void eatTasks(TaskFilterT filter) throws PlowException, TException {
+    public void eatTasks(TaskFilterT filter) throws PlowException {
         stateManager.eatTasks(filter);
     }
 
     @Override
-    public void killTasks(TaskFilterT filter) throws PlowException, TException {
+    public void killTasks(TaskFilterT filter) throws PlowException {
         stateManager.killTasks(filter);
     }
 
     @Override
-    public QuotaT getQuota(String arg0) throws PlowException, TException {
+    public QuotaT getQuota(String arg0) throws PlowException {
         return thriftQuotaDao.getQuota(UUID.fromString(arg0));
     }
 
     @Override
-    public List<QuotaT> getQuotas(QuotaFilterT arg0) throws PlowException,
-            TException {
+    public List<QuotaT> getQuotas(QuotaFilterT arg0) throws PlowException {
         return thriftQuotaDao.getQuotas(arg0);
     }
 
     @Override
-    public QuotaT createQuota(String projId, String clusterId, int size, int burst)
-            throws PlowException, TException {
+    public QuotaT createQuota(String projId, String clusterId, int size, int burst) throws PlowException {
         Project proj = projectService.getProject(UUID.fromString(projId));
         Cluster clus = nodeService.getCluster(UUID.fromString(clusterId));
         Quota quota = nodeService.createQuota(proj, clus, size, burst);
@@ -342,66 +331,56 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public void setQuotaBurst(String id, int value) throws PlowException,
-            TException {
+    public void setQuotaBurst(String id, int value) throws PlowException {
         Quota quota = nodeService.getQuota(UUID.fromString(id));
         nodeService.setQuotaBurst(quota, value);
-
     }
 
     @Override
-    public void setQuotaLocked(String id, boolean value) throws PlowException,
-            TException {
+    public void setQuotaLocked(String id, boolean value) throws PlowException {
         Quota quota = nodeService.getQuota(UUID.fromString(id));
         nodeService.setQuotaLocked(quota, value);
     }
 
     @Override
-    public void setQuotaSize(String id, int value) throws PlowException,
-            TException {
+    public void setQuotaSize(String id, int value) throws PlowException {
         Quota quota = nodeService.getQuota(UUID.fromString(id));
         nodeService.setQuotaSize(quota, value);
     }
 
     @Override
-    public void setLayerMaxCoresPerTask(String id, int cores)
-            throws PlowException, TException {
+    public void setLayerMaxCoresPerTask(String id, int cores) throws PlowException {
         Layer layer = jobService.getLayer(UUID.fromString(id));
         jobService.setLayerMaxCores(layer, cores);
     }
 
     @Override
-    public void setLayerMinCoresPerTask(String id, int cores)
-            throws PlowException, TException {
+    public void setLayerMinCoresPerTask(String id, int cores) throws PlowException {
         Layer layer = jobService.getLayer(UUID.fromString(id));
         jobService.setLayerMinCores(layer, cores);
     }
 
     @Override
-    public void setLayerMinRamPerTask(String id, int ram)
-            throws PlowException, TException {
+    public void setLayerMinRamPerTask(String id, int ram) throws PlowException {
         Layer layer = jobService.getLayer(UUID.fromString(id));
         jobService.setLayerMinRam(layer, ram);
     }
 
     @Override
-    public void setLayerTags(String id, Set<String> tags)
-            throws PlowException, TException {
+    public void setLayerTags(String id, Set<String> tags) throws PlowException {
         Layer layer = jobService.getLayer(UUID.fromString(id));
         jobService.setLayerTags(layer, tags);
     }
 
     @Override
-    public void setLayerThreadable(String id, boolean threadable)
-            throws PlowException, TException {
+    public void setLayerThreadable(String id, boolean threadable) throws PlowException {
         Layer layer = jobService.getLayer(UUID.fromString(id));
         jobService.setLayerThreadable(layer, threadable);
 
     }
 
     @Override
-    public void setProjectActive(String id, boolean value)
-            throws PlowException, TException {
+    public void setProjectActive(String id, boolean value) throws PlowException {
         Project project = projectService.getProject(UUID.fromString(id));
         projectService.setProjectActive(project, value);
     }
@@ -421,42 +400,37 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public void deleteFolder(String id) throws PlowException, TException {
+    public void deleteFolder(String id) throws PlowException {
         Folder folder = projectService.getFolder(UUID.fromString(id));
         projectService.deleteFolder(folder);
     }
 
     @Override
-    public void setFolderMaxCores(String id, int cores) throws PlowException,
-            TException {
+    public void setFolderMaxCores(String id, int cores) throws PlowException {
         Folder folder = projectService.getFolder(UUID.fromString(id));
         projectService.setFolderMaxCores(folder, cores);
     }
 
     @Override
-    public void setFolderMinCores(String id, int cores) throws PlowException,
-            TException {
+    public void setFolderMinCores(String id, int cores) throws PlowException {
         Folder folder = projectService.getFolder(UUID.fromString(id));
         projectService.setFolderMinCores(folder, cores);
     }
 
     @Override
-    public void setFolderName(String id, String name) throws PlowException,
-            TException {
+    public void setFolderName(String id, String name) throws PlowException {
         Folder folder = projectService.getFolder(UUID.fromString(id));
         projectService.setFolderName(folder, name);
     }
 
     @Override
-    public void setNodeLocked(String id, boolean value) throws PlowException,
-            TException {
+    public void setNodeLocked(String id, boolean value) throws PlowException {
         Node node = nodeService.getNode(UUID.fromString(id));
         nodeService.setNodeLocked(node, value);
     }
 
     @Override
-    public void setNodeCluster(String nodeId, String clusterId) throws PlowException,
-            TException {
+    public void setNodeCluster(String nodeId, String clusterId) throws PlowException {
         Node node = nodeService.getNode(UUID.fromString(nodeId));
         if (nodeService.hasProcs(node)) {
             throw new PlowWriteException("You cannot move a Node with running procs.");
@@ -469,27 +443,27 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Override
     public void setNodeTags(String id, Set<String> tags)
-            throws PlowException, TException {
+            throws PlowException {
         Node node = nodeService.getNode(UUID.fromString(id));
         nodeService.setTags(node, tags);
     }
 
     @Override
     public ActionT createAction(String filterId, ActionType type, String value)
-            throws PlowException, TException {
+            throws PlowException {
         Filter filter = filterService.getFilter(UUID.fromString(filterId));
         Action action = filterService.createAction(filter, type, value);
         return thriftActionDao.get(action.getActionId());
     }
 
     @Override
-    public void deleteAction(String id) throws PlowException, TException {
+    public void deleteAction(String id) throws PlowException {
         final Action action = filterService.getAction(UUID.fromString(id));
         filterService.deleteAction(action);
     }
 
     @Override
-    public ActionT getAction(String id) throws PlowException, TException {
+    public ActionT getAction(String id) throws PlowException {
         return thriftActionDao.get(UUID.fromString(id));
     }
 
@@ -501,13 +475,13 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public void deleteMatcher(String matcherId) throws PlowException, TException {
+    public void deleteMatcher(String matcherId) throws PlowException {
         Matcher matcher = filterService.getMatcher(UUID.fromString(matcherId));
         filterService.deleteMatcher(matcher);
     }
 
     @Override
-    public MatcherT getMatcher(String matcherId) throws PlowException, TException {
+    public MatcherT getMatcher(String matcherId) throws PlowException {
         return thriftMatcherDao.get(UUID.fromString(matcherId));
     }
 
@@ -519,14 +493,14 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public FilterT createFilter(String projectId, String name) throws PlowException, TException {
+    public FilterT createFilter(String projectId, String name) throws PlowException {
         Project project = projectService.getProject(UUID.fromString(projectId));
         Filter filter = filterService.createFilter(project, name);
         return thriftFilterDao.get(filter.getFilterId());
     }
 
     @Override
-    public void deleteFilter(String filterId) throws PlowException, TException {
+    public void deleteFilter(String filterId) throws PlowException {
         Filter filter = filterService.getFilter(UUID.fromString(filterId));
         filterService.deleteFilter(filter);
     }
@@ -567,19 +541,18 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public FilterT getFilter(String filterId) throws PlowException, TException {
+    public FilterT getFilter(String filterId) throws PlowException {
         return thriftFilterDao.get(UUID.fromString(filterId));
     }
 
     @Override
-    public void setJobAttrs(String jobId, Map<String, String> attrs) throws PlowException,
-            TException {
+    public void setJobAttrs(String jobId, Map<String, String> attrs) throws PlowException {
         Job job = jobService.getJob(UUID.fromString(jobId));
         jobService.setJobAttrs(job, attrs);
     }
 
     @Override
-    public boolean dropDepend(String arg0) throws PlowException, TException {
+    public boolean dropDepend(String arg0) throws PlowException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -597,25 +570,21 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public List<DependT> getDependsOnTask(String taskId) throws PlowException,
-            TException {
+    public List<DependT> getDependsOnTask(String taskId) throws PlowException {
         return thriftDependDao.getWhatDependsOnTask(UUID.fromString(taskId));
     }
 
     @Override
-    public List<DependT> getTaskDependsOn(String taskId) throws PlowException,
-            TException {
+    public List<DependT> getTaskDependsOn(String taskId) throws PlowException {
         return thriftDependDao.getWhatTaskDependsOn(UUID.fromString(taskId));
     }
     @Override
-    public List<DependT> getJobDependsOn(String jobId) throws PlowException,
-            TException {
+    public List<DependT> getJobDependsOn(String jobId) throws PlowException {
         return thriftDependDao.getWhatJobDependsOn(UUID.fromString(jobId));
     }
 
     @Override
-    public List<DependT> getLayerDependsOn(String layerId) throws PlowException,
-            TException {
+    public List<DependT> getLayerDependsOn(String layerId) throws PlowException {
         return thriftDependDao.getWhatLayerDependsOn(UUID.fromString(layerId));
     }
 
@@ -628,14 +597,14 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Override
     public MatcherT createAttrMatcher(String arg0, MatcherType arg1,
-            String arg2, String arg3) throws PlowException, TException {
+            String arg2, String arg3) throws PlowException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public MatcherT createFieldMatcher(String filterId, MatcherField field,
-            MatcherType type, String value) throws PlowException, TException {
+            MatcherType type, String value) throws PlowException {
         Filter filter = filterService.getFilter(UUID.fromString(filterId));
         Matcher matcher = filterService.createMatcher(filter, field, type, value);
         return thriftMatcherDao.get(matcher.getMatcherId());
