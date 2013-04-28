@@ -194,10 +194,10 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
     @Override
     public boolean reserve(Task task) {
         try {
-            jdbc.queryForObject("SELECT task.pk_task FROM plow.task WHERE pk_task=? AND bool_reserved='f' FOR UPDATE NOWAIT",
-                    String.class, task.getTaskId());
+            jdbc.queryForObject("SELECT task.pk_task FROM plow.task WHERE pk_task=? AND int_state=? AND bool_reserved='f' FOR UPDATE NOWAIT",
+                    String.class, task.getTaskId(), TaskState.WAITING.ordinal());
             return jdbc.update("UPDATE plow.task SET bool_reserved='t' " +
-                    "WHERE pk_task=? AND bool_reserved='f'", task.getTaskId()) == 1;
+                    "WHERE pk_task=? AND int_state=? AND bool_reserved='f'", task.getTaskId(), TaskState.WAITING.ordinal()) == 1;
         } catch (Exception e) {
             return false;
         }
