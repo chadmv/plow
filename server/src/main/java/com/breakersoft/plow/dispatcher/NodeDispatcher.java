@@ -149,9 +149,7 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
             }
             else {
                 /*
-                 * Not sure how this could happen, as the task need to be
-                 * reserved before it can be started, so don't cleanup
-                 * the task.
+                 * This is possible if a API command modifies the task.
                  */
                 dispatchFailed(result, proc, null, "Critical, was able to reserve task but not start it.");
             }
@@ -166,6 +164,8 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
         logger.info("Unable to dispatch {}/{}, {}", new Object[] {proc, task, message});
         result.dispatch = false;
         dispatchService.deallocateProc(proc, message);
-        dispatchService.stopTask(task, TaskState.WAITING);
+        if (task != null) {
+            dispatchService.stopTask(task, TaskState.WAITING);
+        }
     }
 }
