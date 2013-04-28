@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.JobId;
-import com.breakersoft.plow.Node;
-import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.ProcDao;
@@ -40,9 +38,6 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Autowired
     private ProcDao procDao;
-
-    @Autowired
-    private NodeDao nodeDao;
 
     @Autowired
     private TaskDao taskDao;
