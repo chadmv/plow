@@ -71,7 +71,7 @@ cdef class Quota:
         """
         Refresh the attributes from the server
         """
-        getClient().proxy().getQuota(self._quota, self._quota.id)
+        conn().proxy().getQuota(self._quota, self._quota.id)
 
     def set_size(self, int size):
         """ :param size: int """
@@ -104,7 +104,7 @@ cpdef inline Quota get_quota(Guid& id):
         QuotaT qT
         Quota q 
 
-    getClient().proxy().getQuota(qT, id)
+    conn().proxy().getQuota(qT, id)
     q = initQuota(qT)
     return q
 
@@ -130,7 +130,7 @@ def get_quotas(**kwargs):
         except:
             pass
 
-    getClient().proxy().getQuotas(quotas, f)
+    conn().proxy().getQuotas(quotas, f)
     ret = [initQuota(qT) for qT in quotas]
     return ret
 
@@ -148,7 +148,7 @@ def create_quota(Project project,  Cluster cluster, int size, int burst):
         QuotaT qT
         Quota q 
 
-    getClient().proxy().createQuota(qT, project.id, cluster.id, size, burst)
+    conn().proxy().createQuota(qT, project.id, cluster.id, size, burst)
     q = initQuota(qT)
     return q
 
@@ -160,7 +160,7 @@ cpdef inline set_quota_size(Cluster cluster, int size):
     :param cluster: :class:`.Quota` 
     :param size: int 
     """
-    getClient().proxy().setQuotaSize(cluster.id, size)
+    conn().proxy().setQuotaSize(cluster.id, size)
 
 cpdef inline set_quota_burst(Cluster cluster, int burst):
     """
@@ -169,7 +169,7 @@ cpdef inline set_quota_burst(Cluster cluster, int burst):
     :param cluster: :class:`.Quota` 
     :param burst: int 
     """
-    getClient().proxy().setQuotaBurst(cluster.id, burst)
+    conn().proxy().setQuotaBurst(cluster.id, burst)
 
 cpdef inline set_quota_locked(Cluster cluster, bint locked):
     """
@@ -178,5 +178,5 @@ cpdef inline set_quota_locked(Cluster cluster, bint locked):
     :param cluster: :class:`.Quota` 
     :param locked: bool 
     """
-    getClient().proxy().setQuotaLocked(cluster.id, locked)
+    conn().proxy().setQuotaLocked(cluster.id, locked)
 

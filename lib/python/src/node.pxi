@@ -180,7 +180,7 @@ cdef class Node:
         Refresh the attributes from the server
         """
         cdef NodeT node 
-        getClient().proxy().getNode(node, self._node.name)
+        conn().proxy().getNode(node, self._node.name)
         self.setNode(node)
 
     def set_locked(self, bint locked):
@@ -219,7 +219,7 @@ cpdef inline Node get_node(string name):
         NodeT nodeT
         Node node 
 
-    getClient().proxy().getNode(nodeT, name)
+    conn().proxy().getNode(nodeT, name)
     node = initNode(nodeT)
     return node
 
@@ -246,7 +246,7 @@ def get_nodes(**kwargs):
     except:
         pass
 
-    getClient().proxy().getNodes(nodes, f)
+    conn().proxy().getNodes(nodes, f)
     ret = [initNode(nodeT) for nodeT in nodes]
     return ret
 
@@ -257,7 +257,7 @@ cpdef inline set_node_locked(Node node, bint locked):
     :param node: :class:`.Node`
     :param locked: bool 
     """
-    getClient().proxy().setNodeLocked(node.id, locked)
+    conn().proxy().setNodeLocked(node.id, locked)
 
 cpdef inline set_node_cluster(Node node, Cluster cluster):
     """
@@ -266,7 +266,7 @@ cpdef inline set_node_cluster(Node node, Cluster cluster):
     :param node: :class:`.Node`
     :param cluster: :class:`.Cluster`
     """
-    getClient().proxy().setNodeCluster(node.id, cluster.id)
+    conn().proxy().setNodeCluster(node.id, cluster.id)
 
 cpdef inline set_node_tags(Node node, c_set[string]& tags):
     """
@@ -275,6 +275,6 @@ cpdef inline set_node_tags(Node node, c_set[string]& tags):
     :param node: :class:`.Node`
     :param tags: set(str) 
     """
-    getClient().proxy().setNodeTags(node.id, tags)
+    conn().proxy().setNodeTags(node.id, tags)
 
 

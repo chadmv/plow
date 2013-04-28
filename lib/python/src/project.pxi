@@ -39,7 +39,7 @@ cdef class Project:
         """
         Refresh the attributes from the server
         """
-        getClient().proxy().getProject(self.project, self.project.id)
+        conn().proxy().getProject(self.project, self.project.id)
 
     def get_folders(self):
         """
@@ -53,7 +53,7 @@ cdef class Project:
             list results
 
         try:
-            getClient().proxy().getFolders(folders, self.project.id)
+            conn().proxy().getFolders(folders, self.project.id)
         except:
             results = []
             return results
@@ -81,7 +81,7 @@ cpdef inline get_project(Guid& guid):
         ProjectT projT 
         Project project
 
-    getClient().proxy().getProject(projT, guid)
+    conn().proxy().getProject(projT, guid)
     project = initProject(projT)
     return project
 
@@ -97,7 +97,7 @@ cpdef inline get_project_by_code(string code):
         ProjectT projT 
         Project project
 
-    getClient().proxy().getProjectByCode(projT, code)
+    conn().proxy().getProjectByCode(projT, code)
     project = initProject(projT)
     return project
 
@@ -114,7 +114,7 @@ def get_projects():
         list results
 
     try:
-        getClient().proxy().getProjects(projects)
+        conn().proxy().getProjects(projects)
     except:
         results = []
         return results
@@ -134,7 +134,7 @@ def get_active_projects():
         list results
 
     try:
-        getClient().proxy().getActiveProjects(projects)
+        conn().proxy().getActiveProjects(projects)
     except:
         results = []
         return results
@@ -152,7 +152,7 @@ def create_project(string title, string code):
     """
     cdef ProjectT projT
     cdef Project proj 
-    getClient().proxy().createProject(projT, title, code)
+    conn().proxy().createProject(projT, title, code)
     proj = initProject(projT)
     return proj
 
@@ -163,7 +163,7 @@ cpdef inline set_project_active(Project project, bint active):
     :param project: :class:`.Project`
     :param active: bool 
     """
-    getClient().proxy().setProjectActive(project.id, active)
+    conn().proxy().setProjectActive(project.id, active)
 
 
  

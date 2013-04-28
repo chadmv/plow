@@ -78,7 +78,7 @@ cdef class Folder:
         Refresh the attributes from the server
         """
         cdef FolderT folder
-        getClient().proxy().getFolder(folder, self.folder.id)
+        conn().proxy().getFolder(folder, self.folder.id)
         self.setFolder(folder)
 
     def set_min_cores(self, int value):
@@ -115,7 +115,7 @@ cpdef inline get_folder(Guid& folderId):
         FolderT folderT
         Folder folder 
 
-    getClient().proxy().getFolder(folderT, folderId)
+    conn().proxy().getFolder(folderT, folderId)
     folder = initFolder(folderT)
     return folder
 
@@ -139,7 +139,7 @@ def create_folder(Project project, string name):
     :returns: :class:`.Folder`
     """
     cdef FolderT folderT 
-    getClient().proxy().createFolder(folderT, project.id, name)
+    conn().proxy().createFolder(folderT, project.id, name)
     cdef Folder folder = initFolder(folderT)
     return folder
 
@@ -154,7 +154,7 @@ def get_job_board(Project project):
         FolderT folderT 
         vector[FolderT] folders
 
-    getClient().proxy().getJobBoard(folders, project.id)
+    conn().proxy().getJobBoard(folders, project.id)
     cdef list ret = [initFolder(folderT) for folderT in folders]
     return ret
 
@@ -165,7 +165,7 @@ cpdef inline set_folder_min_cores(Folder folder, int value):
     :param folder: :class:`.Folder`
     :param value: int - cores 
     """
-    getClient().proxy().setFolderMinCores(folder.id, value)
+    conn().proxy().setFolderMinCores(folder.id, value)
 
 cpdef inline set_folder_max_cores(Folder folder, int value):
     """
@@ -174,7 +174,7 @@ cpdef inline set_folder_max_cores(Folder folder, int value):
     :param folder: :class:`.Folder`
     :param value: int - cores 
     """
-    getClient().proxy().setFolderMaxCores(folder.id, value)
+    conn().proxy().setFolderMaxCores(folder.id, value)
 
 cpdef inline set_folder_name(Folder folder, string& name):
     """
@@ -183,7 +183,7 @@ cpdef inline set_folder_name(Folder folder, string& name):
     :param folder: :class:`.Folder`
     :param name: str  
     """
-    getClient().proxy().setFolderName(folder.id, name)
+    conn().proxy().setFolderName(folder.id, name)
 
 cpdef inline delete_folder(Folder folder):
     """
@@ -191,6 +191,6 @@ cpdef inline delete_folder(Folder folder):
 
     :param folder: :class:`.Folder`
     """
-    getClient().proxy().deleteFolder(folder.id)
+    conn().proxy().deleteFolder(folder.id)
 
 

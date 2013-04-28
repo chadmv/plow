@@ -191,7 +191,7 @@ cdef class Layer:
         Refresh the attributes from the server
         """
         cdef LayerT layer 
-        getClient().proxy().getLayerById(layer, self._layer.id)
+        conn().proxy().getLayerById(layer, self._layer.id)
         self.setLayer(layer)
 
     def get_outputs(self):
@@ -267,7 +267,7 @@ cpdef inline get_layer_by_id(Guid& layerId):
         Layer layer
 
     try:
-        getClient().proxy().getLayerById(layerT, layerId)
+        conn().proxy().getLayerById(layerT, layerId)
     except RuntimeError:
         return None 
 
@@ -287,7 +287,7 @@ def get_layer(Job job, string name):
         Layer layer
 
     try:
-        getClient().proxy().getLayer(layerT, job.id, name)
+        conn().proxy().getLayer(layerT, job.id, name)
     except RuntimeError:
         return None 
 
@@ -308,7 +308,7 @@ def get_layers(Job job):
         list ret
 
     try:
-        getClient().proxy().getLayers(layers, job.id)
+        conn().proxy().getLayers(layers, job.id)
     except RuntimeError:
         ret = []
         return ret
@@ -324,7 +324,7 @@ cpdef inline add_layer_output(Layer layer, string path, Attrs& attrs):
     :param path: str 
     :param attrs: dict
     """
-    getClient().proxy().addOutput(layer.id, path, attrs)
+    conn().proxy().addOutput(layer.id, path, attrs)
 
 cpdef inline get_layer_outputs(Layer layer):
     """
@@ -340,7 +340,7 @@ cpdef inline get_layer_outputs(Layer layer):
         list ret 
 
     try:
-        getClient().proxy().getLayerOutputs(outputs, layer.id)
+        conn().proxy().getLayerOutputs(outputs, layer.id)
     except RuntimeError:
         ret = []
         return ret 
@@ -353,34 +353,34 @@ cpdef inline set_layer_tags(Layer layer, c_set[string]& tags):
     :param layer: :class:`.Layer`
     :param tags: set(str) 
     """
-    getClient().proxy().setLayerTags(layer.id, tags)
+    conn().proxy().setLayerTags(layer.id, tags)
 
 cpdef inline set_layer_min_cores_per_task(Layer layer, int minCores):
     """ 
     :param layer: :class:`.Layer`
     :param minCores: int 
     """
-    getClient().proxy().setLayerMinRamPerTask(layer.id, minCores)
+    conn().proxy().setLayerMinRamPerTask(layer.id, minCores)
 
 cpdef inline set_layer_max_cores_per_task(Layer layer, int maxCores):
     """ 
     :param layer: :class:`.Layer`
     :param maxCores: int 
     """
-    getClient().proxy().setLayerMaxCoresPerTask(layer.id, maxCores)
+    conn().proxy().setLayerMaxCoresPerTask(layer.id, maxCores)
 
 cpdef inline set_layer_min_ram_per_task(Layer layer, int minRam):
     """ 
     :param layer: :class:`.Layer`
     :param minRam: int 
     """
-    getClient().proxy().setLayerMinRamPerTask(layer.id, minRam)
+    conn().proxy().setLayerMinRamPerTask(layer.id, minRam)
 
 cpdef inline set_layer_threadable(Layer layer, bint threadable):
     """ 
     :param layer: :class:`.Layer`
     :param threadable: bool
     """
-    getClient().proxy().setLayerThreadable(layer.id, threadable)
+    conn().proxy().setLayerThreadable(layer.id, threadable)
 
 

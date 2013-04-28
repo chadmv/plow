@@ -252,7 +252,7 @@ cpdef inline get_depends_on_job(Job job):
         vector[DependT] deps 
         list ret
 
-    getClient().proxy().getDependsOnJob(deps, job.id)
+    conn().proxy().getDependsOnJob(deps, job.id)
     ret = [initDepend(d) for d in deps]
     return ret 
 
@@ -269,7 +269,7 @@ cpdef inline get_job_depends_on(Job job):
         vector[DependT] deps 
         list ret
 
-    getClient().proxy().getJobDependsOn(deps, job.id)
+    conn().proxy().getJobDependsOn(deps, job.id)
     ret = [initDepend(d) for d in deps]
     return ret  
 
@@ -286,7 +286,7 @@ cpdef inline get_depends_on_layer(Layer layer):
         vector[DependT] deps 
         list ret
 
-    getClient().proxy().getDependsOnLayer(deps, layer.id)
+    conn().proxy().getDependsOnLayer(deps, layer.id)
     ret = [initDepend(d) for d in deps]
     return ret 
 
@@ -303,7 +303,7 @@ cpdef inline get_layer_depends_on(Layer layer):
         vector[DependT] deps 
         list ret
 
-    getClient().proxy().getLayerDependsOn(deps, layer.id)
+    conn().proxy().getLayerDependsOn(deps, layer.id)
     ret = [initDepend(d) for d in deps]
     return ret   
 
@@ -320,7 +320,7 @@ cpdef inline get_depends_on_task(Task task):
         vector[DependT] deps 
         list ret
 
-    getClient().proxy().getDependsOnTask(deps, task.id)
+    conn().proxy().getDependsOnTask(deps, task.id)
     ret = [initDepend(d) for d in deps]
     return ret    
 
@@ -337,7 +337,7 @@ cpdef inline get_task_depends_on(Task task):
         vector[DependT] deps 
         list ret
 
-    getClient().proxy().getTaskDependsOn(deps, task.id)
+    conn().proxy().getTaskDependsOn(deps, task.id)
     ret = [initDepend(d) for d in deps]
     return ret 
 
@@ -349,7 +349,7 @@ cpdef inline bint drop_depend(Depend dep) except? -1:
     :return: bool success
     """
     cdef bint ret 
-    ret = getClient().proxy().dropDepend(dep.id)
+    ret = conn().proxy().dropDepend(dep.id)
     return ret
 
 cpdef inline bint reactivate_depend(Depend dep) except? -1:
@@ -360,7 +360,7 @@ cpdef inline bint reactivate_depend(Depend dep) except? -1:
     :return: bool success
     """    
     cdef bint ret 
-    ret = getClient().proxy().reactivateDepend(dep.id)
+    ret = conn().proxy().reactivateDepend(dep.id)
     return ret   
 
 

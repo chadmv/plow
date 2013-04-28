@@ -203,7 +203,7 @@ cdef class Task:
         """
         Refresh the attributes from the server
         """
-        getClient().proxy().getTask(self._task, self._task.id)
+        conn().proxy().getTask(self._task, self._task.id)
 
     def get_log_path(self):
         """
@@ -287,7 +287,7 @@ cpdef inline Task get_task(Guid& taskId):
         TaskT taskT 
         Task task 
 
-    getClient().proxy().getTask(taskT, taskId)
+    conn().proxy().getTask(taskT, taskId)
     task = initTask(taskT)
     return task
 
@@ -313,7 +313,7 @@ def get_tasks(**kwargs):
 
     f = dict_to_taskFilter(kwargs)
 
-    getClient().proxy().getTasks(tasks, f)
+    conn().proxy().getTasks(tasks, f)
     ret = [initTask(taskT) for taskT in tasks]
     return ret
 
@@ -330,7 +330,7 @@ cpdef inline string get_task_log_path(Task task):
         return path
 
     try:
-        getClient().proxy().getTaskLogPath(path, task.id)
+        conn().proxy().getTaskLogPath(path, task.id)
     except RuntimeError:
         return path
 
@@ -349,7 +349,7 @@ def retry_tasks(**kwargs):
 
     """
     cdef TaskFilterT f = dict_to_taskFilter(kwargs)
-    getClient().proxy().retryTasks(f)
+    conn().proxy().retryTasks(f)
 
 def eat_tasks(**kwargs):
     """
@@ -363,7 +363,7 @@ def eat_tasks(**kwargs):
     :param lastUpdateTime: long msec epoch timestamp 
     """
     cdef TaskFilterT f = dict_to_taskFilter(kwargs)
-    getClient().proxy().eatTasks(f)
+    conn().proxy().eatTasks(f)
 
 def kill_tasks(**kwargs):
     """
@@ -377,7 +377,7 @@ def kill_tasks(**kwargs):
     :param lastUpdateTime: long msec epoch timestamp 
     """
     cdef TaskFilterT f = dict_to_taskFilter(kwargs)
-    getClient().proxy().killTasks(f)
+    conn().proxy().killTasks(f)
 
 
 #######################

@@ -22,8 +22,10 @@ class PlowClient::Connection
 {
     public:
         Connection();
+        Connection(const std::string& host, const int32_t port);
         void connect();
         void disconnect();
+        void reconnect();
         RpcServiceClient proxy();        
     private:
         boost::shared_ptr<TSocket> socket;
@@ -37,8 +39,15 @@ PlowClient::Connection::Connection():
     transport(new TFramedTransport(socket)),
     protocol(new TBinaryProtocol(transport)),
     service(protocol)
-{
-}
+{}
+
+PlowClient::Connection::Connection(const std::string& host, const int32_t port):
+    socket(new TSocket(host, port)),
+    transport(new TFramedTransport(socket)),
+    protocol(new TBinaryProtocol(transport)),
+    service(protocol)
+{}
+
 
 void PlowClient::Connection::connect()
 {
@@ -50,6 +59,12 @@ void PlowClient::Connection::disconnect()
     transport->close();
 }
 
+void PlowClient::Connection::reconnect()
+{
+    transport->close();
+    transport->open();
+}
+
 RpcServiceClient PlowClient::Connection::proxy()
 {
     return service;
@@ -57,6 +72,12 @@ RpcServiceClient PlowClient::Connection::proxy()
 
 PlowClient::PlowClient():
     m_conn(new PlowClient::Connection)
+{
+    m_conn->connect();
+}
+
+PlowClient::PlowClient(const std::string& host, const int32_t port):
+    m_conn(new PlowClient::Connection(host, port))
 {
     m_conn->connect();
 }
@@ -71,12 +92,27 @@ RpcServiceClient PlowClient::proxy()
     return m_conn->proxy();
 }
 
-PlowClient* getClient()
+void PlowClient::reconnect()
+{
+    m_conn->reconnect();
+}
+
+PlowClient* getClient(const bool reset)
+{
+    return _getClient("localhost", 11336, reset);
+}
+
+PlowClient* getClient(const std::string& host, const int32_t port, const bool reset)
+{
+    return _getClient(host, port, reset);
+}
+
+PlowClient* _getClient(const std::string& host, const int32_t port, bool reset)
 {
     static boost::thread_specific_ptr<PlowClient> instance;
-    if(!instance.get())
+    if(reset || !instance.get())
     {
-        instance.reset(new PlowClient);
+        instance.reset(new PlowClient(host, port));
     }
     return instance.get();
 }

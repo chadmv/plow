@@ -83,7 +83,7 @@ cdef class Matcher:
         Refresh the attributes from the server
         """
         cdef MatcherT matcher 
-        getClient().proxy().getMatcher(matcher, self.matcher.id)
+        conn().proxy().getMatcher(matcher, self.matcher.id)
         self.setMatcher(matcher)
 
     def delete(self):
@@ -105,7 +105,7 @@ def create_field_matcher(Filter filter, int field, int typ, string& value):
         MatcherT matcher 
         Matcher ret 
 
-    getClient().proxy().createFieldMatcher(matcher, 
+    conn().proxy().createFieldMatcher(matcher, 
                                            filter.id, 
                                            <MatcherField_type>field, 
                                            <MatcherType_type>typ, 
@@ -127,7 +127,7 @@ def create_attr_matcher(Filter filter, int typ, string& attr, string& value):
         MatcherT matcher 
         Matcher ret 
 
-    getClient().proxy().createAttrMatcher(matcher, 
+    conn().proxy().createAttrMatcher(matcher, 
                                           filter.id, 
                                           <MatcherType_type>typ, 
                                           attr,
@@ -146,7 +146,7 @@ cpdef inline Matcher get_matcher(Guid& matcherId):
         MatcherT matcher 
         Matcher ret 
 
-    getClient().proxy().getMatcher(matcher, matcherId)
+    conn().proxy().getMatcher(matcher, matcherId)
     ret = initMatcher(matcher)
     return ret
 
@@ -162,7 +162,7 @@ def get_matchers(Filter filter):
         vector[MatcherT] matchers
         list ret
 
-    getClient().proxy().getMatchers(matchers, filter.id)
+    conn().proxy().getMatchers(matchers, filter.id)
     ret = [initMatcher(m) for m in matchers]
     return ret        
 
@@ -172,7 +172,7 @@ cpdef inline delete_matcher(Matcher matcher):
 
     :param matcher: :class:`.Matcher`
     """
-    getClient().proxy().deleteMatcher(matcher.id)
+    conn().proxy().deleteMatcher(matcher.id)
 
 
  #######################
@@ -233,7 +233,7 @@ cdef class Action:
         Refresh the attributes from the server
         """
         cdef ActionT action
-        getClient().proxy().getAction(action, self.action.id)
+        conn().proxy().getAction(action, self.action.id)
         self.setAction(action)
 
     def delete(self):
@@ -253,7 +253,7 @@ def create_action(Filter filter, int typ, string& value):
         ActionT action 
         Action ret 
 
-    getClient().proxy().createAction(action, filter.id, <ActionType_type>typ, value)
+    conn().proxy().createAction(action, filter.id, <ActionType_type>typ, value)
     ret = initAction(action)
     return ret
 
@@ -268,7 +268,7 @@ cpdef inline Action get_action(Guid& actionId):
         ActionT action 
         Action ret 
 
-    getClient().proxy().getAction(action, actionId)
+    conn().proxy().getAction(action, actionId)
     ret = initAction(action)
     return ret
 
@@ -284,7 +284,7 @@ def get_actions(Filter filter):
         vector[ActionT] actions
         list ret
 
-    getClient().proxy().getActions(actions, filter.id)
+    conn().proxy().getActions(actions, filter.id)
     ret = [initAction(a) for a in actions]
     return ret        
 
@@ -294,7 +294,7 @@ cpdef inline delete_action(Action action):
 
     :param action: :class:`.Action`
     """
-    getClient().proxy().deleteAction(action.id)
+    conn().proxy().deleteAction(action.id)
 
 
 #######################
@@ -370,7 +370,7 @@ cdef class Filter:
         Refresh the attributes from the server
         """
         cdef FilterT filt
-        getClient().proxy().getFilter(filt, self._filter.id)
+        conn().proxy().getFilter(filt, self._filter.id)
         self.setFilter(filt)
 
     def delete(self):
@@ -420,7 +420,7 @@ def create_filter(Project project, string& name):
         FilterT filterT
         Filter ret 
 
-    getClient().proxy().createFilter(filterT, project.id, name)
+    conn().proxy().createFilter(filterT, project.id, name)
     ret = initFilter(filterT)
     return ret
 
@@ -436,7 +436,7 @@ def get_filters(Project project):
         vector[FilterT] filters 
         list ret 
 
-    getClient().proxy().getFilters(filters, project.id)
+    conn().proxy().getFilters(filters, project.id)
     ret = [initFilter(f) for f in filters]
     return ret
 
@@ -451,7 +451,7 @@ cpdef inline Filter get_filter(Guid& filterId):
         FilterT filt 
         Filter ret 
 
-    getClient().proxy().getFilter(filt, filterId)
+    conn().proxy().getFilter(filt, filterId)
     ret = initFilter(filt)
     return ret
 
@@ -461,7 +461,7 @@ cpdef inline delete_filter(Filter filt):
 
     :param filt: :class:`.Filter`
     """
-    getClient().proxy().deleteFilter(filt.id)
+    conn().proxy().deleteFilter(filt.id)
 
 cpdef inline set_filter_name(Filter filt, string& name):
     """
@@ -470,7 +470,7 @@ cpdef inline set_filter_name(Filter filt, string& name):
     :param filt: :class:`.Filter`
     :param name: str 
     """    
-    getClient().proxy().setFilterName(filt.id, name)
+    conn().proxy().setFilterName(filt.id, name)
     filt.name = name
 
 cpdef inline set_filter_order(Filter filt, int order):
@@ -480,7 +480,7 @@ cpdef inline set_filter_order(Filter filt, int order):
     :param filt: :class:`.Filter`
     :param order: int
     """    
-    getClient().proxy().setFilterOrder(filt.id, order)
+    conn().proxy().setFilterOrder(filt.id, order)
 
 cpdef inline increase_filter_order(Filter filt):
     """
@@ -488,7 +488,7 @@ cpdef inline increase_filter_order(Filter filt):
 
     :param filt: :class:`.Filter`
     """    
-    getClient().proxy().increaseFilterOrder(filt.id)
+    conn().proxy().increaseFilterOrder(filt.id)
 
 cpdef inline decrease_filter_order(Filter filt):
     """
@@ -496,5 +496,5 @@ cpdef inline decrease_filter_order(Filter filt):
 
     :param filt: :class:`.Filter`
     """    
-    getClient().proxy().decreaseFilterOrder(filt.id) 
+    conn().proxy().decreaseFilterOrder(filt.id) 
 

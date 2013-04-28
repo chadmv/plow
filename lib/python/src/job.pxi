@@ -135,7 +135,7 @@ cdef class JobSpec:
             Job ret 
 
         spec = self.toJobSpecT()
-        getClient().proxy().launch(job, spec)
+        conn().proxy().launch(job, spec)
 
         ret = initJob(job)
         return ret
@@ -231,7 +231,7 @@ cdef class Job:
         Refresh the attributes from the server
         """
         cdef JobT job 
-        getClient().proxy().getJob(job, self._job.id)
+        conn().proxy().getJob(job, self._job.id)
         self.setJob(job)
 
     def kill(self, string reason):
@@ -335,7 +335,7 @@ cpdef inline get_job(Guid& id):
     cdef Job job
 
     try:
-        getClient().proxy().getJob(jobT, id)
+        conn().proxy().getJob(jobT, id)
     except RuntimeError:
         return None 
 
@@ -353,7 +353,7 @@ def get_active_job(string name):
     cdef Job job
 
     try:
-        getClient().proxy().getActiveJob(jobT, name)
+        conn().proxy().getActiveJob(jobT, name)
     except RuntimeError:
         return None 
 
@@ -380,7 +380,7 @@ def get_jobs(**kwargs):
         JobFilter filter = JobFilter(**kwargs)
         JobFilterT f = filter.value
 
-    getClient().proxy().getJobs(jobs, f)
+    conn().proxy().getJobs(jobs, f)
     ret = [initJob(jobT) for jobT in jobs]
     return ret
 
@@ -393,7 +393,7 @@ cpdef inline kill_job(Job job, string reason):
     :returns: bool success
     """
     cdef bint success
-    success = getClient().proxy().killJob(job.id, reason)
+    success = conn().proxy().killJob(job.id, reason)
     return success
 
 cpdef inline pause_job(Job job, bint paused):
@@ -403,7 +403,7 @@ cpdef inline pause_job(Job job, bint paused):
     :param job: :class:`.Job`
     :param paused: bool pause state
     """
-    getClient().proxy().pauseJob(job.id, paused)
+    conn().proxy().pauseJob(job.id, paused)
 
 cpdef inline set_job_min_cores(Job job, int value):
     """
@@ -412,7 +412,7 @@ cpdef inline set_job_min_cores(Job job, int value):
     :param job: :class:`.Job`
     :param value: int number of cores
     """
-    getClient().proxy().setJobMinCores(job.id, value)
+    conn().proxy().setJobMinCores(job.id, value)
 
 cpdef inline set_job_max_cores(Job job, int value):
     """
@@ -421,7 +421,7 @@ cpdef inline set_job_max_cores(Job job, int value):
     :param job: :class:`.Job`
     :param value: int number of cores
     """
-    getClient().proxy().setJobMaxCores(job.id, value)
+    conn().proxy().setJobMaxCores(job.id, value)
 
 #######################
 # Output
@@ -468,7 +468,7 @@ cpdef inline get_job_outputs(Job job):
         vector[OutputT] outputs
         list ret = []
 
-    getClient().proxy().getJobOutputs(outputs, job.id)
+    conn().proxy().getJobOutputs(outputs, job.id)
 
     ret = [initOutput(outT) for outT in outputs]
     return ret
