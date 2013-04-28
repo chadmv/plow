@@ -119,6 +119,9 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
                 continue;
             }
             dispatch(result, node, task);
+            if (!result.continueDispatching()) {
+                break;
+            }
         }
     }
 
