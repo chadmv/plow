@@ -30,6 +30,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+---
+--- Cronds
+---
+
+CREATE TABLE plow.crond (
+  pk_crond SERIAL NOT NULL,
+  str_name TEXT NOT NULL,
+  str_lock_node TEXT,
+  b_locked BOOLEAN NOT NULL DEFAULT 'f',
+  duration_timeout BIGINT NOT NULL DEFAULT 120000,
+  time_started BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
+  time_stopped BIGINT NOT NULL DEFAULT plow.txTimeMillis()
+) WITHOUT OIDS;
+
 
 ----------------------------------------------------------
 
@@ -608,6 +622,10 @@ AS
 
 ----------------------------------------------------------
 
+---
+--- Cronds
+---
+INSERT INTO plow.crond (str_name) VALUES ('ORPHAN_PROC_CHECK');
 
 ---
 --- Test Project

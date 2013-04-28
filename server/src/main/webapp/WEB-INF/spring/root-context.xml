@@ -66,7 +66,7 @@
         Run the orphan proc checker every 30 seconds, after 2 min startup delay
         that allows all nodes to ping in after server downtime.
      -->
-    <task:scheduled ref="orphanProcChecker" method="execute" fixed-delay="30000" initial-delay="120000"/>
+    <task:scheduled ref="orphanProcChecker" method="start" fixed-delay="30000" initial-delay="120000"/>
   </task:scheduled-tasks>
 
 </beans>

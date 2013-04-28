@@ -1,6 +1,7 @@
 package com.breakersoft.plow.crond;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ import com.breakersoft.plow.thrift.TaskState;
  * @author chambers
  *
  */
-public class OrphanProcChecker {
+public class OrphanProcChecker extends AbstractCrondTask {
 
     private static final Logger logger = LoggerFactory.getLogger(OrphanProcChecker.class);
 
@@ -29,20 +30,34 @@ public class OrphanProcChecker {
     @Autowired
     JobService jobService;
 
-    public void execute() {
+    public OrphanProcChecker() {
+        super(CrondTask.ORPHAN_PROC_CHECK);
+    }
+
+    protected void run() {
+
         final List<DispatchProc> procs = dispatchService.getOrphanProcs();
         logger.info("Orphan proc checker found {} orphan procs.", procs.size());
 
         for (DispatchProc proc: procs) {
 
-            if (proc.getTaskId() != null) {
-                final Task task = jobService.getTask(proc.getTaskId());
-                logger.warn("Found orphaned {}", task);
-                dispatchService.stopTask(task, TaskState.WAITING);
-            }
+            try {
 
-            logger.warn("Deallocating orphan {}", proc);
-            dispatchService.deallocateProc(proc, "orphaned");
+                final UUID taskId = proc.getTaskId();
+
+                logger.warn("Deallocating orphan {}", proc);
+                dispatchService.deallocateProc(proc, "orphaned");
+
+                if (proc.getTaskId() != null) {
+                    final Task task = jobService.getTask(taskId);
+
+                    logger.warn("Found orphaned {}", task);
+                    dispatchService.stopTask(task, TaskState.WAITING);
+                }
+
+            } catch (Exception e) {
+                logger.warn("Failed to handled orphaned proc, " + e.getMessage(), e);
+            }
         }
     }
 }
