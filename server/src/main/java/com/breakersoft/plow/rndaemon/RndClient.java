@@ -46,6 +46,7 @@ public class RndClient {
         try {
             connect().runTask(command);
         } catch (TException e) {
+            logger.warn("Failed to run task " + command, e);
             throw new RndClientExecuteException(e);
         }
         finally {
@@ -57,6 +58,7 @@ public class RndClient {
         try {
             connect().killRunningTask(proc.getProcId().toString(), reason);
         } catch (TException e) {
+            logger.warn("Failed to kill proc " + proc, e);
             throw new RndClientExecuteException(e);
         }
         finally {
