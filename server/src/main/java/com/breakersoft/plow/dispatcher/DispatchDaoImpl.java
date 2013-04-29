@@ -66,9 +66,9 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         "AND " +
             "layer.str_tags && ? " +
         "AND " +
-            "(job_dsp.int_max_cores < job_dsp.int_run_cores OR job_dsp.int_max_cores = -1 )" +
+            "job_dsp.int_max_cores < job_dsp.int_run_cores " +
         "AND " +
-            "(folder_dsp.int_max_cores < folder_dsp.int_run_cores OR folder_dsp.int_max_cores = -1 ) " +
+            "folder_dsp.int_max_cores < folder_dsp.int_run_cores " +
         "ORDER BY " +
             "job_dsp.float_tier ASC, " +
             "folder_dsp.float_tier ASC";
