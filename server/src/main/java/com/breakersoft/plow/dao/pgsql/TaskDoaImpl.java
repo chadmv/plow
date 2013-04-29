@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -23,6 +22,7 @@ import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.breakersoft.plow.util.PlowUtils;
+import com.breakersoft.plow.util.UUIDGen;
 import com.google.common.collect.Lists;
 
 @Repository
@@ -89,7 +89,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
 
     @Override
     public Task create(Layer layer, String name, int number, int taskOrder, int layerOrder) {
-        final UUID id = UUID.randomUUID();
+        final UUID id = UUIDGen.random();
 
         jdbc.update(INSERT, id, layer.getLayerId(), layer.getJobId(), name,
                 number, taskOrder, layerOrder, TaskState.INITIALIZE.ordinal());
