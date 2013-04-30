@@ -397,18 +397,22 @@ CREATE TABLE plow.proc (
   pk_cluster UUID NOT NULL,
   pk_quota UUID NOT NULL,
   pk_job UUID NOT NULL,
+  pk_layer UUID NOT NULL,
   pk_task UUID,
   int_cores SMALLINT NOT NULL,
   int_ram INTEGER NOT NULL,
-  bool_unbooked BOOLEAN DEFAULT 'f' NOT NULL,
-  bool_backfill BOOLEAN DEFAULT 'f' NOT NULL,
   time_created BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
-  time_updated BIGINT NOT NULL DEFAULT plow.txTimeMillis()
+  time_updated BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
+  time_started BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
+  bool_unbooked BOOLEAN NOT NULL DEFAULT 'f' 
 ) WITHOUT OIDS;
 
 CREATE INDEX proc_pk_node_idx ON plow.proc (pk_node);
 CREATE UNIQUE INDEX proc_pk_task_uniq_idx ON plow.proc (pk_task);
 CREATE INDEX proc_pk_job_idx ON plow.proc (pk_job);
+CREATE INDEX proc_pk_layer_idx ON plow.proc (pk_layer);
+CREATE INDEX proc_pk_cluster_idx ON plow.proc (pk_cluster);
+CREATE INDEX proc_pk_quota_idx ON plow.proc (pk_quota);
 
 ----------------------------------------------------------
 
@@ -461,6 +465,8 @@ CREATE TABLE plow.action (
 CREATE INDEX action_pk_filter_idx ON plow.action (pk_filter);
 
 ----------------------------------------------------------
+--- TRIGGERS
+----------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION plow.after_proc_insert() RETURNS TRIGGER AS $$
 BEGIN
@@ -469,8 +475,7 @@ BEGIN
   UPDATE plow.folder_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_folder=
     (SELECT pk_folder FROM job WHERE pk_job=NEW.pk_job);
   UPDATE plow.job_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_job=NEW.pk_job;
-  UPDATE plow.layer_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_layer=
-    (SELECT pk_layer FROM task WHERE pk_task=NEW.pk_task);
+  UPDATE plow.layer_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_layer=NEW.pk_layer;
   RETURN NEW;
 END
 $$
@@ -486,8 +491,7 @@ BEGIN
   UPDATE plow.folder_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_folder=
     (SELECT pk_folder FROM job WHERE pk_job=OLD.pk_job);
   UPDATE plow.job_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_job=OLD.pk_job;
-  UPDATE plow.layer_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_layer=
-    (SELECT pk_layer FROM task WHERE pk_task=OLD.pk_task);
+  UPDATE plow.layer_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_layer= OLD.pk_layer;
   RETURN OLD;
 END
 $$
@@ -495,6 +499,31 @@ LANGUAGE plpgsql;
 
 CREATE TRIGGER trig_after_proc_delete AFTER DELETE ON plow.proc
     FOR EACH ROW EXECUTE PROCEDURE plow.after_proc_delete();
+
+---
+--- plow.after_proc_update()
+--- Update the layer_dsp folder when a proc moves to a differet layer.
+---
+CREATE OR REPLACE FUNCTION plow.after_proc_update() RETURNS TRIGGER AS $$
+BEGIN
+  /*
+    Must do queries in predictable order to avoid deadlock situation.
+  */
+  IF OLD.pk_layer > NEW.pk_layer THEN
+    UPDATE plow.layer_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_layer = OLD.pk_layer;
+    UPDATE plow.layer_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_layer = NEW.pk_layer;
+  ELSEIF OLD.pk_layer < NEW.pk_layer THEN
+    UPDATE plow.layer_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_layer = NEW.pk_layer;
+    UPDATE plow.layer_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_layer = OLD.pk_layer;
+  END IF;
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_after_proc_update AFTER UPDATE ON plow.proc
+    FOR EACH ROW WHEN (OLD.pk_layer != NEW.pk_layer)
+    EXECUTE PROCEDURE plow.after_proc_update();
 
 ---
 --- plow.before_disp_update()

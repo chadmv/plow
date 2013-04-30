@@ -68,6 +68,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                     "pk_cluster",
                     "pk_quota",
                     "pk_task",
+                    "pk_layer",
                     "pk_job",
                     "int_cores",
                     "int_ram");
@@ -79,6 +80,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
         proc.setProcId(UUID.randomUUID());
         proc.setJobId(task.jobId);
         proc.setTaskId(task.taskId);
+        proc.setLayerId(task.getLayerId());
         proc.setHostname(node.getName());
         proc.setNodeId(node.getNodeId());
         proc.setAllocated(true);
@@ -104,6 +106,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                 clusterId,
                 quotaId,
                 task.taskId,
+                task.layerId,
                 task.jobId,
                 task.minCores,
                 task.minRam);
@@ -112,24 +115,38 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
 
     }
 
-    private static final String UPDATE =
+    private static final String UNASSIGN =
         "UPDATE " +
             "plow.proc " +
         "SET " +
-            "pk_task = ?, " +
+            "pk_task = NULL, " +
             "time_updated = plow.txTimeMillis() " +
         "WHERE " +
-            "pk_proc = ?";
-
+            "pk_proc = ? " +
+        "AND " +
+            "pk_task IS NOT NULL";
 
     @Override
-    public void unassign(Proc proc) {
-        jdbc.update(UPDATE, null, proc.getProcId());
+    public boolean unassign(Proc proc) {
+        return jdbc.update(UNASSIGN, proc.getProcId()) == 1;
     }
 
-    public void assign(Proc proc, Task task) {
-         jdbc.update(UPDATE,
-                 task.getTaskId(), proc.getProcId());
+    private static final String ASSIGN =
+            "UPDATE " +
+                "plow.proc " +
+            "SET " +
+                "pk_task = ?, " +
+                "pk_layer = ?, " +
+                "time_updated = plow.txTimeMillis(), " +
+                "time_started = plow.txTimeMillis()  " +
+            "WHERE " +
+                "pk_proc = ? " +
+            "AND " +
+                "pk_task IS NULL";
+
+    public boolean assign(Proc proc, Task task) {
+         return jdbc.update(ASSIGN,
+                 task.getTaskId(), task.getLayerId(), proc.getProcId()) == 1;
     }
 
     @Override

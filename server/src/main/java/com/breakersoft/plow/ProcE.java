@@ -9,6 +9,7 @@ public class ProcE implements Proc {
     private UUID taskId;
     private UUID nodeId;
     private UUID jobId;
+    private UUID layerId;
 
     public UUID getProcId() {
         return procId;
@@ -59,5 +60,11 @@ public class ProcE implements Proc {
     }
     public void setJobId(UUID jobId) {
         this.jobId = jobId;
+    }
+    public UUID getLayerId() {
+        return layerId;
+    }
+    public void setLayerId(UUID layerId) {
+        this.layerId = layerId;
     }
 }

@@ -13,16 +13,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Proc;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.DispatchDao;
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.NodeDispatcher;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
+import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.test.AbstractTest;
@@ -42,11 +43,13 @@ public class ProcDaoTests extends AbstractTest {
     @Resource
     ProcDao procDao;;
 
-    private Proc proc;
+    private DispatchProc proc;
 
     private DispatchTask task;
 
     private DispatchNode dnode;
+
+    private DispatchJob job;
 
     @Before
     public void init() {
@@ -55,10 +58,10 @@ public class ProcDaoTests extends AbstractTest {
         Node node =  nodeService.createNode(getTestNodePing());
         dnode = dispatchDao.getDispatchNode(node.getName());
 
-        JobLaunchEvent event = jobService.launch(getTestJobSpec());
-        DispatchJob  djob = new DispatchJob(event.getJob());
+        JobLaunchEvent event = jobService.launch(getTestJobSpec("proc_tests", 2));
+        job = new DispatchJob(event.getJob());
 
-        task = dispatchService.getDispatchableTasks(djob,dnode).get(0);
+        task = dispatchService.getDispatchableTasks(job, dnode).get(0);
         proc = dispatchService.allocateProc(dnode, task);
     }
 
@@ -93,8 +96,35 @@ public class ProcDaoTests extends AbstractTest {
         assertEquals(1, procs.size());
         assertEquals(proc.getProcId(), procs.get(0).getProcId());
         assertTrue(procs.contains(proc));
-
     }
+
+    @Test
+    public void assignAndUnassignProc() {
+        assertTrue(procDao.unassign(proc));
+        assertTrue(procDao.assign(proc, task));
+
+        // Verify all running core counts.
+        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM job_dsp WHERE pk_job=?", task.getJobId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM folder_dsp WHERE pk_folder=(SELECT pk_folder FROM job WHERE pk_job=?)", job.getJobId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM layer_dsp WHERE pk_layer=?", task.getLayerId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_cores - int_idle_cores FROM node_dsp WHERE pk_node=?", proc.getNodeId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?", proc.getQuotaId()));
+
+        // Task is in a different layer
+        DispatchTask nextTask = dispatchService.getDispatchableTasks(job, dnode).get(1);
+        assertTrue(procDao.unassign(proc));
+        assertTrue(procDao.assign(proc, nextTask));
+        assertFalse(procDao.assign(proc, nextTask));
+
+        // Verify all running core counts.  Basically all the same except the layer changes.
+        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM job_dsp WHERE pk_job=?", task.getJobId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM folder_dsp WHERE pk_folder=(SELECT pk_folder FROM job WHERE pk_job=?)", job.getJobId()));
+        assertEquals(0, jdbc().queryForInt("SELECT int_run_cores FROM layer_dsp WHERE pk_layer=?", task.getLayerId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM layer_dsp WHERE pk_layer=?", nextTask.getLayerId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_cores - int_idle_cores FROM node_dsp WHERE pk_node=?", proc.getNodeId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?", proc.getQuotaId()));
+    }
+
 
     public void testSetProcUnbooked() {
 

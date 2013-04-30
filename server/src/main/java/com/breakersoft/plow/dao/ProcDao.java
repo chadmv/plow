@@ -24,7 +24,7 @@ public interface ProcDao {
 
     DispatchProc create(DispatchNode node, DispatchTask task);
 
-    void unassign(Proc proc);
+    boolean unassign(Proc proc);
 
-    void assign(Proc proc, Task task);
+    boolean assign(Proc proc, Task task);
 }
