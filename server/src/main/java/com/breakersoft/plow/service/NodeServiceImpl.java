@@ -67,23 +67,23 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public Quota getQuota(UUID id) {
-    	return quotaDao.get(id);
+        return quotaDao.get(id);
     }
 
-	@Override
-	public void setQuotaSize(Quota quota, int size) {
-		quotaDao.setSize(quota, size);
-	}
+    @Override
+    public void setQuotaSize(Quota quota, int size) {
+        quotaDao.setSize(quota, size);
+    }
 
-	@Override
-	public void setQuotaBurst(Quota quota, int burst) {
-		quotaDao.setBurst(quota, burst);
-	}
+    @Override
+    public void setQuotaBurst(Quota quota, int burst) {
+        quotaDao.setBurst(quota, burst);
+    }
 
-	@Override
-	public void setQuotaLocked(Quota quota, boolean locked) {
-		quotaDao.setLocked(quota, locked);
-	}
+    @Override
+    public void setQuotaLocked(Quota quota, boolean locked) {
+        quotaDao.setLocked(quota, locked);
+    }
 
     @Override
     public Cluster createCluster(String name, Set<String> tags) {
@@ -122,12 +122,12 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public void setClusterName(Cluster cluster, String name) {
-    	clusterDao.setClusterName(cluster, name);
+        clusterDao.setClusterName(cluster, name);
     }
 
     @Override
     public void setClusterTags(Cluster cluster, Set<String> tags) {
-    	clusterDao.setClusterTags(cluster, tags.toArray(new String[] {}));
+        clusterDao.setClusterTags(cluster, tags.toArray(new String[] {}));
     }
 
     @Override
@@ -146,29 +146,29 @@ public class NodeServiceImpl implements NodeService {
         return procDao.setProcUnbooked(proc, unbooked);
     }
 
-	@Override
-	public void setNodeLocked(Node node, boolean locked) {
-		nodeDao.setLocked(node, locked);
-	}
+    @Override
+    public void setNodeLocked(Node node, boolean locked) {
+        nodeDao.setLocked(node, locked);
+    }
 
-	@Override
-	public Node getNode(UUID id) {
-		return nodeDao.get(id);
-	}
+    @Override
+    public Node getNode(UUID id) {
+        return nodeDao.get(id);
+    }
 
-	@Override
-	public boolean hasProcs(Node node) {
-		return nodeDao.hasProcs(node);
-	}
+    @Override
+    public boolean hasProcs(Node node) {
+        return nodeDao.hasProcs(node);
+    }
 
-	@Override
-	@Transactional(isolation=Isolation.SERIALIZABLE)
-	public void setNodeCluster(Node node, Cluster cluster) {
-		nodeDao.setCluster(node, cluster);
-	}
+    @Override
+    @Transactional(isolation=Isolation.SERIALIZABLE)
+    public void setNodeCluster(Node node, Cluster cluster) {
+        nodeDao.setCluster(node, cluster);
+    }
 
-	@Override
-	public void setTags(Node node, Set<String> tags) {
-		nodeDao.setTags(node, tags);
-	}
+    @Override
+    public void setTags(Node node, Set<String> tags) {
+        nodeDao.setTags(node, tags);
+    }
 }

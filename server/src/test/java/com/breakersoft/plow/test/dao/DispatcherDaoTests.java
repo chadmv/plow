@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.breakersoft.plow.Defaults;
-import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.ClusterDao;
