@@ -62,7 +62,7 @@ struct DependT {
     2:required DependType type,
     3:required bool active,
     4:required common.Timestamp createdTime,
-    5:required common.Timestamp modifiedTime,
+    5:required common.Timestamp satisfiedTime,
     6:required string dependentJobId,
     7:required string dependOnJobId,
     8:optional string dependentLayerId,

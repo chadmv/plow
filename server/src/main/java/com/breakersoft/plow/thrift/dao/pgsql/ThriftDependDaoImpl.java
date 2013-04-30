@@ -32,7 +32,7 @@ public class ThriftDependDaoImpl extends AbstractDao implements ThriftDependDao 
             depend.setDependentJobName(rs.getString("str_dependent_job_name"));
             depend.setDependOnJobName(rs.getString("str_dependon_job_name"));
             depend.setCreatedTime(rs.getLong("time_created"));
-            depend.setModifiedTime(rs.getLong("time_modified"));
+            depend.setSatisfiedTime(rs.getLong("time_satisfied"));
 
             if (depend.getType().equals(DependType.JOB_ON_JOB)) {
                 return depend;
@@ -84,7 +84,7 @@ public class ThriftDependDaoImpl extends AbstractDao implements ThriftDependDao 
                 "str_dependent_task_name," +
                 "str_dependon_task_name," +
                 "time_created," +
-                "time_modified " +
+                "time_satisfied " +
             "FROM " +
                 "plow.depend ";
 

@@ -188,7 +188,7 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
     }
 
     private static final String SATISFY =
-            "UPDATE depend SET uuid_sig=NULL, bool_active='f' WHERE pk_depend=? AND bool_active='t'";
+            "UPDATE depend SET uuid_sig=NULL, bool_active='f', time_satisfied=plow.txTimeMillis() WHERE pk_depend=? AND bool_active='t'";
 
     @Override
     public boolean satisfyDepend(Depend depend) {

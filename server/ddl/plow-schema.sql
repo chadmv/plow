@@ -277,24 +277,24 @@ CREATE TABLE plow.task_ping (
 ---
 
 CREATE TABLE plow.depend (
-    pk_depend UUID NOT NULL PRIMARY KEY,
-    uuid_sig UUID,
-    int_type SMALLINT NOT NULL,
-    bool_active BOOLEAN NOT NULL DEFAULT 't',
-    pk_dependent_job UUID NOT NULL,
-    pk_dependon_job UUID NOT NULL,
-    pk_dependent_layer UUID,
-    pk_dependon_layer UUID,
-    pk_dependent_task UUID,
-    pk_dependon_task UUID,
-    str_dependent_job_name TEXT NOT NULL,
-    str_dependon_job_name TEXT NOT NULL,
-    str_dependent_layer_name TEXT,
-    str_dependon_layer_name TEXT,
-    str_dependent_task_name TEXT,
-    str_dependon_task_name TEXT,
-    time_created BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
-    time_modified BIGINT NOT NULL DEFAULT plow.txTimeMillis()
+  pk_depend UUID NOT NULL PRIMARY KEY,
+  uuid_sig UUID,
+  int_type SMALLINT NOT NULL,
+  bool_active BOOLEAN NOT NULL DEFAULT 't',
+  pk_dependent_job UUID NOT NULL,
+  pk_dependon_job UUID NOT NULL,
+  pk_dependent_layer UUID,
+  pk_dependon_layer UUID,
+  pk_dependent_task UUID,
+  pk_dependon_task UUID,
+  str_dependent_job_name TEXT NOT NULL,
+  str_dependon_job_name TEXT NOT NULL,
+  str_dependent_layer_name TEXT,
+  str_dependon_layer_name TEXT,
+  str_dependent_task_name TEXT,
+  str_dependon_task_name TEXT,
+  time_created BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
+  time_satisfied BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE UNIQUE INDEX depend_uuid_sig_idx ON plow.depend (uuid_sig);
