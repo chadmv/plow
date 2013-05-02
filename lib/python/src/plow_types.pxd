@@ -259,7 +259,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         DependType_type type
         bint active 
         Timestamp createdTime
-        Timestamp modifiedTime
+        Timestamp satisfiedTime
         string dependentJobId
         string dependOnJobId
         string dependentLayerId
