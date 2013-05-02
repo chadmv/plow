@@ -18,6 +18,9 @@ using namespace apache::thrift::transport;
 
 PLOW_NAMESPACE_ENTER
 
+#define DEFAULT_HOST "localhost"
+#define DEFAULT_PORT 11336 
+
 class PlowClient::Connection
 {
     public:
@@ -35,7 +38,7 @@ class PlowClient::Connection
 };
 
 PlowClient::Connection::Connection():
-    socket(new TSocket("localhost", 11336)),
+    socket(new TSocket(DEFAULT_HOST, DEFAULT_PORT)),
     transport(new TFramedTransport(socket)),
     protocol(new TBinaryProtocol(transport)),
     service(protocol)
@@ -97,20 +100,20 @@ void PlowClient::reconnect()
     m_conn->reconnect();
 }
 
+PlowClient* getClient()
+{
+    return getClient(DEFAULT_HOST, DEFAULT_PORT, false);
+}
+
 PlowClient* getClient(const bool reset)
 {
-    return _getClient("localhost", 11336, reset);
+    return getClient(DEFAULT_HOST, DEFAULT_PORT, reset);
 }
 
 PlowClient* getClient(const std::string& host, const int32_t port, const bool reset)
 {
-    return _getClient(host, port, reset);
-}
-
-PlowClient* _getClient(const std::string& host, const int32_t port, bool reset)
-{
     static boost::thread_specific_ptr<PlowClient> instance;
-    if(reset || !instance.get())
+    if (reset || !instance.get())
     {
         instance.reset(new PlowClient(host, port));
     }
