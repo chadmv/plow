@@ -4,6 +4,10 @@ from libcpp.set cimport set as c_set
 from libcpp.map cimport map 
 
 
+cdef extern from "exceptions.h":
+    pass
+
+
 cdef extern from "rpc/common_types.h" namespace "Plow":
     ctypedef string Guid
     ctypedef int Timestamp
@@ -81,10 +85,6 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[MatcherT] matchers
         vector[ActionT] actions
     
-
-    cdef cppclass PlowException:
-        int what
-        string why
 
     cdef cppclass TaskTotalsT:
         int totalTaskCount
