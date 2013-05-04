@@ -92,6 +92,14 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__tree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.__tree.customContextMenuRequested.connect(self.__showContextMenu)
 
+        def treeMousePress(event):
+            item = self.__tree.itemAt(event.pos())
+            if not item:
+                self.__tree.clearSelection()
+            QtGui.QTreeWidget.mousePressEvent(self.__tree, event)
+
+        self.__tree.mousePressEvent = treeMousePress
+
         self.layout().addWidget(self.__tree)
 
     def refresh(self):
