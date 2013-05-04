@@ -314,8 +314,9 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
 
     @Override
     public boolean hasWaitingFrames(Job job) {
-        return jdbc.queryForInt("SELECT job_count.int_waiting FROM plow.job_count WHERE pk_job=?",
-                job.getJobId()) > 0;
+        return jdbc.queryForObject(
+                "SELECT job_count.int_waiting FROM plow.job_count WHERE pk_job=?",
+                Integer.class, job.getJobId()) > 0;
     }
 
     @Override
