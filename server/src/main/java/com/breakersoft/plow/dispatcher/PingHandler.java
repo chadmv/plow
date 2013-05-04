@@ -31,6 +31,8 @@ public class PingHandler {
 
     public void handlePing(Ping ping) {
 
+        logger.info("{} node reporting in.", ping.getHostname());
+
         DispatchNode node;
         try {
             node = dispatchService.getDispatchNode(ping.hostname);
@@ -39,8 +41,6 @@ public class PingHandler {
             Node newNode = nodeService.createNode(ping);
             node = dispatchService.getDispatchNode(newNode.getName());
         }
-
-        logger.info("{} node reporting in.", node.getName());
 
         jobService.updateRunningTasks(ping.tasks);
         jobService.updateMaxRssValues(ping.tasks);
