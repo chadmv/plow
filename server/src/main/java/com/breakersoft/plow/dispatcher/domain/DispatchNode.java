@@ -43,6 +43,12 @@ public class DispatchNode extends NodeE implements DispatchResource {
         this.memory = this.memory - memory;
     }
 
+    /**
+     * Return true if the node has cores and memory available and
+     * dispatchable is set to true.
+     *
+     * @return
+     */
     public boolean isDispatchable() {
         if (cores == 0 || memory <= Defaults.MEMORY_MIN_MB) {
             return false;

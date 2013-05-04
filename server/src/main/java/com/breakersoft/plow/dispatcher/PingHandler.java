@@ -6,6 +6,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 
 import com.breakersoft.plow.Node;
+import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
@@ -26,26 +27,27 @@ public class PingHandler {
     NodeDispatcher nodeDispatcher;
 
     @Autowired
-    DispatchService dispatchSerice;
+    DispatchService dispatchService;
 
     public void handlePing(Ping ping) {
 
-        Node node;
+        DispatchNode node;
         try {
-            node = nodeService.getNode(ping.hostname);
+            node = dispatchService.getDispatchNode(ping.hostname);
             nodeService.updateNode(node, ping);
         } catch (EmptyResultDataAccessException e) {
-            node = nodeService.createNode(ping);
+            Node newNode = nodeService.createNode(ping);
+            node = dispatchService.getDispatchNode(newNode.getName());
         }
+
+        logger.info("{} node reporting in.", node.getName());
 
         jobService.updateRunningTasks(ping.tasks);
         jobService.updateMaxRssValues(ping.tasks);
 
-        logger.info("{} node reporting in.", node.getName());
-
-        nodeDispatcher.book(
-                dispatchSerice.getDispatchNode(node.getName()));
-
+        if (node.isDispatchable()) {
+            nodeDispatcher.book(node);
+        }
     }
 
 }
