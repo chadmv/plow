@@ -226,6 +226,11 @@ def launch(argv, name, layout=None):
 def main():
     import signal
     import sys
+    import logging
+
+    lvl = logging.DEBUG if '-debug' in sys.argv else logging.INFO
+    logging.basicConfig(level=lvl)
+
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     launch(sys.argv, "Plow Wrangle", "Wrangler")
 

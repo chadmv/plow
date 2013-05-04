@@ -114,8 +114,9 @@ cdef extern from "client.h" namespace "Plow":
         RpcServiceClient proxy() nogil 
         void reconnect() nogil except +
 
-    cdef PlowClient* getClient() nogil except NULL
-    cdef PlowClient* getClient(string& host, int port) nogil except NULL
-    cdef PlowClient* getClient(string& host, int port, bint reset) nogil except NULL
+    cdef PlowClient* getClient() nogil except +
+    cdef PlowClient* getClient(bint reset) nogil except +
+    cdef PlowClient* getClient(string& host, int port) nogil except +
+    cdef PlowClient* getClient(string& host, int port, bint reset) nogil except +
 
     

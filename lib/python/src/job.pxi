@@ -240,7 +240,9 @@ cdef class Job:
 
         :param reason: str - reason for killing
         """
-        return kill_job(self, reason)
+        cdef bint ret = kill_job(self, reason)
+        self.refresh()
+        return ret
 
     def pause(self, bint paused):
         """
@@ -249,6 +251,7 @@ cdef class Job:
         :param paused: bool
         """
         pause_job(self, paused)
+        self.refresh()
 
     def get_outputs(self):
         """
@@ -265,6 +268,7 @@ cdef class Job:
         :param value: int 
         """
         set_job_min_cores(self, value)
+        self.refresh()
 
     def set_max_cores(self, int value):
         """
@@ -273,6 +277,7 @@ cdef class Job:
         :param value: int 
         """
         set_job_max_cores(self, value)
+        self.refresh()
 
     def get_layers(self):
         """

@@ -143,7 +143,7 @@ cdef class Depend:
     :var type: :data:`DependType`
     :var active: bool
     :var createdTime: long 
-    :var modifiedTime: long
+    :var satisfiedTime: long
     :var dependentJobId: Guid
     :var dependOnJobId: Guid
     :var dependentLayerId: Guid
@@ -175,8 +175,8 @@ cdef class Depend:
     property createdTime:
         def __get__(self): return long(self._depend.createdTime)
 
-    property modifiedTime:
-        def __get__(self): return long(self._depend.modifiedTime)
+    property satisfiedTime:
+        def __get__(self): return long(self._depend.satisfiedTime)
 
     property dependentJobId:
         def __get__(self): return self._depend.dependentJobId

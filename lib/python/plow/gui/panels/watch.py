@@ -4,7 +4,11 @@ The render job watch panel allows you to
    2. individually add jobs you want to watch.
 """
 import os
+import logging
+from functools import partial
+
 import plow.client
+from plow.client import JobState
 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
@@ -13,6 +17,13 @@ from plow.gui.common.job import JobProgressBar, JobSelectionDialog, JobStateWidg
 from plow.gui.constants import COLOR_JOB_STATE
 from plow.gui.util import formatMaxValue, formatDateTime, formatDuration
 from plow.gui.event import EventManager
+
+
+LOGGER = logging.getLogger(__name__)
+
+
+JOBID_ROLE = QtCore.Qt.UserRole
+JOB_ROLE = QtCore.Qt.UserRole + 1
 
 class RenderJobWatchPanel(Panel):
 
@@ -98,16 +109,22 @@ class RenderJobWatchWidget(QtGui.QWidget):
             "%02d" % job.totals.waiting,
             "%02d" % job.minCores,
             formatMaxValue(job.maxCores),
-            formatDuration(job.startTime, job.stopTime)])
+            formatDuration(job.startTime, job.stopTime)
+        ])
+
         item.setToolTip(6, "Started: %s\nStopped:%s" % 
             (formatDateTime(job.startTime), formatDateTime(job.stopTime)))
 
-        item.setData(0, QtCore.Qt.UserRole, job.id)
+        item.setData(0, JOBID_ROLE, job.id)
+        item.setData(0, JOB_ROLE, job)
+
         self.__tree.addTopLevelItem(item)
 
         progress = JobProgressBar(job.totals, self.__tree)
         self.__tree.setItemWidget(item, len(self.Header)-1, progress);
-        self.__tree.setItemWidget(item, 1, JobStateWidget(job.state, job.totals.dead, self))
+
+        state = JobStateWidget(job.state, job.totals.dead, self)
+        self.__tree.setItemWidget(item, 1, state)
 
         self.__jobs[job.id] = item
         return True
@@ -124,15 +141,17 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
         self.__tree.itemWidget(item, 1).setState(job.state, job.totals.dead)
 
+        item.setData(0, JOB_ROLE, job)
+
     def removeFinishedJobs(self):
         finished = []
         for item in self.__jobs.itervalues():
-            if self.__tree.itemWidget(item, 1).getState() == plow.client.JobState.FINISHED:
+            if self.__tree.itemWidget(item, 1).getState() == JobState.FINISHED:
                 finished.append(item)
         [self.removeJobItem(item) for item in finished]
 
     def removeJobItem(self, item):
-        jobid = str(item.data(0, QtCore.Qt.UserRole))
+        jobid = str(item.data(0, JOBID_ROLE))
         try:
             del self.__jobs[jobid]
         except Exception, e:
@@ -148,7 +167,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
                 self.updateJob(job)
 
     def __updateExistingJobs(self):
-        FINISHED = plow.client.JobState.FINISHED
+        FINISHED = JobState.FINISHED
         req = { }
         req["matchingOnly"] = True
         req["jobIds"] = [jobId for jobId, item in self.__jobs.iteritems() 
@@ -159,7 +178,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         req = { }
         req["matchingOnly"] = True
         req["user"] = []
-        req["states"] = [plow.client.JobState.RUNNING]
+        req["states"] = [JobState.RUNNING]
         if self.attrs["loadMine"]:
             req["user"].append(os.environ["USER"])
         if self.attrs["users"]:
@@ -168,12 +187,48 @@ class RenderJobWatchWidget(QtGui.QWidget):
             req["projects"] = self.attrs["projects"]
         self.__updateJobs(plow.client.get_jobs(**req))
 
-    def __showContextMenu(self):
-        pass
+    def __showContextMenu(self, pos):
+        tree = self.__tree
+        item = tree.itemAt(pos)
+        job = item.data(0, JOB_ROLE)
+
+        menu = QtGui.QMenu(tree)
+        pause = menu.addAction("Un-Pause" if job.paused else "Pause")
+        kill = menu.addAction("Kill")
+        eat = menu.addAction("Eat Dead")
+        retry = menu.addAction("Retry Dead")
+
+        pause.triggered.connect(partial(job.pause, not job.paused))
+
+        eat.setEnabled(bool(job.totals.dead))
+        eat.triggered.connect(partial(self.__eatDeadTasks, job))
+
+        retry.setEnabled(bool(job.totals.dead))
+        retry.triggered.connect(partial(self.__retryDeadTasks, job))
+
+        kill.setEnabled(bool(job.totals.running))
+        kill.triggered.connect(partial(job.kill, "plow-wrangler"))
+
+        menu.popup(tree.mapToGlobal(pos))
 
     def __itemDoubleClicked(self, item, col):
-        uid = item.data(0, QtCore.Qt.UserRole)
+        uid = item.data(0, JOBID_ROLE)
         EventManager.emit("JOB_OF_INTEREST", uid)
+
+    def __eatDeadTasks(self, job):
+        tasks = plow.client.get_tasks(job=job)
+        dead = [t for t in tasks if t.state == plow.client.TaskState.DEAD]
+        if dead:
+            LOGGER.info("Eating %d tasks", len(dead))
+            plow.client.eat_tasks(task=dead)
+
+    def __retryDeadTasks(self, job):
+        tasks = plow.client.get_tasks(job=job)
+        dead = [t for t in tasks if t.state == plow.client.TaskState.DEAD]
+        if dead:
+            LOGGER.info("Retrying %d tasks", len(dead))
+            plow.client.retry_tasks(task=dead)
+
 
 class RenderJobWatchSettingsDialog(QtGui.QDialog):
     """

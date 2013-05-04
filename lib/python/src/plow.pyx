@@ -1,4 +1,5 @@
 cimport cython
+
 from plow_types cimport *
 from client cimport getClient, PlowClient
 
@@ -19,20 +20,42 @@ include "depend.pxi"
 
 # from datetime import datetime
 import uuid
+import time
+import logging 
+
+__HOST = "localhost"
+__PORT = 11336
+
+LOGGER = logging.getLogger("client")
+
+EX_CONNECTION = set([
+    "write() send(): Broken pipe",
+    "Called write on non-open socket",
+    "No more data to read.",
+    "connect() failed: Connection refused"
+    ])
 
 
-HOST = "localhost"
-PORT = 11336
 
-cdef inline PlowClient* conn(bint reset=0) except NULL:
-    return getClient(HOST, PORT, reset)
+cdef inline PlowClient* conn(bint reset=0) except *:
+    cdef:
+        PlowClient* c
+        int i
+
+    try:
+        c = getClient(__HOST, __PORT, reset)
+    except RuntimeError:
+        c = getClient(__HOST, __PORT, True)
+
+    return c
 
 
-cpdef inline reconnect():
+def reconnect():
     """
     Re-establish the connection to the Plow server
     """
-    getClient(HOST, PORT, True).reconnect()
+    cdef PlowClient* c = conn(True)
+    c.reconnect()
 
 
 def set_host(str host="localhost", int port=11336):
@@ -42,9 +65,9 @@ def set_host(str host="localhost", int port=11336):
     :param host: str = "localhost"
     :param port: int = 11336
     """
-    global HOST, PORT
-    HOST = host
-    PORT = port
+    global __HOST, __PORT
+    __HOST = host
+    __PORT = port
     reconnect()    
 
 
@@ -54,7 +77,7 @@ def get_host():
 
     :returns: (str host, int port)
     """
-    return HOST, PORT
+    return __HOST, __PORT
 
 
 def is_uuid(str identifier):
@@ -83,8 +106,6 @@ def get_plow_time():
     """
     cdef long epoch
     epoch = conn().proxy().getPlowTime()
-    # plowTime = datetime.fromtimestamp(epoch / 1000)
-    # return plowTime
     return long(epoch)
 
 
