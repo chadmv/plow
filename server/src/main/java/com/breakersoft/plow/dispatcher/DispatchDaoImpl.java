@@ -249,8 +249,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "task.pk_task,"+
                 "task.pk_layer,"+
                 "task.pk_job,"+
-                "layer.int_min_cores,"+
-                "layer.int_min_ram,  " +
+                "task.int_min_cores,"+
+                "task.int_min_ram,  " +
                 "task.str_name," +
                 "job.pk_project " +
             "FROM " +
@@ -262,13 +262,13 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "WHERE " +
                 "layer.pk_job = ? " +
             "AND " +
-                "layer.int_min_cores <= ? " +
-            "AND " +
-                "layer.int_min_ram <= ? " +
-            "AND " +
                 "layer.str_tags && ? " +
             "AND " +
                 "task.int_state = ? " +
+            "AND " +
+                "task.int_min_cores <= ? " +
+            "AND " +
+                "task.int_min_ram <= ? " +
             "AND " +
                 "task.bool_reserved IS FALSE " +
             "ORDER BY " +
@@ -299,10 +299,10 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                 final PreparedStatement ps = conn.prepareStatement(GET_DISPATCHABLE_TASKS);
                 ps.setObject(1, job.getJobId());
-                ps.setInt(2, resource.getIdleCores());
-                ps.setInt(3, resource.getIdleRam());
-                ps.setArray(4, conn.createArrayOf("text", resource.getTags().toArray()));
-                ps.setInt(5, TaskState.WAITING.ordinal());
+                ps.setArray(2, conn.createArrayOf("text", resource.getTags().toArray()));
+                ps.setInt(3, TaskState.WAITING.ordinal());
+                ps.setInt(4, resource.getIdleCores());
+                ps.setInt(5, resource.getIdleRam());
                 return ps;
             }
         }, DISPATCHABLE_TASK_MAPPER);

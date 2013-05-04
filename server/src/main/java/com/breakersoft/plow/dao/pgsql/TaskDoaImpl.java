@@ -83,16 +83,24 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
 
     private static final String INSERT =
             JdbcUtils.Insert("plow.task",
-                    "pk_task", "pk_layer", "pk_job", "str_name",
-                    "int_number", "int_task_order",
-                    "int_layer_order", "int_state");
+                    "pk_task",
+                    "pk_layer",
+                    "pk_job",
+                    "str_name",
+                    "int_number",
+                    "int_task_order",
+                    "int_layer_order",
+                    "int_state",
+                    "int_min_cores",
+                    "int_min_ram");
 
     @Override
-    public Task create(Layer layer, String name, int number, int taskOrder, int layerOrder) {
+    public Task create(Layer layer, String name, int number, int taskOrder, int layerOrder, int minCores, int minRam) {
         final UUID id = UUIDGen.random();
 
         jdbc.update(INSERT, id, layer.getLayerId(), layer.getJobId(), name,
-                number, taskOrder, layerOrder, TaskState.INITIALIZE.ordinal());
+                number, taskOrder, layerOrder, TaskState.INITIALIZE.ordinal(),
+                minCores, minRam);
         jdbc.update("INSERT INTO task_ping (pk_task) VALUES (?)", id);
 
         TaskE task = new TaskE();

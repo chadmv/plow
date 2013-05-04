@@ -243,13 +243,15 @@ CREATE TABLE plow.task (
   time_stopped BIGINT DEFAULT 0 NOT NULL,
   time_updated BIGINT DEFAULT 0 NOT NULL,
   int_retry SMALLINT DEFAULT -1 NOT NULL,
-  int_cores SMALLINT DEFAULT 0 NOT NULL,
-  int_ram INTEGER DEFAULT 0 NOT NULL
+  int_min_cores SMALLINT NOT NULL,
+  int_min_ram INT NOT NULL,
+  int_cores SMALLINT DEFAULT 1 NOT NULL, 
+  int_ram INTEGER DEFAULT 1 NOT NULL
 ) WITHOUT OIDS;
 
 CREATE INDEX task_pk_layer_idx ON plow.task (pk_layer);
 CREATE INDEX task_pk_job_idx ON plow.task (pk_job);
-CREATE INDEX task_int_state_idx ON plow.task (int_state);
+CREATE INDEX task_dispatch_state_idx ON plow.task (int_state, int_min_cores, int_min_ram, bool_reserved);
 CREATE INDEX task_time_updated_idx ON plow.task (time_updated);
 CREATE UNIQUE INDEX task_str_name_pk_job_idx_uniq ON plow.task (str_name, pk_job);
 

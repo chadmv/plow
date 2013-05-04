@@ -130,7 +130,7 @@ public class JobServiceImpl implements JobService {
                 FrameSet frameSet = new FrameSet(blayer.getRange());
                 for (int frameNum: frameSet) {
                     taskDao.create(layer, String.format("%04d-%s", frameNum, blayer.getName()),
-                            frameNum, frameOrder, layerOrder);
+                            frameNum, frameOrder, layerOrder, blayer.minCores, blayer.minRamMb);
                     frameOrder++;
                 }
             }
@@ -139,7 +139,8 @@ public class JobServiceImpl implements JobService {
                 int taskOrder = 0;
                 for (TaskSpecT task: blayer.getTasks()) {
                     logger.info("Creating task: {}", task.getName());
-                    taskDao.create(layer, task.getName(), 0, taskOrder, layerOrder);
+                    taskDao.create(layer, task.getName(), 0, taskOrder, layerOrder,
+                            blayer.minCores, blayer.minRamMb);
                 }
             }
             else {
