@@ -42,8 +42,8 @@ public class PingHandler {
             node = dispatchService.getDispatchNode(newNode.getName());
         }
 
-        jobService.updateRunningTasks(ping.tasks);
-        jobService.updateMaxRssValues(ping.tasks);
+        jobService.updateRunningTaskStats(ping.tasks);
+        jobService.updateRunningJobStats(ping.tasks);
 
         if (node.isDispatchable()) {
             nodeDispatcher.book(node);
