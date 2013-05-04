@@ -51,7 +51,7 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public void updateNode(Node node, Ping ping) {
-        // TODO Auto-generated method stub
+        nodeDao.update(node, ping);
     }
 
     @Override
