@@ -216,8 +216,7 @@ class NodeModel(QtCore.QAbstractTableModel):
 
         # Remove
         to_remove = set(self.__index.iterkeys()).difference(nodes_ids)
-        for old_id in to_remove:
-            row = rows[old_id]
+        for row, old_id in sorted(((rows[old_id], old_id) for old_id in to_remove), reverse=True):
             self.beginRemoveRows(parent, row, row)
             node = self.__items.pop(row)
             self.endRemoveRows()
