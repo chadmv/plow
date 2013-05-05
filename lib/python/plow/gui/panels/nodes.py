@@ -109,7 +109,7 @@ class ResourceDelegate(QtGui.QItemDelegate):
             super(ResourceDelegate, self).paint(painter, opts, index)
             return 
 
-        text = "%0.2f" % (ratio * 100)
+        text = "%0.2f%%" % (ratio * 100)
         opt = QtGui.QStyleOptionViewItemV4(opts)
         opt.displayAlignment = QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter
 
@@ -130,7 +130,7 @@ class ResourceDelegate(QtGui.QItemDelegate):
             end = self.COLOR_WARN
 
         grad.setColorAt(0.0, self.COLOR_OK.darker(135))
-        grad.setColorAt(ratio, self.COLOR_OK)
+        grad.setColorAt(min(ratio, 1.0), self.COLOR_OK)
         grad.setColorAt(min(ratio + .01, 1.0), end)
         grad.setColorAt(1.0, darkEnd)
 
