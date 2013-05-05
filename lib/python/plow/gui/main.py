@@ -101,6 +101,7 @@ class WorkspaceManager(QtCore.QObject):
         self.__workspaces = list(self.Defaults)
 
         # TODO: a more official way to register panels.
+        self.registerPanelType("JobWrangler", JobWranglerPanel)
         self.registerPanelType("Render Watch", RenderJobWatchPanel)
         self.registerPanelType("Tasks", TaskPanel)
         self.registerPanelType("Clusters", ClusterPanel)
