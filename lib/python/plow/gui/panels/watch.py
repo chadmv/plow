@@ -202,13 +202,16 @@ class RenderJobWatchWidget(QtGui.QWidget):
     def __showContextMenu(self, pos):
         tree = self.__tree
         item = tree.itemAt(pos)
+        if not item:
+            return 
+            
         job = item.data(0, JOB_ROLE)
 
         menu = QtGui.QMenu(tree)
-        pause = menu.addAction("Un-Pause" if job.paused else "Pause")
-        kill = menu.addAction("Kill")
-        eat = menu.addAction("Eat Dead")
-        retry = menu.addAction("Retry Dead")
+        pause = menu.addAction(QtGui.QIcon(":/pause.png"), "Un-Pause" if job.paused else "Pause")
+        kill = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill")
+        eat = menu.addAction(QtGui.QIcon(":/eat.png"), "Eat Dead")
+        retry = menu.addAction(QtGui.QIcon(":/retry.png"), "Retry Dead")
 
         pause.triggered.connect(partial(job.pause, not job.paused))
 
