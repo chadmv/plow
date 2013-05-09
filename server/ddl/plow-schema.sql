@@ -493,6 +493,10 @@ CREATE INDEX action_pk_filter_idx ON plow.action (pk_filter);
 --- TRIGGERS
 ----------------------------------------------------------
 
+---
+--- plow.after_proc_insert()
+--- When a proc is inserted, updates the resource counters for the quota, node, folder, job and layer
+---
 CREATE OR REPLACE FUNCTION plow.after_proc_insert() RETURNS TRIGGER AS $$
 BEGIN
   UPDATE plow.quota SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_quota=NEW.pk_quota;
@@ -509,6 +513,10 @@ LANGUAGE plpgsql;
 CREATE TRIGGER trig_after_proc_insert AFTER INSERT ON plow.proc
     FOR EACH ROW EXECUTE PROCEDURE plow.after_proc_insert();
 
+---
+--- plow.after_proc_delete()
+--- When a proc is deleted, updates the resource counters for the quota, node, folder, job and layer
+---
 CREATE OR REPLACE FUNCTION plow.after_proc_delete() RETURNS TRIGGER AS $$
 BEGIN
   UPDATE plow.quota SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_quota=OLD.pk_quota;
