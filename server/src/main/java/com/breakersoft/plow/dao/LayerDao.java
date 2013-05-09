@@ -25,17 +25,13 @@ public interface LayerDao {
 
     void addOutput(Layer layer, String path, Map<String, String> attrs);
 
-    boolean updateMaxRssMb(UUID layerId, int value);
-
-    boolean updateMaxCpuPerc(UUID layerId, int value);
-
     void setMinCores(Layer layer, int cores);
 
-	void setMaxCores(Layer layer, int cores);
+    void setMaxCores(Layer layer, int cores);
 
-	void setMinRam(Layer layer, int memory);
+    void setMinRam(Layer layer, int memory);
 
-	void setThreadable(Layer layer, boolean threadable);
+    void setThreadable(Layer layer, boolean threadable);
 
-	void setTags(Layer layer, Set<String> tags);
+    void setTags(Layer layer, Set<String> tags);
 }

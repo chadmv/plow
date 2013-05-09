@@ -118,34 +118,6 @@ public class TaskDaoTests extends AbstractTest {
     }
 
     @Test
-    public void testUpdateTaskDispatchData() {
-
-        testCreate();
-
-        simpleJdbcTemplate.update("UPDATE task SET int_state=? WHERE pk_task=?",
-                TaskState.RUNNING.ordinal(), task.getTaskId());
-
-        RunningTask runtask = new RunningTask();
-        runtask.taskId = task.getTaskId().toString();
-        runtask.lastLog = "foo";
-        runtask.rssMb = 999;
-        runtask.cpuPercent = 90;
-        runtask.progress = 50;
-        taskDao.updateTaskDispatchData(runtask);
-
-        Map<String,Object> data = simpleJdbcTemplate.queryForMap(
-                "SELECT * FROM plow.task_ping WHERE pk_task=?",
-                task.getTaskId());
-
-        assertEquals(runtask.lastLog, (String) data.get("str_last_log_line"));
-        assertEquals((Integer)runtask.rssMb, Integer.valueOf((int) data.get("int_rss")));
-        assertEquals((Integer)runtask.rssMb, Integer.valueOf((int) data.get("int_max_rss")));
-        assertEquals(runtask.cpuPercent, ((Integer) data.get("int_cpu_perc")).shortValue());
-        assertEquals(runtask.cpuPercent, ((Integer) data.get("int_max_cpu_perc")).shortValue());
-        assertEquals(50, data.get("int_progress"));
-    }
-
-    @Test
     public void getTasksWithTaskFilterA() {
         testCreate();
         TaskFilterT filter = new TaskFilterT();

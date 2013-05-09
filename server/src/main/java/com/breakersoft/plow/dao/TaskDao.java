@@ -30,8 +30,6 @@ public interface TaskDao {
 
     Task getByNameOrId(Job job, String identifer);
 
-    void updateTaskDispatchData(RunningTask runTask);
-
     void clearLastLogLine(Task task);
 
     boolean start(Task task, int cores, int memory);

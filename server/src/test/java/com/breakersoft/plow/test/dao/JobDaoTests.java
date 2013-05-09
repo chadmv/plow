@@ -150,20 +150,4 @@ public class JobDaoTests extends AbstractTest {
         assertEquals("bar", result.get("foo"));
         assertEquals("bong", result.get("bing"));
     }
-
-    @Test
-    public void testUpdateMaxRss() {
-        JobSpecT spec = getTestJobSpec();
-        JobLaunchEvent event = jobService.launch(spec);
-        UUID jobId = event.getJob().getJobId();
-
-        assertTrue(jobDao.updateMaxRssMb(jobId, 1000));
-        int rss = jdbc().queryForInt(
-                "SELECT int_max_rss FROM job_ping WHERE pk_job=?", jobId);
-        assertEquals(1000, rss);
-        assertFalse(jobDao.updateMaxRssMb(jobId, 999));
-        rss = jdbc().queryForInt(
-                "SELECT int_max_rss FROM job_ping WHERE pk_job=?", jobId);
-        assertEquals(1000, rss);
-    }
 }
