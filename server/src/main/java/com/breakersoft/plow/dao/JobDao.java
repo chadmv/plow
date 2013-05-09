@@ -42,8 +42,6 @@ public interface JobDao {
 
     boolean isPaused(Job job);
 
-    boolean updateMaxRssMb(UUID jobId, int value);
-
     void setMaxCores(Job job, int value);
 
     void setMinCores(Job job, int value);

@@ -101,7 +101,6 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         jdbc.update(INSERT, id, layer.getLayerId(), layer.getJobId(), name,
                 number, taskOrder, layerOrder, TaskState.INITIALIZE.ordinal(),
                 minCores, minRam);
-        jdbc.update("INSERT INTO task_ping (pk_task) VALUES (?)", id);
 
         TaskE task = new TaskE();
         task.setTaskId(id);
@@ -138,65 +137,6 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
     @Override
     public void resetTaskDispatchData(Task task, String host) {
         jdbc.update(RESET_DSP, host, task.getTaskId());
-    }
-
-    private static final String[] UPDATE_DSP = {
-            "UPDATE " +
-                "plow.task " +
-            "SET " +
-                "time_updated = txTimeMillis() " +
-            "WHERE " +
-                "pk_task=?::uuid " +
-            "AND " +
-                "int_state = ?",
-
-            "UPDATE " +
-                "plow.task_ping "  +
-            "SET " +
-                "str_last_log_line=?," +
-                "int_rss=?,"+
-                "int_cpu_perc=?,"+
-                "int_progress=? "+
-            "WHERE " +
-                "pk_task=?::uuid ",
-
-            "UPDATE " +
-                "plow.task_ping " +
-            "SET " +
-                "int_max_rss = ? " +
-            "WHERE " +
-                "pk_task=?::uuid " +
-            "AND " +
-                "int_max_rss < ?",
-
-            "UPDATE " +
-                "plow.task_ping " +
-            "SET " +
-                "int_max_cpu_perc = ? " +
-            "WHERE " +
-                "pk_task=?::uuid " +
-            "AND " +
-                "int_max_cpu_perc < ?"
-
-    };
-
-    @Override
-    public void updateTaskDispatchData(RunningTask runTask) {
-        // TODO: fix this once rnd is pinging in max rss
-        String lastLog = "";
-        if (runTask.isSetLastLog()) {
-            lastLog = runTask.lastLog;
-        }
-
-        if (jdbc.update(UPDATE_DSP[0], runTask.taskId,
-                TaskState.RUNNING.ordinal()) > 0) {
-            jdbc.update(UPDATE_DSP[1],
-                lastLog, runTask.rssMb, runTask.cpuPercent, (int)runTask.progress, runTask.taskId);
-            jdbc.update(UPDATE_DSP[2],
-                runTask.rssMb, runTask.taskId, runTask.rssMb);
-            jdbc.update(UPDATE_DSP[3],
-                    runTask.cpuPercent, runTask.taskId, runTask.cpuPercent);
-        }
     }
 
     @Override

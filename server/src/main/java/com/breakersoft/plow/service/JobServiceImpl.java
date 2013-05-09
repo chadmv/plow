@@ -269,40 +269,6 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void updateRunningJobStats(List<RunningTask> runningTasks) {
-        Collections.sort(runningTasks, new Comparator<RunningTask>() {
-            @Override
-            public int compare(RunningTask o1, RunningTask o2) {
-                return o1.layerId.compareTo(o2.layerId);
-            }
-        });
-
-        for (RunningTask task: runningTasks) {
-            layerDao.updateMaxRssMb(UUID.fromString(task.layerId), task.rssMb);
-            layerDao.updateMaxCpuPerc(UUID.fromString(task.layerId), task.cpuPercent);
-        }
-
-        for (RunningTask task: runningTasks) {
-            jobDao.updateMaxRssMb(UUID.fromString(task.jobId), task.rssMb);
-        }
-
-    }
-
-    @Override
-    public void updateRunningTaskStats(List<RunningTask> runningTasks) {
-        // Sort the tasks by ID to ensure predicatable update.
-        Collections.sort(runningTasks, new Comparator<RunningTask>() {
-            @Override
-            public int compare(RunningTask o1, RunningTask o2) {
-                return o1.taskId.compareTo(o2.taskId);
-            }
-        });
-        for (RunningTask task: runningTasks) {
-            taskDao.updateTaskDispatchData(task);
-        }
-    }
-
-    @Override
     public void setLayerMinCores(Layer layer, int cores) {
         layerDao.setMinCores(layer, cores);
     }

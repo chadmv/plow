@@ -141,20 +141,6 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
     };
 
     @Override
-    public boolean updateMaxRssMb(UUID layerId, int value) {
-        return jdbc.update("UPDATE plow.layer_ping SET int_max_rss=? " +
-                "WHERE pk_layer=? AND int_max_rss < ?",
-                value, layerId, value) == 1;
-    }
-
-    @Override
-    public boolean updateMaxCpuPerc(UUID layerId, int value) {
-        return jdbc.update("UPDATE plow.layer_ping SET int_max_cpu_perc=? " +
-                "WHERE pk_layer=? AND int_max_cpu_perc < ?",
-                value, layerId, value) == 1;
-    }
-
-    @Override
     public FrameRange getFrameRange(Layer layer) {
         return jdbc.queryForObject(
                 "SELECT str_range, int_chunk_size FROM plow.layer WHERE pk_layer=?",

@@ -319,12 +319,6 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 Integer.class, job.getJobId()) > 0;
     }
 
-    @Override
-    public boolean updateMaxRssMb(UUID jobId, int value) {
-        return jdbc.update("UPDATE plow.job_ping SET int_max_rss=? " +
-                "WHERE pk_job=? AND int_max_rss < ?",
-                value, jobId, value) == 1;
-    }
     private static final String HAS_PENDING_FRAMES =
             "SELECT " +
                 "job_count.int_total - (job_count.int_eaten + job_count.int_succeeded) AS pending, " +
