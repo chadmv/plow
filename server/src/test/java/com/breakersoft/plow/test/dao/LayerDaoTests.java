@@ -106,7 +106,7 @@ public class LayerDaoTests extends AbstractTest {
         testCreate();
         layerDao.setMinCores(layer, 8);
         int value = jdbc().queryForInt(
-                "SELECT int_min_cores FROM plow.layer WHERE pk_layer=?", layer.getLayerId());
+                "SELECT int_cores_min FROM plow.layer WHERE pk_layer=?", layer.getLayerId());
         assertEquals(8, value);
     }
 
@@ -115,7 +115,7 @@ public class LayerDaoTests extends AbstractTest {
         testCreate();
         layerDao.setMaxCores(layer, 8);
         int value = jdbc().queryForInt(
-                "SELECT int_max_cores FROM plow.layer WHERE pk_layer=?", layer.getLayerId());
+                "SELECT int_cores_max FROM plow.layer WHERE pk_layer=?", layer.getLayerId());
         assertEquals(8, value);
     }
 
@@ -124,7 +124,7 @@ public class LayerDaoTests extends AbstractTest {
         testCreate();
         layerDao.setMinRam(layer, 8);
         int value = jdbc().queryForInt(
-                "SELECT int_min_ram FROM plow.layer WHERE pk_layer=?", layer.getLayerId());
+                "SELECT int_ram_min FROM plow.layer WHERE pk_layer=?", layer.getLayerId());
         assertEquals(8, value);
     }
 

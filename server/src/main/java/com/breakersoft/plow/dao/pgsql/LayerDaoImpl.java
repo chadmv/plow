@@ -81,7 +81,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
         JdbcUtils.Insert("plow.layer",
                 "pk_layer", "pk_job", "str_name", "str_range",
                 "str_command", "str_tags", "int_chunk_size", "int_order",
-                "int_min_cores", "int_max_cores", "int_min_ram",
+                "int_cores_min", "int_cores_max", "int_ram_min",
                 "bool_threadable", "hstore_env");
 
     @Override
@@ -112,7 +112,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
 
         jdbc.update("INSERT INTO plow.layer_count (pk_layer) VALUES (?)", id);
         jdbc.update("INSERT INTO plow.layer_dsp (pk_layer) VALUES (?)", id);
-        jdbc.update("INSERT INTO plow.layer_ping (pk_layer) VALUES (?)", id);
+        jdbc.update("INSERT INTO plow.layer_stat (pk_layer, pk_job) VALUES (?, ?)", id, job.getJobId());
 
         final LayerE result = new LayerE();
         result.setLayerId(id);
@@ -170,19 +170,19 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
 
     @Override
     public void setMinCores(Layer layer, int cores) {
-        jdbc.update("UPDATE plow.layer SET int_min_cores=? WHERE pk_layer=?",
+        jdbc.update("UPDATE plow.layer SET int_cores_min=? WHERE pk_layer=?",
                 cores, layer.getLayerId());
     }
 
     @Override
     public void setMaxCores(Layer layer, int cores) {
-        jdbc.update("UPDATE plow.layer SET int_max_cores=? WHERE pk_layer=?",
+        jdbc.update("UPDATE plow.layer SET int_cores_max=? WHERE pk_layer=?",
                 cores, layer.getLayerId());
     }
 
     @Override
     public void setMinRam(Layer layer, int memory) {
-        jdbc.update("UPDATE plow.layer SET int_min_ram=? WHERE pk_layer=?",
+        jdbc.update("UPDATE plow.layer SET int_ram_min=? WHERE pk_layer=?",
                 memory, layer.getLayerId());
     }
 

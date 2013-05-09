@@ -38,9 +38,9 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 "job.int_state,"+
                 "job.time_started,"+
                 "job.time_stopped,"+
-                "job_dsp.int_max_cores,"+
-                "job_dsp.int_min_cores,"+
-                "job_dsp.int_run_cores, " +
+                "job_dsp.int_cores_max,"+
+                "job_dsp.int_cores_min,"+
+                "job_dsp.int_cores_run, " +
                 "job_count.int_total, "+
                 "job_count.int_succeeded,"+
                 "job_count.int_running,"+
@@ -48,12 +48,12 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 "job_count.int_eaten,"+
                 "job_count.int_waiting,"+
                 "job_count.int_depend, "+
-                "job_ping.int_max_rss "+
+                "job_ping.int_ram_high "+
             "FROM " +
                 "job " +
             "INNER JOIN job_dsp ON job.pk_job = job_dsp.pk_job " +
             "INNER JOIN job_count ON job.pk_job = job_count.pk_job " +
-            "INNER JOIN job_ping ON job.pk_job = job_ping.pk_job " +
+            "INNER JOIN job_ping ON job.pk_job = job_stat.pk_job " +
             "WHERE " +
                 "job.int_state = ? " +
             "AND " +
@@ -64,9 +64,9 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 "folder.pk_folder,"+
                 "folder.str_name, "+
                 "folder.int_order, " +
-                "folder_dsp.int_max_cores, " +
-                "folder_dsp.int_min_cores, " +
-                "folder_dsp.int_run_cores  " +
+                "folder_dsp.int_cores_max, " +
+                "folder_dsp.int_cores_min, " +
+                "folder_dsp.int_cores_run  " +
             "FROM " +
                 "folder " +
             "INNER JOIN folder_dsp ON folder.pk_folder = folder_dsp.pk_folder " +
@@ -90,9 +90,9 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 folder.setName(rs.getString("str_name"));
                 folder.setJobs(new ArrayList<JobT>());
                 folder.setTotals(new TaskTotalsT());
-                folder.setMaxCores(rs.getInt("int_max_cores"));
-                folder.setMinCores(rs.getInt("int_min_cores"));
-                folder.setRunCores(rs.getInt("int_run_cores"));
+                folder.setMaxCores(rs.getInt("int_cores_max"));
+                folder.setMinCores(rs.getInt("int_cores_min"));
+                folder.setRunCores(rs.getInt("int_cores_run"));
 
                 result.add(folder);
                 folders.put(folder.getId(), folder);
@@ -113,9 +113,9 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 job.setUid(rs.getInt("int_uid"));
                 job.setUsername(rs.getString("str_username"));
                 job.setPaused(rs.getBoolean("bool_paused"));
-                job.setRunCores(rs.getInt("int_run_cores"));
-                job.setMaxCores(rs.getInt("int_max_cores"));
-                job.setMinCores(rs.getInt("int_min_cores"));
+                job.setRunCores(rs.getInt("int_cores_run"));
+                job.setMaxCores(rs.getInt("int_cores_max"));
+                job.setMinCores(rs.getInt("int_cores_min"));
                 job.setStartTime(rs.getLong("time_started"));
                 job.setStopTime(rs.getLong("time_stopped"));
                 job.setState(JobState.findByValue(rs.getInt("int_state")));

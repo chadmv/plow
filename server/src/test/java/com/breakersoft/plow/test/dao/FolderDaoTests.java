@@ -40,7 +40,7 @@ public class FolderDaoTests extends AbstractTest {
         folderDao.setMinCores(folder1, 101);
 
         int value = jdbc().queryForInt(
-                "SELECT int_min_cores FROM plow.folder_dsp WHERE pk_folder=?",  folder1.getFolderId());
+                "SELECT int_cores_min FROM plow.folder_dsp WHERE pk_folder=?",  folder1.getFolderId());
         assertEquals(101, value);
     }
 
@@ -50,7 +50,7 @@ public class FolderDaoTests extends AbstractTest {
         folderDao.setMaxCores(folder1, 101);
 
         int value = jdbc().queryForInt(
-                "SELECT int_max_cores FROM plow.folder_dsp WHERE pk_folder=?", folder1.getFolderId());
+                "SELECT int_cores_max FROM plow.folder_dsp WHERE pk_folder=?", folder1.getFolderId());
         assertEquals(101, value);
     }
 

@@ -38,7 +38,7 @@ public class JobDaoTests extends AbstractTest {
         jobDao.setMinCores(event.getJob(), 101);
 
         int value = jdbc().queryForInt(
-                "SELECT int_min_cores FROM plow.job_dsp WHERE pk_job=?",
+                "SELECT int_cores_min FROM plow.job_dsp WHERE pk_job=?",
                 event.getJob().getJobId());
         assertEquals(101, value);
     }
@@ -50,7 +50,7 @@ public class JobDaoTests extends AbstractTest {
         jobDao.setMaxCores(event.getJob(), 101);
 
         int value = jdbc().queryForInt(
-                "SELECT int_max_cores FROM plow.job_dsp WHERE pk_job=?",
+                "SELECT int_cores_max FROM plow.job_dsp WHERE pk_job=?",
                 event.getJob().getJobId());
         assertEquals(101, value);
     }

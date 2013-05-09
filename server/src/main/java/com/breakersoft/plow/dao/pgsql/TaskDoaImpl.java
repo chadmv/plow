@@ -91,8 +91,8 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                     "int_task_order",
                     "int_layer_order",
                     "int_state",
-                    "int_min_cores",
-                    "int_min_ram");
+                    "int_cores_min",
+                    "int_ram_min");
 
     @Override
     public Task create(Layer layer, String name, int number, int taskOrder, int layerOrder, int minCores, int minRam) {
@@ -122,23 +122,6 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         jdbc.update("UPDATE plow.task_ping SET str_last_log_line=? WHERE pk_task=?", "", task.getTaskId());
     }
 
-    private static final String RESET_DSP =
-            "UPDATE " +
-                "plow.task_ping " +
-            "SET " +
-                "int_rss=0,"+
-                "int_cpu_perc=0,"+
-                "int_progress=0,"+
-                "str_last_node_name=?, "+
-                "str_last_log_line=NULL " +
-            "WHERE " +
-                "pk_task=?";
-
-    @Override
-    public void resetTaskDispatchData(Task task, String host) {
-        jdbc.update(RESET_DSP, host, task.getTaskId());
-    }
-
     @Override
     public boolean reserve(Task task) {
         try {
@@ -162,8 +145,6 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                 "plow.task " +
             "SET " +
                 "int_state = ?, " +
-                "int_cores=?,"+
-                "int_ram=?,"+
                 "bool_reserved = 'f',"+
                 "int_retry=int_retry+1,"+
                 "time_updated = txTimeMillis(), " +
@@ -180,7 +161,6 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
     public boolean start(Task task, int cores, int memory) {
         return jdbc.update(START_TASK,
                 TaskState.RUNNING.ordinal(),
-                cores, memory,
                 task.getTaskId(),
                 TaskState.WAITING.ordinal()) == 1;
     }

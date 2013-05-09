@@ -104,11 +104,11 @@ public class ProcDaoTests extends AbstractTest {
         assertTrue(procDao.assign(proc, task));
 
         // Verify all running core counts.
-        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM job_dsp WHERE pk_job=?", task.getJobId()));
-        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM folder_dsp WHERE pk_folder=(SELECT pk_folder FROM job WHERE pk_job=?)", job.getJobId()));
-        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM layer_dsp WHERE pk_layer=?", task.getLayerId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_cores_run FROM job_dsp WHERE pk_job=?", task.getJobId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_cores_run FROM folder_dsp WHERE pk_folder=(SELECT pk_folder FROM job WHERE pk_job=?)", job.getJobId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_cores_run FROM layer_dsp WHERE pk_layer=?", task.getLayerId()));
         assertEquals(1, jdbc().queryForInt("SELECT int_cores - int_idle_cores FROM node_dsp WHERE pk_node=?", proc.getNodeId()));
-        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?", proc.getQuotaId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_cores_run FROM quota WHERE pk_quota=?", proc.getQuotaId()));
 
         // Task is in a different layer
         DispatchTask nextTask = dispatchService.getDispatchableTasks(job, dnode).get(1);
@@ -117,12 +117,12 @@ public class ProcDaoTests extends AbstractTest {
         assertFalse(procDao.assign(proc, nextTask));
 
         // Verify all running core counts.  Basically all the same except the layer changes.
-        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM job_dsp WHERE pk_job=?", task.getJobId()));
-        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM folder_dsp WHERE pk_folder=(SELECT pk_folder FROM job WHERE pk_job=?)", job.getJobId()));
-        assertEquals(0, jdbc().queryForInt("SELECT int_run_cores FROM layer_dsp WHERE pk_layer=?", task.getLayerId()));
-        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM layer_dsp WHERE pk_layer=?", nextTask.getLayerId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_cores_run FROM job_dsp WHERE pk_job=?", task.getJobId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_cores_run FROM folder_dsp WHERE pk_folder=(SELECT pk_folder FROM job WHERE pk_job=?)", job.getJobId()));
+        assertEquals(0, jdbc().queryForInt("SELECT int_cores_run FROM layer_dsp WHERE pk_layer=?", task.getLayerId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_cores_run FROM layer_dsp WHERE pk_layer=?", nextTask.getLayerId()));
         assertEquals(1, jdbc().queryForInt("SELECT int_cores - int_idle_cores FROM node_dsp WHERE pk_node=?", proc.getNodeId()));
-        assertEquals(1, jdbc().queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?", proc.getQuotaId()));
+        assertEquals(1, jdbc().queryForInt("SELECT int_cores_run FROM quota WHERE pk_quota=?", proc.getQuotaId()));
     }
 
 

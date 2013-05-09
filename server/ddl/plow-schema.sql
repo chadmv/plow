@@ -84,9 +84,9 @@ CREATE INDEX folder_pk_project_idx ON plow.folder (pk_project);
 
 CREATE TABLE plow.folder_dsp (
   pk_folder UUID NOT NULL PRIMARY KEY,
-  int_max_cores INTEGER NOT NULL DEFAULT -1,
-  int_min_cores INTEGER NOT NULL DEFAULT 0,
-  int_run_cores INTEGER NOT NULL DEFAULT 0,
+  int_cores_max INTEGER NOT NULL DEFAULT -1,
+  int_cores_min INTEGER NOT NULL DEFAULT 0,
+  int_cores_run INTEGER NOT NULL DEFAULT 0,
   float_tier REAL NOT NULL DEFAULT 0.0
 ) WITHOUT OIDS;
 
@@ -123,9 +123,9 @@ CREATE INDEX job_pk_project_idx ON plow.job (pk_project);
 
 CREATE TABLE plow.job_dsp (
   pk_job UUID NOT NULL PRIMARY KEY,
-  int_max_cores INTEGER NOT NULL DEFAULT -1,
-  int_min_cores INTEGER NOT NULL DEFAULT 0,
-  int_run_cores INTEGER NOT NULL DEFAULT 0,
+  int_cores_max INTEGER NOT NULL DEFAULT -1,
+  int_cores_min INTEGER NOT NULL DEFAULT 0,
+  int_cores_run INTEGER NOT NULL DEFAULT 0,
   float_tier REAL NOT NULL DEFAULT 0.0
 );
 
@@ -147,10 +147,26 @@ CREATE TABLE plow.job_count (
 CREATE INDEX job_count_int_waiting_idx ON plow.job_count (int_waiting);
 
 ---
-
-CREATE TABLE plow.job_ping (
+--- plow.job_stat - job statistics
+---
+CREATE TABLE plow.job_stat (
   pk_job UUID NOT NULL PRIMARY KEY,
-  int_max_rss INTEGER NOT NULL DEFAULT 0
+  
+  int_ram_high INTEGER NOT NULL DEFAULT 0,
+  int_ram_avg INTEGER NOT NULL DEFAULT 0,
+  flt_ram_std REAL NOT NULL DEFAULT 0.0,
+  
+  flt_cores_high REAL NOT NULL DEFAULT 0.0,
+  flt_cores_avg REAL NOT NULL DEFAULT 0.0,
+  flt_cores_std REAL NOT NULL DEFAULT 0.0,
+  
+  int_core_time_high BIGINT NOT NULL DEFAULT 0,
+  int_core_time_low BIGINT NOT NULL DEFAULT -1,
+  int_core_time_avg BIGINT NOT NULL DEFAULT 0,
+  flt_core_time_std REAL NOT NULL DEFAULT 0,
+
+  int_core_time_success_total BIGINT NOT NULL DEFAULT 0,
+  int_core_time_failed_total BIGINT NOT NULL DEFAULT 0
 );
 
 ----------------------------------------------------------
@@ -168,9 +184,9 @@ CREATE table plow.layer (
   str_tags TEXT[] NOT NULL,
   int_chunk_size INTEGER NOT NULL,
   int_order INTEGER NOT NULL,
-  int_min_cores SMALLINT NOT NULL,
-  int_max_cores SMALLINT NOT NULL,
-  int_min_ram INTEGER NOT NULL,
+  int_cores_min SMALLINT NOT NULL,
+  int_cores_max SMALLINT NOT NULL,
+  int_ram_min INTEGER NOT NULL,
   bool_threadable BOOLEAN DEFAULT 'f' NOT NULL,
   hstore_env hstore
 ) WITHOUT OIDS;
@@ -199,14 +215,31 @@ CREATE INDEX layer_count_int_waiting_idx ON plow.layer_count (int_waiting);
 
 CREATE TABLE plow.layer_dsp (
   pk_layer UUID NOT NULL PRIMARY KEY,
-  int_run_cores INTEGER NOT NULL DEFAULT 0
+  int_cores_run INTEGER NOT NULL DEFAULT 0
 );
 
-
-CREATE TABLE plow.layer_ping (
+---
+--- plow.layer_stat - layer statistics
+---
+CREATE TABLE plow.layer_stat (
   pk_layer UUID NOT NULL PRIMARY KEY,
-  int_max_rss INTEGER NOT NULL DEFAULT 0,
-  int_max_cpu_perc SMALLINT NOT NULL DEFAULT 0
+  pk_job UUID NOT NULL,
+  
+  int_ram_high INTEGER NOT NULL DEFAULT 0,
+  int_ram_avg INTEGER NOT NULL DEFAULT 0,
+  flt_ram_std REAL NOT NULL DEFAULT 0.0,
+  
+  flt_cores_high REAL NOT NULL DEFAULT 0.0,
+  flt_cores_avg REAL NOT NULL DEFAULT 0.0,
+  flt_cores_std REAL NOT NULL DEFAULT 0.0,
+  
+  int_core_time_high BIGINT NOT NULL DEFAULT 0,
+  int_core_time_low BIGINT NOT NULL DEFAULT -1,
+  int_core_time_avg BIGINT NOT NULL DEFAULT 0,
+  flt_core_time_std REAL NOT NULL DEFAULT 0,
+
+  int_core_time_success_total BIGINT NOT NULL DEFAULT 0,
+  int_core_time_failed_total BIGINT NOT NULL DEFAULT 0
 );
 
 ---
@@ -243,36 +276,20 @@ CREATE TABLE plow.task (
   time_stopped BIGINT DEFAULT 0 NOT NULL,
   time_updated BIGINT DEFAULT 0 NOT NULL,
   int_retry SMALLINT DEFAULT -1 NOT NULL,
-  int_min_cores SMALLINT NOT NULL,
-  int_min_ram INT NOT NULL,
-  int_cores SMALLINT DEFAULT 1 NOT NULL, 
-  int_ram INTEGER DEFAULT 1 NOT NULL
+  int_cores_min SMALLINT NOT NULL,
+  int_ram_min INT NOT NULL,
+  str_last_resource TEXT
 ) WITHOUT OIDS;
 
 CREATE INDEX task_pk_layer_idx ON plow.task (pk_layer);
 CREATE INDEX task_pk_job_idx ON plow.task (pk_job);
-CREATE INDEX task_dispatch_state_idx ON plow.task (int_state, int_min_cores, int_min_ram, bool_reserved);
+CREATE INDEX task_dispatch_state_idx ON plow.task (int_state, int_cores_min, int_ram_min, bool_reserved);
 CREATE INDEX task_time_updated_idx ON plow.task (time_updated);
 CREATE UNIQUE INDEX task_str_name_pk_job_idx_uniq ON plow.task (str_name, pk_job);
 
 CREATE INDEX task_order_idx ON plow.task(int_task_order, int_layer_order);
 
 ----------------------------------------------------------
-
-
----
---- Stores the ping data for a task.
----
-CREATE TABLE plow.task_ping (
-  pk_task UUID NOT NULL PRIMARY KEY,
-  int_rss INTEGER DEFAULT 0 NOT NULL,
-  int_max_rss INTEGER DEFAULT 0 NOT NULL,
-  int_cpu_perc SMALLINT NOT NULL DEFAULT 0,
-  int_max_cpu_perc SMALLINT NOT NULL DEFAULT 0,
-  int_progress SMALLINT DEFAULT 0 NOT NULL,
-  str_last_log_line TEXT,
-  str_last_node_name TEXT
-) WITHOUT OIDS;
 
 ---
 --- Dependencies
@@ -379,7 +396,7 @@ CREATE TABLE plow.quota (
   pk_project UUID NOT NULL,
   int_size INTEGER NOT NULL,
   int_burst INTEGER NOT NULL,
-  int_run_cores INTEGER DEFAULT 0 NOT NULL CHECK (int_run_cores <= int_burst),
+  int_cores_run INTEGER DEFAULT 0 NOT NULL CHECK (int_cores_run <= int_burst),
   bool_locked BOOLEAN DEFAULT 'f' NOT NULL
 ) WITHOUT OIDS;
 
@@ -401,12 +418,18 @@ CREATE TABLE plow.proc (
   pk_job UUID NOT NULL,
   pk_layer UUID NOT NULL,
   pk_task UUID,
-  int_cores SMALLINT NOT NULL,
-  int_ram INTEGER NOT NULL,
   time_created BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   time_updated BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   time_started BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
-  bool_unbooked BOOLEAN NOT NULL DEFAULT 'f' 
+  bool_unbooked BOOLEAN NOT NULL DEFAULT 'f',
+  int_cores SMALLINT NOT NULL,
+  int_cores_used REAL NOT NULL DEFAULT 0.0,
+  int_cores_high REAL NOT NULL DEFAULT 0.0,
+  int_ram INTEGER NOT NULL,
+  int_ram_used INTEGER NOT NULL DEFAULT 0,
+  int_ram_high INTEGER NOT NULL DEFAULT 0,
+  int_progress SMALLINT DEFAULT 0 NOT NULL,
+  str_last_log_line TEXT
 ) WITHOUT OIDS;
 
 CREATE INDEX proc_pk_node_idx ON plow.proc (pk_node);
@@ -472,12 +495,12 @@ CREATE INDEX action_pk_filter_idx ON plow.action (pk_filter);
 
 CREATE OR REPLACE FUNCTION plow.after_proc_insert() RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE plow.quota SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_quota=NEW.pk_quota;
+  UPDATE plow.quota SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_quota=NEW.pk_quota;
   UPDATE plow.node_dsp SET int_idle_cores = int_idle_cores - NEW.int_cores WHERE pk_node=NEW.pk_node;
-  UPDATE plow.folder_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_folder=
+  UPDATE plow.folder_dsp SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_folder=
     (SELECT pk_folder FROM job WHERE pk_job=NEW.pk_job);
-  UPDATE plow.job_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_job=NEW.pk_job;
-  UPDATE plow.layer_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_layer=NEW.pk_layer;
+  UPDATE plow.job_dsp SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_job=NEW.pk_job;
+  UPDATE plow.layer_dsp SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_layer=NEW.pk_layer;
   RETURN NEW;
 END
 $$
@@ -488,12 +511,12 @@ CREATE TRIGGER trig_after_proc_insert AFTER INSERT ON plow.proc
 
 CREATE OR REPLACE FUNCTION plow.after_proc_delete() RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE plow.quota SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_quota=OLD.pk_quota;
+  UPDATE plow.quota SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_quota=OLD.pk_quota;
   UPDATE plow.node_dsp SET int_idle_cores = int_idle_cores + OLD.int_cores WHERE pk_node=OLD.pk_node;
-  UPDATE plow.folder_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_folder=
+  UPDATE plow.folder_dsp SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_folder=
     (SELECT pk_folder FROM job WHERE pk_job=OLD.pk_job);
-  UPDATE plow.job_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_job=OLD.pk_job;
-  UPDATE plow.layer_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_layer= OLD.pk_layer;
+  UPDATE plow.job_dsp SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_job=OLD.pk_job;
+  UPDATE plow.layer_dsp SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_layer= OLD.pk_layer;
   RETURN OLD;
 END
 $$
@@ -512,11 +535,11 @@ BEGIN
     Must do queries in predictable order to avoid deadlock situation.
   */
   IF OLD.pk_layer > NEW.pk_layer THEN
-    UPDATE plow.layer_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_layer = OLD.pk_layer;
-    UPDATE plow.layer_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_layer = NEW.pk_layer;
+    UPDATE plow.layer_dsp SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_layer = OLD.pk_layer;
+    UPDATE plow.layer_dsp SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_layer = NEW.pk_layer;
   ELSEIF OLD.pk_layer < NEW.pk_layer THEN
-    UPDATE plow.layer_dsp SET int_run_cores = int_run_cores + NEW.int_cores WHERE pk_layer = NEW.pk_layer;
-    UPDATE plow.layer_dsp SET int_run_cores = int_run_cores - OLD.int_cores WHERE pk_layer = OLD.pk_layer;
+    UPDATE plow.layer_dsp SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_layer = NEW.pk_layer;
+    UPDATE plow.layer_dsp SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_layer = OLD.pk_layer;
   END IF;
   RETURN NEW;
 END
@@ -534,10 +557,10 @@ CREATE TRIGGER trig_after_proc_update AFTER UPDATE ON plow.proc
 ---
 CREATE OR REPLACE FUNCTION plow.before_disp_update() RETURNS TRIGGER AS $$
 BEGIN
-	IF NEW.int_min_cores = 0 THEN
+	IF NEW.int_cores_min = 0 THEN
 		NEW.float_tier := 0;
 	ELSE
-		NEW.float_tier := NEW.int_run_cores / NEW.int_min_cores::real;
+		NEW.float_tier := NEW.int_cores_run / NEW.int_cores_min::real;
 	END IF;
 	RETURN NEW;
 END

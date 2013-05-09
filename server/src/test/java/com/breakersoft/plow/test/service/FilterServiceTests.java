@@ -83,7 +83,7 @@ public class FilterServiceTests extends AbstractTest {
         filterService.applyAction(action, event.getJob());
 
         int value = jdbc().queryForInt(
-                "SELECT int_min_cores FROM plow.job_dsp WHERE pk_job=?",  event.getJob().getJobId());
+                "SELECT int_cores_min FROM plow.job_dsp WHERE pk_job=?",  event.getJob().getJobId());
         assertEquals(10, value);
     }
 
@@ -99,7 +99,7 @@ public class FilterServiceTests extends AbstractTest {
         filterService.applyAction(action, event.getJob());
 
         int value = jdbc().queryForInt(
-                "SELECT int_max_cores FROM plow.job_dsp WHERE pk_job=?",  event.getJob().getJobId());
+                "SELECT int_cores_max FROM plow.job_dsp WHERE pk_job=?",  event.getJob().getJobId());
         assertEquals(10, value);
     }
 

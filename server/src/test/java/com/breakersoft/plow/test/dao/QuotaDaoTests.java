@@ -120,7 +120,7 @@ public class QuotaDaoTests extends AbstractTest {
 
         quotaDao.allocate(c, TEST_PROJECT, 5);
         assertEquals(5,
-                simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
+                simpleJdbcTemplate.queryForInt("SELECT int_cores_run FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
     }
 
@@ -131,22 +131,22 @@ public class QuotaDaoTests extends AbstractTest {
 
         quotaDao.allocate(c, TEST_PROJECT, 5);
         assertEquals(5,
-                simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
+                simpleJdbcTemplate.queryForInt("SELECT int_cores_run FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
 
         quotaDao.free(quota, 1);
         assertEquals(4,
-                simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
+                simpleJdbcTemplate.queryForInt("SELECT int_cores_run FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
 
         quotaDao.allocate(c, TEST_PROJECT, 6);
         assertEquals(10,
-                simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
+                simpleJdbcTemplate.queryForInt("SELECT int_cores_run FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
 
         quotaDao.free(quota, 10);
         assertEquals(0,
-                simpleJdbcTemplate.queryForInt("SELECT int_run_cores FROM quota WHERE pk_quota=?",
+                simpleJdbcTemplate.queryForInt("SELECT int_cores_run FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
     }
 }

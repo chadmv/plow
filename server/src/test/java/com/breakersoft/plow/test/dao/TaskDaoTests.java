@@ -1,20 +1,19 @@
 package com.breakersoft.plow.test.dao;
 
-import static org.junit.Assert.*;
-
-import java.util.Map;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import javax.annotation.Resource;
 
 import org.junit.Test;
 
-import com.breakersoft.plow.Task;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
-import com.breakersoft.plow.dao.TaskDao;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
-import com.breakersoft.plow.rnd.thrift.RunningTask;
+import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.LayerSpecT;
@@ -109,12 +108,6 @@ public class TaskDaoTests extends AbstractTest {
     public void testUnreserve() {
         testCreate();
         taskDao.unreserve(task);
-    }
-
-    @Test
-    public void testResetTaskDispatchData() {
-        testCreate();
-        taskDao.resetTaskDispatchData(task, "foo");
     }
 
     @Test

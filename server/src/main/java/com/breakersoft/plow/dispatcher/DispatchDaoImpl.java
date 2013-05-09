@@ -66,9 +66,9 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         "AND " +
             "layer.str_tags && ? " +
         "AND " +
-            "job_dsp.int_max_cores < job_dsp.int_run_cores " +
+            "job_dsp.int_cores_max < job_dsp.int_cores_run " +
         "AND " +
-            "folder_dsp.int_max_cores < folder_dsp.int_run_cores " +
+            "folder_dsp.int_cores_max < folder_dsp.int_cores_run " +
         "ORDER BY " +
             "job_dsp.float_tier ASC, " +
             "folder_dsp.float_tier ASC";
@@ -204,7 +204,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             DispatchProject project = new DispatchProject();
             project.setProjectId((UUID) rs.getObject("pk_project"));
             project.setQuotaId((UUID) rs.getObject("pk_quota"));
-            project.setTier(rs.getFloat("int_run_cores") / rs.getFloat("int_size"));
+            project.setTier(rs.getFloat("int_cores_run") / rs.getFloat("int_size"));
             return project;
         }
     };
@@ -213,7 +213,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "SELECT " +
                 "quota.pk_project, " +
                 "quota.pk_quota,"+
-                "quota.int_run_cores,"+
+                "quota.int_cores_run,"+
                 "quota.int_size " +
             "FROM " +
                 "plow.quota,"+
@@ -221,7 +221,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "WHERE " +
                 "quota.pk_cluster = cluster.pk_cluster " +
             "AND " +
-                "quota.int_run_cores < quota.int_burst " +
+                "quota.int_cores_run < quota.int_burst " +
             "AND " +
                 "cluster.bool_locked IS FALSE " +
             "AND " +
@@ -249,8 +249,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "task.pk_task,"+
                 "task.pk_layer,"+
                 "task.pk_job,"+
-                "task.int_min_cores,"+
-                "task.int_min_ram,  " +
+                "task.int_cores_min,"+
+                "task.int_ram_min,  " +
                 "task.str_name," +
                 "job.pk_project " +
             "FROM " +
@@ -266,9 +266,9 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "AND " +
                 "task.int_state = ? " +
             "AND " +
-                "task.int_min_cores <= ? " +
+                "task.int_cores_min <= ? " +
             "AND " +
-                "task.int_min_ram <= ? " +
+                "task.int_ram_min <= ? " +
             "AND " +
                 "task.bool_reserved IS FALSE " +
             "ORDER BY " +
@@ -285,8 +285,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             task.taskId = (UUID) rs.getObject("pk_task");
             task.layerId = (UUID) rs.getObject("pk_layer");
             task.jobId = (UUID) rs.getObject("pk_job");
-            task.minCores = rs.getInt("int_min_cores");
-            task.minRam = rs.getInt("int_min_ram");
+            task.minCores = rs.getInt("int_cores_min");
+            task.minRam = rs.getInt("int_ram_min");
             task.name = rs.getString("str_name");
             return task;
         }

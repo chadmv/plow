@@ -127,7 +127,7 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
             "UPDATE " +
                 "plow.quota " +
             "SET " +
-                "int_run_cores = int_run_cores + ? " +
+                "int_cores_run = int_cores_run + ? " +
             "WHERE " +
                 "quota.pk_project = ? " +
             "AND " +
@@ -143,7 +143,7 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
             "UPDATE " +
                 "plow.quota " +
             "SET " +
-                "int_run_cores = int_run_cores - ? " +
+                "int_cores_run = int_cores_run - ? " +
             "WHERE " +
                 "quota.pk_quota = ?";
 
@@ -162,7 +162,7 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
         "AND " +
             "quota.pk_cluster = ? " +
         "AND " +
-            "int_run_cores + ? < int_burst ";
+            "int_cores_run + ? < int_burst ";
 
     @Override
     public boolean check(Cluster cluster, Project project, int cores) {

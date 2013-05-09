@@ -31,8 +31,8 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             layer.id = rs.getString("pk_layer");
             layer.name = rs.getString("str_name");
             layer.chunk = rs.getInt("int_chunk_size");
-            layer.maxCores = rs.getInt("int_max_cores");
-            layer.minCores = rs.getInt("int_min_cores");
+            layer.maxCores = rs.getInt("int_cores_max");
+            layer.minCores = rs.getInt("int_cores_min");
             layer.minRamMb = rs.getInt("int_min_ram");
             layer.range = rs.getString("str_range");
             layer.setMaxRssMb(rs.getInt("int_max_rss"));
@@ -53,8 +53,8 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer.str_range,"+
                 "layer.str_tags, " +
                 "layer.int_chunk_size,"+
-                "layer.int_min_cores,"+
-                "layer.int_max_cores,"+
+                "layer.int_cores_min,"+
+                "layer.int_cores_max,"+
                 "layer.int_min_ram, " +
                 "layer.bool_threadable,"+
                 "layer_count.int_total, "+
@@ -64,14 +64,14 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer_count.int_eaten,"+
                 "layer_count.int_waiting,"+
                 "layer_count.int_depend, "+
-                "layer_dsp.int_run_cores,"+
-                "layer_ping.int_max_rss,"+
-                "layer_ping.int_max_cpu_perc " +
+                "layer_dsp.int_cores_run,"+
+                "layer_stat.int_ram_high,"+
+                "layer_stat.flt_cores_high " +
             "FROM " +
                 "layer " +
             "INNER JOIN layer_count ON layer.pk_layer = layer_count.pk_layer " +
             "INNER JOIN layer_dsp ON layer.pk_layer = layer_dsp.pk_layer " +
-            "INNER JOIN layer_ping ON layer.pk_layer = layer_ping.pk_layer ";
+            "INNER JOIN layer_stat ON layer.pk_layer = layer_stat.pk_layer ";
 
     private static final String GET_BY_ID =
             GET + " WHERE layer.pk_layer = ?";

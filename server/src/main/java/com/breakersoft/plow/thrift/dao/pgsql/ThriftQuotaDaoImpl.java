@@ -29,7 +29,7 @@ public class ThriftQuotaDaoImpl  extends AbstractDao implements ThriftQuotaDao {
 			quota.setId(rs.getString("pk_quota"));
 			quota.setBurst(rs.getInt("int_burst"));
 			quota.setSize(rs.getInt("int_burst"));
-			quota.setRunCores(rs.getInt("int_run_cores"));
+			quota.setRunCores(rs.getInt("int_cores_run"));
 			return quota;
 		}
 	 };
@@ -42,7 +42,7 @@ public class ThriftQuotaDaoImpl  extends AbstractDao implements ThriftQuotaDao {
 			"project.str_code || '.' || cluster.str_name AS str_name, "+
 			"quota.int_burst,"+
 			"quota.int_size,"+
-			"quota.int_run_cores "+
+			"quota.int_cores_run "+
 		"FROM " +
 			"quota " +
 				"INNER JOIN project ON quota.pk_project = project.pk_project " +

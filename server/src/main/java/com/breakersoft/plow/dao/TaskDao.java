@@ -4,9 +4,8 @@ import java.util.List;
 import java.util.UUID;
 
 import com.breakersoft.plow.Job;
-import com.breakersoft.plow.Task;
 import com.breakersoft.plow.Layer;
-import com.breakersoft.plow.rnd.thrift.RunningTask;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
 
@@ -33,8 +32,6 @@ public interface TaskDao {
     void clearLastLogLine(Task task);
 
     boolean start(Task task, int cores, int memory);
-
-    void resetTaskDispatchData(Task task, String host);
 
     List<Task> getTasks(TaskFilterT filter);
 

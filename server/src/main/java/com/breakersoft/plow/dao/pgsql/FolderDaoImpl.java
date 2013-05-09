@@ -98,13 +98,13 @@ public class FolderDaoImpl extends AbstractDao implements FolderDao {
 
     @Override
     public void setMaxCores(Folder folder, int value) {
-        jdbc.update("UPDATE plow.folder_dsp SET int_max_cores=? WHERE pk_folder=?",
+        jdbc.update("UPDATE plow.folder_dsp SET int_cores_max=? WHERE pk_folder=?",
                 value, folder.getFolderId());
     }
 
     @Override
     public void setMinCores(Folder folder, int value) {
-        jdbc.update("UPDATE plow.folder_dsp SET int_min_cores=? WHERE pk_folder=?",
+        jdbc.update("UPDATE plow.folder_dsp SET int_cores_min=? WHERE pk_folder=?",
                 value, folder.getFolderId());
     }
 

@@ -97,9 +97,6 @@ public class DispatchServiceImpl implements DispatchService {
         if (taskDao.start(task, task.minCores, task.minRam)) {
             logger.info("Started {}", task);
 
-            taskDao.resetTaskDispatchData(task, hostname);
-
-
             DispatchStats.taskStartedCount.incrementAndGet();
             return true;
         }
