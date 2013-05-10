@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -17,20 +16,13 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Defaults;
-import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Node;
-import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
-import com.breakersoft.plow.dispatcher.domain.DispatchResource;
-import com.breakersoft.plow.dispatcher.domain.DispatchTask;
-import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.JobState;
-import com.breakersoft.plow.thrift.TaskState;
-import com.google.common.collect.Maps;
 import com.google.common.primitives.Floats;
 
 @Repository

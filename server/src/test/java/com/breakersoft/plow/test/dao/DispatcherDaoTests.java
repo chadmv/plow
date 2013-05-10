@@ -123,25 +123,6 @@ public class DispatcherDaoTests extends AbstractTest {
     }
 
     @Test
-    public void testGetRunTaskCommand() {
-
-        DispatchResult result = new DispatchResult(node);
-        result.isTest = true;
-        nodeDispatcher.dispatch(result, node);
-
-        assertFalse(result.procs.isEmpty());
-
-        DispatchProc proc = result.procs.get(0);
-        Task t = jobService.getTask(proc.getTaskId());
-
-        RunTaskCommand command = dispatchDao.getRunTaskCommand(t);
-        assertEquals(command.jobId, t.getJobId().toString());
-        assertEquals(command.procId, proc.getProcId().toString());
-        assertEquals(command.taskId, proc.getTaskId().toString());
-        assertEquals(command.cores, proc.getIdleCores());
-    }
-
-    @Test
     public void testGetDispatchableTasks() {
 
         List<DispatchTask> tasks =
