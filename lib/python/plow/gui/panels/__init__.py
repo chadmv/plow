@@ -6,6 +6,7 @@ from cluster import ClusterPanel
 from logs import LogsPanel
 from nodes import NodePanel
 from props import PropertiesPanel
+from wrangle import JobWranglerPanel
 
 __all__ = [
     "RenderJobWatchPanel",
@@ -13,6 +14,7 @@ __all__ = [
     "ClusterPanel",
     "LogsPanel",
     "NodePanel",
-    "PropertiesPanel"
+    "PropertiesPanel",
+    "JobWranglerPanel"
 ]
 

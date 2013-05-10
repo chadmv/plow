@@ -14,7 +14,7 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox, SpinSliderWidget, ManagedListWidget
 from plow.gui.common.job import JobProgressBar, JobSelectionDialog, JobStateWidget
-from plow.gui.constants import COLOR_JOB_STATE
+from plow.gui import constants 
 from plow.gui.util import formatMaxValue, formatDateTime, formatDuration
 from plow.gui.event import EventManager
 
@@ -92,6 +92,14 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__tree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.__tree.customContextMenuRequested.connect(self.__showContextMenu)
 
+        def treeMousePress(event):
+            item = self.__tree.itemAt(event.pos())
+            if not item:
+                self.__tree.clearSelection()
+            QtGui.QTreeWidget.mousePressEvent(self.__tree, event)
+
+        self.__tree.mousePressEvent = treeMousePress
+
         self.layout().addWidget(self.__tree)
 
     def refresh(self):
@@ -112,6 +120,8 @@ class RenderJobWatchWidget(QtGui.QWidget):
             formatDuration(job.startTime, job.stopTime)
         ])
 
+        self.__jobs[job.id] = item
+
         item.setToolTip(6, "Started: %s\nStopped:%s" % 
             (formatDateTime(job.startTime), formatDateTime(job.stopTime)))
 
@@ -123,14 +133,16 @@ class RenderJobWatchWidget(QtGui.QWidget):
         progress = JobProgressBar(job.totals, self.__tree)
         self.__tree.setItemWidget(item, len(self.Header)-1, progress);
 
-        state = JobStateWidget(job.state, job.totals.dead, self)
-        self.__tree.setItemWidget(item, 1, state)
+        self.__setJobStateAndColor(item)
+        # state = JobStateWidget(job.state, job.totals.dead, self)
+        # self.__tree.setItemWidget(item, 1, state)
 
-        self.__jobs[job.id] = item
         return True
 
     def updateJob(self, job):
         item = self.__jobs[job.id]
+        item.setData(0, JOB_ROLE, job)
+
         item.setText(2, "%02d" % job.totals.running)
         item.setText(3, "%02d" % job.totals.waiting)
         item.setText(4, "%02d" % job.minCores)
@@ -138,15 +150,15 @@ class RenderJobWatchWidget(QtGui.QWidget):
         item.setText(6, formatDuration(job.startTime, job.stopTime))
         item.setToolTip(6, "Started: %s\nStopped:%s" % 
             (formatDateTime(job.startTime), formatDateTime(job.stopTime)))
-        self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
-        self.__tree.itemWidget(item, 1).setState(job.state, job.totals.dead)
 
-        item.setData(0, JOB_ROLE, job)
+        self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
+        # self.__tree.itemWidget(item, 1).setState(job.state, job.totals.dead)
+        self.__setJobStateAndColor(item)
 
     def removeFinishedJobs(self):
         finished = []
         for item in self.__jobs.itervalues():
-            if self.__tree.itemWidget(item, 1).getState() == JobState.FINISHED:
+            if item.data(0, JOB_ROLE).state == JobState.FINISHED:
                 finished.append(item)
         [self.removeJobItem(item) for item in finished]
 
@@ -171,7 +183,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         req = { }
         req["matchingOnly"] = True
         req["jobIds"] = [jobId for jobId, item in self.__jobs.iteritems() 
-            if self.__tree.itemWidget(item, 1).getState() != FINISHED]
+            if item.data(0, JOB_ROLE).state != FINISHED]
         self.__updateJobs(plow.client.get_jobs(**req))
 
     def __findNewJobs(self):
@@ -190,13 +202,16 @@ class RenderJobWatchWidget(QtGui.QWidget):
     def __showContextMenu(self, pos):
         tree = self.__tree
         item = tree.itemAt(pos)
+        if not item:
+            return 
+            
         job = item.data(0, JOB_ROLE)
 
         menu = QtGui.QMenu(tree)
-        pause = menu.addAction("Un-Pause" if job.paused else "Pause")
-        kill = menu.addAction("Kill")
-        eat = menu.addAction("Eat Dead")
-        retry = menu.addAction("Retry Dead")
+        pause = menu.addAction(QtGui.QIcon(":/pause.png"), "Un-Pause" if job.paused else "Pause")
+        kill = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill")
+        eat = menu.addAction(QtGui.QIcon(":/eat.png"), "Eat Dead")
+        retry = menu.addAction(QtGui.QIcon(":/retry.png"), "Retry Dead")
 
         pause.triggered.connect(partial(job.pause, not job.paused))
 
@@ -210,6 +225,32 @@ class RenderJobWatchWidget(QtGui.QWidget):
         kill.triggered.connect(partial(job.kill, "plow-wrangler"))
 
         menu.popup(tree.mapToGlobal(pos))
+
+    def __setJobStateAndColor(self, item):
+        job = item.data(0, JOB_ROLE)
+        totals = job.totals
+
+        color = QtCore.Qt.black 
+
+        if job.paused:
+            bgcolor = constants.BLUE
+            color = QtCore.Qt.white
+            text = "PAUSED"
+
+        elif totals.dead:
+            if totals.running:
+                text = "RUNNING"
+            else:
+                text = "DEAD"
+            bgcolor = constants.RED 
+
+        else:
+            bgcolor = constants.COLOR_JOB_STATE[job.state]
+            text = constants.JOB_STATES[job.state]
+
+        item.setText(1, text)
+        item.setBackground(1, bgcolor)
+        item.setForeground(1, color)
 
     def __itemDoubleClicked(self, item, col):
         uid = item.data(0, JOBID_ROLE)

@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import datetime 
 
 import plow.client
@@ -7,6 +8,7 @@ import plow.gui.constants as constants
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.event import EventManager
+from plow.gui.common import models
 
 
 NODE_STATES = {}
@@ -18,6 +20,8 @@ for a in dir(plow.client.NodeState):
 
 
 ObjectRole = QtCore.Qt.UserRole + 1
+
+LOGGER = logging.getLogger(__name__)
 
 
 class NodePanel(Panel):
@@ -46,7 +50,7 @@ class NodeWidget(QtGui.QWidget):
         layout = QtGui.QVBoxLayout(self)
 
         self.__model = model = NodeModel(self)
-        self.__proxy = proxy = NodeProxyModel(self)
+        self.__proxy = proxy = models.AlnumSortProxyModel(self)
         proxy.setSourceModel(model)
 
         self.__view = view = QtGui.QTableView(self)
@@ -57,7 +61,7 @@ class NodeWidget(QtGui.QWidget):
         view.setSelectionMode(view.ExtendedSelection)
         view.setSortingEnabled(True)
         view.setModel(proxy)
-        view.setAlternatingRowColors(True)
+        view.setAlternatingRowColors(False)
         view.setAutoFillBackground(False)
         view.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
         view.horizontalHeader().setStretchLastSection(True)
@@ -105,7 +109,7 @@ class ResourceDelegate(QtGui.QItemDelegate):
             super(ResourceDelegate, self).paint(painter, opts, index)
             return 
 
-        text = "%0.2f" % (ratio * 100)
+        text = "%0.2f%%" % (ratio * 100)
         opt = QtGui.QStyleOptionViewItemV4(opts)
         opt.displayAlignment = QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter
 
@@ -126,7 +130,7 @@ class ResourceDelegate(QtGui.QItemDelegate):
             end = self.COLOR_WARN
 
         grad.setColorAt(0.0, self.COLOR_OK.darker(135))
-        grad.setColorAt(ratio, self.COLOR_OK)
+        grad.setColorAt(min(ratio, 1.0), self.COLOR_OK)
         grad.setColorAt(min(ratio + .01, 1.0), end)
         grad.setColorAt(1.0, darkEnd)
 
@@ -166,15 +170,59 @@ class NodeModel(QtCore.QAbstractTableModel):
     def __init__(self, parent=None):
         super(NodeModel, self).__init__(parent)
         self.__items = []
-        self.__index = {}
 
     def hasChildren(self, parent):
         return False
 
-    def refresh(self):
-        #TODO: Update existing
+    def reload(self):
         nodes = plow.client.get_nodes()
         self.setNodeList(nodes)
+
+    def refresh(self):
+        if not self.__items:
+            self.reload()
+            return 
+
+        rows = self.__index
+        colCount = self.columnCount()
+        parent = QtCore.QModelIndex()
+
+        nodes = plow.client.get_nodes()
+        nodes_ids = set()
+        to_add = set()
+
+        # Update
+        for node in nodes:
+            nodes_ids.add(node.id)
+            if node.id in self.__index:
+                row = rows[node.id]
+                self.__items[row] = node
+                start = self.index(row, 0)
+                end = self.index(row, colCount-1)
+                self.dataChanged.emit(start, end)
+                LOGGER.debug("updating %s %s", node.id, node.name)
+            else:
+                to_add.add(node)
+        
+        # Add new
+        if to_add:
+            size = len(to_add)
+            start = len(self.__items)
+            end = start + size - 1
+            self.beginInsertRows(parent, start, end)
+            self.__items.extend(to_add)
+            self.endInsertRows()
+            LOGGER.debug("adding %d new nodes", size)
+
+        # Remove
+        to_remove = set(self.__index.iterkeys()).difference(nodes_ids)
+        for row, old_id in sorted(((rows[old_id], old_id) for old_id in to_remove), reverse=True):
+            self.beginRemoveRows(parent, row, row)
+            node = self.__items.pop(row)
+            self.endRemoveRows()
+            LOGGER.debug("removing %s %s", old_id, node.name)
+
+        self.__index = dict((n.id, row) for row, n in enumerate(self.__items))
 
     def rowCount(self, parent):
         return len(self.__items)
@@ -228,59 +276,7 @@ class NodeModel(QtCore.QAbstractTableModel):
     def setNodeList(self, nodeList):
         self.beginResetModel()
         self.__items = nodeList
+        self.__index = dict((n.id, row) for row, n in enumerate(nodeList))
         self.endResetModel()
-
-
-class NodeProxyModel(QtGui.QSortFilterProxyModel):
-
-    RX_ALNUMS = QtCore.QRegExp('(\d+|\D+)')
-
-    def __init__(self, *args, **kwargs):
-        super(NodeProxyModel, self).__init__(*args, **kwargs)
-        self.setSortRole(QtCore.Qt.UserRole)
-
-    def lessThan(self, left, right):
-        sortRole = self.sortRole()
-        leftData = left.data(sortRole)
-        if isinstance(leftData, (str, unicode)):
-            rightData = right.data(sortRole)
-            return self.lessThanAlphaNumeric(leftData, rightData)
-
-        return self.lessThan(left, right)
-
-    def lessThanAlphaNumeric(self, left, right):
-        if left == right:
-            return False 
-
-        alnums = self.RX_ALNUMS
-        leftList = []
-        rightList = []
-
-        pos = 0
-        while True:
-            pos = alnums.indexIn(left, pos)
-            if pos == -1:
-                break
-
-            leftList.append(alnums.cap(1))
-            pos += alnums.matchedLength()
-
-        pos = 0
-        while True:
-            pos = alnums.indexIn(right, pos)
-            if pos == -1:
-                break
-
-            rightList.append(alnums.cap(1))
-            pos += alnums.matchedLength()
-
-        for leftItem, rightItem in zip(leftList, rightList):
-            if leftItem != rightItem and leftItem.isdigit() and rightItem.isdigit():
-                return int(leftItem) < int(rightItem)
-
-            if leftItem != rightItem:
-                return leftItem < rightItem
-
-        return left < right
 
 
