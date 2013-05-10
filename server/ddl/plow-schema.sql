@@ -490,8 +490,240 @@ CREATE TABLE plow.action (
 CREATE INDEX action_pk_filter_idx ON plow.action (pk_filter);
 
 ----------------------------------------------------------
+
+---
+--- plow.job_history
+---
+CREATE TABLE plow.job_history (
+  pk_job UUID NOT NULL PRIMARY KEY,
+  pk_project UUID NOT NULL REFERENCES plow.project(pk_project),
+  str_name TEXT NOT NULL,
+  str_username TEXT NOT NULL,
+  str_log_path TEXT,
+  int_uid INTEGER NOT NULL,
+  time_started BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
+  time_stopped BIGINT DEFAULT 0,
+  attrs hstore
+) WITHOUT OIDS;
+
+CREATE INDEX job_history_pk_project_idx ON plow.task_job (pk_job);
+CREATE INDEX job_history_time_idx ON plow.job_history (time_stopped, time_started);
+
+---
+--- plow.layer_history
+---
+CREATE table plow.layer_history (
+  pk_layer UUID NOT NULL PRIMARY KEY,
+  pk_job UUID NOT NULL REFERENCES plow.job_history(pk_job) ON DELETE CASCADE,
+  str_name TEXT NOT NULL,
+  str_range TEXT,
+  str_tags TEXT[] NOT NULL,
+  int_chunk_size INTEGER NOT NULL,
+  int_cores_min SMALLINT NOT NULL,
+  int_cores_max SMALLINT NOT NULL,
+  int_ram_min INTEGER NOT NULL,
+  bool_threadable BOOLEAN DEFAULT 'f' NOT NULL
+) WITHOUT OIDS;
+
+CREATE INDEX layer_history_pk_job_idx ON plow.layer_history (pk_job);
+
+---
+--- plow.task_history - One entry is created for every run of a task.
+---
+CREATE TABLE plow.task_history (
+  pk_task UUID NOT NULL PRIMARY KEY,
+  pk_layer UUID NOT NULL REFERENCES plow.layer_history(pk_layer) ON DELETE CASCADE,
+  str_name TEXT,
+  int_number INTEGER NOT NULL,
+  time_started BIGINT  NOT NULL DEFAULT plow.txTimeMillis(),
+  time_stopped BIGINT  NOT NULL DEFAULT 0,
+  int_retry SMALLINT NOT NULL DEFAULT -1,
+  int_core_time BIGINT NOT NULL DEFAULT 0,
+  int_clock_time BIGINT NOT NULL DEFAULT 0,
+  int_cores SMALLINT NOT NULL,
+  int_cores_min SMALLINT NOT NULL,
+  int_cores_high REAL NOT NULL DEFAULT 0,
+  int_ram INTEGER NOT NULL,
+  int_ram_min INTEGER NOT NULL,
+  int_ram_high INTEGER NOT NULL DEFAULT 0
+) WITHOUT OIDS;
+
+CREATE INDEX task_history_time_idx ON plow.task_history (time_stopped, time_started);
+CREATE INDEX task_history_pk_layer_idx ON plow.task_history (pk_layer);
+
+----------------------------------------------------------
 --- TRIGGERS
 ----------------------------------------------------------
+
+---
+--- plow.after_job_inserted - runs after a job has been inserted into plow.job
+--- 
+---
+CREATE OR REPLACE FUNCTION plow.after_job_inserted() RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO
+    plow.job_history
+  (
+    pk_job,
+    pk_project,
+    str_name,
+    str_username,
+    str_log_path,
+    int_uid,
+    time_started,
+    time_stopped,
+    attrs
+  )
+  VALUES
+  (
+    NEW.pk_job,
+    NEW.pk_project,
+    NEW.str_name,
+    NEW.str_username,
+    NEW.str_log_path,
+    NEW.int_uid,
+    NEW.time_started,
+    NEW.time_stopped,
+    NEW.hstore_attrs
+  );
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_after_job_inserted AFTER INSERT ON plow.job
+    FOR EACH ROW EXECUTE PROCEDURE plow.after_job_inserted();
+
+---
+--- plow.after_layer_inserted - runs after a layer has been inserted into plow.layer.
+--- 
+---
+CREATE OR REPLACE FUNCTION plow.after_layer_inserted() RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO
+    plow.layer_history
+  (
+    pk_layer,
+    pk_job,
+    str_name,
+    str_range,
+    str_tags,
+    int_chunk_size,
+    int_cores_min,
+    int_cores_max,
+    int_ram_min,
+    bool_threadable
+  )
+  VALUES
+  (
+    NEW.pk_layer,
+    NEW.pk_job,
+    NEW.str_name,
+    NEW.str_range,
+    NEW.str_tags,
+    NEW.int_chunk_size,
+    NEW.int_cores_min,
+    NEW.int_cores_max,
+    NEW.int_ram_min,
+    NEW.bool_threadable
+  );
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_after_layer_inserted AFTER INSERT ON plow.layer
+    FOR EACH ROW EXECUTE PROCEDURE plow.after_layer_inserted();
+
+---
+--- plow.after_task_stopped
+--- Updates the task historical table and re-caclulates layer/job stats
+---
+CREATE OR REPLACE FUNCTION plow.after_task_stopped() RETURNS TRIGGER AS $$
+DECLARE
+  proc RECORD;
+BEGIN
+
+  SELECT int_cores, int_cores_high, int_ram_high INTO proc FROM plow.proc WHERE pk_task=NEW.pk_task;
+
+  UPDATE 
+    task_history
+  SET 
+    int_cores_high = proc.int_cores_high,
+    int_ram_high = proc.int_ram_high,
+    time_stopped = plow.txTimeMillis(),
+    int_core_time = (plow.txTimeMillis() - time_started) * proc.int_cores,
+    int_clock_time = plow.txTimeMillis() - time_started
+  WHERE
+    pk_task = NEW.pk_task
+  AND
+    time_stopped = 0
+  AND
+    int_retry = NEW.int_retry;
+
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+---
+--- Trigger when as task stop time is updated to non-zero.
+---
+CREATE TRIGGER trig_after_task_stopped AFTER UPDATE ON plow.task
+    FOR EACH ROW WHEN (OLD.time_stopped=0 AND NEW.time_stopped>0)
+    EXECUTE PROCEDURE plow.after_task_stopped();
+
+---
+--- plow.after_task_started
+--- Adds the task data to the historical tables when a task is stopped.
+---
+CREATE OR REPLACE FUNCTION plow.after_task_started() RETURNS TRIGGER AS $$
+DECLARE
+  proc RECORD;
+BEGIN
+
+  /*
+  * Don't let frames flip to running that don't have procs.
+  **/
+  SELECT int_cores, int_ram INTO proc FROM plow.proc WHERE pk_task=NEW.pk_task;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'proc % not found for task', NEW.pk_task;
+  END IF;
+
+  INSERT INTO 
+    task_history 
+  (
+    pk_task,
+    pk_layer,
+    str_name,
+    int_number,
+    int_retry,
+    int_cores,
+    int_cores_min,
+    int_ram,
+    int_ram_min
+  ) VALUES (
+    NEW.pk_task,
+    NEW.pk_layer,
+    NEW.str_name,
+    NEW.int_number,
+    NEW.int_retry,
+    proc.int_cores,
+    NEW.int_cores_min,
+    proc.int_ram,
+    NEW.int_ram_min
+  );
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+---
+--- Trigger when as task goes from waiting to running.
+---
+CREATE TRIGGER trig_after_task_started AFTER UPDATE ON plow.task
+    FOR EACH ROW WHEN (OLD.int_state=1 AND NEW.int_state=2)
+    EXECUTE PROCEDURE plow.after_task_started();
 
 ---
 --- plow.after_proc_insert()
