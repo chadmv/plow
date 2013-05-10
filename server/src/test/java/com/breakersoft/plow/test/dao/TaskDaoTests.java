@@ -85,31 +85,6 @@ public class TaskDaoTests extends AbstractTest {
         assertFalse(taskDao.updateState(task,
                 TaskState.DEAD, TaskState.RUNNING));
     }
-
-    @Test
-    public void testReserve() {
-        testCreate();
-        taskDao.start(task, 1, 1024);
-    }
-
-    @Test
-    public void testStop() {
-        testCreate();
-        taskDao.stop(task, TaskState.SUCCEEDED);
-    }
-
-    @Test
-    public void testStart() {
-        testCreate();
-        taskDao.reserve(task);
-    }
-
-    @Test
-    public void testUnreserve() {
-        testCreate();
-        taskDao.unreserve(task);
-    }
-
     @Test
     public void getTasksWithTaskFilterA() {
         testCreate();

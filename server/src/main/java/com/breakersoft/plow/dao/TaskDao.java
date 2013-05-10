@@ -18,20 +18,11 @@ public interface TaskDao {
 
     Task get(UUID id);
 
-    boolean updateState(Task task, TaskState currentState,
-            TaskState newState);
-
-    boolean reserve(Task frame);
-
-    boolean unreserve(Task frame);
-
-    boolean stop(Task task, TaskState newState);
+    boolean updateState(Task task, TaskState currentState, TaskState newState);
 
     Task getByNameOrId(Job job, String identifer);
 
     void clearLastLogLine(Task task);
-
-    boolean start(Task task, int cores, int memory);
 
     List<Task> getTasks(TaskFilterT filter);
 

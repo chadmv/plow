@@ -12,7 +12,7 @@ import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dao.QuotaDao;
-import com.breakersoft.plow.dao.TaskDao;
+import com.breakersoft.plow.dispatcher.dao.DispatchTaskDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
@@ -39,7 +39,7 @@ public class DispatchServiceImpl implements DispatchService {
     private ProcDao procDao;
 
     @Autowired
-    private TaskDao taskDao;
+    private DispatchTaskDao dispatchTaskDao;
 
     @Autowired
     private QuotaDao quotaDao;
@@ -78,12 +78,12 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Override
     public boolean reserveTask(Task task) {
-        return taskDao.reserve(task);
+        return dispatchTaskDao.reserve(task);
     }
 
     @Override
     public boolean unreserveTask(Task task) {
-        return taskDao.unreserve(task);
+        return dispatchTaskDao.unreserve(task);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Override
     public boolean startTask(String hostname, DispatchTask task) {
-        if (taskDao.start(task, task.minCores, task.minRam)) {
+        if (dispatchTaskDao.start(task)) {
             logger.info("Started {}", task);
 
             DispatchStats.taskStartedCount.incrementAndGet();
@@ -106,7 +106,7 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Override
     public boolean stopTask(Task task, TaskState state) {
-        if (taskDao.stop(task, state)) {
+        if (dispatchTaskDao.stop(task, state)) {
             logger.info("Stopping {}, new state: {}", task, state.toString());
 
             DispatchStats.taskStoppedCount.incrementAndGet();
@@ -166,11 +166,11 @@ public class DispatchServiceImpl implements DispatchService {
     @Override
     public List<DispatchTask> getDispatchableTasks(JobId job,
             DispatchResource resource) {
-        return dispatchDao.getDispatchableTasks(job, resource);
+        return dispatchTaskDao.getDispatchableTasks(job, resource);
     }
 
     @Override
     public RunTaskCommand getRuntaskCommand(Task task) {
-        return dispatchDao.getRunTaskCommand(task);
+        return dispatchTaskDao.getRunTaskCommand(task);
     }
 }

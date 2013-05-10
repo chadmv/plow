@@ -17,7 +17,6 @@ import com.breakersoft.plow.Task;
 import com.breakersoft.plow.TaskE;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.TaskDao;
-import com.breakersoft.plow.rnd.thrift.RunningTask;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.util.JdbcUtils;
@@ -120,70 +119,6 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
     @Override
     public void clearLastLogLine(Task task) {
         jdbc.update("UPDATE plow.task_ping SET str_last_log_line=? WHERE pk_task=?", "", task.getTaskId());
-    }
-
-    @Override
-    public boolean reserve(Task task) {
-        try {
-            jdbc.queryForObject("SELECT task.pk_task FROM plow.task WHERE pk_task=? AND int_state=? AND bool_reserved='f' FOR UPDATE NOWAIT",
-                    String.class, task.getTaskId(), TaskState.WAITING.ordinal());
-            return jdbc.update("UPDATE plow.task SET bool_reserved='t' " +
-                    "WHERE pk_task=? AND int_state=? AND bool_reserved='f'", task.getTaskId(), TaskState.WAITING.ordinal()) == 1;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    @Override
-    public boolean unreserve(Task task) {
-        return jdbc.update("UPDATE plow.task SET bool_reserved='f' " +
-                "WHERE pk_task=? AND bool_reserved='t'", task.getTaskId()) == 1;
-    }
-
-    public static final String START_TASK =
-            "UPDATE " +
-                "plow.task " +
-            "SET " +
-                "int_state = ?, " +
-                "bool_reserved = 'f',"+
-                "int_retry=int_retry+1,"+
-                "time_updated = txTimeMillis(), " +
-                "time_started = txTimeMillis(), " +
-                "time_stopped = 0 " +
-            "WHERE " +
-                "task.pk_task = ? " +
-            "AND " +
-                "int_state = ? " +
-            "AND " +
-                "bool_reserved = 't'";
-
-    @Override
-    public boolean start(Task task, int cores, int memory) {
-        return jdbc.update(START_TASK,
-                TaskState.RUNNING.ordinal(),
-                task.getTaskId(),
-                TaskState.WAITING.ordinal()) == 1;
-    }
-
-    public static final String STOP_TASK =
-            "UPDATE " +
-                "plow.task " +
-            "SET " +
-                "int_state = ?, " +
-                "bool_reserved = 'f', " +
-                "time_stopped = txTimeMillis(), " +
-                "time_updated = txTimeMillis() " +
-            "WHERE " +
-                "task.pk_task = ? " +
-            "AND " +
-                "int_state = ? ";
-
-    @Override
-    public boolean stop(Task task, TaskState newState) {
-        return jdbc.update(STOP_TASK,
-                newState.ordinal(),
-                task.getTaskId(),
-                TaskState.RUNNING.ordinal()) == 1;
     }
 
     @Override
