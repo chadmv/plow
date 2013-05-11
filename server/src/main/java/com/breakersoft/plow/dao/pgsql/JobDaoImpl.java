@@ -8,11 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.thrift.TSerializer;
+import org.apache.thrift.protocol.TJSONProtocol;
+import org.apache.thrift.protocol.TSimpleJSONProtocol;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
@@ -30,6 +36,8 @@ import com.google.common.collect.Maps;
 
 @Repository
 public final class JobDaoImpl extends AbstractDao implements JobDao {
+
+    private static final Logger logger = LoggerFactory.getLogger(JobDaoImpl.class);
 
     public static final RowMapper<Job> MAPPER = new RowMapper<Job>() {
 
@@ -130,6 +138,19 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         jdbc.update("INSERT INTO plow.job_count (pk_job) VALUES (?)", jobId);
         jdbc.update("INSERT INTO plow.job_dsp (pk_job) VALUES (?)", jobId);
         jdbc.update("INSERT INTO plow.job_stat (pk_job) VALUES (?)", jobId);
+
+        // Serialize the spec into json.  Don't let a failure here stop
+        // the job from launching.  This keeps the job spec around mainly
+        // for troubleshooting.
+        try {
+            TSerializer serializer = new TSerializer(new TSimpleJSONProtocol.Factory());
+            String json = serializer.toString(spec);
+
+            jdbc.update("UPDATE plow.job_history SET str_spec=? WHERE pk_job=?",
+                    json, jobId);
+        } catch (Exception e) {
+            logger.warn("Failed to serialize job spec to json: " + e, e);
+        }
 
         final FilterableJob job = new FilterableJob();
         job.setJobId(jobId);

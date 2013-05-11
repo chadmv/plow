@@ -495,7 +495,9 @@ CREATE TABLE plow.job_history (
   int_uid INTEGER NOT NULL,
   time_started BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   time_stopped BIGINT DEFAULT 0,
-  attrs hstore
+  hstore_attrs hstore,
+  hstore_env hstore,
+  str_spec TEXT
 ) WITHOUT OIDS;
 
 CREATE INDEX job_history_pk_project_idx ON plow.task_job (pk_job);
@@ -568,7 +570,8 @@ BEGIN
     int_uid,
     time_started,
     time_stopped,
-    attrs
+    hstore_attrs,
+    hstore_env
   )
   VALUES
   (
@@ -580,7 +583,8 @@ BEGIN
     NEW.int_uid,
     NEW.time_started,
     NEW.time_stopped,
-    NEW.hstore_attrs
+    NEW.hstore_attrs,
+    NEW.hstore_env
   );
   RETURN NEW;
 END
