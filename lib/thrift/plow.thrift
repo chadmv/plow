@@ -242,10 +242,10 @@ struct TaskStatsT {
     6:required i32 highRam,
     7:required common.Timestamp startTime,
     8:required common.Timestamp stopTime,
-    9:required i32 tryNum,
+    9:required i32 retryNum,
     10:required i32 progress,
     11:required string lastLogLine,
-    12:bool succeeded = false
+    12:bool active = false,
     13:i32 exitStatus,
     14:i32 exitSignal
 }

@@ -43,18 +43,19 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             if (task.state.equals(TaskState.RUNNING)) {
                 final TaskStatsT stats = new TaskStatsT();
                 stats.cores = rs.getInt("int_cores");
-                stats.highCores = rs.getDouble("flt_cores_higi");
+                stats.highCores = rs.getDouble("flt_cores_high");
                 stats.usedCores = rs.getDouble("flt_cores_used");
                 stats.ram = rs.getInt("int_ram");
                 stats.usedRam = rs.getInt("int_ram_used");
-                stats.highRam = rs.getInt("int_high_ram");
+                stats.highRam = rs.getInt("int_ram_high");
                 stats.startTime = rs.getLong("time_started");
                 stats.stopTime = rs.getLong("time_stopped");
-                stats.tryNum = rs.getInt("int_retry");
-                stats.progress = rs.getInt("progress");
+                stats.retryNum = rs.getInt("int_retry");
+                stats.progress = rs.getInt("int_progress");
                 stats.lastLogLine = rs.getString("str_last_log_line");
                 stats.exitSignal = rs.getInt("int_exit_signal");
                 stats.exitStatus = rs.getInt("int_exit_status");
+                stats.active = true;
                 task.setStats(stats);
             }
 
@@ -77,11 +78,14 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "task.int_cores_min,"+
             "task.int_ram_min,"+
             "task.str_last_resource, " +
+            "task.int_exit_signal,"+
+            "task.int_exit_status,"+
             "proc.int_cores,"+
             "proc.flt_cores_used,"+
             "proc.flt_cores_high,"+
             "proc.int_ram,"+
             "proc.int_ram_high,"+
+            "proc.int_ram_used,"+
             "proc.int_progress,"+
             "proc.str_last_log_line " +
         "FROM " +
