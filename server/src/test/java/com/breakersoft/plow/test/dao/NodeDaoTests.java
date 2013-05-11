@@ -83,8 +83,10 @@ public class NodeDaoTests extends AbstractTest {
         Cluster cluster = clusterDao.create("test", TAGS);
         Node node = nodeDao.create(cluster, ping);
         nodeDao.update(node, ping);
-        ping.isReboot = true;
-        nodeDao.update(node, ping);
+
+        int swap = simpleJdbcTemplate.queryForInt("SELECT int_swap FROM node_sys WHERE pk_node=?",
+                node.getNodeId());
+        assertEquals(ping.hw.totalSwapMb, swap);
     }
 
     @Test
