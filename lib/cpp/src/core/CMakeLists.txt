@@ -5,6 +5,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/export/plow
 )
 
+set (CMAKE_CXX_FLAGS "-DHAVE_CONFIG_H")
 file(GLOB_RECURSE src_files "${CMAKE_SOURCE_DIR}/src/core/*.cpp")
 
 message(STATUS "Create plow_abi.h from plow_abi.h.in")

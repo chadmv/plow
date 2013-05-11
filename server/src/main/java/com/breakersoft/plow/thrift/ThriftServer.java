@@ -4,7 +4,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.thrift.TProcessor;
-import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadedSelectorServer;
 import org.apache.thrift.transport.TFramedTransport;
@@ -42,7 +42,7 @@ public class ThriftServer {
                 .processor(processor)
                 .workerThreads(32)
                 .selectorThreads(4)
-                .protocolFactory(new TBinaryProtocol.Factory(true, true))
+                .protocolFactory(new TCompactProtocol.Factory())
                 .transportFactory(new TFramedTransport.Factory()));
             thread.start();
 

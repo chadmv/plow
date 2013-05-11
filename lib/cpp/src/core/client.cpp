@@ -3,7 +3,7 @@
 
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TBufferTransports.h>
-#include <thrift/protocol/TBinaryProtocol.h>
+#include <thrift/protocol/TCompactProtocol.h>
 
 #include <boost/thread/tss.hpp>
 
@@ -36,7 +36,7 @@ class PlowClient::Connection
 PlowClient::Connection::Connection():
     socket(new TSocket("localhost", 11336)),
     transport(new TFramedTransport(socket)),
-    protocol(new TBinaryProtocol(transport)),
+    protocol(new TCompactProtocol(transport)),
     service(protocol)
 {
 }
