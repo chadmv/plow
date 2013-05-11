@@ -428,6 +428,7 @@ service RpcService {
     void setJobAttrs(1:common.Guid jobId, 2:Attrs attrs) throws (1:PlowException e),
     list<DependT> getDependsOnJob(1:common.Guid jobId) throws (1:PlowException e),
     list<DependT> getJobDependsOn(1:common.Guid jobId) throws (1:PlowException e),
+    JobSpecT getJobSpec(1:common.Guid jobId) throws (1:PlowException e),
 
     FolderT createFolder(1:string projectId, 2:string name) throws (1:PlowException e),
     FolderT getFolder(1:string id) throws (1:PlowException e),

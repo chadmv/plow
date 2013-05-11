@@ -69,4 +69,14 @@ public class ThriftJobDaoTests extends AbstractTest {
 
         assertEquals(1, thriftJobDao.getOutputs(event.getJob().getJobId()).size());
     }
+
+    @Test
+    public void getJobSpec() {
+        JobSpecT spec1 = getTestJobSpec();
+        JobLaunchEvent event = jobService.launch(spec1);
+        JobSpecT spec2 = thriftJobDao.getJobSpec(event.getJob().getJobId());
+
+        assertEquals(spec1.name, spec2.name);
+    }
+
 }

@@ -25,7 +25,7 @@ import com.breakersoft.plow.dao.ProjectDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.exceptions.InvalidBlueprintException;
+import com.breakersoft.plow.exceptions.JobSpecException;
 import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
@@ -141,7 +141,7 @@ public class JobServiceImpl implements JobService {
                 }
             }
             else {
-                throw new InvalidBlueprintException(
+                throw new JobSpecException(
                         "Layer {} cannot be launched, has no range or tasks.");
             }
             layerOrder++;

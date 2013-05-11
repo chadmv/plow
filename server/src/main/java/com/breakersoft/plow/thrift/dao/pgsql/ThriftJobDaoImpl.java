@@ -8,14 +8,19 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.thrift.TDeserializer;
+import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TJSONProtocol;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
+import com.breakersoft.plow.exceptions.JobSpecException;
 import com.breakersoft.plow.service.DependServiceImpl;
 import com.breakersoft.plow.thrift.JobFilterT;
+import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.JobStatsT;
 import com.breakersoft.plow.thrift.JobT;
@@ -187,4 +192,22 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
         return jdbc.query("SELECT str_path, attrs FROM plow.output WHERE pk_job=?",
                 ThriftLayerDaoImpl.OUT_MAPPER, jobId);
     }
+
+    @Override
+    public JobSpecT getJobSpec(UUID jobId) {
+
+        final String json = jdbc.queryForObject("SELECT str_thrift_spec FROM job_history WHERE pk_job=?",
+                String.class, jobId);
+
+        final TDeserializer deserializer = new TDeserializer(new TJSONProtocol.Factory());
+        final JobSpecT spec = new JobSpecT();
+        try {
+            deserializer.deserialize(spec, json.getBytes());
+            return spec;
+        } catch (TException e) {
+            throw new JobSpecException("Failed to parse job spec " + e, e);
+        }
+    }
+
+
 }

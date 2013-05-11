@@ -18,7 +18,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
-import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
@@ -26,7 +25,7 @@ import com.breakersoft.plow.JobE;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.JobDao;
-import com.breakersoft.plow.exceptions.InvalidBlueprintException;
+import com.breakersoft.plow.exceptions.JobSpecException;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.TaskState;
@@ -149,8 +148,35 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
             jdbc.update("UPDATE plow.job_history SET str_spec=? WHERE pk_job=?",
                     json, jobId);
         } catch (Exception e) {
+            logger.warn("Failed to serialize job spec to readable json: " + e, e);
+        }
+
+        // Serialize the spec into json.  Don't let a failure here stop
+        // the job from launching.  This keeps the job spec around mainly
+        // for troubleshooting.
+        try {
+            final TSerializer serializer = new TSerializer(new TSimpleJSONProtocol.Factory());
+            final String json = serializer.toString(spec);
+
+            jdbc.update("UPDATE plow.job_history SET str_spec=? WHERE pk_job=?",
+                    json, jobId);
+        } catch (Exception e) {
             logger.warn("Failed to serialize job spec to json: " + e, e);
         }
+
+        // Serialize the spec into json.  Don't let a failure here stop
+        // the job from launching.  This keeps the job spec around mainly
+        // for troubleshooting.
+        try {
+            final TSerializer serializer = new TSerializer(new TJSONProtocol.Factory());
+            final String json = serializer.toString(spec);
+
+            jdbc.update("UPDATE plow.job_history SET str_thrift_spec=? WHERE pk_job=?",
+                    json, jobId);
+        } catch (Exception e) {
+            logger.warn("Failed to serialize thrift job spec to json: " + e, e);
+        }
+
 
         final FilterableJob job = new FilterableJob();
         job.setJobId(jobId);
@@ -252,7 +278,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 GET_FRAME_STATUS_COUNTS, job.getJobId());
 
         if (taskCounts.isEmpty()) {
-            throw new InvalidBlueprintException("The job contains no tasks.");
+            throw new JobSpecException("The job contains no tasks.");
         }
 
         for (Map<String, Object> entry: taskCounts) {

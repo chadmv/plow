@@ -1,27 +1,27 @@
 package com.breakersoft.plow.exceptions;
 
-public class InvalidBlueprintException extends PlowException {
+public class JobSpecException extends PlowException {
 
     /**
      *
      */
     private static final long serialVersionUID = 8921792793144591682L;
 
-    public InvalidBlueprintException() {
+    public JobSpecException() {
         // TODO Auto-generated constructor stub
     }
 
-    public InvalidBlueprintException(String arg0) {
+    public JobSpecException(String arg0) {
         super(arg0);
         // TODO Auto-generated constructor stub
     }
 
-    public InvalidBlueprintException(Throwable arg0) {
+    public JobSpecException(Throwable arg0) {
         super(arg0);
         // TODO Auto-generated constructor stub
     }
 
-    public InvalidBlueprintException(String arg0, Throwable arg1) {
+    public JobSpecException(String arg0, Throwable arg1) {
         super(arg0, arg1);
         // TODO Auto-generated constructor stub
     }

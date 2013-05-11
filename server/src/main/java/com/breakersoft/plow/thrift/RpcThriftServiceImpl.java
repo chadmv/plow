@@ -615,4 +615,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
             TException {
         return thriftTaskDao.getTaskStats(UUID.fromString(taskId));
     }
+
+    @Override
+    public JobSpecT getJobSpec(String jobId) throws PlowException, TException {
+        return thriftJobDao.getJobSpec(UUID.fromString(jobId));
+    }
 }
