@@ -75,8 +75,8 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
             "SET " +
                 "int_state = ?, " +
                 "bool_reserved = 'f', " +
-                "time_stopped = txTimeMillis(), " +
-                "time_updated = txTimeMillis() " +
+                "time_stopped = currentTimeMillis(), " +
+                "time_updated = currentTimeMillis() " +
             "WHERE " +
                 "task.pk_task = ? " +
             "AND " +
