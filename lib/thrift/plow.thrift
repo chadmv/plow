@@ -174,59 +174,93 @@ struct ProcT {
     9:bool unbooked
 }
 
+struct JobStatsT {
+    1:required i32 highRam,
+    2:required double highCores,
+    3:required i32 highCoreTime,
+    4:required i64 totalCoreTime,
+    5:required i64 totalGoodCoreTime,
+    6:required i64 totalBadCoreTime
+}
+
 struct JobT {
-    1:common.Guid id,
-    2:common.Guid folderId,
-    3:string name,
-    4:string username,
-    5:i32 uid,
-    6:JobState state,
-    7:bool paused
-    8:i32 minCores,
-    9:i32 maxCores,
-    10:i32 runCores,
-    11:common.Timestamp startTime,
-    12:common.Timestamp stopTime,
-    13:TaskTotalsT totals,
-    14:i32 maxRssMb,
-    15:Attrs attrs
+    1:required common.Guid id,
+    2:required common.Guid folderId,
+    3:required string name,
+    4:required string username,
+    5:required i32 uid,
+    6:required JobState state,
+    7:required bool paused
+    8:required i32 minCores,
+    9:required i32 maxCores,
+    10:required i32 runCores,
+    11:required common.Timestamp startTime,
+    12:required common.Timestamp stopTime,
+    13:required TaskTotalsT totals,
+    14:required JobStatsT stats,
+    15:required Attrs attrs
+}
+
+struct LayerStatsT {
+    1:required i32 highRam,
+    2:required i32 avgRam,
+    3:required double stdDevRam,
+    4:required double highCores,
+    5:required double avgCores,
+    6:required double stdDevCores,
+    7:required i32 highCoreTime,
+    8:required i32 avgCoreTime,
+    9:required i32 lowCoreTime,
+    10:required double stdDevCoreTime,
+    11:required i64 totalCoreTime,
+    12:required i64 totalGoodCoreTime,
+    13:required i64 totalBadCoreTime
 }
 
 struct LayerT {
-    1:common.Guid id,
-    2:string name,
-    3:string range,
-    4:i32 chunk,
-    5:set<string> tags,
-    6:bool threadable
-    7:i32 minCores,
-    8:i32 maxCores,
-    9:i32 minRamMb,
-    10:i32 runCores,
-    11:TaskTotalsT totals,
-    12:i32 maxRssMb,
-    13:i16 maxCpuPerc
+    1:required common.Guid id,
+    2:required string name,
+    3:required string range,
+    4:required i32 chunk,
+    5:required set<string> tags,
+    6:required bool threadable,
+    7:required i32 minCores,
+    8:required i32 maxCores,
+    9:required i32 minRam,
+    10:required i32 maxRam,
+    11:required i32 runCores,
+    12:required TaskTotalsT totals,
+    13:required LayerStatsT stats
+}
+
+struct TaskStatsT {
+    1:required i32 cores,
+    2:required double usedCores,
+    3:required double highCores,
+    4:required i32 ram,
+    5:required i32 usedRam,
+    6:required i32 highRam,
+    7:required common.Timestamp startTime,
+    8:required common.Timestamp stopTime,
+    9:required i32 tryNum,
+    10:required i32 progress,
+    11:required string lastLogLine,
+    12:bool succeeded = false
+    13:i32 exitStatus,
+    14:i32 exitSignal
 }
 
 struct TaskT {
-    1:common.Guid id,
-    2:string name,
-    3:i32 number,
-    4:i32 dependCount,
-    5:i32 order,
-    6:TaskState state,
-    7:common.Timestamp startTime,
-    8:common.Timestamp stopTime,
-    9:string lastNodeName,
-    10:string lastLogLine,
-    11:i32 retries,
-    12:i32 cores,
-    13:i32 ramMb,
-    14:i32 rssMb,
-    15:i32 maxRssMb,
-    16:i16 cpuPerc,
-    17:i16 maxCpuPerc,
-    18:i32 progress
+    1:required common.Guid id,
+    2:required string name,
+    3:required i32 number,
+    4:required TaskState state,
+    7:required i32 order,
+    8:required i32 retries,
+    9:required i32 minCores,
+    10:required i32 minRam,
+    11:string lastResource,
+    12:TaskStatsT stats
 }
 
 struct FolderT {
@@ -425,6 +459,7 @@ service RpcService {
     void killTasks(1:TaskFilterT filter) throws (1:PlowException e),
     list<DependT> getDependsOnTask(1:common.Guid taskId) throws (1:PlowException e),
     list<DependT> getTaskDependsOn(1:common.Guid taskId) throws (1:PlowException e),
+    list<TaskStatsT> getTaskStats(1:common.Guid taskId) throws (1:PlowException e),
 
     bool dropDepend(1:common.Guid dependId) throws (1:PlowException e),
     bool reactivateDepend(1:common.Guid dependId) throws (1:PlowException e),

@@ -116,7 +116,7 @@ CREATE TABLE plow.job (
 ) WITHOUT OIDS;
 
 CREATE UNIQUE INDEX job_str_active_name_uniq_idx ON plow.job (str_active_name);
-CREATE INDEX job_int_state_bool_paused_pk_project_idx ON plow.job (int_state, bool_paused, pk_project);
+CREATE INDEX job_int_state_pk_project_idx ON plow.job (int_state, pk_project);
 CREATE INDEX job_pk_project_idx ON plow.job (pk_project);
 
 ---
@@ -151,22 +151,11 @@ CREATE INDEX job_count_int_waiting_idx ON plow.job_count (int_waiting);
 ---
 CREATE TABLE plow.job_stat (
   pk_job UUID NOT NULL PRIMARY KEY,
-  
-  int_ram_high INTEGER NOT NULL DEFAULT 0,
-  int_ram_avg INTEGER NOT NULL DEFAULT 0,
-  flt_ram_std REAL NOT NULL DEFAULT 0.0,
-  
-  flt_cores_high REAL NOT NULL DEFAULT 0.0,
-  flt_cores_avg REAL NOT NULL DEFAULT 0.0,
-  flt_cores_std REAL NOT NULL DEFAULT 0.0,
-  
-  int_core_time_high BIGINT NOT NULL DEFAULT 0,
-  int_core_time_low BIGINT NOT NULL DEFAULT -1,
-  int_core_time_avg BIGINT NOT NULL DEFAULT 0,
-  flt_core_time_std REAL NOT NULL DEFAULT 0,
-
-  int_core_time_success_total BIGINT NOT NULL DEFAULT 0,
-  int_core_time_failed_total BIGINT NOT NULL DEFAULT 0
+  int_ram_high INTEGER NOT NULL DEFAULT 0,  
+  flt_cores_high REAL NOT NULL DEFAULT 0.0,  
+  int_core_time_high INTEGER NOT NULL DEFAULT 0,
+  int_total_core_time_good BIGINT NOT NULL DEFAULT 0,
+  int_total_core_time_bad BIGINT NOT NULL DEFAULT 0
 );
 
 ----------------------------------------------------------
@@ -187,6 +176,7 @@ CREATE table plow.layer (
   int_cores_min SMALLINT NOT NULL,
   int_cores_max SMALLINT NOT NULL,
   int_ram_min INTEGER NOT NULL,
+  int_ram_max INTEGER NOT NULL DEFAULT 32000,
   bool_threadable BOOLEAN DEFAULT 'f' NOT NULL,
   hstore_env hstore
 ) WITHOUT OIDS;
@@ -238,8 +228,8 @@ CREATE TABLE plow.layer_stat (
   int_core_time_avg BIGINT NOT NULL DEFAULT 0,
   flt_core_time_std REAL NOT NULL DEFAULT 0,
 
-  int_core_time_success_total BIGINT NOT NULL DEFAULT 0,
-  int_core_time_failed_total BIGINT NOT NULL DEFAULT 0
+  int_total_core_time_good BIGINT NOT NULL DEFAULT 0,
+  int_total_core_time_bad BIGINT NOT NULL DEFAULT 0
 );
 
 ---
@@ -278,6 +268,8 @@ CREATE TABLE plow.task (
   int_retry SMALLINT DEFAULT -1 NOT NULL,
   int_cores_min SMALLINT NOT NULL,
   int_ram_min INT NOT NULL,
+  int_exit_status SMALLINT DEFAULT 0 NOT NULL,
+  int_exit_signal SMALLINT DEFAULT 0 NOT NULL,
   str_last_resource TEXT
 ) WITHOUT OIDS;
 
@@ -423,8 +415,8 @@ CREATE TABLE plow.proc (
   time_started BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   bool_unbooked BOOLEAN NOT NULL DEFAULT 'f',
   int_cores SMALLINT NOT NULL,
-  int_cores_used REAL NOT NULL DEFAULT 0.0,
-  int_cores_high REAL NOT NULL DEFAULT 0.0,
+  flt_cores_used REAL NOT NULL DEFAULT 0.0,
+  flt_cores_high REAL NOT NULL DEFAULT 0.0,
   int_ram INTEGER NOT NULL,
   int_ram_used INTEGER NOT NULL DEFAULT 0,
   int_ram_high INTEGER NOT NULL DEFAULT 0,
