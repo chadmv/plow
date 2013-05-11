@@ -175,7 +175,8 @@ cdef class Node:
     property system:
         def __get__(self): return self._system
 
-    cpdef refresh(self):
+    @reconnecting
+    def refresh(self):
         """
         Refresh the attributes from the server
         """
@@ -208,7 +209,8 @@ cdef class Node:
         set_node_tags(self, tags)
 
 
-cpdef inline Node get_node(string name):
+@reconnecting
+def get_node(string name):
     """
     Get a node by name 
 
@@ -223,6 +225,7 @@ cpdef inline Node get_node(string name):
     node = initNode(nodeT)
     return node
 
+@reconnecting
 def get_nodes(**kwargs):
     """
     Get nodes matching keyword filter parameters
@@ -250,7 +253,8 @@ def get_nodes(**kwargs):
     ret = [initNode(nodeT) for nodeT in nodes]
     return ret
 
-cpdef inline set_node_locked(Node node, bint locked):
+@reconnecting
+def set_node_locked(Node node, bint locked):
     """
     Set the lock state of the node 
 
@@ -259,7 +263,8 @@ cpdef inline set_node_locked(Node node, bint locked):
     """
     conn().proxy().setNodeLocked(node.id, locked)
 
-cpdef inline set_node_cluster(Node node, Cluster cluster):
+@reconnecting
+def set_node_cluster(Node node, Cluster cluster):
     """
     Assign the node to a cluster
 
@@ -268,7 +273,8 @@ cpdef inline set_node_cluster(Node node, Cluster cluster):
     """
     conn().proxy().setNodeCluster(node.id, cluster.id)
 
-cpdef inline set_node_tags(Node node, c_set[string]& tags):
+@reconnecting
+def set_node_tags(Node node, c_set[string]& tags):
     """
     Set the tags for the node 
 

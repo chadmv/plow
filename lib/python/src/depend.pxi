@@ -239,7 +239,8 @@ cdef class Depend:
         return ret        
 
 
-cpdef inline get_depends_on_job(Job job):
+@reconnecting
+def get_depends_on_job(Job job):
     """
     Get a list of depends that others have 
     on this job
@@ -256,7 +257,8 @@ cpdef inline get_depends_on_job(Job job):
     ret = [initDepend(d) for d in deps]
     return ret 
 
-cpdef inline get_job_depends_on(Job job):
+@reconnecting
+def get_job_depends_on(Job job):
     """
     Get a list of depends that this job has 
     on others
@@ -273,7 +275,8 @@ cpdef inline get_job_depends_on(Job job):
     ret = [initDepend(d) for d in deps]
     return ret  
 
-cpdef inline get_depends_on_layer(Layer layer):
+@reconnecting
+def get_depends_on_layer(Layer layer):
     """
     Get a list of depends that others have 
     on this layer
@@ -290,7 +293,8 @@ cpdef inline get_depends_on_layer(Layer layer):
     ret = [initDepend(d) for d in deps]
     return ret 
 
-cpdef inline get_layer_depends_on(Layer layer):
+@reconnecting
+def get_layer_depends_on(Layer layer):
     """
     Get a list of depends that this layer has 
     on others
@@ -307,7 +311,9 @@ cpdef inline get_layer_depends_on(Layer layer):
     ret = [initDepend(d) for d in deps]
     return ret   
 
-cpdef inline get_depends_on_task(Task task):
+
+@reconnecting
+def get_depends_on_task(Task task):
     """
     Get a list of depends that others have 
     on this task
@@ -324,7 +330,8 @@ cpdef inline get_depends_on_task(Task task):
     ret = [initDepend(d) for d in deps]
     return ret    
 
-cpdef inline get_task_depends_on(Task task):
+@reconnecting
+def get_task_depends_on(Task task):
     """
     Get a list of depends that this task has 
     on others
@@ -341,7 +348,8 @@ cpdef inline get_task_depends_on(Task task):
     ret = [initDepend(d) for d in deps]
     return ret 
 
-cpdef inline bint drop_depend(Depend dep) except? -1:
+@reconnecting
+def drop_depend(Depend dep):
     """
     Drop the depends 
 
@@ -352,7 +360,8 @@ cpdef inline bint drop_depend(Depend dep) except? -1:
     ret = conn().proxy().dropDepend(dep.id)
     return ret
 
-cpdef inline bint reactivate_depend(Depend dep) except? -1:
+@reconnecting
+def reactivate_depend(Depend dep):
     """
     Reactivate the depends 
 

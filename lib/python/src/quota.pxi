@@ -67,7 +67,8 @@ cdef class Quota:
     property runCores:
         def __get__(self): return self._quota.runCores
 
-    cpdef refresh(self):
+    @reconnecting
+    def refresh(self):
         """
         Refresh the attributes from the server
         """
@@ -93,7 +94,8 @@ cdef class Quota:
         self._quota.isLocked = locked
 
 
-cpdef inline Quota get_quota(Guid& id):
+@reconnecting
+def get_quota(Guid& id):
     """
     Get a quota by id 
 
@@ -108,6 +110,7 @@ cpdef inline Quota get_quota(Guid& id):
     q = initQuota(qT)
     return q
 
+@reconnecting
 def get_quotas(**kwargs):
     """
     Get quotas matching various keyword filter params
@@ -134,6 +137,7 @@ def get_quotas(**kwargs):
     ret = [initQuota(qT) for qT in quotas]
     return ret
 
+@reconnecting
 def create_quota(Project project,  Cluster cluster, int size, int burst):
     """
     Create a quota for a project and cluster 
@@ -152,8 +156,8 @@ def create_quota(Project project,  Cluster cluster, int size, int burst):
     q = initQuota(qT)
     return q
 
-
-cpdef inline set_quota_size(Cluster cluster, int size):
+@reconnecting
+def set_quota_size(Cluster cluster, int size):
     """
     Set the quota size 
 
@@ -161,8 +165,8 @@ cpdef inline set_quota_size(Cluster cluster, int size):
     :param size: int 
     """
     conn().proxy().setQuotaSize(cluster.id, size)
-
-cpdef inline set_quota_burst(Cluster cluster, int burst):
+@reconnecting
+def set_quota_burst(Cluster cluster, int burst):
     """
     Set the quota burst 
 
@@ -170,8 +174,8 @@ cpdef inline set_quota_burst(Cluster cluster, int burst):
     :param burst: int 
     """
     conn().proxy().setQuotaBurst(cluster.id, burst)
-
-cpdef inline set_quota_locked(Cluster cluster, bint locked):
+@reconnecting
+def set_quota_locked(Cluster cluster, bint locked):
     """
     Set the lock state of the quota
 

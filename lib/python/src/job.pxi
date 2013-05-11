@@ -123,6 +123,7 @@ cdef class JobSpec:
         def __get__(self): return self.env
         def __set__(self, val): self.env = val
 
+    @reconnecting
     def launch(self):
         """
         Launch this spec and return the Job 
@@ -226,7 +227,8 @@ cdef class Job:
     property maxRssMb:
         def __get__(self): return self._job.maxRssMb
 
-    cpdef refresh(self):
+    @reconnecting
+    def refresh(self):
         """
         Refresh the attributes from the server
         """
@@ -328,8 +330,9 @@ def launch_job(JobSpec spec):
     """
     cdef Job job = spec.launch()
     return job
-    
-cpdef inline get_job(Guid& id):
+
+@reconnecting
+def get_job(Guid& id):
     """
     Get a :class:`.Job`
 
@@ -339,14 +342,12 @@ cpdef inline get_job(Guid& id):
     cdef JobT jobT
     cdef Job job
 
-    try:
-        conn().proxy().getJob(jobT, id)
-    except RuntimeError:
-        return None 
+    conn().proxy().getJob(jobT, id)
 
     job = initJob(jobT)
     return job
 
+@reconnecting
 def get_active_job(string name):
     """
     Get an active :class:`.Job`
@@ -357,14 +358,12 @@ def get_active_job(string name):
     cdef JobT jobT
     cdef Job job
 
-    try:
-        conn().proxy().getActiveJob(jobT, name)
-    except RuntimeError:
-        return None 
+    conn().proxy().getActiveJob(jobT, name)
 
     job = initJob(jobT)
     return job
 
+@reconnecting
 def get_jobs(**kwargs):
     """
     Get a list of jobs matching a criteria.
@@ -389,7 +388,8 @@ def get_jobs(**kwargs):
     ret = [initJob(jobT) for jobT in jobs]
     return ret
 
-cpdef inline kill_job(Job job, string reason):
+@reconnecting
+def kill_job(Job job, string reason):
     """
     Kill a job
 
@@ -401,7 +401,8 @@ cpdef inline kill_job(Job job, string reason):
     success = conn().proxy().killJob(job.id, reason)
     return success
 
-cpdef inline pause_job(Job job, bint paused):
+@reconnecting
+def pause_job(Job job, bint paused):
     """
     Set the pause state of a job
 
@@ -410,7 +411,8 @@ cpdef inline pause_job(Job job, bint paused):
     """
     conn().proxy().pauseJob(job.id, paused)
 
-cpdef inline set_job_min_cores(Job job, int value):
+@reconnecting
+def set_job_min_cores(Job job, int value):
     """
     Set the minimum number of cores a job should get 
 
@@ -419,7 +421,8 @@ cpdef inline set_job_min_cores(Job job, int value):
     """
     conn().proxy().setJobMinCores(job.id, value)
 
-cpdef inline set_job_max_cores(Job job, int value):
+@reconnecting
+def set_job_max_cores(Job job, int value):
     """
     Set the maximum number of cores a job should get 
 
@@ -461,7 +464,8 @@ cdef class Output:
         def __get__(self): return self.attrs
 
 
-cpdef inline get_job_outputs(Job job):
+@reconnecting
+def get_job_outputs(Job job):
     """
     Get the outputs of a :class:`.Job`
 

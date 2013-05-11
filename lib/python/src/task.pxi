@@ -199,7 +199,8 @@ cdef class Task:
     property state:
         def __get__(self): return self._task.state
 
-    cpdef refresh(self):
+    @reconnecting
+    def refresh(self):
         """
         Refresh the attributes from the server
         """
@@ -276,7 +277,8 @@ cdef inline TaskFilterT dict_to_taskFilter(dict d):
 
     return f 
 
-cpdef inline Task get_task(Guid& taskId):
+@reconnecting
+def get_task(Guid& taskId):
     """
     Get a task by id 
 
@@ -291,6 +293,7 @@ cpdef inline Task get_task(Guid& taskId):
     task = initTask(taskT)
     return task
 
+@reconnecting
 def get_tasks(**kwargs):
     """
     Get a list of tasks by providing various 
@@ -317,7 +320,8 @@ def get_tasks(**kwargs):
     ret = [initTask(taskT) for taskT in tasks]
     return ret
 
-cpdef inline string get_task_log_path(Task task):
+@reconnecting
+def get_task_log_path(Task task):
     """
     Get a log path by task 
 
@@ -336,6 +340,7 @@ cpdef inline string get_task_log_path(Task task):
 
     return path
 
+@reconnecting
 def retry_tasks(**kwargs):
     """
     Retry tasks matching various keyword filter params 
@@ -351,6 +356,7 @@ def retry_tasks(**kwargs):
     cdef TaskFilterT f = dict_to_taskFilter(kwargs)
     conn().proxy().retryTasks(f)
 
+@reconnecting
 def eat_tasks(**kwargs):
     """
     Eat tasks matching various keyword filter params 
@@ -365,6 +371,7 @@ def eat_tasks(**kwargs):
     cdef TaskFilterT f = dict_to_taskFilter(kwargs)
     conn().proxy().eatTasks(f)
 
+@reconnecting
 def kill_tasks(**kwargs):
     """
     Kill tasks matching various filter params 

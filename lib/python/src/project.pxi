@@ -35,12 +35,14 @@ cdef class Project:
     property isActive:
         def __get__(self): return self.project.isActive
 
-    cpdef refresh(self):
+    @reconnecting
+    def refresh(self):
         """
         Refresh the attributes from the server
         """
         conn().proxy().getProject(self.project, self.project.id)
 
+    @reconnecting
     def get_folders(self):
         """
         Get the folders for this project 
@@ -54,7 +56,9 @@ cdef class Project:
 
         try:
             conn().proxy().getFolders(folders, self.project.id)
-        except:
+        except RuntimeError, e:
+            if str(e) in EX_CONNECTION:
+                raise
             results = []
             return results
 
@@ -70,7 +74,8 @@ cdef class Project:
         set_project_active(self, active)
         self.project.isActive = active
 
-cpdef inline get_project(Guid& guid):
+@reconnecting
+def get_project(Guid& guid):
     """
     Get a Project by id 
 
@@ -86,7 +91,8 @@ cpdef inline get_project(Guid& guid):
     return project
 
 
-cpdef inline get_project_by_code(string code):
+@reconnecting
+def get_project_by_code(string code):
     """
     Look up a Project by its code
 
@@ -102,6 +108,7 @@ cpdef inline get_project_by_code(string code):
     return project
 
 
+@reconnecting
 def get_projects():
     """
     Get a list of all Projects 
@@ -115,13 +122,16 @@ def get_projects():
 
     try:
         conn().proxy().getProjects(projects)
-    except:
+    except RuntimeError, e:
+        if str(e) in EX_CONNECTION:
+            raise
         results = []
         return results
 
     results = [initProject(projT) for projT in projects] 
     return results
 
+@reconnecting
 def get_active_projects():
     """
     Return a list of only active Projects 
@@ -135,13 +145,16 @@ def get_active_projects():
 
     try:
         conn().proxy().getActiveProjects(projects)
-    except:
+    except RuntimeError, e:
+        if str(e) in EX_CONNECTION:
+            raise
         results = []
         return results
 
     results = [initProject(projT) for projT in projects] 
     return results    
 
+@reconnecting
 def create_project(string title, string code):
     """
     Create a new Project with a title and code 
@@ -156,7 +169,8 @@ def create_project(string title, string code):
     proj = initProject(projT)
     return proj
 
-cpdef inline set_project_active(Project project, bint active):
+@reconnecting
+def set_project_active(Project project, bint active):
     """
     Set a project to be active 
 
