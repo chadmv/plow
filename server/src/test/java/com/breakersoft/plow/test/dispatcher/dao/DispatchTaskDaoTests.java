@@ -26,7 +26,7 @@ import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.TaskState;
 
-public class DispatchTaskDaoTest extends AbstractTest {
+public class DispatchTaskDaoTests extends AbstractTest {
 
     @Resource
     DispatchTaskDao dispatchTaskDao;
