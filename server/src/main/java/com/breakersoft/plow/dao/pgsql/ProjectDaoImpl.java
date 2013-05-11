@@ -24,7 +24,8 @@ public final class ProjectDaoImpl extends AbstractDao implements ProjectDao {
         public Project mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
             ProjectE project = new ProjectE();
-            project.setProjectId(UUID.fromString(rs.getString(1)));
+            project.setProjectId((UUID) rs.getObject(1));
+            project.setCode(rs.getString(2));
             return project;
         }
     };
@@ -48,21 +49,21 @@ public final class ProjectDaoImpl extends AbstractDao implements ProjectDao {
     @Override
     public Project get(String code) {
         return jdbc.queryForObject(
-                "SELECT pk_project FROM plow.project WHERE str_code=?",
+                "SELECT pk_project, str_code FROM plow.project WHERE str_code=?",
                 MAPPER, code);
     }
 
     @Override
     public Project get(UUID id) {
         return jdbc.queryForObject(
-                "SELECT pk_project FROM plow.project WHERE pk_project=?",
+                "SELECT pk_project, str_code FROM plow.project WHERE pk_project=?",
                 MAPPER, id);
     }
 
     @Override
     public List<Project> getAll() {
         return jdbc.query(
-                "SELECT pk_project FROM plow.project",
+                "SELECT pk_project, str_code FROM plow.project",
                 MAPPER);
     }
 
@@ -75,6 +76,6 @@ public final class ProjectDaoImpl extends AbstractDao implements ProjectDao {
     @Override
     public void setActive(Project project, boolean active) {
         jdbc.update("UPDATE plow.project SET bool_active=? WHERE pk_project=?",
-        		active, project.getProjectId());
+                active, project.getProjectId());
     }
 }

@@ -90,7 +90,7 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
         final List<DispatchJob> jobs = dispatchService.getDispatchJobs(project, node);
 
         if (jobs.isEmpty()) {
-            logger.info("No dispatchable jobs for project: {}", project.getProjectId());
+            logger.info("No dispatchable jobs for {}", project);
             return;
         }
 

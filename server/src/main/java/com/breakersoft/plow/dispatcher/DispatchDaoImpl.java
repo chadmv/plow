@@ -197,6 +197,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             project.setProjectId((UUID) rs.getObject("pk_project"));
             project.setQuotaId((UUID) rs.getObject("pk_quota"));
             project.setTier(rs.getFloat("int_cores_run") / rs.getFloat("int_size"));
+            project.setCode(rs.getString("str_code"));
             return project;
         }
     };
@@ -206,12 +207,16 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "quota.pk_project, " +
                 "quota.pk_quota,"+
                 "quota.int_cores_run,"+
-                "quota.int_size " +
+                "quota.int_size, " +
+                "project.str_code " +
             "FROM " +
                 "plow.quota,"+
-                "plow.cluster " +
+                "plow.cluster, " +
+                "plow.project " +
             "WHERE " +
                 "quota.pk_cluster = cluster.pk_cluster " +
+            "AND " +
+                "quota.pk_project = project.pk_project " +
             "AND " +
                 "quota.int_cores_run < quota.int_burst " +
             "AND " +
