@@ -1,5 +1,50 @@
 
 #######################
+# JobStats
+#
+cdef JobStats initJobStats(JobStatsT& t):
+    cdef JobStats stats = JobStats()
+    stats.setJobStats(t)
+    return stats
+
+
+cdef class JobStats:
+    """
+    Data structure representing stats for a Job
+
+    :var highRam: int
+    :var highCores: float
+    :var highCoreTime: int
+    :var totalCoreTime: long
+    :var totalGoodCoreTime: long
+    :var totalBadCoreTime: long
+     
+    """
+    cdef JobStatsT _stats
+
+    cdef setJobStats(self, JobStatsT& t):
+        self._stats = t 
+
+    property highRam:
+        def __get__(self): return self._stats.highRam
+
+    property highCores:
+        def __get__(self): return self._stats.highCores
+
+    property highCoreTime:
+        def __get__(self): return self._stats.highCoreTime
+
+    property totalCoreTime:
+        def __get__(self): return long(self._stats.totalCoreTime)
+
+    property totalGoodCoreTime:
+        def __get__(self): return long(self._stats.totalGoodCoreTime)
+
+    property totalBadCoreTime:
+        def __get__(self): return long(self._stats.totalBadCoreTime)
+
+
+#######################
 # JobState
 #
 
@@ -165,15 +210,17 @@ cdef class Job:
     :var minCores: int 
     :var maxCores: int 
     :var runCores: int 
-    :var maxRssMb: int 
     :var startTime: long - msec since epoch
     :var stopTime: long - msec since epoch
     :var totals: :class:`.TaskTotals`
+    :var stats: :class:`.JobStats`
+    :var attrs: dict
 
     """
     cdef:
         JobT _job 
         TaskTotals _totals
+        JobStats _stats
 
     def __init__(self):
         self._totals = None
@@ -184,6 +231,7 @@ cdef class Job:
     cdef setJob(self, JobT& j):
         self._job = j
         self._totals = initTaskTotals(self._job.totals)
+        self._stats = initJobStats(self._job.stats)
 
     property id:
         def __get__(self): return self._job.id
@@ -224,8 +272,11 @@ cdef class Job:
     property totals:
         def __get__(self): return self._totals
 
-    property maxRssMb:
-        def __get__(self): return self._job.maxRssMb
+    property stats:
+        def __get__(self): return self._stats
+
+    property attrs:
+        def __get__(self): return self._job.attrs
 
     @reconnecting
     def refresh(self):
