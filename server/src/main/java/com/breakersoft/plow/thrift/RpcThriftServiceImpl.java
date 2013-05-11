@@ -609,4 +609,11 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
         Matcher matcher = filterService.createMatcher(filter, field, type, value);
         return thriftMatcherDao.get(matcher.getMatcherId());
     }
+
+    @Override
+    public List<TaskStatsT> getTaskStats(String taskId) throws PlowException,
+            TException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
+import com.breakersoft.plow.thrift.TaskStatsT;
 import com.breakersoft.plow.thrift.TaskT;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 import com.breakersoft.plow.util.PlowUtils;
@@ -30,51 +31,63 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
 
             final TaskT task = new TaskT();
             task.id = rs.getString("pk_task");
+            task.state = TaskState.findByValue(rs.getInt("int_state"));
             task.name = rs.getString("str_name");
             task.number = rs.getInt("int_number");
-            task.startTime = rs.getLong("time_started");
-            task.stopTime = rs.getLong("time_stopped");
-            task.state = TaskState.findByValue(rs.getInt("int_state"));
-            task.cores = rs.getInt("int_cores");
-            task.ramMb = rs.getInt("int_ram");
-            task.maxRssMb = rs.getInt("int_max_rss");
-            task.rssMb = rs.getInt("int_rss");
-            task.maxRssMb = rs.getInt("int_max_rss");
-            task.cpuPerc = rs.getShort("int_cpu_perc");
-            task.maxCpuPerc = rs.getShort("int_max_cpu_perc");
-            task.lastNodeName = rs.getString("str_last_node_name");
-            task.lastLogLine = rs.getString("str_last_log_line");
-            task.progress = rs.getInt("int_progress");
+            task.order = rs.getInt("int_task_order");
             task.retries = rs.getInt("int_retry");
+            task.minCores = rs.getInt("int_cores_min");
+            task.minRam = rs.getInt("int_ram_min");
+            task.lastResource = rs.getString("str_last_resource");
+
+            if (task.state.equals(TaskState.RUNNING)) {
+                final TaskStatsT stats = new TaskStatsT();
+                stats.cores = rs.getInt("int_cores");
+                stats.highCores = rs.getDouble("flt_cores_higi");
+                stats.usedCores = rs.getDouble("flt_cores_used");
+                stats.ram = rs.getInt("int_ram");
+                stats.usedRam = rs.getInt("int_ram_used");
+                stats.highRam = rs.getInt("int_high_ram");
+                stats.startTime = rs.getLong("time_started");
+                stats.stopTime = rs.getLong("time_stopped");
+                stats.tryNum = rs.getInt("int_retry");
+                stats.progress = rs.getInt("progress");
+                stats.lastLogLine = rs.getString("str_last_log_line");
+                stats.exitSignal = rs.getInt("int_exit_signal");
+                stats.exitStatus = rs.getInt("int_exit_status");
+                task.setStats(stats);
+            }
+
             return task;
         }
     };
+
+    // Make a func off task to gret the cores
 
     private static final String GET =
         "SELECT " +
             "task.pk_task,"+
             "task.str_name,"+
             "task.int_number,"+
-            "task.int_state,"+
-            "task.int_depend_count, "+
             "task.int_task_order,"+
+            "task.int_state,"+
             "task.time_started, " +
             "task.time_stopped," +
-            "task.time_updated,"+
             "task.int_retry,"+
-            "task.int_cores,"+
-            "task.int_ram,"+
-            "task_ping.int_rss,"+
-            "task_ping.int_max_rss,"+
-            "task_ping.int_cpu_perc,"+
-            "task_ping.int_max_cpu_perc,"+
-            "task_ping.str_last_node_name,"+
-            "task_ping.str_last_log_line,"+
-            "task_ping.int_progress " +
+            "task.int_cores_min,"+
+            "task.int_ram_min,"+
+            "task.str_last_resource, " +
+            "proc.int_cores,"+
+            "proc.flt_cores_used,"+
+            "proc.flt_cores_high,"+
+            "proc.int_ram,"+
+            "proc.int_ram_high,"+
+            "proc.int_progress,"+
+            "proc.str_last_log_line " +
         "FROM " +
             "task "+
-        "INNER JOIN " +
-            "task_ping ON task.pk_task = task_ping.pk_task ";
+        "LEFT JOIN " +
+            "plow.proc ON task.pk_task = proc.pk_proc ";
 
     private static final String GET_BY_ID =
         GET + " WHERE task.pk_task=?";

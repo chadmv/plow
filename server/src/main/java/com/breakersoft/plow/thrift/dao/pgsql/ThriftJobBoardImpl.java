@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.thrift.FolderT;
 import com.breakersoft.plow.thrift.JobState;
+import com.breakersoft.plow.thrift.JobStatsT;
 import com.breakersoft.plow.thrift.JobT;
 import com.breakersoft.plow.thrift.TaskTotalsT;
 import com.breakersoft.plow.thrift.dao.ThriftJobBoardDao;
@@ -48,16 +49,23 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 "job_count.int_eaten,"+
                 "job_count.int_waiting,"+
                 "job_count.int_depend, "+
-                "job_ping.int_ram_high "+
+                "job_stat.int_ram_high, "+
+                "job_stat.flt_cores_high, "+
+                "job_stat.int_core_time_high, "+
+                "job_stat.int_total_core_time_good, "+
+                "job_stat.int_total_core_time_bad "+
             "FROM " +
                 "job " +
-            "INNER JOIN job_dsp ON job.pk_job = job_dsp.pk_job " +
-            "INNER JOIN job_count ON job.pk_job = job_count.pk_job " +
-            "INNER JOIN job_ping ON job.pk_job = job_stat.pk_job " +
+            "INNER JOIN " +
+                "job_dsp ON job.pk_job = job_dsp.pk_job " +
+            "INNER JOIN " +
+                "job_count ON job.pk_job = job_count.pk_job " +
+            "INNER JOIN " +
+                "job_stat ON job.pk_job = job_stat.pk_job " +
             "WHERE " +
                 "job.int_state = ? " +
             "AND " +
-                "job.pk_project=?";
+                "job.pk_project = ?";
 
     private static final String GET_FOLDERS =
             "SELECT " +
@@ -104,9 +112,17 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
             @Override
             public void processRow(ResultSet rs) throws SQLException {
 
-                FolderT folder = folders.get(rs.getString("pk_folder"));
+                final FolderT folder = folders.get(rs.getString("pk_folder"));
 
-                JobT job = new JobT();
+                JobStatsT stats = new JobStatsT();
+                stats.highRam = rs.getInt("int_ram_high");
+                stats.highCores = rs.getDouble("flt_cores_high");
+                stats.highCoreTime = rs.getInt("int_core_time_high");
+                stats.totalGoodCoreTime = rs.getLong("int_total_core_time_good");
+                stats.totalBadCoreTime = rs.getLong("int_total_core_time_bad");
+                stats.totalCoreTime = stats.totalGoodCoreTime + stats.totalBadCoreTime;
+
+                final JobT job = new JobT();
                 job.id = rs.getString("pk_job");
                 job.setFolderId(rs.getString("pk_folder"));
                 job.setName(rs.getString("str_name"));
@@ -119,8 +135,9 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 job.setStartTime(rs.getLong("time_started"));
                 job.setStopTime(rs.getLong("time_stopped"));
                 job.setState(JobState.findByValue(rs.getInt("int_state")));
+
                 job.setTotals(JdbcUtils.getTaskTotals(rs));
-                job.setMaxRssMb(rs.getInt("int_max_rss"));
+                job.setStats(stats);
 
                 folder.totals.deadTaskCount += job.totals.deadTaskCount;
                 folder.totals.dependTaskCount += job.totals.deadTaskCount;

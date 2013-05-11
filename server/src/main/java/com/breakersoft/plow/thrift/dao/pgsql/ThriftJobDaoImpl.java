@@ -17,6 +17,7 @@ import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.service.DependServiceImpl;
 import com.breakersoft.plow.thrift.JobFilterT;
 import com.breakersoft.plow.thrift.JobState;
+import com.breakersoft.plow.thrift.JobStatsT;
 import com.breakersoft.plow.thrift.JobT;
 import com.breakersoft.plow.thrift.OutputT;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
@@ -36,20 +37,32 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
         public JobT mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
 
-            JobT job = new JobT();
+            final JobStatsT stats = new JobStatsT();
+            stats.highRam = rs.getInt("int_ram_high");
+            stats.highCores = rs.getDouble("flt_cores_high");
+            stats.highCoreTime = rs.getInt("int_core_time_high");
+            stats.totalGoodCoreTime = rs.getLong("int_total_core_time_good");
+            stats.totalBadCoreTime = rs.getLong("int_total_core_time_bad");
+            stats.totalCoreTime = stats.totalGoodCoreTime + stats.totalBadCoreTime;
+
+            final JobT job = new JobT();
             job.id = rs.getString("pk_job");
-            job.name = rs.getString("str_name");
-            job.uid = rs.getInt("int_uid");
-            job.username = rs.getString("str_username");
-            job.paused = rs.getBoolean("bool_paused");
-            job.maxCores = rs.getInt("int_cores_max");
-            job.minCores = rs.getInt("int_cores_min");
-            job.startTime = rs.getLong("time_started");
-            job.stopTime = rs.getLong("time_stopped");
-            job.state = JobState.findByValue(rs.getInt("int_state"));
-            job.setMaxRssMb(rs.getInt("int_max_rss"));
+            job.setFolderId(rs.getString("pk_folder"));
+            job.setName(rs.getString("str_name"));
+            job.setUid(rs.getInt("int_uid"));
+            job.setUsername(rs.getString("str_username"));
+            job.setPaused(rs.getBoolean("bool_paused"));
+            job.setRunCores(rs.getInt("int_cores_run"));
+            job.setMaxCores(rs.getInt("int_cores_max"));
+            job.setMinCores(rs.getInt("int_cores_min"));
+            job.setStartTime(rs.getLong("time_started"));
+            job.setStopTime(rs.getLong("time_stopped"));
+            job.setState(JobState.findByValue(rs.getInt("int_state")));
+
+            job.setStats(stats);
             job.setTotals(JdbcUtils.getTaskTotals(rs));
             job.setAttrs((Map<String, String>) rs.getObject("hstore_attrs"));
+
             return job;
         }
     };
@@ -76,14 +89,23 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             "job_count.int_eaten,"+
             "job_count.int_waiting,"+
             "job_count.int_depend,"+
-            "job_stat.int_ram_high "+
+            "job_stat.int_ram_high, "+
+            "job_stat.flt_cores_high, "+
+            "job_stat.int_core_time_high, "+
+            "job_stat.int_total_core_time_good, "+
+            "job_stat.int_total_core_time_bad "+
         "FROM " +
             "job " +
-        "INNER JOIN job_dsp ON job.pk_job = job_dsp.pk_job " +
-        "INNER JOIN job_count ON job.pk_job = job_count.pk_job " +
-        "INNER JOIN job_stat ON job.pk_job = job_stat.pk_job " +
-        "INNER JOIN folder ON job.pk_folder = folder.pk_folder " +
-        "INNER JOIN project ON job.pk_project = project.pk_project ";
+        "INNER JOIN " +
+            "job_dsp ON job.pk_job = job_dsp.pk_job " +
+        "INNER JOIN " +
+            "job_count ON job.pk_job = job_count.pk_job " +
+        "INNER JOIN " +
+            "job_stat ON job.pk_job = job_stat.pk_job " +
+        "INNER JOIN " +
+            "folder ON job.pk_folder = folder.pk_folder " +
+        "INNER JOIN " +
+            "project ON job.pk_project = project.pk_project ";
 
     @Override
     public List<JobT> getJobs(JobFilterT filter) {

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
+import com.breakersoft.plow.thrift.LayerStatsT;
 import com.breakersoft.plow.thrift.LayerT;
 import com.breakersoft.plow.thrift.OutputT;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
@@ -27,21 +28,38 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
         @Override
         public LayerT mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
-            LayerT layer = new LayerT();
+
+            final LayerStatsT stats = new LayerStatsT();
+            stats.highRam = rs.getInt("int_ram_high");
+            stats.avgRam = rs.getInt("int_ram_avg");
+            stats.stdDevRam = rs.getDouble("flt_ram_std");
+            stats.highCores = rs.getDouble("flt_cores_high");
+            stats.avgCores = rs.getDouble("flt_cores_avg");
+            stats.stdDevCores = rs.getDouble("flt_cores_std");
+
+            stats.highCoreTime = rs.getInt("int_core_time_high");
+            stats.lowCoreTime = rs.getInt("int_core_time_low");
+            stats.avgCoreTime = rs.getInt("int_core_time_avg");
+            stats.stdDevCoreTime = rs.getDouble("flt_core_time_std");
+            stats.totalGoodCoreTime = rs.getLong("int_total_core_time_good");
+            stats.totalBadCoreTime = rs.getLong("int_total_core_time_bad");
+            stats.totalCoreTime = stats.totalGoodCoreTime + stats.totalBadCoreTime;
+
+            final LayerT layer = new LayerT();
+            layer.setStats(stats);
+            layer.setTotals(JdbcUtils.getTaskTotals(rs));
+
             layer.id = rs.getString("pk_layer");
             layer.name = rs.getString("str_name");
-            layer.chunk = rs.getInt("int_chunk_size");
-            layer.maxCores = rs.getInt("int_cores_max");
-            layer.minCores = rs.getInt("int_cores_min");
-            layer.minRamMb = rs.getInt("int_min_ram");
             layer.range = rs.getString("str_range");
-            layer.setMaxRssMb(rs.getInt("int_max_rss"));
-            layer.setMaxCpuPerc(rs.getShort("int_max_cpu_perc"));
-            layer.setThreadable(rs.getBoolean("bool_threadable"));
+            layer.chunk = rs.getInt("int_chunk_size");
             layer.tags = new HashSet<String>(
                     Arrays.asList((String[])rs.getArray("str_tags").getArray()));
-
-            layer.setTotals(JdbcUtils.getTaskTotals(rs));
+            layer.threadable = rs.getBoolean("bool_threadable");
+            layer.maxCores = rs.getInt("int_cores_max");
+            layer.minCores = rs.getInt("int_cores_min");
+            layer.minRam = rs.getInt("int_ram_min");
+            layer.maxRam = rs.getInt("int_ram_max");
             return layer;
         }
     };
@@ -55,7 +73,8 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer.int_chunk_size,"+
                 "layer.int_cores_min,"+
                 "layer.int_cores_max,"+
-                "layer.int_min_ram, " +
+                "layer.int_ram_min, " +
+                "layer.int_ram_max, " +
                 "layer.bool_threadable,"+
                 "layer_count.int_total, "+
                 "layer_count.int_succeeded,"+
@@ -66,7 +85,17 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer_count.int_depend, "+
                 "layer_dsp.int_cores_run,"+
                 "layer_stat.int_ram_high,"+
-                "layer_stat.flt_cores_high " +
+                "layer_stat.int_ram_avg, " +
+                "layer_stat.flt_ram_std, " +
+                "layer_stat.flt_cores_high, " +
+                "layer_stat.flt_cores_avg, " +
+                "layer_stat.flt_cores_std, " +
+                "layer_stat.int_core_time_high, " +
+                "layer_stat.int_core_time_low, " +
+                "layer_stat.int_core_time_avg, " +
+                "layer_stat.flt_core_time_std, " +
+                "layer_stat.int_total_core_time_good, " +
+                "layer_stat.int_total_core_time_bad " +
             "FROM " +
                 "layer " +
             "INNER JOIN layer_count ON layer.pk_layer = layer_count.pk_layer " +
