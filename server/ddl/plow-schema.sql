@@ -640,16 +640,16 @@ DECLARE
   proc RECORD;
 BEGIN
 
-  SELECT int_cores, int_cores_high, int_ram_high INTO proc FROM plow.proc WHERE pk_task=NEW.pk_task;
+  SELECT int_cores, flt_cores_high, int_ram_high INTO proc FROM plow.proc WHERE pk_task=NEW.pk_task;
 
   UPDATE 
     task_history
   SET 
-    int_cores_high = proc.int_cores_high,
+    flt_cores_high = proc.flt_cores_high,
     int_ram_high = proc.int_ram_high,
-    time_stopped = plow.txTimeMillis(),
-    int_core_time = (plow.txTimeMillis() - time_started) * proc.int_cores,
-    int_clock_time = plow.txTimeMillis() - time_started
+    time_stopped = NEW.time_stopped,
+    int_core_time = (NEW.time_stopped - time_started) * proc.int_cores,
+    int_clock_time = NEW.time_stopped - time_started
   WHERE
     pk_task = NEW.pk_task
   AND

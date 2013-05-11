@@ -8,6 +8,8 @@ import java.util.UUID;
 import javax.annotation.Resource;
 
 import org.junit.Test;
+import org.springframework.test.annotation.Rollback;
+
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.dao.DispatchTaskDao;
@@ -21,6 +23,7 @@ import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
+import com.breakersoft.plow.thrift.TaskStatsT;
 import com.breakersoft.plow.thrift.TaskT;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 
@@ -86,6 +89,34 @@ public class ThriftTaskDaoTests extends AbstractTest {
 
         List<TaskT> task = thriftTaskDao.getTasks(filter);
         assertTrue(task.size() > 0);
+    }
+
+    @Test
+    @Rollback(false)
+    public void testGetTaskStats() throws InterruptedException {
+        JobSpecT spec = getTestJobSpec();
+        JobLaunchEvent event = jobService.launch(spec);
+
+        DispatchNode node = dispatchDao.getDispatchNode(
+                nodeService.createNode(getTestNodePing()).getName());
+
+        DispatchJob job = new DispatchJob(event.getJob());
+        List<DispatchTask> tasks = dispatchTaskDao.getDispatchableTasks(job, node);
+
+        Task t =  tasks.get(0);
+
+        assertTrue(dispatchTaskDao.reserve(tasks.get(0)));
+        procDao.create(node, tasks.get(0));
+        dispatchTaskDao.start(tasks.get(0));
+
+        List<TaskStatsT> stats = thriftTaskDao.getTaskStats(tasks.get(0).getTaskId());
+        assertEquals(1, stats.size());
+
+        Thread.sleep(1000);
+        dispatchTaskDao.stop(t, TaskState.SUCCEEDED);
+
+        stats = thriftTaskDao.getTaskStats(tasks.get(0).getTaskId());
+        assertEquals(1, stats.size());
     }
 
     @Test

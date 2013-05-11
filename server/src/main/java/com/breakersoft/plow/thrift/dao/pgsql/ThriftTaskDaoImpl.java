@@ -143,4 +143,52 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
 
         return jdbc.query(sb.toString(), MAPPER, values.toArray());
     }
+
+    public static final RowMapper<TaskStatsT> STATS_MAPPER = new RowMapper<TaskStatsT>() {
+
+        @Override
+        public TaskStatsT mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+
+            final TaskStatsT stats = new TaskStatsT();
+            stats.cores = rs.getInt("int_cores");
+            stats.highCores = rs.getDouble("flt_cores_high");
+            stats.usedCores = 0;
+            stats.ram = rs.getInt("int_ram");
+            stats.usedRam = 0;
+            stats.highRam = rs.getInt("int_ram_high");
+            stats.startTime = rs.getLong("time_started");
+            stats.stopTime = rs.getLong("time_stopped");
+            stats.retryNum = rs.getInt("int_retry");
+            stats.progress = rs.getInt("int_progress");
+            stats.lastLogLine = "";
+            stats.exitSignal = rs.getInt("int_exit_signal");
+            stats.exitStatus = rs.getInt("int_exit_status");
+            stats.active = true;
+            return stats;
+        }
+    };
+
+    private static final String TASK_HISTORY =
+        "SELECT " +
+            "int_cores,"+
+            "int_cores,"+
+            "flt_cores_high,"+
+            "int_ram,"+
+            "int_ram_high,"+
+            "time_started,"+
+            "time_stopped,"+
+            "int_retry,"+
+            "int_progress,"+
+            "int_exit_signal,"+
+            "int_exit_status "+
+       "FROM " +
+            "task_history " +
+       "WHERE " +
+            "pk_task = ?";
+
+    @Override
+    public List<TaskStatsT> getTaskStats(UUID taskId) {
+        return jdbc.query(TASK_HISTORY, STATS_MAPPER, taskId);
+    }
 }

@@ -613,7 +613,6 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     @Override
     public List<TaskStatsT> getTaskStats(String taskId) throws PlowException,
             TException {
-        // TODO Auto-generated method stub
-        return null;
+        return thriftTaskDao.getTaskStats(UUID.fromString(taskId));
     }
 }
