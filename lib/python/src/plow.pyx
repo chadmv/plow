@@ -3,6 +3,7 @@ cimport cython
 from plow_types cimport *
 from client cimport getClient, PlowClient
 
+include "utils.pxi"
 include "project.pxi"
 include "folder.pxi"
 include "job.pxi"
