@@ -182,6 +182,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string username
         int uid
         JobState_type state
+        JobStatsT stats
         bint paused
         int minCores
         int maxCores
@@ -190,6 +191,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         Timestamp stopTime
         TaskTotalsT totals
         int maxRssMb
+        Attrs attrs
 
     cdef cppclass LayerT:
         Guid id
@@ -200,31 +202,23 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         bint threadable
         int minCores
         int maxCores
-        int minRamMb
+        int minRam
+        int maxRam
         int runCores
         TaskTotalsT totals
-        int maxRssMb
-        int maxCpuPerc
+        LayerStatsT stats
 
     cdef cppclass TaskT:
         Guid id
         string name
         int number
-        int dependCount
-        int order
         TaskState_type state
-        Timestamp startTime
-        Timestamp stopTime
-        string lastNodeName
-        string lastLogLine
+        int order
         int retries
-        int cores
-        int ramMb
-        int rssMb
-        int maxRssMb
-        int cpuPerc
-        int maxCpuPerc
-        int progress
+        int minCores
+        int minRam
+        string lastResource
+        TaskStatsT stats
 
     cdef cppclass FolderT:
         Guid id
@@ -277,6 +271,22 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string name 
         vector[DependSpecT] depends 
 
+    cdef cppclass TaskStatsT:
+        int cores
+        float usedCores
+        float highCores
+        int ram
+        int usedRam
+        int highRam
+        Timestamp startTime
+        Timestamp stopTime
+        int retryNum
+        int progress
+        string lastLogLine
+        bint active
+        int exitStatus
+        int exitSignal
+
     cdef struct _LayerSpecT__isset:
         bint range
 
@@ -294,6 +304,21 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[TaskSpecT] tasks
         Attrs env
         _LayerSpecT__isset __isset
+
+    cdef cppclass LayerStatsT:
+        int highRam
+        int avgRam
+        float stdDevRam
+        float highCores
+        float avgCores
+        float stdDevCores
+        int highCoreTime
+        int avgCoreTime
+        int lowCoreTime
+        float stdDevCoreTime
+        long totalCoreTime
+        long totalGoodCoreTime
+        long totalBadCoreTime
 
     cdef cppclass JobSpecT:
         string name
@@ -315,6 +340,15 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[JobState_type] states 
         vector[Guid] jobIds
         vector[string] name 
+
+    cdef cppclass JobStatsT:
+        int highRam
+        float highCores
+        int highCoreTime
+        long totalCoreTime
+        long totalGoodCoreTime
+        long totalBadCoreTime
+
 
     cdef struct _TaskFilterT__isset:
         bint jobId

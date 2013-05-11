@@ -1,5 +1,77 @@
 
 
+#######################
+# LayerStats
+#
+cdef LayerStats initLayerStats(LayerStatsT& t):
+    cdef LayerStats stats = LayerStats()
+    stats.setLayerStats(t)
+    return stats
+
+
+cdef class LayerStats:
+    """
+    Data structure representing stats for a Layer
+
+    :var highRam: int
+    :var avgRam: int
+    :var stdDevRam: float
+    :var highCores: float
+    :var avgCores: float
+    :var stdDevCores: float
+    :var highCoreTime: int
+    :var avgCoreTime: int
+    :var lowCoreTime: int
+    :var stdDevCoreTime: float
+    :var totalCoreTime: long
+    :var totalGoodCoreTime: long
+    :var totalBadCoreTime: long
+
+    """
+    cdef LayerStatsT _stats
+
+    cdef setLayerStats(self, LayerStatsT& t):
+        self._stats = t 
+
+    property highRam:
+        def __get__(self): return self._stats.highRam
+    
+    property avgRam:
+        def __get__(self): return self._stats.avgRam
+    
+    property stdDevRam:
+        def __get__(self): return self._stats.stdDevRam
+    
+    property highCores:
+        def __get__(self): return self._stats.highCores
+    
+    property avgCores:
+        def __get__(self): return self._stats.avgCores
+    
+    property stdDevCores:
+        def __get__(self): return self._stats.stdDevCores
+    
+    property highCoreTime:
+        def __get__(self): return self._stats.highCoreTime
+    
+    property avgCoreTime:
+        def __get__(self): return self._stats.avgCoreTime
+    
+    property lowCoreTime:
+        def __get__(self): return self._stats.lowCoreTime
+    
+    property stdDevCoreTime:
+        def __get__(self): return self._stats.stdDevCoreTime
+    
+    property totalCoreTime:
+        def __get__(self): return long(self._stats.totalCoreTime)
+    
+    property totalGoodCoreTime:
+        def __get__(self): return long(self._stats.totalGoodCoreTime)
+    
+    property totalBadCoreTime:
+        def __get__(self): return long(self._stats.totalBadCoreTime)
+
 
 #######################
 # Layers
@@ -129,16 +201,18 @@ cdef class Layer:
     :var minCores: int
     :var maxCores: int
     :var runCores: int
-    :var minRamMb: int
-    :var maxRssMb: int
+    :var minRam: int
+    :var maxRam: int
     :var threadable: bool
     :var totals: list[:class:`.TaskTotals`]
     :var tags: set(str)
+    :var stats: :class:`.LayerStats`
     
     """
     cdef:
         LayerT _layer 
         TaskTotals _totals
+        LayerStats _stats
 
     def __init__(self):
         self._totals = None
@@ -149,6 +223,7 @@ cdef class Layer:
     cdef setLayer(self, LayerT& l):
         self._layer = l
         self._totals = initTaskTotals(self._layer.totals)
+        self._stats = initLayerStats(self._layer.stats)
 
     property id:
         def __get__(self): return self._layer.id
@@ -171,11 +246,11 @@ cdef class Layer:
     property runCores:
         def __get__(self): return self._layer.runCores
 
-    property minRamMb:
-        def __get__(self): return self._layer.minRamMb
+    property minRam:
+        def __get__(self): return self._layer.minRam
 
-    property maxRssMb:
-        def __get__(self): return self._layer.maxRssMb
+    property maxRam:
+        def __get__(self): return self._layer.maxRam
 
     property threadable:
         def __get__(self): return self._layer.threadable
@@ -185,6 +260,9 @@ cdef class Layer:
 
     property tags:
         def __get__(self): return self._layer.tags
+
+    property stats:
+        def __get__(self): return self._stats
 
     @reconnecting
     def refresh(self):
@@ -235,7 +313,7 @@ cdef class Layer:
     def set_min_ram_per_task(self, int minRam):
         """ :param minRam: int """
         set_layer_min_ram_per_task(self, minRam)
-        self._layer.minRamMb = minRam
+        self._layer.minRam = minRam
 
     def get_depends(self):
         """

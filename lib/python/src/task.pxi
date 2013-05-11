@@ -1,5 +1,81 @@
 
 #######################
+# TaskStats
+#
+cdef TaskStats initTaskStats(TaskStatsT& t):
+    cdef TaskStats stats = TaskStats()
+    stats.setTaskStats(t)
+    return stats
+
+
+cdef class TaskStats:
+    """
+    Data structure representing stats for a Task
+
+    :var cores: int
+    :var usedCores: float
+    :var highCores: float
+    :var ram: int
+    :var usedRam: int
+    :var highRam: int
+    :var startTime: long
+    :var stopTime: long
+    :var retryNum: int
+    :var progress: int
+    :var lastLogLine: str
+    :var active: bool
+    :var exitStatus: int
+    :var exitSignal: int
+    """
+    cdef TaskStatsT _stats
+
+    cdef setTaskStats(self, TaskStatsT& t):
+        self._stats = t 
+
+    property cores:
+        def __get__(self): return self._stats.cores
+
+    property usedCores:
+        def __get__(self): return self._stats.usedCores
+
+    property highCores:
+        def __get__(self): return self._stats.highCores
+
+    property ram:
+        def __get__(self): return self._stats.ram
+
+    property usedRam:
+        def __get__(self): return self._stats.usedRam
+
+    property highRam:
+        def __get__(self): return self._stats.highRam
+
+    property startTime:
+        def __get__(self): return long(self._stats.startTime)
+
+    property stopTime:
+        def __get__(self): return long(self._stats.stopTime)
+
+    property retryNum:
+        def __get__(self): return self._stats.retryNum
+
+    property progress:
+        def __get__(self): return self._stats.progress
+
+    property lastLogLine:
+        def __get__(self): return self._stats.lastLogLine
+
+    property active:
+        def __get__(self): return self._stats.active
+
+    property exitStatus:
+        def __get__(self): return self._stats.exitStatus
+
+    property exitSignal:
+        def __get__(self): return self._stats.exitSignal
+
+
+#######################
 # TaskState
 #
 
@@ -117,33 +193,27 @@ cdef class Task:
     """
     Represents an existing Task
 
-    :var id: str 
-    :var name: str 
-    :var number: int 
-    :var dependCount: int  
-    :var order: int 
-    :var startTime: long msec epoch timestamp
-    :var stopTime: long msec epoch timestamp
-    :var lastNodeName: str 
-    :var lastLogLine: str 
-    :var retries: int 
-    :var cores: int 
-    :var ramMb: int 
-    :var rssMb: int 
-    :var maxRssMb: int 
-    :var cpuPerc: int 
-    :var maxCpuPerc: int 
-    :var progress: int 
+    :var id:
+    :var name: str
+    :var number: int
+    :var order: int
+    :var retries: int
+    :var minCores: int
+    :var minRam: int
+    :var lastResource: str
     :var state: :data:`.TaskState`
+    :var stats: :class:`.TaskStats`
 
     """
     cdef TaskT _task 
+    cdef TaskStats _stats
 
     def __repr__(self):
         return "<Task: %s>" % self.name
 
     cdef setTask(self, TaskT& t):
         self._task = t
+        self._stats = initTaskStats(t.stats)
 
     property id:
         def __get__(self): return self._task.id
@@ -154,57 +224,35 @@ cdef class Task:
     property number:
         def __get__(self): return self._task.number
 
-    property dependCount:
-        def __get__(self): return self._task.dependCount
-
     property order:
         def __get__(self): return self._task.order
-
-    property startTime:
-        def __get__(self): return long(self._task.startTime)
-
-    property stopTime:
-        def __get__(self): return long(self._task.stopTime)
-
-    property lastNodeName:
-        def __get__(self): return self._task.lastNodeName
-
-    property lastLogLine:
-        def __get__(self): return self._task.lastLogLine
 
     property retries:
         def __get__(self): return self._task.retries
 
-    property cores:
-        def __get__(self): return self._task.cores
+    property minCores:
+        def __get__(self): return self._task.minCores
 
-    property ramMb:
-        def __get__(self): return self._task.ramMb
+    property minRam:
+        def __get__(self): return self._task.minRam
 
-    property rssMb:
-        def __get__(self): return self._task.rssMb
-
-    property maxRssMb:
-        def __get__(self): return self._task.maxRssMb
-
-    property cpuPerc:
-        def __get__(self): return self._task.cpuPerc
-
-    property maxCpuPerc:
-        def __get__(self): return self._task.maxCpuPerc
-
-    property progress:
-        def __get__(self): return self._task.progress
+    property lastResource:
+        def __get__(self): return self._task.lastResource
 
     property state:
         def __get__(self): return self._task.state
+
+    property stats:
+        def __get__(self): return self._stats
 
     @reconnecting
     def refresh(self):
         """
         Refresh the attributes from the server
         """
-        conn().proxy().getTask(self._task, self._task.id)
+        cdef TaskT task
+        conn().proxy().getTask(task, self._task.id)
+        self.setTask(task)
 
     def get_log_path(self):
         """

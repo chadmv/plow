@@ -266,7 +266,8 @@ plowmodule = Extension('plow.client.plow',
     # https://issues.apache.org/jira/browse/THRIFT-1326
     define_macros=[
         ("HAVE_NETINET_IN_H", 1),
-        ("HAVE_INTTYPES_H", 1)
+        ("HAVE_INTTYPES_H", 1),
+        ("HAVE_CONFIG_H", 1),
     ]
 )
 
