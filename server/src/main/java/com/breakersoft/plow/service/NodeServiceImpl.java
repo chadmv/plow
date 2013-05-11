@@ -18,8 +18,8 @@ import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.NodeDao;
-import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dao.QuotaDao;
+import com.breakersoft.plow.dispatcher.dao.ProcDao;
 import com.breakersoft.plow.rnd.thrift.Ping;
 
 @Service

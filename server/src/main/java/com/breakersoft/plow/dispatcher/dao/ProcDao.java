@@ -1,4 +1,4 @@
-package com.breakersoft.plow.dao;
+package com.breakersoft.plow.dispatcher.dao;
 
 import java.util.List;
 import java.util.UUID;

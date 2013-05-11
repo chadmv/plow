@@ -1,4 +1,4 @@
-package com.breakersoft.plow.dispatcher;
+package com.breakersoft.plow.dispatcher.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

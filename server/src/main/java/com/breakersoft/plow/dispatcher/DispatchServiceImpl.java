@@ -10,9 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Task;
-import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dao.QuotaDao;
+import com.breakersoft.plow.dispatcher.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.dao.DispatchTaskDao;
+import com.breakersoft.plow.dispatcher.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;

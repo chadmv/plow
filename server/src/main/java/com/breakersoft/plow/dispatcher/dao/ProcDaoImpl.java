@@ -1,4 +1,4 @@
-package com.breakersoft.plow.dao.pgsql;
+package com.breakersoft.plow.dispatcher.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +13,6 @@ import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.ProcE;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
-import com.breakersoft.plow.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
