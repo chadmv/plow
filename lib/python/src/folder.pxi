@@ -73,7 +73,8 @@ cdef class Folder:
 
             return self._jobs
 
-    cpdef refresh(self):
+    @reconnecting
+    def refresh(self):
         """
         Refresh the attributes from the server
         """
@@ -103,8 +104,8 @@ cdef class Folder:
         """
         delete_folder(self)
 
-
-cpdef inline get_folder(Guid& folderId):
+@reconnecting
+def get_folder(Guid& folderId):
     """
     Get a Folder by id 
 
@@ -130,6 +131,7 @@ def get_folders(Project project):
     cdef list folders = Project.get_folders(proj)
     return
 
+@reconnecting
 def create_folder(Project project, string name):
     """
     Create a folder 
@@ -143,6 +145,7 @@ def create_folder(Project project, string name):
     cdef Folder folder = initFolder(folderT)
     return folder
 
+@reconnecting
 def get_job_board(Project project):
     """
     TODO
@@ -158,7 +161,8 @@ def get_job_board(Project project):
     cdef list ret = [initFolder(folderT) for folderT in folders]
     return ret
 
-cpdef inline set_folder_min_cores(Folder folder, int value):
+@reconnecting
+def set_folder_min_cores(Folder folder, int value):
     """
     Set the minimum cores for a Folder 
 
@@ -167,7 +171,8 @@ cpdef inline set_folder_min_cores(Folder folder, int value):
     """
     conn().proxy().setFolderMinCores(folder.id, value)
 
-cpdef inline set_folder_max_cores(Folder folder, int value):
+@reconnecting
+def set_folder_max_cores(Folder folder, int value):
     """
     Set the maximum cores for a Folder 
 
@@ -176,7 +181,8 @@ cpdef inline set_folder_max_cores(Folder folder, int value):
     """
     conn().proxy().setFolderMaxCores(folder.id, value)
 
-cpdef inline set_folder_name(Folder folder, string& name):
+@reconnecting
+def set_folder_name(Folder folder, string& name):
     """
     Set the name for a Folder 
 
@@ -185,7 +191,8 @@ cpdef inline set_folder_name(Folder folder, string& name):
     """
     conn().proxy().setFolderName(folder.id, name)
 
-cpdef inline delete_folder(Folder folder):
+@reconnecting
+def delete_folder(Folder folder):
     """
     Delete a folder 
 

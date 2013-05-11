@@ -107,7 +107,8 @@ cdef class Cluster:
     property total:
         def __get__(self): return self._total
 
-    cpdef refresh(self):
+    @reconnecting
+    def refresh(self):
         """
         Refresh the attributes from the server
         """
@@ -163,7 +164,8 @@ cdef class Cluster:
         self._cluster.isDefault = True
 
 
-cpdef inline Cluster get_cluster(string name):
+@reconnecting
+def get_cluster(string name):
     """
     Return a Cluster by name 
 
@@ -177,6 +179,7 @@ cpdef inline Cluster get_cluster(string name):
     cluster = initCluster(clusterT)
     return cluster
 
+@reconnecting
 def get_clusters():
     """
     Return a list of all Clusters 
@@ -191,6 +194,7 @@ def get_clusters():
     ret = [initCluster(clusterT) for clusterT in clusters]
     return ret    
 
+@reconnecting
 def get_clusters_by_tag(string tag):
     """
     Return a list of Clusters matching a tag 
@@ -206,6 +210,7 @@ def get_clusters_by_tag(string tag):
     ret = [initCluster(clusterT) for clusterT in clusters]
     return ret    
 
+@reconnecting
 def create_cluster(str name, c_set[string] tags):
     """
     Create a Cluster with a name and set of tags 
@@ -221,7 +226,8 @@ def create_cluster(str name, c_set[string] tags):
     cluster = initCluster(clusterT)
     return cluster
 
-cpdef inline bint delete_cluster(Cluster cluster):
+@reconnecting
+def delete_cluster(Cluster cluster):
     """
     Delete a Cluster 
 
@@ -232,7 +238,8 @@ cpdef inline bint delete_cluster(Cluster cluster):
     ret = conn().proxy().deleteCluster(cluster.id)
     return ret
 
-cpdef inline bint lock_cluster(Cluster cluster, bint locked):
+@reconnecting
+def lock_cluster(Cluster cluster, bint locked):
     """
     Lock a Cluster 
 
@@ -244,7 +251,8 @@ cpdef inline bint lock_cluster(Cluster cluster, bint locked):
     ret = conn().proxy().lockCluster(cluster.id, locked)
     return ret
 
-cpdef inline set_cluster_tags(Cluster cluster, c_set[string] tags):
+@reconnecting
+def set_cluster_tags(Cluster cluster, c_set[string] tags):
     """
     Set the tags for a Cluster 
 
@@ -253,7 +261,8 @@ cpdef inline set_cluster_tags(Cluster cluster, c_set[string] tags):
     """
     conn().proxy().setClusterTags(cluster.id, tags)
 
-cpdef inline set_cluster_name(Cluster cluster, string name):
+@reconnecting
+def set_cluster_name(Cluster cluster, string name):
     """
     Set a name for a Cluster 
 
@@ -262,7 +271,8 @@ cpdef inline set_cluster_name(Cluster cluster, string name):
     """
     conn().proxy().setClusterName(cluster.id, name)
 
-cpdef inline set_default_cluster(Cluster cluster):
+@reconnecting
+def set_default_cluster(Cluster cluster):
     """
     Set a given Cluster to be the default Cluster
 

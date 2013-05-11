@@ -186,7 +186,8 @@ cdef class Layer:
     property tags:
         def __get__(self): return self._layer.tags
 
-    cpdef refresh(self):
+    @reconnecting
+    def refresh(self):
         """
         Refresh the attributes from the server
         """
@@ -255,7 +256,8 @@ cdef class Layer:
         cdef list ret = get_layer_depends_on(self)
         return ret
 
-cpdef inline get_layer_by_id(Guid& layerId):
+@reconnecting
+def get_layer_by_id(Guid& layerId):
     """
     Get a layer by its id 
 
@@ -274,6 +276,7 @@ cpdef inline get_layer_by_id(Guid& layerId):
     layer = initLayer(layerT)
     return layer
 
+@reconnecting
 def get_layer(Job job, string name):
     """
     Get layer by its name
@@ -288,12 +291,15 @@ def get_layer(Job job, string name):
 
     try:
         conn().proxy().getLayer(layerT, job.id, name)
-    except RuntimeError:
-        return None 
+    except RuntimeError, e:
+        if str(e) in EX_CONNECTION:
+            raise
+        return None
 
     layer = initLayer(layerT)
     return layer
 
+@reconnecting
 def get_layers(Job job):
     """
     Get layers by a job id 
@@ -309,14 +315,17 @@ def get_layers(Job job):
 
     try:
         conn().proxy().getLayers(layers, job.id)
-    except RuntimeError:
+    except RuntimeError, e:
+        if str(e) in EX_CONNECTION:
+            raise
         ret = []
         return ret
 
     ret = [initLayer(layerT) for layerT in layers]
     return ret
 
-cpdef inline add_layer_output(Layer layer, string path, Attrs& attrs):
+@reconnecting
+def add_layer_output(Layer layer, string path, Attrs& attrs):
     """
     A an output to a layer 
 
@@ -326,7 +335,8 @@ cpdef inline add_layer_output(Layer layer, string path, Attrs& attrs):
     """
     conn().proxy().addOutput(layer.id, path, attrs)
 
-cpdef inline get_layer_outputs(Layer layer):
+@reconnecting
+def get_layer_outputs(Layer layer):
     """
     Get the outputs for a layer 
 
@@ -341,42 +351,49 @@ cpdef inline get_layer_outputs(Layer layer):
 
     try:
         conn().proxy().getLayerOutputs(outputs, layer.id)
-    except RuntimeError:
+    except RuntimeError, e:
+        if str(e) in EX_CONNECTION:
+            raise
         ret = []
         return ret 
 
     ret = [initOutput(outT) for outT in outputs]
     return ret
 
-cpdef inline set_layer_tags(Layer layer, c_set[string]& tags):
+@reconnecting
+def set_layer_tags(Layer layer, c_set[string]& tags):
     """ 
     :param layer: :class:`.Layer`
     :param tags: set(str) 
     """
     conn().proxy().setLayerTags(layer.id, tags)
 
-cpdef inline set_layer_min_cores_per_task(Layer layer, int minCores):
+@reconnecting
+def set_layer_min_cores_per_task(Layer layer, int minCores):
     """ 
     :param layer: :class:`.Layer`
     :param minCores: int 
     """
     conn().proxy().setLayerMinRamPerTask(layer.id, minCores)
 
-cpdef inline set_layer_max_cores_per_task(Layer layer, int maxCores):
+@reconnecting
+def set_layer_max_cores_per_task(Layer layer, int maxCores):
     """ 
     :param layer: :class:`.Layer`
     :param maxCores: int 
     """
     conn().proxy().setLayerMaxCoresPerTask(layer.id, maxCores)
 
-cpdef inline set_layer_min_ram_per_task(Layer layer, int minRam):
+@reconnecting
+def set_layer_min_ram_per_task(Layer layer, int minRam):
     """ 
     :param layer: :class:`.Layer`
     :param minRam: int 
     """
     conn().proxy().setLayerMinRamPerTask(layer.id, minRam)
 
-cpdef inline set_layer_threadable(Layer layer, bint threadable):
+@reconnecting
+def set_layer_threadable(Layer layer, bint threadable):
     """ 
     :param layer: :class:`.Layer`
     :param threadable: bool

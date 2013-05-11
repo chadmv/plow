@@ -3,6 +3,7 @@ cimport cython
 from plow_types cimport *
 from client cimport getClient, PlowClient
 
+include "utils.pxi"
 include "project.pxi"
 include "folder.pxi"
 include "job.pxi"
@@ -23,6 +24,7 @@ import uuid
 import time
 import logging 
 
+
 __HOST = "localhost"
 __PORT = 11336
 
@@ -34,6 +36,7 @@ EX_CONNECTION = set([
     "No more data to read.",
     "connect() failed: Connection refused"
     ])
+
 
 
 
@@ -98,6 +101,7 @@ def is_uuid(str identifier):
     return ret 
 
 
+@reconnecting
 def get_plow_time():
     """
     Get the Plow server time in msec since the epoch 

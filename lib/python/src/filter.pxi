@@ -78,6 +78,7 @@ cdef class Matcher:
     property attr:
         def __get__(self): return self.matcher.attr
 
+    @reconnecting
     def refresh(self):
         """
         Refresh the attributes from the server
@@ -91,6 +92,7 @@ cdef class Matcher:
         delete_matcher(self)
 
 
+@reconnecting
 def create_field_matcher(Filter filter, int field, int typ, string& value):
     """
     Create a field Matcher 
@@ -113,6 +115,7 @@ def create_field_matcher(Filter filter, int field, int typ, string& value):
     ret = initMatcher(matcher)
     return ret
 
+@reconnecting
 def create_attr_matcher(Filter filter, int typ, string& attr, string& value):
     """
     Create an attribute Matcher 
@@ -135,7 +138,8 @@ def create_attr_matcher(Filter filter, int typ, string& attr, string& value):
     ret = initMatcher(matcher)
     return ret
 
-cpdef inline Matcher get_matcher(Guid& matcherId):
+@reconnecting
+def get_matcher(Guid& matcherId):
     """
     Get a matcher by id
 
@@ -150,6 +154,7 @@ cpdef inline Matcher get_matcher(Guid& matcherId):
     ret = initMatcher(matcher)
     return ret
 
+@reconnecting
 def get_matchers(Filter filter):
     """
     Get a list of Matchers by a filter
@@ -166,7 +171,8 @@ def get_matchers(Filter filter):
     ret = [initMatcher(m) for m in matchers]
     return ret        
 
-cpdef inline delete_matcher(Matcher matcher):
+@reconnecting
+def delete_matcher(Matcher matcher):
     """
     Delete a Matcher 
 
@@ -228,6 +234,7 @@ cdef class Action:
     property value:
         def __get__(self): return self.action.value
 
+    @reconnecting
     def refresh(self):
         """
         Refresh the attributes from the server
@@ -240,6 +247,7 @@ cdef class Action:
         """Delete the action"""
         delete_action(self)
 
+@reconnecting
 def create_action(Filter filter, int typ, string& value):
     """
     Create an action 
@@ -257,7 +265,8 @@ def create_action(Filter filter, int typ, string& value):
     ret = initAction(action)
     return ret
 
-cpdef inline Action get_action(Guid& actionId):
+@reconnecting
+def get_action(Guid& actionId):
     """
     Get an action by id 
 
@@ -272,6 +281,7 @@ cpdef inline Action get_action(Guid& actionId):
     ret = initAction(action)
     return ret
 
+@reconnecting
 def get_actions(Filter filter):
     """
     Get a list of actions from a filter 
@@ -288,7 +298,8 @@ def get_actions(Filter filter):
     ret = [initAction(a) for a in actions]
     return ret        
 
-cpdef inline delete_action(Action action):
+@reconnecting
+def delete_action(Action action):
     """
     Delete an action 
 
@@ -365,6 +376,7 @@ cdef class Filter:
                 self._actions = [initAction(a) for a in self._filter.actions]
             return self._actions
 
+    @reconnecting
     def refresh(self):
         """
         Refresh the attributes from the server
@@ -407,7 +419,7 @@ cdef class Filter:
         decrease_filter_order(self)
         self.refresh()
 
-
+@reconnecting
 def create_filter(Project project, string& name):
     """
     Create a filter for a project 
@@ -424,6 +436,7 @@ def create_filter(Project project, string& name):
     ret = initFilter(filterT)
     return ret
 
+@reconnecting
 def get_filters(Project project):
     """
     Get a list of filters for a project 
@@ -440,7 +453,8 @@ def get_filters(Project project):
     ret = [initFilter(f) for f in filters]
     return ret
 
-cpdef inline Filter get_filter(Guid& filterId):
+@reconnecting
+def get_filter(Guid& filterId):
     """
     Get a filter by id 
 
@@ -455,7 +469,8 @@ cpdef inline Filter get_filter(Guid& filterId):
     ret = initFilter(filt)
     return ret
 
-cpdef inline delete_filter(Filter filt):
+@reconnecting
+def delete_filter(Filter filt):
     """
     Delete a filter
 
@@ -463,7 +478,8 @@ cpdef inline delete_filter(Filter filt):
     """
     conn().proxy().deleteFilter(filt.id)
 
-cpdef inline set_filter_name(Filter filt, string& name):
+@reconnecting
+def set_filter_name(Filter filt, string& name):
     """
     Set a filter name 
 
@@ -473,7 +489,8 @@ cpdef inline set_filter_name(Filter filt, string& name):
     conn().proxy().setFilterName(filt.id, name)
     filt.name = name
 
-cpdef inline set_filter_order(Filter filt, int order):
+@reconnecting
+def set_filter_order(Filter filt, int order):
     """
     Set the filter order
 
@@ -482,7 +499,8 @@ cpdef inline set_filter_order(Filter filt, int order):
     """    
     conn().proxy().setFilterOrder(filt.id, order)
 
-cpdef inline increase_filter_order(Filter filt):
+@reconnecting
+def increase_filter_order(Filter filt):
     """
     Increase the filter order
 
@@ -490,7 +508,8 @@ cpdef inline increase_filter_order(Filter filt):
     """    
     conn().proxy().increaseFilterOrder(filt.id)
 
-cpdef inline decrease_filter_order(Filter filt):
+@reconnecting
+def decrease_filter_order(Filter filt):
     """
     Decrease the filter order
 

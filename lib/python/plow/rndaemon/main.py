@@ -5,8 +5,8 @@ import logging
 
 
 class RndFormatter(logging.Formatter):
-    debug_fmt = "%(asctime)s %(levelname)-8s %(name)s:%(lineno)d - %(message)s"
-    standard_fmt = "%(asctime)s %(levelname)-8s %(name)s - %(message)s"
+    debug_fmt = "%(asctime)s %(levelname)-8s %(process)d:%(name)s:%(lineno)d - %(message)s"
+    standard_fmt = "%(asctime)s %(levelname)-8s %(process)d:%(name)s - %(message)s"
 
     def format(self, record):
 
