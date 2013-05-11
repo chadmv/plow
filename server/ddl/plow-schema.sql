@@ -522,6 +522,7 @@ CREATE INDEX layer_history_pk_job_idx ON plow.layer_history (pk_job);
 ---
 --- plow.task_history - One entry is created for every run of a task.
 ---
+
 CREATE TABLE plow.task_history (
   pk_task UUID NOT NULL PRIMARY KEY,
   pk_layer UUID NOT NULL REFERENCES plow.layer_history(pk_layer) ON DELETE CASCADE,
@@ -529,15 +530,18 @@ CREATE TABLE plow.task_history (
   int_number INTEGER NOT NULL,
   time_started BIGINT  NOT NULL DEFAULT plow.txTimeMillis(),
   time_stopped BIGINT  NOT NULL DEFAULT 0,
-  int_retry SMALLINT NOT NULL DEFAULT -1,
+  int_retry SMALLINT NOT NULL DEFAULT 0,
   int_core_time BIGINT NOT NULL DEFAULT 0,
   int_clock_time BIGINT NOT NULL DEFAULT 0,
   int_cores SMALLINT NOT NULL,
   int_cores_min SMALLINT NOT NULL,
-  int_cores_high REAL NOT NULL DEFAULT 0,
+  flt_cores_high REAL NOT NULL DEFAULT 0,
   int_ram INTEGER NOT NULL,
   int_ram_min INTEGER NOT NULL,
-  int_ram_high INTEGER NOT NULL DEFAULT 0
+  int_ram_high INTEGER NOT NULL DEFAULT 0,
+  int_progress SMALLINT NOT NULL DEFAULT 0,
+  int_exit_status INTEGER NOT NULL DEFAULT 0,
+  int_exit_signal INTEGER NOT NULL DEFAULT 0
 ) WITHOUT OIDS;
 
 CREATE INDEX task_history_time_idx ON plow.task_history (time_stopped, time_started);
