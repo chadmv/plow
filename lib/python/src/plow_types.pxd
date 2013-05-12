@@ -317,8 +317,8 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int lowCoreTime
         float stdDevCoreTime
         long totalCoreTime
-        long totalGoodCoreTime
-        long totalBadCoreTime
+        long totalSuccessCoreTime
+        long totalFailCoreTime
 
     cdef cppclass JobSpecT:
         string name
@@ -346,8 +346,8 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         float highCores
         int highCoreTime
         long totalCoreTime
-        long totalGoodCoreTime
-        long totalBadCoreTime
+        long totalSuccessCoreTime
+        long totalFailCoreTime
 
 
     cdef struct _TaskFilterT__isset:

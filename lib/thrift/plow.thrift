@@ -179,8 +179,8 @@ struct JobStatsT {
     2:required double highCores,
     3:required i32 highCoreTime,
     4:required i64 totalCoreTime,
-    5:required i64 totalGoodCoreTime,
-    6:required i64 totalBadCoreTime
+    5:required i64 totalSuccessCoreTime,
+    6:required i64 totalFailCoreTime
 }
 
 struct JobT {
@@ -213,8 +213,8 @@ struct LayerStatsT {
     9:required i32 lowCoreTime,
     10:required double stdDevCoreTime,
     11:required i64 totalCoreTime,
-    12:required i64 totalGoodCoreTime,
-    13:required i64 totalBadCoreTime
+    12:required i64 totalSuccessCoreTime,
+    13:required i64 totalFailCoreTime
 }
 
 struct LayerT {
