@@ -106,8 +106,8 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public boolean stopTask(Task task, TaskState state) {
-        if (dispatchTaskDao.stop(task, state)) {
+    public boolean stopTask(Task task, TaskState state, int exitStatus, int exitSignal) {
+        if (dispatchTaskDao.stop(task, state, exitStatus, exitSignal)) {
             logger.info("Stopping {}, new state: {}", task, state.toString());
 
             DispatchStats.taskStoppedCount.incrementAndGet();

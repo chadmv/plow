@@ -11,6 +11,8 @@ import javax.annotation.Resource;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.breakersoft.plow.ExitStatus;
+import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.NodeDispatcher;
 import com.breakersoft.plow.dispatcher.dao.DispatchDao;
@@ -62,7 +64,7 @@ public class DispatchTaskDaoTests extends AbstractTest {
 
     @Test
     public void testStop() {
-        dispatchTaskDao.stop(tasks.get(0), TaskState.SUCCEEDED);
+        dispatchTaskDao.stop(tasks.get(0), TaskState.SUCCEEDED, ExitStatus.SUCCESS, Signal.NORMAL);
     }
 
     @Test

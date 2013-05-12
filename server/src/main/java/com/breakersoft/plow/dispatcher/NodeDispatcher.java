@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.breakersoft.plow.ExitStatus;
+import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.dispatcher.command.BookNodeCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
@@ -163,7 +165,7 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
         result.dispatch = false;
         dispatchService.deallocateProc(proc, message);
         if (task != null) {
-            dispatchService.stopTask(task, TaskState.WAITING);
+            dispatchService.stopTask(task, TaskState.WAITING, ExitStatus.FAIL, Signal.ABORTED_TASK);
         }
     }
 }

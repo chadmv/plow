@@ -76,16 +76,20 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
                 "int_state = ?, " +
                 "bool_reserved = 'f', " +
                 "time_stopped = currentTimeMillis(), " +
-                "time_updated = currentTimeMillis() " +
+                "time_updated = currentTimeMillis(), " +
+                "int_exit_status=?," +
+                "int_exit_signal=? " +
             "WHERE " +
                 "task.pk_task = ? " +
             "AND " +
                 "int_state = ? ";
 
     @Override
-    public boolean stop(Task task, TaskState newState) {
+    public boolean stop(Task task, TaskState newState, int exitStatus, int exitSignal) {
         return jdbc.update(STOP_TASK,
                 newState.ordinal(),
+                exitStatus,
+                exitSignal,
                 task.getTaskId(),
                 TaskState.RUNNING.ordinal()) == 1;
     }

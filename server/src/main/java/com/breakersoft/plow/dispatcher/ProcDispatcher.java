@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.breakersoft.plow.ExitStatus;
+import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.dispatcher.command.BookProcCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
@@ -114,7 +116,7 @@ public class ProcDispatcher implements Dispatcher<DispatchProc> {
 
         dispatchService.deallocateProc(resource, message);
         if (task != null) {
-            dispatchService.stopTask(task, TaskState.WAITING);
+            dispatchService.stopTask(task, TaskState.WAITING, ExitStatus.FAIL, Signal.ABORTED_TASK);
         }
         result.dispatch = false;
     }

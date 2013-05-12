@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.breakersoft.plow.ExitStatus;
+import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
@@ -52,7 +54,8 @@ public class OrphanProcChecker extends AbstractCrondTask {
                     final Task task = jobService.getTask(taskId);
 
                     logger.warn("Found orphaned {}", task);
-                    dispatchService.stopTask(task, TaskState.WAITING);
+                    dispatchService.stopTask(task, TaskState.WAITING,
+                            ExitStatus.FAIL, Signal.ORPANED_TASK);
                 }
 
             } catch (Exception e) {

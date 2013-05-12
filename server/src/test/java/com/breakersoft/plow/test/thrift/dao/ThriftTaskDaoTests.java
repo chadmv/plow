@@ -9,7 +9,10 @@ import java.util.UUID;
 import javax.annotation.Resource;
 
 import org.junit.Test;
+import org.springframework.test.annotation.Rollback;
 
+import com.breakersoft.plow.ExitStatus;
+import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.dao.DispatchTaskDao;
@@ -92,6 +95,7 @@ public class ThriftTaskDaoTests extends AbstractTest {
     }
 
     @Test
+    @Rollback(false)
     public void testGetTaskStats() throws InterruptedException {
         JobSpecT spec = getTestJobSpec();
         JobLaunchEvent event = jobService.launch(spec);
@@ -112,7 +116,7 @@ public class ThriftTaskDaoTests extends AbstractTest {
         assertEquals(1, stats.size());
 
         Thread.sleep(1000);
-        dispatchTaskDao.stop(t, TaskState.SUCCEEDED);
+        dispatchTaskDao.stop(t, TaskState.SUCCEEDED, ExitStatus.SUCCESS, Signal.NORMAL);
 
         stats = thriftTaskDao.getTaskStats(tasks.get(0).getTaskId());
         assertEquals(1, stats.size());

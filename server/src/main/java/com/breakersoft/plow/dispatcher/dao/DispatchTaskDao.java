@@ -17,7 +17,7 @@ public interface DispatchTaskDao {
 
     boolean start(Task task);
 
-    boolean stop(Task task, TaskState newState);
+    boolean stop(Task task, TaskState newState, int exitStatus, int exitSignal);
 
     RunTaskCommand getRunTaskCommand(Task task);
 

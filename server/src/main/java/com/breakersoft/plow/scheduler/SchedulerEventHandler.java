@@ -105,7 +105,7 @@ public class SchedulerEventHandler {
 
         logger.info("New state {}", newState.toString());
 
-        if (dispatchService.stopTask(task, newState)) {
+        if (dispatchService.stopTask(task, newState, result.exitStatus, result.exitSignal)) {
             dispatchService.unassignProc(proc);
 
             if (newState.equals(TaskState.SUCCEEDED)) {

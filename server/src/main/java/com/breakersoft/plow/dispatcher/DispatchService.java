@@ -39,7 +39,7 @@ public interface DispatchService {
      */
     void unassignProc(DispatchProc proc);
 
-    boolean stopTask(Task task, TaskState state);
+    boolean stopTask(Task task, TaskState state, int exitStatus, int exitSignal);
 
     // New stuff.
 
@@ -64,7 +64,4 @@ public interface DispatchService {
     void assignProc(DispatchProc proc, DispatchTask task);
 
     List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node);
-
-
-
 }
