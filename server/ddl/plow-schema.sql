@@ -154,8 +154,8 @@ CREATE TABLE plow.job_stat (
   int_ram_high INTEGER NOT NULL DEFAULT 0,  
   flt_cores_high REAL NOT NULL DEFAULT 0.0,  
   int_core_time_high INTEGER NOT NULL DEFAULT 0,
-  int_total_core_time_good BIGINT NOT NULL DEFAULT 0,
-  int_total_core_time_bad BIGINT NOT NULL DEFAULT 0
+  int_total_core_time_success BIGINT NOT NULL DEFAULT 0,
+  int_total_core_time_fail BIGINT NOT NULL DEFAULT 0
 );
 
 ----------------------------------------------------------
@@ -228,8 +228,10 @@ CREATE TABLE plow.layer_stat (
   int_core_time_avg BIGINT NOT NULL DEFAULT 0,
   flt_core_time_std REAL NOT NULL DEFAULT 0,
 
-  int_total_core_time_good BIGINT NOT NULL DEFAULT 0,
-  int_total_core_time_bad BIGINT NOT NULL DEFAULT 0
+  int_total_core_time_success BIGINT NOT NULL DEFAULT 0,
+  int_total_core_time_fail BIGINT NOT NULL DEFAULT 0,
+  int_total_clock_time_success BIGINT NOT NULL DEFAULT 0,
+  int_total_clock_time_fail BIGINT NOT NULL DEFAULT 0
 );
 
 ---
@@ -518,7 +520,6 @@ CREATE table plow.layer_history (
   int_cores_max SMALLINT NOT NULL,
   int_ram_min INTEGER NOT NULL,
   bool_threadable BOOLEAN DEFAULT 'f' NOT NULL
-
 ) WITHOUT OIDS;
 
 CREATE INDEX layer_history_pk_job_idx ON plow.layer_history (pk_job);
@@ -649,34 +650,79 @@ DECLARE
   core_time BIGINT;
 BEGIN
 
-  SELECT int_cores, flt_cores_high, int_ram_high INTO proc FROM plow.proc WHERE pk_task=NEW.pk_task;
+  /* 
+  * Delete tasks aborted during the dispatch process.
+  * See com.plowrender.plow.Signal.
+  */
+  IF NEW.int_exit_signal = 667 THEN
+    DELETE FROM task_history WHERE pk_task=NEW.pk_task AND time_stopped=0;
+    RETURN NEW;
+  END IF;
 
+  /*
+  * Grab the necessary stats off the proc.
+  */ 
+  SELECT 
+    int_cores,
+    flt_cores_high,
+    int_ram_high 
+  INTO
+    proc 
+  FROM
+    plow.proc WHERE pk_task=NEW.pk_task;
+
+  /* Calcculate core and clock time. */
   clock_time := NEW.time_stopped - NEW.time_started;
-  core_time := (NEW.time_stopped - NEW.time_started) * proc.int_cores;
-
-  UPDATE task_history
-  SET 
-    flt_cores_high = proc.flt_cores_high,
-    int_ram_high = proc.int_ram_high,
-    time_stopped = NEW.time_stopped,
-    int_core_time = core_time,
-    int_clock_time = clock_time,
-    int_exit_status = NEW.int_exit_status,
-    int_exit_signal = NEW.int_exit_signal
-  WHERE
-    pk_task = NEW.pk_task
-  AND
-    time_stopped = 0
-  AND
-    int_retry = NEW.int_retry;
-
-  ---
-  --- Caluclate rolling averages for the last 20 frames if
-  --- the frame is a success.  Otherwise, log the bad time.?
+  core_time := clock_time * proc.int_cores;
+  
+  /*
+  * If the task didn't succeed stats are not calculated, but the failed
+  * core time is.
+  */
   IF NEW.int_exit_status != 0 THEN
+   
+   UPDATE task_history
+    SET
+      time_stopped = NEW.time_stopped,
+      int_core_time = core_time,
+      int_clock_time = clock_time,
+      int_exit_status = NEW.int_exit_status,
+      int_exit_signal = NEW.int_exit_signal
+    WHERE
+      pk_task = NEW.pk_task
+    AND
+      time_stopped = 0
+    AND
+      int_retry = NEW.int_retry;
 
+    /* Add the failed core time. */
 
-  ELSE
+    UPDATE
+      layer_stat
+    SET
+      int_total_core_time_failed=int_total_core_time_failed+core_time,
+      int_total_clock_time_failed=int_total_clock_time_failed+clock_time
+    WHERE
+      pk_layer=NEW.pk_layer;
+
+  ELSE 
+
+    UPDATE task_history
+    SET 
+      flt_cores_high = proc.flt_cores_high,
+      int_ram_high = proc.int_ram_high,
+      time_stopped = NEW.time_stopped,
+      int_core_time = core_time,
+      int_clock_time = clock_time,
+      int_exit_status = NEW.int_exit_status,
+      int_exit_signal = NEW.int_exit_signal
+    WHERE
+      pk_task = NEW.pk_task
+    AND
+      time_stopped = 0
+    AND
+      int_retry = NEW.int_retry;
+
 
     SELECT 
       avg(int_core_time) AS core_time_avg,
@@ -717,7 +763,9 @@ BEGIN
       int_core_time_high=core_time,
       int_core_time_low=core_time,
       int_core_time_avg=stats.core_time_avg,
-      flt_core_time_std=COALESCE(stats.core_time_stddev,0)
+      flt_core_time_std=COALESCE(stats.core_time_stddev, 0),
+      int_total_core_time_success=int_total_core_time_success+core_time,
+      int_total_clock_time_success=int_total_clock_time_success+clock_time
     WHERE
       pk_layer=NEW.pk_layer;
 
