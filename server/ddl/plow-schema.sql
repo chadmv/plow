@@ -268,8 +268,8 @@ CREATE TABLE plow.task (
   int_retry SMALLINT DEFAULT -1 NOT NULL,
   int_cores_min SMALLINT NOT NULL,
   int_ram_min INT NOT NULL,
-  int_exit_status SMALLINT DEFAULT 0 NOT NULL,
-  int_exit_signal SMALLINT DEFAULT 0 NOT NULL,
+  int_exit_status SMALLINT,
+  int_exit_signal SMALLINT,
   str_last_resource TEXT
 ) WITHOUT OIDS;
 
@@ -501,7 +501,7 @@ CREATE TABLE plow.job_history (
   str_thrift_spec TEXT
 ) WITHOUT OIDS;
 
-CREATE INDEX job_history_pk_project_idx ON plow.task_job (pk_job);
+CREATE INDEX job_history_pk_project_idx ON plow.job_history (pk_project);
 CREATE INDEX job_history_time_idx ON plow.job_history (time_stopped, time_started);
 
 ---
@@ -518,6 +518,7 @@ CREATE table plow.layer_history (
   int_cores_max SMALLINT NOT NULL,
   int_ram_min INTEGER NOT NULL,
   bool_threadable BOOLEAN DEFAULT 'f' NOT NULL
+
 ) WITHOUT OIDS;
 
 CREATE INDEX layer_history_pk_job_idx ON plow.layer_history (pk_job);
@@ -543,13 +544,13 @@ CREATE TABLE plow.task_history (
   int_ram_min INTEGER NOT NULL,
   int_ram_high INTEGER NOT NULL DEFAULT 0,
   int_progress SMALLINT NOT NULL DEFAULT 0,
-  int_exit_status INTEGER NOT NULL DEFAULT 0,
-  int_exit_signal INTEGER NOT NULL DEFAULT 0
+  int_exit_status SMALLINT,
+  int_exit_signal SMALLINT
 ) WITHOUT OIDS;
 
-CREATE INDEX task_history_time_idx ON plow.task_history (time_stopped, time_started);
+CREATE INDEX task_history_time_idx ON plow.task_history (time_stopped DESC, time_started DESC);
 CREATE INDEX task_history_pk_layer_idx ON plow.task_history (pk_layer);
-
+CREATE INDEX task_history_exit_status ON plow.task_history (int_exit_status NULLS LAST);
 ----------------------------------------------------------
 --- TRIGGERS
 ----------------------------------------------------------
@@ -643,24 +644,84 @@ CREATE TRIGGER trig_after_layer_inserted AFTER INSERT ON plow.layer
 CREATE OR REPLACE FUNCTION plow.after_task_stopped() RETURNS TRIGGER AS $$
 DECLARE
   proc RECORD;
+  stats RECORD;
+  clock_time BIGINT;
+  core_time BIGINT;
 BEGIN
 
   SELECT int_cores, flt_cores_high, int_ram_high INTO proc FROM plow.proc WHERE pk_task=NEW.pk_task;
 
-  UPDATE 
-    task_history
+  clock_time := NEW.time_stopped - NEW.time_started;
+  core_time := (NEW.time_stopped - NEW.time_started) * proc.int_cores;
+
+  UPDATE task_history
   SET 
     flt_cores_high = proc.flt_cores_high,
     int_ram_high = proc.int_ram_high,
     time_stopped = NEW.time_stopped,
-    int_core_time = (NEW.time_stopped - time_started) * proc.int_cores,
-    int_clock_time = NEW.time_stopped - time_started
+    int_core_time = core_time,
+    int_clock_time = clock_time,
+    int_exit_status = NEW.int_exit_status,
+    int_exit_signal = NEW.int_exit_signal
   WHERE
     pk_task = NEW.pk_task
   AND
     time_stopped = 0
   AND
     int_retry = NEW.int_retry;
+
+  ---
+  --- Caluclate rolling averages for the last 20 frames if
+  --- the frame is a success.  Otherwise, log the bad time.?
+  IF NEW.int_exit_status != 0 THEN
+
+
+  ELSE
+
+    SELECT 
+      avg(int_core_time) AS core_time_avg,
+      avg(int_clock_time) AS clock_time_avg,
+      avg(int_ram_high) AS ram_avg,
+      avg(flt_cores_high) AS cores_avg,
+      stddev(int_core_time) AS core_time_stddev,
+      stddev(int_clock_time) AS clock_time_stddev,
+      stddev(int_ram_high) AS ram_stddev,
+      stddev(flt_cores_high) AS cores_stddev
+    INTO 
+      stats
+    FROM (
+      SELECT
+        task_history.int_core_time,
+        task_history.int_clock_time,
+        task_history.int_ram_high,
+        task_history.flt_cores_high
+      FROM
+        plow.task_history
+      WHERE
+        task_history.pk_layer = NEW.pk_layer
+      AND
+        task_history.int_exit_status = 0
+      ORDER BY
+        task_history.time_stopped DESC
+      LIMIT 20) q;
+
+    UPDATE
+      layer_stat
+    SET
+      int_ram_high=proc.int_ram_high,
+      int_ram_avg=stats.ram_avg,
+      flt_ram_std=COALESCE(stats.ram_stddev, 0),
+      flt_cores_high=proc.flt_cores_high,
+      flt_cores_avg=stats.cores_avg,
+      flt_cores_std=COALESCE(stats.cores_stddev, 0),
+      int_core_time_high=core_time,
+      int_core_time_low=core_time,
+      int_core_time_avg=stats.core_time_avg,
+      flt_core_time_std=COALESCE(stats.core_time_stddev,0)
+    WHERE
+      pk_layer=NEW.pk_layer;
+
+  END IF;
 
   RETURN NEW;
 END
