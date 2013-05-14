@@ -75,6 +75,27 @@ cdef class TaskStats:
         def __get__(self): return self._stats.exitSignal
 
 
+@reconnecting
+def get_task_stats(Guid& taskId):
+    """
+    Get a list of task stats from an existing
+    task id
+
+    :param taskId: str
+    :returns: list[:class:`.TaskStats`]
+
+    """
+    cdef:
+        vector[TaskStatsT] vec
+        TaskStatsT statsT
+        list ret
+
+    getClient().proxy().getTaskStats(vec, taskId) 
+
+    ret = [initTaskStats(statsT) for statsT in vec]
+    return ret
+
+
 #######################
 # TaskState
 #
@@ -97,9 +118,14 @@ cdef class _TaskState:
 TaskState = _TaskState()
 
 
+
 #######################
 # TaskSpec
 #
+cdef TaskSpec initTaskSpec(TaskSpecT& t):
+    cdef TaskSpec spec = TaskSpec()
+    spec.setTaskSpec(t)
+    return spec
 
 cdef class TaskSpec:
     """
@@ -118,6 +144,12 @@ cdef class TaskSpec:
 
     def __repr__(self):
         return "<TaskSpec: %s>" % self.name
+
+    cdef setTaskSpec(self, TaskSpecT& t):
+        self.name = t.name
+
+        cdef DependSpecT dep
+        self.depends = [initDependSpec(dep) for dep in t.depends]
 
     cdef TaskSpecT toTaskSpecT(self):
         cdef TaskSpecT s

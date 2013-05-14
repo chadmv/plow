@@ -27,6 +27,7 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
         void getJobOutputs(vector[OutputT]&,  Guid& jobId) nogil except +
         void setJobMinCores(Guid& jobId, int value) nogil except +
         void setJobMaxCores(Guid& jobId, int value) nogil except +
+        void getJobSpec(JobSpecT&, Guid& jobId) nogil except +
 
         void createFolder(FolderT&, string& projectId, string& name) nogil except +
         void getFolder(FolderT&, string& id) nogil except +
@@ -54,6 +55,7 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
         void retryTasks(TaskFilterT& filter) nogil except +
         void eatTasks(TaskFilterT& filter) nogil except +
         void killTasks(TaskFilterT& filter) nogil except +
+        void getTaskStats(vector[TaskStatsT]&, Guid& taskId) nogil except +
 
         void getNode(NodeT&, string& name) nogil except +
         void getNodes(vector[NodeT]&, NodeFilterT& filter) nogil except +

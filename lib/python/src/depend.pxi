@@ -26,6 +26,11 @@ DependType = _DependType()
 #######################
 # DependSpec
 #
+cdef DependSpec initDependSpec(DependSpecT& t):
+    cdef DependSpec spec = DependSpec()
+    spec.setDependSpec(t)
+    return spec
+
 cdef class DependSpec:
     """
     DependSpec 
@@ -73,6 +78,16 @@ cdef class DependSpec:
         if 'dependOnTask' in kwargs:
             self.dependOnTask = kwargs['dependOnTask']
             self.__isset.dependOnTask = True
+
+    cdef setDependSpec(self, DependSpecT& t):
+        self.type = t.type
+        self.dependentJob = t.dependentJob
+        self.dependOnJob = t.dependOnJob
+        self.dependentLayer = t.dependentLayer
+        self.dependOnLayer = t.dependOnLayer
+        self.dependentTask = t.dependentTask
+        self.dependOnTask = t.dependOnTask
+        self.__isset = t.__isset
 
     cdef DependSpecT toDependSpecT(self):
         cdef DependSpecT s

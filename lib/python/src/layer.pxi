@@ -76,6 +76,10 @@ cdef class LayerStats:
 #######################
 # Layers
 #
+cdef LayerSpec initLayerSpec(LayerSpecT& t):
+    cdef LayerSpec spec = LayerSpec()
+    spec.setLayerSpec(t)
+    return spec
 
 cdef class LayerSpec:
     """
@@ -124,6 +128,26 @@ cdef class LayerSpec:
 
     def __repr__(self):
         return "<LayerSpec: %s>" % self.name
+
+    cdef setLayerSpec(self, LayerSpecT& t):
+        self.name  = t.name 
+        self.range = t.range
+        self.chunk = t.chunk
+        self.minCores = t.minCores
+        self.maxCores = t.maxCores
+        self.minRamMb = t.minRamMb
+        self.threadable = t.threadable
+        self.command = t.command
+        self.tags = t.tags
+        self.env = t.env
+
+        self.__isset = t.__isset
+
+        cdef DependSpecT dep
+        self.depends = [initDependSpec(dep) for d in t.depends]
+
+        cdef TaskSpecT task
+        self.tasks = [initTaskSpec(task) for task in t.tasks]
 
     cdef LayerSpecT toLayerSpecT(self):
         cdef LayerSpecT s

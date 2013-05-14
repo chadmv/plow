@@ -60,6 +60,7 @@ cdef class _JobState:
 JobState = _JobState()
 
 
+
 #######################
 # JobFilter
 #
@@ -84,6 +85,11 @@ cdef class JobFilter:
 #######################
 # JobSpec
 #
+cdef JobSpec initJobSpec(JobSpecT& t):
+    cdef JobSpec spec = JobSpec()
+    spec.setJobSpec(t)
+    return spec
+
 cdef class JobSpec:
     """
     A JobSpec specifies the parameters for 
@@ -121,6 +127,22 @@ cdef class JobSpec:
 
     def __repr__(self):
         return "<JobSpec: %s, %s>" % (self.name, self.project)
+
+    cdef setJobSpec(self, JobSpecT& t):
+        self.name = t.name
+        self.project = t.project
+        self.username = t.username
+        self.logPath = t.logPath
+        self.paused = t.paused
+        self.uid = t.uid
+        self.attrs = t.attrs
+        self.env = t.env
+
+        cdef DependSpecT dep
+        self.depends = [initDependSpec(dep) for dep in t.depends]
+
+        cdef LayerSpecT layer
+        self.layers = [initLayerSpec(layer) for layer in t.layers]
 
     cdef JobSpecT toJobSpecT(self):
         cdef JobSpecT s
@@ -184,6 +206,24 @@ cdef class JobSpec:
 
         ret = initJob(job)
         return ret
+
+
+@reconnecting
+def get_job_spec(Guid& jobId):
+    """
+    Get a JobSpec instance from an existing
+    job id Guid
+
+    :param jobId: str
+    :returns: :class:`.JobSpec`
+    """
+    cdef:
+        JobSpecT specT
+        JobSpec spec
+
+    getClient().proxy().getJobSpec(specT, jobId)
+    spec = initJobSpec(specT)
+    return spec
 
 
 #######################
@@ -480,6 +520,8 @@ def set_job_max_cores(Job job, int value):
     :param value: int number of cores
     """
     conn().proxy().setJobMaxCores(job.id, value)
+
+
 
 #######################
 # Output
