@@ -388,7 +388,6 @@ def get_task_log_path(Task task):
 
     return path
 
-@reconnecting
 def retry_tasks(**kwargs):
     """
     Retry tasks matching various keyword filter params 

@@ -402,7 +402,6 @@ def get_layers(Job job):
     ret = [initLayer(layerT) for layerT in layers]
     return ret
 
-@reconnecting
 def add_layer_output(Layer layer, string path, Attrs& attrs):
     """
     A an output to a layer 

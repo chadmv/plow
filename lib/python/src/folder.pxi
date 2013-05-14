@@ -131,7 +131,6 @@ def get_folders(Project project):
     cdef list folders = Project.get_folders(proj)
     return
 
-@reconnecting
 def create_folder(Project project, string name):
     """
     Create a folder 

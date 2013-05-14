@@ -168,7 +168,6 @@ cdef class JobSpec:
         def __get__(self): return self.env
         def __set__(self, val): self.env = val
 
-    @reconnecting
     def launch(self):
         """
         Launch this spec and return the Job 

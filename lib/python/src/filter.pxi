@@ -92,7 +92,6 @@ cdef class Matcher:
         delete_matcher(self)
 
 
-@reconnecting
 def create_field_matcher(Filter filter, int field, int typ, string& value):
     """
     Create a field Matcher 
@@ -115,7 +114,6 @@ def create_field_matcher(Filter filter, int field, int typ, string& value):
     ret = initMatcher(matcher)
     return ret
 
-@reconnecting
 def create_attr_matcher(Filter filter, int typ, string& attr, string& value):
     """
     Create an attribute Matcher 
@@ -247,7 +245,6 @@ cdef class Action:
         """Delete the action"""
         delete_action(self)
 
-@reconnecting
 def create_action(Filter filter, int typ, string& value):
     """
     Create an action 
@@ -419,7 +416,6 @@ cdef class Filter:
         decrease_filter_order(self)
         self.refresh()
 
-@reconnecting
 def create_filter(Project project, string& name):
     """
     Create a filter for a project 
@@ -499,7 +495,6 @@ def set_filter_order(Filter filt, int order):
     """    
     conn().proxy().setFilterOrder(filt.id, order)
 
-@reconnecting
 def increase_filter_order(Filter filt):
     """
     Increase the filter order
@@ -508,7 +503,6 @@ def increase_filter_order(Filter filt):
     """    
     conn().proxy().increaseFilterOrder(filt.id)
 
-@reconnecting
 def decrease_filter_order(Filter filt):
     """
     Decrease the filter order

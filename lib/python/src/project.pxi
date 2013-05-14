@@ -154,7 +154,6 @@ def get_active_projects():
     results = [initProject(projT) for projT in projects] 
     return results    
 
-@reconnecting
 def create_project(string title, string code):
     """
     Create a new Project with a title and code 

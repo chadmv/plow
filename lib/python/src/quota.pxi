@@ -137,7 +137,6 @@ def get_quotas(**kwargs):
     ret = [initQuota(qT) for qT in quotas]
     return ret
 
-@reconnecting
 def create_quota(Project project,  Cluster cluster, int size, int burst):
     """
     Create a quota for a project and cluster 
