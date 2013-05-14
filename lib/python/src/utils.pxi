@@ -3,7 +3,6 @@
 # and catch a possible connection failure.
 # It will then try to reconnect, and retry the
 # original call.
-
 def reconnecting(object func):
 
     def wrapper(*args, **kwargs):
@@ -11,14 +10,20 @@ def reconnecting(object func):
             return func(*args, **kwargs)
 
         except RuntimeError, e:
-            
+                
+            LOGGER.exception("Error running %r", func)
+
             if str(e) in EX_CONNECTION:
+                # print "reconnecting!"
                 LOGGER.debug("Connection lost. Retrying call")
                 reconnect()
-                return func(*args, **kwargs)
-            
+                try:
+                    return func(*args, **kwargs)
+                except Exception, e:
+                    LOGGER.exception("Error re-running %r after reconnect", func)
+                    raise
             else:
-                raise
+                raise e
 
     wrapper.__doc__ = func.__doc__
     return wrapper
