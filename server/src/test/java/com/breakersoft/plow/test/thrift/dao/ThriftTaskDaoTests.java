@@ -95,7 +95,6 @@ public class ThriftTaskDaoTests extends AbstractTest {
     }
 
     @Test
-    @Rollback(false)
     public void testGetTaskStats() throws InterruptedException {
         JobSpecT spec = getTestJobSpec();
         JobLaunchEvent event = jobService.launch(spec);

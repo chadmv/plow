@@ -41,9 +41,9 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             stats.lowCoreTime = rs.getInt("int_core_time_low");
             stats.avgCoreTime = rs.getInt("int_core_time_avg");
             stats.stdDevCoreTime = rs.getDouble("flt_core_time_std");
-            stats.totalGoodCoreTime = rs.getLong("int_total_core_time_good");
-            stats.totalBadCoreTime = rs.getLong("int_total_core_time_bad");
-            stats.totalCoreTime = stats.totalGoodCoreTime + stats.totalBadCoreTime;
+            stats.totalSuccessCoreTime = rs.getLong("int_total_core_time_success");
+            stats.totalFailCoreTime = rs.getLong("int_total_core_time_fail");
+            stats.totalCoreTime = stats.totalSuccessCoreTime + stats.totalFailCoreTime;
 
             final LayerT layer = new LayerT();
             layer.setStats(stats);
@@ -94,8 +94,8 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer_stat.int_core_time_low, " +
                 "layer_stat.int_core_time_avg, " +
                 "layer_stat.flt_core_time_std, " +
-                "layer_stat.int_total_core_time_good, " +
-                "layer_stat.int_total_core_time_bad " +
+                "layer_stat.int_total_core_time_success, " +
+                "layer_stat.int_total_core_time_fail " +
             "FROM " +
                 "layer " +
             "INNER JOIN layer_count ON layer.pk_layer = layer_count.pk_layer " +

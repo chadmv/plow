@@ -24,8 +24,8 @@ cdef class LayerStats:
     :var lowCoreTime: int
     :var stdDevCoreTime: float
     :var totalCoreTime: long
-    :var totalGoodCoreTime: long
-    :var totalBadCoreTime: long
+    :var totalSuccessCoreTime: long
+    :var totalFailCoreTime: long
 
     """
     cdef LayerStatsT _stats
@@ -66,11 +66,11 @@ cdef class LayerStats:
     property totalCoreTime:
         def __get__(self): return long(self._stats.totalCoreTime)
     
-    property totalGoodCoreTime:
-        def __get__(self): return long(self._stats.totalGoodCoreTime)
+    property totalSuccessCoreTime:
+        def __get__(self): return long(self._stats.totalSuccessCoreTime)
     
-    property totalBadCoreTime:
-        def __get__(self): return long(self._stats.totalBadCoreTime)
+    property totalFailCoreTime:
+        def __get__(self): return long(self._stats.totalFailCoreTime)
 
 
 #######################
