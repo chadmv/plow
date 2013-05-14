@@ -32,6 +32,10 @@ class RndProcessHandler(object):
 
 def start(port):
 
+    from plow.rndaemon import profile
+    from plow.rndaemon.profile import test
+    profile.SystemProfiler = test.SystemProfiler
+
     from plow.rndaemon.server import get_server
     from plow.rndaemon.rpc import RndNodeApi
 
@@ -66,11 +70,16 @@ if __name__ == "__main__":
     parser.add_argument("-num", type=int, default=1,
         help="Number of rndaemon instances to start")
 
+    parser.add_argument("-refresh", type=int, default=30,
+        help="How often, in seconds, to ping in updated data for each node")
+
     args = parser.parse_args()  
 
     daemons = []
 
     num = max(args.num, 1)
+    conf.NETWORK_PING_INTERVAL = max(args.refresh, 1)
+
     logger.info("Starting %d rndaemon processes...", num)
 
     for i in xrange(num):
