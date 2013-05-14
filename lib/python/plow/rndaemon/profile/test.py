@@ -38,6 +38,10 @@ class SystemProfiler(AbstractProfiler):
         self.data["physicalCpus"] = random.randint(1,8)
         self.data["logicalCpus"] = random.randint(1,2) * self.data["physicalCpus"]
 
+        ram = random.choice([2048,4096,8192,16384])
+        self.data["totalRamMb"] = ram
+        self.data["totalSwapMb"] = random.choice(map(int, [ram*.25, ram*.5, ram, ram*2]))
+
         self.update()
 
         logger.info("starting Test SystemProfiler as host: %s", host)
@@ -51,11 +55,8 @@ class SystemProfiler(AbstractProfiler):
         return cmd, opts
 
     def update(self):
-        ram = random.choice([2048,4096,8192,16384])
 
-        self.data["totalRamMb"] = ram
-        self.data["freeRamMb"] = random.randint(0, ram)
-        self.data["totalSwapMb"] = random.choice(map(int, [ram*.25, ram*.5, ram, ram*2]))
+        self.data["freeRamMb"] = random.randint(0, self.data["totalRamMb"])
         self.data["freeSwapMb"] = random.randint(0, self.data["totalSwapMb"])
 
         phys = random.randint(0, self.data["physicalCpus"])
