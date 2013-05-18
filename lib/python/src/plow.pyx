@@ -1,3 +1,5 @@
+#cython: embedsignature=True
+
 cimport cython
 
 from plow_types cimport *
