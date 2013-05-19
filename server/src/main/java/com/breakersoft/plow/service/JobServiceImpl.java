@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.FrameSet;
@@ -17,11 +18,13 @@ import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.MatcherFull;
 import com.breakersoft.plow.Project;
+import com.breakersoft.plow.ServiceFull;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.FolderDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.ProjectDao;
+import com.breakersoft.plow.dao.ServiceDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
@@ -33,6 +36,7 @@ import com.breakersoft.plow.thrift.LayerSpecT;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskSpecT;
 import com.breakersoft.plow.thrift.TaskState;
+import com.breakersoft.plow.util.PlowUtils;
 
 
 @Service
@@ -53,6 +57,9 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     ProjectDao projectDao;
+
+    @Autowired
+    ServiceDao serviceDao;
 
     @Autowired
     FolderDao folderDao;
@@ -119,6 +126,9 @@ public class JobServiceImpl implements JobService {
 
         int layerOrder = 0;
         for (LayerSpecT blayer: jobspec.getLayers()) {
+
+            prepLayer(blayer);
+
             Layer layer = layerDao.create(job, blayer, layerOrder);
 
             if (blayer.isSetRange()) {
@@ -127,7 +137,7 @@ public class JobServiceImpl implements JobService {
                 FrameSet frameSet = new FrameSet(blayer.getRange());
                 for (int frameNum: frameSet) {
                     taskDao.create(layer, String.format("%04d-%s", frameNum, blayer.getName()),
-                            frameNum, frameOrder, layerOrder, blayer.minCores, blayer.minRamMb);
+                            frameNum, frameOrder, layerOrder, blayer.minCores, blayer.minRam);
                     frameOrder++;
                 }
             }
@@ -135,9 +145,8 @@ public class JobServiceImpl implements JobService {
                 logger.info("Creating tasks in layer: {}", blayer.name);
                 int taskOrder = 0;
                 for (TaskSpecT task: blayer.getTasks()) {
-                    logger.info("Creating task: {}", task.getName());
                     taskDao.create(layer, task.getName(), 0, taskOrder, layerOrder,
-                            blayer.minCores, blayer.minRamMb);
+                            blayer.minCores, blayer.minRam);
                 }
             }
             else {
@@ -145,6 +154,90 @@ public class JobServiceImpl implements JobService {
                         "Layer {} cannot be launched, has no range or tasks.");
             }
             layerOrder++;
+        }
+    }
+
+    /**
+     * Apply defaults for unset layer values.
+     *
+     * @param layer
+     */
+    private void prepLayer(LayerSpecT layer) {
+
+        // Set a default service name, although it might not be setup
+        // as a valid service.
+        logger.info("setting default service " + layer.getServ());
+        if (!PlowUtils.isValid(layer.getServ())) {
+            logger.info("setting default service");
+            layer.setServ(Defaults.DEFAULT_SERVICE);
+        }
+
+        // Check if there is a service and apply values
+        ServiceFull service = serviceDao.getServiceFull(layer.getServ());
+        if (service != null) {
+
+            if (service.isSetMinCores() && !layer.isSetMinCores()) {
+                layer.setMinCores(service.getMinCores());
+            }
+
+            if (service.isSetMaxCores() && !layer.isSetMaxCores()) {
+                layer.setMaxCores(service.getMaxCores());
+            }
+
+            if (service.isSetMaxRam() && !layer.isSetMaxRam()) {
+                layer.setMaxRam(service.getMaxRam());
+            }
+
+            if (service.isSetMinRam() && !layer.isSetMinRam()) {
+                layer.setMinRam(service.getMinRam());
+            }
+
+            if (service.isSetMaxRetries() && !layer.isSetMaxRetries()) {
+                layer.setMaxRetries(service.getMaxRetries());
+            }
+
+            if (service.isIssetTags() && !layer.isSetTags()) {
+                layer.setTags(layer.getTags());
+            }
+
+            if (service.isIssetThreadable() && !layer.isSetThreadable()) {
+                layer.setThreadable(layer.isThreadable());
+            }
+        }
+
+        if (!layer.isSetMaxCores()) {
+            logger.info("Setting max cores default on {} to {}", layer.name, Defaults.DEFAULT_MAX_CORES);
+            layer.setMaxCores(Defaults.DEFAULT_MAX_CORES);
+        }
+
+        if (!layer.isSetMinCores()) {
+            logger.info("Setting min cores default on {} to {}", layer.name, Defaults.DEFAULT_MIN_CORES);
+            layer.setMinCores(Defaults.DEFAULT_MIN_CORES);
+        }
+
+        if (!layer.isSetMinRam()) {
+            logger.info("Setting min ram default on {} to {}", layer.name, Defaults.DEFAULT_MIN_RAM);
+            layer.setMinRam(Defaults.DEFAULT_MIN_RAM);
+        }
+
+        if (!layer.isSetMaxRam()) {
+            logger.info("Setting max ram default on {} to {}", layer.name, Defaults.DEFAULT_MAX_RAM);
+            layer.setMaxRam(Defaults.DEFAULT_MAX_RAM);
+        }
+
+        if (!layer.isSetMaxRetries()) {
+            logger.info("Setting max retries default on {} to {}", layer.name, Defaults.DEFAULT_MAX_RETRIES);
+            layer.setMaxRetries(Defaults.DEFAULT_MAX_RETRIES);
+        }
+
+        if (!layer.isSetThreadable()) {
+            logger.info("Setting threadable default on {} to {}", layer.name, Defaults.DEFAULT_THREADABLE);
+            layer.setThreadable(Defaults.DEFAULT_THREADABLE);
+        }
+
+        if (!layer.isSetTags()) {
+            logger.info("Setting tags default on {} to {}", layer.name, Defaults.DEFAULT_TAGS);
+            layer.setTags(Defaults.DEFAULT_TAGS);
         }
     }
 
