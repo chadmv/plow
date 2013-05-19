@@ -82,7 +82,8 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
                 "pk_layer", "pk_job", "str_name", "str_range",
                 "str_command", "str_tags", "int_chunk_size", "int_order",
                 "int_cores_min", "int_cores_max", "int_ram_min",
-                "bool_threadable", "hstore_env", "str_service");
+                "int_ram_max", "int_retries_max", "bool_threadable",
+                "hstore_env", "str_service");
 
     @Override
     public Layer create(final Job job, final LayerSpecT layer, final int order) {
@@ -104,9 +105,11 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
                 ret.setInt(9, layer.getMinCores());
                 ret.setInt(10, layer.getMaxCores());
                 ret.setInt(11, layer.getMinRam());
-                ret.setBoolean(12, layer.isThreadable());
-                ret.setObject(13, layer.getEnv());
-                ret.setString(14, layer.getServ());
+                ret.setInt(12, layer.getMaxRam());
+                ret.setInt(13, layer.getMaxRetries());
+                ret.setBoolean(14, layer.isThreadable());
+                ret.setObject(15, layer.getEnv());
+                ret.setString(16, layer.getServ());
                 return ret;
             }
         });
