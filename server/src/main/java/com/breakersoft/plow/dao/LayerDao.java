@@ -1,5 +1,6 @@
 package com.breakersoft.plow.dao;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -33,5 +34,5 @@ public interface LayerDao {
 
     void setThreadable(Layer layer, boolean threadable);
 
-    void setTags(Layer layer, Set<String> tags);
+    void setTags(Layer layer, List<String> tags);
 }

@@ -113,7 +113,7 @@ public interface JobService {
     void setLayerMinCores(Layer layer, int cores);
     void setLayerMaxCores(Layer layer, int cores);
     void setLayerMinRam(Layer layer, int ram);
-    void setLayerTags(Layer layer, Set<String> tags);
+    void setLayerTags(Layer layer, List<String> tags);
     void setLayerThreadable(Layer layer, boolean threadable);
     Layer getLayer(Job job, String layer);
     Layer getLayer(Job job, int idx);

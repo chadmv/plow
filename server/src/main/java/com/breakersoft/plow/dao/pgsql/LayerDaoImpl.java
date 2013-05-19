@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.thrift.LayerSpecT;
 import com.breakersoft.plow.util.JdbcUtils;
+import com.breakersoft.plow.util.PlowUtils;
 
 @Repository
 public class LayerDaoImpl extends AbstractDao implements LayerDao {
@@ -200,12 +202,12 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
             "UPDATE plow.layer SET str_tags=? WHERE pk_layer=?";
 
     @Override
-    public void setTags(final Layer layer, final Set<String> tags) {
+    public void setTags(final Layer layer, final List<String> tags) {
          jdbc.update(new PreparedStatementCreator() {
              @Override
              public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                  final PreparedStatement ret = conn.prepareStatement(UPDATE_TAGS);
-                 ret.setObject(1, JdbcUtils.toArray(conn, tags));
+                 ret.setObject(1, conn.createArrayOf("text", PlowUtils.uniquify(tags)));
                  ret.setObject(2, layer.getLayerId());
                  return ret;
              }

@@ -466,7 +466,7 @@ service RpcService {
     list<LayerT> getLayers(1:common.Guid jobId) throws (1:PlowException e),
     void addOutput(1:common.Guid layerId, 2:string path, 3:common.Attrs attrs) throws (1:PlowException e)
     list<OutputT> getLayerOutputs(1:common.Guid layerId) throws (1:PlowException e),
-    void setLayerTags(1:common.Guid guid, 2:set<string> tags) throws (1:PlowException e),
+    void setLayerTags(1:common.Guid guid, 2:list<string> tags) throws (1:PlowException e),
     void setLayerMinCoresPerTask(1:common.Guid guid, 2:i32 minCores) throws (1:PlowException e),
     void setLayerMaxCoresPerTask(1:common.Guid guid, 2:i32 minCores) throws (1:PlowException e),
     void setLayerMinRamPerTask(1:common.Guid guid, 2:i32 minCores) throws (1:PlowException e),

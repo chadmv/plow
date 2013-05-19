@@ -22,6 +22,7 @@ import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.LayerSpecT;
 import com.breakersoft.plow.util.JdbcUtils;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -131,7 +132,7 @@ public class LayerDaoTests extends AbstractTest {
     @Test
     public void setLayerTags() {
         testCreate();
-        layerDao.setTags(layer, Sets.newHashSet("tag1", "tag2", "tag3"));
+        layerDao.setTags(layer, Lists.newArrayList("tag1", "tag2", "tag3", "tag1"));
 
         List<String> tags = jdbc().query(
                 "SELECT unnest(str_tags) FROM plow.layer WHERE pk_layer=?", JdbcUtils.STRING_MAPPER, layer.getLayerId());

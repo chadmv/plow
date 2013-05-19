@@ -373,7 +373,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void setLayerTags(Layer layer, Set<String> tags) {
+    public void setLayerTags(Layer layer, List<String> tags) {
         layerDao.setTags(layer, tags);
     }
 

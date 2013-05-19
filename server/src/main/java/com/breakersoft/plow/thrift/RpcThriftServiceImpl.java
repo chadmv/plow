@@ -373,7 +373,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public void setLayerTags(String id, Set<String> tags) throws PlowException {
+    public void setLayerTags(String id, List<String> tags) throws PlowException {
         Layer layer = jobService.getLayer(UUID.fromString(id));
         jobService.setLayerTags(layer, tags);
     }
