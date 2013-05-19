@@ -207,6 +207,7 @@ CREATE table plow.layer (
   int_cores_max SMALLINT NOT NULL DEFAULT -1,
   int_ram_min INTEGER NOT NULL CHECK (int_ram_min > 0),
   int_ram_max INTEGER NOT NULL DEFAULT -1,
+  int_retries_max INTEGER NOT NULL DEFAULT 1,
   bool_threadable BOOLEAN DEFAULT 'f' NOT NULL,
   hstore_env hstore
 ) WITHOUT OIDS;
