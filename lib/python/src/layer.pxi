@@ -90,7 +90,9 @@ cdef class LayerSpec:
     :var chunk: int 
     :var minCores: int 
     :var maxCores: int 
-    :var minRam: int 
+    :var minRam: int
+    :var maxRam: int
+    :var maxRetries: int
     :var threadable: bool
     :var command: list[str]
     :var depends: list[:class:`.DependSpec`] 
@@ -100,21 +102,18 @@ cdef class LayerSpec:
 
     """
     cdef public string name
-    cdef public int chunk, minCores, maxCores, minRam
-    cdef public bint threadable
+    cdef public int chunk
+    cdef bint threadable
     cdef list command, depends, tasks 
     cdef list tags
     cdef string range
+    cdef int minCores, maxCores, minRam, maxRam, maxRetries
     cdef dict env
     cdef _LayerSpecT__isset __isset
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
-        self.chunk = kwargs.get('chunk', 0)
-        self.minCores = kwargs.get('minCores', 0)
-        self.maxCores = kwargs.get('maxCores', 0)
-        self.minRam = kwargs.get('minRam', 0)
-        self.threadable = kwargs.get('threadable', False) 
+        self.chunk = kwargs.get('chunk', 1)
         self.command = kwargs.get('command', [])
         self.depends = kwargs.get('depends', [])
         self.tasks = kwargs.get('tasks', [])
@@ -122,9 +121,25 @@ cdef class LayerSpec:
         self.env = kwargs.get('env', {})
 
         if 'range' in kwargs:
-            self.range = kwargs.get('range', '')
-            self.__isset.range = True
+            self.range = kwargs.get('range')
 
+        if 'minCores' in kwargs:
+            self.minCores = kwargs.get('minCores')
+
+        if 'maxCores' in kwargs:
+            self.maxCores = kwargs.get('maxCores')
+
+        if 'minRam' in kwargs:
+            self.minRam = kwargs.get('minRam')
+
+        if 'maxRam' in kwargs:
+            self.maxRam = kwargs.get('maxRam')
+
+        if 'threadable' in kwargs:
+            self.threadable = kwargs.get('threadable')
+
+        if 'maxReties' in kwargs:
+            self.maxRetries = kwargs.get('maxRetries') 
 
     def __repr__(self):
         return "<LayerSpec: %s>" % self.name
@@ -181,6 +196,42 @@ cdef class LayerSpec:
 
         return s
 
+    property minCores:
+        def __get__(self): return self.minCores
+        def __set__(self, val): 
+            self.minCores = val
+            self.__isset.minCores = True
+
+    property maxCores:
+        def __get__(self): return self.maxCores
+        def __set__(self, val): 
+            self.maxCores = val
+            self.__isset.maxCores = True
+
+    property minRam:
+        def __get__(self): return self.minRam
+        def __set__(self, val): 
+            self.minRam = val
+            self.__isset.minRam = True
+    
+    property maxRam:
+        def __get__(self): return self.maxRam
+        def __set__(self, val): 
+            self.maxRam = val
+            self.__isset.maxRam = True
+
+    property maxRetries:
+        def __get__(self): return self.maxRetries
+        def __set__(self, val): 
+            self.maxRetries = val
+            self.__isset.maxRetries = True
+
+    property threadable:
+        def __get__(self): return self.maxRam
+        def __set__(self, val): 
+            self.maxRam = val
+            self.__isset.maxRam = True
+
     property range:
         def __get__(self): return self.range
         def __set__(self, val): 
@@ -201,7 +252,9 @@ cdef class LayerSpec:
 
     property tags:
         def __get__(self): return self.tags
-        def __set__(self, val): self.tags = val
+        def __set__(self, val):
+            self.tags = val
+            self.__isset.tags = True
 
     property env:
         def __get__(self): return self.env

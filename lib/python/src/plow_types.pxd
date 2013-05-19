@@ -289,6 +289,13 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
 
     cdef struct _LayerSpecT__isset:
         bint range
+        bint minCores
+        bint maxCores
+        bint minRam
+        bint maxRam
+        bint tags
+        bint threadable
+        bint maxRetries
 
     cdef cppclass LayerSpecT:
         string name
@@ -299,6 +306,8 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int minCores
         int maxCores
         int minRam
+        int maxRam
+        int maxRetries
         bint threadable
         vector[DependSpecT] depends
         vector[TaskSpecT] tasks
