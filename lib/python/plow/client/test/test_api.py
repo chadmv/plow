@@ -25,7 +25,7 @@ def launch_test_job(name):
     5:i32 chunk = 1,
     6:i32 minCores = 1,
     7:i32 maxCores = 1,
-    8:i32 minRamMb = 1024,
+    8:i32 minRam = 1024,
     9:bool threadable = false,
     10:list<DependSpecT> depends,
     11:list<TaskSpecT> tasks

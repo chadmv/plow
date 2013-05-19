@@ -43,7 +43,7 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
         void getLayers(vector[LayerT]&,  Guid& layerId) nogil except +
         void addOutput( Guid& layerId, string& path,  Attrs& attrs) nogil except +
         void getLayerOutputs(vector[OutputT]&, Guid& layerId) nogil except +
-        void setLayerTags(Guid& guid, c_set[string]& tags) nogil except +
+        void setLayerTags(Guid& guid, vector[string]& tags) nogil except +
         void setLayerMinCoresPerTask(Guid& guid, int minCores) nogil except +
         void setLayerMaxCoresPerTask(Guid& guid, int minCores) nogil except +
         void setLayerMinRamPerTask(Guid& guid, int minCores) nogil except +

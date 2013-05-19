@@ -90,20 +90,20 @@ cdef class LayerSpec:
     :var chunk: int 
     :var minCores: int 
     :var maxCores: int 
-    :var minRamMb: int 
+    :var minRam: int 
     :var threadable: bool
     :var command: list[str]
     :var depends: list[:class:`.DependSpec`] 
     :var tasks: list [:class:`.TaskSpec`]
-    :var tags: set(str)
+    :var tags: list(str)
     :var env: dict
 
     """
     cdef public string name
-    cdef public int chunk, minCores, maxCores, minRamMb
+    cdef public int chunk, minCores, maxCores, minRam
     cdef public bint threadable
     cdef list command, depends, tasks 
-    cdef set tags
+    cdef list tags
     cdef string range
     cdef dict env
     cdef _LayerSpecT__isset __isset
@@ -113,12 +113,12 @@ cdef class LayerSpec:
         self.chunk = kwargs.get('chunk', 0)
         self.minCores = kwargs.get('minCores', 0)
         self.maxCores = kwargs.get('maxCores', 0)
-        self.minRamMb = kwargs.get('minRamMb', 0)
+        self.minRam = kwargs.get('minRam', 0)
         self.threadable = kwargs.get('threadable', False) 
         self.command = kwargs.get('command', [])
         self.depends = kwargs.get('depends', [])
         self.tasks = kwargs.get('tasks', [])
-        self.tags = kwargs.get('tags', set())
+        self.tags = kwargs.get('tags', list())
         self.env = kwargs.get('env', {})
 
         if 'range' in kwargs:
@@ -135,7 +135,7 @@ cdef class LayerSpec:
         self.chunk = t.chunk
         self.minCores = t.minCores
         self.maxCores = t.maxCores
-        self.minRamMb = t.minRamMb
+        self.minRam = t.minRam
         self.threadable = t.threadable
         self.command = t.command
         self.tags = t.tags
@@ -157,7 +157,7 @@ cdef class LayerSpec:
         s.chunk = self.chunk
         s.minCores = self.minCores
         s.maxCores = self.maxCores
-        s.minRamMb = self.minRamMb
+        s.minRam = self.minRam
         s.threadable = self.threadable
         s.command = self.command
         s.tags = self.tags
@@ -229,7 +229,7 @@ cdef class Layer:
     :var maxRam: int
     :var threadable: bool
     :var totals: list[:class:`.TaskTotals`]
-    :var tags: set(str)
+    :var tags: list(str)
     :var stats: :class:`.LayerStats`
     
     """
@@ -310,11 +310,11 @@ cdef class Layer:
         """
         add_layer_output(self, path, attrs)
 
-    def set_tags(self, c_set[string]& tags):
+    def set_tags(self, vector[string]& tags):
         """
         Set the tags for the layer 
 
-        :param tags: set(str)
+        :param tags: list(str)
         """
         set_layer_tags(self, tags)
         self._layer.tags = tags
@@ -462,10 +462,10 @@ def get_layer_outputs(Layer layer):
     return ret
 
 @reconnecting
-def set_layer_tags(Layer layer, c_set[string]& tags):
+def set_layer_tags(Layer layer, vector[string]& tags):
     """ 
     :param layer: :class:`.Layer`
-    :param tags: set(str) 
+    :param tags: list(str) 
     """
     conn().proxy().setLayerTags(layer.id, tags)
 

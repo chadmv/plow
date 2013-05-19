@@ -198,7 +198,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string name
         string range
         int chunk
-        c_set[string] tags
+        vector[string] tags
         bint threadable
         int minCores
         int maxCores
@@ -293,12 +293,12 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
     cdef cppclass LayerSpecT:
         string name
         vector[string] command
-        c_set[string] tags
+        vector[string] tags
         string range
         int chunk
         int minCores
         int maxCores
-        int minRamMb
+        int minRam
         bint threadable
         vector[DependSpecT] depends
         vector[TaskSpecT] tasks
