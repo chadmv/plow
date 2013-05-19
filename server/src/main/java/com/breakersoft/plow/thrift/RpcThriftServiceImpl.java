@@ -18,6 +18,7 @@ import com.breakersoft.plow.Matcher;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
+import com.breakersoft.plow.Service;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.exceptions.PlowWriteException;
 import com.breakersoft.plow.service.FilterService;
@@ -25,6 +26,7 @@ import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.ProjectService;
 import com.breakersoft.plow.service.StateManager;
+import com.breakersoft.plow.service.WranglerService;
 import com.breakersoft.plow.thrift.dao.ThriftActionDao;
 import com.breakersoft.plow.thrift.dao.ThriftClusterDao;
 import com.breakersoft.plow.thrift.dao.ThriftDependDao;
@@ -37,6 +39,7 @@ import com.breakersoft.plow.thrift.dao.ThriftMatcherDao;
 import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
 import com.breakersoft.plow.thrift.dao.ThriftProjectDao;
 import com.breakersoft.plow.thrift.dao.ThriftQuotaDao;
+import com.breakersoft.plow.thrift.dao.ThriftServiceDao;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 
 @ThriftService
@@ -92,6 +95,12 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     ThriftDependDao thriftDependDao;
+
+    @Autowired
+    ThriftServiceDao thriftServiceDao;
+
+    @Autowired
+    WranglerService wranglerService;
 
     @Autowired
     StateManager stateManager;
@@ -616,5 +625,27 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     @Override
     public JobSpecT getJobSpec(String jobId) throws PlowException, TException {
         return thriftJobDao.getJobSpec(UUID.fromString(jobId));
+    }
+
+    @Override
+    public void deleteService(String svcId) throws PlowException, TException {
+        wranglerService.deleteService(UUID.fromString(svcId));
+    }
+
+    @Override
+    public List<ServiceT> getServices() throws PlowException, TException {
+        return thriftServiceDao.getServices();
+    }
+
+    @Override
+    public void updateService(ServiceT svct) throws PlowException, TException {
+        wranglerService.updateService(svct);
+    }
+
+    @Override
+    public ServiceT createService(ServiceT svct) throws PlowException,
+            TException {
+        Service svc = wranglerService.createService(svct);
+        return thriftServiceDao.getService(svc.getName());
     }
 }

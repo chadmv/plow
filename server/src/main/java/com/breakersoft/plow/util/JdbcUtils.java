@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.RowMapper;
 
 import com.breakersoft.plow.thrift.TaskTotalsT;
+import com.google.common.collect.ImmutableList;
 
 public final class JdbcUtils {
 
@@ -47,13 +48,13 @@ public final class JdbcUtils {
     }
 
     public static String In(String col, int size, String cast) {
-    	final String repeat = "?::" + cast;
+        final String repeat = "?::" + cast;
         return String.format("%s IN (%s)", col,
                 StringUtils.repeat(repeat,",", size));
     }
 
     public static final String limitOffset(int limit, int offset) {
-    	return String.format("LIMIT %d OFFSET %d", limit, offset);
+        return String.format("LIMIT %d OFFSET %d", limit, offset);
     }
 
     public static TaskTotalsT getTaskTotals(ResultSet rs) throws SQLException {
@@ -69,14 +70,26 @@ public final class JdbcUtils {
     }
 
     public static final Array toArray(Connection conn, Collection<String> col) throws SQLException {
-    	return conn.createArrayOf("text", col.toArray());
+        return conn.createArrayOf("text", col.toArray());
+    }
+
+    public static final ImmutableList<String> toList(Array sqlArray) {
+        if (sqlArray == null) {
+            return ImmutableList.of();
+        }
+
+        try {
+            return ImmutableList.copyOf((String[])sqlArray.getArray());
+        } catch (SQLException e) {
+            return ImmutableList.of();
+        }
     }
 
     public static final RowMapper<String> STRING_MAPPER = new RowMapper<String>() {
         @Override
         public String mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
-        	return rs.getString(1);
+            return rs.getString(1);
         }
     };
 
@@ -84,12 +97,12 @@ public final class JdbcUtils {
         @Override
         public Object[] mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
-        	final int count = rs.getMetaData().getColumnCount();
-        	Object[] result = new Object[rs.getMetaData().getColumnCount()];
-        	for (int i=0; i<count; i++) {
-        		result[i] = rs.getObject(i+1);
-        	}
-        	return result;
+            final int count = rs.getMetaData().getColumnCount();
+            Object[] result = new Object[rs.getMetaData().getColumnCount()];
+            for (int i=0; i<count; i++) {
+                result[i] = rs.getObject(i+1);
+            }
+            return result;
         }
     };
 }

@@ -1,6 +1,7 @@
 package com.breakersoft.plow.util;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.UUID;
 
 public final class PlowUtils {
@@ -43,5 +44,17 @@ public final class PlowUtils {
             throw new IllegalArgumentException("Expecting non-empty string.");
         }
         return str;
+    }
+
+    /**
+     * Uniquify a collection of strings while maintaining order.
+     * @param c
+     * @return
+     */
+    public static String[] uniquify(Collection<String> c) {
+        if (c == null) {
+            return null;
+        }
+        return new LinkedHashSet<String>(c).toArray(new String[] {});
     }
 }

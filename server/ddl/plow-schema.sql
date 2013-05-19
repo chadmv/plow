@@ -64,6 +64,25 @@ CREATE UNIQUE INDEX project_str_code_idx ON plow.project (str_code);
 ----------------------------------------------------------
 
 ---
+--- Services
+---
+CREATE TABLE plow.service (
+  pk_service UUID NOT NULL PRIMARY KEY,
+  str_name TEXT NOT NULL,
+  str_tags TEXT[],
+  int_cores_min INTEGER,
+  int_cores_max INTEGER,
+  int_ram_min INTEGER,
+  int_ram_max INTEGER,
+  int_retries_max SMALLINT,
+  bool_threadable BOOLEAN 
+);
+
+CREATE UNIQUE INDEX service_name_idx ON plow.service (str_name);
+
+----------------------------------------------------------
+
+---
 --- Folders
 ---
 
@@ -171,6 +190,7 @@ CREATE table plow.layer (
   str_range TEXT,
   str_command TEXT[] NOT NULL,
   str_tags TEXT[] NOT NULL,
+  str_service TEXT NOT NULL,
   int_chunk_size INTEGER NOT NULL,
   int_order INTEGER NOT NULL,
   int_cores_min SMALLINT NOT NULL,

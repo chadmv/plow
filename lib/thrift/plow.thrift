@@ -217,20 +217,34 @@ struct LayerStatsT {
     13:i64 totalFailCoreTime
 }
 
+struct ServiceT {
+    1:common.Guid id,
+    2:required string name,
+    3:list<string> tags = [],
+    4:i32 minCores = -1,
+    5:i32 maxCores = -1,
+    6:i32 minRam = -1,
+    7:i32 maxRam = -1,
+    8:i32 maxRetries = -1,
+    9:bool threadable = false
+}
+
 struct LayerT {
     1:required common.Guid id,
     2:string name,
     3:string range,
-    4:i32 chunk,
-    5:set<string> tags,
-    6:bool threadable,
-    7:i32 minCores,
-    8:i32 maxCores,
-    9:i32 minRam,
-    10:i32 maxRam,
-    11:i32 runCores,
-    12:TaskTotalsT totals,
-    13:LayerStatsT stats
+    4:string serv,
+    5:i32 chunk,
+    6:set<string> tags,
+    7:bool threadable,
+    8:i32 minCores,
+    9:i32 maxCores,
+    10:i32 minRam,
+    11:i32 maxRam,
+    12:i32 runCores,
+    13:i32 maxRetries,
+    14:TaskTotalsT totals,
+    15:LayerStatsT stats
 }
 
 struct TaskStatsT {
@@ -343,14 +357,15 @@ struct LayerSpecT {
     2:list<string> command,
     3:set<string> tags,
     4:optional string range,
-    5:i32 chunk = 1,
-    6:i32 minCores = 1,
-    7:i32 maxCores = 1,
-    8:i32 minRamMb = 1024,
-    9:bool threadable = false,
-    10:list<DependSpecT> depends,
-    11:list<TaskSpecT> tasks,
-    12:Attrs env
+    5:string serv,
+    6:i32 chunk = 1,
+    7:i32 minCores = 1,
+    8:i32 maxCores = 1,
+    9:i32 minRamMb = 1024,
+    10:bool threadable = false,
+    11:list<DependSpecT> depends,
+    12:list<TaskSpecT> tasks,
+    13:Attrs env
 }
 
 struct JobSpecT {
@@ -408,6 +423,11 @@ struct OutputT {
 service RpcService {
     
     i64 getPlowTime() throws (1:PlowException e),
+
+    list<ServiceT> getServices() throws (1:PlowException e),
+    ServiceT createService(1:ServiceT svc) throws (1:PlowException e),
+    void deleteService(1:common.Guid id) throws (1:PlowException e),
+    void updateService(1:ServiceT svc) throws (1:PlowException e),
 
     ProjectT getProject(1:common.Guid id) throws (1:PlowException e),
     ProjectT getProjectByCode(1:string code) throws (1:PlowException e),
