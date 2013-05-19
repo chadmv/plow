@@ -358,7 +358,7 @@ struct LayerSpecT {
     3:optional string range,
     4:list<string> tags,
     5:string serv,
-    6:i32 chunk,
+    6:i32 chunk = 1,
     7:i32 minCores,
     8:i32 maxCores,
     9:i32 minRam,

@@ -201,7 +201,7 @@ CREATE table plow.layer (
   str_command TEXT[] NOT NULL,
   str_tags TEXT[] NOT NULL,
   str_service TEXT NOT NULL,
-  int_chunk_size INTEGER NOT NULL CHECK (int_chunk_size > 0),
+  int_chunk_size INTEGER NOT NULL DEFAULT 1 CHECK (int_chunk_size > 0),
   int_order INTEGER NOT NULL,
   int_cores_min SMALLINT NOT NULL CHECK (int_cores_min > 0),
   int_cores_max SMALLINT NOT NULL DEFAULT -1,
