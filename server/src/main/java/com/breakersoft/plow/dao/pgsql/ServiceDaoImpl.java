@@ -6,12 +6,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Service;
 import com.breakersoft.plow.ServiceE;
+import com.breakersoft.plow.ServiceFull;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.ServiceDao;
 import com.breakersoft.plow.thrift.ServiceT;
@@ -32,6 +34,60 @@ public class ServiceDaoImpl extends AbstractDao implements ServiceDao {
         }
     };
 
+    public static final RowMapper<ServiceFull> MAPPER_FULL = new RowMapper<ServiceFull>() {
+        @Override
+        public ServiceFull mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+
+            final ServiceFull service = new ServiceFull();
+            service.setServiceId((UUID) rs.getObject("pk_service"));
+            service.setName(rs.getString("str_name"));
+
+            if (rs.getBoolean("isset_int_cores_min")) {
+                service.setMinCores(rs.getInt("int_cores_min"));
+            }
+
+            if (rs.getBoolean("isset_int_cores_max")) {
+                service.setMaxCores(rs.getInt("int_cores_max"));
+            }
+
+            if (rs.getBoolean("isset_int_ram_min")) {
+                service.setMinCores(rs.getInt("int_ram_min"));
+            }
+
+            if (rs.getBoolean("isset_int_ram_max")) {
+                service.setMinRam(rs.getInt("int_ram_max"));
+            }
+
+            if (rs.getBoolean("isset_int_ram_min")) {
+                service.setMaxRam(rs.getInt("int_ram_min"));
+            }
+
+            if (rs.getBoolean("isset_bool_threadable")) {
+                service.setThreadable(rs.getBoolean("bool_threadable"));
+            }
+
+            if (rs.getBoolean("isset_str_tags")) {
+                service.setTags(JdbcUtils.toList(rs.getArray("str_tags")));
+            }
+
+            if (rs.getBoolean("isset_int_retries_max")) {
+                service.setMaxRetries(rs.getInt("int_retries_max"));
+            }
+
+            return service;
+        }
+    };
+
+    @Override
+    public ServiceFull getServiceFull(String name) {
+        try {
+            return jdbc.queryForObject("SELECT * FROM plow.service WHERE str_name=?", MAPPER_FULL, name);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
     private static final String GET =
         "SELECT " +
             "pk_service," +
@@ -39,12 +95,19 @@ public class ServiceDaoImpl extends AbstractDao implements ServiceDao {
         "FROM " +
             "service ";
 
+    @Override
     public Service get(UUID id) {
         return jdbc.queryForObject(GET + "WHERE pk_service=?", MAPPER, id);
     }
 
+    @Override
     public Service get(String name) {
         return jdbc.queryForObject(GET + "WHERE str_name=?", MAPPER, name);
+    }
+
+    @Override
+    public boolean exists(String name) {
+        return jdbc.queryForObject("SELECT COUNT(1) FROM plow.service WHERE str_name=?", Integer.class, name) > 0;
     }
 
     private static final String INSERT =
@@ -58,8 +121,16 @@ public class ServiceDaoImpl extends AbstractDao implements ServiceDao {
                     "int_ram_min",
                     "int_ram_max",
                     "int_retries_max",
-                    "bool_threadable");
+                    "bool_threadable",
+                    "isset_int_cores_min",
+                    "isset_int_cores_max",
+                    "isset_int_ram_min",
+                    "isset_int_ram_max",
+                    "isset_str_tags",
+                    "isset_bool_threadable",
+                    "isset_int_retries_max");
 
+    @Override
     public Service create(final ServiceT service) {
 
         final UUID id = UUID.randomUUID();
@@ -70,11 +141,12 @@ public class ServiceDaoImpl extends AbstractDao implements ServiceDao {
                    final PreparedStatement ret = conn.prepareStatement(INSERT);
                    ret.setObject(1, id);
                    ret.setString(2, service.getName());
+
                    if (PlowUtils.isValid(service.getTags())) {
                        ret.setArray(3, conn.createArrayOf("text",  PlowUtils.uniquify(service.getTags())));
                    }
                    else {
-                       ret.setArray(3, conn.createArrayOf("text", new String[] { }));
+                       ret.setArray(3, null);
                    }
                    ret.setInt(4, service.getMinCores());
                    ret.setInt(5, service.getMaxCores());
@@ -82,6 +154,15 @@ public class ServiceDaoImpl extends AbstractDao implements ServiceDao {
                    ret.setInt(7, service.getMaxRam());
                    ret.setInt(8, service.getMaxRetries());
                    ret.setBoolean(9, service.isThreadable());
+
+                   ret.setBoolean(10, service.isSetMinCores());
+                   ret.setBoolean(11, service.isSetMaxCores());
+                   ret.setBoolean(12, service.isSetMinRam());
+                   ret.setBoolean(13, service.isSetMaxRam());
+                   ret.setBoolean(14, service.isSetTags());
+                   ret.setBoolean(15, service.isSetThreadable());
+                   ret.setBoolean(16, service.isSetMaxRetries());
+
                    return ret;
                }
         });
@@ -105,10 +186,18 @@ public class ServiceDaoImpl extends AbstractDao implements ServiceDao {
                 "int_cores_min = ?,"+
                 "int_cores_max = ?,"+
                 "int_retries_max = ?, "+
-                "bool_threadable = ? " +
+                "bool_threadable = ?,"+
+                "isset_int_cores_min=?,"+
+                "isset_int_cores_max=?,"+
+                "isset_int_ram_min=?,"+
+                "isset_int_ram_max=?,"+
+                "isset_str_tags=?,"+
+                "isset_bool_threadable=?,"+
+                "isset_int_retries_max=?" +
             "WHERE " +
                 "pk_service = ?";
 
+    @Override
     public boolean update(final ServiceT service) {
         return jdbc.update(new PreparedStatementCreator() {
             @Override
@@ -122,7 +211,7 @@ public class ServiceDaoImpl extends AbstractDao implements ServiceDao {
                             PlowUtils.uniquify(service.getTags())));
                 }
                 else {
-                     ret.setArray(2, conn.createArrayOf("text", new String[] { }));
+                     ret.setArray(2, null);
                 }
 
                 ret.setInt(3, service.getMinRam());
@@ -131,7 +220,15 @@ public class ServiceDaoImpl extends AbstractDao implements ServiceDao {
                 ret.setInt(6, service.getMaxCores());
                 ret.setInt(7, service.getMaxRetries());
                 ret.setBoolean(8, service.isThreadable());
-                ret.setObject(9, UUID.fromString(service.id));
+                ret.setBoolean(9, service.isSetMinCores());
+                ret.setBoolean(10, service.isSetMaxCores());
+                ret.setBoolean(11, service.isSetMinRam());
+                ret.setBoolean(12, service.isSetMaxRam());
+                ret.setBoolean(13, service.isSetTags());
+                ret.setBoolean(14, service.isSetThreadable());
+                ret.setBoolean(15, service.isSetMaxRetries());
+
+                ret.setObject(16, UUID.fromString(service.id));
                 return ret;
             }
         }) == 1;

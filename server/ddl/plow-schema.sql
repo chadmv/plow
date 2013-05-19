@@ -75,7 +75,17 @@ CREATE TABLE plow.service (
   int_ram_min INTEGER,
   int_ram_max INTEGER,
   int_retries_max SMALLINT,
-  bool_threadable BOOLEAN 
+  bool_threadable BOOLEAN,
+  /**
+  * The isset columns determine if the service defines a value.
+  **/
+  isset_int_cores_min BOOLEAN,
+  isset_int_cores_max BOOLEAN,
+  isset_int_ram_min BOOLEAN,
+  isset_int_ram_max BOOLEAN,
+  isset_str_tags BOOLEAN,
+  isset_bool_threadable BOOLEAN,
+  isset_int_retries_max BOOLEAN
 );
 
 CREATE UNIQUE INDEX service_name_idx ON plow.service (str_name);
@@ -191,12 +201,12 @@ CREATE table plow.layer (
   str_command TEXT[] NOT NULL,
   str_tags TEXT[] NOT NULL,
   str_service TEXT NOT NULL,
-  int_chunk_size INTEGER NOT NULL,
+  int_chunk_size INTEGER NOT NULL CHECK (int_chunk_size > 0),
   int_order INTEGER NOT NULL,
-  int_cores_min SMALLINT NOT NULL,
-  int_cores_max SMALLINT NOT NULL,
-  int_ram_min INTEGER NOT NULL,
-  int_ram_max INTEGER NOT NULL DEFAULT 32000,
+  int_cores_min SMALLINT NOT NULL CHECK (int_cores_min > 0),
+  int_cores_max SMALLINT NOT NULL DEFAULT -1,
+  int_ram_min INTEGER NOT NULL CHECK (int_ram_min > 0),
+  int_ram_max INTEGER NOT NULL DEFAULT -1,
   bool_threadable BOOLEAN DEFAULT 'f' NOT NULL,
   hstore_env hstore
 ) WITHOUT OIDS;

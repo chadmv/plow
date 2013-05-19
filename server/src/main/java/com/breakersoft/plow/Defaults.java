@@ -1,6 +1,8 @@
 
 package com.breakersoft.plow;
 
+import com.google.common.collect.ImmutableList;
+
 public final class Defaults {
 
     public static int CORES_MIN = 1;
@@ -21,12 +23,13 @@ public final class Defaults {
 
     public static int PROC_ORPHAN_CHECK_MILLIS = 300000;
 
-    public static String[] DEFAULT_TAGS = new String[] { "render" };
+    public static ImmutableList<String> DEFAULT_TAGS = ImmutableList.of("render");
     public static int DEFAULT_MIN_CORES = 1;
     public static int DEFAULT_MAX_CORES = 8;
     public static int DEFAULT_MIN_RAM = 3072;
     public static int DEFAULT_MAX_RAM = 20480;
-    public static int DEFAULT_RETRIES = 2;
+    public static int DEFAULT_MAX_RETRIES = 2;
+    public static boolean DEFAULT_THREADABLE = false;
     public static String DEFAULT_SERVICE = "default";
 
 }
