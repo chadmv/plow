@@ -177,6 +177,8 @@ cdef class LayerSpec:
         s.minCores = self.minCores
         s.maxCores = self.maxCores
         s.minRam = self.minRam
+        s.maxRam = self.maxRam
+        s.maxRetries = self.maxRetries
         s.threadable = self.threadable
         s.command = self.command
         s.tags = self.tags
