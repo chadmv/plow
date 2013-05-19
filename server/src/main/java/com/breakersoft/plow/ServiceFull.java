@@ -67,10 +67,10 @@ public class ServiceFull extends ServiceE {
     public boolean isSetMaxRetries() {
         return setMaxRetries;
     }
-    public boolean isIssetThreadable() {
+    public boolean isSetThreadable() {
         return setThreadable;
     }
-    public boolean isIssetTags() {
+    public boolean isSetTags() {
         return setTags;
     }
     public List<String> getTags() {

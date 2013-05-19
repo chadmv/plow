@@ -166,9 +166,8 @@ public class JobServiceImpl implements JobService {
 
         // Set a default service name, although it might not be setup
         // as a valid service.
-        logger.info("setting default service " + layer.getServ());
         if (!PlowUtils.isValid(layer.getServ())) {
-            logger.info("setting default service");
+            logger.info("Setting server on {} to {}", layer.name, Defaults.DEFAULT_SERVICE);
             layer.setServ(Defaults.DEFAULT_SERVICE);
         }
 
@@ -196,11 +195,11 @@ public class JobServiceImpl implements JobService {
                 layer.setMaxRetries(service.getMaxRetries());
             }
 
-            if (service.isIssetTags() && !layer.isSetTags()) {
+            if (service.isSetTags() && !layer.isSetTags()) {
                 layer.setTags(layer.getTags());
             }
 
-            if (service.isIssetThreadable() && !layer.isSetThreadable()) {
+            if (service.isSetThreadable() && !layer.isSetThreadable()) {
                 layer.setThreadable(layer.isThreadable());
             }
         }
