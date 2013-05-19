@@ -196,11 +196,11 @@ public class JobServiceImpl implements JobService {
             }
 
             if (service.isSetTags() && !layer.isSetTags()) {
-                layer.setTags(layer.getTags());
+                layer.setTags(service.getTags());
             }
 
             if (service.isSetThreadable() && !layer.isSetThreadable()) {
-                layer.setThreadable(layer.isThreadable());
+                layer.setThreadable(service.isThreadable());
             }
         }
 
