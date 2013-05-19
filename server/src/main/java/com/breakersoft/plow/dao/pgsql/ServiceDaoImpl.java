@@ -52,15 +52,11 @@ public class ServiceDaoImpl extends AbstractDao implements ServiceDao {
             }
 
             if (rs.getBoolean("isset_int_ram_min")) {
-                service.setMinCores(rs.getInt("int_ram_min"));
+                service.setMinRam(rs.getInt("int_ram_min"));
             }
 
             if (rs.getBoolean("isset_int_ram_max")) {
-                service.setMinRam(rs.getInt("int_ram_max"));
-            }
-
-            if (rs.getBoolean("isset_int_ram_min")) {
-                service.setMaxRam(rs.getInt("int_ram_min"));
+                service.setMaxRam(rs.getInt("int_ram_max"));
             }
 
             if (rs.getBoolean("isset_bool_threadable")) {
