@@ -51,6 +51,6 @@ public class ThriftServiceDaoTests extends AbstractTest {
         newService.name = "foo";
         serviceDao.create(newService);
 
-        assertEquals(1, thriftServiceDao.getServices().size());
+        assertTrue(thriftServiceDao.getServices().size() > 0);
     }
 }
