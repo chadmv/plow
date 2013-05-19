@@ -214,7 +214,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
 
     @Override
     public boolean hasProcs(Node node) {
-        return jdbc.queryForInt("SELECT COUNT(1) FROM proc WHERE pk_node=?", node.getNodeId()) > 0;
+        return jdbc.queryForObject("SELECT COUNT(1) FROM proc WHERE pk_node=?", Integer.class, node.getNodeId()) > 0;
     }
 
     @Override

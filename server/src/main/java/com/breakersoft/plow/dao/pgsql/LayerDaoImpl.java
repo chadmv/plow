@@ -128,9 +128,9 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
 
     @Override
     public boolean isFinished(Layer layer) {
-        return jdbc.queryForInt(
+        return jdbc.queryForObject(
                 "SELECT int_total - (int_succeeded + int_eaten) AS t " +
-                "FROM layer_count WHERE pk_layer=?", layer.getLayerId()) == 0;
+                "FROM layer_count WHERE pk_layer=?", Integer.class, layer.getLayerId()) == 0;
     }
 
     private static final RowMapper<FrameRange> RANGE_MAPPER = new RowMapper<FrameRange>() {
