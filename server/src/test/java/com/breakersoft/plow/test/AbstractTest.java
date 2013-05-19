@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Cluster;
+import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
@@ -80,11 +81,12 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         layer.setCommand(Lists.newArrayList("sleep", "5" ));
         layer.setMaxCores(8);
         layer.setMinCores(1);
-        layer.setMinRamMb(1024);
+        layer.setMinRam(1024);
         layer.setName("test_ls");
         layer.setRange("1-10");
-        layer.setTags(Sets.newHashSet("unassigned"));
+        layer.setTags(Lists.newArrayList("unassigned"));
         layer.env = Maps.newHashMap();
+        layer.setServ(Defaults.DEFAULT_SERVICE);
         jobspec.addToLayers(layer);
 
         return jobspec;
@@ -107,11 +109,12 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
             layer.setCommand(Lists.newArrayList("sleep", "5" ));
             layer.setMaxCores(8);
             layer.setMinCores(1);
-            layer.setMinRamMb(1024);
+            layer.setMinRam(1024);
             layer.setName(String.format("test_ls_%d", i));
             layer.setRange("1-10");
-            layer.setTags(Sets.newHashSet("unassigned"));
+            layer.setTags(Lists.newArrayList("unassigned"));
             layer.env = Maps.newHashMap();
+            layer.setServ(Defaults.DEFAULT_SERVICE);
             jobspec.addToLayers(layer);
         }
 
@@ -134,9 +137,10 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         layer.setCommand(Lists.newArrayList("echo", "%{TASK}" ));
         layer.setMaxCores(8);
         layer.setMinCores(1);
-        layer.setMinRamMb(1024);
+        layer.setMinRam(1024);
         layer.setName("random_tasks");
-        layer.setTags(Sets.newHashSet("unittest"));
+        layer.setTags(Lists.newArrayList("unittest"));
+        layer.setServ(Defaults.DEFAULT_SERVICE);
 
         jobspec.addToLayers(layer);
 
@@ -165,9 +169,10 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         layer.setCommand(Lists.newArrayList("echo", "%{TASK}" ));
         layer.setMaxCores(8);
         layer.setMinCores(1);
-        layer.setMinRamMb(1024);
+        layer.setMinRam(1024);
         layer.setName("random_tasks");
-        layer.setTags(Sets.newHashSet("unittest"));
+        layer.setTags(Lists.newArrayList("unittest"));
+        layer.setServ(Defaults.DEFAULT_SERVICE);
 
         jobspec.addToLayers(layer);
 

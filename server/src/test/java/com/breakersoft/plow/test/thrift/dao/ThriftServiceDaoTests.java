@@ -36,8 +36,8 @@ public class ThriftServiceDaoTests extends AbstractTest {
 
         ServiceT newService = new ServiceT();
         newService.name = "foo";
-        newService.maxCores = 10;
-        newService.minCores = 1;
+        newService.setMaxCores(10);
+        newService.setMinCores(1);
         Service svc = serviceDao.create(newService);
 
         ServiceT service = thriftServiceDao.getService(svc.getServiceId());

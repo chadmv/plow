@@ -220,13 +220,13 @@ struct LayerStatsT {
 struct ServiceT {
     1:common.Guid id,
     2:required string name,
-    3:list<string> tags = [],
-    4:i32 minCores = -1,
-    5:i32 maxCores = -1,
-    6:i32 minRam = -1,
-    7:i32 maxRam = -1,
-    8:i32 maxRetries = -1,
-    9:bool threadable = false
+    3:list<string> tags,
+    4:i32 minCores,
+    5:i32 maxCores,
+    6:i32 minRam,
+    7:i32 maxRam,
+    8:i32 maxRetries,
+    9:bool threadable
 }
 
 struct LayerT {
@@ -235,7 +235,7 @@ struct LayerT {
     3:string range,
     4:string serv,
     5:i32 chunk,
-    6:set<string> tags,
+    6:list<string> tags,
     7:bool threadable,
     8:i32 minCores,
     9:i32 maxCores,
@@ -353,19 +353,21 @@ struct TaskSpecT {
 }
 
 struct LayerSpecT {
-    1:string name,
-    2:list<string> command,
-    3:set<string> tags,
-    4:optional string range,
+    1:required string name,
+    2:required list<string> command,
+    3:optional string range,
+    4:list<string> tags,
     5:string serv,
-    6:i32 chunk = 1,
-    7:i32 minCores = 1,
-    8:i32 maxCores = 1,
-    9:i32 minRamMb = 1024,
-    10:bool threadable = false,
-    11:list<DependSpecT> depends,
-    12:list<TaskSpecT> tasks,
-    13:Attrs env
+    6:i32 chunk,
+    7:i32 minCores,
+    8:i32 maxCores,
+    9:i32 minRam,
+    10:i32 maxRam,
+    11:bool threadable,
+    12:i32 maxRetries,
+    13:list<DependSpecT> depends,
+    14:list<TaskSpecT> tasks,
+    15:Attrs env
 }
 
 struct JobSpecT {

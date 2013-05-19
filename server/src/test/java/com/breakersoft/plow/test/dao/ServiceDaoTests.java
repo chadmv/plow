@@ -135,13 +135,14 @@ public class ServiceDaoTests extends AbstractTest {
         assertEquals(service.minRam, result.get("int_ram_min"));
         assertEquals(service.maxRetries, result.get("int_retries_max"));
         assertEquals(service.threadable, result.get("bool_threadable"));
+
         try {
-            Jdbc4Array sqlArray = (Jdbc4Array) result.get("str_tags");
-            if (sqlArray == null) {
+            Jdbc4Array pgArray = ((Jdbc4Array) result.get("str_tags"));
+            if (pgArray == null) {
                 assertEquals(service.tags, null);
             }
             else {
-                String[] array = (String[]) sqlArray.getArray();
+                String[] array = (String[]) pgArray.getArray();
                 if (service.tags.size() == 0) {
                     assertEquals(0, array.length);
                 }

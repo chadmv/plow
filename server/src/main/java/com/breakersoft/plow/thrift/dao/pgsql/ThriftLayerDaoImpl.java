@@ -2,8 +2,6 @@ package com.breakersoft.plow.thrift.dao.pgsql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -49,12 +47,11 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             layer.setStats(stats);
             layer.setTotals(JdbcUtils.getTaskTotals(rs));
 
-            layer.id = rs.getString("pk_layer");
+            layer.setId(rs.getString("pk_layer"));
             layer.name = rs.getString("str_name");
             layer.range = rs.getString("str_range");
             layer.chunk = rs.getInt("int_chunk_size");
-            layer.tags = new HashSet<String>(
-                    Arrays.asList((String[])rs.getArray("str_tags").getArray()));
+            layer.tags = JdbcUtils.toList(rs.getArray("str_tags"));
             layer.threadable = rs.getBoolean("bool_threadable");
             layer.maxCores = rs.getInt("int_cores_max");
             layer.minCores = rs.getInt("int_cores_min");

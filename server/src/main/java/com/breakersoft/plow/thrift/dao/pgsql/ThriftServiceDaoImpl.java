@@ -24,15 +24,41 @@ public class ThriftServiceDaoImpl extends AbstractDao implements ThriftServiceDa
         public ServiceT mapRow(ResultSet rs, int rowNum) throws SQLException {
 
             final ServiceT service = new ServiceT();
-            service.id = rs.getString("pk_service");
-            service.name = rs.getString("str_name");
-            service.maxCores = rs.getInt("int_cores_max");
-            service.minCores = rs.getInt("int_cores_min");
-            service.minRam = rs.getInt("int_ram_min");
-            service.maxRam = rs.getInt("int_ram_max");
-            service.maxRetries = rs.getInt("int_retries_max");
-            service.tags = JdbcUtils.toList(rs.getArray("str_tags"));
-            service.threadable = rs.getBoolean("bool_threadable");
+            service.setId(rs.getString("pk_service"));
+            service.setName(rs.getString("str_name"));
+
+            if (rs.getBoolean("isset_int_cores_min")) {
+                service.setMinCores(rs.getInt("int_cores_min"));
+            }
+
+            if (rs.getBoolean("isset_int_cores_max")) {
+                service.setMaxCores(rs.getInt("int_cores_max"));
+            }
+
+            if (rs.getBoolean("isset_int_ram_min")) {
+                service.setMinCores(rs.getInt("int_ram_min"));
+            }
+
+            if (rs.getBoolean("isset_int_ram_max")) {
+                service.setMinRam(rs.getInt("int_ram_max"));
+            }
+
+            if (rs.getBoolean("isset_int_ram_min")) {
+                service.setMaxRam(rs.getInt("int_ram_min"));
+            }
+
+            if (rs.getBoolean("isset_bool_threadable")) {
+                service.setThreadable(rs.getBoolean("bool_threadable"));
+            }
+
+            if (rs.getBoolean("isset_str_tags")) {
+                service.setTags(JdbcUtils.toList(rs.getArray("str_tags")));
+            }
+
+            if (rs.getBoolean("isset_int_retries_max")) {
+                service.setMaxRetries(rs.getInt("int_retries_max"));
+            }
+
             return service;
         }
     };
@@ -47,7 +73,14 @@ public class ThriftServiceDaoImpl extends AbstractDao implements ThriftServiceDa
                 "int_ram_max,"+
                 "int_retries_max, "+
                 "str_tags, " +
-                "bool_threadable " +
+                "bool_threadable," +
+                "isset_int_cores_min,"+
+                "isset_int_cores_max,"+
+                "isset_int_ram_min,"+
+                "isset_int_ram_max,"+
+                "isset_str_tags,"+
+                "isset_bool_threadable,"+
+                "isset_int_retries_max " +
             "FROM " +
                 "plow.service ";
 
