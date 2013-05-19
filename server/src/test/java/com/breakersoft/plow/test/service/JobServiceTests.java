@@ -118,6 +118,78 @@ public class JobServiceTests extends AbstractTest {
         assertEquals(service.threadable, lt.threadable);
     }
 
+    @Test
+    public void testLaunchJobNoService() {
+
+        JobSpecT jobspec = new JobSpecT();
+        jobspec.setName("service_test");
+        jobspec.setUid(100);
+        jobspec.setUsername("stella");
+        jobspec.setPaused(false);
+        jobspec.setProject("unittest");
+        jobspec.setLogPath("/tmp/plow/unittests/service_test");
+
+        LayerSpecT layer = new LayerSpecT();
+        layer.setName("foo");
+        layer.setCommand(Lists.newArrayList("sleep", "5" ));
+        layer.setRange("1-10");
+        layer.setEnv(new HashMap<String,String>(0));
+        layer.setServ(Defaults.DEFAULT_SERVICE);
+        jobspec.addToLayers(layer);
+
+        JobLaunchEvent event =
+                jobService.launch(jobspec);
+
+        LayerT lt = thriftLayerDao.getLayer(event.getJob().getJobId(), "foo");
+        assertEquals(Defaults.DEFAULT_MIN_CORES, lt.minCores);
+        assertEquals(Defaults.DEFAULT_MAX_CORES, lt.maxCores);
+        assertEquals(Defaults.DEFAULT_MIN_RAM, lt.minRam);
+        assertEquals(Defaults.DEFAULT_MAX_RAM, lt.maxRam);
+        assertEquals(Defaults.DEFAULT_MAX_RETRIES, lt.maxRetries);
+        assertEquals(Defaults.DEFAULT_TAGS, lt.getTags());
+        assertEquals(Defaults.DEFAULT_THREADABLE, lt.threadable);
+    }
+
+    @Test
+    public void testLaunchJobWithOverrides() {
+
+        JobSpecT jobspec = new JobSpecT();
+        jobspec.setName("service_test");
+        jobspec.setUid(100);
+        jobspec.setUsername("stella");
+        jobspec.setPaused(false);
+        jobspec.setProject("unittest");
+        jobspec.setLogPath("/tmp/plow/unittests/service_test");
+
+        LayerSpecT layer = new LayerSpecT();
+        layer.setName("foo");
+        layer.setCommand(Lists.newArrayList("sleep", "5" ));
+        layer.setRange("1-10");
+        layer.setEnv(new HashMap<String,String>(0));
+        layer.setServ(Defaults.DEFAULT_SERVICE);
+
+        layer.setMinCores(5);
+        layer.setMaxCores(5);
+        layer.setMaxRetries(5);
+        layer.setMinRam(5);
+        layer.setMaxRam(5);
+        layer.setThreadable(true);
+        layer.setTags(Lists.newArrayList("arse"));
+
+        jobspec.addToLayers(layer);
+
+        JobLaunchEvent event =
+                jobService.launch(jobspec);
+
+        LayerT lt = thriftLayerDao.getLayer(event.getJob().getJobId(), "foo");
+        assertEquals(layer.getMinCores(), lt.minCores);
+        assertEquals(layer.getMaxCores(), lt.maxCores);
+        assertEquals(layer.getMinRam(), lt.minRam);
+        assertEquals(layer.getMaxRam(), lt.maxRam);
+        assertEquals(layer.getMaxRetries(), lt.maxRetries);
+        assertEquals(layer.getTags(), lt.getTags());
+        assertEquals(layer.isThreadable(), lt.threadable);
+    }
 
     @Test
     public void testLaunchJobWithAttrs() throws PlowException, TException {
