@@ -52,6 +52,13 @@ public class ServiceFull extends ServiceE {
         setThreadable = true;
         this.threadable = threadable;
     }
+    public List<String> getTags() {
+        return tags;
+    }
+    public void setTags(List<String> tags) {
+        setTags = true;
+        this.tags = tags;
+    }
     public boolean isSetMinCores() {
         return setMinCores;
     }
@@ -72,11 +79,5 @@ public class ServiceFull extends ServiceE {
     }
     public boolean isSetTags() {
         return setTags;
-    }
-    public List<String> getTags() {
-        return tags;
-    }
-    public void setTags(List<String> tags) {
-        this.tags = tags;
     }
 }
