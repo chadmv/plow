@@ -31,5 +31,4 @@ public final class Defaults {
     public static int DEFAULT_MAX_RETRIES = 2;
     public static boolean DEFAULT_THREADABLE = false;
     public static String DEFAULT_SERVICE = "default";
-
 }

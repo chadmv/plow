@@ -24,7 +24,6 @@ import com.breakersoft.plow.thrift.LayerSpecT;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 public class LayerDaoTests extends AbstractTest {
 
