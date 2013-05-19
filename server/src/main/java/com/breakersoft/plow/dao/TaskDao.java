@@ -29,4 +29,9 @@ public interface TaskDao {
     boolean setTaskState(Task task, TaskState newState);
 
     boolean setTaskState(Task task, TaskState newState, TaskState oldState);
+
+    void batchCreate(Layer layer, String range, int layerOrder,
+            int minCores, int minRam);
+
+
 }

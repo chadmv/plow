@@ -2,15 +2,18 @@ package com.breakersoft.plow.dao.pgsql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.object.BatchSqlUpdate;
 import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Defaults;
+import com.breakersoft.plow.FrameSet;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
@@ -89,7 +92,6 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                     "int_number",
                     "int_task_order",
                     "int_layer_order",
-                    "int_state",
                     "int_cores_min",
                     "int_ram_min");
 
@@ -98,8 +100,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         final UUID id = UUIDGen.random();
 
         jdbc.update(INSERT, id, layer.getLayerId(), layer.getJobId(), name,
-                number, taskOrder, layerOrder, TaskState.INITIALIZE.ordinal(),
-                minCores, minRam);
+                number, taskOrder, layerOrder, minCores, minRam);
 
         TaskE task = new TaskE();
         task.setTaskId(id);
@@ -107,6 +108,41 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         task.setJobId(layer.getJobId());
         task.setName(name);
         return task;
+    }
+
+    private static final int[] BATCH_TYPES = new int[] {
+        Types.OTHER,
+        Types.OTHER,
+        Types.OTHER,
+        Types.VARCHAR,
+        Types.INTEGER,
+        Types.INTEGER,
+        Types.INTEGER,
+        Types.INTEGER,
+        Types.INTEGER
+    };
+
+    @Override
+    public void batchCreate(final Layer layer, final String range, final int layerOrder, final int minCores, final int minRam) {
+
+        final FrameSet frameSet = new FrameSet(range);
+        final BatchSqlUpdate update = new BatchSqlUpdate(
+                jdbc.getDataSource(), INSERT, BATCH_TYPES);
+
+        final int size = frameSet.size();
+        for (int i=0; i<size; i++) {
+            int number = frameSet.get(i);
+            update.update(UUIDGen.random(),
+                    layer.getLayerId(),
+                    layer.getJobId(),
+                    String.format("%04d-%s", number, layer.getName()),
+                    number,
+                    i,
+                    layerOrder,
+                    minCores,
+                    minRam);
+        }
+        update.flush();
     }
 
     @Override

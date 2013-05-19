@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
-import com.breakersoft.plow.FrameSet;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.MatcherFull;
@@ -127,18 +126,12 @@ public class JobServiceImpl implements JobService {
         for (LayerSpecT blayer: jobspec.getLayers()) {
 
             prepLayer(blayer);
-
             Layer layer = layerDao.create(job, blayer, layerOrder);
 
             if (blayer.isSetRange()) {
                 logger.info("Creating layer {}, range: {}", blayer.name, blayer.range);
-                int frameOrder = 0;
-                FrameSet frameSet = new FrameSet(blayer.getRange());
-                for (int frameNum: frameSet) {
-                    taskDao.create(layer, String.format("%04d-%s", frameNum, blayer.getName()),
-                            frameNum, frameOrder, layerOrder, blayer.minCores, blayer.minRam);
-                    frameOrder++;
-                }
+                taskDao.batchCreate(layer,
+                        blayer.range, layerOrder, blayer.minCores, blayer.minRam);
             }
             else if (blayer.isSetTasks()) {
                 logger.info("Creating tasks in layer: {}", blayer.name);

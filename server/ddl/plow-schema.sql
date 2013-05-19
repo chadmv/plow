@@ -290,7 +290,7 @@ CREATE TABLE plow.task (
   pk_job UUID NOT NULL,
   str_name VARCHAR(255),
   int_number INTEGER NOT NULL,
-  int_state SMALLINT NOT NULL,
+  int_state SMALLINT NOT NULL DEFAULT 0,
   int_depend_count INTEGER NOT NULL DEFAULT 0,
   int_task_order INTEGER NOT NULL,
   int_layer_order INTEGER NOT NULL,
