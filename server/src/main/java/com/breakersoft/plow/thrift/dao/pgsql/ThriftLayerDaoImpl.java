@@ -57,6 +57,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             layer.minCores = rs.getInt("int_cores_min");
             layer.minRam = rs.getInt("int_ram_min");
             layer.maxRam = rs.getInt("int_ram_max");
+            layer.maxRetries = rs.getInt("int_retries_max");
             return layer;
         }
     };
@@ -73,6 +74,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer.int_ram_min, " +
                 "layer.int_ram_max, " +
                 "layer.bool_threadable,"+
+                "layer.int_retries_max,"+
                 "layer_count.int_total, "+
                 "layer_count.int_succeeded,"+
                 "layer_count.int_running,"+
