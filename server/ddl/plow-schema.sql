@@ -1071,6 +1071,15 @@ INSERT INTO plow.folder_dsp VALUES ('00000000-0000-0000-0000-000000000000', -1, 
 UPDATE plow.project SET pk_folder_default = '00000000-0000-0000-0000-000000000000' WHERE pk_project='00000000-0000-0000-0000-000000000000';
 
 ---
+--- Some standard services
+---
+INSERT INTO plow.service (
+    pk_service, str_name, int_cores_min, int_cores_max, int_ram_min, int_ram_max, int_retries_max, bool_threadable,
+    isset_int_cores_min, isset_int_cores_max, isset_int_ram_min, isset_int_ram_max, isset_bool_threadable, isset_int_retries_max, isset_str_tags)
+VALUES
+  ('12345678-AF00-0000-0000-00000000AAAA', 'shell', 1, 1, 512, 2048, 0, 'f', 't', 't', 't', 't', 't', 't', 'f');
+
+---
 --- Test Cluster
 ---
 INSERT INTO plow.cluster VALUES ('00000000-0000-0000-0000-000000000000', 'unassigned', '{"unassigned"}', 'f', 't');
