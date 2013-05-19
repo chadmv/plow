@@ -106,7 +106,7 @@ cdef class LayerSpec:
     cdef bint threadable
     cdef list command, depends, tasks 
     cdef list tags
-    cdef string range
+    cdef string range, serv
     cdef int minCores, maxCores, minRam, maxRam, maxRetries
     cdef dict env
     cdef _LayerSpecT__isset __isset
@@ -122,6 +122,9 @@ cdef class LayerSpec:
 
         if 'range' in kwargs:
             self.range = kwargs.get('range')
+
+        if 'service' in kwargs:
+            self.service = kwargs.get('service')
 
         if 'minCores' in kwargs:
             self.minCores = kwargs.get('minCores')
@@ -169,6 +172,7 @@ cdef class LayerSpec:
 
         s.name = self.name 
         s.range = self.range
+        s.serv = self.serv
         s.chunk = self.chunk
         s.minCores = self.minCores
         s.maxCores = self.maxCores
@@ -237,6 +241,12 @@ cdef class LayerSpec:
         def __set__(self, val): 
             self.range = val
             self.__isset.range = True
+
+    property service:
+        def __get__(self): return self.serv
+        def __set__(self, val): 
+            self.serv = val
+            self.__isset.serv = True
 
     property command:
         def __get__(self): return self.command

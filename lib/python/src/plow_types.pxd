@@ -296,12 +296,14 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         bint tags
         bint threadable
         bint maxRetries
+        bint serv
 
     cdef cppclass LayerSpecT:
         string name
         vector[string] command
         vector[string] tags
         string range
+        string serv
         int chunk
         int minCores
         int maxCores
