@@ -174,4 +174,10 @@ public class DispatchServiceImpl implements DispatchService {
     public RunTaskCommand getRuntaskCommand(Task task) {
         return dispatchTaskDao.getRunTaskCommand(task);
     }
+
+    @Override
+    @Transactional(readOnly=true)
+    public boolean isAtMaxRetries(Task task) {
+        return dispatchTaskDao.isAtMaxRetries(task);
+    }
 }

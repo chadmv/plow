@@ -25,6 +25,22 @@ import com.google.common.collect.Maps;
 @Repository
 public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao {
 
+    private static final String RETRY =
+            "SELECT " +
+                "layer.int_retries_max - task.int_retry " +
+            "FROM " +
+                "task,"+
+                "layer " +
+            "WHERE " +
+                "task.pk_layer = layer.pk_layer " +
+            "AND " +
+                "task.pk_task = ?";
+
+    @Override
+    public boolean isAtMaxRetries(Task task) {
+        return jdbc.queryForObject(RETRY, Integer.class, task.getTaskId()) <= 0;
+    }
+
     @Override
     public boolean reserve(Task task) {
         try {

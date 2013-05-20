@@ -64,4 +64,6 @@ public interface DispatchService {
     void assignProc(DispatchProc proc, DispatchTask task);
 
     List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node);
+
+    boolean isAtMaxRetries(Task task);
 }

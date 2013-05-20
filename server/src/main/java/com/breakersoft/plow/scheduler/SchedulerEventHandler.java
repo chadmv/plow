@@ -100,7 +100,13 @@ public class SchedulerEventHandler {
             newState = TaskState.SUCCEEDED;
         }
         else {
-            newState = TaskState.DEAD;
+
+            if (dispatchService.isAtMaxRetries(task)) {
+                newState = TaskState.DEAD;
+            }
+            else {
+                newState = TaskState.WAITING;
+            }
         }
 
         logger.info("New state {}", newState.toString());

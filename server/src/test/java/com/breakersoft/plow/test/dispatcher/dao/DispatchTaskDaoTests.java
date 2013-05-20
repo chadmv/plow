@@ -80,6 +80,11 @@ public class DispatchTaskDaoTests extends AbstractTest {
     }
 
     @Test
+    public void testIsAtMaxRetries() {
+        assertFalse(dispatchTaskDao.isAtMaxRetries(tasks.get(0)));
+    }
+
+    @Test
     public void testGetRunTaskCommand() {
 
         DispatchResult result = new DispatchResult(node);
