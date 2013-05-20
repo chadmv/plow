@@ -11,8 +11,7 @@ import com.breakersoft.plow.thrift.TaskState;
 
 public interface TaskDao {
 
-    Task create(Layer layer, String name, int number, int frameOrder, int layerOrder,
-            int intCores, int minRam);
+    Task create(Layer layer, String name, int number, int frameOrder, int layerOrder, int minRam);
 
     Task get(Layer layer, int number);
 
@@ -30,8 +29,7 @@ public interface TaskDao {
 
     boolean setTaskState(Task task, TaskState newState, TaskState oldState);
 
-    void batchCreate(Layer layer, String range, int layerOrder,
-            int minCores, int minRam);
+    void batchCreate(Layer layer, String range, int layerOrder, int minRam);
 
 
 }

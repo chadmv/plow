@@ -212,9 +212,8 @@ CREATE table plow.layer (
   hstore_env hstore
 ) WITHOUT OIDS;
 
-CREATE INDEX layer_pk_job_idx ON plow.layer (pk_job);
 CREATE INDEX layer_str_tags_gin_idx ON plow.layer USING gin(str_tags);
-
+CREATE INDEX layer_pk_job_int_cores_min_idx ON plow.layer (pk_job, int_cores_min);
 CREATE UNIQUE INDEX layer_str_name_pk_job_uniq_idx ON plow.layer (str_name, pk_job);
 
 ---
@@ -299,7 +298,6 @@ CREATE TABLE plow.task (
   time_stopped BIGINT DEFAULT 0 NOT NULL,
   time_updated BIGINT DEFAULT 0 NOT NULL,
   int_retry SMALLINT DEFAULT -1 NOT NULL,
-  int_cores_min SMALLINT NOT NULL,
   int_ram_min INT NOT NULL,
   int_exit_status SMALLINT,
   int_exit_signal SMALLINT,
@@ -308,7 +306,7 @@ CREATE TABLE plow.task (
 
 CREATE INDEX task_pk_layer_idx ON plow.task (pk_layer);
 CREATE INDEX task_pk_job_idx ON plow.task (pk_job);
-CREATE INDEX task_dispatch_state_idx ON plow.task (int_state, int_cores_min, int_ram_min, bool_reserved);
+CREATE INDEX task_dispatch_state_idx ON plow.task (int_state, int_ram_min);
 CREATE INDEX task_time_updated_idx ON plow.task (time_updated);
 CREATE UNIQUE INDEX task_str_name_pk_job_idx_uniq ON plow.task (str_name, pk_job);
 
@@ -570,7 +568,6 @@ CREATE TABLE plow.task_history (
   int_core_time BIGINT NOT NULL DEFAULT 0,
   int_clock_time BIGINT NOT NULL DEFAULT 0,
   int_cores SMALLINT NOT NULL,
-  int_cores_min SMALLINT NOT NULL,
   flt_cores_high REAL NOT NULL DEFAULT 0,
   int_ram INTEGER NOT NULL,
   int_ram_min INTEGER NOT NULL,
@@ -840,7 +837,6 @@ BEGIN
     int_number,
     int_retry,
     int_cores,
-    int_cores_min,
     int_ram,
     int_ram_min
   ) VALUES (
@@ -850,7 +846,6 @@ BEGIN
     NEW.int_number,
     NEW.int_retry,
     proc.int_cores,
-    NEW.int_cores_min,
     proc.int_ram,
     NEW.int_ram_min
   );

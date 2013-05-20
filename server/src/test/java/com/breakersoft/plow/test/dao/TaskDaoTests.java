@@ -43,12 +43,12 @@ public class TaskDaoTests extends AbstractTest {
         job = jobDao.create(TEST_PROJECT, spec);
         LayerSpecT lspec = spec.getLayers().get(0);
         layer = layerDao.create(job, lspec, 0);
-        task = taskDao.create(layer, "0001-test", 1, 0, 0, 1, 512);
-        taskDao.create(layer, "0002-test", 2, 1, 0, 1, 512);
-        taskDao.create(layer, "0003-test", 3, 2, 0, 1, 512);
-        taskDao.create(layer, "0004-test", 4, 3, 0, 1, 512);
-        taskDao.create(layer, "0005-test", 5, 4, 0, 1, 512);
-        taskDao.create(layer, "0006-test", 6, 5, 0, 1, 512);
+        task = taskDao.create(layer, "0001-test", 1, 0, 0, 512);
+        taskDao.create(layer, "0002-test", 2, 1, 0, 512);
+        taskDao.create(layer, "0003-test", 3, 2, 0, 512);
+        taskDao.create(layer, "0004-test", 4, 3, 0, 512);
+        taskDao.create(layer, "0005-test", 5, 4, 0, 512);
+        taskDao.create(layer, "0006-test", 6, 5, 0, 512);
     }
 
     @Test

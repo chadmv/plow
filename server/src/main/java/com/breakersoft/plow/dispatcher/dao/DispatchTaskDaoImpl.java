@@ -115,9 +115,9 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
                 "task.pk_task,"+
                 "task.pk_layer,"+
                 "task.pk_job,"+
-                "task.int_cores_min,"+
                 "task.int_ram_min,  " +
                 "task.str_name," +
+                "layer.int_cores_min,"+
                 "job.pk_project " +
             "FROM " +
                 "plow.layer " +
@@ -128,11 +128,11 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
             "WHERE " +
                 "layer.pk_job = ? " +
             "AND " +
+                "layer.int_cores_min <= ? " +
+            "AND " +
                 "layer.str_tags && ? " +
             "AND " +
                 "task.int_state = ? " +
-            "AND " +
-                "task.int_cores_min <= ? " +
             "AND " +
                 "task.int_ram_min <= ? " +
             "AND " +
@@ -165,9 +165,9 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                 final PreparedStatement ps = conn.prepareStatement(GET_DISPATCHABLE_TASKS);
                 ps.setObject(1, job.getJobId());
-                ps.setArray(2, conn.createArrayOf("text", resource.getTags().toArray()));
-                ps.setInt(3, TaskState.WAITING.ordinal());
-                ps.setInt(4, resource.getIdleCores());
+                ps.setInt(2, resource.getIdleCores());
+                ps.setArray(3, conn.createArrayOf("text", resource.getTags().toArray()));
+                ps.setInt(4, TaskState.WAITING.ordinal());
                 ps.setInt(5, resource.getIdleRam());
                 return ps;
             }

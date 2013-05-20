@@ -75,7 +75,7 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "task.time_started, " +
             "task.time_stopped," +
             "task.int_retry,"+
-            "task.int_cores_min,"+
+            "layer.int_cores_min,"+
             "task.int_ram_min,"+
             "task.str_last_resource, " +
             "task.int_exit_signal,"+
@@ -90,6 +90,8 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "proc.str_last_log_line " +
         "FROM " +
             "task "+
+        "INNER JOIN " +
+            "layer ON task.pk_layer = layer.pk_layer " +
         "LEFT JOIN " +
             "plow.proc ON task.pk_task = proc.pk_proc ";
 

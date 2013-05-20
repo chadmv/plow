@@ -92,15 +92,14 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                     "int_number",
                     "int_task_order",
                     "int_layer_order",
-                    "int_cores_min",
                     "int_ram_min");
 
     @Override
-    public Task create(Layer layer, String name, int number, int taskOrder, int layerOrder, int minCores, int minRam) {
+    public Task create(Layer layer, String name, int number, int taskOrder, int layerOrder, int minRam) {
         final UUID id = UUIDGen.random();
 
         jdbc.update(INSERT, id, layer.getLayerId(), layer.getJobId(), name,
-                number, taskOrder, layerOrder, minCores, minRam);
+                number, taskOrder, layerOrder, minRam);
 
         TaskE task = new TaskE();
         task.setTaskId(id);
@@ -118,12 +117,11 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         Types.INTEGER,
         Types.INTEGER,
         Types.INTEGER,
-        Types.INTEGER,
         Types.INTEGER
     };
 
     @Override
-    public void batchCreate(final Layer layer, final String range, final int layerOrder, final int minCores, final int minRam) {
+    public void batchCreate(final Layer layer, final String range, final int layerOrder, final int minRam) {
 
         final FrameSet frameSet = new FrameSet(range);
         final BatchSqlUpdate update = new BatchSqlUpdate(
@@ -139,7 +137,6 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                     number,
                     i,
                     layerOrder,
-                    minCores,
                     minRam);
         }
         update.flush();
