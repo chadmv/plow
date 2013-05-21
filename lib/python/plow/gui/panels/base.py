@@ -110,7 +110,7 @@ class Panel(QtGui.QDockWidget):
                 self.attrs[attr] = settings.value(key)
         
         if self.attrs.has_key("refreshSeconds"):
-            self.setRefreshTime(self.attrs["refreshSeconds"])
+            self.setRefreshTime(int(self.attrs["refreshSeconds"]))
             self.refresh()
 
 
