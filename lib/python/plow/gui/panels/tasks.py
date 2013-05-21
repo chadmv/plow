@@ -188,6 +188,7 @@ class TaskModel(QtCore.QAbstractTableModel):
         row = index.row()
         col = index.column()
         task = self.__tasks[row]
+        stats = task.stats 
 
         if role == QtCore.Qt.DisplayRole:
             if col == 0:
@@ -195,22 +196,27 @@ class TaskModel(QtCore.QAbstractTableModel):
             elif col == 1:
                 return TASK_STATES[task.state]
             elif col == 2:
-                return task.lastNodeName
+                return task.lastResource
             elif col == 3:
-                return "%s/%02dMB" % (task.cores, task.ramMb)
+                return "%s/%02dMB" % (stats.cores, stats.ram)
             elif col == 4:
-                return formatDuration(task.startTime, task.stopTime)
+                return formatDuration(stats.startTime, stats.stopTime)
             elif col == 5:
-                return task.lastLogLine
+                return stats.lastLogLine
+        
         elif role == QtCore.Qt.BackgroundRole and col ==1:
             return COLOR_TASK_STATE[task.state]
+        
         elif role == QtCore.Qt.ToolTipRole and col == 3:
             tip = "Allocated Cores: %d\nCurrent CPU Perc:%d\nMax CPU Perc:%d\nAllocated RAM:%dMB\nCurrent RSS:%dMB\nMaxRSS:%dMB"
-            return tip % (task.cores, task.cpuPerc, task.maxCpuPerc, task.ramMb, task.rssMb, task.maxRssMb)
+            return tip % (stats.cores, stats.usedCores, stats.highCores, stats.ram, stats.usedRam, stats.highRam)
+        
         elif role == IdRole:
             return task.id
+        
         elif role == ObjectRole:
             return task
+        
         return
 
     def headerData(self, section, orientation, role):
