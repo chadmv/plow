@@ -19,7 +19,6 @@ thrift --gen cpp --out $OUT plow.thrift
 
 rm $OUT/RpcService_server.skeleton.cpp
 
-cp plow__init__.py ../python/plow/client/__init__.py
 
 # Java
 ########################################################################
