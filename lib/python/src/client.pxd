@@ -11,6 +11,11 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
 
         long getPlowTime() nogil except +
 
+        void getServices(vector[ServiceT]&) nogil except +
+        void createService(ServiceT&, ServiceT& svc) nogil except +
+        void deleteService(Guid& id) nogil except +
+        void updateService(ServiceT& svc) nogil except +
+
         void getProject(ProjectT&, Guid& id) nogil except +
         void getProjectByCode(ProjectT&, string& code) nogil except +
         void getProjects(vector[ProjectT]&) nogil except +
