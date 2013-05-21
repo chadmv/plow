@@ -11,20 +11,10 @@ General
 ===================
 
 .. autofunction:: plow.client.get_plow_time
+.. autofunction:: plow.client.reconnect
+.. autofunction:: plow.client.get_host
+.. autofunction:: plow.client.set_host
 .. autofunction:: plow.client.is_uuid
-
-.. data:: plow.client.DependType
-
-    Constants representing dependencies between types
-
-    .. data:: plow.client.DependType.JOB_ON_JOB
-    .. data:: plow.client.DependType.LAYER_ON_LAYER
-    .. data:: plow.client.DependType.LAYER_ON_TASK
-    .. data:: plow.client.DependType.TASK_ON_LAYER
-    .. data:: plow.client.DependType.TASK_ON_TASK
-    .. data:: plow.client.DependType.TASK_BY_TASK
-
-.. autoclass:: plow.client.DependSpec
 
 
 .. _project:
@@ -71,7 +61,6 @@ Job
     .. data:: plow.client.JobState.FINISHED
 
 .. autoclass:: plow.client.Job
-.. autoclass:: plow.client.JobSpec
 
 .. autofunction:: plow.client.launch_job
 .. autofunction:: plow.client.get_active_job
@@ -82,6 +71,11 @@ Job
 .. autofunction:: plow.client.get_job_outputs
 .. autofunction:: plow.client.set_job_min_cores
 .. autofunction:: plow.client.set_job_max_cores
+
+.. autoclass:: plow.client.JobSpec
+.. autofunction:: plow.client.get_job_spec
+
+.. autoclass:: plow.client.JobStats
 
 .. autoclass:: plow.client.Output
 .. autofunction:: plow.client.get_job_outputs
@@ -106,7 +100,10 @@ Task
 
 .. autoclass:: plow.client.TaskSpec
 
+.. autoclass:: plow.client.TaskStats
+
 .. autoclass:: plow.client.TaskTotals
+.. autofunction:: plow.client.get_task_stats
 
 .. autoclass:: plow.client.Task
 .. autofunction:: plow.client.get_task
@@ -123,6 +120,8 @@ Layer
 ===================
 
 .. autoclass:: plow.client.LayerSpec
+
+.. autoclass:: plow.client.LayerStats
 
 .. autoclass:: plow.client.Layer
 .. autofunction:: plow.client.get_layer_by_id
@@ -248,3 +247,32 @@ Filtering / Matching / Actions
 .. autofunction:: plow.client.increase_filter_order
 .. autofunction:: plow.client.decrease_filter_order
 
+
+
+.. _depends:
+
+Dependencies
+==============================
+
+.. data:: plow.client.DependType
+
+    Constants representing dependencies between types
+
+    .. data:: plow.client.DependType.JOB_ON_JOB
+    .. data:: plow.client.DependType.LAYER_ON_LAYER
+    .. data:: plow.client.DependType.LAYER_ON_TASK
+    .. data:: plow.client.DependType.TASK_ON_LAYER
+    .. data:: plow.client.DependType.TASK_ON_TASK
+    .. data:: plow.client.DependType.TASK_BY_TASK
+
+.. autoclass:: plow.client.DependSpec
+
+.. autoclass:: plow.client.Depend
+.. autofunction:: plow.client.get_depends_on_job
+.. autofunction:: plow.client.get_job_depends_on
+.. autofunction:: plow.client.get_depends_on_layer
+.. autofunction:: plow.client.get_layer_depends_on
+.. autofunction:: plow.client.get_depends_on_task
+.. autofunction:: plow.client.get_task_depends_on
+.. autofunction:: plow.client.drop_depend
+.. autofunction:: plow.client.reactivate_depend
