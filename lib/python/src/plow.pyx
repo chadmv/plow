@@ -3,7 +3,7 @@
 cimport cython
 
 from plow_types cimport *
-from client cimport getClient, PlowClient
+from client cimport getClient, resetClient, PlowClient
 
 include "utils.pxi"
 include "project.pxi"
@@ -73,7 +73,7 @@ def set_host(str host="localhost", int port=11336):
     global __HOST, __PORT
     __HOST = host
     __PORT = port
-    reconnect()    
+    resetClient()    
 
 
 def get_host():

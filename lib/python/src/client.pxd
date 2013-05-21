@@ -121,4 +121,5 @@ cdef extern from "client.h" namespace "Plow":
     cdef PlowClient* getClient(string& host, int port) nogil except +
     cdef PlowClient* getClient(string& host, int port, bint reset) nogil except +
 
+    cdef void resetClient() nogil except +
     
