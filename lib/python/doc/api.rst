@@ -3,12 +3,16 @@ Client API Documentation
 ************************
 
 .. contents::
+    :depth: 2
 
 
 .. _general:
 
 General
 ===================
+
+Functions
+^^^^^^^^^
 
 .. autofunction:: plow.client.get_plow_time
 .. autofunction:: plow.client.reconnect
@@ -22,7 +26,14 @@ General
 Project
 ===================
 
+Classes
+^^^^^^^^^
+
 .. autoclass:: plow.client.Project
+    :members:
+
+Functions
+^^^^^^^^^
 
 .. autofunction:: plow.client.get_project
 .. autofunction:: plow.client.get_projects
@@ -36,7 +47,14 @@ Project
 Folder
 ===================
 
+Classes
+^^^^^^^^^
+
 .. autoclass:: plow.client.Folder
+    :members:
+
+Functions
+^^^^^^^^^
 
 .. autofunction:: plow.client.get_folder
 .. autofunction:: plow.client.get_folders
@@ -52,6 +70,9 @@ Folder
 Job
 ===================
 
+Constants
+^^^^^^^^^
+
 .. data:: plow.client.JobState
 
     Constants representing the state of a Job 
@@ -60,7 +81,23 @@ Job
     .. data:: plow.client.JobState.RUNNING
     .. data:: plow.client.JobState.FINISHED
 
+Classes
+^^^^^^^^^
+
 .. autoclass:: plow.client.Job
+    :members:
+
+.. autoclass:: plow.client.JobSpec
+    :members:
+
+.. autoclass:: plow.client.JobStats
+    :members:
+
+.. autoclass:: plow.client.Output
+    :members:
+
+Functions
+^^^^^^^^^
 
 .. autofunction:: plow.client.launch_job
 .. autofunction:: plow.client.get_active_job
@@ -72,12 +109,8 @@ Job
 .. autofunction:: plow.client.set_job_min_cores
 .. autofunction:: plow.client.set_job_max_cores
 
-.. autoclass:: plow.client.JobSpec
 .. autofunction:: plow.client.get_job_spec
 
-.. autoclass:: plow.client.JobStats
-
-.. autoclass:: plow.client.Output
 .. autofunction:: plow.client.get_job_outputs
 
 
@@ -85,6 +118,9 @@ Job
 
 Task
 ===================
+
+Constants
+^^^^^^^^^
 
 .. data:: plow.client.TaskState
 
@@ -98,14 +134,26 @@ Task
     .. data:: plow.client.TaskState.DEPEND
     .. data:: plow.client.TaskState.SUCCEEDED
 
+Classes
+^^^^^^^^^
+
 .. autoclass:: plow.client.TaskSpec
+    :members:
 
 .. autoclass:: plow.client.TaskStats
+    :members:
 
 .. autoclass:: plow.client.TaskTotals
-.. autofunction:: plow.client.get_task_stats
+    :members:
 
 .. autoclass:: plow.client.Task
+    :members:
+
+Functions
+^^^^^^^^^
+
+.. autofunction:: plow.client.get_task_stats
+
 .. autofunction:: plow.client.get_task
 .. autofunction:: plow.client.get_tasks
 .. autofunction:: plow.client.get_task_log_path
@@ -119,11 +167,29 @@ Task
 Layer
 ===================
 
+Classes
+^^^^^^^^^
+
 .. autoclass:: plow.client.LayerSpec
+    :members:
 
 .. autoclass:: plow.client.LayerStats
+    :members:
+
+.. autoclass:: plow.client.Service
+    :members:
 
 .. autoclass:: plow.client.Layer
+    :members:
+
+Functions
+^^^^^^^^^
+
+.. autofunction:: plow.client.get_services
+.. autofunction:: plow.client.create_service
+.. autofunction:: plow.client.delete_service
+.. autofunction:: plow.client.update_service
+
 .. autofunction:: plow.client.get_layer_by_id
 .. autofunction:: plow.client.get_layer
 .. autofunction:: plow.client.get_layers
@@ -141,6 +207,9 @@ Layer
 Node
 ===================
 
+Constants
+^^^^^^^^^
+
 .. data:: plow.client.NodeState
 
     Constants representing the state of a Node 
@@ -149,9 +218,18 @@ Node
     .. data:: plow.client.NodeState.DOWN
     .. data:: plow.client.NodeState.REPAIR
 
+Classes
+^^^^^^^^^
+
 .. autoclass:: plow.client.NodeSystem
+    :members:
 
 .. autoclass:: plow.client.Node
+    :members:
+
+Functions
+^^^^^^^^^
+
 .. autofunction:: plow.client.get_node
 .. autofunction:: plow.client.get_nodes
 .. autofunction:: plow.client.set_node_locked
@@ -164,8 +242,17 @@ Node
 Cluster
 ===================
 
+Classes
+^^^^^^^^^
+
 .. autoclass:: plow.client.Cluster
+    :members:
+
 .. autoclass:: plow.client.ClusterCounts
+    :members:
+
+Functions
+^^^^^^^^^
 
 .. autofunction:: plow.client.get_cluster
 .. autofunction:: plow.client.get_clusters
@@ -182,7 +269,15 @@ Cluster
 Quota
 ===================
 
+Classes
+^^^^^^^^^
+
 .. autoclass:: plow.client.Quota
+    :members:
+
+Functions
+^^^^^^^^^
+
 .. autofunction:: plow.client.get_quota
 .. autofunction:: plow.client.get_quotas
 .. autofunction:: plow.client.create_quota
@@ -194,6 +289,9 @@ Quota
 
 Filtering / Matching / Actions
 ==============================
+
+Constants
+^^^^^^^^^
 
 .. data:: plow.client.MatcherType
 
@@ -214,13 +312,6 @@ Filtering / Matching / Actions
     .. data:: plow.client.NodeState.USER
     .. data:: plow.client.NodeState.ATTR
 
-.. autoclass:: plow.client.Matcher
-.. autofunction:: plow.client.create_field_matcher
-.. autofunction:: plow.client.create_attr_matcher
-.. autofunction:: plow.client.get_matcher
-.. autofunction:: plow.client.get_matchers
-.. autofunction:: plow.client.delete_matcher
-
 .. data:: plow.client.ActionType
 
     Constants representing actions to trigger 
@@ -231,13 +322,32 @@ Filtering / Matching / Actions
     .. data:: plow.client.ActionType.PAUSE
     .. data:: plow.client.ActionType.STOP_PROCESSING
 
+Classes
+^^^^^^^^^
+
+.. autoclass:: plow.client.Matcher
+    :members:
+
 .. autoclass:: plow.client.Action
+    :members:
+
+.. autoclass:: plow.client.Filter
+    :members:
+
+Functions
+^^^^^^^^^
+
+.. autofunction:: plow.client.create_field_matcher
+.. autofunction:: plow.client.create_attr_matcher
+.. autofunction:: plow.client.get_matcher
+.. autofunction:: plow.client.get_matchers
+.. autofunction:: plow.client.delete_matcher
+
 .. autofunction:: plow.client.create_action
 .. autofunction:: plow.client.get_action
 .. autofunction:: plow.client.get_actions
 .. autofunction:: plow.client.delete_action
 
-.. autoclass:: plow.client.Filter
 .. autofunction:: plow.client.create_filter
 .. autofunction:: plow.client.get_filters
 .. autofunction:: plow.client.get_filter
@@ -254,6 +364,9 @@ Filtering / Matching / Actions
 Dependencies
 ==============================
 
+Constants
+^^^^^^^^^
+
 .. data:: plow.client.DependType
 
     Constants representing dependencies between types
@@ -265,9 +378,18 @@ Dependencies
     .. data:: plow.client.DependType.TASK_ON_TASK
     .. data:: plow.client.DependType.TASK_BY_TASK
 
+Classes
+^^^^^^^^^
+
 .. autoclass:: plow.client.DependSpec
+    :members:
 
 .. autoclass:: plow.client.Depend
+    :members:
+
+Functions
+^^^^^^^^^
+
 .. autofunction:: plow.client.get_depends_on_job
 .. autofunction:: plow.client.get_job_depends_on
 .. autofunction:: plow.client.get_depends_on_layer
