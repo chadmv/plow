@@ -90,7 +90,7 @@ def get_task_stats(Guid& taskId):
         TaskStatsT statsT
         list ret
 
-    getClient().proxy().getTaskStats(vec, taskId) 
+    conn().proxy().getTaskStats(vec, taskId) 
 
     ret = [initTaskStats(statsT) for statsT in vec]
     return ret
