@@ -139,7 +139,7 @@ class LogViewerWidget(QtGui.QWidget):
         self.__view = view = QtGui.QPlainTextEdit(self)
         font = view.font()
         font.setPointSize(font.pointSize()-2)
-        font.setWeight(font.Light)
+        # font.setWeight(font.Light)
         view.setFont(font)
         view.setLineWrapMode(view.WidgetWidth)
         view.setReadOnly(True)
