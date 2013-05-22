@@ -2,6 +2,9 @@ package com.breakersoft.plow.crond;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.breakersoft.plow.dao.CrondDao;
 
 /**
@@ -11,6 +14,8 @@ import com.breakersoft.plow.dao.CrondDao;
  *
  */
 public abstract class AbstractCrondTask {
+
+    private static final Logger logger = LoggerFactory.getLogger(AbstractCrondTask.class);
 
     @Resource
     CrondDao crondDao;
@@ -27,6 +32,10 @@ public abstract class AbstractCrondTask {
         }
         try {
             run();
+        }
+        catch (Exception e) {
+            logger.error("Failed to execute crond task {}", taskType);
+            logger.error("Unexpected exception, ", e);
         }
         finally {
             crondDao.unlock(taskType);
