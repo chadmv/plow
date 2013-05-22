@@ -5,6 +5,8 @@ from itertools import chain, imap
 from functools import partial
 
 import plow.client
+TaskState = plow.client.TaskState
+
 import plow.gui.constants as constants
 
 from plow.gui.manifest import QtCore, QtGui
@@ -14,12 +16,7 @@ from plow.gui.common import tree, models
 from plow.gui.util import formatDateTime, formatDuration
 
 JOB_STATES = {}
-for a in dir(plow.client.JobState):
-    if a.startswith('_'):
-        continue
-    val = getattr(plow.client.JobState, a)
-    JOB_STATES[val] = a
-
+TASK_STATES = {}
 
 DATA_ROLE = models.DATA_ROLE
 OBJECT_ROLE = DATA_ROLE + 1
@@ -29,6 +26,17 @@ ID_ROLE = DATA_ROLE + 3
 INVALID_TYPE = 0
 FOLDER_TYPE = 1
 JOB_TYPE = 2
+
+
+def _init():
+    for a in dir(plow.client.JobState):
+        if a.startswith('_'):
+            continue
+        val = getattr(plow.client.JobState, a)
+        JOB_STATES[val] = a
+
+_init()
+del _init
 
 
 LOGGER = logging.getLogger(__name__)
@@ -120,10 +128,10 @@ class JobWranglerWidget(QtGui.QWidget):
         view.setModel(proxy)
 
         view.sortByColumn(4, QtCore.Qt.DescendingOrder)
+        view.setSortingEnabled(True)
         view.setEditTriggers(view.NoEditTriggers)
         view.setSelectionBehavior(view.SelectRows)
         view.setSelectionMode(view.ExtendedSelection)
-        view.setSortingEnabled(True)
         view.setUniformRowHeights(True)
         view.setAlternatingRowColors(False)
         view.setAutoFillBackground(True)
@@ -138,8 +146,14 @@ class JobWranglerWidget(QtGui.QWidget):
 
         layout.addWidget(view)
 
+        #
+        # Connections
+        #
         view.doubleClicked.connect(self.__itemDoubleClicked)
         view.activated.connect(self.__itemClicked)
+
+        model.modelReset.connect(view.expandAll)
+
 
         
     def model(self):
@@ -323,6 +337,18 @@ class JobModel(tree.TreeModel):
         # re-index the rows
         self.__folder_index = dict((f.id, row) for row, f in enumerate(self.__folders))
 
+    def itemByFolderId(self, f_id):
+        row = self.__folder_index.get(f_id)
+        if row is None:
+            return None
+
+        try:
+            item = self.__folders[row]
+        except IndexError:
+            return None 
+
+        return item
+
     def setFolderList(self, folders):
         self.beginResetModel()
 
@@ -495,16 +521,16 @@ class JobNode(PlowNode):
                     text = "PAUSED"
 
                 elif totals.dead:
-                    if totals.running:
-                        text = "RUNNING"
-                    else:
-                        text = "DEAD"
-                    bgcolor = constants.RED 
+                    bgcolor = constants.COLOR_TASK_STATE[TaskState.DEAD]
+                    color = QtCore.Qt.white
+                    text = "RUNNING" if totals.running else "DEAD"
 
                 if role == BG:
                     return QtGui.QBrush(bgcolor)
+               
                 elif role == FG:
                     return QtGui.QBrush(color)
+               
                 else:
                     return text
 
