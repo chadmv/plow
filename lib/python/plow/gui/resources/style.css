@@ -64,9 +64,10 @@ QMenu::item
     padding: 2px 20px 2px 20px;
 }
 
-QMenu::item:selected
+QMenu::item:selected:!disabled
 {
-    color: #000000;
+    color: palette(window-text);
+    background-color: palette(dark);
 }
 
 QWidget:disabled
