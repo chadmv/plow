@@ -1,11 +1,16 @@
 """MainWindow"""
 import os
+import logging 
 
 from manifest import QtCore, QtGui
 from panels import *
 from resources import icons
 from event import EventManager
 from util import loadTheme 
+
+
+LOGGER = logging.getLogger("plow-wrangle")
+
 
 class DefaultConfig(object):
 
@@ -31,13 +36,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.session = QtGui.QSessionManager(self)
         self.settings = QtCore.QSettings("plow", appname)
-        print self.settings.fileName()
         self.workspace = WorkspaceManager(self)
 
-        # If the active panel supports a keyword search then this
-        # should be enabled, otherwise disabled.
-        self.textSearch = QtGui.QLineEdit()
-        self.textSearch.setMaximumWidth(200)
+        LOGGER.debug("Using settings file %s", self.settings.fileName())
 
         spacer = QtGui.QWidget()
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -46,9 +47,8 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar_top = QtGui.QToolBar(self)
         self.toolbar_top.setObjectName("Toolbar")
         self.toolbar_top.addWidget(spacer)
-        self.workspace.addWorkspaceSelectionMenu(self.toolbar_top)
-        self.toolbar_top.addWidget(self.textSearch)
         self.toolbar_top.toggleViewAction().setDisabled(True)
+        self.workspace.addWorkspaceSelectionMenu(self.toolbar_top)
 
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar_top)
 
@@ -216,7 +216,6 @@ class WorkspaceManager(QtCore.QObject):
 
 def launch(argv, name, layout=None):
     # Initialize the default configuration files if none exist
-
     app = QtGui.QApplication(argv)
     loadTheme()
 
@@ -230,7 +229,6 @@ def launch(argv, name, layout=None):
 def main():
     import signal
     import sys
-    import logging
 
     lvl = logging.DEBUG if '-debug' in sys.argv else logging.INFO
     logging.basicConfig(level=lvl)
