@@ -54,7 +54,7 @@ public interface DispatchService {
      * @param proc
      * @param why
      */
-    void deallocateProc(DispatchProc proc, String why);
+    void deallocateProc(Proc proc, String why);
 
     DispatchProc allocateProc(DispatchNode node, DispatchTask task);
 

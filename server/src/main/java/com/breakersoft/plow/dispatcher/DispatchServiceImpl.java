@@ -158,7 +158,7 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public void deallocateProc(DispatchProc proc, String why) {
+    public void deallocateProc(Proc proc, String why) {
 
         if (proc == null) {
             return;
