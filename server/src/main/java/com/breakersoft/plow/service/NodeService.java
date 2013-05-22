@@ -12,6 +12,7 @@ import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.rnd.thrift.Ping;
+import com.breakersoft.plow.thrift.NodeState;
 
 public interface NodeService {
 
@@ -26,6 +27,8 @@ public interface NodeService {
     boolean hasProcs(Node node);
     void setNodeCluster(Node node, Cluster cluster);
     void setTags(Node node, Set<String> tags);
+    boolean setNodeState(Node node, NodeState state);
+    List<Node> getUnresponsiveNodes();
 
     /*
      * Quotas

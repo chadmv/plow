@@ -17,6 +17,7 @@ import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.test.AbstractTest;
+import com.breakersoft.plow.thrift.NodeState;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.google.common.collect.Sets;
 
@@ -129,5 +130,34 @@ public class NodeDaoTests extends AbstractTest {
         assertEquals(ping.hw.totalRamMb - Defaults.MEMORY_RESERVE_MB,
                 simpleJdbcTemplate.queryForInt("SELECT int_free_ram FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
+    }
+
+    @Test
+    public void setState() {
+         Ping ping = getTestNodePing();
+         Cluster cluster = clusterDao.create("test", TAGS);
+         Node node = nodeDao.create(cluster, ping);
+
+         assertEquals(NodeState.UP.ordinal(),
+                 simpleJdbcTemplate.queryForInt("SELECT int_state FROM node WHERE pk_node=?",
+                         node.getNodeId()));
+
+         nodeDao.setState(node, NodeState.DOWN);
+         assertEquals(NodeState.DOWN.ordinal(),
+                 simpleJdbcTemplate.queryForInt("SELECT int_state FROM node WHERE pk_node=?",
+                         node.getNodeId()));
+    }
+
+    @Test
+    public void getUnresponsive() {
+         Ping ping = getTestNodePing();
+         Cluster cluster = clusterDao.create("test", TAGS);
+         Node node = nodeDao.create(cluster, ping);
+
+         assertEquals(0, nodeDao.getUnresponsiveNodes().size());
+         jdbc().update("UPDATE plow.node SET time_updated = time_updated - (86400 * 1000) WHERE pk_node=?",
+                 node.getNodeId());
+
+         assertFalse(nodeDao.getUnresponsiveNodes().isEmpty());
     }
 }

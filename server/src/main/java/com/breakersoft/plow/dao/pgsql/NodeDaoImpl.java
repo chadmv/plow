@@ -20,6 +20,7 @@ import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.exceptions.PlowWriteException;
 import com.breakersoft.plow.rnd.thrift.Ping;
+import com.breakersoft.plow.thrift.NodeState;
 import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
@@ -173,6 +174,24 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
         return jdbc.queryForObject(GET_BY_ID, MAPPER, id);
     }
 
+    private static final String GET_UNRESPONSIVE =
+            "SELECT " +
+                "pk_node, " +
+                "pk_cluster, "+
+                "str_name " +
+            "FROM " +
+                "plow.node " +
+            "WHERE " +
+                "node.int_state = ? " +
+            "AND " +
+                "plow.currentTimeMillis() - node.time_updated >= ? " +
+            "LIMIT 50";
+
+    @Override
+    public List<Node> getUnresponsiveNodes() {
+        return jdbc.query(GET_UNRESPONSIVE, MAPPER, NodeState.UP.ordinal(), Defaults.NODE_UNRESPONSIVE_MS);
+    }
+
     private int getBookableMemory(int memory) {
         return memory = memory - Defaults.MEMORY_RESERVE_MB;
     }
@@ -241,5 +260,11 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                  return ret;
              }
          });
+    }
+
+    @Override
+    public boolean setState(Node node, NodeState state) {
+        return jdbc.update("UPDATE plow.node SET int_state=? WHERE pk_node=? AND int_state!=?",
+                state.ordinal(), node.getNodeId(), state.ordinal()) == 1;
     }
 }

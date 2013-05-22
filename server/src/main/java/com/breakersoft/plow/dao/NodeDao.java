@@ -1,11 +1,13 @@
 package com.breakersoft.plow.dao;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.rnd.thrift.Ping;
+import com.breakersoft.plow.thrift.NodeState;
 
 public interface NodeDao {
 
@@ -28,5 +30,9 @@ public interface NodeDao {
     boolean hasProcs(Node node);
 
     void setTags(Node node, Set<String> tags);
+
+    boolean setState(Node node, NodeState state);
+
+    List<Node> getUnresponsiveNodes();
 
 }

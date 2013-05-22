@@ -21,6 +21,7 @@ import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dispatcher.dao.ProcDao;
 import com.breakersoft.plow.rnd.thrift.Ping;
+import com.breakersoft.plow.thrift.NodeState;
 
 @Service
 @Transactional
@@ -52,6 +53,16 @@ public class NodeServiceImpl implements NodeService {
     @Override
     public void updateNode(Node node, Ping ping) {
         nodeDao.update(node, ping);
+    }
+
+    @Override
+    public boolean setNodeState(Node node, NodeState state) {
+        return nodeDao.setState(node, state);
+    }
+
+    @Override
+    public List<Node> getUnresponsiveNodes() {
+        return nodeDao.getUnresponsiveNodes();
     }
 
     @Override
