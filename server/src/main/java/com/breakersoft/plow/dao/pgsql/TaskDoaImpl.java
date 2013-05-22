@@ -53,22 +53,19 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
                 "task.pk_job, " +
                 "task.str_name " +
             "FROM " +
-                "plow.layer, " +
-                "plow.task " +
-            "WHERE " +
-                "layer.pk_layer = task.pk_layer " ;
+                "plow.task INNER JOIN plow.layer ON  layer.pk_layer = task.pk_layer ";
 
     @Override
     public Task get(UUID id) {
         return jdbc.queryForObject(
-                GET + "AND task.pk_task=?",
+                GET + "WHERE task.pk_task=?",
                 MAPPER, id);
     }
 
     @Override
     public Task get(Layer layer, int number) {
         return jdbc.queryForObject(
-                GET + "AND layer.pk_layer=? AND task.int_number=?",
+                GET + "WHERE layer.pk_layer=? AND task.int_number=?",
                 MAPPER, layer.getLayerId(), number);
     }
 
@@ -78,7 +75,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
             return get(UUID.fromString(identifer));
         } catch (IllegalArgumentException e) {
             return jdbc.queryForObject(
-                    GET + "AND task.pk_job=? AND task.str_name=?",
+                    GET + "WHERE task.pk_job=? AND task.str_name=?",
                     MAPPER, job.getJobId(), identifer);
         }
     }
@@ -212,7 +209,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
 
         final StringBuilder sb = new StringBuilder(512);
         sb.append(GET);
-        sb.append(" AND ");
+        sb.append(" WHERE ");
         sb.append(StringUtils.join(where, " AND "));
         sb.append(" ORDER BY task.int_task_order ASC ");
 
