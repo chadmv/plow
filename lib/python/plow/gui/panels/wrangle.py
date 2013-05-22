@@ -252,6 +252,12 @@ class JobModel(tree.TreeModel):
         if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
             return JobNode.HEADERS[section]
 
+        elif role == QtCore.Qt.TextAlignmentRole:
+            if section == 0:
+                return QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter 
+            else:
+                return QtCore.Qt.AlignCenter
+                
         return None
 
     def reset(self):
