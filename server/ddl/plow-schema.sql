@@ -1056,6 +1056,7 @@ AS
 --- Cronds
 ---
 INSERT INTO plow.crond (str_name) VALUES ('ORPHAN_PROC_CHECK');
+INSERT INTO plow.crond (str_name) VALUES ('DOWN_NODE_CHECK');
 
 ---
 --- Test Project
