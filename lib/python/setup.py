@@ -22,7 +22,9 @@ except:
 
 from setuptools import setup, find_packages, Extension, Command
 from setuptools.command.install import install as _install
+
 from distutils.sysconfig import get_config_vars
+from distutils.command.build_ext import build_ext
 from distutils import log
 
 import doc.conf
@@ -52,33 +54,21 @@ for p in PLOW_CPP:
     PLOW_SOURCE_EXTRA += glob.glob(os.path.join(p, "*.cpp"))
 
 
-# Check for cython
-try:
-    from Cython.Distutils import build_ext
-except ImportError:
-    use_cython = False
-else:
-    use_cython = True
-
-if not os.path.exists(PLOW_SOURCE_MAIN_PYX):
-    use_cython = False
-
-if not use_cython and not os.path.exists(PLOW_SOURCE_MAIN_CPP):
-    print "Error: Cython is not installed and the generated {0} source " \
-          "file does not exist. \nNeed cython installed to continue.".format(PLOW_SOURCE_MAIN_CPP)
-    sys.exit(1)
 
 # Check for thrift generated sources
-gen_dir = "../thrift"
-if os.path.exists(gen_dir):
-    gen_cmd = "cd {0} && ./generate-sources.sh".format(gen_dir)
-    print "Re-generating Thrift python client bindings"
-    ret = subprocess.call(gen_cmd, shell=True)
-    if ret != 0 and not os.path.exists("src/core/rpc"):
-        print "Error: Missing the plow/client/core/rpc source file location.\n" \
-              "Tried to generate, but Thrift command failed: {0}\n" \
-              "Is Thrift installed?".format(gen_cmd)
-        sys.exit(1)
+# gen_dir = "../thrift"
+# if os.path.exists(gen_dir):
+#     gen_cmd = "cd {0} && ./generate-sources.sh".format(gen_dir)
+    
+#     print "Re-generating Thrift python client bindings"
+    
+#     ret = subprocess.call(gen_cmd, shell=True)
+#     if ret != 0 and not os.path.exists("src/core/rpc"):
+#         print "Error: Missing the plow/client/core/rpc source file location.\n" \
+#               "Tried to generate, but Thrift command failed: {0}\n" \
+#               "Is Thrift installed?".format(gen_cmd)
+#         sys.exit(1)
+
 
 
 ldflags = []
@@ -147,14 +137,66 @@ os.environ['OPT'] = " ".join(flag for flag in opt if flag not in exclude)
 
 
 
+# Check for cython
+try:
+    from Cython import __version__ as cython_version
+
+    from distutils.version import StrictVersion
+
+    if StrictVersion(cython_version) < StrictVersion("0.19"):
+        print "[Warning] Cython version < 0.19 detected. Will try and build if .cpp exists already"
+        raise ImportError
+    else:
+        from Cython.Build import cythonize
+
+except ImportError:
+    use_cython = False
+else:
+    use_cython = True
+
+if not os.path.exists(PLOW_SOURCE_MAIN_PYX):
+    use_cython = False
+
+
+if not use_cython and not os.path.exists(PLOW_SOURCE_MAIN_CPP):
+    print "Error: Cython >=0.19 is not installed and the generated {0} source " \
+          "file does not exist. \nNeed cython installed to continue.".format(PLOW_SOURCE_MAIN_CPP)
+    sys.exit(1)
+
+
+
+
+plowmodule = Extension('plow.client.plow',
+    PLOW_SOURCE_EXTRA,
+    language="c++",
+    libraries=[BOOST_PYTHON], 
+    extra_compile_args=cflags,
+    extra_link_args=ldflags,
+
+    # https://issues.apache.org/jira/browse/THRIFT-1326
+    define_macros=[
+        ("HAVE_NETINET_IN_H", 1),
+        ("HAVE_INTTYPES_H", 1),
+        ("HAVE_CONFIG_H", 1),
+    ]
+)
+
+argv = set(sys.argv[1:])
+
+if use_cython:
+    plowmodule.sources.insert(0, PLOW_SOURCE_MAIN_PYX)
+    force = '-f' in argv or '--force' in argv
+    ext_modules = cythonize([plowmodule], quiet=True, force=force)
+
+else:
+    plowmodule.sources.insert(0, PLOW_SOURCE_MAIN_CPP)
+    ext_modules = [plowmodule]
+
+
+
 #-----------------------------------------------------------------------------
 # Extra commands
 #-----------------------------------------------------------------------------
-cmdclass = {}
-
-if use_cython:
-    cmdclass['build_ext'] = build_ext
-
 class CleanCommand(Command):
     """Custom distutils command to clean the .so and .pyc files."""
 
@@ -216,8 +258,37 @@ class InstallCommand(_install):
                 self.announce("{0} already exists".format(dst_path), log.INFO)
 
 
-cmdclass['clean'] = CleanCommand
-cmdclass['install'] = InstallCommand
+class ThriftCommand(Command):
+    user_options = [ ]
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        gen_dir = "../thrift"
+        if os.path.exists(gen_dir):
+            gen_cmd = "cd {0} && ./generate-sources.sh".format(gen_dir)
+
+            self.announce("Re-generating Thrift python client bindings", log.INFO)
+            
+            ret = subprocess.call(gen_cmd, shell=True)
+            if ret != 0 and not os.path.exists("src/core/rpc"):
+                err= "Error: Missing the plow/client/core/rpc source file location.\n" \
+                      "Tried to generate, but Thrift command failed: {0}\n" \
+                      "Is Thrift installed?".format(gen_cmd)
+                self.announce(err, log.ERROR)
+                sys.exit(1)
+
+
+cmdclass = {
+    'build_ext': build_ext,
+    'clean' : CleanCommand,
+    'install': InstallCommand,
+    'build_thrift': ThriftCommand,
+}
 
 # build docs
 try:
@@ -228,13 +299,6 @@ except ImportError:
 
 
 # Utility functions
-def get_data(*paths):
-    data = []
-    for p in paths:
-        data.extend(glob.iglob(p))
-    return data
-
-
 def copy_dir(src, dst):
     if os.path.isdir(src):
         if os.path.isdir(dst):
@@ -249,27 +313,6 @@ def copy_dir(src, dst):
 # dist it from here
 copy_dir(ETC_SRC_DIR, ETC_DST_DIR)
 
-
-if use_cython:
-    PLOW_SOURCE_MAIN = PLOW_SOURCE_MAIN_PYX
-else:
-    PLOW_SOURCE_MAIN = PLOW_SOURCE_MAIN_CPP
-
-
-plowmodule = Extension('plow.client.plow',
-    [PLOW_SOURCE_MAIN] + PLOW_SOURCE_EXTRA,
-    language="c++",
-    libraries=[BOOST_PYTHON], 
-    extra_compile_args=cflags,
-    extra_link_args=ldflags,
-
-    # https://issues.apache.org/jira/browse/THRIFT-1326
-    define_macros=[
-        ("HAVE_NETINET_IN_H", 1),
-        ("HAVE_INTTYPES_H", 1),
-        ("HAVE_CONFIG_H", 1),
-    ]
-)
 
 setup(
     name="plow",
@@ -287,7 +330,7 @@ setup(
 
     zip_safe = False,
 
-    ext_modules = [plowmodule],
+    ext_modules=ext_modules,
     cmdclass=cmdclass,
 
     # # stand-alone scripts from the root bin
