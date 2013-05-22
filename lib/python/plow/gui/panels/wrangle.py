@@ -197,31 +197,38 @@ class JobWranglerWidget(QtGui.QWidget):
 
         menu = QtGui.QMenu(tree)
         pause = menu.addAction(QtGui.QIcon(":/pause.png"), "Un-Pause" if job.paused else "Pause")
-        kill = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill")
-        eat = menu.addAction(QtGui.QIcon(":/eat.png"), "Eat Dead")
-        retry = menu.addAction(QtGui.QIcon(":/retry.png"), "Retry Dead")
+        kill = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill Job")
+        kill_tasks = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill Tasks")
+        eat = menu.addAction(QtGui.QIcon(":/eat.png"), "Eat Dead Tasks")
+        retry = menu.addAction(QtGui.QIcon(":/retry.png"), "Retry Dead Tasks")
 
         pause.triggered.connect(partial(job.pause, not job.paused))
 
         eat.setEnabled(bool(job.totals.dead))
-        eat.triggered.connect(partial(self.__eatDeadTasks, job))
+        eat.triggered.connect(partial(self.eatDeadTasks, job))
 
         retry.setEnabled(bool(job.totals.dead))
-        retry.triggered.connect(partial(self.__retryDeadTasks, job))
+        retry.triggered.connect(partial(self.retryDeadTasks, job))
 
-        kill.setEnabled(bool(job.totals.running))
         kill.triggered.connect(partial(job.kill, "plow-wrangler"))
+        kill_tasks.triggered.connect(partial(self.killTasks, job))
 
         menu.popup(tree.mapToGlobal(pos))
 
-    def __eatDeadTasks(self, job):
+    def killTasks(self, job):
+        tasks = plow.client.get_tasks(job=job)
+        if tasks:
+            LOGGER.info("Killing %d tasks", len(tasks))
+            plow.client.kill_tasks(task=tasks)
+
+    def eatDeadTasks(self, job):
         tasks = plow.client.get_tasks(job=job)
         dead = [t for t in tasks if t.state == plow.client.TaskState.DEAD]
         if dead:
             LOGGER.info("Eating %d tasks", len(dead))
             plow.client.eat_tasks(task=dead)
 
-    def __retryDeadTasks(self, job):
+    def retryDeadTasks(self, job):
         tasks = plow.client.get_tasks(job=job)
         dead = [t for t in tasks if t.state == plow.client.TaskState.DEAD]
         if dead:
