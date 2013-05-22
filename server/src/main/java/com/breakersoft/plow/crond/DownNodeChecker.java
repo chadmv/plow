@@ -38,6 +38,8 @@ public class DownNodeChecker extends AbstractCrondTask {
     @Override
     protected void run() {
 
+        logger.info("Running check for down nodes.");
+
         final List<Node> nodes = nodeService.getUnresponsiveNodes();
         if (nodes.isEmpty()) {
             return;
