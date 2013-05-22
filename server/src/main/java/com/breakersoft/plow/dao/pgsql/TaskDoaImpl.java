@@ -168,10 +168,20 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
     @Override
     public List<Task> getTasks(TaskFilterT filter) {
 
+        final StringBuilder sb = new StringBuilder(512);
+        sb.append(GET);
+
         final List<String> where = Lists.newArrayList();
         final List<Object> values = Lists.newArrayList();
 
         boolean idsIsSet = false;
+
+        if (PlowUtils.isValid(filter.nodeIds)) {
+            sb.append("INNER JOIN plow.proc ON proc.pk_task = task.pk_task ");
+            where.add(JdbcUtils.In("proc.pk_node", filter.nodeIds.size(), "uuid"));
+            values.addAll(filter.nodeIds);
+            idsIsSet = true;
+        }
 
         if (PlowUtils.isValid(filter.jobId)) {
             idsIsSet = true;
@@ -204,11 +214,9 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         }
 
         if (!idsIsSet) {
-            throw new RuntimeException("A job ID, layer IDs or task IDs must be set.");
+            throw new RuntimeException("A job ID, layer IDs, task IDs, or node IDs must be set.");
         }
 
-        final StringBuilder sb = new StringBuilder(512);
-        sb.append(GET);
         sb.append(" WHERE ");
         sb.append(StringUtils.join(where, " AND "));
         sb.append(" ORDER BY task.int_task_order ASC ");

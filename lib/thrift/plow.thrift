@@ -400,7 +400,8 @@ struct TaskFilterT {
     4:i32 limit = 0,
     5:i32 offset = 0,
     6:i64 lastUpdateTime = 0,
-    7:list<common.Guid> taskIds
+    7:list<common.Guid> taskIds,
+    8:list<common.Guid> nodeIds
 }
 
 struct NodeFilterT {

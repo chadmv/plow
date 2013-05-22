@@ -4,16 +4,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.junit.Test;
 
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
+import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.TaskDao;
+import com.breakersoft.plow.dispatcher.DispatchService;
+import com.breakersoft.plow.dispatcher.dao.DispatchDao;
+import com.breakersoft.plow.dispatcher.domain.DispatchJob;
+import com.breakersoft.plow.dispatcher.domain.DispatchNode;
+import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.LayerSpecT;
@@ -30,6 +40,12 @@ public class TaskDaoTests extends AbstractTest {
 
     @Resource
     JobDao jobDao;
+
+    @Resource
+    DispatchDao dispatchDao;
+
+    @Resource
+    DispatchService dispatchService;
 
     private Layer layer;
 
@@ -112,6 +128,27 @@ public class TaskDaoTests extends AbstractTest {
 
         filter.addToStates(TaskState.INITIALIZE);
         assertEquals(6, taskDao.getTasks(filter).size());
+    }
+
+    @Test
+    public void getTasksWithTaskFilterUsingNode() {
+
+        Node node =  nodeService.createNode(getTestNodePing());
+        DispatchNode dnode = dispatchDao.getDispatchNode(node.getName());
+
+        JobLaunchEvent event = jobService.launch(getTestJobSpec("proc_tests", 2));
+        DispatchJob job = new DispatchJob(event.getJob());
+
+        DispatchTask task = dispatchService.getDispatchableTasks(job, dnode).get(0);
+        DispatchProc proc = dispatchService.allocateProc(dnode, task);
+
+
+        TaskFilterT filter = new TaskFilterT();
+        filter.addToNodeIds(proc.getNodeId().toString());
+
+        List<Task> tasks = taskDao.getTasks(filter);
+        assertEquals(1, tasks.size());
+        assertEquals(task.getTaskId(), tasks.get(0).getTaskId());
     }
 
     @Test(expected=RuntimeException.class)
