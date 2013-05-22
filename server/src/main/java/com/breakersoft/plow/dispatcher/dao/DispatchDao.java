@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.breakersoft.plow.Node;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
@@ -28,4 +29,6 @@ public interface DispatchDao {
     DispatchJob getDispatchJob(UUID id);
 
     List<DispatchProc> getOrphanProcs();
+
+    DispatchProc getDispatchProc(Task task);
 }

@@ -3,6 +3,7 @@ package com.breakersoft.plow.dispatcher;
 import java.util.List;
 
 import com.breakersoft.plow.JobId;
+import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
@@ -30,6 +31,8 @@ public interface DispatchService {
     boolean unreserveTask(Task task);
 
     DispatchProc getDispatchProc(String id);
+
+    DispatchProc getDispatchProc(Task task);
 
     /**
      * Unassigns the task from the proc. The proc is still assigned to

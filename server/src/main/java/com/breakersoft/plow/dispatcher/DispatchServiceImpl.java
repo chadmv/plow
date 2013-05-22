@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.JobId;
+import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dispatcher.dao.DispatchDao;
@@ -69,6 +70,12 @@ public class DispatchServiceImpl implements DispatchService {
     @Transactional(readOnly=true)
     public DispatchProc getDispatchProc(String id) {
         return dispatchDao.getDispatchProc(UUID.fromString(id));
+    }
+
+    @Override
+    @Transactional(readOnly=true)
+    public DispatchProc getDispatchProc(Task task) {
+        return dispatchDao.getDispatchProc(task);
     }
 
     @Override

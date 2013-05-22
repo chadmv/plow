@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Node;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
@@ -141,6 +142,14 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     @Override
     public DispatchProc getDispatchProc(UUID id) {
         return jdbc.queryForObject(GET_DISPATCH_PROC_BY_ID, DPROC_MAPPER, id);
+    }
+
+    private static final String GET_DISPATCH_PROC_BY_TASK =
+            GET_DISPATCH_PROC + " WHERE proc.pk_task=?";
+
+    @Override
+    public DispatchProc getDispatchProc(Task task) {
+        return jdbc.queryForObject(GET_DISPATCH_PROC_BY_TASK, DPROC_MAPPER, task.getTaskId());
     }
 
     private static final String GET_ORPHAN_DISPATCH_PROCS =
