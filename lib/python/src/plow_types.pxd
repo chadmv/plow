@@ -193,10 +193,22 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int maxRssMb
         Attrs attrs
 
+    cdef cppclass ServiceT:
+        Guid id
+        string name
+        vector[string] tags
+        int minCores
+        int maxCores
+        int minRam
+        int maxRam
+        int maxRetries
+        bint threadable        
+
     cdef cppclass LayerT:
         Guid id
         string name
         string range
+        string serv
         int chunk
         vector[string] tags
         bint threadable

@@ -51,6 +51,7 @@ class Panel(QtGui.QDockWidget):
         toolbar.addWidget(self.__label)
 
     def setRefreshTime(self, value):
+        value = int(value)
         if self.__refreshTimer is None:
             self.__refreshTimer = QtCore.QTimer(self)
             self.__refreshTimer.timeout.connect(self.refresh)

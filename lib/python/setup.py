@@ -99,7 +99,7 @@ if BOOST_LIB:
 # Check for thrift
 THRIFT_LIB = os.getenv("THRIFT_LIBRARY_PATH", "")
 if THRIFT_LIB:
-    ldflags.append("-L{0}".format(THRIFT_LIB))
+    ldflags.append("-L{0} -lthrift".format(THRIFT_LIB))
 else:
     try:
         p = Popen(['pkg-config', '--libs', 'thrift'], stdout=PIPE)

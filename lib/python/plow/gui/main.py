@@ -12,6 +12,7 @@ class DefaultConfig(object):
     # Default window size
     Size = QtCore.QSize(800, 600)
 
+
 class MainWindow(QtGui.QMainWindow):
     """
     MainWindow class for all applications.  All that differentiates one
@@ -25,7 +26,7 @@ class MainWindow(QtGui.QMainWindow):
         self.__default_workspace = workspace
         self.setDockOptions(self.AnimatedDocks | 
                             self.AllowNestedDocks |
-                            self. AllowTabbedDocks |
+                            self.AllowTabbedDocks |
                             self.VerticalTabs)
 
         self.session = QtGui.QSessionManager(self)
@@ -86,6 +87,7 @@ class MainWindow(QtGui.QMainWindow):
         self.settings.setValue("main::workspace", self.workspace.activeWorkspace())
         
         self.workspace.saveState()
+
 
 class WorkspaceManager(QtCore.QObject):
     
@@ -210,6 +212,7 @@ class WorkspaceManager(QtCore.QObject):
     def __panelMenuTriggered(self, action):
         ptype = str(action.text())
         self.createPanel(ptype, None, False)
+
 
 def launch(argv, name, layout=None):
     # Initialize the default configuration files if none exist

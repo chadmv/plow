@@ -221,7 +221,7 @@ def get_job_spec(Guid& jobId):
         JobSpecT specT
         JobSpec spec
 
-    getClient().proxy().getJobSpec(specT, jobId)
+    conn().proxy().getJobSpec(specT, jobId)
     spec = initJobSpec(specT)
     return spec
 

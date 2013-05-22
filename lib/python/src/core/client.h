@@ -25,6 +25,8 @@ extern PlowClient* getClient();
 extern PlowClient* getClient(const bool reset);
 extern PlowClient* getClient(const std::string& host, const int32_t port, const bool reset=0);
 
+extern void resetClient();
+
 PLOW_NAMESPACE_EXIT
 
 #endif

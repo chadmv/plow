@@ -1,4 +1,144 @@
 
+#######################
+# Service
+#
+cdef Service initService(ServiceT& s):
+    cdef Service serv = Service()
+    serv.setService(s)
+    return serv
+
+
+cdef class Service:
+    """
+    Data structure representing an existing Layer Service
+
+    :var id: str
+    :var name: str
+    :var tags: list[str]
+    :var minCores: int
+    :var maxCores: int
+    :var minRam: int
+    :var maxRam: int
+    :var maxRetries: int
+    :var threadable: bool
+
+    """
+    cdef ServiceT servT
+
+    cdef setService(self, ServiceT& s):
+        self.servT = s
+
+    property id:
+        def __get__(self): return self.servT.id
+    
+    property name:
+        def __get__(self): return self.servT.name
+        def __set__(self, string v): self.servT.name = v
+    
+    property tags:
+        def __get__(self): return self.servT.tags
+        def __set__(self, list v): self.servT.tags = v
+    
+    property minCores:
+        def __get__(self): return self.servT.minCores
+        def __set__(self, int v): self.servT.minCores = v
+    
+    property maxCores:
+        def __get__(self): return self.servT.maxCores
+        def __set__(self, int v): self.servT.maxCores = v
+    
+    property minRam:
+        def __get__(self): return self.servT.minRam
+        def __set__(self, int v): self.servT.minRam = v
+    
+    property maxRam:
+        def __get__(self): return self.servT.maxRam
+        def __set__(self, int v): self.servT.maxRam = v
+    
+    property maxRetries:
+        def __get__(self): return self.servT.maxRetries
+        def __set__(self, int v): self.servT.maxRetries = v
+    
+    property threadable:
+        def __get__(self): return self.servT.threadable
+        def __set__(self, bint v): self.servT.maxRetries = v
+
+    def create(self):
+        """
+        Create this service, if it is a new object.
+        Does nothing if the object already exists 
+        (already has an id)
+        """
+        if not self.id:
+            create_service(self)
+
+    def delete(self):
+        """
+        Deletes this instance, if it was created (has an id)
+        """    
+        if self.id:
+            delete_service(self)
+
+    def update(self):
+        """
+        Commit any changes to this existing service
+        """
+        if self.id:
+            update_service(self)
+
+
+@reconnecting
+def get_services():
+    """
+    Get a list of existing Service instances
+
+    :returns: list[:class:`.Service`]
+    """
+    cdef:
+        ServiceT servT
+        vector[ServiceT] vec
+        list ret
+
+    conn().proxy().getServices(vec)
+    ret = [initService(servT) for servT in vec]
+    return ret
+
+def create_service(Service src):
+    """
+    Create a new service. Updates the original
+    service object passed in, and returns it.
+
+    :param src: :class:`.Service`
+    :returns: :class:`.Service`
+    """
+    cdef ServiceT created
+
+    conn().proxy().createService(created, src.servT)
+    src.setService(created)    
+
+    return src
+
+@reconnecting
+def delete_service(Service src):
+    """
+    Delete an existing Service instance
+
+    :param src: :class:`.Service`
+    """
+    cdef ServiceT empty
+    conn().proxy().deleteService(src.id)
+    src.setService(empty)
+
+@reconnecting
+def update_service(Service src):
+    """
+    Update an existing Service to reflect
+    changes made to the object
+
+    :param src: :class:`.Service`  
+    """
+    conn().proxy().updateService(src.servT)
+
 
 #######################
 # LayerStats
@@ -87,6 +227,7 @@ cdef class LayerSpec:
 
     :var name: str
     :var range: str 
+    :var serv: str
     :var chunk: int 
     :var minCores: int 
     :var maxCores: int 
@@ -103,17 +244,22 @@ cdef class LayerSpec:
     """
     cdef public string name
     cdef public int chunk
-    cdef bint threadable
-    cdef list command, depends, tasks 
-    cdef list tags
-    cdef string range, serv
+
     cdef int minCores, maxCores, minRam, maxRam, maxRetries
+    cdef bint threadable
+    cdef string range, serv
+    cdef list command, depends, tasks, tags
     cdef dict env
     cdef _LayerSpecT__isset __isset
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
-        self.chunk = kwargs.get('chunk', 1)
+        self.serv = kwargs.get('serv', '')
+        self.chunk = kwargs.get('chunk', 0)
+        self.minCores = kwargs.get('minCores', 0)
+        self.maxCores = kwargs.get('maxCores', 0)
+        self.minRam = kwargs.get('minRam', 0)
+        self.threadable = kwargs.get('threadable', False) 
         self.command = kwargs.get('command', [])
         self.depends = kwargs.get('depends', [])
         self.tasks = kwargs.get('tasks', [])
@@ -149,6 +295,7 @@ cdef class LayerSpec:
 
     cdef setLayerSpec(self, LayerSpecT& t):
         self.name  = t.name 
+        self.serv = t.serv 
         self.range = t.range
         self.chunk = t.chunk
         self.minCores = t.minCores
@@ -171,6 +318,7 @@ cdef class LayerSpec:
         cdef LayerSpecT s
 
         s.name = self.name 
+        s.serv = self.serv 
         s.range = self.range
         s.serv = self.serv
         s.chunk = self.chunk
@@ -285,6 +433,7 @@ cdef class Layer:
 
     :var id: str
     :var name: str
+    :var serv: str
     :var range: str
     :var chunk: int
     :var minCores: int
@@ -319,6 +468,9 @@ cdef class Layer:
 
     property name:
         def __get__(self): return self._layer.name
+
+    property serv:
+        def __get__(self): return self._layer.serv
 
     property range:
         def __get__(self): return self._layer.range

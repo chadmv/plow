@@ -16,10 +16,15 @@ using namespace apache::thrift;
 using namespace apache::thrift::protocol;
 using namespace apache::thrift::transport;
 
+namespace {
+    static boost::thread_specific_ptr<PLOW_NAMESPACE::PlowClient> CLIENT_INSTANCE;
+}
+
 PLOW_NAMESPACE_ENTER
 
 #define DEFAULT_HOST "localhost"
 #define DEFAULT_PORT 11336 
+
 
 class PlowClient::Connection
 {
@@ -112,12 +117,18 @@ PlowClient* getClient(const bool reset)
 
 PlowClient* getClient(const std::string& host, const int32_t port, const bool reset)
 {
-    static boost::thread_specific_ptr<PlowClient> instance;
-    if (reset || !instance.get())
-    {
-        instance.reset(new PlowClient(host, port));
+    if ( reset || !CLIENT_INSTANCE.get() ) {
+        CLIENT_INSTANCE.reset(new PlowClient(host, port));
     }
-    return instance.get();
+    return CLIENT_INSTANCE.get();
+}
+
+void resetClient()
+{
+    if (CLIENT_INSTANCE.get()) 
+    {
+        CLIENT_INSTANCE.reset();
+    }
 }
 
 PLOW_NAMESPACE_EXIT

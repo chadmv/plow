@@ -455,7 +455,7 @@ class JobNode(PlowNode):
     TYPE = JOB_TYPE
     HEADERS = [
                 "Name", "Running", "State", "Owner", 
-                "Duration", "maxRssMb",
+                "Duration", "maxRam",
                ]
 
     HEADER_WIDTHS = (400,75,80,80,100,50)
@@ -466,7 +466,7 @@ class JobNode(PlowNode):
         lambda j: "Paused" if j.paused else JOB_STATES.get(j.state, '').title(),
         lambda j: j.username,
         lambda j: formatDateTime(j.startTime),
-        lambda j: j.maxRssMb,
+        lambda j: j.stats.highRam,
     ]
 
     DATA_CALLBACKS = DISPLAY_CALLBACKS[:]
