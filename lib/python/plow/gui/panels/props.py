@@ -186,7 +186,9 @@ class PropertiesPanel(Panel):
 class PropertiesWidget(QtGui.QWidget):
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        QtGui.QVBoxLayout(self)
+        layout = QtGui.QVBoxLayout(self)
+        layout.setContentsMargins(4,0,4,4)
+
         self.__attrs = attrs
         self.__scroll = QtGui.QScrollArea(self)
         self.__scroll.setWidgetResizable(True)
@@ -196,6 +198,9 @@ class PropertiesWidget(QtGui.QWidget):
 
     def setWidget(self, widget):
         self.__scroll.setWidget(widget)
+
+    def refresh(self):
+        pass
 
 
 

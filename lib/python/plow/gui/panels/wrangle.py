@@ -105,7 +105,7 @@ class JobWranglerWidget(QtGui.QWidget):
         self.__attrs = attrs
 
         layout = QtGui.QVBoxLayout(self)
-        layout.setContentsMargins(4,4,4,4)
+        layout.setContentsMargins(4,0,4,4)
 
         # DEBUG
         if not "projects" in attrs:

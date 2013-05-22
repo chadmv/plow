@@ -70,6 +70,7 @@ class ClusterPanel(Panel):
     def __handleJobOfInterestEvent(self, *args, **kwargs):
         self.widget().setJobId(args[0])
 
+
 class ClusterWidget(QtGui.QWidget):
 
     Header = ["Name", "Tags", "Usage", "Nodes", "Locked", "Repair", "Down", "Cores"]
@@ -77,24 +78,27 @@ class ClusterWidget(QtGui.QWidget):
 
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        QtGui.QVBoxLayout(self)
+        layout = QtGui.QVBoxLayout(self)
+        layout.setContentsMargins(4,0,4,4)
+
         self.__attrs = attrs
         
-        self.__tree = QtGui.QTreeView(self)
-        self.__tree.setSelectionBehavior(QtGui.QTableView.SelectRows);
-        self.__tree.setItemDelegateForColumn(2, SimplePercentageBarDelegate(self))
-        self.__tree.setAlternatingRowColors(True)
-        self.__tree.setUniformRowHeights(True)
-        self.__tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
-        self.__tree.setAutoFillBackground(False)
-        self.__tree.setSelectionMode(self.__tree.ExtendedSelection)
-        self.__tree.doubleClicked.connect(self.__itemDoubleClicked)
+        self.__tree = tree = QtGui.QTreeView(self)
+        tree.setSelectionBehavior(tree.SelectRows);
+        tree.setItemDelegateForColumn(2, SimplePercentageBarDelegate(self))
+        tree.setAlternatingRowColors(True)
+        tree.setUniformRowHeights(True)
+        tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
+        tree.setAutoFillBackground(False)
+        tree.setSelectionMode(tree.ExtendedSelection)
+        tree.doubleClicked.connect(self.__itemDoubleClicked)
 
         self.__model = ClusterModel()
-        self.__tree.setModel(self.__model)
+        tree.setModel(self.__model)
         self.__model.refresh()
 
-        [self.__tree.setColumnWidth(i, v) for i, v in enumerate(self.Width)]
+        for i,v in enumerate(self.Width):
+            tree.setColumnWidth(i, v) 
 
         self.layout().addWidget(self.__tree)
 

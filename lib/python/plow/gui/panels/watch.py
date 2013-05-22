@@ -71,6 +71,7 @@ class RenderJobWatchPanel(Panel):
     def refresh(self):
         self.widget().refresh()
 
+
 class RenderJobWatchWidget(QtGui.QWidget):
 
     Header = ["Job", "State", "Run", "Wait", "Min", "Max", "Duration", "Progress"]
@@ -78,19 +79,20 @@ class RenderJobWatchWidget(QtGui.QWidget):
 
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        QtGui.QVBoxLayout(self)
+        layout = QtGui.QVBoxLayout(self)
+        layout.setContentsMargins(4,0,4,4)
+
         self.attrs = attrs
         self.__jobs = { }
 
-        self.__tree = QtGui.QTreeWidget(self)
-        self.__tree.setHeaderLabels(self.Header)
-        self.__tree.setColumnCount(len(self.Header))
-        self.__tree.setUniformRowHeights(True)
-        self.__tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
-        [self.__tree.setColumnWidth(i, v) for i, v in enumerate(self.Width)]
-        self.__tree.itemDoubleClicked.connect(self.__itemDoubleClicked)
-        self.__tree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.__tree.customContextMenuRequested.connect(self.__showContextMenu)
+        self.__tree = tree = QtGui.QTreeWidget(self)
+        tree.setHeaderLabels(self.Header)
+        tree.setColumnCount(len(self.Header))
+        tree.setUniformRowHeights(True)
+        tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
+
+        for i, v in enumerate(self.Width):
+            tree.setColumnWidth(i, v) 
 
         def treeMousePress(event):
             item = self.__tree.itemAt(event.pos())
@@ -98,9 +100,14 @@ class RenderJobWatchWidget(QtGui.QWidget):
                 self.__tree.clearSelection()
             QtGui.QTreeWidget.mousePressEvent(self.__tree, event)
 
-        self.__tree.mousePressEvent = treeMousePress
+        tree.mousePressEvent = treeMousePress
 
-        self.layout().addWidget(self.__tree)
+        layout.addWidget(tree)
+
+        # connections
+        tree.itemDoubleClicked.connect(self.__itemDoubleClicked)
+        tree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        tree.customContextMenuRequested.connect(self.__showContextMenu)
 
     def refresh(self):
         self.__updateExistingJobs()
