@@ -119,6 +119,10 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
         jdbc.update("UPDATE plow.node SET " +
                 "time_updated=plow.txTimeMillis() WHERE pk_node=?", node.getNodeId());
 
+        jdbc.update("UPDATE plow.node SET " +
+                "int_state=? WHERE pk_node=? AND int_state=?",
+                NodeState.UP.ordinal(), node.getNodeId(), NodeState.DOWN.ordinal());
+
         jdbc.update(FULL_UPDATE,
                 ping.hw.physicalCpus,
                 ping.hw.logicalCpus,
