@@ -23,6 +23,21 @@ class TableWidget(QtGui.QTableView):
         vheader.setDefaultSectionSize(constants.DEFAULT_ROW_HEIGHT)        
 
 
+class TreeWidget(QtGui.QTreeView):
+    def __init__(self, *args, **kwargs):
+        super(TreeWidget, self).__init__(*args, **kwargs)
+
+        self.setSortingEnabled(True)
+        self.setEditTriggers(self.NoEditTriggers)
+        self.setSelectionBehavior(self.SelectRows)
+        self.setSelectionMode(self.ExtendedSelection)
+        self.setUniformRowHeights(True)
+        self.setAlternatingRowColors(False)
+        self.setAutoFillBackground(True)
+        self.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
+        # self.setVerticalScrollMode(self.ScrollPerPixel)
+
+
 class SpinSliderWidget(QtGui.QWidget):
     def __init__(self, minimum, maximum, value, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -302,9 +317,9 @@ class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
         rect = opt.rect
         rect.adjust(self.Margins[0], self.Margins[1], -self.Margins[2], -self.Margins[3])
         data = index.data()
-        
+
         painter.save()
-        painter.setRenderHints(
+        painter.setRenderHints (
             painter.HighQualityAntialiasing |
             painter.SmoothPixmapTransform |
             painter.Antialiasing)

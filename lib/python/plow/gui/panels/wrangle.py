@@ -13,6 +13,7 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.common import tree, models
+from plow.gui.common.widgets import TreeWidget
 from plow.gui.util import formatDateTime, formatDuration
 
 JOB_STATES = {}
@@ -123,20 +124,9 @@ class JobWranglerWidget(QtGui.QWidget):
         self.__proxy = proxy = models.AlnumSortProxyModel(self)
         proxy.setSourceModel(model)
 
-        self.__view = view = QtGui.QTreeView(self)
-
+        self.__view = view = TreeWidget(self)
         view.setModel(proxy)
-
         view.sortByColumn(4, QtCore.Qt.DescendingOrder)
-        view.setSortingEnabled(True)
-        view.setEditTriggers(view.NoEditTriggers)
-        view.setSelectionBehavior(view.SelectRows)
-        view.setSelectionMode(view.ExtendedSelection)
-        view.setUniformRowHeights(True)
-        view.setAlternatingRowColors(False)
-        view.setAutoFillBackground(True)
-        # view.setVerticalScrollMode(view.ScrollPerPixel)
-        view.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
 
         for i, width in enumerate(JobNode.HEADER_WIDTHS):
             view.setColumnWidth(i, width)

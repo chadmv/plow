@@ -7,7 +7,9 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.util import formatPercentage
 from plow.gui.event import EventManager
-from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelegate, ManagedListWidget, BooleanCheckBox, FormWidgetLabel
+from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelegate, \
+                                    ManagedListWidget, BooleanCheckBox, FormWidgetLabel, \
+                                    TreeWidget
 
 IdRole = QtCore.Qt.UserRole
 ObjectRole = QtCore.Qt.UserRole + 1
@@ -83,15 +85,8 @@ class ClusterWidget(QtGui.QWidget):
 
         self.__attrs = attrs
         
-        self.__tree = tree = QtGui.QTreeView(self)
-        tree.setSelectionBehavior(tree.SelectRows);
+        self.__tree = tree = TreeWidget(self)
         tree.setItemDelegateForColumn(2, SimplePercentageBarDelegate(self))
-        tree.setAlternatingRowColors(True)
-        tree.setUniformRowHeights(True)
-        tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
-        tree.setAutoFillBackground(False)
-        tree.setSelectionMode(tree.ExtendedSelection)
-        tree.doubleClicked.connect(self.__itemDoubleClicked)
 
         self.__model = ClusterModel()
         tree.setModel(self.__model)
