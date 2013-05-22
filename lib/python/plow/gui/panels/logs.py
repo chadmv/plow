@@ -47,6 +47,7 @@ class TabbedLogVieweWidget(QtGui.QWidget):
         self.__tabs.tabCloseRequested.connect(self.closeTab)
 
         layout = QtGui.QVBoxLayout()
+        layout.setContentsMargins(4,0,4,4)
         layout.addWidget(self.__tabs)
         self.setLayout(layout)
 
@@ -238,10 +239,15 @@ class LogViewerWidget(QtGui.QWidget):
         self.__jobNameLabel.setVisible(bool(name))
         self.__jobNameSpacer.setVisible(bool(name))
 
-    def findText(self, text, cursor=None, opts=0):
+    def findText(self, text, cursor=None, opts=None):
         if not cursor:
             cursor = QtGui.QTextCursor()
-        newCursor = self.__view.document().find(text, cursor, opts)
+
+        if opts:
+            newCursor = self.__view.document().find(text, cursor, opts)
+        else:
+            newCursor = self.__view.document().find(text, cursor)
+
         if newCursor.isNull():
             LOGGER.debug("nothing found in text")
 
