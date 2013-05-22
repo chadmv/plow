@@ -27,4 +27,9 @@ public class Signal {
      */
     public static final int MANUAL_RETRY = 670;
 
+    /**
+     * The node went down.
+     */
+    public static final int NODE_DOWN = 671;
+
 }
