@@ -8,8 +8,8 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.util import formatDuration
 from plow.gui.event import EventManager
-from plow.gui.constants import COLOR_TASK_STATE, TASK_STATES
-from plow.gui.common.widgets import CheckableComboBox
+from plow.gui import constants 
+from plow.gui.common.widgets import CheckableComboBox, TableWidget
 
 IdRole = QtCore.Qt.UserRole
 ObjectRole = QtCore.Qt.UserRole + 1
@@ -35,7 +35,7 @@ class TaskPanel(Panel):
         # comment button (multi-select)
         # 
 
-        self.__state_filter = CheckableComboBox("Task States", TASK_STATES, [], None, self)
+        self.__state_filter = CheckableComboBox("Task States", constants.TASK_STATES, [], None, self)
         self.__layer_filter = CheckableComboBox("Layers", [], [], None, self)
 
         self.titleBarWidget().addWidget(self.__state_filter)    
@@ -61,22 +61,22 @@ class TaskWidget(QtGui.QWidget):
 
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        QtGui.QVBoxLayout(self)
+        layout = QtGui.QVBoxLayout(self)
+        layout.setContentsMargins(4,0,4,4)
+
         self.__attrs = attrs
         
-        self.__table = QtGui.QTableView(self)
-        self.__table.setSelectionBehavior(QtGui.QTableView.SelectRows);
-        self.__table.horizontalHeader().setStretchLastSection(True)
-        self.__table.setAlternatingRowColors(True)
-        self.__table.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
-        self.__table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.__table.customContextMenuRequested.connect(self.__showContextMenu)
-        self.__table.doubleClicked.connect(self.__rowDoubleClicked)
+        self.__table = table = TableWidget(self)
+        table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+
+        # connections
+        table.customContextMenuRequested.connect(self.__showContextMenu)
+        table.doubleClicked.connect(self.__rowDoubleClicked)
 
         self.__jobId = None
         self.__model = None
 
-        self.layout().addWidget(self.__table)
+        self.layout().addWidget(table)
 
     def refresh(self):
         if self.__model:
@@ -194,7 +194,7 @@ class TaskModel(QtCore.QAbstractTableModel):
             if col == 0:
                 return task.name
             elif col == 1:
-                return TASK_STATES[task.state]
+                return constants.TASK_STATES[task.state]
             elif col == 2:
                 return task.lastResource
             elif col == 3:
@@ -205,7 +205,7 @@ class TaskModel(QtCore.QAbstractTableModel):
                 return stats.lastLogLine
         
         elif role == QtCore.Qt.BackgroundRole and col ==1:
-            return COLOR_TASK_STATE[task.state]
+            return constants.COLOR_TASK_STATE[task.state]
         
         elif role == QtCore.Qt.ToolTipRole and col == 3:
             tip = "Allocated Cores: %d\nCurrent CPU Perc:%d\nMax CPU Perc:%d\nAllocated RAM:%dMB\nCurrent RSS:%dMB\nMaxRSS:%dMB"

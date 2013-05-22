@@ -3,13 +3,13 @@ import logging
 from datetime import datetime 
 
 import plow.client
-import plow.gui.constants as constants
 
+from plow.gui import constants
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.common import models
-
+from plow.gui.common.widgets import TableWidget
 
 NODE_STATES = {}
 for a in dir(plow.client.NodeState):
@@ -48,23 +48,15 @@ class NodeWidget(QtGui.QWidget):
         self.__attrs = attrs
 
         layout = QtGui.QVBoxLayout(self)
+        layout.setContentsMargins(4,0,4,4)
 
         self.__model = model = NodeModel(self)
         self.__proxy = proxy = models.AlnumSortProxyModel(self)
         proxy.setSourceModel(model)
 
-        self.__view = view = QtGui.QTableView(self)
-        view.verticalHeader().hide()
-        view.sortByColumn(0, QtCore.Qt.AscendingOrder)
-        view.setEditTriggers(view.NoEditTriggers)
-        view.setSelectionBehavior(view.SelectRows)
-        view.setSelectionMode(view.ExtendedSelection)
-        view.setSortingEnabled(True)
+        self.__view = view = TableWidget(self)
         view.setModel(proxy)
-        view.setAlternatingRowColors(False)
-        view.setAutoFillBackground(False)
-        view.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
-        view.horizontalHeader().setStretchLastSection(True)
+        view.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
         layout.addWidget(view)
 

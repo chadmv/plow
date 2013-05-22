@@ -1,6 +1,27 @@
 """Non-Plow specific widgets."""
 from plow.gui.manifest import QtGui, QtCore
 from plow.gui.common.help import getHelp, getHelpTextWidget
+from plow.gui import constants 
+
+
+class TableWidget(QtGui.QTableView):
+    def __init__(self, *args, **kwargs):
+        super(TableWidget, self).__init__(*args, **kwargs)
+
+        self.setEditTriggers(self.NoEditTriggers)
+        self.setSelectionBehavior(self.SelectRows)
+        self.setSelectionMode(self.ExtendedSelection)
+        self.setSortingEnabled(True)
+        self.setAlternatingRowColors(False)
+        self.setAutoFillBackground(False)
+        self.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
+        
+        self.horizontalHeader().setStretchLastSection(True)
+        
+        vheader = self.verticalHeader()
+        vheader.hide()
+        vheader.setDefaultSectionSize(constants.DEFAULT_ROW_HEIGHT)        
+
 
 class SpinSliderWidget(QtGui.QWidget):
     def __init__(self, minimum, maximum, value, parent=None):

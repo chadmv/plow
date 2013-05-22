@@ -9,6 +9,9 @@ The job status is how the job is doin.
 
 """
 
+#
+# Colors
+#
 BLUE = QtGui.QColor(38, 98, 117)
 PURPLE = QtGui.QColor(175, 38, 193)
 RED = QtGui.QColor(177, 24, 0)
@@ -33,6 +36,9 @@ COLOR_TASK_STATE = [
     GREEN
 ]
 
+#
+# Display names
+#
 TIME_NO_TIME = "__-__ __:__:__"
 
 TIME_NO_DURATION = "__:__:__"
@@ -48,3 +54,9 @@ TASK_STATES = ["INITIALIZE",
 JOB_STATES = ["INITIALIZE", 
               "RUNNING",
               "FINISHED"]
+
+
+#
+# Sizes
+#
+DEFAULT_ROW_HEIGHT = 20
