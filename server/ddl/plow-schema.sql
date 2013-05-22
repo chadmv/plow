@@ -180,8 +180,8 @@ CREATE INDEX job_count_int_waiting_idx ON plow.job_count (int_waiting);
 ---
 CREATE TABLE plow.job_stat (
   pk_job UUID NOT NULL PRIMARY KEY,
-  int_ram_high INTEGER NOT NULL DEFAULT 0,  
-  flt_cores_high REAL NOT NULL DEFAULT 0.0,  
+  int_ram_high INTEGER NOT NULL DEFAULT 0,
+  flt_cores_high REAL NOT NULL DEFAULT 0.0,
   int_core_time_high INTEGER NOT NULL DEFAULT 0,
   int_total_core_time_success BIGINT NOT NULL DEFAULT 0,
   int_total_core_time_fail BIGINT NOT NULL DEFAULT 0
@@ -244,15 +244,15 @@ CREATE TABLE plow.layer_dsp (
 CREATE TABLE plow.layer_stat (
   pk_layer UUID NOT NULL PRIMARY KEY,
   pk_job UUID NOT NULL,
-  
+
   int_ram_high INTEGER NOT NULL DEFAULT 0,
   int_ram_avg INTEGER NOT NULL DEFAULT 0,
   flt_ram_std REAL NOT NULL DEFAULT 0.0,
-  
+
   flt_cores_high REAL NOT NULL DEFAULT 0.0,
   flt_cores_avg REAL NOT NULL DEFAULT 0.0,
   flt_cores_std REAL NOT NULL DEFAULT 0.0,
-  
+
   int_core_time_high BIGINT NOT NULL DEFAULT 0,
   int_core_time_low BIGINT NOT NULL DEFAULT -1,
   int_core_time_avg BIGINT NOT NULL DEFAULT 0,
@@ -586,7 +586,7 @@ CREATE INDEX task_history_exit_status ON plow.task_history (int_exit_status NULL
 
 ---
 --- plow.after_job_inserted - runs after a job has been inserted into plow.job
---- 
+---
 ---
 CREATE OR REPLACE FUNCTION plow.after_job_inserted() RETURNS TRIGGER AS $$
 BEGIN
@@ -627,7 +627,7 @@ CREATE TRIGGER trig_after_job_inserted AFTER INSERT ON plow.job
 
 ---
 --- plow.after_layer_inserted - runs after a layer has been inserted into plow.layer.
---- 
+---
 ---
 CREATE OR REPLACE FUNCTION plow.after_layer_inserted() RETURNS TRIGGER AS $$
 BEGIN
@@ -678,7 +678,7 @@ DECLARE
   core_time BIGINT;
 BEGIN
 
-  /* 
+  /*
   * Delete tasks aborted during the dispatch process.
   * See com.plowrender.plow.Signal.
   */
@@ -689,26 +689,26 @@ BEGIN
 
   /*
   * Grab the necessary stats off the proc.
-  */ 
-  SELECT 
+  */
+  SELECT
     int_cores,
     flt_cores_high,
-    int_ram_high 
+    int_ram_high
   INTO
-    proc 
+    proc
   FROM
     plow.proc WHERE pk_task=NEW.pk_task;
 
   /* Calcculate core and clock time. */
   clock_time := NEW.time_stopped - NEW.time_started;
   core_time := clock_time * proc.int_cores;
-  
+
   /*
   * If the task didn't succeed stats are not calculated, but the failed
   * core time is.
   */
   IF NEW.int_exit_status != 0 THEN
-   
+
    UPDATE task_history
     SET
       time_stopped = NEW.time_stopped,
@@ -728,15 +728,15 @@ BEGIN
     UPDATE
       layer_stat
     SET
-      int_total_core_time_failed=int_total_core_time_failed+core_time,
-      int_total_clock_time_failed=int_total_clock_time_failed+clock_time
+      int_total_core_time_fail=int_total_core_time_fail+core_time,
+      int_total_clock_time_fail=int_total_clock_time_fail+clock_time
     WHERE
       pk_layer=NEW.pk_layer;
 
-  ELSE 
+  ELSE
 
     UPDATE task_history
-    SET 
+    SET
       flt_cores_high = proc.flt_cores_high,
       int_ram_high = proc.int_ram_high,
       time_stopped = NEW.time_stopped,
@@ -752,7 +752,7 @@ BEGIN
       int_retry = NEW.int_retry;
 
 
-    SELECT 
+    SELECT
       avg(int_core_time) AS core_time_avg,
       avg(int_clock_time) AS clock_time_avg,
       avg(int_ram_high) AS ram_avg,
@@ -761,7 +761,7 @@ BEGIN
       stddev(int_clock_time) AS clock_time_stddev,
       stddev(int_ram_high) AS ram_stddev,
       stddev(flt_cores_high) AS cores_stddev
-    INTO 
+    INTO
       stats
     FROM (
       SELECT
@@ -828,8 +828,8 @@ BEGIN
     RAISE EXCEPTION 'proc % not found for task', NEW.pk_task;
   END IF;
 
-  INSERT INTO 
-    task_history 
+  INSERT INTO
+    task_history
   (
     pk_task,
     pk_layer,
@@ -933,12 +933,12 @@ CREATE TRIGGER trig_after_proc_update AFTER UPDATE ON plow.proc
 ---
 CREATE OR REPLACE FUNCTION plow.before_disp_update() RETURNS TRIGGER AS $$
 BEGIN
-	IF NEW.int_cores_min = 0 THEN
-		NEW.float_tier := 0;
-	ELSE
-		NEW.float_tier := NEW.int_cores_run / NEW.int_cores_min::real;
-	END IF;
-	RETURN NEW;
+  IF NEW.int_cores_min = 0 THEN
+    NEW.float_tier := 0;
+  ELSE
+    NEW.float_tier := NEW.int_cores_run / NEW.int_cores_min::real;
+  END IF;
+  RETURN NEW;
 END
 $$
 LANGUAGE plpgsql;
