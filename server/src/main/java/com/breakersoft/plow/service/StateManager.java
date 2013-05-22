@@ -1,6 +1,7 @@
 package com.breakersoft.plow.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,12 @@ import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobFinishedEvent;
+import com.breakersoft.plow.exceptions.PlowException;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
 import com.breakersoft.plow.rndaemon.RndClient;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
+import com.breakersoft.plow.util.PlowUtils;
 
 @Component
 public class StateManager {
@@ -70,7 +73,7 @@ public class StateManager {
         }
     }
 
-    public void eatTask(Task task) {
+    public void eatTask(Task task, boolean checkFinished) {
         logger.info("Thread: {} Eating Task: {}", Thread.currentThread().getName(), task.getTaskId());
 
         if (dispatchService.stopTask(task, TaskState.EATEN, ExitStatus.FAIL, Signal.MANUAL_KILL)) {
@@ -78,6 +81,13 @@ public class StateManager {
         }
         else {
             jobService.setTaskState(task, TaskState.EATEN);
+        }
+
+        if (checkFinished) {
+            Job job = jobService.getJob(task.getJobId());
+            if (jobService.isFinished(job)) {
+                  shutdownJob(job);
+            }
         }
     }
 
@@ -111,17 +121,30 @@ public class StateManager {
     }
 
     @Async(value="stateChangeExecutor")
-    public void eatTasks(TaskFilterT filter) {
-        final List<Task> tasks = jobService.getTasks(filter);
-        logger.info("Thread: {} Batch eating {} tasks", Thread.currentThread().getName(), tasks.size());
-        for (final Task t: tasks) {
-            stateChangeExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    eatTask(t);
-                }
-            });
+    public void eatTasks(final TaskFilterT filter) {
+        if (PlowUtils.isValid(filter.jobId)) {
+            throw new PlowException("A jobId is not set on the task filter.");
         }
+        stateChangeExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                final List<Task> tasks = jobService.getTasks(filter);
+                logger.info("Thread: {} Batch eating {} tasks", Thread.currentThread().getName(), tasks.size());
+
+                if (tasks.isEmpty()) {
+                    return;
+                }
+
+                for (final Task t: tasks) {
+                    eatTask(t, false);
+                }
+
+                Job job = jobService.getJob(UUID.fromString(filter.jobId));
+                if (jobService.isFinished(job)) {
+                    shutdownJob(job);
+                }
+            }
+        });
     }
 
     @Async(value="stateChangeExecutor")

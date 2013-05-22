@@ -7,11 +7,17 @@ import javax.annotation.Resource;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.breakersoft.plow.Task;
+import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.EventManagerImpl;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.StateManager;
 import com.breakersoft.plow.test.AbstractTest;
+import com.breakersoft.plow.thrift.TaskFilterT;
+import com.breakersoft.plow.thrift.TaskState;
+import com.breakersoft.plow.thrift.TaskT;
+import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 import com.google.common.eventbus.Subscribe;
 
 public class StateManagerTests extends AbstractTest {
@@ -21,6 +27,9 @@ public class StateManagerTests extends AbstractTest {
 
     @Resource
     EventManager eventManager;
+
+    @Resource
+    TaskDao taskDao;
 
     private boolean jobShutdownEventHandled;
 
@@ -44,6 +53,32 @@ public class StateManagerTests extends AbstractTest {
         stateManager.killJob(event.getJob(), "unit test kill");
         assertTrue(jobShutdownEventHandled);
     }
+
+    @Test
+    public void testEatAll() throws InterruptedException {
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
+
+        TaskFilterT filter = new TaskFilterT();
+        filter.jobId = event.getJob().getJobId().toString();
+        stateManager.eatTasks(filter);
+        Thread.sleep(1000);
+        assertTrue(jobShutdownEventHandled);
+    }
+
+    @Test
+    public void testEatSingle() throws InterruptedException {
+        JobLaunchEvent event = jobService.launch(getTestJobSpec());
+        TaskFilterT filter = new TaskFilterT();
+        filter.jobId = event.getJob().getJobId().toString();
+        filter.limit = 1;
+
+        Task t = taskDao.getTasks(filter).get(0);
+        stateManager.eatTask(t, false);
+
+        assertEquals(TaskState.EATEN.ordinal(),
+                jdbc().queryForInt("SELECT int_state FROM plow.task WHERE pk_task=?", t.getTaskId()));
+    }
+
     @Subscribe
     public void handleJobShutdownEvent(JobLaunchEvent event) {
         jobShutdownEventHandled = true;
