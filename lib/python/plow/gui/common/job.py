@@ -84,48 +84,58 @@ class JobProgressBar(QtGui.QWidget):
 class JobSelectionDialog(QtGui.QDialog):
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
-        self.__jobs = plow.client.get_active_jobs()
+        self.__jobs = plow.client.get_jobs(matchingOnly=True, states=[plow.JobState.RUNNING])
 
         self.__txt_filter = QtGui.QLineEdit(self)
         self.__txt_filter.textChanged.connect(self.__filterChanged)
-        self.__list_jobs = QtGui.QListWidget(self)
-        self.__list_jobs.setSelectionMode(self.__list_jobs.ExtendedSelection)
-        self.__list_jobs.addItems([job.name for job in self.__jobs])
-        self.__list_jobs.sortItems()
-        self.__list_jobs.itemDoubleClicked.connect(self.__itemDoubleClicked)
+
+        jobs = [job.name for job in self.__jobs]
+        self.__model = QtGui.QStringListModel(jobs, self)
+
+        self.__proxyModel = proxy = QtGui.QSortFilterProxyModel(self)
+        proxy.setSourceModel(self.__model)
+
+        self.__list_jobs = view = QtGui.QListView(self)
+        view.setSelectionMode(self.__list_jobs.ExtendedSelection)
+        view.setModel(proxy)
+
+        proxy.sort(0)
+        proxy.setDynamicSortFilter(True)
 
         self.__btns = QtGui.QDialogButtonBox(
             QtGui.QDialogButtonBox.Ok | 
             QtGui.QDialogButtonBox.Cancel)
 
-        self.__btns.accepted.connect(self.accept)
-        self.__btns.rejected.connect(self.reject)
-
-        layout = QtGui.QVBoxLayout()
+        layout = QtGui.QVBoxLayout(self)
         layout.addWidget(self.__txt_filter)
         layout.addWidget(self.__list_jobs)
         layout.addWidget(self.__btns)
-        self.setLayout(layout)
 
-    def __itemDoubleClicked(self, item):
-        self.accept()
+        # connections
+        self.__list_jobs.doubleClicked.connect(self.accept)
+        self.__btns.accepted.connect(self.accept)
+        self.__btns.rejected.connect(self.reject)
 
     def __filterChanged(self, value):
+        value = value.strip()
         if not value:
-            self.__list_jobs.clear()
-            self.__list_jobs.addItems([job.name for job in self.__jobs])
+            self.__proxyModel.setFilterFixedString("")
+
         else:
-            new_items = [i.text() for i in self.__list_jobs.findItems(value, QtCore.Qt.MatchContains)]
-            self.__list_jobs.clear()
-            self.__list_jobs.addItems(new_items)
-        self.__list_jobs.sortItems()
+            searchStr = '*'.join(value.split())
+            self.__proxyModel.setFilterWildcard(searchStr)
 
     def getSelectedJobs(self):
-        jobNames = [str(item.text()) for item in self.__list_jobs.selectedItems()]
+        indexes = self.__list_jobs.selectionModel().selectedIndexes()
+        jobNames = [self.__proxyModel.data(i) for i in indexes]
+
         if not jobNames:
-            return []
-        else:
-            return plow.client.get_jobs(matchingOnly=True, name=jobNames, states=[plow.JobState.RUNNING])
+            return jobNames
+
+        return plow.client.get_jobs(matchingOnly=True, 
+                                    name=jobNames, 
+                                    states=[plow.JobState.RUNNING])
+
 
 class JobStateWidget(QtGui.QWidget):
     """

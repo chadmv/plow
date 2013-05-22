@@ -57,7 +57,9 @@ class RenderJobWatchPanel(Panel):
     def openLoadDialog(self):
         dialog = JobSelectionDialog()
         if dialog.exec_():
-            [self.widget().addJob(job) for job in dialog.getSelectedJobs()]
+            widget = self.widget()
+            for job in dialog.getSelectedJobs():
+                widget.addJob(job) 
 
     def _openPanelSettingsDialog(self):
         d = RenderJobWatchSettingsDialog(self.attrs)
