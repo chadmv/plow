@@ -1,6 +1,7 @@
 package com.breakersoft.plow.service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import com.breakersoft.plow.rndaemon.RndClient;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.util.PlowUtils;
+import com.google.common.collect.Sets;
 
 @Component
 public class StateManager {
@@ -135,13 +137,17 @@ public class StateManager {
                     return;
                 }
 
+                Set<UUID> jobIds = Sets.newHashSet();
                 for (final Task t: tasks) {
                     eatTask(t, false);
+                    jobIds.add(t.getJobId());
                 }
 
-                Job job = jobService.getJob(UUID.fromString(filter.jobId));
-                if (jobService.isFinished(job)) {
-                    shutdownJob(job);
+                for (UUID jobId: jobIds) {
+                    Job job = jobService.getJob(jobId);
+                    if (jobService.isFinished(job)) {
+                        shutdownJob(job);
+                    }
                 }
             }
         });
