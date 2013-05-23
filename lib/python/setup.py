@@ -8,6 +8,7 @@ import os
 import sys
 import glob
 import shutil
+import re 
 
 import subprocess
 from subprocess import Popen, PIPE
@@ -187,11 +188,11 @@ if use_cython:
     plowmodule.sources.insert(0, PLOW_SOURCE_MAIN_PYX)
     force = '-f' in argv or '--force' in argv
     ext_modules = cythonize([plowmodule], quiet=True, force=force)
+    ext_modules[0].sources = [re.sub(r'\.c$', '.cpp', p) for p in ext_modules[0].sources]
 
 else:
     plowmodule.sources.insert(0, PLOW_SOURCE_MAIN_CPP)
     ext_modules = [plowmodule]
-
 
 
 #-----------------------------------------------------------------------------
