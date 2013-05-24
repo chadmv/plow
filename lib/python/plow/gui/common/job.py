@@ -44,6 +44,7 @@ class JobProgressBar(QtGui.QWidget):
             totals.depend,
             totals.succeeded
         ]
+        self.update()
 
     def paintEvent(self, event):
 
