@@ -410,6 +410,61 @@ cdef class Job:
         cdef list ret = get_job_depends_on(self)
         return ret
 
+    def kill_tasks(self, object callback=None):
+        """
+        Kill all tasks on a job
+
+        :param callback: Optional callback function to run if tasks were killed
+        """
+        tasks = get_tasks(job=self)
+        if tasks:
+            LOGGER.debug("Killing %d tasks", len(tasks))
+            kill_tasks(tasks=tasks)
+            if callback:
+                callback()
+
+    def eat_dead_tasks(self, object callback=None):
+        """
+        Eat all dead tasks on a job
+
+        :param callback: Optional callback function to run if tasks were eaten
+        """
+        cdef: 
+            list tasks, dead
+            Task t
+
+        tasks = get_tasks(job=self)
+        if not tasks:
+            return
+
+        dead = [t for t in tasks if t.state == TaskState.DEAD]
+        if dead:
+            LOGGER.debug("Eating %d tasks", len(dead))
+            eat_tasks(tasks=dead)
+            if callback:
+                callback()
+
+    def retry_dead_tasks(self, object callback=None):
+        """
+        Retry all dead tasks on a job
+
+        :param callback: Optional callback function to run if tasks were retried
+        """
+        cdef: 
+            list tasks, dead
+            Task t
+
+        tasks = get_tasks(job=self)
+        if not tasks:
+            return 
+
+        dead = [t for t in tasks if t.state == TaskState.DEAD]
+        if dead:
+            LOGGER.debug("Retrying %d tasks", len(dead))
+            retry_tasks(tasks=dead)
+            if callback:
+                callback()
+
 
 def launch_job(JobSpec spec):
     """
