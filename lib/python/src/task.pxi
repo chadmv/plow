@@ -425,8 +425,8 @@ def retry_tasks(**kwargs):
     Retry tasks matching various keyword filter params 
 
     :param job: :class:`.Job` 
-    :param layer: list of :class:`.Layer` 
-    :param task: list of :class:`.Task` 
+    :param layers: list of :class:`.Layer` 
+    :param tasks: list of :class:`.Task` 
     :param limit: int 
     :param offset: int 
     :param lastUpdateTime: long msec epoch timestamp 
@@ -441,8 +441,8 @@ def eat_tasks(**kwargs):
     Eat tasks matching various keyword filter params 
 
     :param job: :class:`.Job` 
-    :param layer: list of :class:`.Layer` 
-    :param task: list of :class:`.Task` 
+    :param layers: list of :class:`.Layer` 
+    :param tasks: list of :class:`.Task` 
     :param limit: int 
     :param offset: int 
     :param lastUpdateTime: long msec epoch timestamp 
@@ -456,8 +456,8 @@ def kill_tasks(**kwargs):
     Kill tasks matching various filter params 
 
     :param job: :class:`.Job` 
-    :param layer: list of :class:`.Layer` 
-    :param task: list of :class:`.Task` 
+    :param layers: list of :class:`.Layer` 
+    :param tasks: list of :class:`.Task` 
     :param limit: int 
     :param offset: int 
     :param lastUpdateTime: long msec epoch timestamp 
