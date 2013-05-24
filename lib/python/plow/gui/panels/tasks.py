@@ -14,6 +14,7 @@ from plow.gui.common.widgets import CheckableComboBox, TableWidget
 IdRole = QtCore.Qt.UserRole
 ObjectRole = QtCore.Qt.UserRole + 1
 
+
 class TaskPanel(Panel):
 
     def __init__(self, name="Tasks", parent=None):
@@ -53,9 +54,9 @@ class TaskPanel(Panel):
     def __handleJobOfInterestEvent(self, *args, **kwargs):
         self.widget().setJobId(args[0])
 
+
 class TaskWidget(QtGui.QWidget):
 
-    Header = ["Name", "State", "Node", "Resource", "Duration", "Log"]
     Width = [350]
     Refresh = 1500
 
@@ -134,7 +135,21 @@ class TaskWidget(QtGui.QWidget):
         if full:
             EventManager.emit("GLOBAL_REFRESH")
 
+
 class TaskModel(QtCore.QAbstractTableModel):
+
+    HEADERS = ["Name", "State", "Node", "Resource", "Duration", "Log"]
+
+    HEADER_CALLBACKS = {
+        0 : lambda t: t.name,
+        1 : lambda t: constants.TASK_STATES[t.state],
+        2 : lambda t: t.lastResource,
+        3 : lambda t: "%s/%02dMB" % (t.stats.cores, t.stats.ram),
+        4 : lambda t: formatDuration(t.stats.startTime, t.stats.stopTime),
+        5 : lambda t: str(t.stats.cores - t.stats.usedCores),
+        6 : lambda t: t.stats.lastLogLine,
+    }
+
     def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.__tasks = []
@@ -169,20 +184,22 @@ class TaskModel(QtCore.QAbstractTableModel):
     def refresh(self):
         if not self.__jobId:
             return
+
         t = plow.client.get_plow_time()
         tasks = plow.client.get_tasks(jobId=self.__jobId, lastUpdateTime=self.__lastUpdateTime)
         self.__lastUpdateTime = t
 
+        count = len(self.HEADERS)-1
         for task in tasks:
             idx = self.__index[task.id]
             self.__tasks[idx] = task
-            self.dataChanged.emit(self.index(idx,0), self.index(idx, len(TaskWidget.Header)-1))
+            self.dataChanged.emit(self.index(idx,0), self.index(idx, count))
 
     def rowCount(self, parent=None):
         return len(self.__tasks)
 
     def columnCount(self, parent=None):
-        return len(TaskWidget.Header)
+        return len(self.HEADERS)
 
     def data(self, index, role):
         row = index.row()
@@ -191,25 +208,18 @@ class TaskModel(QtCore.QAbstractTableModel):
         stats = task.stats 
 
         if role == QtCore.Qt.DisplayRole:
-            if col == 0:
-                return task.name
-            elif col == 1:
-                return constants.TASK_STATES[task.state]
-            elif col == 2:
-                return task.lastResource
-            elif col == 3:
-                return "%s/%02dMB" % (stats.cores, stats.ram)
-            elif col == 4:
-                return formatDuration(stats.startTime, stats.stopTime)
-            elif col == 5:
-                return stats.lastLogLine
+            cbk = self.HEADER_CALLBACKS.get(col)
+            if cbk is not None:
+                return cbk(task)
         
         elif role == QtCore.Qt.BackgroundRole and col ==1:
             return constants.COLOR_TASK_STATE[task.state]
         
         elif role == QtCore.Qt.ToolTipRole and col == 3:
-            tip = "Allocated Cores: %d\nCurrent CPU Perc:%d\nMax CPU Perc:%d\nAllocated RAM:%dMB\nCurrent RSS:%dMB\nMaxRSS:%dMB"
-            return tip % (stats.cores, stats.usedCores, stats.highCores, stats.ram, stats.usedRam, stats.highRam)
+            tip = "Allocated Cores: %d\nCurrent CPU Perc:%d\n" \
+                  "Max CPU Perc:%d\nAllocated RAM:%dMB\nCurrent RSS:%dMB\nMaxRSS:%dMB"
+            return tip % (stats.cores, stats.usedCores, stats.highCores, 
+                          stats.ram, stats.usedRam, stats.highRam)
         
         elif role == IdRole:
             return task.id
@@ -221,12 +231,13 @@ class TaskModel(QtCore.QAbstractTableModel):
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
-            return TaskWidget.Header[section]
+            return self.HEADERS[section]
 
     def __durationRefreshTimer(self):
         RUNNING = plow.client.TaskState.RUNNING
         [self.dataChanged.emit(self.index(idx, 4),  self.index(idx, 4)) 
             for idx, t in enumerate(self.__tasks) if t.state == RUNNING]
+
 
 class TaskWidgetConfigDialog(QtGui.QDialog):
     """
