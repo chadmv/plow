@@ -13,7 +13,7 @@ from plow.client import JobState
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox, SpinSliderWidget, ManagedListWidget
-from plow.gui.common.job import JobProgressBar, JobSelectionDialog, JobStateWidget
+from plow.gui.common.job import JobProgressBar, JobSelectionDialog, JobStateWidget, jobContextMenu
 from plow.gui import constants 
 from plow.gui.util import formatMaxValue, formatDateTime, formatDuration
 from plow.gui.event import EventManager
@@ -215,24 +215,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
             return 
             
         job = item.data(0, JOB_ROLE)
-
-        menu = QtGui.QMenu(tree)
-        pause = menu.addAction(QtGui.QIcon(":/pause.png"), "Un-Pause" if job.paused else "Pause")
-        kill = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill")
-        eat = menu.addAction(QtGui.QIcon(":/eat.png"), "Eat Dead")
-        retry = menu.addAction(QtGui.QIcon(":/retry.png"), "Retry Dead")
-
-        pause.triggered.connect(partial(job.pause, not job.paused))
-
-        eat.setEnabled(bool(job.totals.dead))
-        eat.triggered.connect(partial(self.__eatDeadTasks, job))
-
-        retry.setEnabled(bool(job.totals.dead))
-        retry.triggered.connect(partial(self.__retryDeadTasks, job))
-
-        kill.setEnabled(bool(job.totals.running))
-        kill.triggered.connect(partial(job.kill, "plow-wrangler"))
-
+        menu = jobContextMenu(job, parent=tree)
         menu.popup(tree.mapToGlobal(pos))
 
     def __setJobStateAndColor(self, item):
@@ -265,19 +248,6 @@ class RenderJobWatchWidget(QtGui.QWidget):
         uid = item.data(0, JOBID_ROLE)
         EventManager.emit("JOB_OF_INTEREST", uid)
 
-    def __eatDeadTasks(self, job):
-        tasks = plow.client.get_tasks(job=job)
-        dead = [t for t in tasks if t.state == plow.client.TaskState.DEAD]
-        if dead:
-            LOGGER.info("Eating %d tasks", len(dead))
-            plow.client.eat_tasks(task=dead)
-
-    def __retryDeadTasks(self, job):
-        tasks = plow.client.get_tasks(job=job)
-        dead = [t for t in tasks if t.state == plow.client.TaskState.DEAD]
-        if dead:
-            LOGGER.info("Retrying %d tasks", len(dead))
-            plow.client.retry_tasks(task=dead)
 
 
 class RenderJobWatchSettingsDialog(QtGui.QDialog):

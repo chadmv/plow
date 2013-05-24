@@ -14,6 +14,7 @@ from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.common import tree, models
 from plow.gui.common.widgets import TreeWidget
+from plow.gui.common.job import jobContextMenu
 from plow.gui.util import formatDateTime, formatDuration
 
 JOB_STATES = {}
@@ -144,6 +145,11 @@ class JobWranglerWidget(QtGui.QWidget):
 
         model.modelReset.connect(view.expandAll)
 
+        self.__refreshTimer = timer = QtCore.QTimer(self)
+        timer.setSingleShot(True)
+        timer.setInterval(1500)
+        timer.timeout.connect(self.refresh)
+
 
         
     def model(self):
@@ -184,46 +190,13 @@ class JobWranglerWidget(QtGui.QWidget):
             return 
 
         job = index.data(OBJECT_ROLE)
-
-        menu = QtGui.QMenu(tree)
-        pause = menu.addAction(QtGui.QIcon(":/pause.png"), "Un-Pause" if job.paused else "Pause")
-        kill = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill Job")
-        kill_tasks = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill Tasks")
-        eat = menu.addAction(QtGui.QIcon(":/eat.png"), "Eat Dead Tasks")
-        retry = menu.addAction(QtGui.QIcon(":/retry.png"), "Retry Dead Tasks")
-
-        pause.triggered.connect(partial(job.pause, not job.paused))
-
-        eat.setEnabled(bool(job.totals.dead))
-        eat.triggered.connect(partial(self.eatDeadTasks, job))
-
-        retry.setEnabled(bool(job.totals.dead))
-        retry.triggered.connect(partial(self.retryDeadTasks, job))
-
-        kill.triggered.connect(partial(job.kill, "plow-wrangler"))
-        kill_tasks.triggered.connect(partial(self.killTasks, job))
-
+        menu = jobContextMenu(job, partial(self.queueRefresh, True), tree)
         menu.popup(tree.mapToGlobal(pos))
 
-    def killTasks(self, job):
-        tasks = plow.client.get_tasks(job=job)
-        if tasks:
-            LOGGER.info("Killing %d tasks", len(tasks))
-            plow.client.kill_tasks(task=tasks)
-
-    def eatDeadTasks(self, job):
-        tasks = plow.client.get_tasks(job=job)
-        dead = [t for t in tasks if t.state == plow.client.TaskState.DEAD]
-        if dead:
-            LOGGER.info("Eating %d tasks", len(dead))
-            plow.client.eat_tasks(task=dead)
-
-    def retryDeadTasks(self, job):
-        tasks = plow.client.get_tasks(job=job)
-        dead = [t for t in tasks if t.state == plow.client.TaskState.DEAD]
-        if dead:
-            LOGGER.info("Retrying %d tasks", len(dead))
-            plow.client.retry_tasks(task=dead)
+    def queueRefresh(self, full=False):
+        self.__refreshTimer.start()
+        if full:
+            EventManager.emit("GLOBAL_REFRESH")
 
 
 class JobModel(tree.TreeModel):

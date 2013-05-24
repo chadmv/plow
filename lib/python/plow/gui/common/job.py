@@ -1,15 +1,22 @@
 """Commonly used Job widgets."""
 
+from functools import partial 
+
 import plow.client
 import plow.gui.constants as constants
 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.form import FormWidget, FormWidgetFactory
 
+
+
 class JobProgressFormWidget(FormWidget):
     def __init__(self, value, parent=None):
         FormWidget.__init__(self, parent)
         self.setWidget(JobProgressBar(value, parent))
+
+FormWidgetFactory.register("jobProgressBar", JobProgressFormWidget)
+
 
 class JobStateFormWidget(FormWidget):
     def __init__(self, value, parent=None):
@@ -17,8 +24,8 @@ class JobStateFormWidget(FormWidget):
         self.setWidget(JobStateWidget(value, False, parent))
         self._widget.setMinimumWidth(100)
 
-FormWidgetFactory.register("jobProgressBar", JobProgressFormWidget)
 FormWidgetFactory.register("jobState", JobStateFormWidget)
+
 
 class JobProgressBar(QtGui.QWidget):
     # Left, top, right, bottom
@@ -183,3 +190,26 @@ class JobStateWidget(QtGui.QWidget):
         painter.setPen(QtCore.Qt.black)
         painter.drawText(rect, QtCore.Qt.AlignCenter, constants.JOB_STATES[self.__state])
         painter.end()
+
+
+
+def jobContextMenu(job, refreshCallback=None, parent=None):
+    """
+    Get a job context QMenu with common operations
+    """
+    menu = QtGui.QMenu(parent)
+
+    pause = menu.addAction(QtGui.QIcon(":/pause.png"), "Un-Pause" if job.paused else "Pause")
+    kill = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill Job")
+    kill_tasks = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill Tasks")
+    eat = menu.addAction(QtGui.QIcon(":/eat.png"), "Eat Dead Tasks")
+    retry = menu.addAction(QtGui.QIcon(":/retry.png"), "Retry Dead Tasks")
+
+    pause.triggered.connect(partial(job.pause, not job.paused))
+    eat.triggered.connect(partial(job.eat_dead_tasks, refreshCallback))
+    retry.triggered.connect(partial(job.retry_dead_tasks, refreshCallback))
+    kill.triggered.connect(partial(job.kill, "plow-wrangler"))
+    kill_tasks.triggered.connect(partial(job.kill_tasks, refreshCallback))
+
+    return menu
+
