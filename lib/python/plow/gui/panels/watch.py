@@ -189,10 +189,25 @@ class RenderJobWatchWidget(QtGui.QWidget):
 
     def __updateExistingJobs(self):
         FINISHED = JobState.FINISHED
-        req = { }
-        req["matchingOnly"] = True
-        req["jobIds"] = [jobId for jobId, item in self.__jobs.iteritems() 
-            if item.data(0, JOB_ROLE).state != FINISHED]
+        now = QtCore.QDateTime.currentDateTimeUtc()
+        toDateTime = QtCore.QDateTime.fromMSecsSinceEpoch
+
+        req = {"matchingOnly": True}
+
+        jobs = []
+        for jobId, item in self.__jobs.iteritems():
+            job = item.data(0, JOB_ROLE)
+
+            # we will continue to pull updates on finished jobs for
+            # 60 seconds longer
+            if job.state == FINISHED:
+                sec = toDateTime(job.stopTime).secsTo(now)
+                if sec > 60:              
+                    continue
+
+            jobs.append(jobId)
+
+        req["jobIds"] = jobs
         self.__updateJobs(plow.client.get_jobs(**req))
 
     def __findNewJobs(self):
