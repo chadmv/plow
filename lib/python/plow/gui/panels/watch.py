@@ -77,7 +77,7 @@ class RenderJobWatchPanel(Panel):
 class RenderJobWatchWidget(QtGui.QWidget):
 
     Header = ["Job", "State", "Run", "Wait", "Min", "Max", "Duration", "Progress"]
-    Width = [400, 75, 60, 60, 60, 60, 100, 250]
+    Width = [400, 75, 60, 60, 60, 60, 100, 125]
 
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -92,6 +92,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         tree.setColumnCount(len(self.Header))
         tree.setUniformRowHeights(True)
         tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
+        tree.header().setStretchLastSection(True)
 
         for i, v in enumerate(self.Width):
             tree.setColumnWidth(i, v) 
@@ -143,8 +144,6 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__tree.setItemWidget(item, len(self.Header)-1, progress);
 
         self.__setJobStateAndColor(item)
-        # state = JobStateWidget(job.state, job.totals.dead, self)
-        # self.__tree.setItemWidget(item, 1, state)
 
         return True
 
@@ -157,11 +156,11 @@ class RenderJobWatchWidget(QtGui.QWidget):
         item.setText(4, "%02d" % job.minCores)
         item.setText(5, formatMaxValue(job.maxCores))
         item.setText(6, formatDuration(job.startTime, job.stopTime))
+
         item.setToolTip(6, "Started: %s\nStopped:%s" % 
             (formatDateTime(job.startTime), formatDateTime(job.stopTime)))
 
         self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
-        # self.__tree.itemWidget(item, 1).setState(job.state, job.totals.dead)
         self.__setJobStateAndColor(item)
 
     def removeFinishedJobs(self):
@@ -169,7 +168,9 @@ class RenderJobWatchWidget(QtGui.QWidget):
         for item in self.__jobs.itervalues():
             if item.data(0, JOB_ROLE).state == JobState.FINISHED:
                 finished.append(item)
-        [self.removeJobItem(item) for item in finished]
+
+        for item in finished:
+            self.removeJobItem(item)
 
     def removeJobItem(self, item):
         jobid = str(item.data(0, JOBID_ROLE))
