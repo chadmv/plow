@@ -25,7 +25,7 @@ def formatDateTime(epoch):
     date = datetime.fromtimestamp(epoch / 1000).strftime("%Y-%m-%d %H:%M:%S")
     return str(date)
 
-def formatDuration(startTime, stopTime):
+def formatDuration(startTime, stopTime=0):
     """
     Format a duration to hh:mm::ss
     """
@@ -33,7 +33,7 @@ def formatDuration(startTime, stopTime):
         return constants.TIME_NO_DURATION
     if stopTime == 0:
         stopTime = int(time.time()) * 1000
-    duration = (stopTime - startTime) / 1000
+    duration = max((stopTime - startTime) / 1000, 0)
     m, s = divmod(duration, 60)
     h, m = divmod(m, 60)
     return "%02d:%02d:%02d" % (h, m, s)
