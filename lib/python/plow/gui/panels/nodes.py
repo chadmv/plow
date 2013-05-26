@@ -9,7 +9,8 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.common import models
-from plow.gui.common.widgets import TableWidget
+from plow.gui.common.widgets import TableWidget, ResourceDelegate
+from plow.gui.util import formatDuration
 
 NODE_STATES = {}
 for a in dir(plow.client.NodeState):
@@ -69,9 +70,9 @@ class NodeWidget(QtGui.QWidget):
         view.setColumnHidden(model.HEADERS.index('Swap (Total)'), True)
 
         view.setItemDelegateForColumn(model.HEADERS.index('Ram (Free)'), 
-                                      ResourceDelegate(self))
+                                      ResourceDelegate(parent=self))
         view.setItemDelegateForColumn(model.HEADERS.index('Swap (Free)'), 
-                                      ResourceDelegate(self))
+                                      ResourceDelegate(warn=.75, critical=.25, parent=self))
 
         view.doubleClicked.connect(self.__itemDoubleClicked)
 
@@ -94,58 +95,13 @@ class NodeWidget(QtGui.QWidget):
         EventManager.emit("NODE_OF_INTEREST", uid)
 
 
-class ResourceDelegate(QtGui.QItemDelegate):
-
-    COLOR_CRITICAL = constants.RED
-    COLOR_WARN = constants.YELLOW
-    COLOR_OK = constants.GREEN
-
-    def paint(self, painter, opts, index):
-        currentData = index.data(QtCore.Qt.UserRole)
-        try:
-            ratio = float(currentData)
-        except:
-            super(ResourceDelegate, self).paint(painter, opts, index)
-            return 
-
-        text = "%0.2f%%" % (ratio * 100)
-        opt = QtGui.QStyleOptionViewItemV4(opts)
-        opt.displayAlignment = QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter
-
-        grad = QtGui.QLinearGradient(opt.rect.topLeft(), opt.rect.topRight())
-        darkEnd = QtCore.Qt.transparent
-        end = darkEnd 
-
-        if ratio == 1:
-            darkEnd = self.COLOR_OK
-            end = darkEnd
-
-        elif ratio <= .05:
-            darkEnd = self.COLOR_CRITICAL.darker(135)
-            end = self.COLOR_CRITICAL
-
-        elif ratio <= .15:
-            darkEnd = self.COLOR_WARN.darker(135)
-            end = self.COLOR_WARN
-
-        grad.setColorAt(0.0, self.COLOR_OK.darker(135))
-        grad.setColorAt(min(ratio, 1.0), self.COLOR_OK)
-        grad.setColorAt(min(ratio + .01, 1.0), end)
-        grad.setColorAt(1.0, darkEnd)
-
-        self.drawBackground(painter, opt, index)
-        painter.fillRect(opt.rect, QtGui.QBrush(grad))
-        self.drawDisplay(painter, opt, opt.rect, text)
-
-
-
 class NodeModel(QtCore.QAbstractTableModel):
 
     HEADERS = [
                 "Name", "Cluster", 
                 "State", "Locked", "Cores (Total)", "Cores (Idle)",
                 "Ram (Total)", "Ram (Free)", "Swap (Total)",
-                "Swap (Free)", "Uptime"
+                "Swap (Free)", "Ping", "Uptime"
                ]
 
     HEADER_CALLBACKS = {
@@ -159,7 +115,8 @@ class NodeModel(QtCore.QAbstractTableModel):
         7 : lambda n: n.system.freeRamMb,
         8 : lambda n: n.system.totalSwapMb,
         9 : lambda n: n.system.freeSwapMb,
-        10: lambda n: datetime.fromtimestamp(n.bootTime).strftime("%Y-%m-%d %H:%M"), 
+        10: lambda n: formatDuration(n.updatedTime), 
+        11: lambda n: formatDuration(n.bootTime), 
     }
 
     def __init__(self, parent=None):
@@ -247,6 +204,15 @@ class NodeModel(QtCore.QAbstractTableModel):
         elif role == QtCore.Qt.TextAlignmentRole:
             if col != 0:
                 return QtCore.Qt.AlignCenter
+
+        elif role == QtCore.Qt.BackgroundRole:
+            if node.state == plow.client.NodeState.DOWN:
+                return constants.RED 
+
+            if node.locked:
+                return constants.BLUE
+
+            return None
 
         elif role == ObjectRole:
             return node

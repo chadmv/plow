@@ -77,6 +77,7 @@ class BooleanCheckBox(QtGui.QCheckBox):
     def isChecked(self):
         return self.checkState() == QtCore.Qt.Checked
 
+
 class FilterableListBox(QtGui.QWidget):
     """
     A list box widget with a text filter.
@@ -124,6 +125,7 @@ class CheckableComboBox(QtGui.QWidget):
         self.layout().addWidget(self.__btn)
 
         self.__btn.toggled.connect(self.__btn.showMenu)
+
 
 class CheckableListBox(QtGui.QWidget):
     """
@@ -173,6 +175,7 @@ class CheckableListBox(QtGui.QWidget):
         else:
             self.listItems.setDisabled(False)
 
+
 class RadioBoxArray(QtGui.QWidget):
     """
     An array of linked radio boxes.
@@ -191,6 +194,7 @@ class RadioBoxArray(QtGui.QWidget):
             group_box_layout.addWidget(radio, row, item % cols)
 
         layout.addWidget(group_box)
+
 
 class ManagedListWidget(QtGui.QWidget):
     """
@@ -285,6 +289,7 @@ class FormWidgetLabel(QtGui.QWidget):
         layout.addWidget(getHelpTextWidget(self.__help))
         frame.show()
 
+
 class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
     """
     A simple status bar, much like a heath meter, which 
@@ -294,8 +299,8 @@ class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
     Margins = [5, 4, 5, 4]
 
     __PEN = QtGui.QColor(33, 33, 33)
-    __C1 = QtGui.QColor(177, 24, 0)
-    __C2 = QtGui.QColor(76, 115, 0)
+    __C1 = constants.RED
+    __C2 = constants.GREEN
 
     def __init__(self, parent=None):
         QtGui.QStyledItemDelegate.__init__(self, parent)
@@ -337,3 +342,88 @@ class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
             painter.setBrush(self.__C2)
             painter.drawRoundedRect(rect, 3, 3)
         painter.restore()
+
+
+class ResourceDelegate(QtGui.QItemDelegate):
+    """
+    A custom QItemDelegate to be set onto a specific
+    column of a view, containing numeric data that can
+    be represented as a resource. 
+
+    The default role to check for this data on an index 
+    is Qt.UserRole, but can be set to any other role to 
+    source the numeric data. 
+
+    Example:
+        If we have a column in our view that contains a 
+        percentage value of how much memory is left in the 
+        system (from 0.0 - 1.0), then we can do:
+
+           delegate = ResourceDelegate(warn=.5, critical=.1)
+
+        This will show a warning indication when the ratio is 
+        below 50%, and a critical indication when it falls below 
+        10%
+
+        If we are storing our data in another role... 
+
+            otherRole = QtCore.Qt.UserRole + 50
+            delegate = ResourceDelegate(dataRole=otherRole)
+
+    """
+    COLOR_CRITICAL = constants.RED
+    COLOR_WARN = constants.YELLOW
+    COLOR_OK = constants.GREEN
+    COLOR_BG = constants.GRAY
+
+    def __init__(self, warn=0.15, critical=0.05, dataRole=QtCore.Qt.UserRole, parent=None):
+        super(ResourceDelegate, self).__init__(parent)
+        self._warn = warn 
+        self._crit = critical
+        self._role = dataRole
+
+    def paint(self, painter, opts, index):
+        currentData = index.data(self._role)
+        try:
+            ratio = float(currentData)
+        except:
+            super(ResourceDelegate, self).paint(painter, opts, index)
+            return 
+
+        text = "%0.2f%%" % (ratio * 100)
+        opt = QtGui.QStyleOptionViewItemV4(opts)
+        opt.displayAlignment = QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter
+
+        grad = QtGui.QLinearGradient(opt.rect.topLeft(), opt.rect.topRight())
+        # darkEnd = QtCore.Qt.transparent
+        darkEnd = self.COLOR_BG
+        end = darkEnd 
+
+        if ratio == 1:
+            darkEnd = self.COLOR_OK
+            end = darkEnd
+
+        elif ratio <= self._crit:
+            darkEnd = self.COLOR_CRITICAL
+            end = self.COLOR_CRITICAL
+
+        elif ratio <= self._warn:
+            darkEnd = self.COLOR_WARN
+            end = self.COLOR_WARN
+
+        grad.setColorAt(0.0, self.COLOR_OK)
+        grad.setColorAt(min(ratio, 1.0), self.COLOR_OK)
+        grad.setColorAt(min(ratio + .01, 1.0), end)
+        grad.setColorAt(1.0, darkEnd)
+
+        self.drawBackground(painter, opt, index)
+        painter.fillRect(opt.rect, QtGui.QBrush(grad))
+        self.drawDisplay(painter, opt, opt.rect, text)
+
+        state_bg = index.data(QtCore.Qt.BackgroundRole)
+        if state_bg:
+            painter.setBrush(QtCore.Qt.NoBrush)
+            pen = QtGui.QPen(state_bg)
+            pen.setWidth(2)
+            painter.setPen(pen)
+            painter.drawRect(opt.rect)
