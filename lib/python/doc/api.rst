@@ -29,6 +29,8 @@ Project
 Classes
 ^^^^^^^^^
 
+.. _project_project:
+
 .. autoclass:: plow.client.Project
     :members:
 
@@ -41,6 +43,7 @@ Functions
 .. autofunction:: plow.client.get_active_projects
 .. autofunction:: plow.client.create_project
 .. autofunction:: plow.client.set_project_active
+.. autofunction:: plow.client.get_job_board
 
 .. _folder:
 
@@ -49,6 +52,8 @@ Folder
 
 Classes
 ^^^^^^^^^
+
+.. _folder_folder:
 
 .. autoclass:: plow.client.Folder
     :members:
@@ -59,7 +64,6 @@ Functions
 .. autofunction:: plow.client.get_folder
 .. autofunction:: plow.client.get_folders
 .. autofunction:: plow.client.create_folder
-.. autofunction:: plow.client.get_job_board
 .. autofunction:: plow.client.set_folder_min_cores
 .. autofunction:: plow.client.set_folder_max_cores
 .. autofunction:: plow.client.set_folder_name
@@ -84,14 +88,22 @@ Constants
 Classes
 ^^^^^^^^^
 
+.. _job_job:
+
 .. autoclass:: plow.client.Job
     :members:
+
+.. _job_jobspec:
 
 .. autoclass:: plow.client.JobSpec
     :members:
 
+.. _job_jobstats:
+
 .. autoclass:: plow.client.JobStats
     :members:
+
+.. _job_output:
 
 .. autoclass:: plow.client.Output
     :members:
@@ -137,16 +149,24 @@ Constants
 Classes
 ^^^^^^^^^
 
+.. _task_task:
+
+.. autoclass:: plow.client.Task
+    :members:
+
+.. _task_spec:
+
 .. autoclass:: plow.client.TaskSpec
     :members:
+
+.. _task_stats:
 
 .. autoclass:: plow.client.TaskStats
     :members:
 
-.. autoclass:: plow.client.TaskTotals
-    :members:
+.. _task_totals:
 
-.. autoclass:: plow.client.Task
+.. autoclass:: plow.client.TaskTotals
     :members:
 
 Functions
@@ -170,16 +190,24 @@ Layer
 Classes
 ^^^^^^^^^
 
+.. _layer_layer:
+
+.. autoclass:: plow.client.Layer
+    :members:
+
+.. _layer_spec:
+
 .. autoclass:: plow.client.LayerSpec
     :members:
+
+.. _layer_stats:
 
 .. autoclass:: plow.client.LayerStats
     :members:
 
-.. autoclass:: plow.client.Service
-    :members:
+.. _layer_service:
 
-.. autoclass:: plow.client.Layer
+.. autoclass:: plow.client.Service
     :members:
 
 Functions
@@ -221,10 +249,14 @@ Constants
 Classes
 ^^^^^^^^^
 
-.. autoclass:: plow.client.NodeSystem
-    :members:
+.. _node_node:
 
 .. autoclass:: plow.client.Node
+    :members:
+
+.. _node_system:
+
+.. autoclass:: plow.client.NodeSystem
     :members:
 
 Functions
@@ -245,8 +277,12 @@ Cluster
 Classes
 ^^^^^^^^^
 
+.. _cluster_cluster:
+
 .. autoclass:: plow.client.Cluster
     :members:
+
+.. _cluster_counts:
 
 .. autoclass:: plow.client.ClusterCounts
     :members:
@@ -271,6 +307,8 @@ Quota
 
 Classes
 ^^^^^^^^^
+
+.. _quote_quota:
 
 .. autoclass:: plow.client.Quota
     :members:
@@ -325,11 +363,17 @@ Constants
 Classes
 ^^^^^^^^^
 
+.. _filters_matcher:
+
 .. autoclass:: plow.client.Matcher
     :members:
 
+.. _filters_action:
+
 .. autoclass:: plow.client.Action
     :members:
+
+.. _filters_filter:
 
 .. autoclass:: plow.client.Filter
     :members:
@@ -381,10 +425,14 @@ Constants
 Classes
 ^^^^^^^^^
 
-.. autoclass:: plow.client.DependSpec
-    :members:
+.. _depends_depend:
 
 .. autoclass:: plow.client.Depend
+    :members:
+
+.. _depends_spec:
+
+.. autoclass:: plow.client.DependSpec
     :members:
 
 Functions

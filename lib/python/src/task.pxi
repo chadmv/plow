@@ -233,7 +233,7 @@ cdef class Task:
     :var minCores: int
     :var minRam: int
     :var lastResource: str
-    :var state: :data:`.TaskState`
+    :var state: :obj:`.TaskState`
     :var stats: :class:`.TaskStats`
 
     """
