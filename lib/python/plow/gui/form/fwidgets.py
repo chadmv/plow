@@ -25,7 +25,7 @@ class FormWidget(QtGui.QWidget):
         layout.addWidget(self.__status, 0, 1)
 
         if not FormWidget.__LOCKED_PIX:
-            FormWidget.__LOCKED_PIX = QtGui.QPixmap(":/locked.png")
+            FormWidget.__LOCKED_PIX = QtGui.QPixmap(":/images/locked.png")
             FormWidget.__LOCKED_PIX = FormWidget.__LOCKED_PIX.scaled(
                 QtCore.QSize(12, 12), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
 

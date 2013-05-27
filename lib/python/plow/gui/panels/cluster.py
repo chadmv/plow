@@ -33,11 +33,11 @@ class ClusterPanel(Panel):
         # comment button (multi-select)
         # 
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/settings.png"), "Edit Selected Cluster Configuration", self.openClusterPropertiesDialog)
+            QtGui.QIcon(":/images/settings.png"), "Edit Selected Cluster Configuration", self.openClusterPropertiesDialog)
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/locked.png"), "Lock Selected Clusters", self.__handleClusterLock)
+            QtGui.QIcon(":/images/locked.png"), "Lock Selected Clusters", self.__handleClusterLock)
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/unlocked.png"), "Unlock Selected Clusters", self.__handleClusterUnlock)
+            QtGui.QIcon(":/images/unlocked.png"), "Unlock Selected Clusters", self.__handleClusterUnlock)
 
     def openLoadDialog(self):
         print "Open search dialog"
@@ -131,7 +131,7 @@ class ClusterModel(QtCore.QAbstractTableModel):
         self.__index = dict([(item.id, i) for i, item in enumerate(self.__items)])
         self.__lastUpdateTime = 0;
 
-        self.__iconLocked = QtGui.QIcon(":/locked.png")
+        self.__iconLocked = QtGui.QIcon(":/images/locked.png")
 
     def hasChildren(self, parent):
         return False

@@ -96,9 +96,9 @@ class TaskWidget(QtGui.QWidget):
     
     def __showContextMenu(self, pos):
         menu = QtGui.QMenu()
-        menu.addAction(QtGui.QIcon(":/retry.png"), "Retry", self.retrySelected)
-        menu.addAction(QtGui.QIcon(":/kill.png"), "Kill", self.killSelected)
-        menu.addAction(QtGui.QIcon(":/eat.png"), "Eat", self.eatSelected)
+        menu.addAction(QtGui.QIcon(":/images/retry.png"), "Retry", self.retrySelected)
+        menu.addAction(QtGui.QIcon(":/images/kill.png"), "Kill", self.killSelected)
+        menu.addAction(QtGui.QIcon(":/images/eat.png"), "Eat", self.eatSelected)
         menu.exec_(self.mapToGlobal(pos))
         
     def __rowDoubleClicked(self, index):

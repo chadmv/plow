@@ -199,11 +199,11 @@ def jobContextMenu(job, refreshCallback=None, parent=None):
     """
     menu = QtGui.QMenu(parent)
 
-    pause = menu.addAction(QtGui.QIcon(":/pause.png"), "Un-Pause" if job.paused else "Pause")
-    kill = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill Job")
-    kill_tasks = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill Tasks")
-    eat = menu.addAction(QtGui.QIcon(":/eat.png"), "Eat Dead Tasks")
-    retry = menu.addAction(QtGui.QIcon(":/retry.png"), "Retry Dead Tasks")
+    pause = menu.addAction(QtGui.QIcon(":/images/pause.png"), "Un-Pause" if job.paused else "Pause")
+    kill = menu.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Job")
+    kill_tasks = menu.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Tasks")
+    eat = menu.addAction(QtGui.QIcon(":/images/eat.png"), "Eat Dead Tasks")
+    retry = menu.addAction(QtGui.QIcon(":/images/retry.png"), "Retry Dead Tasks")
 
     pause.triggered.connect(partial(job.pause, not job.paused))
     eat.triggered.connect(partial(job.eat_dead_tasks, refreshCallback))

@@ -49,10 +49,10 @@ class RenderJobWatchPanel(Panel):
         # comment button (multi-select)
         # 
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/load.png"), "Load", self.openLoadDialog)
+            QtGui.QIcon(":/images/load.png"), "Load", self.openLoadDialog)
 
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/sweep.png"), "Remove Finished Jobs", self.removeFinishedJobs)
+            QtGui.QIcon(":/images/sweep.png"), "Remove Finished Jobs", self.removeFinishedJobs)
 
     def openLoadDialog(self):
         dialog = JobSelectionDialog()

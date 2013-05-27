@@ -214,10 +214,10 @@ class ManagedListWidget(QtGui.QWidget):
             self.list_widget.addItem(list_item)
         self.list_widget.sortItems()
 
-        self.btn_add = QtGui.QPushButton(QtGui.QIcon(":/plus.png"), "", self)
+        self.btn_add = QtGui.QPushButton(QtGui.QIcon(":/images/plus.png"), "", self)
         self.btn_add.setFlat(True)
         self.btn_add.clicked.connect(self.addItem)
-        self.btn_sub = QtGui.QPushButton(QtGui.QIcon(":/minus.png"), "", self)
+        self.btn_sub = QtGui.QPushButton(QtGui.QIcon(":/images/minus.png"), "", self)
         self.btn_sub.setFlat(True)
         self.btn_sub.clicked.connect(self.removeItems)
 
@@ -262,7 +262,7 @@ class FormWidgetLabel(QtGui.QWidget):
         self.__help = help
 
         self.__btn = QtGui.QToolButton(self)
-        self.__btn.setIcon(QtGui.QIcon(":/help.png"))
+        self.__btn.setIcon(QtGui.QIcon(":/images/help.png"))
         self.__btn.setFocusPolicy(QtCore.Qt.NoFocus)
         self.__btn.clicked.connect(self.__show_popup)
         self.__btn.setStyleSheet("QToolButton { border: 0px }")

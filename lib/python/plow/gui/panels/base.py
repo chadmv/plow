@@ -29,14 +29,14 @@ class Panel(QtGui.QDockWidget):
         # to this toolbar.
         toolbar = QtGui.QToolBar(self)
         toolbar.setIconSize(QtCore.QSize(18, 18))
-        toolbar.addAction(QtGui.QIcon(":/close.png"), "Close", self.__close)
+        toolbar.addAction(QtGui.QIcon(":/images/close.png"), "Close", self.__close)
 
-        float_action = QtGui.QAction(QtGui.QIcon(":/float.png"), "Float", self)
+        float_action = QtGui.QAction(QtGui.QIcon(":/images/float.png"), "Float", self)
         float_action.toggled.connect(self.__floatingChanged)
         float_action.setCheckable(True)
         toolbar.addAction(float_action)
 
-        config_action = QtGui.QAction(QtGui.QIcon(":/config.png"), "Configure Panel", self)        
+        config_action = QtGui.QAction(QtGui.QIcon(":/images/config.png"), "Configure Panel", self)        
         config_action.triggered.connect(self._openPanelSettingsDialog)
         toolbar.addAction(config_action)
 

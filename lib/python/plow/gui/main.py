@@ -3,8 +3,8 @@ import os
 import logging 
 
 from manifest import QtCore, QtGui
+import resources
 from panels import *
-from resources import icons
 from event import EventManager
 from util import loadTheme 
 
@@ -217,6 +217,7 @@ class WorkspaceManager(QtCore.QObject):
 def launch(argv, name, layout=None):
     # Initialize the default configuration files if none exist
     app = QtGui.QApplication(argv)
+    app.setAttribute(QtCore.Qt.AA_DontShowIconsInMenus, False)
     loadTheme()
 
     win = MainWindow(name, layout)
