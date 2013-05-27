@@ -192,6 +192,10 @@ cdef class TaskFilter:
             self.value.taskIds = kwargs['taskIds']
             self.value.__isset.taskIds = True
 
+        if 'nodeIds' in kwargs:
+            self.value.nodeIds = kwargs['nodeIds']
+            self.value.__isset.nodeIds = True
+
         if 'limit' in kwargs:
             self.value.limit = kwargs['limit']
             self.value.__isset.limit = True
@@ -206,7 +210,7 @@ cdef class TaskFilter:
 
         cdef TaskState_type i
         if 'states' in kwargs:
-            for i in kwargs.get('states', []):
+            for i in kwargs['states']:
                 self.value.states.push_back(i) 
             self.value.__isset.states = True
 
@@ -349,6 +353,9 @@ cdef inline TaskFilterT dict_to_taskFilter(dict d):
     if 'layers' in d:
         d['layerIds'] = [p.id for p in d.pop('layers')]
 
+    if 'nodes' in d:
+        d['nodeIds'] = [p.id for p in d.pop('nodes')]
+
     if 'job' in d:
         d['jobId'] = d.pop('job').id
 
@@ -381,9 +388,11 @@ def get_tasks(**kwargs):
 
     :param job: :class:`.Job` 
     :param layers: list of :class:`.Layer` 
+    :param nodes: list of :class:`.Node` 
     :param taskIds: list of str :class:`.Task` id's 
     :param limit: int 
     :param offset: int 
+    :param states: list[:obj:`.TaskState`]
     :param lastUpdateTime: long msec epoch timestamp 
 
     :returns: list[:class:`.Task`]
@@ -426,9 +435,11 @@ def retry_tasks(**kwargs):
 
     :param job: :class:`.Job` 
     :param layers: list of :class:`.Layer` 
-    :param tasks: list of :class:`.Task` 
+    :param nodes: list of :class:`.Node` 
+    :param taskIds: list of str :class:`.Task` id's 
     :param limit: int 
     :param offset: int 
+    :param states: list[:obj:`.TaskState`]
     :param lastUpdateTime: long msec epoch timestamp 
 
     """
@@ -442,9 +453,11 @@ def eat_tasks(**kwargs):
 
     :param job: :class:`.Job` 
     :param layers: list of :class:`.Layer` 
-    :param tasks: list of :class:`.Task` 
+    :param nodes: list of :class:`.Node` 
+    :param taskIds: list of str :class:`.Task` id's 
     :param limit: int 
     :param offset: int 
+    :param states: list[:obj:`.TaskState`]
     :param lastUpdateTime: long msec epoch timestamp 
     """
     cdef TaskFilterT f = dict_to_taskFilter(kwargs)
@@ -457,9 +470,11 @@ def kill_tasks(**kwargs):
 
     :param job: :class:`.Job` 
     :param layers: list of :class:`.Layer` 
-    :param tasks: list of :class:`.Task` 
+    :param nodes: list of :class:`.Node` 
+    :param taskIds: list of str :class:`.Task` id's 
     :param limit: int 
     :param offset: int 
+    :param states: list[:obj:`.TaskState`]
     :param lastUpdateTime: long msec epoch timestamp 
     """
     cdef TaskFilterT f = dict_to_taskFilter(kwargs)

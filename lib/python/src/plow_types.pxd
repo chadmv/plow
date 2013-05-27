@@ -381,12 +381,14 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         bint offset
         bint lastUpdateTime
         bint taskIds
+        bint nodeIds
 
     cdef cppclass TaskFilterT:
         Guid jobId 
         vector[Guid] layerIds
         vector[TaskState_type] states 
         vector[Guid] taskIds
+        vector[Guid] nodeIds
         int limit 
         int offset 
         Timestamp lastUpdateTime
