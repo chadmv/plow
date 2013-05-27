@@ -57,7 +57,7 @@ class TaskPanel(Panel):
 
 class TaskWidget(QtGui.QWidget):
 
-    Width = [350]
+    Width = [250, 90, 125, 100, 100, 65]
     Refresh = 1500
 
     def __init__(self, attrs, parent=None):
@@ -88,11 +88,15 @@ class TaskWidget(QtGui.QWidget):
         if not self.__model:
             self.__model = TaskModel(self)
             new_model = True
+
         self.__jobId = jobid
         self.__model.setJob(jobid)
         self.__table.setModel(self.__model)
+        
         if new_model:
-            self.__table.setColumnWidth(0, self.Width[0])
+            table = self.__table
+            for i, w in enumerate(self.Width):
+                table.setColumnWidth(i, w)
     
     def __showContextMenu(self, pos):
         menu = QtGui.QMenu()
@@ -138,7 +142,7 @@ class TaskWidget(QtGui.QWidget):
 
 class TaskModel(QtCore.QAbstractTableModel):
 
-    HEADERS = ["Name", "State", "Node", "Resource", "Duration", "Log"]
+    HEADERS = ["Name", "State", "Node", "Resources", "Duration", "Retries", "Log"]
 
     HEADER_CALLBACKS = {
         0 : lambda t: t.name,
@@ -146,14 +150,14 @@ class TaskModel(QtCore.QAbstractTableModel):
         2 : lambda t: t.lastResource,
         3 : lambda t: "%s/%02dMB" % (t.stats.cores, t.stats.ram),
         4 : lambda t: formatDuration(t.stats.startTime, t.stats.stopTime),
-        5 : lambda t: str(t.stats.cores - t.stats.usedCores),
+        5 : lambda t: t.stats.retryNum,
         6 : lambda t: t.stats.lastLogLine,
     }
 
     def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.__tasks = []
-        self.__index = { }
+        self.__index = {}
         self.__jobId = None
         self.__lastUpdateTime = 0
 
@@ -214,7 +218,11 @@ class TaskModel(QtCore.QAbstractTableModel):
         
         elif role == QtCore.Qt.BackgroundRole and col ==1:
             return constants.COLOR_TASK_STATE[task.state]
-        
+
+        elif role == QtCore.Qt.TextAlignmentRole:
+            if 0 < col < 6:
+                return QtCore.Qt.AlignCenter
+
         elif role == QtCore.Qt.ToolTipRole and col == 3:
             tip = "Allocated Cores: %d\nCurrent CPU Perc:%d\n" \
                   "Max CPU Perc:%d\nAllocated RAM:%dMB\nCurrent RSS:%dMB\nMaxRSS:%dMB"
