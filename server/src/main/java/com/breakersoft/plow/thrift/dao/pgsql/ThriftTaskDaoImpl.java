@@ -40,23 +40,25 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             task.minRam = rs.getInt("int_ram_min");
             task.lastResource = rs.getString("str_last_resource");
 
+            final TaskStatsT stats = new TaskStatsT();
+            stats.startTime = rs.getLong("time_started");
+            stats.stopTime = rs.getLong("time_stopped");
+            stats.exitSignal = rs.getInt("int_exit_signal");
+            stats.exitStatus = rs.getInt("int_exit_status");
+            stats.active = false;
+            task.setStats(stats);
+
             if (task.state.equals(TaskState.RUNNING)) {
-                final TaskStatsT stats = new TaskStatsT();
                 stats.cores = rs.getInt("int_cores");
                 stats.highCores = rs.getDouble("flt_cores_high");
                 stats.usedCores = rs.getDouble("flt_cores_used");
                 stats.ram = rs.getInt("int_ram");
                 stats.usedRam = rs.getInt("int_ram_used");
                 stats.highRam = rs.getInt("int_ram_high");
-                stats.startTime = rs.getLong("time_started");
-                stats.stopTime = rs.getLong("time_stopped");
                 stats.retryNum = rs.getInt("int_retry");
                 stats.progress = rs.getInt("int_progress");
                 stats.lastLogLine = rs.getString("str_last_log_line");
-                stats.exitSignal = rs.getInt("int_exit_signal");
-                stats.exitStatus = rs.getInt("int_exit_status");
                 stats.active = true;
-                task.setStats(stats);
             }
 
             return task;

@@ -19,6 +19,7 @@ import com.breakersoft.plow.dispatcher.dao.DispatchTaskDao;
 import com.breakersoft.plow.dispatcher.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
+import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
@@ -84,8 +85,8 @@ public class ThriftTaskDaoTests extends AbstractTest {
         List<DispatchTask> tasks = dispatchTaskDao.getDispatchableTasks(job, node);
 
         assertTrue(dispatchTaskDao.reserve(tasks.get(0)));
-        procDao.create(node, tasks.get(0));
-        dispatchTaskDao.start(tasks.get(0));
+        DispatchProc proc = procDao.create(node, tasks.get(0));
+        dispatchTaskDao.start(tasks.get(0), proc);
 
         TaskFilterT filter = new TaskFilterT();
         filter.jobId = event.getJob().getJobId().toString();
@@ -108,8 +109,8 @@ public class ThriftTaskDaoTests extends AbstractTest {
         Task t =  tasks.get(0);
 
         assertTrue(dispatchTaskDao.reserve(tasks.get(0)));
-        procDao.create(node, tasks.get(0));
-        dispatchTaskDao.start(tasks.get(0));
+        DispatchProc proc = procDao.create(node, tasks.get(0));
+        dispatchTaskDao.start(tasks.get(0), proc);
 
         List<TaskStatsT> stats = thriftTaskDao.getTaskStats(tasks.get(0).getTaskId());
         assertEquals(1, stats.size());

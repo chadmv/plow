@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Task;
+import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
@@ -15,7 +16,7 @@ public interface DispatchTaskDao {
 
     boolean unreserve(Task task);
 
-    boolean start(Task task);
+    boolean start(Task task, DispatchProc proc);
 
     boolean stop(Task task, TaskState newState, int exitStatus, int exitSignal);
 

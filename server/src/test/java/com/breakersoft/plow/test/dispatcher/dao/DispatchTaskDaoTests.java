@@ -58,8 +58,8 @@ public class DispatchTaskDaoTests extends AbstractTest {
     @Test
     public void testStart() {
         assertTrue(dispatchTaskDao.reserve(tasks.get(0)));
-        procDao.create(node, tasks.get(0));
-        assertTrue(dispatchTaskDao.start(tasks.get(0)));
+        DispatchProc proc = procDao.create(node, tasks.get(0));
+        assertTrue(dispatchTaskDao.start(tasks.get(0), proc));
     }
 
     @Test

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
+import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
@@ -69,7 +70,9 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
                 "int_retry=int_retry+1,"+
                 "time_updated = txTimeMillis(), " +
                 "time_started = txTimeMillis(), " +
-                "time_stopped = 0 " +
+                "time_stopped = 0, " +
+                "int_last_resoure=?,"+
+                "int_last_ram_high"
             "WHERE " +
                 "task.pk_task = ? " +
             "AND " +
@@ -78,7 +81,7 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
                 "bool_reserved = 't'";
 
     @Override
-    public boolean start(Task task) {
+    public boolean start(Task task, DispatchProc proc) {
         return jdbc.update(START_TASK,
                 TaskState.RUNNING.ordinal(),
                 task.getTaskId(),

@@ -101,8 +101,8 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public boolean startTask(String hostname, DispatchTask task) {
-        if (dispatchTaskDao.start(task)) {
+    public boolean startTask(DispatchTask task, DispatchProc proc) {
+        if (dispatchTaskDao.start(task, proc)) {
             logger.info("Started {}", task);
 
             DispatchStats.taskStartedCount.incrementAndGet();
