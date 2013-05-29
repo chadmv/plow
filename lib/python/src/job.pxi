@@ -235,6 +235,7 @@ cdef inline Job initJob(JobT& j):
     return job
 
 
+@cython.final
 cdef class Job:
     """
     A Job 
@@ -381,14 +382,28 @@ cdef class Job:
         ret = get_layers(self)
         return ret
 
-    def get_tasks(self):
+    cpdef inline list get_tasks(self, list states=None):
         """
-        Get a list of tasks for this job 
+        Get a list of tasks for this job, optionally
+        filtered by a list of task stats
 
+        :param stats: list[:obj:`.TaskState`] = None
         :returns: list[:class:`.Task`]
         """
-        cdef list ret 
-        ret = get_tasks(job=self)
+        cdef:
+            Task t
+            list ret 
+            set state_set
+
+        # FIXME: Issue #48
+        # For now, filtering client side. 
+        if states:
+            # ret = get_tasks(job=self, states=states)
+            state_set = set(states) 
+            ret = [t for t in get_tasks(job=self) if t.state in state_set]    
+        else:
+            ret = get_tasks(job=self)
+
         return ret
 
     def get_depends(self):
@@ -429,15 +444,8 @@ cdef class Job:
 
         :param callback: Optional callback function to run if tasks were eaten
         """
-        cdef: 
-            list tasks, dead
-            Task t
+        cdef list dead = self.get_tasks(states=[TaskState.DEAD])
 
-        tasks = get_tasks(job=self)
-        if not tasks:
-            return
-
-        dead = [t for t in tasks if t.state == TaskState.DEAD]
         if dead:
             LOGGER.debug("Eating %d tasks", len(dead))
             eat_tasks(tasks=dead)
@@ -450,15 +458,8 @@ cdef class Job:
 
         :param callback: Optional callback function to run if tasks were retried
         """
-        cdef: 
-            list tasks, dead
-            Task t
+        cdef list dead = self.get_tasks(states=[TaskState.DEAD])
 
-        tasks = get_tasks(job=self)
-        if not tasks:
-            return 
-
-        dead = [t for t in tasks if t.state == TaskState.DEAD]
         if dead:
             LOGGER.debug("Retrying %d tasks", len(dead))
             retry_tasks(tasks=dead)
