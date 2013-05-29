@@ -1,6 +1,7 @@
 """Commonly used Job widgets."""
 
 from functools import partial 
+from itertools import chain
 
 import plow.client
 import plow.gui.constants as constants
@@ -193,23 +194,67 @@ class JobStateWidget(QtGui.QWidget):
 
 
 
-def jobContextMenu(job, refreshCallback=None, parent=None):
+def jobContextMenu(jobs, refreshCallback=None, parent=None):
     """
     Get a job context QMenu with common operations
     """
     menu = QtGui.QMenu(parent)
 
-    pause = menu.addAction(QtGui.QIcon(":/images/pause.png"), "Un-Pause" if job.paused else "Pause")
-    kill = menu.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Job")
-    kill_tasks = menu.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Tasks")
-    eat = menu.addAction(QtGui.QIcon(":/images/eat.png"), "Eat Dead Tasks")
-    retry = menu.addAction(QtGui.QIcon(":/images/retry.png"), "Retry Dead Tasks")
+    if not isinstance(jobs, (tuple, set, list, dict)):
+        jobs = [jobs]
 
-    pause.triggered.connect(partial(job.pause, not job.paused))
-    eat.triggered.connect(partial(job.eat_dead_tasks, refreshCallback))
-    retry.triggered.connect(partial(job.retry_dead_tasks, refreshCallback))
-    kill.triggered.connect(partial(job.kill, "plow-wrangler"))
-    kill_tasks.triggered.connect(partial(job.kill_tasks, refreshCallback))
+    total = len(jobs)
+    isPaused = jobs[0].paused
+
+    pause = menu.addAction(QtGui.QIcon(":/images/pause.png"), "Un-Pause" if isPaused else "Pause")
+    kill = menu.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Job%s" % 's' if total else '')
+
+    menu.addSeparator()
+
+    kill_tasks = menu.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Tasks")
+    eat_tasks = menu.addAction(QtGui.QIcon(":/images/eat.png"), "Eat Dead Tasks")
+    retry_tasks = menu.addAction(QtGui.QIcon(":/images/retry.png"), "Retry Dead Tasks")
+
+    def action_on_tasks(fn, job_list, dead=False):
+        if dead:
+            tasks = chain.from_iterable(j.get_dead_tasks() for j in job_list)
+        else:
+            tasks = chain.from_iterable(j.get_tasks() for j in job_list)
+
+        print "fn:", fn, ", Jobs:", len(job_list), ", Dead:", dead
+
+        if tasks:
+            fn(tasks=list(tasks))
+            if refreshCallback:
+                refreshCallback()            
+
+    eat_tasks.triggered.connect(partial(action_on_tasks, plow.client.eat_tasks, jobs, dead=True))
+    retry_tasks.triggered.connect(partial(action_on_tasks, plow.client.retry_tasks, jobs, dead=True))
+    kill_tasks.triggered.connect(partial(action_on_tasks, plow.client.kill_tasks, jobs, dead=True))
+
+    def pause_fn(job_list, pause):
+        print "Set pause state of ", len(job_list), 'jobs to', pause
+        for j in job_list:
+            j.pause(pause)
+
+        if refreshCallback:
+            refreshCallback()
+
+    pause.triggered.connect(partial(pause_fn, jobs, not isPaused))
+
+    def kill_fn(job_list):
+        print "killing", len(job_list), "jobs"
+        for j in job_list:
+            j.kill('plow-wrangler')
+
+        if refreshCallback:
+            refreshCallback()
+
+    kill.triggered.connect(partial(kill_fn, jobs))
 
     return menu
+
+
+
+
 

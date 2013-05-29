@@ -169,6 +169,16 @@ class JobWranglerWidget(QtGui.QWidget):
         self.__attrs["projects"] = projects
         self.__model.setProjects(projects)
 
+    def selectedJobs(self):
+        model = self.__view.selectionModel()
+        return [idx.data(OBJECT_ROLE) for idx in model.selectedRows() \
+                    if idx.data(TYPE_ROLE) == JOB_TYPE]
+
+    def selectedFolders(self):
+        model = self.__view.selectionModel()
+        return [idx.data(OBJECT_ROLE) for idx in model.selectedRows() \
+                    if idx.data(TYPE_ROLE) == FOLDER_TYPE]
+
     def __itemDoubleClicked(self, index):
         if index.data(TYPE_ROLE) == JOB_TYPE:
             uid = index.data(ID_ROLE)
@@ -185,12 +195,24 @@ class JobWranglerWidget(QtGui.QWidget):
         if not index:
             return 
 
+        # TODO: Folder context menu?
         typ = index.data(TYPE_ROLE)
         if typ != JOB_TYPE:
             return 
 
+        jobs = self.selectedJobs()
+        if not jobs:
+            return 
+
         job = index.data(OBJECT_ROLE)
-        menu = jobContextMenu(job, partial(self.queueRefresh, True), tree)
+        if jobs[0] is not job:
+            try:
+                jobs.remove(job)
+            except ValueError:
+                pass
+            jobs.insert(0, job)
+
+        menu = jobContextMenu(jobs, partial(self.queueRefresh, True), tree)
         menu.popup(tree.mapToGlobal(pos))
 
     def queueRefresh(self, full=False):
@@ -446,6 +468,13 @@ class FolderNode(PlowNode):
         lambda f: (f.totals.running / float(f.totals.total)) if f.totals.total else 0,
     ]
 
+    def data(self, column, role=QtCore.Qt.DisplayRole):
+        if role == QtCore.Qt.TextAlignmentRole:
+            if column > 0:
+                return QtCore.Qt.AlignCenter
+
+        return super(FolderNode, self).data(column, role)
+
     def _getChildren(self):
         if not self.ref:
             return []
@@ -482,6 +511,10 @@ class JobNode(PlowNode):
         TOOL = QtCore.Qt.ToolTipRole
         BG = QtCore.Qt.BackgroundRole
         FG = QtCore.Qt.ForegroundRole
+
+        if role == QtCore.Qt.TextAlignmentRole:
+            if column > 0:
+                return QtCore.Qt.AlignCenter
 
         # State
         if column == 2:
