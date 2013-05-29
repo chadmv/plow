@@ -10,9 +10,11 @@ from plow.gui.util import formatDuration
 from plow.gui.event import EventManager
 from plow.gui import constants 
 from plow.gui.common.widgets import CheckableComboBox, TableWidget
+from plow.gui.common import models
 
 IdRole = QtCore.Qt.UserRole
 ObjectRole = QtCore.Qt.UserRole + 1
+SortRole = QtCore.Qt.UserRole + 0
 
 
 class TaskPanel(Panel):
@@ -68,6 +70,7 @@ class TaskWidget(QtGui.QWidget):
         self.__attrs = attrs
         
         self.__table = table = TableWidget(self)
+        table.sortByColumn(0, QtCore.Qt.AscendingOrder)
         table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
         # connections
@@ -76,6 +79,11 @@ class TaskWidget(QtGui.QWidget):
 
         self.__jobId = None
         self.__model = None
+        self.__proxy = proxy = models.AlnumSortProxyModel(self)
+        proxy.setSortRole(SortRole)
+        proxy.setDynamicSortFilter(True)
+        proxy.sort(0, QtCore.Qt.AscendingOrder)
+        table.setModel(proxy)
 
         self.layout().addWidget(table)
 
@@ -87,11 +95,11 @@ class TaskWidget(QtGui.QWidget):
         new_model = False
         if not self.__model:
             self.__model = TaskModel(self)
+            self.__proxy.setSourceModel(self.__model)
             new_model = True
 
         self.__jobId = jobid
         self.__model.setJob(jobid)
-        self.__table.setModel(self.__model)
         
         if new_model:
             table = self.__table
@@ -144,14 +152,24 @@ class TaskModel(QtCore.QAbstractTableModel):
 
     HEADERS = ["Name", "State", "Node", "Resources", "Duration", "Retries", "Log"]
 
-    HEADER_CALLBACKS = {
-        0 : lambda t: t.name,
-        1 : lambda t: constants.TASK_STATES[t.state],
-        2 : lambda t: t.lastResource,
-        3 : lambda t: "%s/%02dMB" % (t.stats.cores, t.stats.ram),
-        4 : lambda t: formatDuration(t.stats.startTime, t.stats.stopTime),
-        5 : lambda t: t.stats.retryNum,
-        6 : lambda t: t.stats.lastLogLine,
+    DISPLAY_CALLBACKS = {
+        0: lambda t: t.name,
+        1: lambda t: constants.TASK_STATES[t.state],
+        2: lambda t: t.lastResource,
+        3: lambda t: "%s/%02dMB" % (t.stats.cores, t.stats.ram),
+        4: lambda t: formatDuration(t.stats.startTime, t.stats.stopTime),
+        5: lambda t: t.stats.retryNum,
+        6: lambda t: t.stats.lastLogLine,
+    }
+
+    SORT_CALLBACKS = {
+        0: DISPLAY_CALLBACKS[0],
+        1: DISPLAY_CALLBACKS[1],
+        2: DISPLAY_CALLBACKS[2],
+        3: lambda t: (t.stats.cores, t.stats.ram),
+        4: lambda t: t.stats.stopTime - t.stats.startTime,
+        5: DISPLAY_CALLBACKS[5],
+        6: DISPLAY_CALLBACKS[6],
     }
 
     def __init__(self, parent=None):
@@ -212,7 +230,7 @@ class TaskModel(QtCore.QAbstractTableModel):
         stats = task.stats 
 
         if role == QtCore.Qt.DisplayRole:
-            cbk = self.HEADER_CALLBACKS.get(col)
+            cbk = self.DISPLAY_CALLBACKS.get(col)
             if cbk is not None:
                 return cbk(task)
         
@@ -223,12 +241,17 @@ class TaskModel(QtCore.QAbstractTableModel):
             if 0 < col < 6:
                 return QtCore.Qt.AlignCenter
 
+        elif role == SortRole:
+            cbk = self.SORT_CALLBACKS.get(col)
+            if cbk is not None:
+                return cbk(task)
+
         elif role == QtCore.Qt.ToolTipRole and col == 3:
             tip = "Allocated Cores: %d\nCurrent CPU Perc:%d\n" \
                   "Max CPU Perc:%d\nAllocated RAM:%dMB\nCurrent RSS:%dMB\nMaxRSS:%dMB"
             return tip % (stats.cores, stats.usedCores, stats.highCores, 
                           stats.ram, stats.usedRam, stats.highRam)
-        
+
         elif role == IdRole:
             return task.id
         
