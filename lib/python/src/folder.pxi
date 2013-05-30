@@ -145,22 +145,6 @@ def create_folder(Project project, string name):
     return folder
 
 @reconnecting
-def get_job_board(Project project):
-    """
-    TODO
-
-    :param project: :class:`.Project`
-    :returns: list[:class:`.Folder`]
-    """
-    cdef: 
-        FolderT folderT 
-        vector[FolderT] folders
-
-    conn().proxy().getJobBoard(folders, project.id)
-    cdef list ret = [initFolder(folderT) for folderT in folders]
-    return ret
-
-@reconnecting
 def set_folder_min_cores(Folder folder, int value):
     """
     Set the minimum cores for a Folder 

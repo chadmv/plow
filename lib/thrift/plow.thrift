@@ -261,20 +261,22 @@ struct TaskStatsT {
     11:string lastLogLine,
     12:bool active = false,
     13:i32 exitStatus,
-    14:i32 exitSignal
+    14:i32 exitSignal,
+    15:string lastNode
 }
 
 struct TaskT {
     1:required common.Guid id,
-    2:string name,
-    3:i32 number,
-    4:TaskState state,
+    2:common.Guid layerId,
+    3:common.Guid jobId,
+    4:string name,
+    5:i32 number,
+    6:TaskState state,
     7:i32 order,
     8:i32 retries,
     9:i32 minCores,
     10:i32 minRam,
-    11:string lastResource,
-    12:TaskStatsT stats
+    11:TaskStatsT stats
 }
 
 struct FolderT {
@@ -485,8 +487,8 @@ service RpcService {
     list<DependT> getTaskDependsOn(1:common.Guid taskId) throws (1:PlowException e),
     list<TaskStatsT> getTaskStats(1:common.Guid taskId) throws (1:PlowException e),
 
-    bool dropDepend(1:common.Guid dependId) throws (1:PlowException e),
-    bool reactivateDepend(1:common.Guid dependId) throws (1:PlowException e),
+    void dropDepend(1:common.Guid dependId) throws (1:PlowException e),
+    void activateDepend(1:common.Guid dependId) throws (1:PlowException e),
 
     NodeT getNode(1:string name) throws (1:PlowException e),
     list<NodeT> getNodes(1:NodeFilterT filter) throws (1:PlowException e),

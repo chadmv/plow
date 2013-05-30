@@ -229,29 +229,17 @@ cdef class Depend:
     property dependOnTaskName:
         def __get__(self): return self._depend.dependOnTaskName
 
+    @reconnecting
     def drop(self):
-        """
-        Drop the dependency
+        """Drop the dependency """
+        conn().proxy().dropDepend(self.id)
+        self.active = False
 
-        :returns: bool success
-        """
-        cdef bint ret 
-        ret = drop_depend(self)
-        if ret:
-            self.active = False
-        return ret
-
-    def reactivate(self):
-        """
-        Reactivate the dependency 
-
-        :returns: bool success
-        """
-        cdef bint ret 
-        ret = reactivate_depend(self)
-        if ret:
-            self.active = True
-        return ret        
+    @reconnecting
+    def activate(self):
+        """Reactivate the dependency """
+        conn().proxy().activateDepend(self.id)
+        self.active = True
 
 
 @reconnecting
@@ -369,23 +357,17 @@ def drop_depend(Depend dep):
     Drop the depends 
 
     :param dep: :class:`.Depend` 
-    :return: bool success
     """
-    cdef bint ret 
-    ret = conn().proxy().dropDepend(dep.id)
-    return ret
+    conn().proxy().dropDepend(dep.id)
 
 @reconnecting
-def reactivate_depend(Depend dep):
+def activate_depend(Depend dep):
     """
     Reactivate the depends 
 
     :param dep: :class:`.Depend` 
-    :return: bool success
     """    
-    cdef bint ret 
-    ret = conn().proxy().reactivateDepend(dep.id)
-    return ret   
+    conn().proxy().activateDepend(dep.id)
 
 
 

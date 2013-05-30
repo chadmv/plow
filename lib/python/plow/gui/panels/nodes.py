@@ -9,7 +9,8 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.common import models
-from plow.gui.common.widgets import TableWidget
+from plow.gui.common.widgets import TableWidget, ResourceDelegate
+from plow.gui.util import formatDuration
 
 NODE_STATES = {}
 for a in dir(plow.client.NodeState):
@@ -60,11 +61,18 @@ class NodeWidget(QtGui.QWidget):
 
         layout.addWidget(view)
 
-        view.setColumnHidden(8, True)
-        view.setColumnHidden(10, True)
+        view.setColumnWidth(0, 150)
+        view.setColumnWidth(model.HEADERS.index('Locked'), 60)
+        view.setColumnWidth(model.HEADERS.index('Cores (Total)'), 90)
+        view.setColumnWidth(model.HEADERS.index('Cores (Idle)'), 90)
 
-        view.setItemDelegateForColumn(9, ResourceDelegate(self))
-        view.setItemDelegateForColumn(11, ResourceDelegate(self))
+        view.setColumnHidden(model.HEADERS.index('Ram (Total)'), True)
+        view.setColumnHidden(model.HEADERS.index('Swap (Total)'), True)
+
+        view.setItemDelegateForColumn(model.HEADERS.index('Ram (Free)'), 
+                                      ResourceDelegate(parent=self))
+        view.setItemDelegateForColumn(model.HEADERS.index('Swap (Free)'), 
+                                      ResourceDelegate(warn=.75, critical=.25, parent=self))
 
         view.doubleClicked.connect(self.__itemDoubleClicked)
 
@@ -87,77 +95,29 @@ class NodeWidget(QtGui.QWidget):
         EventManager.emit("NODE_OF_INTEREST", uid)
 
 
-class ResourceDelegate(QtGui.QItemDelegate):
-
-    COLOR_CRITICAL = constants.RED
-    COLOR_WARN = constants.YELLOW
-    COLOR_OK = constants.GREEN
-
-    def paint(self, painter, opts, index):
-        currentData = index.data(QtCore.Qt.UserRole)
-        try:
-            ratio = float(currentData)
-        except:
-            super(ResourceDelegate, self).paint(painter, opts, index)
-            return 
-
-        text = "%0.2f%%" % (ratio * 100)
-        opt = QtGui.QStyleOptionViewItemV4(opts)
-        opt.displayAlignment = QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter
-
-        grad = QtGui.QLinearGradient(opt.rect.topLeft(), opt.rect.topRight())
-        darkEnd = QtCore.Qt.transparent
-        end = darkEnd 
-
-        if ratio == 1:
-            darkEnd = self.COLOR_OK
-            end = darkEnd
-
-        elif ratio <= .05:
-            darkEnd = self.COLOR_CRITICAL.darker(135)
-            end = self.COLOR_CRITICAL
-
-        elif ratio <= .15:
-            darkEnd = self.COLOR_WARN.darker(135)
-            end = self.COLOR_WARN
-
-        grad.setColorAt(0.0, self.COLOR_OK.darker(135))
-        grad.setColorAt(min(ratio, 1.0), self.COLOR_OK)
-        grad.setColorAt(min(ratio + .01, 1.0), end)
-        grad.setColorAt(1.0, darkEnd)
-
-        self.drawBackground(painter, opt, index)
-        painter.fillRect(opt.rect, QtGui.QBrush(grad))
-        self.drawDisplay(painter, opt, opt.rect, text)
-
-
-
 class NodeModel(QtCore.QAbstractTableModel):
 
     HEADERS = [
-                "Name", "Platform", "CpuModel", "Cluster", 
+                "Name", "Cluster", 
                 "State", "Locked", "Cores (Total)", "Cores (Idle)",
                 "Ram (Total)", "Ram (Free)", "Swap (Total)",
-                "Swap (Free)", "Uptime"
+                "Swap (Free)", "Ping", "Uptime"
                ]
 
     HEADER_CALLBACKS = {
         0 : lambda n: n.name,
-        1 : lambda n: n.system.platform,
-        2 : lambda n: n.system.cpuModel,
-        3 : lambda n: n.clusterName,
-        4 : lambda n: NODE_STATES.get(n.state, ''),
-        5 : lambda n: str(bool(n.locked)),
-        6 : lambda n: n.totalCores,
-        7 : lambda n: n.idleCores,
-        8 : lambda n: n.system.totalRamMb,
-        9 : lambda n: n.system.freeRamMb,
-        10: lambda n: n.system.totalSwapMb,
-        11: lambda n: n.system.freeSwapMb,
-        12: lambda n: datetime.fromtimestamp(n.bootTime).strftime("%Y-%m-%d %H:%M"), 
+        1 : lambda n: n.clusterName,
+        2 : lambda n: NODE_STATES.get(n.state, ''),
+        3 : lambda n: str(bool(n.locked)),
+        4 : lambda n: n.totalCores,
+        5 : lambda n: n.idleCores,
+        6 : lambda n: n.system.totalRamMb,
+        7 : lambda n: n.system.freeRamMb,
+        8 : lambda n: n.system.totalSwapMb,
+        9 : lambda n: n.system.freeSwapMb,
+        10: lambda n: formatDuration(n.updatedTime), 
+        11: lambda n: formatDuration(n.bootTime), 
     }
-
-    ALIGN_CENTER = frozenset(xrange(3,13))
 
     def __init__(self, parent=None):
         super(NodeModel, self).__init__(parent)
@@ -234,22 +194,36 @@ class NodeModel(QtCore.QAbstractTableModel):
             return self.HEADER_CALLBACKS[col](node)
 
         elif role == QtCore.Qt.UserRole:
-            if col == 9:
+            if col == 7:
                 return node.system.freeRamMb / float(node.system.totalRamMb)
-            elif col == 11:
+            elif col == 9:
                 return node.system.freeSwapMb / float(node.system.totalSwapMb)
             else:
                 return self.HEADER_CALLBACKS[col](node) 
 
         elif role == QtCore.Qt.TextAlignmentRole:
-            if col in self.ALIGN_CENTER:
+            if col != 0:
                 return QtCore.Qt.AlignCenter
+
+        elif role == QtCore.Qt.BackgroundRole:
+            if node.state == plow.client.NodeState.DOWN:
+                return constants.RED 
+
+            if node.locked:
+                return constants.BLUE
+
+            return None
 
         elif role == ObjectRole:
             return node
 
-
     def headerData(self, section, orientation, role):
+        if role == QtCore.Qt.TextAlignmentRole:
+            if section == 0:
+                return QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter 
+            else:
+                return QtCore.Qt.AlignCenter
+
         if role != QtCore.Qt.DisplayRole:
             return None 
 

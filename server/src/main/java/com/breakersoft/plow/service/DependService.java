@@ -1,6 +1,7 @@
 package com.breakersoft.plow.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.breakersoft.plow.Depend;
 import com.breakersoft.plow.Job;
@@ -21,4 +22,8 @@ public interface DependService {
     List<Depend> getOnTaskDepends(Task task);
 
     boolean satisfyDepend(Depend depend);
+
+    Depend getDepend(UUID id);
+
+    boolean unsatisfyDepend(Depend depend);
 }

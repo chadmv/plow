@@ -110,7 +110,7 @@ cdef class Node:
     :var totalRamMb: int
     :var freeRamMb: int
     :var tags: set(str)
-    :var state: :class:`.NodeState`
+    :var state: :obj:`.NodeState`
     :var system: :class:`.NodeSystem`
 
     """

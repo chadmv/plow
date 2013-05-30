@@ -81,7 +81,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 ping.hw.freeRamMb,
                 ping.hw.totalSwapMb,
                 ping.hw.freeSwapMb,
-                ping.bootTime,
+                ping.bootTime * 1000,
                 ping.hw.cpuModel,
                 ping.hw.platform);
 
@@ -130,7 +130,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 ping.hw.freeRamMb,
                 ping.hw.totalSwapMb,
                 ping.hw.freeSwapMb,
-                ping.bootTime,
+                ping.bootTime * 1000,
                 ping.hw.cpuModel,
                 ping.hw.platform,
                 node.getNodeId());

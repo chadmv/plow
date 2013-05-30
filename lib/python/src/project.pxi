@@ -74,6 +74,16 @@ cdef class Project:
         set_project_active(self, active)
         self.project.isActive = active
 
+    def get_job_board(self):
+        """
+        Get the folders for this project that have active jobs
+
+        :returns: list[:class:`.Folder`]
+        """
+        cdef list board = get_job_board(self)
+        return board
+
+
 @reconnecting
 def get_project(Guid& guid):
     """
@@ -178,5 +188,19 @@ def set_project_active(Project project, bint active):
     """
     conn().proxy().setProjectActive(project.id, active)
 
+@reconnecting
+def get_job_board(Project project):
+    """
+    Get a list of folders for the given project that have
+    active jobs.
 
- 
+    :param project: :class:`.Project`
+    :returns: list[:class:`.Folder`]
+    """
+    cdef: 
+        FolderT folderT 
+        vector[FolderT] folders
+
+    conn().proxy().getJobBoard(folders, project.id)
+    cdef list ret = [initFolder(folderT) for folderT in folders]
+    return ret

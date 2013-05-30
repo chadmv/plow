@@ -3,8 +3,8 @@ import os
 import logging 
 
 from manifest import QtCore, QtGui
+import resources
 from panels import *
-from resources import icons
 from event import EventManager
 from util import loadTheme 
 
@@ -217,6 +217,7 @@ class WorkspaceManager(QtCore.QObject):
 def launch(argv, name, layout=None):
     # Initialize the default configuration files if none exist
     app = QtGui.QApplication(argv)
+    app.setAttribute(QtCore.Qt.AA_DontShowIconsInMenus, False)
     loadTheme()
 
     win = MainWindow(name, layout)
@@ -229,12 +230,23 @@ def launch(argv, name, layout=None):
 def main():
     import signal
     import sys
+    import argparse
 
-    lvl = logging.DEBUG if '-debug' in sys.argv else logging.INFO
-    logging.basicConfig(level=lvl)
+    parser = argparse.ArgumentParser(
+        description='Plow Monitoring and Management GUI',
+        usage='%(prog)s [opts]',
+    )
+
+    parser.add_argument("-debug", action="store_true", 
+        help="Print more debugging output")
+
+    args = parser.parse_args()  
+
+    logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     launch(sys.argv, "Plow Wrangle", "Wrangler")
+
 
 if __name__ == "__main__":
     main()

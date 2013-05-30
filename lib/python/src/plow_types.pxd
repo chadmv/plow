@@ -221,15 +221,10 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         LayerStatsT stats
 
     cdef cppclass TaskT:
-        Guid id
+        Guid id, jobId, layerId
         string name
-        int number
+        int number, order, retries, minCores, minRam
         TaskState_type state
-        int order
-        int retries
-        int minCores
-        int minRam
-        string lastResource
         TaskStatsT stats
 
     cdef cppclass FolderT:
@@ -298,6 +293,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         bint active
         int exitStatus
         int exitSignal
+        string lastNode
 
     cdef struct _LayerSpecT__isset:
         bint range
@@ -381,12 +377,14 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         bint offset
         bint lastUpdateTime
         bint taskIds
+        bint nodeIds
 
     cdef cppclass TaskFilterT:
         Guid jobId 
         vector[Guid] layerIds
         vector[TaskState_type] states 
         vector[Guid] taskIds
+        vector[Guid] nodeIds
         int limit 
         int offset 
         Timestamp lastUpdateTime

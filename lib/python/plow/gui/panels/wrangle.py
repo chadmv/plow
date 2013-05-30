@@ -13,6 +13,8 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.common import tree, models
+from plow.gui.common.widgets import TreeWidget
+from plow.gui.common.job import jobContextMenu
 from plow.gui.util import formatDateTime, formatDuration
 
 JOB_STATES = {}
@@ -123,20 +125,9 @@ class JobWranglerWidget(QtGui.QWidget):
         self.__proxy = proxy = models.AlnumSortProxyModel(self)
         proxy.setSourceModel(model)
 
-        self.__view = view = QtGui.QTreeView(self)
-
+        self.__view = view = TreeWidget(self)
         view.setModel(proxy)
-
         view.sortByColumn(4, QtCore.Qt.DescendingOrder)
-        view.setSortingEnabled(True)
-        view.setEditTriggers(view.NoEditTriggers)
-        view.setSelectionBehavior(view.SelectRows)
-        view.setSelectionMode(view.ExtendedSelection)
-        view.setUniformRowHeights(True)
-        view.setAlternatingRowColors(False)
-        view.setAutoFillBackground(True)
-        # view.setVerticalScrollMode(view.ScrollPerPixel)
-        view.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
 
         for i, width in enumerate(JobNode.HEADER_WIDTHS):
             view.setColumnWidth(i, width)
@@ -153,6 +144,11 @@ class JobWranglerWidget(QtGui.QWidget):
         view.activated.connect(self.__itemClicked)
 
         model.modelReset.connect(view.expandAll)
+
+        self.__refreshTimer = timer = QtCore.QTimer(self)
+        timer.setSingleShot(True)
+        timer.setInterval(1500)
+        timer.timeout.connect(self.refresh)
 
 
         
@@ -173,6 +169,16 @@ class JobWranglerWidget(QtGui.QWidget):
         self.__attrs["projects"] = projects
         self.__model.setProjects(projects)
 
+    def selectedJobs(self):
+        model = self.__view.selectionModel()
+        return [idx.data(OBJECT_ROLE) for idx in model.selectedRows() \
+                    if idx.data(TYPE_ROLE) == JOB_TYPE]
+
+    def selectedFolders(self):
+        model = self.__view.selectionModel()
+        return [idx.data(OBJECT_ROLE) for idx in model.selectedRows() \
+                    if idx.data(TYPE_ROLE) == FOLDER_TYPE]
+
     def __itemDoubleClicked(self, index):
         if index.data(TYPE_ROLE) == JOB_TYPE:
             uid = index.data(ID_ROLE)
@@ -189,51 +195,30 @@ class JobWranglerWidget(QtGui.QWidget):
         if not index:
             return 
 
+        # TODO: Folder context menu?
         typ = index.data(TYPE_ROLE)
         if typ != JOB_TYPE:
             return 
 
+        jobs = self.selectedJobs()
+        if not jobs:
+            return 
+
         job = index.data(OBJECT_ROLE)
+        if jobs[0] is not job:
+            try:
+                jobs.remove(job)
+            except ValueError:
+                pass
+            jobs.insert(0, job)
 
-        menu = QtGui.QMenu(tree)
-        pause = menu.addAction(QtGui.QIcon(":/pause.png"), "Un-Pause" if job.paused else "Pause")
-        kill = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill Job")
-        kill_tasks = menu.addAction(QtGui.QIcon(":/kill.png"), "Kill Tasks")
-        eat = menu.addAction(QtGui.QIcon(":/eat.png"), "Eat Dead Tasks")
-        retry = menu.addAction(QtGui.QIcon(":/retry.png"), "Retry Dead Tasks")
-
-        pause.triggered.connect(partial(job.pause, not job.paused))
-
-        eat.setEnabled(bool(job.totals.dead))
-        eat.triggered.connect(partial(self.eatDeadTasks, job))
-
-        retry.setEnabled(bool(job.totals.dead))
-        retry.triggered.connect(partial(self.retryDeadTasks, job))
-
-        kill.triggered.connect(partial(job.kill, "plow-wrangler"))
-        kill_tasks.triggered.connect(partial(self.killTasks, job))
-
+        menu = jobContextMenu(jobs, partial(self.queueRefresh, True), tree)
         menu.popup(tree.mapToGlobal(pos))
 
-    def killTasks(self, job):
-        tasks = plow.client.get_tasks(job=job)
-        if tasks:
-            LOGGER.info("Killing %d tasks", len(tasks))
-            plow.client.kill_tasks(task=tasks)
-
-    def eatDeadTasks(self, job):
-        tasks = plow.client.get_tasks(job=job)
-        dead = [t for t in tasks if t.state == plow.client.TaskState.DEAD]
-        if dead:
-            LOGGER.info("Eating %d tasks", len(dead))
-            plow.client.eat_tasks(task=dead)
-
-    def retryDeadTasks(self, job):
-        tasks = plow.client.get_tasks(job=job)
-        dead = [t for t in tasks if t.state == plow.client.TaskState.DEAD]
-        if dead:
-            LOGGER.info("Retrying %d tasks", len(dead))
-            plow.client.retry_tasks(task=dead)
+    def queueRefresh(self, full=False):
+        self.__refreshTimer.start()
+        if full:
+            EventManager.emit("GLOBAL_REFRESH")
 
 
 class JobModel(tree.TreeModel):
@@ -262,6 +247,12 @@ class JobModel(tree.TreeModel):
         if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
             return JobNode.HEADERS[section]
 
+        elif role == QtCore.Qt.TextAlignmentRole:
+            if section == 0:
+                return QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter 
+            else:
+                return QtCore.Qt.AlignCenter
+                
         return None
 
     def reset(self):
@@ -477,6 +468,13 @@ class FolderNode(PlowNode):
         lambda f: (f.totals.running / float(f.totals.total)) if f.totals.total else 0,
     ]
 
+    def data(self, column, role=QtCore.Qt.DisplayRole):
+        if role == QtCore.Qt.TextAlignmentRole:
+            if column > 0:
+                return QtCore.Qt.AlignCenter
+
+        return super(FolderNode, self).data(column, role)
+
     def _getChildren(self):
         if not self.ref:
             return []
@@ -513,6 +511,10 @@ class JobNode(PlowNode):
         TOOL = QtCore.Qt.ToolTipRole
         BG = QtCore.Qt.BackgroundRole
         FG = QtCore.Qt.ForegroundRole
+
+        if role == QtCore.Qt.TextAlignmentRole:
+            if column > 0:
+                return QtCore.Qt.AlignCenter
 
         # State
         if column == 2:

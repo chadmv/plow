@@ -72,7 +72,7 @@ public class ProcDispatcher implements Dispatcher<DispatchProc> {
 
         try {
             dispatchService.assignProc(proc, task);
-            if (dispatchService.startTask(proc.getHostname(), task)) {
+            if (dispatchService.startTask(task, proc)) {
                 RunTaskCommand command =
                         dispatchService.getRuntaskCommand(task);
                 RndClient client = new RndClient(proc.getHostname());

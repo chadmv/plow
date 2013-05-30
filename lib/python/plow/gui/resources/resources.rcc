@@ -1,0 +1,27 @@
+<RCC>
+  <qresource>
+    <file>images/checkbox.png</file>
+    <file alias="images/down_arrow.png">images/down_arrow.png</file>
+    <file alias="images/up_arrow.png">images/up_arrow_16.png</file>
+    <file alias="images/left_arrow.png">images/left_arrow_16.png</file>
+    <file alias="images/right_arrow.png">images/right_arrow_16.png</file>
+    <file>images/handle.png</file>
+    <file>images/close.png</file>
+    <file>images/float.png</file>
+    <file>images/load.png</file>
+    <file>images/settings.png</file>
+    <file>images/config.png</file>
+    <file>images/locked.png</file>
+    <file>images/unlocked.png</file>
+    <file>images/minus.png</file>
+    <file>images/plus.png</file>
+    <file>images/help.png</file>
+    <file>images/retry.png</file>
+    <file>images/kill.png</file>
+    <file>images/eat.png</file>
+    <file>images/pause.png</file>
+    <file>images/resume.png</file>
+    <file>images/sweep.png</file>
+  </qresource>
+</RCC>
+

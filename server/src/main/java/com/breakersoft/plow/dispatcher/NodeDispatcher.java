@@ -137,7 +137,7 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
             // the task is already running some where.
             proc = dispatchService.allocateProc(node, task);
 
-            if (dispatchService.startTask(node.getName(), task)) {
+            if (dispatchService.startTask(task, proc)) {
                 RunTaskCommand command =
                         dispatchService.getRuntaskCommand(task);
 

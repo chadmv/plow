@@ -105,11 +105,11 @@ class LogViewerWidget(QtGui.QWidget):
 
         self.__findPrevBtn = prev = QtGui.QAction(self)
         prev.setToolTip("Find Previous Match")
-        prev.setIcon(QtGui.QIcon(":/left_arrow.png"))
+        prev.setIcon(QtGui.QIcon(":/images/left_arrow.png"))
 
         self.__findNextBtn = nxt = QtGui.QAction(self)
         nxt.setToolTip("Find Next Match")
-        nxt.setIcon(QtGui.QIcon(":/right_arrow.png"))
+        nxt.setIcon(QtGui.QIcon(":/images/right_arrow.png"))
 
         self.__jobNameLabel = label = QtGui.QLabel(self)
         label.setIndent(10)

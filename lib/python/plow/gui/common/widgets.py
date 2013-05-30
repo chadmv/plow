@@ -1,4 +1,7 @@
 """Non-Plow specific widgets."""
+
+from itertools import izip_longest
+
 from plow.gui.manifest import QtGui, QtCore
 from plow.gui.common.help import getHelp, getHelpTextWidget
 from plow.gui import constants 
@@ -21,6 +24,21 @@ class TableWidget(QtGui.QTableView):
         vheader = self.verticalHeader()
         vheader.hide()
         vheader.setDefaultSectionSize(constants.DEFAULT_ROW_HEIGHT)        
+
+
+class TreeWidget(QtGui.QTreeView):
+    def __init__(self, *args, **kwargs):
+        super(TreeWidget, self).__init__(*args, **kwargs)
+
+        self.setSortingEnabled(True)
+        self.setEditTriggers(self.NoEditTriggers)
+        self.setSelectionBehavior(self.SelectRows)
+        self.setSelectionMode(self.ExtendedSelection)
+        self.setUniformRowHeights(True)
+        self.setAlternatingRowColors(False)
+        self.setAutoFillBackground(True)
+        self.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
+        # self.setVerticalScrollMode(self.ScrollPerPixel)
 
 
 class SpinSliderWidget(QtGui.QWidget):
@@ -62,6 +80,7 @@ class BooleanCheckBox(QtGui.QCheckBox):
     def isChecked(self):
         return self.checkState() == QtCore.Qt.Checked
 
+
 class FilterableListBox(QtGui.QWidget):
     """
     A list box widget with a text filter.
@@ -81,34 +100,52 @@ class CheckableComboBox(QtGui.QWidget):
     """
     A combo box with selectable items.
     """
-    def __init__(self, title, options, selected, icons=None, parent=None):
+    
+    optionSelected = QtCore.Signal(str)
+
+    def __init__(self, title, options, selected=None, icons=None, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        QtGui.QVBoxLayout(self)
+        layout = QtGui.QVBoxLayout(self)
 
-        self.__btn = QtGui.QPushButton(title)
-        self.__btn.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.__btn.setMaximumHeight(22)
-        self.__btn.setFlat(True)
-        self.__btn.setContentsMargins(0, 0, 0, 0)
-        self.__menu = QtGui.QMenu(self)
-        self.__btn.setMenu(self.__menu)
+        self.__btn = btn = QtGui.QPushButton(title)
+        btn.setFocusPolicy(QtCore.Qt.NoFocus)
+        btn.setMaximumHeight(22)
+        btn.setFlat(True)
+        btn.setContentsMargins(0, 0, 0, 0)
 
-        for i, opt in enumerate(options):
-            a = QtGui.QAction(self)
+        self.__menu = menu = QtGui.QMenu(self)
+        btn.setMenu(menu)
+
+        self.setOptions(options, selected, icons)
+
+        layout.addWidget(btn)
+
+        btn.toggled.connect(btn.showMenu)
+        menu.triggered.connect(lambda action: self.optionSelected.emit(action.text()))
+
+    def options(self):
+        return [a.text() for a in self.__menu.actions()]
+
+    def setOptions(self, options, selected=None, icons=None):
+        if selected and not isinstance(selected, (set, dict)):
+            selected = set(selected)
+
+        menu = self.__menu
+        menu.clear()
+
+        for opt, icon in izip_longest(options, icons or []):
+            a = QtGui.QAction(menu)
             a.setText(opt)
             a.setCheckable(True)
-            if opt in selected:
+            if selected and opt in selected:
                 a.setChecked(True)
-            if icons:
-                try:
-                    a.setIcon(icons[i])
-                except IndexError:
-                    pass
-            self.__menu.addAction(a)
+            if icon:
+                a.setIcon(icons[i])
+            menu.addAction(a)        
 
-        self.layout().addWidget(self.__btn)
+    def selectedOptions(self):
+        return [a.text() for a in self.__menu.actions() if a.isChecked()]
 
-        self.__btn.toggled.connect(self.__btn.showMenu)
 
 class CheckableListBox(QtGui.QWidget):
     """
@@ -158,6 +195,7 @@ class CheckableListBox(QtGui.QWidget):
         else:
             self.listItems.setDisabled(False)
 
+
 class RadioBoxArray(QtGui.QWidget):
     """
     An array of linked radio boxes.
@@ -177,6 +215,7 @@ class RadioBoxArray(QtGui.QWidget):
 
         layout.addWidget(group_box)
 
+
 class ManagedListWidget(QtGui.QWidget):
     """
     A list widget that lets you add/remove things.
@@ -195,10 +234,10 @@ class ManagedListWidget(QtGui.QWidget):
             self.list_widget.addItem(list_item)
         self.list_widget.sortItems()
 
-        self.btn_add = QtGui.QPushButton(QtGui.QIcon(":/plus.png"), "", self)
+        self.btn_add = QtGui.QPushButton(QtGui.QIcon(":/images/plus.png"), "", self)
         self.btn_add.setFlat(True)
         self.btn_add.clicked.connect(self.addItem)
-        self.btn_sub = QtGui.QPushButton(QtGui.QIcon(":/minus.png"), "", self)
+        self.btn_sub = QtGui.QPushButton(QtGui.QIcon(":/images/minus.png"), "", self)
         self.btn_sub.setFlat(True)
         self.btn_sub.clicked.connect(self.removeItems)
 
@@ -243,7 +282,7 @@ class FormWidgetLabel(QtGui.QWidget):
         self.__help = help
 
         self.__btn = QtGui.QToolButton(self)
-        self.__btn.setIcon(QtGui.QIcon(":/help.png"))
+        self.__btn.setIcon(QtGui.QIcon(":/images/help.png"))
         self.__btn.setFocusPolicy(QtCore.Qt.NoFocus)
         self.__btn.clicked.connect(self.__show_popup)
         self.__btn.setStyleSheet("QToolButton { border: 0px }")
@@ -270,6 +309,7 @@ class FormWidgetLabel(QtGui.QWidget):
         layout.addWidget(getHelpTextWidget(self.__help))
         frame.show()
 
+
 class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
     """
     A simple status bar, much like a heath meter, which 
@@ -279,8 +319,8 @@ class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
     Margins = [5, 4, 5, 4]
 
     __PEN = QtGui.QColor(33, 33, 33)
-    __C1 = QtGui.QColor(177, 24, 0)
-    __C2 = QtGui.QColor(76, 115, 0)
+    __C1 = constants.RED
+    __C2 = constants.GREEN
 
     def __init__(self, parent=None):
         QtGui.QStyledItemDelegate.__init__(self, parent)
@@ -302,9 +342,9 @@ class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
         rect = opt.rect
         rect.adjust(self.Margins[0], self.Margins[1], -self.Margins[2], -self.Margins[3])
         data = index.data()
-        
+
         painter.save()
-        painter.setRenderHints(
+        painter.setRenderHints (
             painter.HighQualityAntialiasing |
             painter.SmoothPixmapTransform |
             painter.Antialiasing)
@@ -322,3 +362,88 @@ class SimplePercentageBarDelegate(QtGui.QStyledItemDelegate):
             painter.setBrush(self.__C2)
             painter.drawRoundedRect(rect, 3, 3)
         painter.restore()
+
+
+class ResourceDelegate(QtGui.QItemDelegate):
+    """
+    A custom QItemDelegate to be set onto a specific
+    column of a view, containing numeric data that can
+    be represented as a resource. 
+
+    The default role to check for this data on an index 
+    is Qt.UserRole, but can be set to any other role to 
+    source the numeric data. 
+
+    Example:
+        If we have a column in our view that contains a 
+        percentage value of how much memory is left in the 
+        system (from 0.0 - 1.0), then we can do:
+
+           delegate = ResourceDelegate(warn=.5, critical=.1)
+
+        This will show a warning indication when the ratio is 
+        below 50%, and a critical indication when it falls below 
+        10%
+
+        If we are storing our data in another role... 
+
+            otherRole = QtCore.Qt.UserRole + 50
+            delegate = ResourceDelegate(dataRole=otherRole)
+
+    """
+    COLOR_CRITICAL = constants.RED
+    COLOR_WARN = constants.YELLOW
+    COLOR_OK = constants.GREEN
+    COLOR_BG = constants.GRAY
+
+    def __init__(self, warn=0.15, critical=0.05, dataRole=QtCore.Qt.UserRole, parent=None):
+        super(ResourceDelegate, self).__init__(parent)
+        self._warn = warn 
+        self._crit = critical
+        self._role = dataRole
+
+    def paint(self, painter, opts, index):
+        currentData = index.data(self._role)
+        try:
+            ratio = float(currentData)
+        except:
+            super(ResourceDelegate, self).paint(painter, opts, index)
+            return 
+
+        text = "%0.2f%%" % (ratio * 100)
+        opt = QtGui.QStyleOptionViewItemV4(opts)
+        opt.displayAlignment = QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter
+
+        grad = QtGui.QLinearGradient(opt.rect.topLeft(), opt.rect.topRight())
+        # darkEnd = QtCore.Qt.transparent
+        darkEnd = self.COLOR_BG
+        end = darkEnd 
+
+        if ratio == 1:
+            darkEnd = self.COLOR_OK
+            end = darkEnd
+
+        elif ratio <= self._crit:
+            darkEnd = self.COLOR_CRITICAL
+            end = self.COLOR_CRITICAL
+
+        elif ratio <= self._warn:
+            darkEnd = self.COLOR_WARN
+            end = self.COLOR_WARN
+
+        grad.setColorAt(0.0, self.COLOR_OK)
+        grad.setColorAt(min(ratio, 1.0), self.COLOR_OK)
+        grad.setColorAt(min(ratio + .01, 1.0), end)
+        grad.setColorAt(1.0, darkEnd)
+
+        self.drawBackground(painter, opt, index)
+        painter.fillRect(opt.rect, QtGui.QBrush(grad))
+        self.drawDisplay(painter, opt, opt.rect, text)
+
+        state_bg = index.data(QtCore.Qt.BackgroundRole)
+        if state_bg:
+            painter.setBrush(QtCore.Qt.NoBrush)
+            pen = QtGui.QPen(state_bg)
+            pen.setWidth(2)
+            painter.setPen(pen)
+            painter.drawRect(opt.rect)

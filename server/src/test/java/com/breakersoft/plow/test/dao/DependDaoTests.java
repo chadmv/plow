@@ -45,6 +45,38 @@ public class DependDaoTests extends AbstractTest {
     }
 
     @Test
+    public void testUnsatisfyDepend() {
+        JobSpecT spec1 = getTestJobSpec("depend_test_1");
+        JobSpecT spec2 = getTestJobSpec("depend_test_2");
+
+        JobLaunchEvent event1 = jobService.launch(spec1);
+        JobLaunchEvent event2 = jobService.launch(spec2);
+
+        DependSpecT dspec = new DependSpecT();
+        dspec.type = DependType.JOB_ON_JOB;
+        dspec.dependentJob = event1.getJob().getJobId().toString();
+        dspec.dependOnJob = event2.getJob().getJobId().toString();
+
+        Depend depend = dependDao.createJobOnJob(event1.getJob(), event2.getJob());
+        dependDao.satisfyDepend(depend);
+
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM depend WHERE uuid_sig IS NULL"));
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM depend WHERE bool_active='f'"));
+
+        dependDao.unsatisfyDepend(depend);
+
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM depend WHERE uuid_sig IS NULL"));
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM depend WHERE bool_active='t'"));
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM depend WHERE uuid_sig=?", depend.genSig()));
+    }
+
+
+    @Test
     public void testUpdateDependCounts() {
         JobSpecT spec1 = getTestJobSpec("depend_test_1");
         JobSpecT spec2 = getTestJobSpec("depend_test_2");

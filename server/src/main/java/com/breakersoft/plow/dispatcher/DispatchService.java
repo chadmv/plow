@@ -62,7 +62,7 @@ public interface DispatchService {
 
     RunTaskCommand getRuntaskCommand(Task task);
 
-    boolean startTask(String hostname, DispatchTask task);
+    boolean startTask(DispatchTask task, DispatchProc proc);
 
     void assignProc(DispatchProc proc, DispatchTask task);
 

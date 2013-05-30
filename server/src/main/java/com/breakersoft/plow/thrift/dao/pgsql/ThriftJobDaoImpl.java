@@ -120,7 +120,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
 
         if (PlowUtils.isValid(filter.project)) {
             clauses.add(JdbcUtils.In(
-                    "project.str_name", filter.project.size()));
+                    "project.str_code", filter.project.size()));
             values.addAll(filter.project);
         }
 

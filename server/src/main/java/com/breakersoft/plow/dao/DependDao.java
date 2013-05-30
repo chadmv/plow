@@ -36,6 +36,7 @@ public interface DependDao {
 
     Depend get(UUID id);
     boolean satisfyDepend(Depend depend);
+    boolean unsatisfyDepend(Depend depend);
 
     List<Depend> getOnTaskDepends(Task task);
     List<Depend> getOnLayerDepends(Layer layer);

@@ -8,15 +8,18 @@ import os
 import sys
 import glob
 import shutil
+import re 
 
 import subprocess
 from subprocess import Popen, PIPE
 from ctypes.util import find_library
 
+sys.path.insert(0, 'lib/fake_pyrex')
+
 
 try:
-    from python.ez_setup import use_setuptools
-    use_setuptools()
+    from lib.ez_setup import use_setuptools
+    use_setuptools("0.6c12dev")
 except:
     pass
 
@@ -34,9 +37,6 @@ import doc.conf
 #-----------------------------------------------------------------------------
 __version__ = doc.conf.release
 
-
-sys.path.append('fake_pyrex')
-
 TEMP_BUILD_DIR = '__dist__'
 ETC_SRC_DIR = os.path.abspath('../../etc')
 ETC_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'etc')
@@ -52,23 +52,6 @@ PLOW_CPP = PLOW_INCLUDES
 PLOW_SOURCE_EXTRA = []
 for p in PLOW_CPP:
     PLOW_SOURCE_EXTRA += glob.glob(os.path.join(p, "*.cpp"))
-
-
-
-# Check for thrift generated sources
-# gen_dir = "../thrift"
-# if os.path.exists(gen_dir):
-#     gen_cmd = "cd {0} && ./generate-sources.sh".format(gen_dir)
-    
-#     print "Re-generating Thrift python client bindings"
-    
-#     ret = subprocess.call(gen_cmd, shell=True)
-#     if ret != 0 and not os.path.exists("src/core/rpc"):
-#         print "Error: Missing the plow/client/core/rpc source file location.\n" \
-#               "Tried to generate, but Thrift command failed: {0}\n" \
-#               "Is Thrift installed?".format(gen_cmd)
-#         sys.exit(1)
-
 
 
 ldflags = []
@@ -187,11 +170,11 @@ if use_cython:
     plowmodule.sources.insert(0, PLOW_SOURCE_MAIN_PYX)
     force = '-f' in argv or '--force' in argv
     ext_modules = cythonize([plowmodule], quiet=True, force=force)
+    ext_modules[0].sources = [re.sub(r'\.c$', '.cpp', p) for p in ext_modules[0].sources]
 
 else:
     plowmodule.sources.insert(0, PLOW_SOURCE_MAIN_CPP)
     ext_modules = [plowmodule]
-
 
 
 #-----------------------------------------------------------------------------

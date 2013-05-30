@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.Action;
 import com.breakersoft.plow.Cluster;
+import com.breakersoft.plow.Depend;
 import com.breakersoft.plow.Filter;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
@@ -21,6 +22,7 @@ import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Service;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.exceptions.PlowWriteException;
+import com.breakersoft.plow.service.DependService;
 import com.breakersoft.plow.service.FilterService;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
@@ -53,6 +55,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     FilterService filterService;
+
+    @Autowired
+    DependService dependService;
 
     @Autowired
     NodeService nodeService;
@@ -558,9 +563,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public boolean dropDepend(String arg0) throws PlowException {
-        // TODO Auto-generated method stub
-        return false;
+    public void dropDepend(String dependId) throws PlowException {
+        Depend depend = dependService.getDepend(UUID.fromString(dependId));
+        stateManager.satisfyDepend(depend);
     }
 
     @Override
@@ -595,10 +600,10 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public boolean reactivateDepend(String arg0) throws PlowException,
+    public void activateDepend(String dependId) throws PlowException,
             TException {
-        // TODO Auto-generated method stub
-        return false;
+        Depend depend = dependService.getDepend(UUID.fromString(dependId));
+        stateManager.unsatisfyDepend(depend);
     }
 
     @Override

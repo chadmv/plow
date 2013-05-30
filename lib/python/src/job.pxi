@@ -235,6 +235,7 @@ cdef inline Job initJob(JobT& j):
     return job
 
 
+@cython.final
 cdef class Job:
     """
     A Job 
@@ -381,14 +382,21 @@ cdef class Job:
         ret = get_layers(self)
         return ret
 
-    def get_tasks(self):
+    cpdef inline list get_tasks(self, list states=None):
         """
-        Get a list of tasks for this job 
+        Get a list of tasks for this job, optionally
+        filtered by a list of task stats
 
+        :param stats: list[:obj:`.TaskState`] = None
         :returns: list[:class:`.Task`]
         """
         cdef list ret 
-        ret = get_tasks(job=self)
+
+        if states:
+            ret = get_tasks(job=self, states=states)
+        else:
+            ret = get_tasks(job=self)
+
         return ret
 
     def get_depends(self):
@@ -409,6 +417,47 @@ cdef class Job:
         """
         cdef list ret = get_job_depends_on(self)
         return ret
+
+    def kill_tasks(self, object callback=None):
+        """
+        Kill all tasks on a job
+
+        :param callback: Optional callback function to run if tasks were killed
+        """
+        tasks = get_tasks(job=self)
+        if tasks:
+            LOGGER.debug("Killing %d tasks", len(tasks))
+            kill_tasks(tasks=tasks)
+            if callback:
+                callback()
+
+    def eat_dead_tasks(self, object callback=None):
+        """
+        Eat all dead tasks on a job
+
+        :param callback: Optional callback function to run if tasks were eaten
+        """
+        cdef list dead = self.get_tasks(states=[TaskState.DEAD])
+
+        if dead:
+            LOGGER.debug("Eating %d tasks", len(dead))
+            eat_tasks(tasks=dead)
+            if callback:
+                callback()
+
+    def retry_dead_tasks(self, object callback=None):
+        """
+        Retry all dead tasks on a job
+
+        :param callback: Optional callback function to run if tasks were retried
+        """
+        cdef list dead = self.get_tasks(states=[TaskState.DEAD])
+
+        if dead:
+            LOGGER.debug("Retrying %d tasks", len(dead))
+            retry_tasks(tasks=dead)
+            if callback:
+                callback()
 
 
 def launch_job(JobSpec spec):
@@ -459,8 +508,8 @@ def get_jobs(**kwargs):
     Get a list of jobs matching a criteria.
 
     :param matchingOnly: bool
-    :param regex: str regex pattern
-    :param project: list[str] of matching project
+    :param regex: str regex pattern to match against job names
+    :param project: list[str] of matching project codes
     :param user: list[str] of matching user names
     :param jobIds: list[str] of matching job ids
     :param name: list[str] of matching job names

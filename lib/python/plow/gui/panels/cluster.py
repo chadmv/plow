@@ -7,7 +7,9 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.util import formatPercentage
 from plow.gui.event import EventManager
-from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelegate, ManagedListWidget, BooleanCheckBox, FormWidgetLabel
+from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelegate, \
+                                    ManagedListWidget, BooleanCheckBox, FormWidgetLabel, \
+                                    TreeWidget
 
 IdRole = QtCore.Qt.UserRole
 ObjectRole = QtCore.Qt.UserRole + 1
@@ -31,11 +33,11 @@ class ClusterPanel(Panel):
         # comment button (multi-select)
         # 
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/settings.png"), "Edit Selected Cluster Configuration", self.openClusterPropertiesDialog)
+            QtGui.QIcon(":/images/settings.png"), "Edit Selected Cluster Configuration", self.openClusterPropertiesDialog)
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/locked.png"), "Lock Selected Clusters", self.__handleClusterLock)
+            QtGui.QIcon(":/images/locked.png"), "Lock Selected Clusters", self.__handleClusterLock)
         self.titleBarWidget().addAction(
-            QtGui.QIcon(":/unlocked.png"), "Unlock Selected Clusters", self.__handleClusterUnlock)
+            QtGui.QIcon(":/images/unlocked.png"), "Unlock Selected Clusters", self.__handleClusterUnlock)
 
     def openLoadDialog(self):
         print "Open search dialog"
@@ -73,8 +75,8 @@ class ClusterPanel(Panel):
 
 class ClusterWidget(QtGui.QWidget):
 
-    Header = ["Name", "Tags", "Usage", "Nodes", "Locked", "Repair", "Down", "Cores"]
-    Width = [350]
+    Header = ["Name", "Usage", "Nodes", "Locked", "Repair", "Down", "Cores", "Tags"]
+    Width = [250, 90, 70, 70, 70, 70, 70, 150]
 
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -83,17 +85,10 @@ class ClusterWidget(QtGui.QWidget):
 
         self.__attrs = attrs
         
-        self.__tree = tree = QtGui.QTreeView(self)
-        tree.setSelectionBehavior(tree.SelectRows);
-        tree.setItemDelegateForColumn(2, SimplePercentageBarDelegate(self))
-        tree.setAlternatingRowColors(True)
-        tree.setUniformRowHeights(True)
-        tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
-        tree.setAutoFillBackground(False)
-        tree.setSelectionMode(tree.ExtendedSelection)
-        tree.doubleClicked.connect(self.__itemDoubleClicked)
+        self.__tree = tree = TreeWidget(self)
+        tree.setItemDelegateForColumn(1, SimplePercentageBarDelegate(self))
 
-        self.__model = ClusterModel()
+        self.__model = ClusterModel(self)
         tree.setModel(self.__model)
         self.__model.refresh()
 
@@ -101,6 +96,9 @@ class ClusterWidget(QtGui.QWidget):
             tree.setColumnWidth(i, v) 
 
         self.layout().addWidget(self.__tree)
+
+        # connections
+        tree.doubleClicked.connect(self.__itemDoubleClicked)
 
     def getSelectedClusters(self):
         rows = self.__tree.selectionModel().selectedRows()
@@ -116,6 +114,16 @@ class ClusterWidget(QtGui.QWidget):
 
 class ClusterModel(QtCore.QAbstractTableModel):
 
+    HEADER_CALLBACKS = {
+        0 : lambda c: c.name,
+        1 : lambda c: [c.total.runCores, c.total.cores],
+        2 : lambda c: c.total.nodes,
+        3 : lambda c: c.total.lockedNodes,
+        4 : lambda c: c.total.repairNodes,
+        5 : lambda c: c.total.downNodes,
+        6 : lambda c: c.total.cores,
+        7 : lambda c: ",".join(c.tags),
+    }
 
     def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
@@ -123,7 +131,7 @@ class ClusterModel(QtCore.QAbstractTableModel):
         self.__index = dict([(item.id, i) for i, item in enumerate(self.__items)])
         self.__lastUpdateTime = 0;
 
-        self.__iconLocked = QtGui.QIcon(":/locked.png")
+        self.__iconLocked = QtGui.QIcon(":/images/locked.png")
 
     def hasChildren(self, parent):
         return False
@@ -146,7 +154,6 @@ class ClusterModel(QtCore.QAbstractTableModel):
         for removed in frozenset(self.__index.keys()).difference(updated):
             pass
 
-
     def rowCount(self, parent):
         if parent.isValid():
             return 0
@@ -163,44 +170,43 @@ class ClusterModel(QtCore.QAbstractTableModel):
         cluster = self.__items[row]
 
         if role == QtCore.Qt.DisplayRole:
-            if col == 0:
-                return cluster.name
-            elif col == 1:
-                return ",".join(cluster.tags)
-            elif col == 2:
-                return [cluster.total.runCores, cluster.total.cores]
-            elif col == 3:
-                return cluster.total.nodes
-            elif col == 4:
-                return cluster.total.lockedNodes
-            elif col == 5:
-                return cluster.total.repairNodes
-            elif col == 6:
-                return cluster.total.downNodes
-            elif col == 7:
-                return cluster.total.cores
+            cbk = self.HEADER_CALLBACKS.get(col)
+            if cbk is not None:
+                return cbk(cluster)
+        
         elif role == QtCore.Qt.BackgroundColorRole:
             if cluster.isLocked:
                 return constants.BLUE
-            elif col == 4 and cluster.total.lockedNodes:
+            elif col == 3 and cluster.total.lockedNodes:
                 return constants.BLUE
-            elif col == 5 and cluster.total.repairNodes:
+            elif col == 4 and cluster.total.repairNodes:
                 return constants.ORANGE
-            elif col == 6 and cluster.total.downNodes:
+            elif col == 5 and cluster.total.downNodes:
                 return constants.RED
+
+        elif role == QtCore.Qt.TextAlignmentRole:
+            if col != 0:
+                return QtCore.Qt.AlignCenter
 
         elif role == QtCore.Qt.DecorationRole and col == 0:
             if cluster.isLocked:
                 return self.__iconLocked
+
+        elif role == IdRole:
+            return cluster.id
+       
+        elif role == ObjectRole:
+            return cluster
+
         elif role == QtCore.Qt.ToolTipRole:
-            if col == 2:
+            if col == 1:
                 return "\n".join([
                     "Total Cores: %d" % cluster.total.cores,
                     "Running Cores: %d" % cluster.total.runCores,
                     "Idle Cores: %d" % cluster.total.idleCores,
                     "Usage: %s" % formatPercentage(cluster.total.runCores, cluster.total.cores)
                 ])
-            if col == 7:
+            if col == 6:
                 return "\n".join([
                     "Total Cores: %d" % cluster.total.cores,
                     "Running Cores: %d" % cluster.total.runCores,
@@ -210,7 +216,7 @@ class ClusterModel(QtCore.QAbstractTableModel):
                     "Repair Cores: %d" % cluster.total.repairCores,
                     "Locked Cores: %d" % cluster.total.lockedCores
                 ])
-            elif col == 3:
+            elif col == 2:
                 return "\n".join([
                     "Total Nodes: %d" % cluster.total.nodes,
                     "Up Nodes: %d" % cluster.total.upNodes,
@@ -218,14 +224,17 @@ class ClusterModel(QtCore.QAbstractTableModel):
                     "Repair Nodes: %d" % cluster.total.repairNodes,
                     "Locked Nodes: %d" % cluster.total.lockedNodes,
                 ])
-        elif role == IdRole:
-            return cluster.id
-        elif role == ObjectRole:
-            return cluster
+
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
             return ClusterWidget.Header[section]
+
+        elif role == QtCore.Qt.TextAlignmentRole:
+            if section == 0:
+                return QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter 
+            else:
+                return QtCore.Qt.AlignCenter
 
 
 class ClusterWidgetConfigDialog(QtGui.QDialog):

@@ -10,9 +10,12 @@ from plow.gui.util import formatDuration
 from plow.gui.event import EventManager
 from plow.gui import constants 
 from plow.gui.common.widgets import CheckableComboBox, TableWidget
+from plow.gui.common import models
 
 IdRole = QtCore.Qt.UserRole
 ObjectRole = QtCore.Qt.UserRole + 1
+SortRole = QtCore.Qt.UserRole + 2
+
 
 class TaskPanel(Panel):
 
@@ -34,12 +37,16 @@ class TaskPanel(Panel):
         # kill button (multi-select)
         # comment button (multi-select)
         # 
+        titleBar = self.titleBarWidget()
 
-        self.__state_filter = CheckableComboBox("Task States", constants.TASK_STATES, [], None, self)
-        self.__layer_filter = CheckableComboBox("Layers", [], [], None, self)
+        self.__state_filter = CheckableComboBox("Task States", constants.TASK_STATES, parent=self)
+        self.__layer_filter = CheckableComboBox("Layers", [], parent=self)
 
-        self.titleBarWidget().addWidget(self.__state_filter)    
-        self.titleBarWidget().addWidget(self.__layer_filter)
+        titleBar.addWidget(self.__state_filter)    
+        titleBar.addWidget(self.__layer_filter)
+
+        self.__state_filter.optionSelected.connect(self.__stateFilterChanged)
+        self.__layer_filter.optionSelected.connect(self.__layerFilterChanged)
 
     def openLoadDialog(self):
         print "Open search dialog"
@@ -51,12 +58,23 @@ class TaskPanel(Panel):
         self.widget().refresh()
 
     def __handleJobOfInterestEvent(self, *args, **kwargs):
-        self.widget().setJobId(args[0])
+        taskWidget = self.widget()
+        taskWidget.setJobId(args[0])
+
+        self.__layer_filter.setOptions(taskWidget.layerNames)
+
+    def __stateFilterChanged(self):
+        sel = self.__state_filter.selectedOptions()
+        self.widget().setStateFilters(sel)
+
+    def __layerFilterChanged(self):
+        sel = self.__layer_filter.selectedOptions()
+        self.widget().setLayerFilters(sel)
+
 
 class TaskWidget(QtGui.QWidget):
 
-    Header = ["Name", "State", "Node", "Resource", "Duration", "Log"]
-    Width = [350]
+    Width = [250, 90, 125, 100, 100, 65]
     Refresh = 1500
 
     def __init__(self, attrs, parent=None):
@@ -65,20 +83,44 @@ class TaskWidget(QtGui.QWidget):
         layout.setContentsMargins(4,0,4,4)
 
         self.__attrs = attrs
-        
+
         self.__table = table = TableWidget(self)
+        table.sortByColumn(0, QtCore.Qt.AscendingOrder)
         table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+
+        self.__jobId = None
+        self.__layers = {}
+        self.__model = None
+        self.__proxy = proxy = TaskFilterProxyModel(self)
+        proxy.setSortRole(SortRole)
+        proxy.setDynamicSortFilter(True)
+        proxy.sort(0, QtCore.Qt.AscendingOrder)
+        table.setModel(proxy)
+
+        self.layout().addWidget(table)
 
         # connections
         table.customContextMenuRequested.connect(self.__showContextMenu)
         table.doubleClicked.connect(self.__rowDoubleClicked)
 
-        self.__jobId = None
-        self.__model = None
+    @property 
+    def layers(self):
+        return self.__layers.values()
 
-        self.layout().addWidget(table)
+    @property 
+    def layerNames(self):
+        return sorted(self.__layers.keys())
+
+    def layerNameToId(self, name):
+        layer = self.__layers.get(name)
+        if layer:
+            return layer.id 
+        else:
+            return ''
 
     def refresh(self):
+        self.__updateLayers()
+
         if self.__model:
             self.__model.refresh()
 
@@ -86,23 +128,54 @@ class TaskWidget(QtGui.QWidget):
         new_model = False
         if not self.__model:
             self.__model = TaskModel(self)
+            self.__proxy.setSourceModel(self.__model)
             new_model = True
+
         self.__jobId = jobid
+        self.__updateLayers()
+
         self.__model.setJob(jobid)
-        self.__table.setModel(self.__model)
+        
         if new_model:
-            self.__table.setColumnWidth(0, self.Width[0])
+            table = self.__table
+            for i, w in enumerate(self.Width):
+                table.setColumnWidth(i, w)
     
     def __showContextMenu(self, pos):
         menu = QtGui.QMenu()
-        menu.addAction(QtGui.QIcon(":/retry.png"), "Retry", self.retrySelected)
-        menu.addAction(QtGui.QIcon(":/kill.png"), "Kill", self.killSelected)
-        menu.addAction(QtGui.QIcon(":/eat.png"), "Eat", self.eatSelected)
+        menu.addAction(QtGui.QIcon(":/images/retry.png"), "Retry", self.retrySelected)
+        menu.addAction(QtGui.QIcon(":/images/kill.png"), "Kill", self.killSelected)
+        menu.addAction(QtGui.QIcon(":/images/eat.png"), "Eat", self.eatSelected)
         menu.exec_(self.mapToGlobal(pos))
         
     def __rowDoubleClicked(self, index):
         uid = index.data(IdRole)
         EventManager.emit("TASK_OF_INTEREST", uid, self.__jobId)
+
+    def __updateLayers(self):
+        if self.__jobId:
+            self.__layers = dict((l.name, l) for l in plow.client.get_layers(self.__jobId))
+
+    def setStateFilters(self, states):
+        self.__proxy.setFilters(states=states)
+
+    def setLayerFilters(self, layers):
+        layer_set = set()
+        allLayers = self.__layers
+
+        for l in layers:
+
+            obj = allLayers.get(l)
+            if obj:
+                layer_set.add(obj.id)
+
+            elif isinstance(l, plow.client.Layer):
+                layer_set.add(l.id)
+
+            elif plow.client.is_uuid(l):
+                layer_set.add(l)
+
+        self.__proxy.setFilters(layerIds=layer_set)
 
     def retrySelected(self):
         tasks = self.getSelectedTaskIds()
@@ -134,11 +207,35 @@ class TaskWidget(QtGui.QWidget):
         if full:
             EventManager.emit("GLOBAL_REFRESH")
 
+
 class TaskModel(QtCore.QAbstractTableModel):
+
+    HEADERS = ["Name", "State", "Node", "Resources", "Duration", "Retries", "Log"]
+
+    DISPLAY_CALLBACKS = {
+        0: lambda t: t.name,
+        1: lambda t: constants.TASK_STATES[t.state],
+        2: lambda t: t.stats.lastNode,
+        3: lambda t: "%s/%02dMB" % (t.stats.cores, t.stats.ram),
+        4: lambda t: formatDuration(t.stats.startTime, t.stats.stopTime),
+        5: lambda t: t.stats.retryNum,
+        6: lambda t: t.stats.lastLogLine,
+    }
+
+    SORT_CALLBACKS = {
+        0: DISPLAY_CALLBACKS[0],
+        1: DISPLAY_CALLBACKS[1],
+        2: DISPLAY_CALLBACKS[2],
+        3: lambda t: (t.stats.cores, t.stats.ram),
+        4: lambda t: t.stats.stopTime - t.stats.startTime,
+        5: DISPLAY_CALLBACKS[5],
+        6: DISPLAY_CALLBACKS[6],
+    }
+
     def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.__tasks = []
-        self.__index = { }
+        self.__index = {}
         self.__jobId = None
         self.__lastUpdateTime = 0
 
@@ -157,7 +254,7 @@ class TaskModel(QtCore.QAbstractTableModel):
             self.__jobId = jobid
             self.__tasks = plow.client.get_tasks(jobId=jobid)
             for i, task in enumerate(self.__tasks):
-                self.__index[task.id] = i;
+                self.__index[task.id] = i
             self.__lastUpdateTime = plow.client.get_plow_time()
         finally:
             self.endResetModel()
@@ -169,20 +266,22 @@ class TaskModel(QtCore.QAbstractTableModel):
     def refresh(self):
         if not self.__jobId:
             return
+
         t = plow.client.get_plow_time()
         tasks = plow.client.get_tasks(jobId=self.__jobId, lastUpdateTime=self.__lastUpdateTime)
         self.__lastUpdateTime = t
 
+        count = len(self.HEADERS)-1
         for task in tasks:
             idx = self.__index[task.id]
             self.__tasks[idx] = task
-            self.dataChanged.emit(self.index(idx,0), self.index(idx, len(TaskWidget.Header)-1))
+            self.dataChanged.emit(self.index(idx,0), self.index(idx, count))
 
     def rowCount(self, parent=None):
         return len(self.__tasks)
 
     def columnCount(self, parent=None):
-        return len(TaskWidget.Header)
+        return len(self.HEADERS)
 
     def data(self, index, role):
         row = index.row()
@@ -191,26 +290,28 @@ class TaskModel(QtCore.QAbstractTableModel):
         stats = task.stats 
 
         if role == QtCore.Qt.DisplayRole:
-            if col == 0:
-                return task.name
-            elif col == 1:
-                return constants.TASK_STATES[task.state]
-            elif col == 2:
-                return task.lastResource
-            elif col == 3:
-                return "%s/%02dMB" % (stats.cores, stats.ram)
-            elif col == 4:
-                return formatDuration(stats.startTime, stats.stopTime)
-            elif col == 5:
-                return stats.lastLogLine
+            cbk = self.DISPLAY_CALLBACKS.get(col)
+            if cbk is not None:
+                return cbk(task)
         
-        elif role == QtCore.Qt.BackgroundRole and col ==1:
+        elif role == QtCore.Qt.BackgroundRole and col == 1:
             return constants.COLOR_TASK_STATE[task.state]
-        
+
+        elif role == QtCore.Qt.TextAlignmentRole:
+            if 0 < col < 6:
+                return QtCore.Qt.AlignCenter
+
+        elif role == SortRole:
+            cbk = self.SORT_CALLBACKS.get(col)
+            if cbk is not None:
+                return cbk(task)
+
         elif role == QtCore.Qt.ToolTipRole and col == 3:
-            tip = "Allocated Cores: %d\nCurrent CPU Perc:%d\nMax CPU Perc:%d\nAllocated RAM:%dMB\nCurrent RSS:%dMB\nMaxRSS:%dMB"
-            return tip % (stats.cores, stats.usedCores, stats.highCores, stats.ram, stats.usedRam, stats.highRam)
-        
+            tip = "Allocated Cores: %d\nCurrent CPU Perc:%d\n" \
+                  "Max CPU Perc:%d\nAllocated RAM:%dMB\nCurrent RSS:%dMB\nMaxRSS:%dMB"
+            return tip % (stats.cores, stats.usedCores, stats.highCores, 
+                          stats.ram, stats.usedRam, stats.highRam)
+
         elif role == IdRole:
             return task.id
         
@@ -221,12 +322,62 @@ class TaskModel(QtCore.QAbstractTableModel):
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
-            return TaskWidget.Header[section]
+            return self.HEADERS[section]
 
     def __durationRefreshTimer(self):
         RUNNING = plow.client.TaskState.RUNNING
         [self.dataChanged.emit(self.index(idx, 4),  self.index(idx, 4)) 
             for idx, t in enumerate(self.__tasks) if t.state == RUNNING]
+
+
+class TaskFilterProxyModel(models.AlnumSortProxyModel):
+
+    def __init__(self, *args, **kwargs):
+        super(TaskFilterProxyModel, self).__init__(*args, **kwargs)
+        self.__states = set()
+        self.__layers = set()
+        self.__customFilterEnabled = False
+
+    def setFilters(self, states=None, layerIds=None):
+        self.__customFilterEnabled = False
+
+        if states is not None:
+            state_set = set()
+            for s in states:
+                if isinstance(s, (str, unicode)):
+                    s = constants.TASK_STATES.index(s)
+                state_set.add(s)
+            self.__states = state_set
+            self.__customFilterEnabled = True
+
+        if layerIds is not None:
+            self.__layers = set(layerIds)
+            self.__customFilterEnabled = True
+
+        self.invalidateFilter()
+
+    def filterAcceptsRow(self, row, parent):
+        if not self.__customFilterEnabled:
+            return super(TaskFilterProxyModel, self).filterAcceptsRow(row, parent)
+
+        idx = self.index(row, 0, parent)
+        if not idx:
+            return True
+
+        task = idx.data(ObjectRole)
+        if not task:
+            return True
+
+        states = self.__states
+        if states and task.state not in states:
+            return False
+
+        layers = self.__layers
+        if layers and task.layerId not in layers:
+            return False
+
+        return True
+
 
 class TaskWidgetConfigDialog(QtGui.QDialog):
     """

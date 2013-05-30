@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 
+import com.breakersoft.plow.Depend;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.event.JobLaunchEvent;
@@ -24,6 +25,73 @@ public class DependServiceTests extends AbstractTest {
 
     @Resource
     StateManager jobStateManager;
+
+    @Test
+    public void testSatisfyDepend() {
+        JobSpecT spec1 = getTestJobSpec("depend_test_1");
+        JobSpecT spec2 = getTestJobSpec("depend_test_2");
+
+        JobLaunchEvent event1 = jobService.launch(spec1);
+        JobLaunchEvent event2 = jobService.launch(spec2);
+
+        DependSpecT dspec = new DependSpecT();
+        dspec.type = DependType.JOB_ON_JOB;
+        dspec.dependentJob = event1.getJob().getJobId().toString();
+        dspec.dependOnJob = event2.getJob().getJobId().toString();
+
+        Depend depend = dependService.createDepend(dspec);
+
+        assertEquals(10,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event2.getJob().getJobId()));
+
+        dependService.satisfyDepend(depend);
+
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
+    }
+
+    @Test
+    public void testUnsatisfyDepend() {
+        JobSpecT spec1 = getTestJobSpec("depend_test_1");
+        JobSpecT spec2 = getTestJobSpec("depend_test_2");
+
+        JobLaunchEvent event1 = jobService.launch(spec1);
+        JobLaunchEvent event2 = jobService.launch(spec2);
+
+        DependSpecT dspec = new DependSpecT();
+        dspec.type = DependType.JOB_ON_JOB;
+        dspec.dependentJob = event1.getJob().getJobId().toString();
+        dspec.dependOnJob = event2.getJob().getJobId().toString();
+
+        Depend depend = dependService.createDepend(dspec);
+
+        assertEquals(10,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event2.getJob().getJobId()));
+
+        dependService.satisfyDepend(depend);
+
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
+
+        dependService.unsatisfyDepend(depend);
+
+        assertEquals(10,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event2.getJob().getJobId()));
+    }
 
     @Test
     public void testJobOnJob() {

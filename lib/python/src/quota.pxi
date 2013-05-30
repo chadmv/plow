@@ -10,6 +10,14 @@ cdef class QuotaFilter:
     cdef QuotaFilterT value
 
     def __init__(self, **kwargs):
+
+        cdef str name 
+        for name in ('project', 'cluster'):
+            try:
+                kwargs[name] = [p.id for p in kwargs[name]]
+            except KeyError:
+                pass
+
         self.value.project = kwargs.get('project', [])
         self.value.cluster = kwargs.get('cluster', [])
 
@@ -26,7 +34,8 @@ cdef inline Quota initQuota(QuotaT& q):
 
 cdef class Quota:
     """
-    TODO
+    Represents an existing Quota object, set on 
+    a project and cluster.
 
     :var id: str
     :var clusterId: str :class:`.Cluster` id
@@ -122,18 +131,12 @@ def get_quotas(**kwargs):
     cdef:
         QuotaT qT
         vector[QuotaT] quotas 
+        QuotaFilter filt
         list ret
-        QuotaFilter filter = QuotaFilter(**kwargs)
-        QuotaFilterT f = filter.value
 
-    cdef str name 
-    for name in ('project', 'cluster'):
-        try:
-            kwargs[name] = [p.id for p in kwargs[name]]
-        except:
-            pass
+    filt = QuotaFilter(**kwargs)
 
-    conn().proxy().getQuotas(quotas, f)
+    conn().proxy().getQuotas(quotas, filt.value)
     ret = [initQuota(qT) for qT in quotas]
     return ret
 

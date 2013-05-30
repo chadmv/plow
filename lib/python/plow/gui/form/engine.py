@@ -43,9 +43,8 @@ class RotatingTriangle(QtGui.QWidget):
     def __init__(self, opened=True, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        path = os.path.dirname(__file__) + "/../resources/down_arrow.png"
         if not RotatingTriangle.__OPEN_PIX:
-            RotatingTriangle.__OPEN_PIX = QtGui.QPixmap(path)
+            RotatingTriangle.__OPEN_PIX = QtGui.QPixmap(":/images/down_arrow.png")
             RotatingTriangle.__CLOSE_PIX = self.__rotate(-90, self.__OPEN_PIX)
 
         self.__open = opened
