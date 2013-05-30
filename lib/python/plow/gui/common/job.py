@@ -8,7 +8,7 @@ import plow.gui.constants as constants
 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.form import FormWidget, FormWidgetFactory
-
+from plow.gui.util import ask
 
 
 class JobProgressFormWidget(FormWidget):
@@ -215,25 +215,44 @@ def jobContextMenu(jobs, refreshCallback=None, parent=None):
     eat_tasks = menu.addAction(QtGui.QIcon(":/images/eat.png"), "Eat Dead Tasks")
     retry_tasks = menu.addAction(QtGui.QIcon(":/images/retry.png"), "Retry Dead Tasks")
 
+
     def action_on_tasks(fn, job_list, dead=False):
         if dead:
-            tasks = chain.from_iterable(j.get_dead_tasks() for j in job_list)
+            states = [plow.client.TaskState.DEAD]
         else:
-            tasks = chain.from_iterable(j.get_tasks() for j in job_list)
+            states = []
 
-        print "fn:", fn, ", Jobs:", len(job_list), ", Dead:", dead
+        tasks = list(chain.from_iterable(j.get_tasks(states=states) for j in job_list))
+
+        if not tasks:
+            return
+
+        msg = "Run %r on %d jobs  (%d tasks) ?" % (fn.__name__, len(job_list), len(tasks))
+        if not ask(msg, parent=parent):
+            return
 
         if tasks:
-            fn(tasks=list(tasks))
+            fn(tasks=tasks)
             if refreshCallback:
-                refreshCallback()            
+                refreshCallback()  
 
-    eat_tasks.triggered.connect(partial(action_on_tasks, plow.client.eat_tasks, jobs, dead=True))
-    retry_tasks.triggered.connect(partial(action_on_tasks, plow.client.retry_tasks, jobs, dead=True))
-    kill_tasks.triggered.connect(partial(action_on_tasks, plow.client.kill_tasks, jobs, dead=True))
+
+    eat_tasks.triggered.connect(partial(action_on_tasks, 
+                                        plow.client.eat_tasks, 
+                                        jobs, 
+                                        dead=True))
+
+    retry_tasks.triggered.connect(partial(action_on_tasks, 
+                                          plow.client.retry_tasks, 
+                                          jobs, 
+                                          dead=True))
+
+    kill_tasks.triggered.connect(partial(action_on_tasks, 
+                                         plow.client.kill_tasks, 
+                                         jobs, 
+                                         dead=False))
 
     def pause_fn(job_list, pause):
-        print "Set pause state of ", len(job_list), 'jobs to', pause
         for j in job_list:
             j.pause(pause)
 
@@ -243,7 +262,9 @@ def jobContextMenu(jobs, refreshCallback=None, parent=None):
     pause.triggered.connect(partial(pause_fn, jobs, not isPaused))
 
     def kill_fn(job_list):
-        print "killing", len(job_list), "jobs"
+        if not ask("Kill %d job(s) ?" %  len(job_list), parent=parent):
+            return
+
         for j in job_list:
             j.kill('plow-wrangler')
 
