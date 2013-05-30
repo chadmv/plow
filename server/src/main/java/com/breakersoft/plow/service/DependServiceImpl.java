@@ -4,6 +4,7 @@ import static com.breakersoft.plow.util.PlowUtils.checkEmpty;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -129,6 +130,22 @@ public class DependServiceImpl implements DependService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean unsatisfyDepend(Depend depend) {
+        if (dependDao.unsatisfyDepend(depend)) {
+            dependDao.incrementDependCounts(depend);
+            return true;
+        }
+        return false;
+    }
+
+
+    @Override
+    @Transactional(readOnly=true)
+    public Depend getDepend(UUID id) {
+        return dependDao.get(id);
     }
 
     @Override

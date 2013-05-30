@@ -184,6 +184,18 @@ public class StateManager {
         return false;
     }
 
+    @Async(value="stateChangeExecutor")
+    public void satisfyDepend(Depend depend) {
+        logger.info("Satisfying dependency {}", depend);
+        dependService.satisfyDepend(depend);
+    }
+
+    @Async(value="stateChangeExecutor")
+    public void unsatisfyDepend(Depend depend) {
+        logger.info("Reactivating dependency {}", depend);
+        dependService.unsatisfyDepend(depend);
+    }
+
     public void satisfyDependsOn(Job job) {
         for (Depend depend: dependService.getOnJobDepends(job)) {
             dependService.satisfyDepend(depend);

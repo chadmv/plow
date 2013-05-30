@@ -195,6 +195,14 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
         return jdbc.update(SATISFY, depend.getDependId()) == 1;
     }
 
+    private static final String UNSATISFY =
+            "UPDATE depend SET uuid_sig=?, bool_active='t', time_satisfied=plow.txTimeMillis() WHERE pk_depend=? AND bool_active='f'";
+
+    @Override
+    public boolean unsatisfyDepend(Depend depend) {
+        return jdbc.update(UNSATISFY, depend.genSig(), depend.getDependId()) == 1;
+    }
+
     private static final String INSERT =
             JdbcUtils.Insert(
                     "plow.depend",

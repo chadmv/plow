@@ -15,4 +15,5 @@ public interface Depend {
     UUID getDependOnLayerId();
     UUID getDependentTaskId();
     UUID getDependOnTaskId();
+    UUID genSig();
 }

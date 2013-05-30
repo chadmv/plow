@@ -487,8 +487,8 @@ service RpcService {
     list<DependT> getTaskDependsOn(1:common.Guid taskId) throws (1:PlowException e),
     list<TaskStatsT> getTaskStats(1:common.Guid taskId) throws (1:PlowException e),
 
-    bool dropDepend(1:common.Guid dependId) throws (1:PlowException e),
-    bool reactivateDepend(1:common.Guid dependId) throws (1:PlowException e),
+    void dropDepend(1:common.Guid dependId) throws (1:PlowException e),
+    void activateDepend(1:common.Guid dependId) throws (1:PlowException e),
 
     NodeT getNode(1:string name) throws (1:PlowException e),
     list<NodeT> getNodes(1:NodeFilterT filter) throws (1:PlowException e),
