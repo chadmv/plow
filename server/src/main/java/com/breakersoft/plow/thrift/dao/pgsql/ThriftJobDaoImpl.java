@@ -162,8 +162,6 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             sb.append(StringUtils.join(clauses, " AND "));
         }
 
-        logger.info(sb.toString());
-
         if (filter.matchingOnly && values.isEmpty()) {
             return new ArrayList<JobT>(0);
         }
