@@ -215,18 +215,21 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
                     "str_dependon_task_name");
     @Override
     public Depend createJobOnJob(Job dependent, Job dependOn) {
-        DependType type = DependType.JOB_ON_JOB;
-        UUID id = UUID.randomUUID();
-        UUID sig = genSig(
-                type.toString(),
-                dependent.getJobId().toString(),
-                dependOn.getJobId().toString());
+
+        final DependType type = DependType.JOB_ON_JOB;
+        final UUID id = UUID.randomUUID();
+        final DependE result = new DependE();
+        result.setActive(true);
+        result.setType(type);
+        result.setDependId(id);
+        result.setDependentJobId(dependent.getJobId());
+        result.setDependOnJobId(dependOn.getJobId());
 
         logger.info("Setting up Job on Job depend: {} -> {}", dependent, dependOn);
 
         jdbc.update(INSERT,
                 id,
-                sig,
+                result.genSig(),
                 type.ordinal(),
                 dependent.getJobId(),
                 dependOn.getJobId(),
@@ -235,29 +238,28 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
                 dependOn.getName(),
                 null, null, null, null);
 
-        DependE result = new DependE();
-        result.setActive(true);
-        result.setType(type);
-        result.setDependId(id);
-        result.setDependentJobId(dependent.getJobId());
-        result.setDependOnJobId(dependOn.getJobId());
         return result;
     }
 
     @Override
     public Depend createLayerOnLayer(Job dependentJob, Layer dependent, Job dependOnJob, Layer dependOn) {
-        DependType type = DependType.LAYER_ON_LAYER;
-        UUID id = UUID.randomUUID();
-        UUID sig = genSig(
-                type.toString(),
-                dependent.getLayerId().toString(),
-                dependOn.getLayerId().toString());
+
+        final DependType type = DependType.LAYER_ON_LAYER;
+        final UUID id = UUID.randomUUID();
+        final DependE result = new DependE();
+        result.setActive(true);
+        result.setType(type);
+        result.setDependId(id);
+        result.setDependentJobId(dependent.getJobId());
+        result.setDependOnJobId(dependOn.getJobId());
+        result.setDependentLayerId(dependent.getLayerId());
+        result.setDependOnLayerId(dependOn.getLayerId());
 
         logger.info("Setting up Layer on Layer depend: {} -> {}", dependent, dependOn);
 
         jdbc.update(INSERT,
                 id,
-                sig,
+                result.genSig(),
                 type.ordinal(),
                 dependent.getJobId(),
                 dependOn.getJobId(),
@@ -270,14 +272,7 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
                 dependOn.getName(),
                 null, null);
 
-        DependE result = new DependE();
-        result.setActive(true);
-        result.setType(type);
-        result.setDependId(id);
-        result.setDependentJobId(dependent.getJobId());
-        result.setDependOnJobId(dependOn.getJobId());
-        result.setDependentLayerId(dependent.getLayerId());
-        result.setDependOnLayerId(dependOn.getLayerId());
+
         return result;
     }
 
@@ -289,18 +284,23 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
             Layer dependOnLayer,
             Task dependOn) {
 
-        DependType type = DependType.LAYER_ON_TASK;
-        UUID id = UUID.randomUUID();
-        UUID sig = genSig(
-                type.toString(),
-                dependent.getLayerId().toString(),
-                dependOn.getTaskId().toString());
+        final DependType type = DependType.LAYER_ON_TASK;
+        final UUID id = UUID.randomUUID();
+        final DependE result = new DependE();
+        result.setActive(true);
+        result.setType(type);
+        result.setDependId(id);
+        result.setDependentJobId(dependent.getJobId());
+        result.setDependOnJobId(dependOn.getJobId());
+        result.setDependentLayerId(dependent.getLayerId());
+        result.setDependOnLayerId(dependOn.getLayerId());
+        result.setDependOnTaskId(dependOn.getTaskId());
 
         logger.info("Setting up Layer on Task depend: {} -> {}", dependent, dependOn);
 
         jdbc.update(INSERT,
                 id,
-                sig,
+                result.genSig(),
                 type.ordinal(),
                 dependent.getJobId(),
                 dependOn.getJobId(),
@@ -315,15 +315,7 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
                 dependOnLayer.getName(),
                 dependOn.getName());
 
-        DependE result = new DependE();
-        result.setActive(true);
-        result.setType(type);
-        result.setDependId(id);
-        result.setDependentJobId(dependent.getJobId());
-        result.setDependOnJobId(dependOn.getJobId());
-        result.setDependentLayerId(dependent.getLayerId());
-        result.setDependOnLayerId(dependOn.getLayerId());
-        result.setDependOnTaskId(dependOn.getTaskId());
+
         return result;
 
     }
@@ -336,18 +328,23 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
             Job dependOnJob,
             Layer dependOnLayer) {
 
-        DependType type = DependType.TASK_ON_LAYER;
-        UUID id = UUID.randomUUID();
-        UUID sig = genSig(
-                type.toString(),
-                dependentTask.getTaskId().toString(),
-                dependOnLayer.getLayerId().toString());
+        final DependType type = DependType.TASK_ON_LAYER;
+        final UUID id = UUID.randomUUID();
+        final DependE result = new DependE();
+        result.setActive(true);
+        result.setType(type);
+        result.setDependId(id);
+        result.setDependentJobId(dependentJob.getJobId());
+        result.setDependOnJobId(dependOnJob.getJobId());
+        result.setDependentLayerId(dependentLayer.getLayerId());
+        result.setDependOnLayerId(dependOnLayer.getLayerId());
+        result.setDependentTaskId(dependentTask.getTaskId());
 
         logger.info("Setting up Task on Layer depend: {} -> {}", dependentTask, dependOnLayer);
 
         jdbc.update(INSERT,
                 id,
-                sig,
+                result.genSig(),
                 type.ordinal(),
                 dependentTask.getJobId(),
                 dependOnJob.getJobId(),
@@ -362,15 +359,6 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
                 dependentTask.getName(),
                 null);
 
-        DependE result = new DependE();
-        result.setActive(true);
-        result.setType(type);
-        result.setDependId(id);
-        result.setDependentJobId(dependentJob.getJobId());
-        result.setDependOnJobId(dependOnJob.getJobId());
-        result.setDependentLayerId(dependentLayer.getLayerId());
-        result.setDependOnLayerId(dependOnLayer.getLayerId());
-        result.setDependentTaskId(dependentTask.getTaskId());
         return result;
     }
 
@@ -383,18 +371,24 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
             Layer dependOnLayer,
             Task dependOnTask) {
 
-        DependType type = DependType.TASK_ON_TASK;
-        UUID id = UUID.randomUUID();
-        UUID sig = genSig(
-                type.toString(),
-                dependentTask.getTaskId().toString(),
-                dependOnTask.getTaskId().toString());
+        final DependType type = DependType.TASK_ON_TASK;
+        final UUID id = UUID.randomUUID();
+        final DependE result = new DependE();
+        result.setActive(true);
+        result.setType(type);
+        result.setDependId(id);
+        result.setDependentJobId(dependentTask.getJobId());
+        result.setDependOnJobId(dependOnTask.getJobId());
+        result.setDependentLayerId(dependentTask.getLayerId());
+        result.setDependOnLayerId(dependOnTask.getLayerId());
+        result.setDependentTaskId(dependentTask.getTaskId());
+        result.setDependOnTaskId(dependOnTask.getTaskId());
 
         logger.info("Setting up Task on Task depend: {} -> {}", dependentTask, dependOnTask);
 
         jdbc.update(INSERT,
                 id,
-                sig,
+                result.genSig(),
                 type.ordinal(),
                 dependentTask.getJobId(),
                 dependOnTask.getJobId(),
@@ -409,24 +403,6 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
                 dependentTask.getName(),
                 dependOnTask.getName());
 
-        DependE result = new DependE();
-        result.setActive(true);
-        result.setType(type);
-        result.setDependId(id);
-        result.setDependentJobId(dependentTask.getJobId());
-        result.setDependOnJobId(dependOnTask.getJobId());
-        result.setDependentLayerId(dependentTask.getLayerId());
-        result.setDependOnLayerId(dependOnTask.getLayerId());
-        result.setDependentTaskId(dependentTask.getTaskId());
-        result.setDependOnTaskId(dependOnTask.getTaskId());
         return result;
-    }
-
-    private UUID genSig(String ... str) {
-        StringBuilder sb = new StringBuilder(256);
-        for(String s: str) {
-            sb.append(s);
-        }
-        return UUID.nameUUIDFromBytes(sb.toString().getBytes());
     }
 }
