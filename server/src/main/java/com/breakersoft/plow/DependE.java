@@ -103,7 +103,7 @@ public class DependE implements Depend {
     }
 
     public String toString() {
-        return String.format("Depend %s", dependId);
+        return String.format("Depend %s [%s]", type, dependId);
     }
 
     public UUID genSig() {

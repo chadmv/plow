@@ -96,7 +96,7 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
                 result = jdbc.update(BASE_INC + "task.pk_task=?", depend.getDependentTaskId());
                 break;
         }
-        logger.info("Incremented {} depend counts {}", depend.getType(), result);
+        logger.info("Incremented {} depend counts {}", depend, result);
     }
 
     private static final String BASE_DEC =
@@ -120,7 +120,7 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
                 break;
         }
 
-        logger.info("Incremented depend counts {}", depend.getType(), result);
+        logger.info("Decreement depend counts {}", depend, result);
     }
 
     private static final String GET_BY_TASK =
