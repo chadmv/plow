@@ -38,6 +38,22 @@ public class ThriftJobDaoTests extends AbstractTest {
     }
 
     @Test
+    public void getJobsByProject() {
+        JobSpecT spec = getTestJobSpec();
+        jobService.launch(spec);
+
+        assertTrue(thriftJobDao.getJobs(new JobFilterT()).size() > 0);
+
+        JobFilterT f = new JobFilterT();
+        f.addToProject("unittest1");
+        assertEquals(0, thriftJobDao.getJobs(f).size());
+
+        f = new JobFilterT();
+        f.addToProject("unittest");
+        assertEquals(1, thriftJobDao.getJobs(f).size());
+    }
+
+    @Test
     public void getJob() {
         JobSpecT spec = getTestJobSpec();
         JobLaunchEvent event = jobService.launch(spec);
