@@ -16,6 +16,7 @@ import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.DependDao;
+import com.breakersoft.plow.exceptions.DependencyException;
 import com.breakersoft.plow.thrift.DependType;
 import com.breakersoft.plow.util.JdbcUtils;
 
@@ -224,6 +225,10 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
     @Override
     public Depend createJobOnJob(Job dependent, Job dependOn) {
 
+        if (dependent.equals(dependOn)) {
+            throw new DependencyException("A job cannot depend on itself.");
+        }
+
         final DependType type = DependType.JOB_ON_JOB;
         final UUID id = UUID.randomUUID();
         final DependE result = new DependE();
@@ -251,6 +256,10 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
 
     @Override
     public Depend createLayerOnLayer(Job dependentJob, Layer dependent, Job dependOnJob, Layer dependOn) {
+
+        if (dependent.equals(dependOn)) {
+            throw new DependencyException("A layer cannot depend on itself.");
+        }
 
         final DependType type = DependType.LAYER_ON_LAYER;
         final UUID id = UUID.randomUUID();
@@ -378,6 +387,10 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
             Job dependOnJob,
             Layer dependOnLayer,
             Task dependOnTask) {
+
+        if (dependentTask.equals(dependOnTask)) {
+            throw new DependencyException("A task cannot depend on itself.");
+        }
 
         final DependType type = DependType.TASK_ON_TASK;
         final UUID id = UUID.randomUUID();
