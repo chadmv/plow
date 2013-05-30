@@ -40,14 +40,14 @@ public class ThriftServer {
             server = new TThreadedSelectorServer(
                     new TThreadedSelectorServer.Args(transport)
                 .processor(processor)
-                .workerThreads(32)
+                .workerThreads(64)
                 .selectorThreads(4)
                 .protocolFactory(new TCompactProtocol.Factory())
                 .transportFactory(new TFramedTransport.Factory()));
             thread.start();
 
         } catch (TTransportException e) {
-             e.printStackTrace();
+            throw new RuntimeException("Unable to start thrift server " + e, e);
         }
     }
 

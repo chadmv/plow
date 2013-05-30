@@ -17,13 +17,12 @@ public class RndThriftServiceImpl implements RndServiceApi.Iface {
     SchedulerEventHandler handler;
 
     @Override
-    public void sendPing(Ping ping) throws RndException, TException {
+    public void sendPing(Ping ping) throws RndException {
         handler.handleNodePing(ping);
     }
 
     @Override
-    public void taskComplete(RunTaskResult result) throws RndException,
-            TException {
+    public void taskComplete(RunTaskResult result) throws RndException {
         handler.handleRunTaskResult(result);
     }
 }
