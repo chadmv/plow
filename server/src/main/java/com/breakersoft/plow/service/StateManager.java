@@ -113,12 +113,7 @@ public class StateManager {
         final List<Task> tasks = jobService.getTasks(filter);
         logger.info("Thread: {} Batch retrying {} Tasks", Thread.currentThread().getName(), tasks.size());
         for (final Task t: tasks) {
-            stateChangeExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    retryTask(t);
-                }
-            });
+            retryTask(t);
         }
     }
 
@@ -127,30 +122,26 @@ public class StateManager {
         if (PlowUtils.isValid(filter.jobId)) {
             throw new PlowException("A jobId is not set on the task filter.");
         }
-        stateChangeExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                final List<Task> tasks = jobService.getTasks(filter);
-                logger.info("Thread: {} Batch eating {} tasks", Thread.currentThread().getName(), tasks.size());
 
-                if (tasks.isEmpty()) {
-                    return;
-                }
+        final List<Task> tasks = jobService.getTasks(filter);
+        logger.info("Thread: {} Batch eating {} tasks", Thread.currentThread().getName(), tasks.size());
 
-                Set<UUID> jobIds = Sets.newHashSet();
-                for (final Task t: tasks) {
-                    eatTask(t, false);
-                    jobIds.add(t.getJobId());
-                }
+        if (tasks.isEmpty()) {
+            return;
+        }
 
-                for (UUID jobId: jobIds) {
-                    Job job = jobService.getJob(jobId);
-                    if (jobService.isFinished(job)) {
-                        shutdownJob(job);
-                    }
-                }
+        Set<UUID> jobIds = Sets.newHashSet();
+        for (final Task t: tasks) {
+            eatTask(t, false);
+            jobIds.add(t.getJobId());
+        }
+
+        for (UUID jobId: jobIds) {
+            Job job = jobService.getJob(jobId);
+            if (jobService.isFinished(job)) {
+                shutdownJob(job);
             }
-        });
+        }
     }
 
     @Async(value="stateChangeExecutor")
@@ -158,12 +149,7 @@ public class StateManager {
         final List<Task> tasks = jobService.getTasks(filter);
         logger.info("Thread: {} Batch killing {} tasks", Thread.currentThread().getName(), tasks.size());
         for (final Task t: tasks) {
-            stateChangeExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    killTask(t);
-                }
-            });
+            killTask(t);
         }
     }
 
