@@ -197,19 +197,25 @@ public class StateManager {
     }
 
     public void satisfyDependsOn(Job job) {
-        for (Depend depend: dependService.getOnJobDepends(job)) {
+        final List<Depend> depends = dependService.getOnJobDepends(job);
+        logger.info("{} has {} dependencies.", job, depends.size());
+        for (Depend depend: depends) {
             dependService.satisfyDepend(depend);
         }
     }
 
     public void satisfyDependsOn(Task task) {
-        for (Depend depend: dependService.getOnTaskDepends(task)) {
+        final List<Depend> depends = dependService.getOnTaskDepends(task);
+        logger.info("{} has {} dependencies.", task, depends.size());
+        for (Depend depend: depends) {
             dependService.satisfyDepend(depend);
         }
     }
 
     public void satisfyDependsOn(Layer layer) {
-        for (Depend depend: dependService.getOnLayerDepends(layer)) {
+        final List<Depend> depends = dependService.getOnLayerDepends(layer);
+        logger.info("{} has {} dependencies.", layer, depends.size());
+        for (Depend depend: depends) {
             dependService.satisfyDepend(depend);
         }
     }
