@@ -18,7 +18,9 @@ enum JobState {
     // Job is now accepting procs.
     RUNNING,
     // The job has been stopped.
-    FINISHED
+    FINISHED,
+    // Post
+    POST
 }
 
 /**
@@ -369,7 +371,8 @@ struct LayerSpecT {
     12:i32 chunk = 1,
     13:list<DependSpecT> depends,
     14:list<TaskSpecT> tasks,
-    15:Attrs env
+    15:Attrs env,
+    16:bool isPost
 }
 
 struct JobSpecT {

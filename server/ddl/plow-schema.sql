@@ -2,7 +2,6 @@
  *
  * Table suffixes.
  * No suffix - state/configuration data.
- * _ping - data that is updated via RnDaemon pings
  * _dsp - data that is updated via dispatch
  * _count - counts maintained by triggers
  *
@@ -138,6 +137,7 @@ CREATE TABLE plow.job (
   int_uid INTEGER NOT NULL,
   int_state SMALLINT NOT NULL DEFAULT 0,
   bool_paused BOOLEAN NOT NULL DEFAULT 'f',
+  bool_post BOOLEAN NOT NULL DEFAULT 'f',
   time_started BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   time_stopped BIGINT DEFAULT 0,
   hstore_attrs hstore,
@@ -186,6 +186,17 @@ CREATE TABLE plow.job_stat (
   int_total_core_time_success BIGINT NOT NULL DEFAULT 0,
   int_total_core_time_fail BIGINT NOT NULL DEFAULT 0
 );
+
+---
+--- plow.job_post
+---
+CREATE TABLE plow.job_post (
+  pk_job_post BIGSERIAL NOT NULL PRIMARY KEY,
+  pk_job_first UUID NOT NULL,
+  pk_job_second UUID NOT NULL
+);
+
+CREATE INDEX job_post_pk_job_idx ON plow.job_post (pk_job_first);
 
 ----------------------------------------------------------
 

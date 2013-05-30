@@ -240,11 +240,12 @@ cdef class LayerSpec:
     :var tasks: list [:class:`.TaskSpec`]
     :var tags: list(str)
     :var env: dict
-
+    :var isPost: bool
     """
     cdef public string name
     cdef public int chunk
-
+    cdef public bint isPost
+    
     cdef int minCores, maxCores, minRam, maxRam, maxRetries
     cdef bint threadable
     cdef string range, serv
@@ -305,6 +306,7 @@ cdef class LayerSpec:
         self.command = t.command
         self.tags = t.tags
         self.env = t.env
+        self.isPost = t.isPost
 
         self.__isset = t.__isset
 
@@ -331,6 +333,7 @@ cdef class LayerSpec:
         s.command = self.command
         s.tags = self.tags
         s.env = self.env
+        s.isPost = self.isPost
         
         s.__isset = self.__isset
 

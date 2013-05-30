@@ -13,7 +13,7 @@ import com.breakersoft.plow.thrift.JobState;
 
 public interface JobDao {
 
-    FilterableJob create(Project project, JobSpecT blueprint);
+    FilterableJob create(Project project, JobSpecT blueprint, boolean isPostJob);
 
     Job get(String name, JobState state);
 
@@ -50,4 +50,8 @@ public interface JobDao {
     void setAttrs(Job job, Map<String, String> attrs);
 
     Map<String, String> getAttrs(Job job);
+
+    void tiePostJob(JobId parentJob, JobId postJob);
+
+    boolean flipPostJob(Job job);
 }

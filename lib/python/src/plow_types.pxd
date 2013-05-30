@@ -322,6 +322,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[DependSpecT] depends
         vector[TaskSpecT] tasks
         Attrs env
+        bint isPost
         _LayerSpecT__isset __isset
 
     cdef cppclass LayerStatsT:

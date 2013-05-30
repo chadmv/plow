@@ -186,6 +186,46 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         return jobspec;
     }
 
+    public JobSpecT getTestJobSpecWithPostTasks(String name) {
+
+        JobSpecT jobspec = new JobSpecT();
+        jobspec.setName(name);
+        jobspec.setUid(100);
+        jobspec.setUsername("stella");
+        jobspec.setPaused(false);
+        jobspec.setProject("unittest");
+        jobspec.setLogPath("/tmp/plow/unittests/" + name);
+        jobspec.attrs = Maps.newHashMap();
+
+        LayerSpecT layer = new LayerSpecT();
+        layer.setChunk(1);
+        layer.setCommand(Lists.newArrayList("sleep", "5" ));
+        layer.setMaxCores(8);
+        layer.setMinCores(1);
+        layer.setMinRam(1024);
+        layer.setName("test_ls");
+        layer.setRange("1-10");
+        layer.setTags(Lists.newArrayList("unassigned"));
+        layer.setMaxRetries(2);
+        layer.env = Maps.newHashMap();
+        layer.setServ(Defaults.DEFAULT_SERVICE);
+        jobspec.addToLayers(layer);
+
+        LayerSpecT layer2 = new LayerSpecT();
+        layer2.isPost = true;
+        layer2.setChunk(1);
+        layer2.setCommand(Lists.newArrayList("sleep", "5" ));
+        layer2.setName("test_post");
+        layer2.setRange("1-2");
+        layer2.setTags(Lists.newArrayList("unassigned"));
+        layer2.setMaxRetries(2);
+        layer2.env = Maps.newHashMap();
+        layer2.setServ(Defaults.DEFAULT_SERVICE);
+        jobspec.addToLayers(layer2);
+
+        return jobspec;
+    }
+
     public  Ping getTestNodePing() {
 
         Hardware hw = new Hardware();

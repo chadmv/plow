@@ -40,7 +40,7 @@ public class LayerDaoTests extends AbstractTest {
     @Test
     public void testCreate() {
         JobSpecT spec = getTestJobSpec();
-        job = jobDao.create(TEST_PROJECT, spec);
+        job = jobDao.create(TEST_PROJECT, spec, false);
         LayerSpecT bl = spec.getLayers().get(0);
         layer = layerDao.create(job, bl, 0);
     }

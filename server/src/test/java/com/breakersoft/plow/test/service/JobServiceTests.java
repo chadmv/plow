@@ -220,6 +220,13 @@ public class JobServiceTests extends AbstractTest {
         assertEquals("riker", job.attrs.get("cmdr"));
     }
 
+    @Test
+    public void testLaunchJobPostTasks() {
+        JobLaunchEvent event =
+                jobService.launch(getTestJobSpecWithPostTasks("post_test"));
+        //TODO fill in test
+    }
+
     @Subscribe
     public void handleJobLaunchEvent(JobLaunchEvent event) {
         jobLaunchEventHandled = true;

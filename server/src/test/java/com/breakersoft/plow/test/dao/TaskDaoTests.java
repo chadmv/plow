@@ -56,7 +56,7 @@ public class TaskDaoTests extends AbstractTest {
     @Test
     public void testCreate() {
         JobSpecT spec = getTestJobSpec();
-        job = jobDao.create(TEST_PROJECT, spec);
+        job = jobDao.create(TEST_PROJECT, spec, false);
         LayerSpecT lspec = spec.getLayers().get(0);
         layer = layerDao.create(job, lspec, 0);
         task = taskDao.create(layer, "0001-test", 1, 0, 0, 512);

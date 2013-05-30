@@ -78,15 +78,17 @@ public class JobServiceImpl implements JobService {
         logger.info("launching job spec: {} ", jobspec);
 
         final Project project = projectDao.get(jobspec.getProject());
-        final FilterableJob job = jobDao.create(project, jobspec);
+        final FilterableJob job = jobDao.create(project, jobspec, false);
         final Folder folder = filterJob(job, project);
 
-        createJobTopology(job, project, jobspec);
-        createDependencies(job, jobspec);
+        createJobTopology(job, project, jobspec, false);
+        createDependencies(job, jobspec, false);
 
         jobDao.updateFrameStatesForLaunch(job);
         jobDao.updateFrameCountsForLaunch(job);
         jobDao.setJobState(job, JobState.RUNNING);
+
+        createPostJob(job, jobspec);
 
         //TODO: do this someplace else. (tranny hook or aspect)
         // Don't want to add jobs to the dispatcher that fail to
@@ -95,13 +97,40 @@ public class JobServiceImpl implements JobService {
         eventManager.post(event);
 
         logger.info("{} launch success", job.getName());
-
         return event;
+    }
+
+    private void createPostJob(Job parentJob, JobSpecT jobspec) {
+
+        boolean hasPostLayers = false;
+        // check if we have post layers!
+        for (LayerSpecT blayer: jobspec.getLayers()) {
+            if (blayer.isPost) {
+                hasPostLayers = true;
+                break;
+            }
+        }
+
+        if (!hasPostLayers) {
+            return;
+        }
+
+        final FilterableJob job = jobDao.create(parentJob, jobspec, true);
+        filterJob(job, parentJob);
+
+        createJobTopology(job, parentJob, jobspec, true);
+        createDependencies(job, jobspec, true);
+
+        jobDao.updateFrameStatesForLaunch(job);
+        jobDao.updateFrameCountsForLaunch(job);
+        jobDao.setJobState(job, JobState.POST);
+        jobDao.tiePostJob(parentJob, job);
     }
 
     @Override
     public boolean shutdown(Job job) {
         if (jobDao.shutdown(job)) {
+            jobDao.flipPostJob(job);
             return true;
         }
         return false;
@@ -121,10 +150,14 @@ public class JobServiceImpl implements JobService {
     }
 
     private void createJobTopology(
-            Job job, Project project, JobSpecT jobspec) {
+            Job job, Project project, JobSpecT jobspec, boolean postJob) {
 
         int layerOrder = 0;
         for (LayerSpecT blayer: jobspec.getLayers()) {
+
+            if (blayer.isPost != postJob) {
+                continue;
+            }
 
             prepLayer(blayer);
             Layer layer = layerDao.create(job, blayer, layerOrder);
@@ -232,11 +265,16 @@ public class JobServiceImpl implements JobService {
         }
     }
 
-    private void createDependencies(Job job, JobSpecT jspec) {
+    private void createDependencies(Job job, JobSpecT jspec, boolean postJob) {
 
         logger.info("Setting up dependencies in job {}", jspec.name);
 
         for (LayerSpecT layer: jspec.getLayers()) {
+
+            if (layer.isPost != postJob) {
+                continue;
+            }
+
             if (!layer.isSetDepends()) {
                 continue;
             }

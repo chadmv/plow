@@ -1,9 +1,10 @@
 package com.breakersoft.plow.test.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
-import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -28,7 +29,7 @@ public class JobDaoTests extends AbstractTest {
 
     @Test
     public void testCreate() {
-        jobDao.create(TEST_PROJECT, getTestJobSpec());
+        jobDao.create(TEST_PROJECT, getTestJobSpec(), false);
     }
 
     @Test
@@ -58,7 +59,7 @@ public class JobDaoTests extends AbstractTest {
     @Test
     public void testGetByNameAndState() {
         JobSpecT spec = getTestJobSpec();
-        Job jobA = jobDao.create(TEST_PROJECT, spec);
+        Job jobA = jobDao.create(TEST_PROJECT, spec, false);
         Job jobB = jobDao.get(spec.getName(), JobState.INITIALIZE);
 
         assertEquals(jobA.getJobId(), jobB.getJobId());
@@ -68,7 +69,7 @@ public class JobDaoTests extends AbstractTest {
     @Test
     public void testGetById() {
         JobSpecT spec = getTestJobSpec();
-        Job jobA = jobDao.create(TEST_PROJECT, spec);
+        Job jobA = jobDao.create(TEST_PROJECT, spec, false);
         Job jobB = jobDao.get(jobA.getJobId());
 
         assertEquals(jobA.getJobId(), jobB.getJobId());
@@ -78,7 +79,7 @@ public class JobDaoTests extends AbstractTest {
     @Test
     public void testGetActiveById() {
         JobSpecT spec = getTestJobSpec();
-        Job jobA = jobDao.create(TEST_PROJECT, spec);
+        Job jobA = jobDao.create(TEST_PROJECT, spec, false);
         Job jobB = jobDao.getActive(jobA.getJobId());
 
         assertEquals(jobA.getJobId(), jobB.getJobId());
@@ -88,7 +89,7 @@ public class JobDaoTests extends AbstractTest {
     @Test
     public void testGetActiveByName() {
         JobSpecT spec = getTestJobSpec();
-        Job jobA = jobDao.create(TEST_PROJECT, spec);
+        Job jobA = jobDao.create(TEST_PROJECT, spec, false);
         Job jobB = jobDao.getActive(spec.getName());
 
         assertEquals(jobA.getJobId(), jobB.getJobId());
@@ -98,7 +99,7 @@ public class JobDaoTests extends AbstractTest {
     @Test
     public void testGetActiveByNameOrId() {
         JobSpecT spec = getTestJobSpec();
-        Job jobA = jobDao.create(TEST_PROJECT, spec);
+        Job jobA = jobDao.create(TEST_PROJECT, spec, false);
         Job jobB = jobDao.get(jobA.getJobId());
         Job jobC = jobDao.getByActiveNameOrId(spec.getName());
 

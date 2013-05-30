@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import org.apache.thrift.TSerializer;
 import org.apache.thrift.protocol.TJSONProtocol;
-import org.apache.thrift.protocol.TSimpleJSONProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -108,29 +107,38 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         JdbcUtils.Insert("plow.job",
                 "pk_job", "pk_project", "str_name", "str_active_name",
                 "str_username", "int_uid", "int_state", "bool_paused",
-                "str_log_path", "hstore_attrs", "hstore_env")
+                "str_log_path", "hstore_attrs", "hstore_env", "bool_post")
     };
 
     @Override
-    public FilterableJob create(final Project project, final JobSpecT spec) {
+    public FilterableJob create(final Project project, final JobSpecT spec, final boolean isPostJob) {
 
         final UUID jobId = UUID.randomUUID();
+        final String name = createJobName(spec, isPostJob);
 
         jdbc.update(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                 final PreparedStatement ret = conn.prepareStatement(INSERT[0]);
+
+
+                boolean paused = spec.isPaused();
+                if (isPostJob) {
+                    paused = false;
+                }
+
                 ret.setObject(1, jobId);
                 ret.setObject(2, project.getProjectId());
-                ret.setString(3, spec.getName());
-                ret.setString(4, spec.getName());
+                ret.setString(3, name);
+                ret.setString(4, name);
                 ret.setString(5, spec.username);
                 ret.setInt(6, spec.getUid());
                 ret.setInt(7, JobState.INITIALIZE.ordinal());
-                ret.setBoolean(8, spec.isPaused());
-                ret.setString(9, String.format("%s/%s", spec.logPath, spec.name));
+                ret.setBoolean(8, paused);
+                ret.setString(9, String.format("%s/%s", spec.logPath, name));
                 ret.setObject(10, spec.attrs);
                 ret.setObject(11, spec.env);
+                ret.setBoolean(12, isPostJob);
                 return ret;
             }
         });
@@ -138,32 +146,6 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         jdbc.update("INSERT INTO plow.job_count (pk_job) VALUES (?)", jobId);
         jdbc.update("INSERT INTO plow.job_dsp (pk_job) VALUES (?)", jobId);
         jdbc.update("INSERT INTO plow.job_stat (pk_job) VALUES (?)", jobId);
-
-        // Serialize the spec into json.  Don't let a failure here stop
-        // the job from launching.  This keeps the job spec around mainly
-        // for troubleshooting.
-        try {
-            TSerializer serializer = new TSerializer(new TSimpleJSONProtocol.Factory());
-            String json = serializer.toString(spec);
-
-            jdbc.update("UPDATE plow.job_history SET str_spec=? WHERE pk_job=?",
-                    json, jobId);
-        } catch (Exception e) {
-            logger.warn("Failed to serialize job spec to readable json: " + e, e);
-        }
-
-        // Serialize the spec into json.  Don't let a failure here stop
-        // the job from launching.  This keeps the job spec around mainly
-        // for troubleshooting.
-        try {
-            final TSerializer serializer = new TSerializer(new TSimpleJSONProtocol.Factory());
-            final String json = serializer.toString(spec);
-
-            jdbc.update("UPDATE plow.job_history SET str_spec=? WHERE pk_job=?",
-                    json, jobId);
-        } catch (Exception e) {
-            logger.warn("Failed to serialize job spec to json: " + e, e);
-        }
 
         // Serialize the spec into json.  Don't let a failure here stop
         // the job from launching.  This keeps the job spec around mainly
@@ -183,10 +165,25 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         job.setJobId(jobId);
         job.setProjectId(project.getProjectId());
         job.setFolderId(null); // Don't know folder yet
-        job.setName(spec.getName());
+        job.setName(name);
         job.username = spec.username;
         job.attrs = spec.attrs;
         return job;
+    }
+
+    private String createJobName(final JobSpecT spec, final boolean isPostJob) {
+        if (isPostJob) {
+            return String.format("%s__post_%d", spec.getName(), System.currentTimeMillis());
+        }
+        else {
+            return spec.getName();
+        }
+    }
+
+    @Override
+    public void tiePostJob(JobId parentJob, JobId postJob) {
+        jdbc.update("INSERT INTO plow.job_post (pk_job_first, pk_job_second) VALUES (?, ?)",
+                parentJob.getJobId(), postJob.getJobId());
     }
 
     private static final String UPDATE_ATTRS =
@@ -244,6 +241,12 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
         return jdbc.update("UPDATE plow.job SET int_state=?, " +
                     "str_active_name=NULL, time_stopped=plow.txTimeMillis() WHERE pk_job=? AND int_state=?",
                 JobState.FINISHED.ordinal(), job.getJobId(), JobState.RUNNING.ordinal()) == 1;
+    }
+
+    @Override
+    public boolean flipPostJob(Job job) {
+        return jdbc.update("UPDATE plow.job SET int_state=? WHERE pk_job=(SELECT pk_job_second FROM plow.job_post WHERE pk_job_first=?)",
+                        JobState.RUNNING.ordinal(), job.getJobId()) == 1;
     }
 
     @Override
