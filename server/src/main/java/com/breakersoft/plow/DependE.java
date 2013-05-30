@@ -102,6 +102,10 @@ public class DependE implements Depend {
         return dependId.hashCode();
     }
 
+    public String toString() {
+        return String.format("Depend %s", dependId);
+    }
+
     public UUID genSig() {
         final ByteBuffer buffer = ByteBuffer.allocate(12);
         buffer.putInt(type.ordinal());
