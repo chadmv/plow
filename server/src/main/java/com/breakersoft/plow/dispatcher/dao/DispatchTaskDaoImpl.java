@@ -71,8 +71,11 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
                 "time_updated = txTimeMillis(), " +
                 "time_started = txTimeMillis(), " +
                 "time_stopped = 0, " +
-                "int_last_resoure=?,"+
-                "int_last_ram_high"
+                "str_last_node_name=?,"+
+                "int_last_ram=?,"+
+                "int_last_ram_high=0,"+
+                "int_last_cores=?,"+
+                "flt_last_cores_high=0" +
             "WHERE " +
                 "task.pk_task = ? " +
             "AND " +
@@ -84,6 +87,9 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
     public boolean start(Task task, DispatchProc proc) {
         return jdbc.update(START_TASK,
                 TaskState.RUNNING.ordinal(),
+                proc.getHostname(),
+                proc.getIdleRam(),
+                proc.getIdleCores(),
                 task.getTaskId(),
                 TaskState.WAITING.ordinal()) == 1;
     }

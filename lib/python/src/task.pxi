@@ -26,6 +26,8 @@ cdef class TaskStats:
     :var active: bool
     :var exitStatus: int
     :var exitSignal: int
+    :var lastNode: str
+
     """
     cdef TaskStatsT _stats
 
@@ -74,6 +76,8 @@ cdef class TaskStats:
     property exitSignal:
         def __get__(self): return self._stats.exitSignal
 
+    property lastNode:
+        def __get__(self): return self._stats.lastNode
 
 @reconnecting
 def get_task_stats(Guid& taskId):
@@ -236,7 +240,6 @@ cdef class Task:
     :var retries: int
     :var minCores: int
     :var minRam: int
-    :var lastResource: str
     :var state: :obj:`.TaskState`
     :var stats: :class:`.TaskStats`
 
@@ -271,9 +274,6 @@ cdef class Task:
 
     property minRam:
         def __get__(self): return self._task.minRam
-
-    property lastResource:
-        def __get__(self): return self._task.lastResource
 
     property state:
         def __get__(self): return self._task.state

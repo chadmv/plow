@@ -301,9 +301,11 @@ CREATE TABLE plow.task (
   int_ram_min INT NOT NULL,
   int_exit_status SMALLINT,
   int_exit_signal SMALLINT,
-  str_last_resource TEXT,
+  str_last_node_name TEXT,
+  int_last_ram INTEGER DEFAULT 0 NOT NULL,
   int_last_ram_high INTEGER DEFAULT 0 NOT NULL,
-  flt_last_cpu_high REAL DEFAULT 0 NOT NULL
+  int_last_cores INTEGER DEFAULT 0 NOT NULL,
+  flt_last_cores_high REAL DEFAULT 0 NOT NULL
 ) WITHOUT OIDS;
 
 CREATE INDEX task_pk_layer_idx ON plow.task (pk_layer);

@@ -38,13 +38,19 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             task.retries = rs.getInt("int_retry");
             task.minCores = rs.getInt("int_cores_min");
             task.minRam = rs.getInt("int_ram_min");
-            task.lastResource = rs.getString("str_last_resource");
 
             final TaskStatsT stats = new TaskStatsT();
             stats.startTime = rs.getLong("time_started");
             stats.stopTime = rs.getLong("time_stopped");
             stats.exitSignal = rs.getInt("int_exit_signal");
             stats.exitStatus = rs.getInt("int_exit_status");
+            stats.lastNode = rs.getString("str_last_node_name");
+            stats.ram = rs.getInt("int_last_ram");
+            stats.highRam = rs.getInt("int_last_ram_high");
+            stats.cores = rs.getInt("int_last_cores");
+            stats.highCores = rs.getDouble("flt_last_cores_high");
+            stats.retryNum = rs.getInt("int_retry");
+
             stats.active = false;
             task.setStats(stats);
 
@@ -55,7 +61,6 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
                 stats.ram = rs.getInt("int_ram");
                 stats.usedRam = rs.getInt("int_ram_used");
                 stats.highRam = rs.getInt("int_ram_high");
-                stats.retryNum = rs.getInt("int_retry");
                 stats.progress = rs.getInt("int_progress");
                 stats.lastLogLine = rs.getString("str_last_log_line");
                 stats.active = true;
@@ -77,9 +82,13 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "task.time_started, " +
             "task.time_stopped," +
             "task.int_retry,"+
+            "task.int_last_ram,"+
+            "task.int_last_ram_high,"+
+            "task.int_last_cores,"+
+            "task.flt_last_cores_high,"+
             "layer.int_cores_min,"+
             "task.int_ram_min,"+
-            "task.str_last_resource, " +
+            "task.str_last_node_name, " +
             "task.int_exit_signal,"+
             "task.int_exit_status,"+
             "proc.int_cores,"+

@@ -155,7 +155,7 @@ class TaskModel(QtCore.QAbstractTableModel):
     DISPLAY_CALLBACKS = {
         0: lambda t: t.name,
         1: lambda t: constants.TASK_STATES[t.state],
-        2: lambda t: t.lastResource,
+        2: lambda t: t.stats.lastNode,
         3: lambda t: "%s/%02dMB" % (t.stats.cores, t.stats.ram),
         4: lambda t: formatDuration(t.stats.startTime, t.stats.stopTime),
         5: lambda t: t.stats.retryNum,

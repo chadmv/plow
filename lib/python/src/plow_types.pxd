@@ -229,7 +229,6 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int retries
         int minCores
         int minRam
-        string lastResource
         TaskStatsT stats
 
     cdef cppclass FolderT:
@@ -298,6 +297,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         bint active
         int exitStatus
         int exitSignal
+        string lastNode
 
     cdef struct _LayerSpecT__isset:
         bint range

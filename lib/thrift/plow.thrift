@@ -261,7 +261,8 @@ struct TaskStatsT {
     11:string lastLogLine,
     12:bool active = false,
     13:i32 exitStatus,
-    14:i32 exitSignal
+    14:i32 exitSignal,
+    15:string lastNode
 }
 
 struct TaskT {
@@ -273,8 +274,7 @@ struct TaskT {
     8:i32 retries,
     9:i32 minCores,
     10:i32 minRam,
-    11:string lastResource,
-    12:TaskStatsT stats
+    11:TaskStatsT stats
 }
 
 struct FolderT {
