@@ -13,6 +13,7 @@ import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.MatcherFull;
 import com.breakersoft.plow.Project;
@@ -277,7 +278,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public boolean isFinished(Job job) {
+    public boolean isFinished(JobId job) {
         return jobDao.isFinished(job);
     }
 
@@ -333,7 +334,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public boolean isJobPaused(Job job) {
+    public boolean isJobPaused(JobId job) {
         return jobDao.isPaused(job);
     }
 

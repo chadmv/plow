@@ -83,11 +83,9 @@ public class SchedulerEventHandler {
     public void handleRunTaskResult(RunTaskResult result) {
 
         Task task = null;
-        Job job = null;
         DispatchProc proc = null;
         try {
             task = jobService.getTask(UUID.fromString(result.taskId));
-            job = jobService.getJob(UUID.fromString(result.jobId));
             proc = dispatchService.getDispatchProc(result.procId);
         }
         catch (EmptyResultDataAccessException e) {
@@ -124,18 +122,19 @@ public class SchedulerEventHandler {
         }
 
         if (proc.isUnbooked()) {
-            dispatchService.deallocateProc(proc, "Task was stopped");
+            dispatchService.deallocateProc(proc, "Proc was unbooked");
         }
 
-        if (jobService.isJobPaused(job)) {
+        if (jobService.isJobPaused(task)) {
             dispatchService.deallocateProc(proc,
-                    "Job is paused: " + job.getJobId());
+                    "The job for task '" + task + "' was paused.");
             return;
         }
 
-        if (jobService.isFinished(job)) {
+        if (jobService.isFinished(task)) {
+            Job job = jobService.getJob(UUID.fromString(result.jobId));
             dispatchService.deallocateProc(proc,
-                    "Job is finished " + job.getJobId());
+                    "Job is finished " + task.getJobId());
             jobStateManager.shutdownJob(job);
             return;
         }

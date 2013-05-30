@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.event.JobLaunchEvent;
@@ -95,7 +96,7 @@ public interface JobService {
      * @param job
      * @return
      */
-    boolean isJobPaused(Job job);
+    boolean isJobPaused(JobId job);
 
     /**
      * Set the arbitrary attrs on a job.
@@ -127,7 +128,14 @@ public interface JobService {
 
 
     Task getTask(UUID id);
-    boolean isFinished(Job job);
+
+    /**
+     * Return true if the job has no more pending frames and can be shutdown.
+     *
+     * @param job
+     * @return
+     */
+    boolean isFinished(JobId job);
     Task getTask(Layer layer, int number);
     List<Task> getTasks(TaskFilterT filter);
     boolean setTaskState(Task task, TaskState currentState, TaskState newState);

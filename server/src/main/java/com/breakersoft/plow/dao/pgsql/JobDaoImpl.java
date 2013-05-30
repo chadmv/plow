@@ -22,6 +22,7 @@ import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.JobE;
+import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.JobDao;
@@ -354,7 +355,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
     }
 
     @Override
-    public boolean isPaused(Job job) {
+    public boolean isPaused(JobId job) {
         return jdbc.queryForObject("SELECT bool_paused FROM plow.job WHERE pk_job=?",
                 Boolean.class, job.getJobId());
     }
@@ -379,7 +380,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
             "WHERE " +
                 "job.pk_job=?";
     @Override
-    public boolean isFinished(Job job) {
+    public boolean isFinished(JobId job) {
         SqlRowSet row =  jdbc.queryForRowSet(HAS_PENDING_FRAMES, job.getJobId());
         if (!row.first()) {
             return true;

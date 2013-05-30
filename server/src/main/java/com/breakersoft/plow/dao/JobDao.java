@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.Job;
+import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
@@ -26,7 +27,7 @@ public interface JobDao {
 
     boolean hasWaitingFrames(Job job);
 
-    boolean isFinished(Job job);
+    boolean isFinished(JobId job);
 
     void updateFolder(Job job, Folder folder);
 
@@ -40,7 +41,7 @@ public interface JobDao {
 
     void setPaused(Job job, boolean value);
 
-    boolean isPaused(Job job);
+    boolean isPaused(JobId job);
 
     void setMaxCores(Job job, int value);
 
