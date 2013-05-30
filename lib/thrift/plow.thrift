@@ -267,9 +267,11 @@ struct TaskStatsT {
 
 struct TaskT {
     1:required common.Guid id,
-    2:string name,
-    3:i32 number,
-    4:TaskState state,
+    2:common.Guid layerId,
+    3:common.Guid jobId,
+    4:string name,
+    5:i32 number,
+    6:TaskState state,
     7:i32 order,
     8:i32 retries,
     9:i32 minCores,

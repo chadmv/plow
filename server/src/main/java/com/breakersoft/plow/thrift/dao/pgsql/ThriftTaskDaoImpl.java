@@ -33,6 +33,8 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
 
             final TaskT task = new TaskT();
             task.id = rs.getString("pk_task");
+            task.layerId = rs.getString("pk_layer");
+            task.jobId = rs.getString("pk_job");
             task.state = TaskState.findByValue(rs.getInt("int_state"));
             task.name = rs.getString("str_name");
             task.number = rs.getInt("int_number");
@@ -77,6 +79,8 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
     private static final String GET =
         "SELECT " +
             "task.pk_task,"+
+            "task.pk_layer,"+
+            "task.pk_job,"+
             "task.str_name,"+
             "task.int_number,"+
             "task.int_task_order,"+
