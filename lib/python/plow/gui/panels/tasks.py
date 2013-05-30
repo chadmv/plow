@@ -14,7 +14,7 @@ from plow.gui.common import models
 
 IdRole = QtCore.Qt.UserRole
 ObjectRole = QtCore.Qt.UserRole + 1
-SortRole = QtCore.Qt.UserRole + 0
+SortRole = QtCore.Qt.UserRole + 2
 
 
 class TaskPanel(Panel):
