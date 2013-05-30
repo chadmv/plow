@@ -1,5 +1,6 @@
 package com.breakersoft.plow;
 
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import com.breakersoft.plow.thrift.DependType;
@@ -100,6 +101,44 @@ public class DependE implements Depend {
     public int hashCode() {
         return dependId.hashCode();
     }
+
+    public UUID genSig() {
+        final ByteBuffer buffer = ByteBuffer.allocate(12);
+        buffer.putInt(type.ordinal());
+
+        switch (type) {
+        case JOB_ON_JOB:
+            buffer.putInt(dependentJobId.hashCode());
+            buffer.putInt(dependOnJobId.hashCode());
+            break;
+
+        case LAYER_ON_LAYER:
+            buffer.putInt(dependentLayerId.hashCode());
+            buffer.putInt(dependOnLayerId.hashCode());
+            break;
+
+        case LAYER_ON_TASK:
+            buffer.putInt(dependentLayerId.hashCode());
+            buffer.putInt(dependOnTaskId.hashCode());
+            break;
+
+        case TASK_ON_LAYER:
+            buffer.putInt(dependentTaskId.hashCode());
+            buffer.putInt(dependOnLayerId.hashCode());
+            break;
+
+        case TASK_ON_TASK:
+            buffer.putInt(dependentTaskId.hashCode());
+            buffer.putInt(dependOnTaskId.hashCode());
+            break;
+
+        default:
+            throw new RuntimeException("Unhandled depend type: " + type.toString());
+        }
+
+        return UUID.nameUUIDFromBytes(buffer.array());
+    }
+
     public boolean equals(Object obj) {
         if (obj == null)
             return false;
