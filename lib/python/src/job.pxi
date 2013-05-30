@@ -390,17 +390,10 @@ cdef class Job:
         :param stats: list[:obj:`.TaskState`] = None
         :returns: list[:class:`.Task`]
         """
-        cdef:
-            Task t
-            list ret 
-            set state_set
+        cdef list ret 
 
-        # FIXME: Issue #48
-        # For now, filtering client side. 
         if states:
-            # ret = get_tasks(job=self, states=states)
-            state_set = set(states) 
-            ret = [t for t in get_tasks(job=self) if t.state in state_set]    
+            ret = get_tasks(job=self, states=states)
         else:
             ret = get_tasks(job=self)
 
