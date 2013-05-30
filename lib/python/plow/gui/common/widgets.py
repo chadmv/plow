@@ -1,4 +1,7 @@
 """Non-Plow specific widgets."""
+
+from itertools import izip_longest
+
 from plow.gui.manifest import QtGui, QtCore
 from plow.gui.common.help import getHelp, getHelpTextWidget
 from plow.gui import constants 
@@ -97,34 +100,51 @@ class CheckableComboBox(QtGui.QWidget):
     """
     A combo box with selectable items.
     """
-    def __init__(self, title, options, selected, icons=None, parent=None):
+    
+    optionSelected = QtCore.Signal(str)
+
+    def __init__(self, title, options, selected=None, icons=None, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        QtGui.QVBoxLayout(self)
+        layout = QtGui.QVBoxLayout(self)
 
-        self.__btn = QtGui.QPushButton(title)
-        self.__btn.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.__btn.setMaximumHeight(22)
-        self.__btn.setFlat(True)
-        self.__btn.setContentsMargins(0, 0, 0, 0)
-        self.__menu = QtGui.QMenu(self)
-        self.__btn.setMenu(self.__menu)
+        self.__btn = btn = QtGui.QPushButton(title)
+        btn.setFocusPolicy(QtCore.Qt.NoFocus)
+        btn.setMaximumHeight(22)
+        btn.setFlat(True)
+        btn.setContentsMargins(0, 0, 0, 0)
 
-        for i, opt in enumerate(options):
-            a = QtGui.QAction(self)
+        self.__menu = menu = QtGui.QMenu(self)
+        btn.setMenu(menu)
+
+        self.setOptions(options, selected, icons)
+
+        layout.addWidget(btn)
+
+        btn.toggled.connect(btn.showMenu)
+        menu.triggered.connect(lambda action: self.optionSelected.emit(action.text()))
+
+    def options(self):
+        return [a.text() for a in self.__menu.actions()]
+
+    def setOptions(self, options, selected=None, icons=None):
+        if selected and not isinstance(selected, (set, dict)):
+            selected = set(selected)
+
+        menu = self.__menu
+        menu.clear()
+
+        for opt, icon in izip_longest(options, icons or []):
+            a = QtGui.QAction(menu)
             a.setText(opt)
             a.setCheckable(True)
-            if opt in selected:
+            if selected and opt in selected:
                 a.setChecked(True)
-            if icons:
-                try:
-                    a.setIcon(icons[i])
-                except IndexError:
-                    pass
-            self.__menu.addAction(a)
+            if icon:
+                a.setIcon(icons[i])
+            menu.addAction(a)        
 
-        self.layout().addWidget(self.__btn)
-
-        self.__btn.toggled.connect(self.__btn.showMenu)
+    def selectedOptions(self):
+        return [a.text() for a in self.__menu.actions() if a.isChecked()]
 
 
 class CheckableListBox(QtGui.QWidget):
