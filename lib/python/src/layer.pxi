@@ -596,18 +596,24 @@ def get_layer_by_id(Guid& layerId):
     return layer
 
 @reconnecting
-def get_layer(Job job, string name):
+def get_layer(object job, string name):
     """
     Get layer by its name
 
-    :param job: :class:`.Job`
+    :param job: :class:`.Job` or str job id
     :param name: str 
     :returns: :class:`.Layer`
     """
     cdef:
         LayerT layerT 
         Layer layer
+        Guid jobId
 
+    if isinstance(job, Job):
+        jobId = job.id
+    else:
+        jobId = job
+        
     try:
         conn().proxy().getLayer(layerT, job.id, name)
     except RuntimeError, e:
@@ -619,21 +625,27 @@ def get_layer(Job job, string name):
     return layer
 
 @reconnecting
-def get_layers(Job job):
+def get_layers(object job):
     """
-    Get layers by a job id 
+    Get layers by a job or job id 
 
-    :param job: :class:`.Job`
+    :param job: :class:`.Job` or str job id
     :returns: list[:class:`.Layer`]
     """
     cdef:
         LayerT layerT 
         Layer layer
         vector[LayerT] layers 
+        Guid jobId
         list ret
 
+    if isinstance(job, Job):
+        jobId = job.id
+    else:
+        jobId = job
+
     try:
-        conn().proxy().getLayers(layers, job.id)
+        conn().proxy().getLayers(layers, jobId)
     except RuntimeError, e:
         if str(e) in EX_CONNECTION:
             raise
