@@ -37,12 +37,16 @@ class TaskPanel(Panel):
         # kill button (multi-select)
         # comment button (multi-select)
         # 
+        titleBar = self.titleBarWidget()
 
-        self.__state_filter = CheckableComboBox("Task States", constants.TASK_STATES, [], None, self)
-        self.__layer_filter = CheckableComboBox("Layers", [], [], None, self)
+        self.__state_filter = CheckableComboBox("Task States", constants.TASK_STATES, parent=self)
+        self.__layer_filter = CheckableComboBox("Layers", [], parent=self)
 
-        self.titleBarWidget().addWidget(self.__state_filter)    
-        self.titleBarWidget().addWidget(self.__layer_filter)
+        titleBar.addWidget(self.__state_filter)    
+        titleBar.addWidget(self.__layer_filter)
+
+        self.__state_filter.optionSelected.connect(self.__stateFilterChanged)
+        self.__layer_filter.optionSelected.connect(self.__layerFilterChanged)
 
     def openLoadDialog(self):
         print "Open search dialog"
@@ -54,7 +58,18 @@ class TaskPanel(Panel):
         self.widget().refresh()
 
     def __handleJobOfInterestEvent(self, *args, **kwargs):
-        self.widget().setJobId(args[0])
+        taskWidget = self.widget()
+        taskWidget.setJobId(args[0])
+
+        self.__layer_filter.setOptions(taskWidget.layerNames)
+
+    def __stateFilterChanged(self):
+        sel = self.__state_filter.selectedOptions()
+        self.widget().setStateFilters(sel)
+
+    def __layerFilterChanged(self):
+        sel = self.__layer_filter.selectedOptions()
+        self.widget().setLayerFilters(sel)
 
 
 class TaskWidget(QtGui.QWidget):
@@ -68,18 +83,15 @@ class TaskWidget(QtGui.QWidget):
         layout.setContentsMargins(4,0,4,4)
 
         self.__attrs = attrs
-        
+
         self.__table = table = TableWidget(self)
         table.sortByColumn(0, QtCore.Qt.AscendingOrder)
         table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
-        # connections
-        table.customContextMenuRequested.connect(self.__showContextMenu)
-        table.doubleClicked.connect(self.__rowDoubleClicked)
-
         self.__jobId = None
+        self.__layers = {}
         self.__model = None
-        self.__proxy = proxy = models.AlnumSortProxyModel(self)
+        self.__proxy = proxy = TaskFilterProxyModel(self)
         proxy.setSortRole(SortRole)
         proxy.setDynamicSortFilter(True)
         proxy.sort(0, QtCore.Qt.AscendingOrder)
@@ -87,7 +99,28 @@ class TaskWidget(QtGui.QWidget):
 
         self.layout().addWidget(table)
 
+        # connections
+        table.customContextMenuRequested.connect(self.__showContextMenu)
+        table.doubleClicked.connect(self.__rowDoubleClicked)
+
+    @property 
+    def layers(self):
+        return self.__layers.values()
+
+    @property 
+    def layerNames(self):
+        return sorted(self.__layers.keys())
+
+    def layerNameToId(self, name):
+        layer = self.__layers.get(name)
+        if layer:
+            return layer.id 
+        else:
+            return ''
+
     def refresh(self):
+        self.__updateLayers()
+
         if self.__model:
             self.__model.refresh()
 
@@ -99,6 +132,8 @@ class TaskWidget(QtGui.QWidget):
             new_model = True
 
         self.__jobId = jobid
+        self.__updateLayers()
+
         self.__model.setJob(jobid)
         
         if new_model:
@@ -116,6 +151,31 @@ class TaskWidget(QtGui.QWidget):
     def __rowDoubleClicked(self, index):
         uid = index.data(IdRole)
         EventManager.emit("TASK_OF_INTEREST", uid, self.__jobId)
+
+    def __updateLayers(self):
+        if self.__jobId:
+            self.__layers = dict((l.name, l) for l in plow.client.get_layers(self.__jobId))
+
+    def setStateFilters(self, states):
+        self.__proxy.setFilters(states=states)
+
+    def setLayerFilters(self, layers):
+        layer_set = set()
+        allLayers = self.__layers
+
+        for l in layers:
+
+            obj = allLayers.get(l)
+            if obj:
+                layer_set.add(obj.id)
+
+            elif isinstance(l, plow.client.Layer):
+                layer_set.add(l.id)
+
+            elif plow.client.is_uuid(l):
+                layer_set.add(l)
+
+        self.__proxy.setFilters(layerIds=layer_set)
 
     def retrySelected(self):
         tasks = self.getSelectedTaskIds()
@@ -194,7 +254,7 @@ class TaskModel(QtCore.QAbstractTableModel):
             self.__jobId = jobid
             self.__tasks = plow.client.get_tasks(jobId=jobid)
             for i, task in enumerate(self.__tasks):
-                self.__index[task.id] = i;
+                self.__index[task.id] = i
             self.__lastUpdateTime = plow.client.get_plow_time()
         finally:
             self.endResetModel()
@@ -234,7 +294,7 @@ class TaskModel(QtCore.QAbstractTableModel):
             if cbk is not None:
                 return cbk(task)
         
-        elif role == QtCore.Qt.BackgroundRole and col ==1:
+        elif role == QtCore.Qt.BackgroundRole and col == 1:
             return constants.COLOR_TASK_STATE[task.state]
 
         elif role == QtCore.Qt.TextAlignmentRole:
@@ -268,6 +328,55 @@ class TaskModel(QtCore.QAbstractTableModel):
         RUNNING = plow.client.TaskState.RUNNING
         [self.dataChanged.emit(self.index(idx, 4),  self.index(idx, 4)) 
             for idx, t in enumerate(self.__tasks) if t.state == RUNNING]
+
+
+class TaskFilterProxyModel(models.AlnumSortProxyModel):
+
+    def __init__(self, *args, **kwargs):
+        super(TaskFilterProxyModel, self).__init__(*args, **kwargs)
+        self.__states = set()
+        self.__layers = set()
+        self.__customFilterEnabled = False
+
+    def setFilters(self, states=None, layerIds=None):
+        self.__customFilterEnabled = False
+
+        if states is not None:
+            state_set = set()
+            for s in states:
+                if isinstance(s, (str, unicode)):
+                    s = constants.TASK_STATES.index(s)
+                state_set.add(s)
+            self.__states = state_set
+            self.__customFilterEnabled = True
+
+        if layerIds is not None:
+            self.__layers = set(layerIds)
+            self.__customFilterEnabled = True
+
+        self.invalidateFilter()
+
+    def filterAcceptsRow(self, row, parent):
+        if not self.__customFilterEnabled:
+            return super(TaskFilterProxyModel, self).filterAcceptsRow(row, parent)
+
+        idx = self.index(row, 0, parent)
+        if not idx:
+            return True
+
+        task = idx.data(ObjectRole)
+        if not task:
+            return True
+
+        states = self.__states
+        if states and task.state not in states:
+            return False
+
+        layers = self.__layers
+        if layers and task.layerId not in layers:
+            return False
+
+        return True
 
 
 class TaskWidgetConfigDialog(QtGui.QDialog):
