@@ -11,11 +11,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
+import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.thrift.TaskStatsT;
 import com.breakersoft.plow.thrift.TaskT;
 import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
+import com.breakersoft.plow.util.JdbcUtils;
 import com.breakersoft.plow.util.PlowUtils;
 import com.google.common.collect.Lists;
 
@@ -132,20 +134,47 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
 
     @Override
     public List<TaskT> getTasks(TaskFilterT filter) {
-        List<String> where = Lists.newArrayList();
-        List<Object> values = Lists.newArrayList();
+        final List<String> where = Lists.newArrayList();
+        final List<Object> values = Lists.newArrayList();
 
         if (PlowUtils.isValid(filter.jobId)) {
             where.add("task.pk_job = ? ");
             values.add(UUID.fromString(filter.jobId));
         }
-        else {
-            throw new RuntimeException("At least a jobId must be set.");
+
+        if (PlowUtils.isValid(filter.layerIds)) {
+            where.add(JdbcUtils.In(
+                    "task.pk_layer", filter.layerIds.size()));
+            values.addAll(filter.layerIds);
+        }
+
+        if (PlowUtils.isValid(filter.nodeIds)) {
+            where.add(JdbcUtils.In(
+                    "proc.pk_node", filter.nodeIds.size()));
+            values.addAll(filter.nodeIds);
+        }
+
+        if (PlowUtils.isValid(filter.taskIds)) {
+            where.add(JdbcUtils.In(
+                    "task.pk_task", filter.taskIds.size()));
+            values.addAll(filter.taskIds);
+        }
+
+        if (where.isEmpty()) {
+             throw new RuntimeException("A job, layer, task, or node ID must be set.");
         }
 
         if (filter.getLastUpdateTime() > 0) {
             where.add("task.time_updated >= ?");
             values.add(filter.getLastUpdateTime());
+        }
+
+        if (PlowUtils.isValid(filter.states)) {
+            where.add(JdbcUtils.In(
+                    "task.int_state", filter.states.size()));
+            for (TaskState state: filter.states) {
+                values.add(state.ordinal());
+            }
         }
 
         final StringBuilder sb = new StringBuilder(512);

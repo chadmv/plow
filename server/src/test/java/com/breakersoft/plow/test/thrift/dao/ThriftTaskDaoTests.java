@@ -74,7 +74,7 @@ public class ThriftTaskDaoTests extends AbstractTest {
 
 
     @Test
-    public void testGetRunningTasks() {
+    public void testGetTasksByJob() {
         JobSpecT spec = getTestJobSpec();
         JobLaunchEvent event = jobService.launch(spec);
 
@@ -93,6 +93,34 @@ public class ThriftTaskDaoTests extends AbstractTest {
 
         List<TaskT> task = thriftTaskDao.getTasks(filter);
         assertTrue(task.size() > 0);
+    }
+
+    @Test
+    public void testGetRunningTasks() {
+        JobSpecT spec = getTestJobSpec();
+        JobLaunchEvent event = jobService.launch(spec);
+
+        DispatchNode node = dispatchDao.getDispatchNode(
+                nodeService.createNode(getTestNodePing()).getName());
+
+        DispatchJob job = new DispatchJob(event.getJob());
+        List<DispatchTask> tasks = dispatchTaskDao.getDispatchableTasks(job, node);
+
+        assertTrue(dispatchTaskDao.reserve(tasks.get(0)));
+        DispatchProc proc = procDao.create(node, tasks.get(0));
+        dispatchTaskDao.start(tasks.get(0), proc);
+
+        TaskFilterT filter = new TaskFilterT();
+        filter.jobId = event.getJob().getJobId().toString();
+        filter.addToStates(TaskState.RUNNING);
+
+        List<TaskT> task = thriftTaskDao.getTasks(filter);
+        assertTrue(task.size() > 0);
+
+        dispatchTaskDao.stop(tasks.get(0), TaskState.DEAD, 1, 1);
+
+        task = thriftTaskDao.getTasks(filter);
+        assertTrue(task.size() == 0);
     }
 
     @Test
