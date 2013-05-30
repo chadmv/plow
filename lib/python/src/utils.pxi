@@ -1,10 +1,13 @@
 
+import functools 
+
 # A decorator that will try to run the function.
 # and catch a possible connection failure.
 # It will then try to reconnect, and retry the
 # original call.
 def reconnecting(object func):
 
+    @functools.wraps(func, ('__name__', '__doc__'), ('__dict__',))
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -25,32 +28,12 @@ def reconnecting(object func):
             else:
                 raise e
 
-    wrapper.__doc__ = func.__doc__
+    cdef str attr
+    for attr in ('__qualname__', '__module__', '__repr__'):
+        try:
+            setattr(wrapper, attr, getattr(func, attr))
+        except AttributeError:
+            pass
+
     return wrapper
 
-
-# class __wrapper(object):
-
-#     def __init__(self, func):
-#         self.func = func
-#         self.__doc__ = func.__doc__
-
-#     def __repr__(self):
-#         return self.func.__repr__()
-
-#     def __call__(self, *args, **kwargs):
-#         try:
-#             return self.func(*args, **kwargs)
-
-#         except RuntimeError, e:
-            
-#             if str(e) in EX_CONNECTION:
-#                 LOGGER.debug("Connection lost. Retrying call")
-#                 reconnect()
-#                 return self.func(*args, **kwargs)
-            
-#             else:
-#                 raise
-
-# def reconnecting(object func):
-#     return __wrapper(func)
