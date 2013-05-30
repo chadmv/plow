@@ -221,14 +221,10 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         LayerStatsT stats
 
     cdef cppclass TaskT:
-        Guid id
+        Guid id, jobId, layerId
         string name
-        int number
+        int number, order, retries, minCores, minRam
         TaskState_type state
-        int order
-        int retries
-        int minCores
-        int minRam
         TaskStatsT stats
 
     cdef cppclass FolderT:

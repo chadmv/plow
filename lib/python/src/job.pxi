@@ -508,8 +508,8 @@ def get_jobs(**kwargs):
     Get a list of jobs matching a criteria.
 
     :param matchingOnly: bool
-    :param regex: str regex pattern
-    :param project: list[str] of matching project
+    :param regex: str regex pattern to match against job names
+    :param project: list[str] of matching project codes
     :param user: list[str] of matching user names
     :param jobIds: list[str] of matching job ids
     :param name: list[str] of matching job names

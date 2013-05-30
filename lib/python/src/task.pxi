@@ -235,6 +235,8 @@ cdef class Task:
 
     :var id:
     :var name: str
+    :var layerId: str
+    :var jobId: str
     :var number: int
     :var order: int
     :var retries: int
@@ -256,6 +258,12 @@ cdef class Task:
 
     property id:
         def __get__(self): return self._task.id
+    
+    property jobId:
+        def __get__(self): return self._task.jobId
+    
+    property layerId:
+        def __get__(self): return self._task.layerId
 
     property name:
         def __get__(self): return self._task.name
