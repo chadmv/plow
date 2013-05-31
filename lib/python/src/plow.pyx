@@ -32,15 +32,6 @@ __PORT = 11336
 
 LOGGER = logging.getLogger("client")
 
-EX_CONNECTION = set([
-    "write() send(): Broken pipe",
-    "Called write on non-open socket",
-    "No more data to read.",
-    "connect() failed: Connection refused"
-    ])
-
-
-
 
 cdef inline PlowClient* conn(bint reset=0) except *:
     cdef:

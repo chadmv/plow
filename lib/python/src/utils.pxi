@@ -1,6 +1,14 @@
 
 import functools 
 
+
+EX_CONNECTION = set([
+    "write() send(): Broken pipe",
+    "Called write on non-open socket",
+    "No more data to read.",
+    "connect() failed: Connection refused"
+    ])
+
 # A decorator that will try to run the function.
 # and catch a possible connection failure.
 # It will then try to reconnect, and retry the
