@@ -66,7 +66,8 @@ class _ResourceManager(object):
     def checkin(self, cores):
         with self.__lock:
             self.__slots.extend(cores)
-            logger.info("Checked in CPUS: %s; Now available: %s", cores, list(self.__slots))
+            avail, total = len(self.__slots), Profiler.physicalCpus
+            logger.info("Checked in CPUS: %s; Now available: %d / %d", cores, avail, total)
 
     def getSlots(self):
         return list(xrange(Profiler.physicalCpus))
@@ -102,10 +103,11 @@ class _ProcessManager(object):
     def runProcess(self, processCmd, wait=-1):
         cpus = ResourceMgr.checkout(processCmd.cores)
         pthread = _ProcessThread(processCmd, cpus)
-        pthread.start()
 
         with self.__lock:
             self.__threads[processCmd.procId] = _RunningProc(processCmd, pthread, cpus)
+
+        pthread.start()
 
         task = pthread.getRunningTask(wait)
         logger.info("process thread started")
@@ -403,31 +405,32 @@ class _ProcessThread(threading.Thread):
         # logger.debug("updateMetrics(): %r", self)
         try:
             p = psutil.Process(self.__pid)
+
+            rss_bytes = 0
+            cpu_perc = 0
+
+            try:
+                rss_bytes = p.get_memory_info().rss
+                cpu_perc = p.get_cpu_percent(None)
+            except psutil.Error:
+                return
+
+            children = [child for child in p.get_children(True) 
+                            if child.status != psutil.STATUS_ZOMBIE]
+
+            for child in children:
+                try:
+                    rss_bytes += child.get_memory_info().rss
+                except psutil.Error:
+                    pass            
+                try:
+                    cpu_perc += child.get_cpu_percent(None) 
+                except psutil.Error:
+                    pass
+
         except psutil.NoSuchProcess:
             return
 
-        rss_bytes = 0
-        cpu_perc = 0
-
-        try:
-            rss_bytes = p.get_memory_info().rss
-            cpu_perc = p.get_cpu_percent(None)
-        except psutil.Error:
-            return
-
-        children = [child for child in p.get_children(True) 
-                        if child.status != psutil.STATUS_ZOMBIE]
-
-        for child in children:
-            try:
-                rss_bytes += child.get_memory_info().rss
-            except psutil.Error:
-                pass            
-            try:
-                cpu_perc += child.get_cpu_percent(None) 
-            except psutil.Error:
-                pass
-        
         cpu_perc = int(round(cpu_perc))
 
         with self.__metricsLock:
@@ -542,6 +545,7 @@ class _ProcessThread(threading.Thread):
         ProcessMgr.processFinished(result)
         if self.__logfp is not None:
             self.__logfp.writeLogFooterAndClose(result)
+            self.__logfp = None
 
 
 #

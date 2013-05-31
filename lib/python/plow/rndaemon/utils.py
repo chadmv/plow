@@ -29,8 +29,10 @@ class ProcessLog(object):
         self._fileObj = open(name, mode, buffering)
 
     def __del__(self):
-        if self._fileObj is not None:
+        try:
             self._fileObj.close()
+        except:
+            pass
 
     def __getattr__(self, name):
         return getattr(self._fileObj, name)
