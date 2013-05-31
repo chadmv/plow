@@ -21,7 +21,8 @@ include "depend.pxi"
 # Module Init
 #
 plow_module_init()
-PlowException = <object>_PlowException
+PlowError = <object>_PlowError
+PlowConnectionError = <object>_PlowConnectionError
 
 #
 # Python imports
@@ -45,7 +46,10 @@ cdef inline PlowClient* conn(bint reset=0) except *:
     try:
         c = getClient(__HOST, __PORT, reset)
     except RuntimeError:
-        c = getClient(__HOST, __PORT, True)
+        try:
+            c = getClient(__HOST, __PORT, True)
+        except RuntimeError, e:
+            raise PlowConnectionError(*e.args)
 
     return c
 

@@ -7,7 +7,8 @@ from cpython cimport PyObject
 
 
 cdef extern from "exceptions.h":
-    PyObject* _PlowException "PlowException"
+    PyObject* _PlowError "PlowError"
+    PyObject* _PlowConnectionError "PlowConnectionError"
     int plow_module_init() except -1
 
 

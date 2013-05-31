@@ -34,7 +34,7 @@ def reconnecting(object func):
                     LOGGER.exception("Error re-running %r after reconnect", func)
                     raise
             else:
-                raise e
+                raise PlowConnectionError(*e.args)
 
     cdef str attr
     for attr in ('__qualname__', '__module__', '__repr__'):

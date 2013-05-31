@@ -3,13 +3,23 @@
 
 #include "rpc/plow_types.h"
 
-static PyObject *PlowException = NULL;
+
+static PyObject *PlowError = NULL;
+static PyObject *PlowConnectionError = NULL;
+
 
 int plow_module_init(void) {
-  char ex_name[] = "plow.PlowException";
-  PlowException = PyErr_NewException(ex_name, NULL, NULL);
-  if (PlowException == NULL)
+
+  char plowErrorName[] = "plow.PlowError";
+  PlowError = PyErr_NewException(plowErrorName, NULL, NULL);
+  if (PlowError == NULL)
     return -1;
+
+  char plowConnErrorName[] = "plow.PlowConnectionError";
+  PlowConnectionError = PyErr_NewException(plowConnErrorName, PlowError, NULL);
+  if (PlowConnectionError == NULL)
+    return -1;
+
   return 0;
 }
 
@@ -27,7 +37,7 @@ static void __Pyx_CppExn2PyErr() {
   } 
   catch (const Plow::PlowException& exn) {
     PyObject *args = Py_BuildValue("(si)", exn.why.c_str(), exn.what);
-    PyErr_SetObject(PlowException, args);
+    PyErr_SetObject(PlowError, args);
     Py_DECREF(args);
   } 
   catch (const std::bad_alloc& exn) {

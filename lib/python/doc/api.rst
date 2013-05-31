@@ -445,4 +445,13 @@ Functions
 .. autofunction:: plow.client.get_depends_on_task
 .. autofunction:: plow.client.get_task_depends_on
 .. autofunction:: plow.client.drop_depend
-.. autofunction:: plow.client.reactivate_depend
+.. autofunction:: plow.client.activate_depend
+
+.. _exceptions:
+
+Exceptions
+===================
+
+.. autoexception:: plow.client.PlowError
+.. autoexception:: plow.client.PlowConnectionError
+
