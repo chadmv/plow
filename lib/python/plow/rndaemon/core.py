@@ -99,7 +99,7 @@ class _ProcessManager(object):
 
         self.sendPing(True)
 
-    def runProcess(self, processCmd):
+    def runProcess(self, processCmd, wait=-1):
         cpus = ResourceMgr.checkout(processCmd.cores)
         pthread = _ProcessThread(processCmd, cpus)
         pthread.start()
@@ -107,7 +107,7 @@ class _ProcessManager(object):
         with self.__lock:
             self.__threads[processCmd.procId] = _RunningProc(processCmd, pthread, cpus)
 
-        task = pthread.getRunningTask()
+        task = pthread.getRunningTask(wait)
         logger.info("process thread started")
 
         return task
@@ -262,6 +262,7 @@ class _ProcessThread(threading.Thread):
         self.__pid = -1
 
         self.__wasKilled = False
+        self.__hasStarted = threading.Event()
 
         self.__progressLock = threading.Lock()
         self.__progress = 0.0
@@ -280,13 +281,23 @@ class _ProcessThread(threading.Thread):
             self.__pid)
 
 
-    def getRunningTask(self):
+    def getRunningTask(self, wait=-1):
         """
-        getRunningTask() -> RunningTask
+        getRunningTask(float wait=-1) -> RunningTask
 
         Returns a RunningTask instance representing 
         the current state of the task.
+
+        If wait > 0, then wait that many seconds for
+        the process to start. This is useful if you are
+        creating the process and then checking its running
+        task right away. Some information may not be 
+        available until after the thread has gotten the
+        process running.
         """
+        if wait > 0:
+            self.__hasStarted.wait(wait)
+
         rt = RunningTask()
 
         with self.__lock:
@@ -341,6 +352,7 @@ class _ProcessThread(threading.Thread):
                 self.__pptr = p
                 self.__pid = p.pid
 
+            self.__hasStarted.set()
             logger.info("PID: %d", p.pid)
 
             self.updateMetrics()
