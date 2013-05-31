@@ -4,8 +4,8 @@ import os
 import unittest
 import platform
 
-from plowapp.rndaemon.profile import SystemProfiler
-import plowapp.rndaemon.profile.linux as linuxProfiler 
+from plow.rndaemon.profile import SystemProfiler
+import plow.rndaemon.profile.linux as linuxProfiler 
 
 
 import logging

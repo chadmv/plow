@@ -18,7 +18,7 @@ import psutil
 
 import logging
 
-from plowapp.rndaemon.rpc.ttypes import RndException
+from plow.rndaemon.rpc.ttypes import RndException
 
 logging.basicConfig(
     format='PID %(process)s::%(funcName)s:\t%(message)s',

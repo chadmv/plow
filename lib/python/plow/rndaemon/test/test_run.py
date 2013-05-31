@@ -7,6 +7,8 @@ import time
 import math
 import re 
 import platform
+import uuid 
+import signal 
 
 from functools import partial
 from multiprocessing import Process, Event 
@@ -14,14 +16,19 @@ from ast import literal_eval
 
 import psutil
 
-from plowapp.rndaemon import conf 
+from thrift.protocol import TCompactProtocol
+
+from plow.rndaemon import conf 
 conf.NETWORK_DISABLED = True
 
-from plowapp.rndaemon.rpc import ttypes, RndServiceApi
-from plowapp.rndaemon import core, server, client, utils
+from plow.rndaemon.rpc import ttypes, RndServiceApi
+from plow.rndaemon import core, server, client, utils
+
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
+
+
 
 conf.TASK_PROXY_USER = os.getenv('PLOW_PROXY_USER', conf.TASK_PROXY_USER)
 
@@ -31,7 +38,12 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 IS_LINUX = platform.system() in ('FreeBSD', 'Linux')
 
 
+
 class TestResourceManager(unittest.TestCase):
+
+    def tearDown(self):
+        print "\n"
+        print "="*60, "\n"
 
     def testCoreCheckout(self):
         manager = core.ResourceMgr
@@ -68,6 +80,8 @@ class TestProcessManager(unittest.TestCase):
         # give these types of tests a moment to close down
         time.sleep(1)
         core.ProcessMgr.processFinished = self._processmgr_processFinished
+        print "\n"
+        print "="*60, "\n"
 
     def testRunTaskCommand(self):
         process = self.getNewTaskCommand()
@@ -119,14 +133,8 @@ class TestProcessManager(unittest.TestCase):
 
     def testKillRunningTask(self):
         process = self.getNewTaskCommand()
-        # process.command = [CMDS_UTIL, 'hard_to_kill']
-        process.command = [
-            'taskrun',
-             '-debug',
-             '-task',
-             'hard_to_kill_job',
-             os.path.join(DATA_DIR, 'hard_kill.bp')
-        ]
+        process.command = [CMDS_UTIL, 'hard_to_kill']
+
         core.ProcessMgr.runProcess(process)
         time.sleep(1)
 
@@ -144,15 +152,14 @@ class TestProcessManager(unittest.TestCase):
 
         i = 0
         while core.ProcessMgr.getRunningTasks():
-            time.sleep(.25)
+            time.sleep(.5)
             self.assertTrue(i < 10, 
                 "Tasks are still running when they should be dead by now")
             i += 1
 
         sig, status = self.getLogSignalStatus(process.logFile)
         self.assertEqual(status, 1, "Expected a 0 Exit Status, but got %s" % status)
-        self.assertEqual(sig, -9, "Expected a -9 Signal, but got %s" % sig)
-
+        assert abs(sig) in (signal.SIGTERM, signal.SIGKILL), "Expected a 9 or 15 Exit Signal, but got %s" % sig
 
 
     def testFailedTask(self):
@@ -165,16 +172,11 @@ class TestProcessManager(unittest.TestCase):
         core.ProcessMgr.processFinished = partial(processFinished, D)
 
         process = self.getNewTaskCommand()
-        process.command = [
-            'taskrun',
-             '-debug',
-             '-task',
-             'crashing_job',
-             os.path.join(DATA_DIR, 'crashing.bp')
-        ]
+        process.command = [CMDS_UTIL, 'crashing']
 
-        task = core.ProcessMgr.runProcess(process)
+        task = core.ProcessMgr.runProcess(process, wait=5)
         ppid = task.pid
+        # self.assertNotEqual(ppid, -1, "Procss never started properly")
 
         try:
             psutil.Process(ppid).wait(5)
@@ -185,7 +187,7 @@ class TestProcessManager(unittest.TestCase):
 
         i = 0
         while core.ProcessMgr.getRunningTasks():
-            time.sleep(.25)
+            time.sleep(.5)
             self.assertTrue(i < 10, 
                 "Tasks are still running when they should be dead by now")
             i += 1
@@ -245,8 +247,8 @@ class TestProcessManager(unittest.TestCase):
 
     def getNewTaskCommand(self):
         process = ttypes.RunTaskCommand()
-        process.procId = "a"
-        process.taskId = "b"
+        process.procId = uuid.uuid4()
+        process.taskId = uuid.uuid4()
         process.cores = 1
         process.env = {}
         process.logFile = self._logfile 
@@ -317,10 +319,15 @@ class TestCommunications(unittest.TestCase):
     def setUp(self):
         self.event = Event()
 
-        self.server_port = 9092
+        self.server_port = 21212
 
         handler = _ServiceHandler(self.event)
-        self.server = server.get_server(RndServiceApi, handler, self.server_port)
+        prot = TCompactProtocol.TCompactProtocolFactory()
+
+        self.server = server.get_server(RndServiceApi, 
+                                        handler, 
+                                        self.server_port,
+                                        protocol=prot)
 
         self.t_server = Process(target=self.server.serve)
         self.t_server.daemon = True
@@ -330,6 +337,8 @@ class TestCommunications(unittest.TestCase):
     def tearDown(self):
         self.t_server.terminate()
         time.sleep(1)
+        print "\n"
+        print "="*60, "\n"
 
     def testSendPing(self):
         """
@@ -339,7 +348,7 @@ class TestCommunications(unittest.TestCase):
         ping = ttypes.Ping()
         ping.hw = ttypes.Hardware()
 
-        service, transport = client.getPlowConnection('localhost', self.server_port)
+        service, transport = client.getPlowConnection("localhost", self.server_port)
         service.sendPing(ping)
         self.event.wait(3)
 

@@ -31,11 +31,11 @@ class RndProcessHandler(object):
         core.ProcessMgr.reboot(now)
 
 
-def get_server(api, handler, port):
+def get_server(api, handler, port, **kwargs):
     processor = api.Processor(handler)
     socket = TSocket.TServerSocket(port=port)
-    tfactory = TTransport.TFramedTransportFactory()
-    pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+    tfactory = kwargs.get('transport') or TTransport.TFramedTransportFactory()
+    pfactory = kwargs.get('protocol') or TBinaryProtocol.TBinaryProtocolFactory()
     server = TServer.TThreadedServer(processor, socket, tfactory, pfactory)    
     return server
 

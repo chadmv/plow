@@ -2,7 +2,7 @@ import conf
 
 from thrift.transport import TSocket
 from thrift.transport import TTransport
-from thrift.protocol import TCompactProtocol
+from thrift.protocol import TCompactProtocol, TBinaryProtocol
 
 from rpc import RndServiceApi, RndNodeApi
 
@@ -26,7 +26,8 @@ def getLocalConnection(port=None):
         port = conf.NETWORK_PORT
     socket = TSocket.TSocket("localhost", port)
     transport = TTransport.TFramedTransport(socket)
-    protocol = TCompactProtocol.TCompactProtocol(transport)
+    protocol = TBinaryProtocol.TBinaryProtocol(transport)
     service = RndNodeApi.Client(protocol)
     transport.open()
     return (service, transport)
+
