@@ -7,7 +7,7 @@ import os
 import traceback
 import errno
 
-from collections import namedtuple
+from collections import namedtuple, deque
 
 import psutil
 
@@ -38,39 +38,42 @@ class _ResourceManager(object):
     """
 
     def __init__(self):
-        self.__slots = dict((i, 0) for i in xrange(Profiler.physicalCpus))
-        self.__lock = threading.Lock()
-        logger.info("Intializing resource manager with %d physical cores.", Profiler.physicalCpus)
+        self.__slots = deque(xrange(Profiler.physicalCpus))
+        self.__slots_all = tuple(self.__slots)
+        self.__lock = threading.RLock()
+
+        logger.info("Intializing resource manager with %d physical cores.", 
+                    Profiler.physicalCpus)
 
     def checkout(self, numCores):
         if numCores < 1:
             raise ttypes.RndException(1, "Cannot reserve 0 slots")
 
+        result = []
+
         with self.__lock:
-            open_slots = self.getOpenSlots()
-            logger.info(open_slots)
+            open_slots = self.__slots
+            logger.info("Open slots: %s", list(open_slots))
+
             if numCores > len(open_slots):
                 raise ttypes.RndException(1, "No more open slots")
-            result = open_slots[0:numCores]
-            for i in result:
-                self.__slots[i] = 1
-            logger.info("Checked out CPUS: %s", result)
-            return result
+
+            result = [open_slots.pop() for _ in xrange(numCores)]
+    
+        logger.info("Checked out CPUS: %s", result)
+        return result
 
     def checkin(self, cores):
         with self.__lock:
-            for core in cores:
-                if self.__slots[core] == 1:
-                    self.__slots[core] = 0
-                else:
-                    logger.warn("Failed to check in core: %d", core)
-        logger.info("Checked in CPUS: %s", cores)
+            self.__slots.extend(cores)
+            logger.info("Checked in CPUS: %s; Now available: %s", cores, list(self.__slots))
 
     def getSlots(self):
-        return dict(self.__slots)
+        return list(xrange(Profiler.physicalCpus))
 
     def getOpenSlots(self):
-        return [slot for slot in self.__slots if self.__slots[slot] == 0]
+        with self.__lock:
+            return list(self.__slots)
 
 
 #
@@ -99,15 +102,20 @@ class _ProcessManager(object):
     def runProcess(self, processCmd):
         cpus = ResourceMgr.checkout(processCmd.cores)
         pthread = _ProcessThread(processCmd, cpus)
+        pthread.start()
+
         with self.__lock:
             self.__threads[processCmd.procId] = _RunningProc(processCmd, pthread, cpus)
-        pthread.start()
+
+        task = pthread.getRunningTask()
         logger.info("process thread started")
-        return pthread.getRunningTask()
+
+        return task
 
     def processFinished(self, processResult):
-        ResourceMgr.checkin(self.__threads[processResult.procId].cpus)
         with self.__lock:
+            cpus = self.__threads[processResult.procId].cpus
+            ResourceMgr.checkin(cpus)
             try:
                 del self.__threads[processResult.procId]
             except Exception, e:
@@ -247,6 +255,7 @@ class _ProcessThread(threading.Thread):
         self.__logfp = None
         self.__cpus = cpus or set()
 
+        self.__lock = threading.RLock()
         self.__rtc = rtc
         self.__pptr = None
         self.__logfp = None
@@ -279,11 +288,13 @@ class _ProcessThread(threading.Thread):
         the current state of the task.
         """
         rt = RunningTask()
-        rt.jobId = self.__rtc.jobId
-        rt.procId = self.__rtc.procId
-        rt.taskId = self.__rtc.taskId
-        rt.layerId = self.__rtc.layerId
-        rt.pid = self.__pid
+
+        with self.__lock:
+            rt.jobId = self.__rtc.jobId
+            rt.procId = self.__rtc.procId
+            rt.taskId = self.__rtc.taskId
+            rt.layerId = self.__rtc.layerId
+            rt.pid = self.__pid
 
         with self.__metricsLock:
             rt.rssMb = self.__metrics['rssMb']
@@ -324,10 +335,13 @@ class _ProcessThread(threading.Thread):
             cmd, opts = Profiler.getSubprocessOpts(rtc.command, **opts)
 
             logger.info("Running command: %s", rtc.command)
-            self.__pptr = p = subprocess.Popen(cmd, **opts)
+            p = subprocess.Popen(cmd, **opts)
 
-            self.__pid = p.pid
-            logger.info("PID: %d", self.__pid)
+            with self.__lock:
+                self.__pptr = p
+                self.__pid = p.pid
+
+            logger.info("PID: %d", p.pid)
 
             self.updateMetrics()
 
@@ -484,10 +498,12 @@ class _ProcessThread(threading.Thread):
 
     def __completed(self, retcode):
         result = ttypes.RunTaskResult()
-        result.procId = self.__rtc.procId
-        result.taskId = self.__rtc.taskId
-        result.jobId = self.__rtc.jobId
         result.maxRssMb = 0
+
+        with self.__lock:
+            result.procId = self.__rtc.procId
+            result.taskId = self.__rtc.taskId
+            result.jobId = self.__rtc.jobId
 
         if self.__wasKilled:
             result.exitStatus = 1
@@ -498,8 +514,6 @@ class _ProcessThread(threading.Thread):
         else:
             result.exitStatus = retcode
             result.exitSignal = 0
-
-        max
 
         logger.info("Process result %s", result)
         if not conf.NETWORK_DISABLED:
