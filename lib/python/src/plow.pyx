@@ -18,10 +18,14 @@ include "quota.pxi"
 include "depend.pxi"
 
 #
+# Module Init
+#
+plow_module_init()
+PlowException = <object>_PlowException
+
+#
 # Python imports
 #
-
-# from datetime import datetime
 import uuid
 import time
 import logging 

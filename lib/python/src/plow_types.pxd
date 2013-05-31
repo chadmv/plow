@@ -3,9 +3,12 @@ from libcpp.vector cimport vector
 from libcpp.set cimport set as c_set
 from libcpp.map cimport map 
 
+from cpython cimport PyObject
+
 
 cdef extern from "exceptions.h":
-    pass
+    PyObject* _PlowException "PlowException"
+    int plow_module_init() except -1
 
 
 cdef extern from "rpc/common_types.h" namespace "Plow":

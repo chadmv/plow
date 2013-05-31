@@ -3,14 +3,16 @@
 
 #include "rpc/plow_types.h"
 
-static PyObject *PlowErrorObject;
+static PyObject *PlowException = NULL;
 
-/* Should be added to plow.cpp
+int plow_module_init(void) {
+  char ex_name[] = "plow.PlowException";
+  PlowException = PyErr_NewException(ex_name, NULL, NULL);
+  if (PlowException == NULL)
+    return -1;
+  return 0;
+}
 
-  PlowErrorObject = PyErr_NewException("plow.PlowException", NULL, NULL);
-  PyDict_SetItemString(__pyx_d, "PlowException", PlowErrorObject);
-
-*/
 
 #define __Pyx_CppExn2PyErr plow_exception_handler
 
@@ -25,8 +27,7 @@ static void __Pyx_CppExn2PyErr() {
   } 
   catch (const Plow::PlowException& exn) {
     PyObject *args = Py_BuildValue("(si)", exn.why.c_str(), exn.what);
-    PyErr_SetObject(PyExc_StandardError, args);
-    // PyErr_SetObject(PlowErrorObject, args);
+    PyErr_SetObject(PlowException, args);
     Py_DECREF(args);
   } 
   catch (const std::bad_alloc& exn) {
