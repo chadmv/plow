@@ -183,8 +183,12 @@ CREATE TABLE plow.job_stat (
   int_ram_high INTEGER NOT NULL DEFAULT 0,
   flt_cores_high REAL NOT NULL DEFAULT 0.0,
   int_core_time_high INTEGER NOT NULL DEFAULT 0,
+  
   int_total_core_time_success BIGINT NOT NULL DEFAULT 0,
-  int_total_core_time_fail BIGINT NOT NULL DEFAULT 0
+  int_total_core_time_fail BIGINT NOT NULL DEFAULT 0,
+  
+  int_total_clock_time_success BIGINT NOT NULL DEFAULT 0,
+  int_total_clock_time_fail BIGINT NOT NULL DEFAULT 0
 );
 
 ---
@@ -602,6 +606,62 @@ CREATE INDEX task_history_exit_status ON plow.task_history (int_exit_status NULL
 ----------------------------------------------------------
 
 ---
+--- plow.before_layer_stat_updated() - verify high/low values are correct.
+---
+CREATE OR REPLACE FUNCTION plow.before_layer_stat_updated() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.int_ram_high < OLD.int_ram_high THEN
+    NEW.int_ram_high = OLD.int_ram_high;
+  END IF;
+
+  IF NEW.flt_cores_high < OLD.flt_cores_high THEN
+    NEW.flt_cores_high = OLD.flt_cores_high;
+  END IF;
+
+  IF NEW.int_core_time_high < OLD.int_core_time_high THEN
+    NEW.int_core_time_high = OLD.int_core_time_high;
+  END IF;
+
+  IF OLD.int_core_time_low != -1 THEN
+    IF NEW.int_core_time_low > OLD.int_core_time_low THEN
+      NEW.int_core_time_low = OLD.int_core_time_low;
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_before_layer_stat_updated BEFORE UPDATE ON plow.layer_stat
+    FOR EACH ROW EXECUTE PROCEDURE plow.before_layer_stat_updated();
+
+---
+--- plow.before_job_stat_updated() - verify high/low values are correct.
+---
+CREATE OR REPLACE FUNCTION plow.before_job_stat_updated() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.int_ram_high < OLD.int_ram_high THEN
+    NEW.int_ram_high = OLD.int_ram_high;
+  END IF;
+
+  IF NEW.flt_cores_high < OLD.flt_cores_high THEN
+    NEW.flt_cores_high = OLD.flt_cores_high;
+  END IF;
+
+  IF NEW.int_core_time_high < OLD.int_core_time_high THEN
+    NEW.int_core_time_high = OLD.int_core_time_high;
+  END IF;
+
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_before_job_stat_updated BEFORE UPDATE ON plow.job_stat
+    FOR EACH ROW EXECUTE PROCEDURE plow.before_job_stat_updated();
+
+---
 --- plow.after_job_inserted - runs after a job has been inserted into plow.job
 ---
 ---
@@ -750,6 +810,15 @@ BEGIN
     WHERE
       pk_layer=NEW.pk_layer;
 
+    UPDATE
+      job_stat
+    SET
+      int_total_core_time_fail=int_total_core_time_fail+core_time,
+      int_total_clock_time_fail=int_total_clock_time_fail+clock_time
+    WHERE
+      pk_job = NEW.pk_job;
+
+
   ELSE
 
     UPDATE task_history
@@ -814,6 +883,17 @@ BEGIN
     WHERE
       pk_layer=NEW.pk_layer;
 
+
+    UPDATE
+      job_stat
+    SET
+      int_ram_high=proc.int_ram_high,
+      flt_cores_high=proc.flt_cores_high,
+      int_core_time_high=core_time,
+      int_total_core_time_success=int_total_core_time_success+core_time,
+      int_total_clock_time_success=int_total_clock_time_success+clock_time
+    WHERE
+      pk_job=NEW.pk_job;
   END IF;
 
   RETURN NEW;
