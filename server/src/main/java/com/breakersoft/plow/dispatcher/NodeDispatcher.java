@@ -151,7 +151,7 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
                 /*
                  * This is possible if a API command modifies the task.
                  */
-                dispatchFailed(result, proc, null, "Critical, was able to reserve task but not start it.");
+                dispatchFailed(result, proc, task, "Critical, was able to reserve task but not start it.");
             }
         }
         catch (Exception e) {
@@ -164,8 +164,14 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
         logger.info("Unable to dispatch {}/{}, {}", new Object[] {proc, task, message});
         result.dispatch = false;
         dispatchService.deallocateProc(proc, message);
+
         if (task != null) {
-            dispatchService.stopTask(task, TaskState.WAITING, ExitStatus.FAIL, Signal.ABORTED_TASK);
+            if (task.started) {
+                dispatchService.stopTask(task, TaskState.WAITING, ExitStatus.FAIL, Signal.ABORTED_TASK);
+            }
+            else {
+                dispatchService.unreserveTask(task);
+            }
         }
     }
 }

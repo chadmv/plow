@@ -15,6 +15,7 @@ public class DispatchTask implements Task, Project {
     public int minCores;
     public int minRam;
     public String name;
+    public boolean started = false;
 
     public UUID getProjectId() {
         return projectId;

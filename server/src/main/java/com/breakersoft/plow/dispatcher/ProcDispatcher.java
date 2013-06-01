@@ -85,7 +85,7 @@ public class ProcDispatcher implements Dispatcher<DispatchProc> {
                 /*
                  * We had reserved the task but were somehow unable to start it,
                  */
-                dispatchFailed(result, proc, null, "Critical, unable to start reserved task.");
+                dispatchFailed(result, proc, task, "Critical, unable to start reserved task.");
             }
         }
         catch (Exception e) {
@@ -116,7 +116,12 @@ public class ProcDispatcher implements Dispatcher<DispatchProc> {
 
         dispatchService.deallocateProc(resource, message);
         if (task != null) {
-            dispatchService.stopTask(task, TaskState.WAITING, ExitStatus.FAIL, Signal.ABORTED_TASK);
+            if (task.started) {
+                dispatchService.stopTask(task, TaskState.WAITING, ExitStatus.FAIL, Signal.ABORTED_TASK);
+            }
+            else {
+                dispatchService.unreserveTask(task);
+            }
         }
         result.dispatch = false;
     }

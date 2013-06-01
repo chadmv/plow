@@ -104,7 +104,7 @@ public class DispatchServiceImpl implements DispatchService {
     public boolean startTask(DispatchTask task, DispatchProc proc) {
         if (dispatchTaskDao.start(task, proc)) {
             logger.info("Started {}", task);
-
+            task.started = true;
             DispatchStats.taskStartedCount.incrementAndGet();
             return true;
         }
