@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
-import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.thrift.TaskStatsT;
@@ -44,32 +43,30 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             task.minRam = rs.getInt("int_ram_min");
 
             final TaskStatsT stats = new TaskStatsT();
-            stats.startTime = rs.getLong("time_started");
-            stats.stopTime = rs.getLong("time_stopped");
-            stats.exitSignal = rs.getInt("int_exit_signal");
-            stats.exitStatus = rs.getInt("int_exit_status");
-            stats.lastNode = rs.getString("str_last_node_name");
-            stats.ram = rs.getInt("int_last_ram");
-            stats.highRam = rs.getInt("int_last_ram_high");
-            stats.cores = rs.getInt("int_last_cores");
-            stats.highCores = rs.getDouble("flt_last_cores_high");
-            stats.retryNum = rs.getInt("int_retry");
+            stats.setStartTime(rs.getLong("time_started"));
+            stats.setStopTime(rs.getLong("time_stopped"));
+            stats.setExitSignal(rs.getInt("int_exit_signal"));
+            stats.setExitStatus(rs.getInt("int_exit_status"));
+            stats.setLastNode(rs.getString("str_last_node_name"));
+            stats.setRam(rs.getInt("int_last_ram"));
+            stats.setHighRam(rs.getInt("int_last_ram_high"));
+            stats.setCores(rs.getInt("int_last_cores"));
+            stats.setHighCores(rs.getDouble("flt_last_cores_high"));
+            stats.setRetryNum(rs.getInt("int_retry"));
+            stats.setActive(false);
 
-            stats.active = false;
-            task.setStats(stats);
-
-            if (task.state.equals(TaskState.RUNNING)) {
-                stats.cores = rs.getInt("int_cores");
-                stats.highCores = rs.getDouble("flt_cores_high");
-                stats.usedCores = rs.getDouble("flt_cores_used");
-                stats.ram = rs.getInt("int_ram");
-                stats.usedRam = rs.getInt("int_ram_used");
-                stats.highRam = rs.getInt("int_ram_high");
-                stats.progress = rs.getInt("int_progress");
-                stats.lastLogLine = rs.getString("str_last_log_line");
+            if (rs.getInt("p_cores") > 0) {
+                stats.setCores(rs.getInt("p_cores"));
+                stats.setHighCores(rs.getDouble("p_cores_used"));
+                stats.setUsedCores(rs.getDouble("p_cores_high"));
+                stats.setRam(rs.getInt("p_ram"));
+                stats.setUsedRam(rs.getInt("p_ram_high"));
+                stats.setHighRam(rs.getInt("p_ram_used"));
+                stats.setProgress(rs.getInt("p_progress"));
+                stats.setLastLogLine(rs.getString("p_last_log_line"));
                 stats.active = true;
             }
-
+            task.setStats(stats);
             return task;
         }
     };
@@ -97,20 +94,20 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
             "task.str_last_node_name, " +
             "task.int_exit_signal,"+
             "task.int_exit_status,"+
-            "proc.int_cores,"+
-            "proc.flt_cores_used,"+
-            "proc.flt_cores_high,"+
-            "proc.int_ram,"+
-            "proc.int_ram_high,"+
-            "proc.int_ram_used,"+
-            "proc.int_progress,"+
-            "proc.str_last_log_line " +
+            "proc.int_cores p_cores,"+
+            "proc.flt_cores_used AS p_cores_used,"+
+            "proc.flt_cores_high AS p_cores_high,"+
+            "proc.int_ram AS p_ram,"+
+            "proc.int_ram_high AS p_ram_high,"+
+            "proc.int_ram_used AS p_ram_used,"+
+            "proc.int_progress AS p_progress,"+
+            "proc.str_last_log_line AS p_last_log_line " +
         "FROM " +
             "task "+
         "INNER JOIN " +
             "layer ON task.pk_layer = layer.pk_layer " +
         "LEFT JOIN " +
-            "plow.proc ON task.pk_task = proc.pk_proc ";
+            "plow.proc ON task.pk_task = proc.pk_task ";
 
     private static final String GET_BY_ID =
         GET + " WHERE task.pk_task=?";
