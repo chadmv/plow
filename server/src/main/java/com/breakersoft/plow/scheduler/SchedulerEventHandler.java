@@ -87,6 +87,7 @@ public class SchedulerEventHandler {
 
         if (!ping.tasks.isEmpty()) {
             statsService.updateProcRuntimeStats(ping.tasks);
+            statsService.updateTaskRuntimeStats(ping.tasks);
         }
     }
 

@@ -8,4 +8,6 @@ public interface StatsService {
 
     void updateProcRuntimeStats(List<RunningTask> tasks);
 
+    void updateTaskRuntimeStats(List<RunningTask> tasks);
+
 }

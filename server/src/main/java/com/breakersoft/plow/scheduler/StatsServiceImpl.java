@@ -34,7 +34,23 @@ public class StatsServiceImpl implements StatsService {
         });
         for (RunningTask task: tasks) {
             logger.info("Updating stats {}", task);
-            statsDao.updateRuntimeStats(task);
+            statsDao.updateProcRuntimeStats(task);
+        }
+    }
+
+    @Override
+    public void updateTaskRuntimeStats(List<RunningTask> tasks) {
+
+        // Sort to ensure predictable update order.
+        Collections.sort(tasks, new Comparator<RunningTask>() {
+            @Override
+            public int compare(RunningTask o1, RunningTask o2) {
+                return o1.taskId.compareTo(o2.taskId);
+            }
+        });
+
+        for (RunningTask task: tasks) {
+            statsDao.updateTaskRuntimeStats(task);
         }
     }
 }
