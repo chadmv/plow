@@ -6,7 +6,7 @@ public class LayerE implements Layer {
 
     private UUID layerId;
     private UUID jobId;
-    private String name;
+    private String name = "unknown_layer";
 
     public LayerE() { }
 
