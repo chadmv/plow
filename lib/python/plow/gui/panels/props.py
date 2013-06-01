@@ -116,7 +116,8 @@ class PropertiesPanel(Panel):
                     },
                     {
                         "title": "UID",
-                        "value": job.uid,
+                        "value": str(job.uid),
+                        "widget": "text",
                         "readOnly": True
                     },
                     {
