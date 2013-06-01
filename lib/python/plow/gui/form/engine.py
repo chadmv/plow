@@ -32,6 +32,9 @@ class FormWidgetFactory(object):
         if data.get("suffix"):
             w.setSuffix(data["suffix"])
         w.setReadOnly(data.get("readOnly", False))
+        if data.get("maximumWidth"):
+            w.setMaximumWidth(data["maximumWidth"])
+
         return w
 
     @classmethod

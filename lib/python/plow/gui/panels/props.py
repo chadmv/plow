@@ -199,31 +199,36 @@ class PropertiesPanel(Panel):
                 "title": "Resource Stats",
                 "children": [
                     {
-                        "title": "High RAM",
-                        "value": job.stats.highRam,
+                        "title": "High RAM (MB)",
+                        "value": str(job.stats.highRam),
+                        "maximumWidth": 125,
                         "readOnly": True,
                     },
                     {
                         "title": "High CPU",
-                        "value": job.stats.highCores,
+                        "value": str(job.stats.highCores),
                         "readOnly": True,
+                        "maximumWidth": 125,
                     },
                     {
                         "title": "High Core Time",
                         "value": formatCoreTime(job.stats.highCoreTime),
                         "readOnly": True,
+                        "maximumWidth": 125,                  
                     },
                     {
                         "title": "Success Core Hours",
                         "value": [formatCoreTime(job.stats.totalSuccessCoreTime), "rgba(76, 115, 0, 192)"],
                         "widget": "pillWidget",                                 
-                        "readOnly": True,       
+                        "readOnly": True,
+                        "maximumWidth": 125,    
                     },
                     {
                         "title": "Fail Core Hours",
                         "value":  [formatCoreTime(job.stats.totalFailCoreTime), "rgba(177, 24, 0, 192)"], 
                         "widget": "pillWidget",
                         "readOnly": True,
+                        "maximumWidth": 125,
                     }
                 ]
             }
