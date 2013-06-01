@@ -1025,8 +1025,8 @@ CREATE TRIGGER trig_after_proc_update AFTER UPDATE ON plow.proc
     EXECUTE PROCEDURE plow.after_proc_update();
 
 ---
---- plow.after_proc_update()
---- Update the layer_dsp folder when a proc moves to a differet layer.
+--- plow.before_proc_ping_update()
+--- Before updating the proc check the high cores/high ram values.
 ---
 CREATE OR REPLACE FUNCTION plow.before_proc_ping_update() RETURNS TRIGGER AS $$
 BEGIN
@@ -1047,6 +1047,30 @@ LANGUAGE plpgsql;
 CREATE TRIGGER trig_before_proc_ping_update BEFORE UPDATE ON plow.proc
     FOR EACH ROW WHEN (OLD.pk_task = NEW.pk_task)
     EXECUTE PROCEDURE plow.before_proc_ping_update();
+
+---
+--- plow.before_task_ping_update()
+--- Before updating the task check the high cores/high ram values.
+---
+CREATE OR REPLACE FUNCTION plow.before_task_ping_update() RETURNS TRIGGER AS $$
+BEGIN
+
+  IF NEW.int_last_ram_high < OLD.int_last_ram_high THEN
+    NEW.int_last_ram_high = OLD.int_last_ram_high;
+  END IF;
+
+  IF NEW.flt_last_cores_high < OLD.flt_last_cores_high THEN
+    NEW.flt_last_cores_high = OLD.flt_last_cores_high;
+  END IF;
+
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_before_task_ping_update BEFORE UPDATE ON plow.task
+    FOR EACH ROW WHEN (NEW.int_state = 2 AND OLD.int_state = 2)
+    EXECUTE PROCEDURE plow.before_task_ping_update();
 
 ---
 --- plow.before_disp_update()
