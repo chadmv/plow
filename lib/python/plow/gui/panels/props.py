@@ -14,84 +14,34 @@ class PropertiesPanel(Panel):
         Panel.__init__(self, name, "Properties", parent)
 
         self.setWidget(PropertiesWidget(self.attrs, self))
+        self.setRefreshTime(30)
         self.setWindowTitle(name)
 
         EventManager.bind("JOB_OF_INTEREST", self.__handleJobOfInterestEvent)
         EventManager.bind("NODE_OF_INTEREST", self.__handleNodeOfInterestEvent)
 
+        self.__object = None
+
     def init(self):
-        pass
+
+        self.titleBarWidget().addAction(
+            QtGui.QIcon(":/images/retry.png"), "Refresh", self.refresh)
 
     def openConfigDialog(self):
         pass
 
     def refresh(self):
-        self.widget().refresh()
+        if not self.__object:
+            return
+        if self.__object[0] == "job":
+            self.displayJob(self.__object[1])
+        elif self.__object[0] == "node":
+            self.displayNode(self.__object[1])
 
-    def __handleNodeOfInterestEvent(self, *args, **kwargs):
+    def displayJob(self, jobid):
 
-        node = pc.get_node(args[0])
-
-        widgets = [ 
-            {
-                "title": "Node",
-                "children": [
-                    {
-                        "title": "Name",
-                        "widget": "text",
-                        "value": node.name,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Cluster",
-                        "widget": "text",
-                        "value": node.clusterName,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "IP Addr",
-                        "widget": "text",
-                        "value": node.ipaddr,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Tags",
-                        "widget": "text",
-                        "value": ",".join(node.tags),
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Locked",
-                        "widget": "lockToggle",
-                        "value": node.locked,
-                    }
-                ]
-            },
-            {
-                "title": "System",
-                "children": [
-                    {
-                        "title": "CPU Model",
-                        "widget": "text",
-                        "value": node.system.cpuModel,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Platform",
-                        "widget": "text",
-                        "value": node.system.platform,
-                        "readOnly": True
-                    },
-                ]
-            }
-        ]
-
-        form = PlowForm(widgets)
-        self.widget().setWidget(form)
-
-    def __handleJobOfInterestEvent(self, *args, **kwargs):
-
-        job = pc.get_job(args[0])
+        job = pc.get_job(jobid)
+        self.__object = ("job",  jobid)
 
         widgets = [ {
                 "title": "Job Status",
@@ -238,6 +188,74 @@ class PropertiesPanel(Panel):
         form = PlowForm(widgets)
         self.widget().setWidget(form)
 
+
+    def displayNode(self, nodeid):
+
+        node = pc.get_node(nodeid)
+        self.__object = ("node",  nodeid)
+
+        widgets = [ 
+            {
+                "title": "Node",
+                "children": [
+                    {
+                        "title": "Name",
+                        "widget": "text",
+                        "value": node.name,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Cluster",
+                        "widget": "text",
+                        "value": node.clusterName,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "IP Addr",
+                        "widget": "text",
+                        "value": node.ipaddr,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Tags",
+                        "widget": "text",
+                        "value": ",".join(node.tags),
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Locked",
+                        "widget": "lockToggle",
+                        "value": node.locked,
+                    }
+                ]
+            },
+            {
+                "title": "System",
+                "children": [
+                    {
+                        "title": "CPU Model",
+                        "widget": "text",
+                        "value": node.system.cpuModel,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Platform",
+                        "widget": "text",
+                        "value": node.system.platform,
+                        "readOnly": True
+                    },
+                ]
+            }
+        ]
+
+        form = PlowForm(widgets)
+        self.widget().setWidget(form)
+
+    def __handleNodeOfInterestEvent(self, *args, **kwargs):
+        self.displayNode(args[0])
+
+    def __handleJobOfInterestEvent(self, *args, **kwargs):
+        self.displayJob(args[0])
 
 class PropertiesWidget(QtGui.QWidget):
     def __init__(self, attrs, parent=None):
