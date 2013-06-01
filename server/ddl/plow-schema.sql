@@ -760,6 +760,7 @@ BEGIN
   * See com.plowrender.plow.Signal.
   */
   IF NEW.int_exit_signal = 667 THEN
+    UPDATE plow.task SET int_retries = int_retries -1 WHERE pk_task=NEW.pk_task;
     DELETE FROM task_history WHERE pk_task=NEW.pk_task AND time_stopped=0;
     RETURN NEW;
   END IF;
@@ -1022,6 +1023,30 @@ LANGUAGE plpgsql;
 CREATE TRIGGER trig_after_proc_update AFTER UPDATE ON plow.proc
     FOR EACH ROW WHEN (OLD.pk_layer != NEW.pk_layer)
     EXECUTE PROCEDURE plow.after_proc_update();
+
+---
+--- plow.after_proc_update()
+--- Update the layer_dsp folder when a proc moves to a differet layer.
+---
+CREATE OR REPLACE FUNCTION plow.before_proc_ping_update() RETURNS TRIGGER AS $$
+BEGIN
+
+  IF NEW.int_ram_high < OLD.int_ram_high THEN
+    NEW.int_ram_high = OLD.int_ram_high;
+  END IF;
+
+  IF NEW.flt_cores_high < OLD.flt_cores_high THEN
+    NEW.flt_cores_high = OLD.flt_cores_high;
+  END IF;
+
+  RETURN NEW;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trig_before_proc_ping_update BEFORE UPDATE ON plow.proc
+    FOR EACH ROW WHEN (OLD.pk_task = NEW.pk_task)
+    EXECUTE PROCEDURE plow.before_proc_ping_update();
 
 ---
 --- plow.before_disp_update()
