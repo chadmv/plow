@@ -24,7 +24,7 @@ class FormWidget(QtGui.QWidget):
 
         self.__status = QtGui.QLabel(self)
         self.__status.setContentsMargins(5, 0, 0, 0)
-        layout.addWidget(self.__status, 0, 1)
+        layout.addWidget(self.__status, 0, 2)
 
         if not FormWidget.__LOCKED_PIX:
             FormWidget.__LOCKED_PIX = QtGui.QPixmap(":/images/locked.png")
@@ -37,6 +37,12 @@ class FormWidget(QtGui.QWidget):
             self.__status.setPixmap(FormWidget.__LOCKED_PIX)
         else:
             self.__status.setText("")
+
+    def setSuffix(self, value):
+        self._setSuffix(value)
+
+    def _setSuffix(self, value):
+        self.layout().addWidget(QtGui.QLabel(value), 0, 1)
 
     def _setReadOnly(self, value):
         pass
@@ -60,24 +66,32 @@ class Number(FormWidget):
         FormWidget.__init__(self, parent)
         widget = QtGui.QSpinBox(self)
         widget.setValue(value)
+        widget.setMinimumWidth(100)
         self.setWidget(widget)
         self._widget.setFocusPolicy(QtCore.Qt.NoFocus)
 
     def _setReadOnly(self, value):
         self._widget.setReadOnly(value)
         self._widget.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        
+
+    def _setSuffix(self, value):
+        self._widget.setSuffix(value)
+
 class Decimal(FormWidget):
     def __init__(self, value, parent=None):
         FormWidget.__init__(self, parent)
         widget = QtGui.QDoubleSpinBox(self)
         widget.setValue(value)
         self.setWidget(widget)
+        widget.setMinimumWidth(100)
         self._widget.setFocusPolicy(QtCore.Qt.NoFocus)
 
     def _setReadOnly(self, value):
         self._widget.setReadOnly(value)
         self._widget.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+
+    def _setSuffix(self, value):
+        self._widget.setSuffix(value)
 
 class DateTime(FormWidget):
     def __init__(self, value, parent=None):

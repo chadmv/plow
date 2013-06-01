@@ -29,6 +29,8 @@ class FormWidgetFactory(object):
                 value = str(value)
 
         w = cls.Map[widget](data.get("value", ""), parent)
+        if data.get("suffix"):
+            w.setSuffix(data["suffix"])
         w.setReadOnly(data.get("readOnly", False))
         return w
 
