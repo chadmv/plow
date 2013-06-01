@@ -64,11 +64,14 @@ public class StateManager {
             client.kill(proc, "Killed by user");
         } catch (RndClientExecuteException e) {
             logger.warn("Failed to stop running task: {}, {}", task.getTaskId(), e);
+
+            // If this fails...then deallocate here.
+            dispatchService.deallocateProc(proc, "Failed to communicate with RND");
         }
     }
 
     public void killTask(Task task) {
-        logger.info("Thread: {} Eating Task: {}", Thread.currentThread().getName(), task.getTaskId());
+        logger.info("Thread: {} Killing Task: {}", Thread.currentThread().getName(), task.getTaskId());
 
         if (dispatchService.stopTask(task, TaskState.WAITING, ExitStatus.FAIL, Signal.MANUAL_KILL)) {
             killProc(task, true);
