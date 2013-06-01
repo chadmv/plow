@@ -93,6 +93,7 @@ class _ProcessManager(object):
         self.__lock = threading.RLock()
         self.__timer = None 
         self.__isReboot = threading.Event()
+        self.__isShutdown = threading.Event()
 
         self.__sampler = threading.Thread(target=self._processSampler)
         self.__sampler.daemon = True 
@@ -101,6 +102,14 @@ class _ProcessManager(object):
         self.sendPing(True)
 
     def runProcess(self, processCmd, wait=-1):
+        """
+        Takes a RunTaskCommand object, reserves resources, 
+        and starts the process.
+
+        Optionally, a wait time may be specified in float
+        seconds, to wait until the job has fully started, 
+        before returning.
+        """
         cpus = ResourceMgr.checkout(processCmd.cores)
         pthread = _ProcessThread(processCmd, cpus)
 
@@ -115,6 +124,11 @@ class _ProcessManager(object):
         return task
 
     def processFinished(self, processResult):
+        """
+        Callback for when a process has finished running. 
+        Receives the RunTaskResult object. 
+        Deallocates the resources.
+        """
         with self.__lock:
             cpus = self.__threads[processResult.procId].cpus
             ResourceMgr.checkin(cpus)
@@ -124,10 +138,18 @@ class _ProcessManager(object):
                 logger.warn("Process %s not found: %s", processResult.procId, e)
 
     def sendPing(self, isReboot=False, repeat=True):
+        """
+        Ping into the server with current task and resource states.
+        If repeat is True, schedules another ping at an interval defined 
+        by the rndaemon config.
+        """
+        if self.__isShutdown.is_set():
+            repeat = False
+
         # TODO: What is the purpose of the isReboot flag?
         # Using the internal flag to determine if we are in a 
         # reboot state.
-        isReboot = self.__isReboot.isSet()
+        isReboot = self.__isReboot.is_set()
 
         with self.__lock:
             tasks = self.getRunningTasks()
@@ -154,6 +176,9 @@ class _ProcessManager(object):
             self.__timer.start()
 
     def killRunningTask(self, procId, reason):
+        """
+        Kill a currently running task by its procId. 
+        """
         logger.info("kill requested for procId %s, %s", procId, reason)
 
         with self.__lock:
@@ -175,7 +200,29 @@ class _ProcessManager(object):
             raise ttypes.RndException(1, err)
 
     def getRunningTasks(self):
+        """ Get a list of all running task objects """
         return [t.pthread.getRunningTask() for t in self.__threads.itervalues()]
+
+    def shutdown(self):
+        """
+        Gracefully shut down all running tasks so they can report back in
+        """
+        logger.debug("Shutdown requested for process manager.")
+        self.__isShutdown.set()
+
+        with self.__lock:
+            threads = [proc.pthread for proc in self.__threads.itervalues()]
+
+        for t in threads:
+            t.shutdown()
+
+        logger.debug("Asked %d tasks to quit and report. Waiting for them to complete", len(threads))
+
+        for t in threads:
+            if not t.wait(10):
+                logger.warn("Thread failed to close down after waiting 10 seconds: %r", t) 
+
+        logger.debug("Done waiting on task shutdown")
 
     def reboot(self, now=False):
         """
@@ -199,12 +246,17 @@ class _ProcessManager(object):
 
         if now:
             logger.info("*SYSTEM GOING DOWN FOR IMMEDIATE REBOOT*")
+
+            # stop all of the tasks
+            self.shutdown()
+
             with self.__lock:
                 if self.__timer:
                     self.__timer.cancel()
                 # The reboot could happen from the ping if the task
                 # queue is empty. 
                 self.sendPing(repeat=False)
+
             # Otherwise, the reboot will happen here, regardless
             # of whether there are active tasks running.
             Profiler.reboot()
@@ -217,7 +269,7 @@ class _ProcessManager(object):
         Loop that updates metrics on every running process 
         at intervals.
         """
-        while True:
+        while not self.__isShutdown.is_set():
             with self.__lock:
                 pthreads = [t.pthread for t in self.__threads.itervalues()]
 
@@ -231,6 +283,11 @@ class _ProcessManager(object):
 # RunningTask
 #
 class RunningTask(ttypes.RunningTask):
+    """
+    Subclass of ttypes.RunningTask that adjusts the
+    __repr__ to only print a reduces amount of the last
+    log line string.
+    """
     def __repr__(self):
         D = self.__dict__.copy()
 
@@ -263,8 +320,11 @@ class _ProcessThread(threading.Thread):
         self.__logfp = None
         self.__pid = -1
 
-        self.__wasKilled = False
+        self.__killThread = None
+
+        self.__wasKilled = threading.Event()
         self.__hasStarted = threading.Event()
+        self.__isShutdown = threading.Event()
 
         self.__progressLock = threading.Lock()
         self.__progress = 0.0
@@ -283,6 +343,25 @@ class _ProcessThread(threading.Thread):
             self.__rtc.procId, 
             self.__pid)
 
+    def shutdown(self):
+        """
+        Instruct the process to shutdown gracefully.
+        Returns the same output as killProcess()
+        """
+        logger.debug("Shutdown request received. Killing %r", self)
+        self.__isShutdown.set()
+        self.killProcess(block=False)
+
+    def wait(self, timeout=None):
+        """
+        Waits for the process to finish. 
+        By default, blocks indefinitely. Specify a
+        timeout in float seconds to wait. If the timeout 
+        value is exceeded, return False
+        Returns True if the task ended. 
+        """
+        self.join(timeout)
+        return not self.isAlive()
 
     def getRunningTask(self, wait=-1):
         """
@@ -321,6 +400,11 @@ class _ProcessThread(threading.Thread):
         return rt
 
     def run(self):
+        """
+        Run method called implicitely by start() 
+        Fires up the process to do the actual task. 
+        Logs output, and records resource metrics.
+        """
         rtc = self.__rtc 
         retcode = 1
 
@@ -365,6 +449,7 @@ class _ProcessThread(threading.Thread):
             lock = self.__progressLock
 
             for line in iter(r_pipe.readline, ""):
+
                 writeLog(line)
 
                 with lock:
@@ -375,21 +460,26 @@ class _ProcessThread(threading.Thread):
                         if prog is not None:
                             self.__progress = prog 
 
+                if self.__isShutdown.is_set():
+                    break
+
             try:
                 retcode = p.wait()
             except OSError, e:
-                if e.errno == errno.ECHILD:
-                    pass
-                else:
-                    raise
+                if e.errno != errno.ECHILD:
+                    if not self.__isShutdown.is_set():
+                        raise
 
             r_pipe.close()
 
             logger.debug("Return code: %s", retcode)
 
         except Exception, e:
-            logger.warn("Failed to execute command: %s", e)
-            logger.debug(traceback.format_exc())
+            if self.__isShutdown.is_set():
+                logger.debug("Thread detected shutdown request. Leaving gracefully.")
+            else:
+                logger.warn("Failed to execute command: %s", e)
+                logger.debug(traceback.format_exc())
 
         finally:
             self.__completed(retcode)
@@ -443,9 +533,9 @@ class _ProcessThread(threading.Thread):
             })
             # logger.debug("metrics: %s", self.__metrics)
 
-    def killProcess(self):
+    def killProcess(self, block=True):
         """
-        killProcess() -> (list killed_pids, list not_killed)
+        killProcess(bool block=True) -> (list killed_pids, list not_killed)
 
         Stop the entire process tree
 
@@ -453,11 +543,33 @@ class _ProcessThread(threading.Thread):
         the pids from the process tree that were successfully 
         stopped. The second list contains pids that were not 
         able to be stopped successfully.
+
+        By default the call blocks until the attempt to kill 
+        has completed. Set block=False to issue the kill async. 
         """
-        p = psutil.Process(self.__pid)
+        if block:
+            return self.__killProcess()
+
+        # guards against repeat calls to kill while one async
+        # call is already running
+        if self.__killThread and self.__killThread.isAlive():
+            return
+
+        t = threading.Thread(target=self.__killProcess)
+        t.start()
+        self.__killThread = t
+        return
+
+
+    def __killProcess(self):
+        try:
+            p = psutil.Process(self.__pid)
+        except psutil.NoSuchProcess:
+            return
+
         children = p.get_children(recursive=True)
 
-        self.__wasKilled = True
+        self.__wasKilled.set()
 
         # kill the top parent
         self.__killOneProcess(p)
@@ -482,39 +594,45 @@ class _ProcessThread(threading.Thread):
         Try and nicely stop a Process first, then kill it. 
         Return True if process was killed.
         """
-        try: 
-            p.wait(0.001)
-        except psutil.TimeoutExpired: 
+        try:
+            try: 
+                p.wait(0.001)
+            except psutil.TimeoutExpired: 
+                pass
+
+            if not p.is_running():
+                return True
+
+            pid = p.pid 
+
+            logger.info("Asking nicely for pid %d (%s) to stop", pid, p.name)
+            p.terminate()
+            try: 
+                p.wait(5)
+            except psutil.TimeoutExpired: 
+                pass
+
+            if not p.is_running():
+                return True
+
+            logger.info("Killing pid %d (%s)", pid, p.name)
+            p.kill()
+            try: 
+                p.wait(1)
+            except psutil.TimeoutExpired: 
+                pass
+
+            if p.is_running():
+                logger.warn("Failed to properly kill pid %d (taskId: %s)", pid, self.__rtc.taskId)
+                return False 
+
+        except psutil.NoSuchProcess:
             pass
-        if not p.is_running():
-            return True
-
-        pid = p.pid 
-
-        logger.info("Asking nicely for pid %d (%s) to stop", pid, p.name)
-        p.terminate()
-        try: 
-            p.wait(5)
-        except psutil.TimeoutExpired: 
-            pass
-
-        if not p.is_running():
-            return True
-
-        logger.info("Killing pid %d (%s)", pid, p.name)
-        p.kill()
-        try: 
-            p.wait(1)
-        except psutil.TimeoutExpired: 
-            pass
-
-        if p.is_running():
-            logger.warn("Failed to properly kill pid %d (taskId: %s)", pid, self.__rtc.taskId)
-            return False 
 
         return True
 
     def __completed(self, retcode):
+        logger.debug("Process completed: %r, %r", self, self.__isShutdown.is_set())
         result = ttypes.RunTaskResult()
         result.maxRssMb = self.__metrics['maxRssMb']
 
@@ -523,12 +641,19 @@ class _ProcessThread(threading.Thread):
             result.taskId = self.__rtc.taskId
             result.jobId = self.__rtc.jobId
 
-        if self.__wasKilled:
+        if self.__isShutdown.is_set():
+            result.exitStatus = 1
+            result.exitSignal = 86
+            logger.info("Task closing gracefully from shutdown request")
+
+        elif self.__wasKilled.is_set():
             result.exitStatus = 1
             result.exitSignal = retcode if retcode < 0 else -9
+        
         elif retcode < 0:
             result.exitStatus = 1
             result.exitSignal = retcode
+        
         else:
             result.exitStatus = retcode
             result.exitSignal = 0
@@ -549,6 +674,7 @@ class _ProcessThread(threading.Thread):
         if self.__logfp is not None:
             self.__logfp.writeLogFooterAndClose(result)
             self.__logfp = None
+
 
 
 #

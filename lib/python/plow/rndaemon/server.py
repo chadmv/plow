@@ -2,6 +2,7 @@
 
 import logging
 import sys
+import signal
 
 import conf
 import core
@@ -40,7 +41,15 @@ def get_server(api, handler, port, **kwargs):
     return server
 
 
+def exit_handler(signum, frame):
+    logger.info("Caught SIGTERM. Shutting down...")
+    core.ProcessMgr.shutdown()
+    sys.exit(0)
+
+
 def start():
+    signal.signal(signal.SIGTERM, exit_handler)
+
     logger.info("Staring Render Node Daemon on TCP port %d" % conf.NETWORK_PORT)
     server = get_server(RndNodeApi, RndProcessHandler(), conf.NETWORK_PORT)
 

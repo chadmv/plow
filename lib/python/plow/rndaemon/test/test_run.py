@@ -245,6 +245,25 @@ class TestProcessManager(unittest.TestCase):
 
             D['result'] = None
 
+
+    def testTaskShutdown(self):
+        procs = []
+        for slot in core.ResourceMgr.getOpenSlots():
+            process = self.getNewTaskCommand()
+            process.command = [CMDS_UTIL, 'hard_to_kill']
+            core.ProcessMgr.runProcess(process)
+            procs.append(process)
+
+        time.sleep(1)
+
+        core.ProcessMgr.shutdown()
+
+        for proc in procs:
+            sig, status = self.getLogSignalStatus(proc.logFile)
+            self.assertEqual(status, 1, "Expected 1 Exit Status, but got %s" % status)
+            self.assertEqual(sig, 86, "Expected 86 Exit Signal, but got %s" % sig)
+
+
     def getNewTaskCommand(self):
         process = ttypes.RunTaskCommand()
         process.procId = uuid.uuid4()
