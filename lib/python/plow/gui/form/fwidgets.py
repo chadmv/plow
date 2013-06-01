@@ -4,7 +4,9 @@ from plow.gui.util import formatDateTime, formatDuration
 __all__ = [
     "Text",
     "Number",
-    "DateTime"
+    "Decimal",
+    "DateTime",
+    "PillWidget"
 ]
 
 class FormWidget(QtGui.QWidget):
@@ -63,6 +65,19 @@ class Number(FormWidget):
 
     def _setReadOnly(self, value):
         self._widget.setReadOnly(value)
+        self._widget.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        
+class Decimal(FormWidget):
+    def __init__(self, value, parent=None):
+        FormWidget.__init__(self, parent)
+        widget = QtGui.QDoubleSpinBox(self)
+        widget.setValue(value)
+        self.setWidget(widget)
+        self._widget.setFocusPolicy(QtCore.Qt.NoFocus)
+
+    def _setReadOnly(self, value):
+        self._widget.setReadOnly(value)
+        self._widget.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
 
 class DateTime(FormWidget):
     def __init__(self, value, parent=None):
@@ -73,3 +88,13 @@ class Duration(FormWidget):
     def __init__(self, times, parent=None):
         FormWidget.__init__(self, parent)
         self.setWidget(QtGui.QLabel(formatDuration(times[0], times[1]), self))
+
+class PillWidget(FormWidget):
+    def __init__(self, value, parent):
+        FormWidget.__init__(self, parent)
+        data, color = value
+
+        self.label = QtGui.QLabel(data, self)
+        self.label.setStyleSheet("border: 1px solid #222222; background-color: %s; border-radius: 6px;" % color)
+        self.label.setMinimumWidth(100)
+        self.setWidget(self.label)
