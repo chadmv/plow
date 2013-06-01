@@ -1,6 +1,8 @@
 package com.breakersoft.plow.scheduler;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,9 @@ public class SchedulerEventHandler {
     SchedulerService schedulerService;
 
     @Autowired
+    StatsService statsService;
+
+    @Autowired
     NodeService nodeService;
 
     @Autowired
@@ -48,9 +53,6 @@ public class SchedulerEventHandler {
 
     @Autowired
     DispatchService dispatchService;
-
-    @Autowired
-    DependService dependService;
 
     @Autowired
     JobService jobService;
@@ -61,6 +63,11 @@ public class SchedulerEventHandler {
     @Autowired
     ProcDispatcher procDispatcher;
 
+    /**
+     * This is a oneway method, the RNDaemon is not listening for a response.
+     *
+     * @param ping
+     */
     public void handleNodePing(Ping ping) {
 
         logger.info("{} node reporting in.", ping.getHostname());
@@ -74,9 +81,12 @@ public class SchedulerEventHandler {
             node = dispatchService.getDispatchNode(newNode.getName());
         }
 
-
         if (node.isDispatchable()) {
             nodeDispatcher.book(node);
+        }
+
+        if (!ping.tasks.isEmpty()) {
+            statsService.updateProcRuntimeStats(ping.tasks);
         }
     }
 
