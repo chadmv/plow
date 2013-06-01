@@ -273,6 +273,7 @@ class _ProcessThread(threading.Thread):
         self.__metricsLock = threading.Lock()
         self.__metrics = {
             'rssMb': 0,
+            'maxRssMb': 0,
             'cpuPercent': 0,
         }
 
@@ -432,10 +433,12 @@ class _ProcessThread(threading.Thread):
             return
 
         cpu_perc = int(round(cpu_perc))
+        rssMb = rss_bytes / 1024 / 1024
 
         with self.__metricsLock:
             self.__metrics.update({
-                'rssMb': rss_bytes / 1024 / 1024,
+                'rssMb': rssMb,
+                'maxRssMb': max(rssMb, self.__metrics['maxRssMb']),
                 'cpuPercent': cpu_perc,
             })
             # logger.debug("metrics: %s", self.__metrics)
@@ -513,7 +516,7 @@ class _ProcessThread(threading.Thread):
 
     def __completed(self, retcode):
         result = ttypes.RunTaskResult()
-        result.maxRssMb = 0
+        result.maxRssMb = self.__metrics['maxRssMb']
 
         with self.__lock:
             result.procId = self.__rtc.procId
