@@ -3,7 +3,6 @@ import os
 import logging 
 
 from manifest import QtCore, QtGui
-import resources
 from panels import *
 from event import EventManager
 from util import loadTheme 
