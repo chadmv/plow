@@ -10,6 +10,9 @@ from plow.gui.event import EventManager
 LOGGER = logging.getLogger(__file__)
 
 
+DEFAULT_FONT_SIZE = 10
+
+
 class LogsPanel(Panel):
 
     def __init__(self, name="Logs", parent=None):
@@ -17,6 +20,8 @@ class LogsPanel(Panel):
 
         self.setWidget(TabbedLogVieweWidget(self.attrs, self))
         self.setWindowTitle(name)
+
+        self.setAttr("fontPointSize", DEFAULT_FONT_SIZE)
 
         EventManager.bind("TASK_OF_INTEREST", self.__handleTaskOfInterestEvent)
         
@@ -46,10 +51,16 @@ class TabbedLogVieweWidget(QtGui.QWidget):
         self.__tabs.setTabsClosable(True)
         self.__tabs.tabCloseRequested.connect(self.closeTab)
 
+        self.__fontSize = DEFAULT_FONT_SIZE
+
         layout = QtGui.QVBoxLayout()
         layout.setContentsMargins(4,0,4,4)
         layout.addWidget(self.__tabs)
         self.setLayout(layout)
+
+    def __iter__(self):
+        for i in xrange(self.__tabs.count()):
+            yield self.__tabs.widget(i)
 
     def addTask(self, job, task):
         index = self.__tasks.get(task.id, None)
@@ -57,11 +68,14 @@ class TabbedLogVieweWidget(QtGui.QWidget):
             self.__tabs.setCurrentIndex(index)
         else:
             viewer = LogViewerWidget(job, task, {}, self)
+            viewer.setFontPointSize(self.__fontSize)
             viewer.setInterval(self.__interval)
             index = self.__tabs.addTab(viewer, task.name)
             self.__tabs.setTabToolTip(index, viewer.logPath)
             self.__tabs.setCurrentIndex(index)
             self.__tasks[task.id] = index
+
+            viewer.fontPointSizeChanged.connect(self.setFontPointSize)
             
     def closeTab(self, index):
         taskId = None
@@ -85,8 +99,15 @@ class TabbedLogVieweWidget(QtGui.QWidget):
         for i in xrange(self.__tabs.count()):
             self.__tabs.widget(i).setInterval(msec)
 
+    def setFontPointSize(self, size):
+        self.__fontSize = size
+        for tab in self:
+            tab.setFontPointSize(size)
+
 
 class LogViewerWidget(QtGui.QWidget):
+
+    fontPointSizeChanged = QtCore.Signal(float)
 
     def __init__(self, job=None, task=None, attrs=None, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -145,7 +166,7 @@ class LogViewerWidget(QtGui.QWidget):
         view.setLineWrapMode(view.WidgetWidth)
         view.setReadOnly(True)
         view.setMaximumBlockCount(1000000)
-        self.__view.setFocusPolicy(QtCore.Qt.NoFocus)
+        # self.__view.setFocusPolicy(QtCore.Qt.NoFocus)
 
         layout = QtGui.QVBoxLayout(self)
         layout.setSpacing(0)
@@ -175,6 +196,17 @@ class LogViewerWidget(QtGui.QWidget):
             self.setCurrentTask(task)
 
 
+    def keyPressEvent(self, event):
+        if event.modifiers() & QtCore.Qt.ControlModifier:
+            key = event.key()
+            if key == QtCore.Qt.Key_Plus:
+                self.incrementFontSize()
+            elif key == QtCore.Qt.Key_Minus:
+                self.decrementFontSize()
+
+        super(LogViewerWidget, self).keyPressEvent(event)
+
+
     @property 
     def logPath(self):
         return self.__log_file.fileName() 
@@ -202,6 +234,25 @@ class LogViewerWidget(QtGui.QWidget):
 
     def setInterval(self, msec):
         self.__logWatcher.setInterval(msec)
+
+    def fontPointSize(self):
+        return self.__view.font().pointSize()
+
+    def setFontPointSize(self, size):
+        font = self.__view.font()
+        lastSize = font.pointSizeF()
+        if size == lastSize:
+            return
+
+        font.setPointSizeF(size)
+        self.__view.setFont(font)
+        self.fontPointSizeChanged.emit(size)
+
+    def incrementFontSize(self):
+        self.setFontPointSize(min(self.fontPointSize()+1, 20))
+
+    def decrementFontSize(self):
+        self.setFontPointSize(max(self.fontPointSize()-1, 8))
 
     def setCurrentTask(self, task):
         if not task.id or task.id == self.taskId:
