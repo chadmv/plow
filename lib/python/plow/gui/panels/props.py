@@ -6,6 +6,7 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.form import PlowForm
+from plow.gui.util import formatCoreTime
 
 class PropertiesPanel(Panel):
 
@@ -102,6 +103,23 @@ class PropertiesPanel(Panel):
                         "readOnly": True
                     },
                     {
+                        "title": "ID",
+                        "widget": "text",
+                        "value": job.id,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "User",
+                        "widget": "text",
+                        "value": job.username,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "UID",
+                        "value": job.uid,
+                        "readOnly": True
+                    },
+                    {
                         "title": "State",
                         "widget": "jobState",
                         "value": job.state
@@ -173,6 +191,38 @@ class PropertiesPanel(Panel):
                                     {
                         "title": "Waiting",
                         "value": job.totals.waiting,
+                        "readOnly": True,
+                    }
+                ]
+            },
+            {
+                "title": "Resource Stats",
+                "children": [
+                    {
+                        "title": "High RAM",
+                        "value": job.stats.highRam,
+                        "readOnly": True,
+                    },
+                    {
+                        "title": "High CPU",
+                        "value": job.stats.highCores,
+                        "readOnly": True,
+                    },
+                    {
+                        "title": "High Core Time",
+                        "value": formatCoreTime(job.stats.highCoreTime),
+                        "readOnly": True,
+                    },
+                    {
+                        "title": "Success Core Hours",
+                        "value": [formatCoreTime(job.stats.totalSuccessCoreTime), "rgba(76, 115, 0, 192)"],
+                        "widget": "pillWidget",                                 
+                        "readOnly": True,       
+                    },
+                    {
+                        "title": "Fail Core Hours",
+                        "value":  [formatCoreTime(job.stats.totalFailCoreTime), "rgba(177, 24, 0, 192)"], 
+                        "widget": "pillWidget",
                         "readOnly": True,
                     }
                 ]

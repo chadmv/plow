@@ -38,6 +38,11 @@ def formatDuration(startTime, stopTime=0):
     h, m = divmod(m, 60)
     return "%02d:%02d:%02d" % (h, m, s)
 
+def formatCoreTime(core_time_ms):
+    """
+    Format core time in millis to core hours.
+    """
+    return "%0.2f" % (core_time_ms / 1000 / 3600.0)
 
 def loadTheme():
     QtGui.QApplication.setStyle("plastique")

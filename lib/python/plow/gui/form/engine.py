@@ -9,8 +9,10 @@ class FormWidgetFactory(object):
     Map = {
         "text": fwidgets.Text,
         "number": fwidgets.Number,
+        "decimal": fwidgets.Decimal,
         "datetime": fwidgets.DateTime,
-        "duration": fwidgets.Duration
+        "duration": fwidgets.Duration,
+        "pillWidget": fwidgets.PillWidget
     }
 
     @classmethod
@@ -20,8 +22,11 @@ class FormWidgetFactory(object):
         if not widget:
             if isinstance(value, int):
                 widget = "number"
+            elif isinstance(value, float):
+                widget = "decimal"
             else:
                 widget = "text"
+                value = str(value)
 
         w = cls.Map[widget](data.get("value", ""), parent)
         w.setReadOnly(data.get("readOnly", False))
