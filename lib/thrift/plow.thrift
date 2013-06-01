@@ -177,12 +177,12 @@ struct ProcT {
 }
 
 struct JobStatsT {
-    1:required i32 highRam,
-    2:required double highCores,
-    3:required i32 highCoreTime,
-    4:required i64 totalCoreTime,
-    5:required i64 totalSuccessCoreTime,
-    6:required i64 totalFailCoreTime
+    1:i32 highRam,
+    2:double highCores,
+    3:i32 highCoreTime,
+    4:i64 totalCoreTime,
+    5:i64 totalSuccessCoreTime,
+    6:i64 totalFailCoreTime
 }
 
 struct JobT {
