@@ -8,6 +8,11 @@ public class Signal {
     public static final int NORMAL = 0;
 
     /**
+     * Exit signal when a node is shutdown.
+     */
+    public static final int NODE_SHUTDOWN = 86;
+
+    /**
      * Exit signal for an aborted dispatch.
      */
     public static final int ABORTED_TASK = 667;
