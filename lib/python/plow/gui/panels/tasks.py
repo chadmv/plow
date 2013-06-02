@@ -262,6 +262,9 @@ class TaskModel(QtCore.QAbstractTableModel):
             self.__tasks = plow.client.get_tasks(jobId=jobid)
             self.__lastUpdateTime = plow.client.get_plow_time()
 
+            for i, task in enumerate(self.__tasks):
+                self.__index[task.id] = i
+
         finally:
             self.endResetModel()
             self.__timer.start()
