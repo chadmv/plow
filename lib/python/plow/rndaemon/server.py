@@ -56,4 +56,5 @@ def start():
     try:
         server.serve()
     except KeyboardInterrupt:
+        exit_handler(None,None)
         sys.exit(2)
