@@ -611,20 +611,20 @@ CREATE INDEX task_history_exit_status ON plow.task_history (int_exit_status NULL
 CREATE OR REPLACE FUNCTION plow.before_layer_stat_updated() RETURNS TRIGGER AS $$
 BEGIN
   IF NEW.int_ram_high < OLD.int_ram_high THEN
-    NEW.int_ram_high = OLD.int_ram_high;
+    NEW.int_ram_high := OLD.int_ram_high;
   END IF;
 
   IF NEW.flt_cores_high < OLD.flt_cores_high THEN
-    NEW.flt_cores_high = OLD.flt_cores_high;
+    NEW.flt_cores_high := OLD.flt_cores_high;
   END IF;
 
   IF NEW.int_core_time_high < OLD.int_core_time_high THEN
-    NEW.int_core_time_high = OLD.int_core_time_high;
+    NEW.int_core_time_high := OLD.int_core_time_high;
   END IF;
 
   IF OLD.int_core_time_low != -1 THEN
     IF NEW.int_core_time_low > OLD.int_core_time_low THEN
-      NEW.int_core_time_low = OLD.int_core_time_low;
+      NEW.int_core_time_low := OLD.int_core_time_low;
     END IF;
   END IF;
 
@@ -642,15 +642,15 @@ CREATE TRIGGER trig_before_layer_stat_updated BEFORE UPDATE ON plow.layer_stat
 CREATE OR REPLACE FUNCTION plow.before_job_stat_updated() RETURNS TRIGGER AS $$
 BEGIN
   IF NEW.int_ram_high < OLD.int_ram_high THEN
-    NEW.int_ram_high = OLD.int_ram_high;
+    NEW.int_ram_high := OLD.int_ram_high;
   END IF;
 
   IF NEW.flt_cores_high < OLD.flt_cores_high THEN
-    NEW.flt_cores_high = OLD.flt_cores_high;
+    NEW.flt_cores_high := OLD.flt_cores_high;
   END IF;
 
   IF NEW.int_core_time_high < OLD.int_core_time_high THEN
-    NEW.int_core_time_high = OLD.int_core_time_high;
+    NEW.int_core_time_high := OLD.int_core_time_high;
   END IF;
 
   RETURN NEW;
@@ -1032,11 +1032,11 @@ CREATE OR REPLACE FUNCTION plow.before_proc_ping_update() RETURNS TRIGGER AS $$
 BEGIN
 
   IF NEW.int_ram_high < OLD.int_ram_high THEN
-    NEW.int_ram_high = OLD.int_ram_high;
+    NEW.int_ram_high := OLD.int_ram_high;
   END IF;
 
   IF NEW.flt_cores_high < OLD.flt_cores_high THEN
-    NEW.flt_cores_high = OLD.flt_cores_high;
+    NEW.flt_cores_high := OLD.flt_cores_high;
   END IF;
 
   RETURN NEW;
@@ -1056,11 +1056,11 @@ CREATE OR REPLACE FUNCTION plow.before_task_ping_update() RETURNS TRIGGER AS $$
 BEGIN
 
   IF NEW.int_last_ram_high < OLD.int_last_ram_high THEN
-    NEW.int_last_ram_high = OLD.int_last_ram_high;
+    NEW.int_last_ram_high := OLD.int_last_ram_high;
   END IF;
 
   IF NEW.flt_last_cores_high < OLD.flt_last_cores_high THEN
-    NEW.flt_last_cores_high = OLD.flt_last_cores_high;
+    NEW.flt_last_cores_high := OLD.flt_last_cores_high;
   END IF;
 
   RETURN NEW;
