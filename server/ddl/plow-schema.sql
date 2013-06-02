@@ -760,7 +760,7 @@ BEGIN
   * See com.plowrender.plow.Signal.
   */
   IF NEW.int_exit_signal = 667 THEN
-    UPDATE plow.task SET int_retries = int_retries -1 WHERE pk_task=NEW.pk_task;
+    UPDATE plow.task SET int_retry = int_retry-1 WHERE pk_task=NEW.pk_task;
     DELETE FROM task_history WHERE pk_task=NEW.pk_task AND time_stopped=0;
     RETURN NEW;
   END IF;
