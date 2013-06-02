@@ -10,7 +10,7 @@ from plow.gui.event import EventManager
 LOGGER = logging.getLogger(__file__)
 
 
-DEFAULT_FONT_SIZE = 10
+DEFAULT_FONT_SIZE = 10.0
 
 
 class LogsPanel(Panel):
@@ -249,10 +249,10 @@ class LogViewerWidget(QtGui.QWidget):
         self.fontPointSizeChanged.emit(size)
 
     def incrementFontSize(self):
-        self.setFontPointSize(min(self.fontPointSize()+1, 20))
+        self.setFontPointSize(min(self.fontPointSize()+1, 18))
 
     def decrementFontSize(self):
-        self.setFontPointSize(max(self.fontPointSize()-1, 8))
+        self.setFontPointSize(max(self.fontPointSize()-1, 6))
 
     def setCurrentTask(self, task):
         if not task.id or task.id == self.taskId:
