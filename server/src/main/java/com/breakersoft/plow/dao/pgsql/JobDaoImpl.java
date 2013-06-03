@@ -135,7 +135,7 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
                 ret.setInt(6, spec.getUid());
                 ret.setInt(7, JobState.INITIALIZE.ordinal());
                 ret.setBoolean(8, paused);
-                ret.setString(9, String.format("%s/%s", spec.logPath, name));
+                ret.setString(9, spec.logPath);
                 ret.setObject(10, spec.attrs);
                 ret.setObject(11, spec.env);
                 ret.setBoolean(12, isPostJob);
