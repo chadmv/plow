@@ -255,16 +255,9 @@ cdef class LayerSpec:
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
-        self.serv = kwargs.get('serv', '')
-        self.chunk = kwargs.get('chunk', 0)
-        self.minCores = kwargs.get('minCores', 0)
-        self.maxCores = kwargs.get('maxCores', 0)
-        self.minRam = kwargs.get('minRam', 0)
-        self.threadable = kwargs.get('threadable', False) 
         self.command = kwargs.get('command', [])
         self.depends = kwargs.get('depends', [])
         self.tasks = kwargs.get('tasks', [])
-        self.tags = kwargs.get('tags', list())
         self.env = kwargs.get('env', {})
 
         if 'range' in kwargs:
@@ -290,6 +283,9 @@ cdef class LayerSpec:
 
         if 'maxReties' in kwargs:
             self.maxRetries = kwargs.get('maxRetries') 
+
+        if 'tags' in kwargs:
+            self.tags = kwargs.get('tags')
 
     def __repr__(self):
         return "<LayerSpec: %s>" % self.name
