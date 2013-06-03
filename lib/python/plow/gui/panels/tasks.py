@@ -27,16 +27,11 @@ class TaskPanel(Panel):
         self.setWidget(TaskWidget(self.attrs, self))
         self.setWindowTitle(name)
 
+        self.__lastJobId = None
+
         EventManager.bind("JOB_OF_INTEREST", self.__handleJobOfInterestEvent)
 
     def init(self):
-        # TODO
-        # sweep button (remove finished)
-        # refresh button
-        # seperator
-        # kill button (multi-select)
-        # comment button (multi-select)
-        # 
         titleBar = self.titleBarWidget()
 
         self.__state_filter = CheckableComboBox("Task States", constants.TASK_STATES, parent=self)
@@ -58,10 +53,14 @@ class TaskPanel(Panel):
         self.widget().refresh()
 
     def __handleJobOfInterestEvent(self, *args, **kwargs):
+        jobId = args[0]
         taskWidget = self.widget()
         taskWidget.setJobId(args[0])
 
-        self.__layer_filter.setOptions(taskWidget.layerNames)
+        if jobId != self.__lastJobId:
+            self.__layer_filter.setOptions(taskWidget.layerNames)
+
+        self.__lastJobId = jobId
 
     def __stateFilterChanged(self):
         sel = self.__state_filter.selectedOptions()
@@ -130,6 +129,9 @@ class TaskWidget(QtGui.QWidget):
             self.__model = TaskModel(self)
             self.__proxy.setSourceModel(self.__model)
             new_model = True
+
+        if jobid != self.__jobId:
+            self.__proxy.setFilters(layerIds=[])
 
         self.__jobId = jobid
         self.__updateLayers()
@@ -239,26 +241,33 @@ class TaskModel(QtCore.QAbstractTableModel):
         self.__jobId = None
         self.__lastUpdateTime = 0
 
-        # A timer for refreshing seconds.
+        # A timer for refreshing duration column.
         self.__timer = QtCore.QTimer(self)
+        self.__timer.setInterval(1000)
         self.__timer.timeout.connect(self.__durationRefreshTimer)
 
     def setJob(self, jobid):
         ## Clear out existing tasks.
         ## TODO make sure to emit right signals
+        self.__timer.stop()
+
+        self.beginResetModel()
+
+        self.__tasks = []
+        self.__index.clear()
+        self.__jobId = jobid
+        self.__lastUpdateTime = 0
+
         try:
-            self.__timer.stop()
-            self.beginResetModel()
-            self.__tasks = []
-            self.__index.clear()
-            self.__jobId = jobid
             self.__tasks = plow.client.get_tasks(jobId=jobid)
+            self.__lastUpdateTime = plow.client.get_plow_time()
+
             for i, task in enumerate(self.__tasks):
                 self.__index[task.id] = i
-            self.__lastUpdateTime = plow.client.get_plow_time()
+
         finally:
             self.endResetModel()
-            self.__timer.start(1000)
+            self.__timer.start()
 
     def getJobId(self):
         return self.__jobId
@@ -273,9 +282,9 @@ class TaskModel(QtCore.QAbstractTableModel):
 
         count = len(self.HEADERS)-1
         for task in tasks:
-            idx = self.__index[task.id]
-            self.__tasks[idx] = task
-            self.dataChanged.emit(self.index(idx,0), self.index(idx, count))
+            row = self.__index[task.id]
+            self.__tasks[row] = task
+            self.dataChanged.emit(self.index(row, 0), self.index(row, count))
 
     def rowCount(self, parent=None):
         return len(self.__tasks)
@@ -317,7 +326,7 @@ class TaskModel(QtCore.QAbstractTableModel):
         
         elif role == ObjectRole:
             return task
-        
+
         return
 
     def headerData(self, section, orientation, role):
@@ -326,8 +335,9 @@ class TaskModel(QtCore.QAbstractTableModel):
 
     def __durationRefreshTimer(self):
         RUNNING = plow.client.TaskState.RUNNING
-        [self.dataChanged.emit(self.index(idx, 4),  self.index(idx, 4)) 
-            for idx, t in enumerate(self.__tasks) if t.state == RUNNING]
+        for idx, t in enumerate(self.__tasks):
+            if t.state == RUNNING:
+                self.dataChanged.emit(self.index(idx, 4),  self.index(idx, 4))
 
 
 class TaskFilterProxyModel(models.AlnumSortProxyModel):
@@ -336,37 +346,37 @@ class TaskFilterProxyModel(models.AlnumSortProxyModel):
         super(TaskFilterProxyModel, self).__init__(*args, **kwargs)
         self.__states = set()
         self.__layers = set()
+
+        self.__all_filters = (self.__states, self.__layers)
         self.__customFilterEnabled = False
 
     def setFilters(self, states=None, layerIds=None):
-        self.__customFilterEnabled = False
-
         if states is not None:
-            state_set = set()
+            self.__states.clear()
             for s in states:
                 if isinstance(s, (str, unicode)):
                     s = constants.TASK_STATES.index(s)
-                state_set.add(s)
-            self.__states = state_set
-            self.__customFilterEnabled = True
+                self.__states.add(s)
 
         if layerIds is not None:
-            self.__layers = set(layerIds)
-            self.__customFilterEnabled = True
+            self.__layers.clear()
+            self.__layers.update(layerIds)
 
+        self.__customFilterEnabled = any(self.__all_filters)
         self.invalidateFilter()
 
     def filterAcceptsRow(self, row, parent):
         if not self.__customFilterEnabled:
             return super(TaskFilterProxyModel, self).filterAcceptsRow(row, parent)
 
-        idx = self.index(row, 0, parent)
-        if not idx:
-            return True
+        model = self.sourceModel()          
+        idx = model.index(row, 0, parent)
+        if not idx.isValid():
+            return False
 
-        task = idx.data(ObjectRole)
+        task = model.data(idx, ObjectRole)
         if not task:
-            return True
+            return False
 
         states = self.__states
         if states and task.state not in states:
