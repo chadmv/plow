@@ -72,10 +72,22 @@ cdef class JobFilter:
     def __init__(self, **kwargs):
         self.value.matchingOnly = kwargs.get('matchingOnly', False)
         self.value.regex = kwargs.get('regex', '')
-        self.value.project = kwargs.get('project', [])
-        self.value.user = kwargs.get('user', [])
         self.value.jobIds = kwargs.get('jobIds', [])
-        self.value.name = kwargs.get('name', [])
+
+        project = kwargs.get('project', [])
+        if isinstance(project, (str, unicode)):
+            project = [project]
+        self.value.project = project
+        
+        user = kwargs.get('user', [])
+        if isinstance(user, (str, unicode)):
+            user = [user]
+        self.value.user = user
+
+        name = kwargs.get('name', [])
+        if isinstance(name, (str, unicode)):
+            name = [name]
+        self.value.name = name
 
         cdef JobState_type i
         for i in kwargs.get('states', []):
