@@ -47,9 +47,6 @@ public class OrphanProcChecker extends AbstractCrondTask {
 
                 final UUID taskId = proc.getTaskId();
 
-                logger.warn("Deallocating orphan {}", proc);
-                dispatchService.deallocateProc(proc, "orphaned");
-
                 if (proc.getTaskId() != null) {
                     final Task task = jobService.getTask(taskId);
 
@@ -57,6 +54,9 @@ public class OrphanProcChecker extends AbstractCrondTask {
                     dispatchService.stopTask(task, TaskState.WAITING,
                             ExitStatus.FAIL, Signal.ORPANED_TASK);
                 }
+
+                logger.warn("Deallocating orphan {}", proc);
+                dispatchService.deallocateProc(proc, "orphaned");
 
             } catch (Exception e) {
                 logger.warn("Failed to handled orphaned proc, " + e.getMessage(), e);
