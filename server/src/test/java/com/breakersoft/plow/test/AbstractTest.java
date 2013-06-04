@@ -93,6 +93,34 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         return jobspec;
     }
 
+    public JobSpecT getTestJobSpec(String name, String range, int chunk) {
+
+        JobSpecT jobspec = new JobSpecT();
+        jobspec.setName(name);
+        jobspec.setUid(100);
+        jobspec.setUsername("stella");
+        jobspec.setPaused(false);
+        jobspec.setProject("unittest");
+        jobspec.setLogPath("/tmp/plow/unittests/" + name);
+
+        LayerSpecT layer = new LayerSpecT();
+        layer.setChunk(chunk);
+        layer.setCommand(Lists.newArrayList("sleep", "5" ));
+        layer.setMaxCores(8);
+        layer.setMinCores(1);
+        layer.setMinRam(1024);
+        layer.setName(name);
+        layer.setRange(range);
+        layer.setTags(Lists.newArrayList("unassigned"));
+        layer.setMaxRetries(2);
+        layer.env = Maps.newHashMap();
+        layer.setServ(Defaults.DEFAULT_SERVICE);
+        jobspec.addToLayers(layer);
+
+        return jobspec;
+    }
+
+
     public JobSpecT getTestJobSpec(String name, int layers) {
 
         JobSpecT jobspec = new JobSpecT();

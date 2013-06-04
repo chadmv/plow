@@ -316,4 +316,164 @@ public class DependServiceTests extends AbstractTest {
         // Satisifed handled by satisfyDependsOn(task)
 
     }
+
+    @Test
+    public void testTaskByTaskChunkedOnNonChunked() {
+        JobSpecT spec1 = getTestJobSpec("depend_test_1", "1-10", 5);
+        JobSpecT spec2 = getTestJobSpec("depend_test_2", "1-10", 1);
+
+        JobLaunchEvent event1 = jobService.launch(spec1);
+        JobLaunchEvent event2 = jobService.launch(spec2);
+
+        Layer dependentLayer =
+                jobService.getLayer(event1.getJob(), 0);
+        Layer dependOnLayer =
+                jobService.getLayer(event2.getJob(), 0);
+
+        DependSpecT dspec = new DependSpecT();
+        dspec.type = DependType.TASK_BY_TASK;
+        dspec.dependentJob = event1.getJob().getJobId().toString();
+        dspec.dependOnJob = event2.getJob().getJobId().toString();
+        dspec.dependentLayer = dependentLayer.getLayerId().toString();
+        dspec.dependOnLayer = dependOnLayer.getLayerId().toString();
+
+        dependService.createDepend(dspec);
+
+        assertEquals(10,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event2.getJob().getJobId()));
+        assertEquals(10,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM plow.depend"));
+    }
+
+    @Test
+    public void testTaskByTaskNonChunkedOnChunked() {
+        JobSpecT spec1 = getTestJobSpec("depend_test_1", "1-10", 1);
+        JobSpecT spec2 = getTestJobSpec("depend_test_2", "1-10", 5);
+
+        JobLaunchEvent event1 = jobService.launch(spec1);
+        JobLaunchEvent event2 = jobService.launch(spec2);
+
+        Layer dependentLayer =
+                jobService.getLayer(event1.getJob(), 0);
+        Layer dependOnLayer =
+                jobService.getLayer(event2.getJob(), 0);
+
+        DependSpecT dspec = new DependSpecT();
+        dspec.type = DependType.TASK_BY_TASK;
+        dspec.dependentJob = event1.getJob().getJobId().toString();
+        dspec.dependOnJob = event2.getJob().getJobId().toString();
+        dspec.dependentLayer = dependentLayer.getLayerId().toString();
+        dspec.dependOnLayer = dependOnLayer.getLayerId().toString();
+
+        dependService.createDepend(dspec);
+
+        assertEquals(10,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event2.getJob().getJobId()));
+        assertEquals(10,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM plow.depend"));
+    }
+
+    @Test
+    public void testTaskByTaskChunkedOnChunked() {
+        JobSpecT spec1 = getTestJobSpec("depend_test_1", "1-10", 5);
+        JobSpecT spec2 = getTestJobSpec("depend_test_2", "1-10", 5);
+
+        JobLaunchEvent event1 = jobService.launch(spec1);
+        JobLaunchEvent event2 = jobService.launch(spec2);
+
+        Layer dependentLayer =
+                jobService.getLayer(event1.getJob(), 0);
+        Layer dependOnLayer =
+                jobService.getLayer(event2.getJob(), 0);
+
+        DependSpecT dspec = new DependSpecT();
+        dspec.type = DependType.TASK_BY_TASK;
+        dspec.dependentJob = event1.getJob().getJobId().toString();
+        dspec.dependOnJob = event2.getJob().getJobId().toString();
+        dspec.dependentLayer = dependentLayer.getLayerId().toString();
+        dspec.dependOnLayer = dependOnLayer.getLayerId().toString();
+
+        dependService.createDepend(dspec);
+
+        assertEquals(2,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event2.getJob().getJobId()));
+        assertEquals(2,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM plow.depend"));
+    }
+
+    @Test
+    public void testTaskByTaskChunked2OnChunked5() {
+        JobSpecT spec1 = getTestJobSpec("depend_test_1", "1-10", 2);
+        JobSpecT spec2 = getTestJobSpec("depend_test_2", "1-10", 5);
+
+        JobLaunchEvent event1 = jobService.launch(spec1);
+        JobLaunchEvent event2 = jobService.launch(spec2);
+
+        Layer dependentLayer =
+                jobService.getLayer(event1.getJob(), 0);
+        Layer dependOnLayer =
+                jobService.getLayer(event2.getJob(), 0);
+
+        DependSpecT dspec = new DependSpecT();
+        dspec.type = DependType.TASK_BY_TASK;
+        dspec.dependentJob = event1.getJob().getJobId().toString();
+        dspec.dependOnJob = event2.getJob().getJobId().toString();
+        dspec.dependentLayer = dependentLayer.getLayerId().toString();
+        dspec.dependOnLayer = dependOnLayer.getLayerId().toString();
+
+        dependService.createDepend(dspec);
+
+        assertEquals(6,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event2.getJob().getJobId()));
+        assertEquals(6,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM plow.depend"));
+    }
+
+    @Test
+    public void testTaskByTaskChunked5OnChunked2() {
+        JobSpecT spec1 = getTestJobSpec("depend_test_1", "1-10", 2);
+        JobSpecT spec2 = getTestJobSpec("depend_test_2", "1-10", 5);
+
+        JobLaunchEvent event1 = jobService.launch(spec1);
+        JobLaunchEvent event2 = jobService.launch(spec2);
+
+        Layer dependentLayer =
+                jobService.getLayer(event1.getJob(), 0);
+        Layer dependOnLayer =
+                jobService.getLayer(event2.getJob(), 0);
+
+        DependSpecT dspec = new DependSpecT();
+        dspec.type = DependType.TASK_BY_TASK;
+        dspec.dependentJob = event1.getJob().getJobId().toString();
+        dspec.dependOnJob = event2.getJob().getJobId().toString();
+        dspec.dependentLayer = dependentLayer.getLayerId().toString();
+        dspec.dependOnLayer = dependOnLayer.getLayerId().toString();
+
+        dependService.createDepend(dspec);
+
+        assertEquals(6,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event1.getJob().getJobId()));
+        assertEquals(0,
+                simpleJdbcTemplate.queryForInt("SELECT SUM(int_depend_count) FROM task WHERE pk_job=?",
+                event2.getJob().getJobId()));
+        assertEquals(6,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM plow.depend"));
+    }
 }

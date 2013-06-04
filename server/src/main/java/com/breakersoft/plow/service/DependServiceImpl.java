@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,12 +21,16 @@ import com.breakersoft.plow.dao.DependDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.TaskDao;
+import com.breakersoft.plow.exceptions.DependencyException;
 import com.breakersoft.plow.thrift.DependSpecT;
 import com.google.common.collect.Sets;
 
 @Service
 @Transactional
 public class DependServiceImpl implements DependService {
+
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(DependServiceImpl.class);
 
     @Autowired
     JobDao jobDao;
@@ -172,18 +178,29 @@ public class DependServiceImpl implements DependService {
          * Task by task depends requires both layers to actually
          * have a frame range.
          */
-        FrameRange dependentRange = layerDao.getFrameRange(dependentLayer);
-        FrameRange dependOnRange = layerDao.getFrameRange(dependOnLayer);
+        final FrameRange dependentRange = layerDao.getFrameRange(dependentLayer);
+        final FrameRange dependOnRange = layerDao.getFrameRange(dependOnLayer);
+        final Set<Integer> dependOnTaskNumbers = Sets.newLinkedHashSet();
 
-        for (int i=0; i<dependentRange.numFrames;i++) {
+        for (int i=0; i<dependentRange.frameSet.size(); i=i+dependentRange.chunkSize) {
+            dependOnTaskNumbers.clear();
 
-            Set<Integer> dependOnTaskNumbers = Sets.newLinkedHashSet();
-
+            // get the task number for the given index.
             int depTaskNum = dependentRange.frameSet.get(i);
-            int onTaskNum = depTaskNum;
 
-            if (dependOnRange.frameSet.contains(onTaskNum)) {
-                dependOnTaskNumbers.add(onTaskNum);
+            for (int c=0; c<dependentRange.chunkSize; c++) {
+                int onTaskNum = depTaskNum + c;
+
+                if (dependOnRange.frameSet.contains(onTaskNum)) {
+                    if (dependOnRange.chunkSize == 1) {
+                        dependOnTaskNumbers.add(onTaskNum);
+                    }
+                    else if (dependOnRange.chunkSize > 1) {
+                        int idx = (dependOnRange.frameSet.indexOf(onTaskNum)
+                                / dependOnRange.chunkSize) * dependOnRange.chunkSize;
+                        dependOnTaskNumbers.add(dependOnRange.frameSet.get(idx));
+                    }
+                }
             }
 
             //TODO: handle chunks
@@ -193,13 +210,22 @@ public class DependServiceImpl implements DependService {
                 continue;
             }
 
+            logger.info("Creating depend on " + dependOnTaskNumbers.size() + " tasks");
+
             Task dependentTask = taskDao.get(dependentLayer, depTaskNum);
             for (int taskNum: dependOnTaskNumbers) {
-                Task dependOnTask = taskDao.get(dependOnLayer, taskNum);
-                Depend dep = dependDao.createTaskOnTask(
-                        dependentJob, dependentLayer, dependentTask,
-                        dependOnJob, dependOnLayer, dependOnTask);
-                dependDao.incrementDependCounts(dep);
+                try {
+                    Task dependOnTask = taskDao.get(dependOnLayer, taskNum);
+                    Depend dep = dependDao.createTaskOnTask(
+                            dependentJob, dependentLayer, dependentTask,
+                            dependOnJob, dependOnLayer, dependOnTask);
+                    dependDao.incrementDependCounts(dep);
+
+                } catch (DataAccessException e) {
+                    throw new DependencyException(
+                            "Unable to find task " + taskNum + " in " + dependOnLayer.getName() + ", while setting up dependencies.");
+                }
+
             }
         }
     }
