@@ -749,7 +749,6 @@ CREATE TRIGGER trig_after_layer_inserted AFTER INSERT ON plow.layer
 ---
 CREATE OR REPLACE FUNCTION plow.after_task_stopped() RETURNS TRIGGER AS $$
 DECLARE
-  proc RECORD;
   stats RECORD;
   clock_time BIGINT;
   core_time BIGINT;
@@ -765,21 +764,9 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  /*
-  * Grab the necessary stats off the proc.
-  */
-  SELECT
-    int_cores,
-    flt_cores_high,
-    int_ram_high
-  INTO
-    proc
-  FROM
-    plow.proc WHERE pk_task=NEW.pk_task;
-
-  /* Calcculate core and clock time. */
+  /* Calculate core and clock time. */
   clock_time := NEW.time_stopped - NEW.time_started;
-  core_time := clock_time * proc.int_cores;
+  core_time := clock_time * NEW.int_last_cores;
 
   /*
   * If the task didn't succeed stats are not calculated, but the failed
@@ -824,8 +811,8 @@ BEGIN
 
     UPDATE task_history
     SET
-      flt_cores_high = proc.flt_cores_high,
-      int_ram_high = proc.int_ram_high,
+      flt_cores_high = NEW.flt_last_cores_high,
+      int_ram_high = NEW.int_last_ram_high,
       time_stopped = NEW.time_stopped,
       int_core_time = core_time,
       int_clock_time = clock_time,
@@ -869,10 +856,10 @@ BEGIN
     UPDATE
       layer_stat
     SET
-      int_ram_high=proc.int_ram_high,
+      int_ram_high=NEW.int_last_ram_high,
       int_ram_avg=stats.ram_avg,
       flt_ram_std=COALESCE(stats.ram_stddev, 0),
-      flt_cores_high=proc.flt_cores_high,
+      flt_cores_high=NEW.flt_last_cores_high,
       flt_cores_avg=stats.cores_avg,
       flt_cores_std=COALESCE(stats.cores_stddev, 0),
       int_core_time_high=core_time,
@@ -888,8 +875,8 @@ BEGIN
     UPDATE
       job_stat
     SET
-      int_ram_high=proc.int_ram_high,
-      flt_cores_high=proc.flt_cores_high,
+      int_ram_high=NEW.int_last_ram_high,
+      flt_cores_high=NEW.flt_last_cores_high,
       int_core_time_high=core_time,
       int_total_core_time_success=int_total_core_time_success+core_time,
       int_total_clock_time_success=int_total_clock_time_success+clock_time
