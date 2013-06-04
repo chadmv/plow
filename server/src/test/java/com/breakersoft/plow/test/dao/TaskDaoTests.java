@@ -68,6 +68,66 @@ public class TaskDaoTests extends AbstractTest {
     }
 
     @Test
+    public void testBatchCreateFull() {
+        JobSpecT spec = getTestJobSpec();
+        job = jobDao.create(TEST_PROJECT, spec, false);
+        LayerSpecT lspec = spec.getLayers().get(0);
+        layer = layerDao.create(job, lspec, 0);
+
+        taskDao.batchCreate(layer, "1-10", 10, 1, 512);
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM task WHERE pk_layer=?",
+                        layer.getLayerId()));
+    }
+
+    @Test
+    public void testBatchCreateOver() {
+        JobSpecT spec = getTestJobSpec();
+        job = jobDao.create(TEST_PROJECT, spec, false);
+        LayerSpecT lspec = spec.getLayers().get(0);
+        layer = layerDao.create(job, lspec, 0);
+
+        taskDao.batchCreate(layer, "1-10", 1100, 1, 512);
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM task WHERE pk_layer=?",
+                        layer.getLayerId()));
+    }
+
+    @Test
+    public void testBatchCreateWithZeroChunk() {
+        JobSpecT spec = getTestJobSpec();
+        job = jobDao.create(TEST_PROJECT, spec, false);
+        LayerSpecT lspec = spec.getLayers().get(0);
+        layer = layerDao.create(job, lspec, 0);
+
+        taskDao.batchCreate(layer, "1-10", 0, 1, 512);
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM task WHERE pk_layer=?",
+                        layer.getLayerId()));
+    }
+
+    @Test
+    public void testBatchCreateWithOddChunk() {
+        JobSpecT spec = getTestJobSpec();
+        job = jobDao.create(TEST_PROJECT, spec, false);
+        LayerSpecT lspec = spec.getLayers().get(0);
+        layer = layerDao.create(job, lspec, 0);
+
+        taskDao.batchCreate(layer, "1-10", 7, 1, 512);
+
+        assertEquals(2,
+                simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM task WHERE pk_layer=?",
+                        layer.getLayerId()));
+
+        assertEquals(1,
+                simpleJdbcTemplate.queryForInt("SELECT int_number FROM task WHERE pk_layer=? AND int_task_order=0",
+                        layer.getLayerId()));
+        assertEquals(8,
+                simpleJdbcTemplate.queryForInt("SELECT int_number FROM task WHERE pk_layer=? AND int_task_order=1",
+                        layer.getLayerId()));
+    }
+
+    @Test
     public void testGet() {
         testCreate();
         Task f1 = taskDao.get(task.getTaskId());

@@ -165,7 +165,7 @@ public class JobServiceImpl implements JobService {
             if (blayer.isSetRange()) {
                 logger.info("Creating layer {}, range: {}", blayer.name, blayer.range);
                 taskDao.batchCreate(layer,
-                        blayer.range, layerOrder, blayer.minRam);
+                        blayer.range, blayer.chunk, layerOrder, blayer.minRam);
             }
             else if (blayer.isSetTasks()) {
                 logger.info("Creating tasks in layer: {}", blayer.name);

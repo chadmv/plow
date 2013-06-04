@@ -118,23 +118,30 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
     };
 
     @Override
-    public void batchCreate(final Layer layer, final String range, final int layerOrder, final int minRam) {
+    public void batchCreate(Layer layer, String range, int chunk, int layerOrder, int minRam) {
 
         final FrameSet frameSet = new FrameSet(range);
+        final int size = frameSet.size();
         final BatchSqlUpdate update = new BatchSqlUpdate(
                 jdbc.getDataSource(), INSERT, BATCH_TYPES);
 
-        final int size = frameSet.size();
-        for (int i=0; i<size; i++) {
+        // If the chunk size 0 or less we chunk the entire thing.
+        if (chunk <= 0) {
+            chunk = size;
+        }
+
+        int frameOrderCounter = 0;
+        for (int i=0; i<size; i=i+chunk) {
             int number = frameSet.get(i);
             update.update(UUIDGen.random(),
                     layer.getLayerId(),
                     layer.getJobId(),
                     String.format("%04d-%s", number, layer.getName()),
                     number,
-                    i,
+                    frameOrderCounter,
                     layerOrder,
                     minRam);
+            frameOrderCounter++;
         }
         update.flush();
     }
