@@ -55,13 +55,19 @@ class RenderJobWatchPanel(Panel):
             QtGui.QIcon(":/images/sweep.png"), "Remove Finished Jobs", self.removeFinishedJobs)
 
     def openLoadDialog(self):
-        dialog = JobSelectionDialog()
+        dialog = JobSelectionDialog(self)
         if dialog.exec_():
             widget = self.widget()
             for job in dialog.getSelectedJobs():
                 widget.addJob(job) 
 
     def _openPanelSettingsDialog(self):
+        # Older PySide QSettings may serialize a single item
+        # list to just a string
+        users = self.attrs['users']
+        if isinstance(users, (str, unicode)):
+            self.attrs['users'] = [users]
+
         d = RenderJobWatchSettingsDialog(self.attrs)
         if d.exec_():
             self.attrs.update(d.getAttrs())
@@ -307,8 +313,6 @@ class RenderJobWatchSettingsDialog(QtGui.QDialog):
         layout.addWidget(buttons)
 
     def getAttrs(self):
-
-
         return {
             "refreshSeconds": self.sliderRefresh.value(),
             "loadMine": self.checkboxLoadMine.isChecked(),

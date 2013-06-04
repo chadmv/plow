@@ -161,7 +161,7 @@ class CheckableListBox(QtGui.QWidget):
         for opt in options:
             item = QtGui.QListWidgetItem(opt)
             item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-            if opt in checked:
+            if checked and opt in checked:
                 item.setCheckState(QtCore.Qt.Checked)
             else:
                 item.setCheckState(QtCore.Qt.Unchecked)
@@ -229,7 +229,7 @@ class ManagedListWidget(QtGui.QWidget):
 
         self.list_widget = QtGui.QListWidget(self)
         self.list_widget.itemDoubleClicked.connect(self.list_widget.editItem)
-        for item in items:
+        for item in (items or []):
             list_item = self.__newItem(item)
             self.list_widget.addItem(list_item)
         self.list_widget.sortItems()
