@@ -409,8 +409,10 @@ class _ProcessThread(threading.Thread):
         retcode = 1
 
         try:
+            uid = self.__rtc.uid
+
             logger.info("Opening log file: %s", rtc.logFile)
-            self.__logfp = utils.ProcessLog(self.__rtc.logFile)
+            self.__logfp = utils.ProcessLog(self.__rtc.logFile, uid=uid)
             self.__logfp.writeLogHeader(rtc)
 
             env = os.environ.copy()
@@ -425,7 +427,7 @@ class _ProcessThread(threading.Thread):
             opts = {
                 'stdout': subprocess.PIPE, 
                 'stderr': subprocess.STDOUT,
-                'uid': self.__rtc.uid,
+                'uid': uid,
                 'cpus': self.__cpus,
                 'env': env,
             }
@@ -503,35 +505,38 @@ class _ProcessThread(threading.Thread):
             try:
                 rss_bytes = p.get_memory_info().rss
                 cpu_perc = p.get_cpu_percent(None)
-            except psutil.Error:
+            except psutil.Error, e:
+                logger.debug("Error while getting memory/cpu data for pid %r: %s", self.__pid, e)
                 return
 
             children = [child for child in p.get_children(True) 
                             if child.status != psutil.STATUS_ZOMBIE]
 
             for child in children:
+
                 try:
                     rss_bytes += child.get_memory_info().rss
-                except psutil.Error:
-                    pass            
+                except psutil.Error, e:
+                    logger.debug("Error while getting memory data for child pid %r: %s", child.pid, e)
+
                 try:
                     cpu_perc += child.get_cpu_percent(None) 
-                except psutil.Error:
-                    pass
+                except psutil.Error, e:
+                    logger.debug("Error while getting cpu data for child pid %r: %s", child.pid, e)
 
         except psutil.NoSuchProcess:
             return
 
-        cpu_perc = int(round(cpu_perc))
+        cpu_perc_int = int(round(cpu_perc))
         rssMb = rss_bytes / 1024 / 1024
 
         with self.__metricsLock:
             self.__metrics.update({
                 'rssMb': rssMb,
                 'maxRssMb': max(rssMb, self.__metrics['maxRssMb']),
-                'cpuPercent': cpu_perc,
+                'cpuPercent': cpu_perc_int,
             })
-            # logger.debug("metrics: %s", self.__metrics)
+            # logger.debug("metrics: %s; rss_bytes %0.3f; cpu_perc %0.3f", self.__metrics, rss_bytes, cpu_perc)
 
     def killProcess(self, block=True):
         """

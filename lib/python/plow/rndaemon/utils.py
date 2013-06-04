@@ -24,9 +24,27 @@ class ProcessLog(object):
     Passes all standard file methods through to the file 
     object. 
     """
-    def __init__(self, name, mode='w', buffering=-1):
+    def __init__(self, name, mode='w', buffering=-1, uid=None):
+        old_mask = os.umask(0)
         self.makeLogDir(name)
         self._fileObj = open(name, mode, buffering)
+        os.umask(old_mask)
+
+        if uid is not None:
+            folder = os.path.dirname(name)
+            gid = os.getgid()
+
+            for elem in (folder, name):
+                try:
+                    os.chmod(elem, 0777)
+                except Exception, e:
+                    logger.warn("Failed to chmod path %r to 0777: %s", elem, e)
+
+                try:
+                    os.chown(elem, uid, gid)
+                except Exception, e:
+                    logger.warn("Failed to chown path %r to uid %r / gid %r: %s", elem, uid, gid, e)
+
 
     def __del__(self):
         try:
@@ -63,9 +81,9 @@ class ProcessLog(object):
             "=====================================\n" \
             "Exit Status: %d\n" \
             "Signal: %d\n" \
-            "MaxRSS: 0\n" \
+            "MaxRSS: %d\n" \
             "=====================================\n\n" \
-            % (result.exitStatus, result.exitSignal))
+            % (result.exitStatus, result.exitSignal, result.maxRssMb))
 
         self._fileObj.close() 
 
@@ -79,6 +97,7 @@ class ProcessLog(object):
         """
         folder = os.path.dirname(path)
         if os.path.exists(folder):
+            logger.debug("Log directory already exists: %r", folder)
             return
 
         numTries = 0
@@ -89,7 +108,7 @@ class ProcessLog(object):
             if numTries >= maxTries:
                 raise Exception("Failed creating log path after %d tries." % numTries)
             try:
-                os.makedirs(folder, 0777)
+                os.makedirs(folder, mode=0777)
             except OSError, exp:
                 logger.warn("Error creating log path: %s, %s %d", folder, exp, exp.errno)
                 if exp.errno != errno.EEXIST:
@@ -98,10 +117,12 @@ class ProcessLog(object):
                     os.utime(os.path.dirname(folder), None)
 
             if os.path.exists(folder):
-                return
+                break
 
             time.sleep(sleep)
             numTries += 1
+
+        logger.debug("Created log directory: %r", folder)
 
 
 class ProcessLogParser(object):
