@@ -182,7 +182,7 @@ public class ThriftTaskDaoTests extends AbstractTest {
         UUID id = simpleJdbcTemplate.queryForObject(
                 "SELECT pk_task FROM task ORDER BY int_task_order DESC LIMIT 1", UUID.class);
 
-        String logPath = "/tmp/plow/unittests/test/test/0010-test_ls.-1.log";
+        String logPath = "/tmp/plow/unittests/test/0010-test_ls.-1.log";
         String result = thriftTaskDao.getLogPath(id);
         assertEquals(logPath, result);
     }
