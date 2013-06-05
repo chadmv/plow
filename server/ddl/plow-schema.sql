@@ -183,10 +183,10 @@ CREATE TABLE plow.job_stat (
   int_ram_high INTEGER NOT NULL DEFAULT 0,
   flt_cores_high REAL NOT NULL DEFAULT 0.0,
   int_core_time_high INTEGER NOT NULL DEFAULT 0,
-  
+
   int_total_core_time_success BIGINT NOT NULL DEFAULT 0,
   int_total_core_time_fail BIGINT NOT NULL DEFAULT 0,
-  
+
   int_total_clock_time_success BIGINT NOT NULL DEFAULT 0,
   int_total_clock_time_fail BIGINT NOT NULL DEFAULT 0
 );
@@ -216,7 +216,7 @@ CREATE table plow.layer (
   str_command TEXT[] NOT NULL,
   str_tags TEXT[] NOT NULL,
   str_service TEXT NOT NULL,
-  int_chunk_size INTEGER NOT NULL DEFAULT 1,
+  int_chunk_size INTEGER NOT NULL DEFAULT 1 CHECK (int_chunk_size > 0),
   int_order INTEGER NOT NULL,
   int_cores_min SMALLINT NOT NULL CHECK (int_cores_min > 0),
   int_cores_max SMALLINT NOT NULL DEFAULT -1,
