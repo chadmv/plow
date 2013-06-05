@@ -11,7 +11,6 @@ import javax.annotation.Resource;
 import org.apache.thrift.TException;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.test.annotation.Rollback;
 
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.event.EventManager;

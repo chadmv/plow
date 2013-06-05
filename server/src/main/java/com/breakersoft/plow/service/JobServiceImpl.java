@@ -171,7 +171,6 @@ public class JobServiceImpl implements JobService {
                 taskDao.batchCreate(layer, frameRange, layerOrder, blayer.minRam);
             }
             else if (blayer.isSetTasks()) {
-
                 logger.info("Creating tasks in layer: {}", blayer.name);
 
                 prepLayer(blayer, null);
