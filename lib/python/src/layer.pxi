@@ -513,9 +513,23 @@ cdef class Layer:
         conn().proxy().getLayerById(layer, self._layer.id)
         self.setLayer(layer)
 
+    def get_tasks(self):
+        """ 
+        Get the tasks for this layer
+
+        :returns: list[:class:`.Task`]
+        """
+        cdef list ret = get_tasks(layers=[self])
+        return ret
+
     def get_outputs(self):
-        """ :returns: list[:class:`.Output`] """
-        return get_layer_outputs(self)
+        """ 
+        Get the outputs for this layer
+
+        :returns: list[:class:`.Output`] 
+        """
+        cdef list ret = get_layer_outputs(self)
+        return ret
 
     def add_output(self, string path, Attrs& attrs):
         """
