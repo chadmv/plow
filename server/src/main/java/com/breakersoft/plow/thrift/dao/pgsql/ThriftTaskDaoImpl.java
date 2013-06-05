@@ -145,19 +145,19 @@ public class ThriftTaskDaoImpl extends AbstractDao implements ThriftTaskDao {
 
         if (PlowUtils.isValid(filter.layerIds)) {
             where.add(JdbcUtils.In(
-                    "task.pk_layer", filter.layerIds.size()));
+                    "task.pk_layer", filter.layerIds.size(), "uuid"));
             values.addAll(filter.layerIds);
         }
 
         if (PlowUtils.isValid(filter.nodeIds)) {
             where.add(JdbcUtils.In(
-                    "proc.pk_node", filter.nodeIds.size()));
+                    "proc.pk_node", filter.nodeIds.size(), "uuid"));
             values.addAll(filter.nodeIds);
         }
 
         if (PlowUtils.isValid(filter.taskIds)) {
             where.add(JdbcUtils.In(
-                    "task.pk_task", filter.taskIds.size()));
+                    "task.pk_task", filter.taskIds.size(), "uuid"));
             values.addAll(filter.taskIds);
         }
 
