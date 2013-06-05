@@ -184,7 +184,7 @@ cdef class Node:
         conn().proxy().getNode(node, self._node.name)
         self.setNode(node)
 
-    def set_locked(self, bint locked):
+    def lock(self, bint locked):
         """
         Set the lock state of the node 
 
