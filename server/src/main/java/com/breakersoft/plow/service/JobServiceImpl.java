@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
+import com.breakersoft.plow.FrameRange;
+import com.breakersoft.plow.FrameSet;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Layer;
@@ -159,16 +161,22 @@ public class JobServiceImpl implements JobService {
                 continue;
             }
 
-            prepLayer(blayer);
-            Layer layer = layerDao.create(job, blayer, layerOrder);
-
             if (blayer.isSetRange()) {
                 logger.info("Creating layer {}, range: {}", blayer.name, blayer.range);
-                taskDao.batchCreate(layer,
-                        blayer.range, blayer.chunk, layerOrder, blayer.minRam);
+
+                final FrameRange frameRange = new FrameRange(blayer.range, blayer.chunk);
+                prepLayer(blayer, frameRange);
+
+                final Layer layer = layerDao.create(job, blayer, layerOrder);
+                taskDao.batchCreate(layer, frameRange, layerOrder, blayer.minRam);
             }
             else if (blayer.isSetTasks()) {
+
                 logger.info("Creating tasks in layer: {}", blayer.name);
+
+                prepLayer(blayer, null);
+                final Layer layer = layerDao.create(job, blayer, layerOrder);
+
                 int taskOrder = 0;
                 for (TaskSpecT task: blayer.getTasks()) {
                     taskDao.create(layer, task.getName(), 0, taskOrder, layerOrder, blayer.minRam);
@@ -187,7 +195,7 @@ public class JobServiceImpl implements JobService {
      *
      * @param layer
      */
-    private void prepLayer(LayerSpecT layer) {
+    private void prepLayer(LayerSpecT layer, FrameRange frameRange) {
 
         // Set a default service name, although it might not be setup
         // as a valid service.
@@ -262,6 +270,12 @@ public class JobServiceImpl implements JobService {
         if (!layer.isSetTags()) {
             logger.info("Setting tags default on {} to {}", layer.name, Defaults.DEFAULT_TAGS);
             layer.setTags(Defaults.DEFAULT_TAGS);
+        }
+
+        if (frameRange != null) {
+            if (layer.chunk <= 0) {
+                layer.chunk = frameRange.chunkSize;
+            }
         }
     }
 

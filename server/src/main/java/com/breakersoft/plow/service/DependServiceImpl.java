@@ -200,6 +200,9 @@ public class DependServiceImpl implements DependService {
                                 / dependOnRange.chunkSize) * dependOnRange.chunkSize;
                         dependOnTaskNumbers.add(dependOnRange.frameSet.get(idx));
                     }
+                    else if (dependOnRange.chunkSize <=0 ) {
+                        dependOnTaskNumbers.add(dependOnRange.frameSet.get(0));
+                    }
                 }
             }
 

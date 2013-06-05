@@ -13,7 +13,7 @@ import org.springframework.jdbc.object.BatchSqlUpdate;
 import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Defaults;
-import com.breakersoft.plow.FrameSet;
+import com.breakersoft.plow.FrameRange;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
@@ -118,21 +118,15 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
     };
 
     @Override
-    public void batchCreate(Layer layer, String range, int chunk, int layerOrder, int minRam) {
+    public void batchCreate(Layer layer, FrameRange frameRange, int layerOrder, int minRam) {
 
-        final FrameSet frameSet = new FrameSet(range);
-        final int size = frameSet.size();
+        final int size = frameRange.frameSet.size();
         final BatchSqlUpdate update = new BatchSqlUpdate(
                 jdbc.getDataSource(), INSERT, BATCH_TYPES);
 
-        // If the chunk size 0 or less we chunk the entire thing.
-        if (chunk <= 0) {
-            chunk = size;
-        }
-
         int frameOrderCounter = 0;
-        for (int i=0; i<size; i=i+chunk) {
-            int number = frameSet.get(i);
+        for (int i=0; i<size; i=i+frameRange.chunkSize) {
+            int number = frameRange.frameSet.get(i);
             update.update(UUIDGen.random(),
                     layer.getLayerId(),
                     layer.getJobId(),

@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 
+import com.breakersoft.plow.FrameRange;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Node;
@@ -74,7 +75,7 @@ public class TaskDaoTests extends AbstractTest {
         LayerSpecT lspec = spec.getLayers().get(0);
         layer = layerDao.create(job, lspec, 0);
 
-        taskDao.batchCreate(layer, "1-10", 10, 1, 512);
+        taskDao.batchCreate(layer, new FrameRange("1-10", 10), 1, 512);
         assertEquals(1,
                 simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM task WHERE pk_layer=?",
                         layer.getLayerId()));
@@ -87,7 +88,7 @@ public class TaskDaoTests extends AbstractTest {
         LayerSpecT lspec = spec.getLayers().get(0);
         layer = layerDao.create(job, lspec, 0);
 
-        taskDao.batchCreate(layer, "1-10", 1100, 1, 512);
+        taskDao.batchCreate(layer, new FrameRange("1-10", 1100), 1, 512);
         assertEquals(1,
                 simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM task WHERE pk_layer=?",
                         layer.getLayerId()));
@@ -100,7 +101,7 @@ public class TaskDaoTests extends AbstractTest {
         LayerSpecT lspec = spec.getLayers().get(0);
         layer = layerDao.create(job, lspec, 0);
 
-        taskDao.batchCreate(layer, "1-10", 0, 1, 512);
+        taskDao.batchCreate(layer, new FrameRange("1-10", 0), 1, 512);
         assertEquals(1,
                 simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM task WHERE pk_layer=?",
                         layer.getLayerId()));
@@ -113,7 +114,7 @@ public class TaskDaoTests extends AbstractTest {
         LayerSpecT lspec = spec.getLayers().get(0);
         layer = layerDao.create(job, lspec, 0);
 
-        taskDao.batchCreate(layer, "1-10", 7, 1, 512);
+        taskDao.batchCreate(layer, new FrameRange("1-10", 7), 1, 512);
 
         assertEquals(2,
                 simpleJdbcTemplate.queryForInt("SELECT COUNT(1) FROM task WHERE pk_layer=?",

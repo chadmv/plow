@@ -3,6 +3,7 @@ package com.breakersoft.plow.dao;
 import java.util.List;
 import java.util.UUID;
 
+import com.breakersoft.plow.FrameRange;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
@@ -29,7 +30,5 @@ public interface TaskDao {
 
     boolean setTaskState(Task task, TaskState newState, TaskState oldState);
 
-    void batchCreate(Layer layer, String range, int chunk, int layerOrder, int minRam);
-
-
+    void batchCreate(Layer layer, FrameRange frameRange, int layerOrder, int minRam);
 }

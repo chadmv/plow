@@ -137,11 +137,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
         @Override
         public FrameRange mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
-            FrameRange range = new FrameRange();
-            range.frameSet = new FrameSet(rs.getString("str_range"));
-            range.chunkSize = rs.getInt("int_chunk_size");
-            range.numFrames = range.frameSet.size() / range.chunkSize;
-            return range;
+            return new FrameRange(new FrameSet(rs.getString("str_range")), rs.getInt("int_chunk_size"));
         }
     };
 
