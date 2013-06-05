@@ -62,7 +62,7 @@ cdef inline Cluster initCluster(ClusterT& n):
     return cluster
 
 
-cdef class Cluster:
+cdef class Cluster(PlowBase):
     """
     A Cluster 
 

@@ -114,5 +114,12 @@ def get_plow_time():
     return long(epoch)
 
 
+@cython.internal
+cdef class PlowBase:
 
+    def __cmp__(self, other):
+        return cmp(hash(self), hash(other))
+        
+    def __hash__(self):
+        return hash(self.id)
 

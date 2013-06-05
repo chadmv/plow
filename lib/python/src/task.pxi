@@ -229,7 +229,7 @@ cdef inline Task initTask(TaskT& t):
     return task
 
 
-cdef class Task:
+cdef class Task(PlowBase):
     """
     Represents an existing Task
 

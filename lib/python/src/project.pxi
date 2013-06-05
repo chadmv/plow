@@ -8,7 +8,7 @@ cdef inline Project initProject(ProjectT& p):
     return project
 
 
-cdef class Project:
+cdef class Project(PlowBase):
     """
     A Project 
 

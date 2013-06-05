@@ -91,7 +91,7 @@ cdef inline Node initNode(NodeT& n):
     return node
 
 
-cdef class Node:
+cdef class Node(PlowBase):
     """
     Represents an existing Node (system)
     that can perform tasks

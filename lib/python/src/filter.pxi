@@ -47,7 +47,7 @@ cdef inline Matcher initMatcher(MatcherT& m):
     return matcher
 
 
-cdef class Matcher:
+cdef class Matcher(PlowBase):
     """
     A matcher is a combination of a type 
     a field and a value
@@ -209,7 +209,7 @@ cdef inline Action initAction(ActionT& a):
     return action
 
 
-cdef class Action:
+cdef class Action(PlowBase):
     """
     An Action is represents a type and a value 
 
@@ -314,7 +314,7 @@ cdef inline Filter initFilter(FilterT& a):
     return filter
 
 
-cdef class Filter:
+cdef class Filter(PlowBase):
     """
     A filter combines matcher and actions instances
 

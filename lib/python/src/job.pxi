@@ -248,7 +248,7 @@ cdef inline Job initJob(JobT& j):
 
 
 @cython.final
-cdef class Job:
+cdef class Job(PlowBase):
     """
     A Job 
 

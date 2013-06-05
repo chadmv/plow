@@ -32,7 +32,7 @@ cdef inline Quota initQuota(QuotaT& q):
     return quota
 
 
-cdef class Quota:
+cdef class Quota(PlowBase):
     """
     Represents an existing Quota object, set on 
     a project and cluster.

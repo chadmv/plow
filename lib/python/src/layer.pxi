@@ -8,7 +8,7 @@ cdef Service initService(ServiceT& s):
     return serv
 
 
-cdef class Service:
+cdef class Service(PlowBase):
     """
     Data structure representing an existing Layer Service
 
@@ -426,7 +426,7 @@ cdef inline Layer initLayer(LayerT& l):
     return layer
 
 
-cdef class Layer:
+cdef class Layer(PlowBase):
     """
     Represents an existing layer 
 

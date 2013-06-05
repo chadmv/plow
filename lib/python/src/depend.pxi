@@ -148,7 +148,7 @@ cdef inline Depend initDepend(DependT& d):
     dep.setDepend(d)
     return dep
 
-cdef class Depend:
+cdef class Depend(PlowBase):
     """
     Depend 
 

@@ -9,7 +9,7 @@ cdef inline Folder initFolder(FolderT& f):
     return folder
 
 
-cdef class Folder:
+cdef class Folder(PlowBase):
     """
     A Folder 
 
