@@ -1,4 +1,5 @@
 import os
+from functools import partial 
 
 import plow.client
 import plow.gui.constants as constants
@@ -31,13 +32,19 @@ class ClusterPanel(Panel):
         # seperator
         # kill button (multi-select)
         # comment button (multi-select)
-        # 
-        self.titleBarWidget().addAction(
-            QtGui.QIcon(":/images/settings.png"), "Edit Selected Cluster Configuration", self.openClusterPropertiesDialog)
-        self.titleBarWidget().addAction(
-            QtGui.QIcon(":/images/locked.png"), "Lock Selected Clusters", self.__handleClusterLock)
-        self.titleBarWidget().addAction(
-            QtGui.QIcon(":/images/unlocked.png"), "Unlock Selected Clusters", self.__handleClusterUnlock)
+        #
+        titleBar = self.titleBarWidget() 
+        titleBar.addAction(QtGui.QIcon(":/images/settings.png"), 
+                                       "Edit Selected Cluster Configuration", 
+                                       self.openClusterPropertiesDialog)
+
+        titleBar.addAction(QtGui.QIcon(":/images/locked.png"), 
+                                       "Lock Selected Clusters", 
+                                       partial(self.__setClusterLocked, True))
+
+        titleBar.addAction(QtGui.QIcon(":/images/unlocked.png"), 
+                                       "Unlock Selected Clusters", 
+                                       partial(self.__setClusterLocked, False))
 
     def openLoadDialog(self):
         print "Open search dialog"
@@ -55,17 +62,10 @@ class ClusterPanel(Panel):
     def refresh(self):
         self.widget().refresh()
 
-    def __handleClusterLock(self):
+    def __setClusterLocked(self, locked):
         try:
             for cluster in self.widget().getSelectedClusters():
-                cluster.lock(True)
-        finally:
-            self.refresh()
-
-    def __handleClusterUnlock(self):
-        try:
-            for cluster in self.widget().getSelectedClusters():
-                cluster.lock(True)
+                cluster.lock(locked)
         finally:
             self.refresh()
 

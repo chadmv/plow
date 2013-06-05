@@ -1,6 +1,7 @@
 import os
 import logging
 from datetime import datetime 
+from functools import partial 
 
 import plow.client
 
@@ -36,10 +37,24 @@ class NodePanel(Panel):
         self.setWindowTitle(name)
 
     def init(self):
-        pass
+        titleBar = self.titleBarWidget() 
+        titleBar.addAction(QtGui.QIcon(":/images/locked.png"), 
+                                       "Lock Selected Clusters", 
+                                       partial(self.__setNodesLocked, True))
+
+        titleBar.addAction(QtGui.QIcon(":/images/unlocked.png"), 
+                                       "Unlock Selected Clusters", 
+                                       partial(self.__setNodesLocked, False))
 
     def refresh(self):
         self.widget().refresh()
+
+    def __setNodesLocked(self, locked):
+        try:
+            for node in self.widget().getSelectedNodes():
+                node.lock(locked)
+        finally:
+            self.refresh()
 
 
 class NodeWidget(QtGui.QWidget):
@@ -89,6 +104,10 @@ class NodeWidget(QtGui.QWidget):
 
     def refresh(self):
         self.__model.refresh()
+
+    def getSelectedNodes(self):
+        rows = self.__view.selectionModel().selectedRows()
+        return [index.data(ObjectRole) for index in rows]
 
     def __itemDoubleClicked(self, index):
         uid = index.data(ObjectRole).id
