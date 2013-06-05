@@ -349,6 +349,24 @@ cdef class Task:
         cdef list ret = get_task_depends_on(self)
         return ret
 
+    def get_job(self):
+        """
+        Return the Job object for this task 
+
+        :returns: :class:`.Job`
+        """
+        cdef Job job = get_job(self.jobId)
+        return job
+
+    def get_layer(self):
+        """
+        Return the Layer object for this task 
+
+        :returns: :class:`.Layer`
+        """
+        cdef Layer layer = get_layer_by_id(self.layerId)
+        return layer
+
 
 cdef inline TaskFilterT dict_to_taskFilter(dict d):
     cdef:
