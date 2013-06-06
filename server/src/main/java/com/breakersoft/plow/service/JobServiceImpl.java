@@ -273,6 +273,7 @@ public class JobServiceImpl implements JobService {
 
         if (frameRange != null) {
             if (layer.chunk <= 0) {
+                logger.info("Setting chunk size to %d", frameRange.chunkSize);
                 layer.chunk = frameRange.chunkSize;
             }
         }
