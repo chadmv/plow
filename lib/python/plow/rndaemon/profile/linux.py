@@ -77,20 +77,20 @@ class SystemProfiler(PosixSystemProfiler):
 
         env = opts['env']
 
-        uid = env.get('PLOW_TASK_UID')
-        gid = env.get('PLOW_TASK_GID')
+        # uid = env.get('PLOW_TASK_UID')
+        # gid = env.get('PLOW_TASK_GID')
         cpus = kwargs.get('cpus', set())
 
         opts['preexec_fn'] = partial(self._preexec_fn, 
-                                    uid, gid, cpus, 
-                                    self.cpuprofile.logical_cpus)
+                                     cpus=kwargs.get('cpus'), 
+                                     cpu_map=cpuprofile.logical_cpus)
 
         return cmd, opts
 
     @staticmethod
-    def _preexec_fn(*args):
+    def _preexec_fn(**kwargs):
         """
-        _preexec_fn(*args) -> void
+        _preexec_fn(**kwargs) -> void
 
         static method used for a subprocess.Popen call, 
         to be executed in the process right before calling the command.
@@ -98,21 +98,26 @@ class SystemProfiler(PosixSystemProfiler):
         Sets the process to the given uid and gid. 
         Locks hyperthreaded processors to the process tree
         """
-        uid, gid, cpus, cpu_map = args
+        uid = kwargs.get("uid")
+        gid = kwargs.get("gid")
+        cpus = kwargs.get("cpus")
+        cpu_map = kwargs.get("cpu_map")
 
-        if not None in (uid, gid):
+        if gid is not None:
             os.setgid(int(gid))
+        if uid is not None:
             os.setuid(int(uid))
 
-        logical_ids = set()
-        for slot in cpus:
-            logical_ids.update(cpu_map.get(slot, []))
+        if cpus is not None and cpu_map is not None:
+            logical_ids = set()
+            for slot in cpus:
+                logical_ids.update(cpu_map.get(slot, []))
 
-        # logger = logging.getLogger(__name__)
-        # logger.debug("Would lock logical processor ids %s", logical_ids)
+            # logger = logging.getLogger(__name__)
+            # logger.debug("Would lock logical processor ids %s", logical_ids)
 
-        p = psutil.Process(os.getpid())
-        p.set_cpu_affinity(logical_ids)
+            p = psutil.Process(os.getpid())
+            p.set_cpu_affinity(logical_ids)
 
 
 class CpuProfile(object):

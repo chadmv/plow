@@ -91,21 +91,9 @@ class SystemProfiler(AbstractProfiler):
                 'PLOW_TASK_GID': str(gid),
             })
 
-            logger.debug("Switching user to (%d, %d)", uid, gid)
-            opts['preexec_fn'] = partial(self._preexec_fn, uid, gid)
+            cmd[:0] = ["sudo", "-E", "-n", "-u", username, "--"]
+            logger.debug("Switching user to %s (%d, %d)", username, uid, gid)
 
         return cmd, opts  
 
-    @staticmethod
-    def _preexec_fn(*args):
-        """
-        _preexec_fn(*args) -> void
 
-        function used for a subprocess.Popen call, 
-        to be executed in the process right before calling the command.
-
-        Sets the process to the given uid and gid. 
-        """
-        uid, gid = args
-        os.setgid(gid)
-        os.setuid(uid)

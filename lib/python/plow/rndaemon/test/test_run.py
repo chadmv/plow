@@ -8,6 +8,7 @@ import math
 import re 
 import platform
 import uuid 
+import pwd
 import signal 
 
 from functools import partial
@@ -32,8 +33,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 conf.TASK_PROXY_USER = os.getenv('PLOW_PROXY_USER', conf.TASK_PROXY_USER)
 
-CMDS_UTIL = os.path.join(os.path.dirname(__file__), 'utils/cmds.py')
-DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+ROOT = os.path.abspath(os.path.dirname(__file__))
+CMDS_UTIL = os.path.join(ROOT, 'utils/cmds.py')
+DATA_DIR = os.path.join(ROOT, 'data')
 
 IS_LINUX = platform.system() in ('FreeBSD', 'Linux')
 
@@ -269,6 +271,8 @@ class TestProcessManager(unittest.TestCase):
         process.procId = uuid.uuid4()
         process.taskId = uuid.uuid4()
         process.cores = 1
+        process.uid = os.geteuid()
+        process.username = pwd.getpwuid(process.uid).pw_name
         process.env = {}
         process.logFile = self._logfile 
         return process

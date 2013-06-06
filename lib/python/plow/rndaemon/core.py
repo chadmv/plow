@@ -410,7 +410,8 @@ class _ProcessThread(threading.Thread):
 
         try:
             uid = self.__rtc.uid
-
+            cpus = self.__cpus 
+            
             logger.info("Opening log file: %s", rtc.logFile)
             self.__logfp = utils.ProcessLog(self.__rtc.logFile, uid=uid)
             self.__logfp.writeLogHeader(rtc)
@@ -428,7 +429,7 @@ class _ProcessThread(threading.Thread):
                 'stdout': subprocess.PIPE, 
                 'stderr': subprocess.STDOUT,
                 'uid': uid,
-                'cpus': self.__cpus,
+                'cpus': cpus,
                 'env': env,
             }
 
