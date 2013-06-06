@@ -172,7 +172,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             node.setCores(rs.getInt("int_idle_cores"));
             node.setMemory(rs.getInt("int_free_ram"));
             node.setName(rs.getString("str_name"));
-            node.setDispatchable(true);
+            node.setLocked(rs.getBoolean("bool_locked"));
             return node;
         }
     };
@@ -183,6 +183,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "node.pk_cluster,"+
                 "node.str_name,"+
                 "node.str_tags,"+
+                "node.bool_locked,"+
                 "node_dsp.int_idle_cores,"+
                 "node_dsp.int_free_ram " +
             "FROM " +

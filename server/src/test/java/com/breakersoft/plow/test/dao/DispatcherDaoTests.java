@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Proc;
-import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.FolderDao;
 import com.breakersoft.plow.dao.QuotaDao;
@@ -27,7 +26,6 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
@@ -100,6 +98,7 @@ public class DispatcherDaoTests extends AbstractTest {
         assertEquals(node.getName(), dnode.getName());
         assertEquals(node.getNodeId(), dnode.getNodeId());
         assertEquals(node.getTags(), dnode.getTags());
+        assertEquals(node.isLocked(), dnode.isLocked());
     }
 
     @Test

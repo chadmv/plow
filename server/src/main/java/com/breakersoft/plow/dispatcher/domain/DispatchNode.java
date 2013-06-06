@@ -10,7 +10,7 @@ public class DispatchNode extends NodeE implements DispatchResource {
     private int cores;
     private int memory;
     private Set<String> tags;
-    private boolean dispatchable;
+    private boolean locked;
 
     public DispatchNode() { }
 
@@ -53,11 +53,12 @@ public class DispatchNode extends NodeE implements DispatchResource {
         if (cores == 0 || memory <= Defaults.MEMORY_MIN_MB) {
             return false;
         }
-        return dispatchable;
-    }
 
-    public void setDispatchable(boolean dispatchable) {
-        this.dispatchable = dispatchable;
+        if (locked) {
+            return false;
+        }
+
+        return true;
     }
 
     public String toString() {
@@ -68,5 +69,13 @@ public class DispatchNode extends NodeE implements DispatchResource {
     public void allocate(int cores, int ram) {
         this.cores = this.cores - cores;
         this.memory = this.memory - ram;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 }

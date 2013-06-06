@@ -1,8 +1,6 @@
 package com.breakersoft.plow.scheduler;
 
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,6 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
-import com.breakersoft.plow.service.DependService;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.StateManager;
@@ -81,13 +78,13 @@ public class SchedulerEventHandler {
             node = dispatchService.getDispatchNode(newNode.getName());
         }
 
-        if (node.isDispatchable()) {
-            nodeDispatcher.book(node);
-        }
-
         if (!ping.tasks.isEmpty()) {
             statsService.updateProcRuntimeStats(ping.tasks);
             statsService.updateTaskRuntimeStats(ping.tasks);
+        }
+
+        if (node.isDispatchable()) {
+            nodeDispatcher.book(node);
         }
     }
 
