@@ -233,20 +233,21 @@ struct ServiceT {
 
 struct LayerT {
     1:required common.Guid id,
-    2:string name,
-    3:string range,
-    4:string serv,
-    5:i32 chunk,
-    6:list<string> tags,
-    7:bool threadable,
-    8:i32 minCores,
-    9:i32 maxCores,
-    10:i32 minRam,
-    11:i32 maxRam,
-    12:i32 runCores,
-    13:i32 maxRetries,
-    14:TaskTotalsT totals,
-    15:LayerStatsT stats
+    2:common.Guid jobId,
+    3:string name,
+    4:string range,
+    5:string serv,
+    6:i32 chunk,
+    7:list<string> tags,
+    8:bool threadable,
+    9:i32 minCores,
+    10:i32 maxCores,
+    11:i32 minRam,
+    12:i32 maxRam,
+    13:i32 runCores,
+    14:i32 maxRetries,
+    15:TaskTotalsT totals,
+    16:LayerStatsT stats
 }
 
 struct TaskStatsT {

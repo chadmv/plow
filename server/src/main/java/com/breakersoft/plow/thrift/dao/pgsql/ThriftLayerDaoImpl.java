@@ -48,6 +48,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             layer.setTotals(JdbcUtils.getTaskTotals(rs));
 
             layer.setId(rs.getString("pk_layer"));
+            layer.setJobId(rs.getString("pk_job"));
             layer.name = rs.getString("str_name");
             layer.range = rs.getString("str_range");
             layer.chunk = rs.getInt("int_chunk_size");
@@ -65,6 +66,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
     private static final String GET =
             "SELECT " +
                 "layer.pk_layer,"+
+                "layer.pk_job,"+
                 "layer.str_name,"+
                 "layer.str_range,"+
                 "layer.str_tags, " +
