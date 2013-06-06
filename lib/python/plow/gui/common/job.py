@@ -9,6 +9,8 @@ import plow.gui.constants as constants
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.form import FormWidget, FormWidgetFactory
 from plow.gui.util import ask
+from plow.gui.common.widgets import FilterableListBox
+
 
 
 class JobProgressFormWidget(FormWidget):
@@ -90,60 +92,203 @@ class JobProgressBar(QtGui.QWidget):
         event.accept()
 
 
+class JobColumnWidget(QtGui.QScrollArea):
+
+    DATA_ROLE = FilterableListBox.DATA_ROLE
+
+    selectionChanged = QtCore.Signal(list)
+
+    def __init__(self, parent=None):
+        super(JobColumnWidget, self).__init__(parent)
+
+        self.__currentJob = None
+        self.__currentLayer = None 
+        self.__currentTask = None
+
+        self.setFocusPolicy(QtCore.Qt.NoFocus)
+
+        contentWidget = QtGui.QWidget(self)
+        self.setWidget(contentWidget)
+        self.setWidgetResizable(True)
+
+        mainLayout = QtGui.QHBoxLayout(contentWidget)
+
+        self._jobWidget = job = JobSelectionWidget(self)
+        job.setMinimumWidth(220)
+
+        self._layerWidget = layer = FilterableListBox(parent=self)
+        layer.setLabel("Layer:")
+        layer.setMinimumWidth(180)
+
+        self._taskWidget = task = FilterableListBox(parent=self)
+        task.setLabel("Task:")
+        task.setMinimumWidth(120)
+
+        mainLayout.addWidget(job)
+        mainLayout.addWidget(layer)
+        mainLayout.addWidget(task)
+
+        # connections
+        job.selectionChanged.connect(self._jobSelectionChanged)
+        job.valueClicked.connect(layer.clearSelection)
+        job.valueClicked.connect(task.clearSelection)
+
+        layer.selectionChanged.connect(self._layerSelectionChanged)
+        layer.valueClicked.connect(task.clearSelection)
+
+        task.selectionChanged.connect(self._taskSelectionChanged)
+
+    @property 
+    def currentJob(self):
+        return self.__currentJob 
+
+    @property 
+    def currentLayer(self):
+        return self.__currentLayer
+
+    def reset(self):
+        self._clearTask()
+        self._clearLayer()
+        self._clearJob()
+
+    def setJobFilter(self, val):
+        self._jobWidget.setFilter(val, selectFirst=True)
+
+    def setLayerFilter(self, val):
+        self._layerWidget.setFilter(val, selectFirst=True)
+
+    def setTaskFilter(self, val):
+        self._taskWidget.setFilter(val, selectFirst=True)
+
+    def setSingleSelections(self, enabled):
+        for w in (self._jobWidget, self._layerWidget, self._taskWidget):
+            w.setSingleSelections(enabled)
+
+    def getSelection(self):
+        for w in (self._taskWidget, self._layerWidget, self._jobWidget):
+            items = w.getSelectedValues(self.DATA_ROLE)
+            if items:
+                return items
+
+        return []
+
+    def setLayersEnabled(self, enabled):
+        self._layerWidget.clearSelection(clearFilter=False)
+        self._layerWidget.setEnabled(enabled)
+        self.setTasksEnabled(enabled)
+
+    def setTasksEnabled(self, enabled):
+        self._taskWidget.clearSelection(clearFilter=False)
+        self._taskWidget.setEnabled(enabled)
+
+    def _jobSelectionChanged(self, selection):
+        self.__currentJob = None
+        self._clearTask()
+
+        count = len(selection)
+        if count != 1:
+            self._clearLayer()
+            return
+
+        jobs = self._jobWidget.getSelectedValues(self.DATA_ROLE)
+        if not jobs:
+            return
+
+        self.__currentJob = jobs[0]
+
+        if self._layerWidget.isEnabled():
+            layers = self.__currentJob.get_layers()
+            layerNames = [l.name for l in layers]
+            self._layerWidget.setStringList(layerNames, data=layers)
+
+        self.selectionChanged.emit(jobs)
+
+    def _layerSelectionChanged(self, selection):
+        self.__currentLayer = None
+
+        count = len(selection)
+        if count != 1:
+            self._clearTask()
+            return
+
+        self.__currentLayer = None
+        layers = self._layerWidget.getSelectedValues(self.DATA_ROLE)
+        if not layers:
+            return
+
+        layer = layers[0]
+        self.__currentLayer = layer
+
+        if self._taskWidget.isEnabled():
+            tasks = layer.get_tasks()
+            self._taskWidget.setStringList([t.name for t in tasks], data=tasks)
+
+        self.selectionChanged.emit(layers)
+
+    def _taskSelectionChanged(self, selection):
+        tasks = self._taskWidget.getSelectedValues(self.DATA_ROLE)
+        self.selectionChanged.emit(tasks)
+
+    def _clearLayer(self):
+        self.__currentLayer = None 
+        self._layerWidget.clear()
+
+    def _clearTask(self):
+        self.__currentTask = None
+        self._taskWidget.clear()
+
+    def _clearJob(self):
+        self.__currentJob = None
+        self._jobWidget.clearSelection()
+        self._jobWidget.setFilter('')
+
+
+class JobSelectionWidget(FilterableListBox):
+
+    def __init__(self, parent=None, **kwargs):
+        super(JobSelectionWidget, self).__init__(parent=parent)
+        self.setLabel("Job:")
+
+        if not kwargs:
+            kwargs = {"states": [plow.JobState.RUNNING]}
+
+        kwargs['matchingOnly'] = True
+        self.__opts = kwargs
+
+        self.refresh()
+
+    def refresh(self):
+        jobs = plow.client.get_jobs(**self.__opts)
+        jobNames = [job.name for job in jobs]        
+        self.setStringList(jobNames, data=jobs)
+
+
 class JobSelectionDialog(QtGui.QDialog):
+
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
-        self.__jobs = plow.client.get_jobs(matchingOnly=True, states=[plow.JobState.RUNNING])
-
-        self.__txt_filter = QtGui.QLineEdit(self)
-        self.__txt_filter.textChanged.connect(self.__filterChanged)
-
-        jobs = [job.name for job in self.__jobs]
-        self.__model = QtGui.QStringListModel(jobs, self)
-
-        self.__proxyModel = proxy = QtGui.QSortFilterProxyModel(self)
-        proxy.setSourceModel(self.__model)
-
-        self.__list_jobs = view = QtGui.QListView(self)
-        view.setSelectionMode(self.__list_jobs.ExtendedSelection)
-        view.setModel(proxy)
-
-        proxy.sort(0)
-        proxy.setDynamicSortFilter(True)
+        layout = QtGui.QVBoxLayout(self)
+        self.__jobSelector = JobSelectionWidget(self)
 
         self.__btns = QtGui.QDialogButtonBox(
             QtGui.QDialogButtonBox.Ok | 
             QtGui.QDialogButtonBox.Cancel)
 
-        layout = QtGui.QVBoxLayout(self)
-        layout.addWidget(self.__txt_filter)
-        layout.addWidget(self.__list_jobs)
+        layout.addWidget(self.__jobSelector)
         layout.addWidget(self.__btns)
 
         # connections
-        self.__list_jobs.doubleClicked.connect(self.accept)
+        self.__jobSelector.valueDoubleClicked.connect(self.accept)
         self.__btns.accepted.connect(self.accept)
         self.__btns.rejected.connect(self.reject)
 
-    def __filterChanged(self, value):
-        value = value.strip()
-        if not value:
-            self.__proxyModel.setFilterFixedString("")
-
-        else:
-            searchStr = '*'.join(value.split())
-            self.__proxyModel.setFilterWildcard(searchStr)
-
     def getSelectedJobs(self):
-        indexes = self.__list_jobs.selectionModel().selectedIndexes()
-        jobNames = [self.__proxyModel.data(i) for i in indexes]
-
-        if not jobNames:
-            return jobNames
-
-        return plow.client.get_jobs(matchingOnly=True, 
-                                    name=jobNames, 
+        names = self.__jobSelector.getSelectedValues()
+        jobs = plow.client.get_jobs(matchingOnly=True, 
+                                    name=names, 
                                     states=[plow.JobState.RUNNING])
+
+        return jobs
 
 
 class JobStateWidget(QtGui.QWidget):
