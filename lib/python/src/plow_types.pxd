@@ -210,6 +210,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
 
     cdef cppclass LayerT:
         Guid id
+        Guid jobId
         string name
         string range
         string serv

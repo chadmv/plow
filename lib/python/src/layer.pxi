@@ -431,6 +431,7 @@ cdef class Layer(PlowBase):
     Represents an existing layer 
 
     :var id: str
+    :var jobId: str
     :var name: str
     :var serv: str
     :var range: str
@@ -464,6 +465,9 @@ cdef class Layer(PlowBase):
 
     property id:
         def __get__(self): return self._layer.id
+
+    property jobId:
+        def __get__(self): return self._layer.jobId
 
     property name:
         def __get__(self): return self._layer.name
@@ -512,6 +516,15 @@ cdef class Layer(PlowBase):
         cdef LayerT layer 
         conn().proxy().getLayerById(layer, self._layer.id)
         self.setLayer(layer)
+
+    def get_job(self):
+        """ 
+        Get the Job for this layer
+
+        :returns: list[:class:`.Job`]
+        """
+        cdef Job job = get_job(self.jobId)
+        return job    
 
     def get_tasks(self):
         """ 
