@@ -193,6 +193,7 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
             "layer.str_command, " +
             "layer.str_name AS layer_name, " +
             "layer.hstore_env AS layer_env, " +
+            "layer.int_chunk_size, " +
             "task.int_number, " +
             "task.pk_task,"+
             "task.pk_layer,"+
@@ -258,6 +259,7 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
             task.env.put("PLOW_LOG_DIR", rs.getString("str_log_path"));
             task.env.put("PLOW_UID", rs.getString("int_uid"));
             task.env.put("PLOW_TASK_NUMBER", rs.getString("int_number"));
+            task.env.put("PLOW_CHUNK", rs.getString("int_chunk_size"));
 
             return task;
         }
