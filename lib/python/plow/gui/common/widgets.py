@@ -85,15 +85,141 @@ class FilterableListBox(QtGui.QWidget):
     """
     A list box widget with a text filter.
     """
-    def __init__(self, filt=None, items=None, parent=None):
+
+    DATA_ROLE = QtCore.Qt.UserRole
+
+    selectionChanged = QtCore.Signal(list)
+    valueDoubleClicked = QtCore.Signal(object)
+    valueClicked = QtCore.Signal(object)
+
+    def __init__(self, filt=None, items=None, data=None, parent=None):
         QtGui.QWidget.__init__(self, parent)
+
+        self.__data = {}
+
+        self.__txt_label = QtGui.QLabel(self)
+        self.__txt_filter = QtGui.QLineEdit(self)
+        self.__txt_filter.textChanged.connect(self.__filterChanged)
+
+        self.__model = QtGui.QStringListModel(self)
+
+        self.__proxyModel = proxy = QtGui.QSortFilterProxyModel(self)
+        proxy.setSourceModel(self.__model)
+
+        self.__list = view = QtGui.QListView(self)
+        view.setSelectionMode(self.__list.ExtendedSelection)
+        view.setModel(proxy)
+
+        proxy.sort(0)
+        proxy.setDynamicSortFilter(True)
+
         layout = QtGui.QVBoxLayout(self)
+        layout.setSpacing(4)
+        layout.setContentsMargins(0, 0, 0, 0)
 
-        self.text = QtGui.QLineEdit(self)
-        self.items = QtGui.QListWidget(self)
+        hlayout = QtGui.QHBoxLayout()
+        hlayout.setContentsMargins(0, 0, 0, 0)
+        hlayout.addWidget(self.__txt_label)
+        hlayout.addWidget(self.__txt_filter)
 
-        layout.addWidget(self.text)
-        layout.addWidget(self.items)
+        layout.addLayout(hlayout)
+        layout.addWidget(self.__list)
+
+        # connections
+        self.__list.doubleClicked.connect(self._itemDoubleClicked)
+        self.__list.clicked.connect(self._itemClicked)
+        self.__list.selectionModel().selectionChanged.connect(self._selectionChanged)
+
+        if items:
+            self.setStringList(items)
+
+        if filt:
+            self.setFilter(filt)
+
+    def clear(self):
+        self.setStringList([])
+        self.setFilter('')
+
+    def clearSelection(self, clearFilter=True):
+        self.__list.clearSelection()
+        if clearFilter:
+            self.setFilter('')
+
+    def setLabel(self, val):
+        self.__txt_label.setText(val)
+
+    def setFilter(self, val, selectFirst=False):
+        if not val:
+            val = ''
+
+        self.__txt_filter.setText(val)
+
+        if not selectFirst:
+            return 
+
+        proxy = self.__proxyModel
+        matches = proxy.match(proxy.index(0,0), QtCore.Qt.DisplayRole, val, 1, QtCore.Qt.MatchContains)
+        if matches:
+            selModel = self.__list.selectionModel()
+            selModel.select(matches[0], selModel.ClearAndSelect)
+
+    def setStringList(self, aList, data=None):
+        model = self.__model
+        model.setStringList(aList)
+        self.__data = {}
+
+        role = self.DATA_ROLE
+        for row, val in enumerate(aList):
+            try:
+                dataVal = data[row]
+            except Exception, e:
+                dataVal = val
+            self.__data[row] = dataVal
+
+    def setSingleSelections(self, enabled):
+        if enabled:
+            mode = self.__list.SingleSelection
+        else:
+            mode = self.__list.ExtendedSelection
+        self.__list.setSelectionMode(mode)
+
+    def getSelectedValues(self, role=QtCore.Qt.DisplayRole):
+        indexes = self.__list.selectedIndexes()
+
+        if self.__list.selectionMode() == self.__list.SingleSelection:
+            indexes = indexes[:1]
+
+        proxy = self.__proxyModel
+        sourceModel = proxy.sourceModel()
+        data = self.__data 
+
+        if role == self.DATA_ROLE:
+            values = [data.get(proxy.mapToSource(i).row()) for i in indexes]
+        else:
+            values = [proxy.data(i) for i in indexes]
+
+        return values
+
+    def __filterChanged(self, value):
+        value = value.strip()
+        if not value:
+            self.__proxyModel.setFilterFixedString("")
+
+        else:
+            searchStr = '*'.join(value.split())
+            self.__proxyModel.setFilterWildcard(searchStr)
+
+    def _itemDoubleClicked(self, item):
+        data = self.__proxyModel.data(item)
+        self.valueDoubleClicked.emit(data)
+
+    def _itemClicked(self, item):
+        data = self.__proxyModel.data(item)
+        self.valueClicked.emit(data)
+
+    def _selectionChanged(self):
+        sel = self.getSelectedValues()
+        self.selectionChanged.emit(sel)
 
 
 class CheckableComboBox(QtGui.QWidget):
