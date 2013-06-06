@@ -8,6 +8,7 @@ import traceback
 import errno
 
 from collections import namedtuple, deque
+from itertools import chain 
 
 import psutil
 
@@ -307,6 +308,11 @@ class _ProcessThread(threading.Thread):
     """
     The _ProcessThread wraps a running task.
     """
+
+    DISK_IO_T = namedtuple('diskIO', 'read_count write_count read_bytes write_bytes')
+
+    _DO_DISK_IO = hasattr(psutil.Process, "get_io_counters")
+
     def __init__(self, rtc, cpus=None):
         threading.Thread.__init__(self)
         self.daemon = True
@@ -335,6 +341,7 @@ class _ProcessThread(threading.Thread):
             'rssMb': 0,
             'maxRssMb': 0,
             'cpuPercent': 0,
+            'diskIO': self.DISK_IO_T(-1,-1,-1,-1),
         }
 
     def __repr__(self):
@@ -382,16 +389,20 @@ class _ProcessThread(threading.Thread):
 
         rt = RunningTask()
 
+        rtc = self.__rtc
         with self.__lock:
-            rt.jobId = self.__rtc.jobId
-            rt.procId = self.__rtc.procId
-            rt.taskId = self.__rtc.taskId
-            rt.layerId = self.__rtc.layerId
+            rt.jobId = rtc.jobId
+            rt.procId = rtc.procId
+            rt.taskId = rtc.taskId
+            rt.layerId = rtc.layerId
             rt.pid = self.__pid
 
+        metrics = self.__metrics
         with self.__metricsLock:
-            rt.rssMb = self.__metrics['rssMb']
-            rt.cpuPercent = self.__metrics['cpuPercent']
+            rt.rssMb = metrics['rssMb']
+            rt.cpuPercent = metrics['cpuPercent']
+            # TODO: Add support to RunningTask to deliver disk io
+            # rt.diskIO = metrics['diskIO']
 
         with self.__progressLock:
             rt.progress = self.__progress 
@@ -497,47 +508,70 @@ class _ProcessThread(threading.Thread):
         i.e. rss 
         """
         # logger.debug("updateMetrics(): %r", self)
+
+        rss_bytes = 0
+        cpu_perc = 0
+
+        do_disk_io = self._DO_DISK_IO
+        if do_disk_io:
+            disk_io = [0,0,0,0]
+        else:
+            disk_io = [-1,-1,-1,-1]
+
         try:
-            p = psutil.Process(self.__pid)
+            root_pid = self.__pid
+            p = psutil.Process(root_pid)
 
-            rss_bytes = 0
-            cpu_perc = 0
+            for proc in chain([p], p.get_children(True)):
 
-            try:
-                rss_bytes = p.get_memory_info().rss
-                cpu_perc = p.get_cpu_percent(None)
-            except psutil.Error, e:
-                logger.debug("Error while getting memory/cpu data for pid %r: %s", self.__pid, e)
-                return
+                this_pid = proc.pid
 
-            children = [child for child in p.get_children(True) 
-                            if child.status != psutil.STATUS_ZOMBIE]
-
-            for child in children:
+                if proc.status == psutil.STATUS_ZOMBIE:
+                    continue
 
                 try:
-                    rss_bytes += child.get_memory_info().rss
+                    rss_bytes += proc.get_memory_info().rss
                 except psutil.Error, e:
-                    logger.debug("Error while getting memory data for child pid %r: %s", child.pid, e)
+                    logger.debug("Error while getting memory data for pid %r: %s", this_pid, e)
 
                 try:
-                    cpu_perc += child.get_cpu_percent(None) 
+                    cpu_perc += proc.get_cpu_percent(None) 
                 except psutil.Error, e:
-                    logger.debug("Error while getting cpu data for child pid %r: %s", child.pid, e)
+                    logger.debug("Error while getting cpu data for pid %r: %s", this_pid, e)
 
-        except psutil.NoSuchProcess:
+                if do_disk_io:
+                    try:
+                        counters = proc.get_io_counters()
+                    except psutil.Error, e:
+                        logger.debug("Error while getting disk io data for pid %r: %s", this_pid, e)
+
+                    for i, val in enumerate(counters):
+                        disk_io[i] += val
+
+        except psutil.NoSuchProcess, e:
             return
 
         cpu_perc_int = int(round(cpu_perc))
         rssMb = rss_bytes / 1024 / 1024
 
+        metrics = self.__metrics
+        
         with self.__metricsLock:
-            self.__metrics.update({
+            maxRss = max(rssMb, metrics['maxRssMb'])
+
+            if do_disk_io:
+                disk_io = map(max, zip(disk_io, metrics['diskIO']))
+                disk_io_t = self.DISK_IO_T(*disk_io)
+            else:
+                disk_io_t = self.DISK_IO_T(-1,-1,-1,-1)
+
+            metrics.update({
                 'rssMb': rssMb,
-                'maxRssMb': max(rssMb, self.__metrics['maxRssMb']),
+                'maxRssMb': maxRss,
                 'cpuPercent': cpu_perc_int,
+                'diskIO': disk_io_t,
             })
-            # logger.debug("metrics: %s; rss_bytes %0.3f; cpu_perc %0.3f", self.__metrics, rss_bytes, cpu_perc)
+            logger.debug("metrics: %r", metrics)
 
     def killProcess(self, block=True):
         """
