@@ -161,9 +161,8 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
     }
 
     public void dispatchFailed(DispatchResult result, DispatchProc proc, DispatchTask task, String message) {
+
         logger.info("Unable to dispatch {}/{}, {}", new Object[] {proc, task, message});
-        result.dispatch = false;
-        dispatchService.deallocateProc(proc, message);
 
         if (task != null) {
             if (task.started) {
@@ -173,5 +172,8 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
                 dispatchService.unreserveTask(task);
             }
         }
+
+        result.dispatch = false;
+        dispatchService.deallocateProc(proc, message);
     }
 }
