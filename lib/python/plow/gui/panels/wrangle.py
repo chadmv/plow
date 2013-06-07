@@ -527,12 +527,10 @@ class JobNode(PlowNode):
                 if job.paused:
                     bgcolor = constants.BLUE
                     color = QtCore.Qt.white
-                    text = "PAUSED"
 
                 elif totals.dead:
                     bgcolor = constants.COLOR_TASK_STATE[TaskState.DEAD]
                     color = QtCore.Qt.white
-                    text = "RUNNING" if totals.running else "DEAD"
 
                 if role == BG:
                     return QtGui.QBrush(bgcolor)

@@ -8,7 +8,7 @@ import logging
 from functools import partial
 
 import plow.client
-from plow.client import JobState
+from plow.client import JobState, TaskState
 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
@@ -84,6 +84,9 @@ class RenderJobWatchWidget(QtGui.QWidget):
 
     Header = ["Job", "State", "Run", "Wait", "Min", "Max", "Duration", "Progress"]
     Width = [400, 75, 60, 60, 60, 60, 100, 125]
+
+    COLOR_DEAD = constants.COLOR_TASK_STATE[TaskState.DEAD]
+    COLOR_PAUSED = constants.BLUE
 
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -245,22 +248,18 @@ class RenderJobWatchWidget(QtGui.QWidget):
         totals = job.totals
 
         color = QtCore.Qt.black 
+        text = constants.JOB_STATES[job.state]
 
         if job.paused:
-            bgcolor = constants.BLUE
+            bgcolor = self.COLOR_PAUSED
             color = QtCore.Qt.white
-            text = "PAUSED"
 
         elif totals.dead:
-            if totals.running:
-                text = "RUNNING"
-            else:
-                text = "DEAD"
-            bgcolor = constants.RED 
+            bgcolor = self.COLOR_DEAD
+            color = QtCore.Qt.white
 
         else:
             bgcolor = constants.COLOR_JOB_STATE[job.state]
-            text = constants.JOB_STATES[job.state]
 
         item.setText(1, text)
         item.setBackground(1, bgcolor)
