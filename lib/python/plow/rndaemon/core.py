@@ -309,8 +309,6 @@ class _ProcessThread(threading.Thread):
     The _ProcessThread wraps a running task.
     """
 
-    DISK_IO_T = namedtuple('diskIO', 'read_count write_count read_bytes write_bytes')
-
     _DO_DISK_IO = hasattr(psutil.Process, "get_io_counters")
 
     def __init__(self, rtc, cpus=None):
@@ -341,7 +339,7 @@ class _ProcessThread(threading.Thread):
             'rssMb': 0,
             'maxRssMb': 0,
             'cpuPercent': 0,
-            'diskIO': self.DISK_IO_T(-1,-1,-1,-1),
+            'diskIO': ttypes.DiskIO(-1,-1,-1,-1),
         }
 
     def __repr__(self):
@@ -398,11 +396,13 @@ class _ProcessThread(threading.Thread):
             rt.pid = self.__pid
 
         metrics = self.__metrics
+
         with self.__metricsLock:
             rt.rssMb = metrics['rssMb']
             rt.cpuPercent = metrics['cpuPercent']
-            # TODO: Add support to RunningTask to deliver disk io
-            # rt.diskIO = metrics['diskIO']
+
+            if self._DO_DISK_IO:
+                rt.diskIO = metrics['diskIO']
 
         with self.__progressLock:
             rt.progress = self.__progress 
@@ -515,8 +515,6 @@ class _ProcessThread(threading.Thread):
         do_disk_io = self._DO_DISK_IO
         if do_disk_io:
             disk_io = [0,0,0,0]
-        else:
-            disk_io = [-1,-1,-1,-1]
 
         try:
             root_pid = self.__pid
@@ -555,15 +553,11 @@ class _ProcessThread(threading.Thread):
         rssMb = rss_bytes / 1024 / 1024
 
         metrics = self.__metrics
-        
-        with self.__metricsLock:
-            maxRss = max(rssMb, metrics['maxRssMb'])
 
-            if do_disk_io:
-                disk_io = map(max, zip(disk_io, metrics['diskIO']))
-                disk_io_t = self.DISK_IO_T(*disk_io)
-            else:
-                disk_io_t = self.DISK_IO_T(-1,-1,-1,-1)
+        with self.__metricsLock:
+
+            maxRss = max(rssMb, metrics['maxRssMb'])
+            disk_io_t = ttypes.DiskIO(*disk_io) if do_disk_io else None
 
             metrics.update({
                 'rssMb': rssMb,

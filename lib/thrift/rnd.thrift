@@ -14,6 +14,13 @@ exception RndException {
   3: optional list<string> stack
 }
 
+struct DiskIO {
+    1:i64 read_count = 0,
+    2:i64 write_count = 0,
+    3:i64 read_bytes = 0,
+    4:i64 write_bytes = 0,
+}
+
 struct RunTaskCommand {
     1:common.Guid procId,
     2:common.Guid taskId,
@@ -38,6 +45,7 @@ struct RunningTask {
     7:optional double progress = 0.0,
     8:optional string lastLog = "",
     9:i16 cpuPercent
+    10:optional DiskIO diskIO
 }
 
 struct RunTaskResult {
