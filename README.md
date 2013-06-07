@@ -15,25 +15,22 @@ Developent Environment Requirements
 Server
 ------
 
-* Postgresql 9.2
+* [Postgresql](http://www.postgresql.org) 9.2
+* [Java7](http://www.java.com/en/download/index.jsp)
 
-http://www.postgresql.org
-
-* Java7
-
-http://www.java.com/en/download/index.jsp
 
 Client and Tools
 ----------------
 
 * Python 2.7
-* Qt 4.8
-* PySide 1.1.x
-* Thrift 0.9
+* [Qt](http://qt-project.org/downloads) 4.8
+* [PySide](http://qt-project.org/wiki/Get-PySide) 1.1.x
+* [Cython](http://www.cython.org/) >= 0.19 
+* [Thrift](http://thrift.apache.org/) 0.9
 
 Plow has an API for job submission, but the Blueprint library makes this much easier.
 
-* Blueprint https://github.com/sqlboy/blueprint
+* [Blueprint](https://github.com/sqlboy/blueprint)
 
 
 Installing the Server
