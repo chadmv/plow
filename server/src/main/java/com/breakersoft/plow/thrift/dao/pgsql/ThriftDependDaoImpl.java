@@ -23,7 +23,7 @@ public class ThriftDependDaoImpl extends AbstractDao implements ThriftDependDao 
         public DependT mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
 
-            DependT depend = new DependT();
+            final DependT depend = new DependT();
             depend.setId(rs.getString("pk_depend"));
             depend.setActive(rs.getBoolean("bool_active"));
             depend.setType(DependType.findByValue(rs.getInt("int_type")));
@@ -87,6 +87,11 @@ public class ThriftDependDaoImpl extends AbstractDao implements ThriftDependDao 
                 "time_satisfied " +
             "FROM " +
                 "plow.depend ";
+
+    @Override
+    public DependT getDepend(UUID dependId) {
+        return jdbc.queryForObject(GET + " WHERE pk_depend=?", MAPPER, dependId);
+    }
 
     @Override
     public List<DependT> getWhatDependsOnJob(UUID jobId) {

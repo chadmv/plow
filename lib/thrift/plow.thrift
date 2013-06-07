@@ -493,7 +493,8 @@ service RpcService {
 
     void dropDepend(1:common.Guid dependId) throws (1:PlowException e),
     void activateDepend(1:common.Guid dependId) throws (1:PlowException e),
-
+    DependT createDepend(1:DependSpecT dependSpec) throws (1:PlowException e),
+    
     NodeT getNode(1:string name) throws (1:PlowException e),
     list<NodeT> getNodes(1:NodeFilterT filter) throws (1:PlowException e),
     void setNodeLocked(1:common.Guid id, 2:bool locked) throws (1:PlowException e),

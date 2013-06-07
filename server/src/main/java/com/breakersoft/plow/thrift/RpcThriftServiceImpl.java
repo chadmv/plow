@@ -653,4 +653,10 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
         Service svc = wranglerService.createService(svct);
         return thriftServiceDao.getService(svc.getName());
     }
+
+    @Override
+    public DependT createDepend(DependSpecT spec) throws PlowException {
+        final Depend depend = dependService.createDepend(spec);
+        return thriftDependDao.getDepend(depend.getDependId());
+    }
 }
