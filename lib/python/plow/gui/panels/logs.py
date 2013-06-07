@@ -10,19 +10,23 @@ from plow.gui.event import EventManager
 LOGGER = logging.getLogger(__file__)
 
 
-DEFAULT_FONT_SIZE = 10.0
+DEFAULT_FONT_SIZE = 11 # pixels
+MIN_FONT_SIZE = 6
+MAX_FONT_SIZE = 24
 
 
 class LogsPanel(Panel):
 
     def __init__(self, name="Logs", parent=None):
-        Panel.__init__(self, name, "Logs", parent)
+        super(LogsPanel, self).__init__(name, "Logs", parent)
 
-        self.setWidget(TabbedLogVieweWidget(self.attrs, self))
+        tabbedViewer = TabbedLogVieweWidget(self.attrs, self)
+        self.setWidget(tabbedViewer)
         self.setWindowTitle(name)
 
-        self.setAttr("fontPointSize", DEFAULT_FONT_SIZE)
+        self.setAttr("fontSize", DEFAULT_FONT_SIZE)
 
+        tabbedViewer.fontSizeChanged.connect(self.__fontSizeChanged)
         EventManager.bind("TASK_OF_INTEREST", self.__handleTaskOfInterestEvent)
         
     def init(self):
@@ -30,6 +34,13 @@ class LogsPanel(Panel):
 
     def refresh(self):
         pass
+
+    def restore(self, *args, **kwargs):
+        super(LogsPanel, self).restore(*args, **kwargs)
+
+        size = int(self.getAttr("fontSize"))
+        if MIN_FONT_SIZE <= size <= MAX_FONT_SIZE:
+            self.widget().setFontSize(size)
 
     def _openPanelSettingsDialog(self):
         pass
@@ -40,7 +51,14 @@ class LogsPanel(Panel):
         self.widget().addTask(job, task)
         self.raise_()
 
+    def __fontSizeChanged(self, size):
+        self.setAttr("fontSize", size)
+
+
 class TabbedLogVieweWidget(QtGui.QWidget):
+
+    fontSizeChanged = QtCore.Signal(int)
+
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -68,14 +86,14 @@ class TabbedLogVieweWidget(QtGui.QWidget):
             self.__tabs.setCurrentIndex(index)
         else:
             viewer = LogViewerWidget(job, task, {}, self)
-            viewer.setFontPointSize(self.__fontSize)
+            viewer.setFontSize(self.__fontSize)
             viewer.setInterval(self.__interval)
             index = self.__tabs.addTab(viewer, task.name)
             self.__tabs.setTabToolTip(index, viewer.logPath)
             self.__tabs.setCurrentIndex(index)
             self.__tasks[task.id] = index
 
-            viewer.fontPointSizeChanged.connect(self.setFontPointSize)
+            viewer.fontSizeChanged.connect(self.setFontSize)
             
     def closeTab(self, index):
         taskId = None
@@ -99,15 +117,17 @@ class TabbedLogVieweWidget(QtGui.QWidget):
         for i in xrange(self.__tabs.count()):
             self.__tabs.widget(i).setInterval(msec)
 
-    def setFontPointSize(self, size):
+    def setFontSize(self, size):
         self.__fontSize = size
         for tab in self:
-            tab.setFontPointSize(size)
+            tab.setFontSize(size)
+
+        self.fontSizeChanged.emit(size)
 
 
 class LogViewerWidget(QtGui.QWidget):
 
-    fontPointSizeChanged = QtCore.Signal(float)
+    fontSizeChanged = QtCore.Signal(int)
 
     def __init__(self, job=None, task=None, attrs=None, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -160,8 +180,7 @@ class LogViewerWidget(QtGui.QWidget):
 
         self.__view = view = QtGui.QPlainTextEdit(self)
         font = view.font()
-        font.setPointSize(font.pointSize()-2)
-        # font.setWeight(font.Light)
+        font.setPixelSize(DEFAULT_FONT_SIZE)
         view.setFont(font)
         view.setLineWrapMode(view.WidgetWidth)
         view.setReadOnly(True)
@@ -235,24 +254,25 @@ class LogViewerWidget(QtGui.QWidget):
     def setInterval(self, msec):
         self.__logWatcher.setInterval(msec)
 
-    def fontPointSize(self):
-        return self.__view.font().pointSize()
+    def fontSize(self):
+        return self.__view.font().pixelSize()
 
-    def setFontPointSize(self, size):
+    def setFontSize(self, size):
+        size = min(max(size, MIN_FONT_SIZE), MAX_FONT_SIZE)
         font = self.__view.font()
-        lastSize = font.pointSizeF()
+        lastSize = font.pixelSize()
         if size == lastSize:
             return
 
-        font.setPointSizeF(size)
+        font.setPixelSize(size)
         self.__view.setFont(font)
-        self.fontPointSizeChanged.emit(size)
+        self.fontSizeChanged.emit(size)
 
     def incrementFontSize(self):
-        self.setFontPointSize(min(self.fontPointSize()+1, 18))
+        self.setFontSize(min(self.fontSize()+1, MAX_FONT_SIZE))
 
     def decrementFontSize(self):
-        self.setFontPointSize(max(self.fontPointSize()-1, 6))
+        self.setFontSize(max(self.fontSize()-1, MIN_FONT_SIZE))
 
     def setCurrentTask(self, task):
         if not task.id or task.id == self.taskId:
