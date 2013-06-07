@@ -13,4 +13,5 @@ public interface ThriftDependDao {
     List<DependT> getWhatJobDependsOn(UUID jobId);
     List<DependT> getWhatLayerDependsOn(UUID layerId);
     List<DependT> getWhatTaskDependsOn(UUID taskId);
+    DependT getDepend(UUID dependId);
 }

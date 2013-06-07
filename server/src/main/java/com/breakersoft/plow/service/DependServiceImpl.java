@@ -61,6 +61,10 @@ public class DependServiceImpl implements DependService {
 
         Depend depend = null;
 
+        if (spec.getType() == null) {
+            throw new DependencyException("Dependency type is not set to a value.");
+        }
+
         switch(spec.getType()) {
 
         case JOB_ON_JOB:
@@ -121,6 +125,9 @@ public class DependServiceImpl implements DependService {
 
             createTaskByTask(dependentJob, dependentLayer, dependOnJob, dependOnLayer);
             break;
+
+        default:
+            throw new DependencyException("Unhandled dependency type " + spec.getType());
         }
 
         if (depend != null) {

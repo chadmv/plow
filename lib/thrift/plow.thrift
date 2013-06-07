@@ -458,6 +458,7 @@ service RpcService {
     list<DependT> getDependsOnJob(1:common.Guid jobId) throws (1:PlowException e),
     list<DependT> getJobDependsOn(1:common.Guid jobId) throws (1:PlowException e),
     JobSpecT getJobSpec(1:common.Guid jobId) throws (1:PlowException e),
+    void createJobOnJobDepend(1:common.Guid jobId, 2:common.Guid onJobId) throws (1:PlowException e),
 
     FolderT createFolder(1:string projectId, 2:string name) throws (1:PlowException e),
     FolderT getFolder(1:string id) throws (1:PlowException e),
@@ -480,6 +481,9 @@ service RpcService {
     void setLayerThreadable(1:common.Guid guid, 2:bool threadable) throws (1:PlowException e),
     list<DependT> getDependsOnLayer(1:common.Guid layerId) throws (1:PlowException e),
     list<DependT> getLayerDependsOn(1:common.Guid layerId) throws (1:PlowException e),
+    void createLayerOnLayerDepend(1:common.Guid layerId, 2:common.Guid onLayerId) throws (1:PlowException e),
+    void createLayerOnTaskDepend(1:common.Guid layerId, 2:common.Guid onTaskId) throws (1:PlowException e),
+    void createTaskByTaskDepend(1:common.Guid layerId, 2:common.Guid onLayerId) throws (1:PlowException e),
 
     TaskT getTask(1:common.Guid taskId) throws (1:PlowException e),
     list<TaskT> getTasks(1:TaskFilterT filter) throws (1:PlowException e),
@@ -490,9 +494,12 @@ service RpcService {
     list<DependT> getDependsOnTask(1:common.Guid taskId) throws (1:PlowException e),
     list<DependT> getTaskDependsOn(1:common.Guid taskId) throws (1:PlowException e),
     list<TaskStatsT> getTaskStats(1:common.Guid taskId) throws (1:PlowException e),
+    void createTaskOnLayerDepend(1:common.Guid taskId, 2:common.Guid onLayerId) throws (1:PlowException e),
+    void createTaskOnTaskDepend(1:common.Guid taskId, 2:common.Guid onTaskId) throws (1:PlowException e),
 
     void dropDepend(1:common.Guid dependId) throws (1:PlowException e),
     void activateDepend(1:common.Guid dependId) throws (1:PlowException e),
+    DependT createDepend(1:DependSpecT dependSpec) throws (1:PlowException e),
 
     NodeT getNode(1:string name) throws (1:PlowException e),
     list<NodeT> getNodes(1:NodeFilterT filter) throws (1:PlowException e),

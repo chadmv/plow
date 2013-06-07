@@ -30,6 +30,24 @@ public class ThriftDependDaoTests extends AbstractTest {
     ThriftDependDao thriftDependDao;
 
     @Test
+    public void testGetDepend() {
+        JobSpecT spec1 = getTestJobSpec("depend_test_1");
+        JobSpecT spec2 = getTestJobSpec("depend_test_2");
+
+        JobLaunchEvent event1 = jobService.launch(spec1);
+        JobLaunchEvent event2 = jobService.launch(spec2);
+
+        DependSpecT dspec = new DependSpecT();
+        dspec.type = DependType.JOB_ON_JOB;
+        dspec.dependentJob = event1.getJob().getJobId().toString();
+        dspec.dependOnJob = event2.getJob().getJobId().toString();
+
+        Depend dependA = dependDao.createJobOnJob(event1.getJob(), event2.getJob());
+        DependT dependT = thriftDependDao.getDepend(dependA.getDependId());
+        assertEquals(dependA.getDependId().toString(), dependT.id);
+    }
+
+    @Test
     public void testGetWhatDependsOnJob() {
         JobSpecT spec1 = getTestJobSpec("depend_test_1");
         JobSpecT spec2 = getTestJobSpec("depend_test_2");
