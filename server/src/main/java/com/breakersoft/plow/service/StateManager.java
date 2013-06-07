@@ -156,6 +156,7 @@ public class StateManager {
         }
     }
 
+    @Async(value="stateChangeExecutor")
     public boolean killJob(Job job, String reason) {
         final boolean killResult = shutdownJob(job);
         if (killResult) {
