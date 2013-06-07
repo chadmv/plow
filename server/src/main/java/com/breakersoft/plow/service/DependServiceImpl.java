@@ -23,6 +23,7 @@ import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.exceptions.DependencyException;
 import com.breakersoft.plow.thrift.DependSpecT;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 @Service
@@ -60,6 +61,10 @@ public class DependServiceImpl implements DependService {
         Task dependOnTask;
 
         Depend depend = null;
+
+        if (spec.getType() == null) {
+            throw new DependencyException("Dependency type is not set to a value.");
+        }
 
         switch(spec.getType()) {
 
@@ -121,6 +126,9 @@ public class DependServiceImpl implements DependService {
 
             createTaskByTask(dependentJob, dependentLayer, dependOnJob, dependOnLayer);
             break;
+
+        default:
+            throw new DependencyException("Unhandled dependency type " + spec.getType());
         }
 
         if (depend != null) {
