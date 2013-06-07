@@ -23,6 +23,7 @@ import com.breakersoft.plow.event.JobFinishedEvent;
 import com.breakersoft.plow.exceptions.PlowException;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
 import com.breakersoft.plow.rndaemon.RndClient;
+import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.util.PlowUtils;
@@ -172,6 +173,12 @@ public class StateManager {
             return true;
         }
         return false;
+    }
+
+
+    @Async(value="stateChangeExecutor")
+    public void createDepend(DependSpecT depend) {
+        dependService.createDepend(depend);
     }
 
     @Async(value="stateChangeExecutor")

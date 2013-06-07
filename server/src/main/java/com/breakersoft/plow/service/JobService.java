@@ -106,6 +106,14 @@ public interface JobService {
      */
     void setJobAttrs(Job job, Map<String, String> attrs);
 
+    /**
+     * Return an active job with the given id.
+     *
+     * @param id
+     * @return
+     */
+    Job getActiveJob(UUID id);
+
     /*
      * Layers
      */
@@ -140,5 +148,4 @@ public interface JobService {
     List<Task> getTasks(TaskFilterT filter);
     boolean setTaskState(Task task, TaskState currentState, TaskState newState);
     boolean setTaskState(Task task, TaskState state);
-
 }

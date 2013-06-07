@@ -328,6 +328,11 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public Job getActiveJob(UUID id) {
+        return jobDao.getActive(id);
+    }
+
+    @Override
     public void setJobAttrs(Job job, Map<String,String> attrs) {
         jobDao.setAttrs(job, attrs);
     }

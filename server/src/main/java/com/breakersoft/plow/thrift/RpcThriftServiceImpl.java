@@ -20,6 +20,7 @@ import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Service;
+import com.breakersoft.plow.Task;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.exceptions.PlowWriteException;
 import com.breakersoft.plow.service.DependService;
@@ -658,5 +659,117 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     public DependT createDepend(DependSpecT spec) throws PlowException {
         final Depend depend = dependService.createDepend(spec);
         return thriftDependDao.getDepend(depend.getDependId());
+    }
+
+    @Override
+    public void createJobOnJobDepend(String dependErId, String dependOnId)
+            throws PlowException, TException {
+
+        // Verify the jobs exist and are active.
+        jobService.getActiveJob(UUID.fromString(dependErId));
+        jobService.getActiveJob(UUID.fromString(dependOnId));
+
+        DependSpecT depend = new DependSpecT();
+        depend.setType(DependType.JOB_ON_JOB);
+        depend.setDependentJob(dependErId);
+        depend.setDependOnJob(dependOnId);
+
+        stateManager.createDepend(depend);
+    }
+
+    @Override
+    public void createLayerOnLayerDepend(String dependErId, String dependOnId)
+            throws PlowException, TException {
+
+        Layer erLayer = jobService.getLayer(UUID.fromString(dependErId));
+        Layer onLayer = jobService.getLayer(UUID.fromString(dependOnId));
+
+        DependSpecT depend = new DependSpecT();
+        depend.setType(DependType.LAYER_ON_LAYER);
+        depend.setDependentLayer(dependErId);
+        depend.setDependOnLayer(dependOnId);
+        depend.setDependentJob(erLayer.getJobId().toString());
+        depend.setDependOnJob(onLayer.getJobId().toString());
+
+        stateManager.createDepend(depend);
+    }
+
+    @Override
+    public void createLayerOnTaskDepend(String dependErId, String dependOnId)
+            throws PlowException, TException {
+
+        Layer erLayer = jobService.getLayer(UUID.fromString(dependErId));
+        Task onTask = jobService.getTask(UUID.fromString(dependOnId));
+
+        DependSpecT depend = new DependSpecT();
+        depend.setType(DependType.LAYER_ON_LAYER);
+        depend.setDependentLayer(dependErId);
+        depend.setDependOnTask(dependOnId);
+        depend.setDependentJob(erLayer.getJobId().toString());
+        depend.setDependOnJob(onTask.getJobId().toString());
+        depend.setDependOnLayer(onTask.getLayerId().toString());
+
+        stateManager.createDepend(depend);
+    }
+
+    @Override
+    public void createTaskByTaskDepend(String dependErId, String dependOnId)
+            throws PlowException, TException {
+
+        Layer erLayer = jobService.getLayer(UUID.fromString(dependErId));
+        Layer onLayer = jobService.getLayer(UUID.fromString(dependOnId));
+
+        // TODO: somewhere check that both tasks have a range.
+
+        DependSpecT depend = new DependSpecT();
+        depend.setType(DependType.TASK_BY_TASK);
+        depend.setDependentJob(erLayer.getJobId().toString());
+        depend.setDependentLayer(dependErId);
+        depend.setDependOnLayer(dependOnId);
+        depend.setDependOnJob(onLayer.getJobId().toString());
+
+        stateManager.createDepend(depend);
+    }
+
+    @Override
+    public void createTaskOnLayerDepend(String dependErId, String dependOnId)
+            throws PlowException, TException {
+
+        Task erTask = jobService.getTask(UUID.fromString(dependErId));
+        Layer onLayer = jobService.getLayer(UUID.fromString(dependOnId));
+
+        DependSpecT depend = new DependSpecT();
+        depend.setDependOnTask(dependOnId);
+
+        depend.setType(DependType.LAYER_ON_LAYER);
+        depend.setDependentJob(erTask.getJobId().toString());
+        depend.setDependentLayer(erTask.getLayerId().toString());
+        depend.setDependentTask(erTask.getTaskId().toString());
+        depend.setDependOnJob(onLayer.getJobId().toString());
+        depend.setDependOnLayer(onLayer.getLayerId().toString());
+
+        stateManager.createDepend(depend);
+    }
+
+    @Override
+    public void createTaskOnTaskDepend(String dependErId, String dependOnId)
+            throws PlowException, TException {
+
+        Task erTask = jobService.getTask(UUID.fromString(dependErId));
+        Task onTask = jobService.getTask(UUID.fromString(dependOnId));
+
+        DependSpecT depend = new DependSpecT();
+        depend.setDependOnTask(dependOnId);
+
+        depend.setType(DependType.LAYER_ON_LAYER);
+        depend.setDependentJob(erTask.getJobId().toString());
+        depend.setDependentLayer(erTask.getLayerId().toString());
+        depend.setDependentTask(erTask.getTaskId().toString());
+
+        depend.setDependOnJob(onTask.getJobId().toString());
+        depend.setDependOnLayer(onTask.getLayerId().toString());
+        depend.setDependOnTask(onTask.getTaskId().toString());
+
+        stateManager.createDepend(depend);
     }
 }
