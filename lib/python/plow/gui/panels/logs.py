@@ -81,16 +81,21 @@ class TabbedLogVieweWidget(QtGui.QWidget):
             yield self.__tabs.widget(i)
 
     def addTask(self, job, task):
+        tabs = self.__tabs
         index = self.__tasks.get(task.id, None)
+
         if index is not None:
-            self.__tabs.setCurrentIndex(index)
+            tabs.setCurrentIndex(index)
+            logView = tabs.currentWidget()
+            logView.setCurrentTask(task)
+
         else:
             viewer = LogViewerWidget(job, task, {}, self)
             viewer.setFontSize(self.__fontSize)
             viewer.setInterval(self.__interval)
-            index = self.__tabs.addTab(viewer, task.name)
-            self.__tabs.setTabToolTip(index, viewer.logPath)
-            self.__tabs.setCurrentIndex(index)
+            index = tabs.addTab(viewer, task.name)
+            tabs.setTabToolTip(index, viewer.logPath)
+            tabs.setCurrentIndex(index)
             self.__tasks[task.id] = index
 
             viewer.fontSizeChanged.connect(self.setFontSize)
@@ -275,7 +280,14 @@ class LogViewerWidget(QtGui.QWidget):
         self.setFontSize(max(self.fontSize()-1, MIN_FONT_SIZE))
 
     def setCurrentTask(self, task):
-        if not task.id or task.id == self.taskId:
+        if not task.id:
+            return
+
+        if task.id == self.taskId:
+            if self.isTailing(): 
+                self.scrollToBottom()
+            else:
+                self.readMore()
             return 
 
         logPath = task.get_log_path()
@@ -353,6 +365,18 @@ class LogViewerWidget(QtGui.QWidget):
         if logPath:
             self.setLogPath(logPath)
 
+    def readMore(self, scroll=True):
+        self.__logUpdated()
+        if scroll:
+            self.scrollToBottom()
+
+    def scrollToBottom(self):
+        bar = self.__view.verticalScrollBar()
+        bar.setValue(bar.maximum())
+
+    def isTailing(self):
+        return self.__chk_tail.isChecked()
+
     def __logUpdated(self):
         cursor = self.__view.textCursor()
         cursor.movePosition(cursor.End)
@@ -364,8 +388,7 @@ class LogViewerWidget(QtGui.QWidget):
             cursor.insertText(line) 
 
         if not self.__searchLine.text().strip():
-            bar = self.__view.verticalScrollBar()
-            bar.setValue(bar.maximum())
+            self.scrollToBottom()
 
     def __logTailToggled(self, checked):
         if checked:
