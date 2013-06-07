@@ -13,7 +13,6 @@ import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.FilterableJob;
 import com.breakersoft.plow.Folder;
 import com.breakersoft.plow.FrameRange;
-import com.breakersoft.plow.FrameSet;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Layer;
@@ -289,11 +288,20 @@ public class JobServiceImpl implements JobService {
                 continue;
             }
 
-            if (!layer.isSetDepends()) {
-                continue;
+            if (layer.isSetDepends()) {
+                for (DependSpecT depend: layer.getDepends()) {
+                    dependService.createDepend(job, depend);
+                }
             }
-            for (DependSpecT depend: layer.getDepends()) {
-                dependService.createDepend(job, depend);
+
+            if (layer.isSetTasks()) {
+                for (TaskSpecT task: layer.getTasks())  {
+                    if (task.isSetDepends()) {
+                        for (DependSpecT depend: task.getDepends()) {
+                            dependService.createDepend(job, depend);
+                        }
+                    }
+                }
             }
         }
 

@@ -18,6 +18,8 @@ import com.breakersoft.plow.event.EventManagerImpl;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.WranglerService;
 import com.breakersoft.plow.test.AbstractTest;
+import com.breakersoft.plow.thrift.DependSpecT;
+import com.breakersoft.plow.thrift.DependType;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobT;
 import com.breakersoft.plow.thrift.LayerSpecT;
@@ -25,6 +27,7 @@ import com.breakersoft.plow.thrift.LayerT;
 import com.breakersoft.plow.thrift.PlowException;
 import com.breakersoft.plow.thrift.RpcService;
 import com.breakersoft.plow.thrift.ServiceT;
+import com.breakersoft.plow.thrift.TaskSpecT;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -115,6 +118,46 @@ public class JobServiceTests extends AbstractTest {
         assertEquals(service.maxRetries, lt.maxRetries);
         assertEquals(service.tags, lt.getTags());
         assertEquals(service.threadable, lt.threadable);
+    }
+
+    @Test
+    public void testLaunchJobWithTaskOnTaskDepends() {
+        JobSpecT jobspec = new JobSpecT();
+        jobspec.setName("task_on_task_depends");
+        jobspec.setUid(100);
+        jobspec.setUsername("stella");
+        jobspec.setPaused(false);
+        jobspec.setProject("unittest");
+        jobspec.setLogPath("/tmp/plow/unittests/service_test");
+
+        LayerSpecT layer = new LayerSpecT();
+        layer.setName("foo");
+        layer.setCommand(Lists.newArrayList("sleep", "5" ));
+        layer.setEnv(new HashMap<String,String>(0));
+        layer.setServ(Defaults.DEFAULT_SERVICE);
+
+        TaskSpecT task1 = new TaskSpecT();
+        task1.name = "task_a";
+
+        TaskSpecT task2 = new TaskSpecT();
+        task2.name = "task_b";
+
+        DependSpecT depend = new DependSpecT();
+        depend.setDependentTask(task1.name);
+        depend.setDependOnTask(task2.name);
+        depend.setType(DependType.TASK_ON_TASK);
+
+        task2.addToDepends(depend);
+        layer.addToTasks(task1);
+        layer.addToTasks(task2);
+        jobspec.addToLayers(layer);
+
+        JobLaunchEvent event =
+                jobService.launch(jobspec);
+
+        assertEquals(1, jdbc().queryForInt("SELECT int_depend_count FROM task WHERE pk_job=? AND str_name=?",
+                event.getJob().getJobId(), task1.name));
+
     }
 
     @Test
