@@ -82,7 +82,7 @@ class SystemProfiler(PosixSystemProfiler):
         cpus = kwargs.get('cpus', set())
 
         opts['preexec_fn'] = partial(self._preexec_fn, 
-                                     cpus=kwargs.get('cpus'), 
+                                     cpus=cpus, 
                                      cpu_map=cpuprofile.logical_cpus)
 
         return cmd, opts
@@ -113,11 +113,9 @@ class SystemProfiler(PosixSystemProfiler):
             for slot in cpus:
                 logical_ids.update(cpu_map.get(slot, []))
 
-            # logger = logging.getLogger(__name__)
-            # logger.debug("Would lock logical processor ids %s", logical_ids)
-
-            p = psutil.Process(os.getpid())
-            p.set_cpu_affinity(logical_ids)
+            if logical_ids:
+                p = psutil.Process(os.getpid())
+                p.set_cpu_affinity(logical_ids)
 
 
 class CpuProfile(object):
