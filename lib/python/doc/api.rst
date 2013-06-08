@@ -438,6 +438,12 @@ Classes
 Functions
 ^^^^^^^^^
 
+.. autofunction:: plow.client.create_job_on_job_depend
+.. autofunction:: plow.client.create_layer_on_layer_depend
+.. autofunction:: plow.client.create_layer_on_task_depend
+.. autofunction:: plow.client.create_task_by_task_depend
+.. autofunction:: plow.client.create_task_on_layer_depend
+.. autofunction:: plow.client.create_task_on_task_depend
 .. autofunction:: plow.client.get_depends_on_job
 .. autofunction:: plow.client.get_job_depends_on
 .. autofunction:: plow.client.get_depends_on_layer
