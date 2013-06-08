@@ -274,8 +274,8 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public ClusterT createCluster(String name, Set<String> tags) throws PlowException {
-        final Cluster cluster = nodeService.createCluster(name, tags);
+    public ClusterT createCluster(String name) throws PlowException {
+        final Cluster cluster = nodeService.createCluster(name);
         return thriftClusterDao.getCluster(cluster.getClusterId().toString());
     }
 

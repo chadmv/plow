@@ -1,6 +1,8 @@
 package com.breakersoft.plow.test.thrift;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import javax.annotation.Resource;
 
 import org.apache.thrift.TException;
@@ -12,7 +14,6 @@ import com.breakersoft.plow.thrift.JobT;
 import com.breakersoft.plow.thrift.PlowException;
 import com.breakersoft.plow.thrift.RpcService;
 import com.breakersoft.plow.thrift.TaskFilterT;
-import com.google.common.collect.Sets;
 
 public class RpcThriftServiceTests extends AbstractTest {
 
@@ -21,37 +22,35 @@ public class RpcThriftServiceTests extends AbstractTest {
 
     @Test
     public void testLaunch() throws PlowException, TException {
-    	rpcService.launch(getTestJobSpec());
+        rpcService.launch(getTestJobSpec());
     }
 
     @Test
     public void testCreateCluster() throws PlowException, TException {
-    	ClusterT cluster = rpcService.createCluster(
-    			"bing", Sets.newHashSet("bang", "bong"));
-    	assertEquals("bing", cluster.name);
-    	assertTrue(cluster.tags.contains("bang"));
-    	assertTrue(cluster.tags.contains("bong"));
+        ClusterT cluster = rpcService.createCluster("bing");
+        assertEquals("bing", cluster.name);
+        assertTrue(cluster.tags.contains("bing"));
     }
 
     @Test
     public void testDeleteCluster() throws PlowException, TException {
-    	ClusterT cluster = rpcService.createCluster("bing", Sets.newHashSet("bang", "bong"));
-    	rpcService.deleteCluster(cluster.id);
+        ClusterT cluster = rpcService.createCluster("bing");
+        rpcService.deleteCluster(cluster.id);
     }
 
     @Test
     public void testGetProjects() throws PlowException, TException {
-    	rpcService.getProjects();
+        rpcService.getProjects();
     }
 
     @Test
     public void testRetryTasks() throws PlowException, TException, InterruptedException {
 
-    	JobT job = rpcService.launch(getTestJobSpec());
-    	TaskFilterT filter = new TaskFilterT();
-    	//filter.setJobId(job.id);
+        JobT job = rpcService.launch(getTestJobSpec());
+        TaskFilterT filter = new TaskFilterT();
+        //filter.setJobId(job.id);
 
-    	rpcService.retryTasks(filter);
-    	Thread.sleep(2000);
+        rpcService.retryTasks(filter);
+        Thread.sleep(2000);
     }
 }

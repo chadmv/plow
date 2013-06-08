@@ -4,10 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Set;
-
 import javax.annotation.Resource;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.breakersoft.plow.Cluster;
@@ -20,7 +19,6 @@ import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.test.AbstractTest;
-import com.google.common.collect.Sets;
 
 public class QuotaDaoTests extends AbstractTest {
 
@@ -33,30 +31,32 @@ public class QuotaDaoTests extends AbstractTest {
     @Resource
     NodeService nodeService;
 
-    private final static Set<String> TAGS = Sets.newHashSet("test");
+    private Cluster cluster;
+
+    @Before
+    public void init() {
+        cluster = nodeService.createCluster("test");
+    }
 
     @Test
     public void testCreate() {
-        Cluster c = nodeService.createCluster("test", TAGS);
-        Quota q1 = quotaDao.create(TEST_PROJECT, c, 10, 100);
+        Quota q1 = quotaDao.create(TEST_PROJECT, cluster, 10, 100);
         Quota q2 = quotaDao.get(q1.getQuotaId());
         assertEquals(q1, q2);
     }
 
     @Test
     public void testCheck() {
-        Cluster c = nodeService.createCluster("test", TAGS);
-        quotaDao.create(TEST_PROJECT, c, 10, 100);
-        assertTrue(quotaDao.check(c, TEST_PROJECT, 99));
-        assertFalse(quotaDao.check(c, TEST_PROJECT, 100));
-        assertFalse(quotaDao.check(c, TEST_PROJECT, 101));
-        assertTrue(quotaDao.check(c, TEST_PROJECT, 0));
+        quotaDao.create(TEST_PROJECT, cluster, 10, 100);
+        assertTrue(quotaDao.check(cluster, TEST_PROJECT, 99));
+        assertFalse(quotaDao.check(cluster, TEST_PROJECT, 100));
+        assertFalse(quotaDao.check(cluster, TEST_PROJECT, 101));
+        assertTrue(quotaDao.check(cluster, TEST_PROJECT, 0));
     }
 
     @Test
     public void testSetSize() {
-        Cluster c = nodeService.createCluster("test", TAGS);
-        Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
+        Quota quota = quotaDao.create(TEST_PROJECT, cluster, 10, 100);
         quotaDao.setSize(quota, 1);
         assertEquals(1,
                 simpleJdbcTemplate.queryForInt("SELECT int_size FROM quota WHERE pk_quota=?",
@@ -65,8 +65,7 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void testSetBurst() {
-        Cluster c = nodeService.createCluster("test", TAGS);
-        Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
+        Quota quota = quotaDao.create(TEST_PROJECT, cluster, 10, 100);
         quotaDao.setBurst(quota, 1);
         assertEquals(1,
                 simpleJdbcTemplate.queryForInt("SELECT int_burst FROM quota WHERE pk_quota=?",
@@ -75,8 +74,7 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void testSetLocked() {
-        Cluster c = nodeService.createCluster("test", TAGS);
-        Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
+        Quota quota = quotaDao.create(TEST_PROJECT, cluster, 10, 100);
         quotaDao.setLocked(quota, true);
         assertEquals(true,
                 simpleJdbcTemplate.queryForObject("SELECT bool_locked FROM quota WHERE pk_quota=?",
@@ -92,8 +90,7 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void testGet() {
-        Cluster c = nodeService.createCluster("test", TAGS);
-        Quota q1 = quotaDao.create(TEST_PROJECT, c, 10, 100);
+        Quota q1 = quotaDao.create(TEST_PROJECT, cluster, 10, 100);
         Quota q2 = quotaDao.get(q1.getQuotaId());
         Quota q3 = quotaDao.get(q1.getQuotaId());
         assertEquals(q1, q2);
@@ -115,10 +112,9 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void allocateResources() {
-        Cluster c = nodeService.createCluster("test", TAGS);
-        Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
+        Quota quota = quotaDao.create(TEST_PROJECT, cluster, 10, 100);
 
-        quotaDao.allocate(c, TEST_PROJECT, 5);
+        quotaDao.allocate(cluster, TEST_PROJECT, 5);
         assertEquals(5,
                 simpleJdbcTemplate.queryForInt("SELECT int_cores_run FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
@@ -126,10 +122,9 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void freeResources() {
-        Cluster c = nodeService.createCluster("test", TAGS);
-        Quota quota = quotaDao.create(TEST_PROJECT, c, 10, 100);
+        Quota quota = quotaDao.create(TEST_PROJECT, cluster, 10, 100);
 
-        quotaDao.allocate(c, TEST_PROJECT, 5);
+        quotaDao.allocate(cluster, TEST_PROJECT, 5);
         assertEquals(5,
                 simpleJdbcTemplate.queryForInt("SELECT int_cores_run FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
@@ -139,7 +134,7 @@ public class QuotaDaoTests extends AbstractTest {
                 simpleJdbcTemplate.queryForInt("SELECT int_cores_run FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));
 
-        quotaDao.allocate(c, TEST_PROJECT, 6);
+        quotaDao.allocate(cluster, TEST_PROJECT, 6);
         assertEquals(10,
                 simpleJdbcTemplate.queryForInt("SELECT int_cores_run FROM quota WHERE pk_quota=?",
                         quota.getQuotaId()));

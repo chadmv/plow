@@ -97,6 +97,12 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
+    public Cluster createCluster(String name) {
+        String[] tags = new String[] { name };
+        return clusterDao.create(name, tags);
+    }
+
+    @Override
     public Cluster createCluster(String name, Set<String> tags) {
         return clusterDao.create(name, tags.toArray(new String[] {}));
     }

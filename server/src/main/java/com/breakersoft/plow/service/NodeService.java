@@ -45,6 +45,7 @@ public interface NodeService {
      * Clusters
      */
 
+    Cluster createCluster(String name);
     Cluster createCluster(String name, Set<String> tags);
     Cluster getCluster(String name);
     Cluster getCluster(UUID id);
