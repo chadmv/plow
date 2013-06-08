@@ -5,6 +5,7 @@ import java.util.UUID;
 public class ClusterE implements Cluster {
 
     private UUID clusterId;
+    private String name;
 
     @Override
     public UUID getClusterId() {
@@ -13,6 +14,14 @@ public class ClusterE implements Cluster {
 
     public void setClusterId(UUID clusterId) {
         this.clusterId = clusterId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int hashCode() {
