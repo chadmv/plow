@@ -139,7 +139,7 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                 final PreparedStatement ret = conn.prepareStatement(UPDATE_TAGS);
-                 ret.setArray(1, conn.createArrayOf("text", tags));
+                ret.setArray(1, conn.createArrayOf("text", tags));
                 ret.setObject(2, c.getClusterId());
                 return ret;
             }
