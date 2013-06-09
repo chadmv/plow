@@ -1,4 +1,4 @@
-package com.breakersoft.plow.scheduler;
+package com.breakersoft.plow.dispatcher;
 
 import java.util.UUID;
 
@@ -12,13 +12,12 @@ import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.LayerE;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Task;
-import com.breakersoft.plow.dispatcher.DispatchService;
-import com.breakersoft.plow.dispatcher.NodeDispatcher;
-import com.breakersoft.plow.dispatcher.ProcDispatcher;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
+import com.breakersoft.plow.scheduler.SchedulerService;
+import com.breakersoft.plow.scheduler.StatsService;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.StateManager;
@@ -31,10 +30,10 @@ import com.breakersoft.plow.thrift.TaskState;
  *
  */
 @Component
-public class SchedulerEventHandler {
+public class RndEventHandler {
 
     private static final Logger logger =
-            org.slf4j.LoggerFactory.getLogger(SchedulerEventHandler.class);
+            org.slf4j.LoggerFactory.getLogger(RndEventHandler.class);
 
     @Autowired
     SchedulerService schedulerService;
