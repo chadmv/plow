@@ -8,6 +8,7 @@ import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.thrift.NodeState;
+import com.breakersoft.plow.thrift.SlotMode;
 
 public interface NodeDao {
 
@@ -27,7 +28,7 @@ public interface NodeDao {
 
     void setCluster(Node node, Cluster cluster);
 
-    boolean hasProcs(Node node);
+    boolean hasProcs(Node node, boolean withLock);
 
     void setTags(Node node, Set<String> tags);
 
@@ -35,4 +36,5 @@ public interface NodeDao {
 
     List<Node> getUnresponsiveNodes();
 
+    void setSlotMode(Node node, SlotMode mode, int cores, int ram);
 }

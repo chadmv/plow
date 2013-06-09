@@ -443,12 +443,8 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Override
     public void setNodeCluster(String nodeId, String clusterId) throws PlowException {
-        Node node = nodeService.getNode(UUID.fromString(nodeId));
-        if (nodeService.hasProcs(node)) {
-            throw new PlowWriteException("You cannot move a Node with running procs.");
-        }
-
-        Cluster cluster = nodeService.getCluster(UUID.fromString(clusterId));
+        final Node node = nodeService.getNode(UUID.fromString(nodeId));
+        final Cluster cluster = nodeService.getCluster(UUID.fromString(clusterId));
         // isolation=Serializable.
         nodeService.setNodeCluster(node, cluster);
     }
@@ -771,5 +767,12 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
         depend.setDependOnTask(onTask.getTaskId().toString());
 
         stateManager.createDepend(depend);
+    }
+
+    @Override
+    public void setNodeSlotMode(String id, SlotMode mode, int cores, int ram) throws PlowException {
+        final Node node = nodeService.getNode(UUID.fromString(id));
+        // isolation=Serializable.
+        nodeService.setNodeSlotMode(node, mode, cores, ram);
     }
 }

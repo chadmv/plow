@@ -396,10 +396,13 @@ CREATE TABLE plow.node (
   str_name VARCHAR(128) NOT NULL,
   str_ipaddr VARCHAR(15) NOT NULL,
   int_state SMALLINT NOT NULL DEFAULT 0,
+  int_slot_mode SMALLINT NOT NULL DEFAULT 0,
+  int_slot_cores SMALLINT NOT NULL DEFAULT 0,
+  int_slot_ram INTEGER NOT NULL DEFAULT 0,
   bool_locked BOOLEAN NOT NULL DEFAULT 'f',
   time_created BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   time_updated BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
-  str_tags TEXT[]
+  str_tags TEXT[] NOT NULL
 ) WITHOUT OIDS;
 
 CREATE UNIQUE INDEX node_str_name_uniq_idx ON plow.node (str_name);
@@ -1081,6 +1084,15 @@ CREATE TRIGGER trig_before_job_disp_update BEFORE UPDATE ON plow.job_dsp
 
 CREATE TRIGGER trig_before_folder_disp_update BEFORE UPDATE ON plow.folder_dsp
     FOR EACH ROW EXECUTE PROCEDURE plow.before_disp_update();
+
+---
+--- plow.before_node_config_change()
+---
+--- Verify that the node has no running processes.
+---
+CREATE OR REPLACE FUNCTION plow.before_node_config_change() RETURNS TRIGGER AS $$
+BEGIN
+  IF N
 
 ---
 --- plow.after_task_state_change()

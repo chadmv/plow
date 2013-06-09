@@ -20,8 +20,10 @@ import com.breakersoft.plow.dao.ClusterDao;
 import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dispatcher.dao.ProcDao;
+import com.breakersoft.plow.exceptions.PlowWriteException;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.thrift.NodeState;
+import com.breakersoft.plow.thrift.SlotMode;
 
 @Service
 @Transactional
@@ -174,18 +176,25 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public boolean hasProcs(Node node) {
-        return nodeDao.hasProcs(node);
-    }
-
-    @Override
     @Transactional(isolation=Isolation.SERIALIZABLE)
     public void setNodeCluster(Node node, Cluster cluster) {
+        if (nodeDao.hasProcs(node, true)) {
+             throw new PlowWriteException("You cannot change a cluster with running procs.");
+        }
         nodeDao.setCluster(node, cluster);
     }
 
     @Override
     public void setTags(Node node, Set<String> tags) {
         nodeDao.setTags(node, tags);
+    }
+
+    @Override
+    @Transactional(isolation=Isolation.SERIALIZABLE)
+    public void setNodeSlotMode(Node node, SlotMode mode, int cores, int ram) {
+        if (nodeDao.hasProcs(node, true)) {
+            throw new PlowWriteException("You cannot change slot configuration with running procs.");
+        }
+        nodeDao.setSlotMode(node, mode, cores, ram);
     }
 }

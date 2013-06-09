@@ -21,7 +21,9 @@ import com.breakersoft.plow.dao.NodeDao;
 import com.breakersoft.plow.exceptions.PlowWriteException;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.thrift.NodeState;
+import com.breakersoft.plow.thrift.SlotMode;
 import com.breakersoft.plow.util.JdbcUtils;
+import com.google.common.base.Preconditions;
 
 @Repository
 public class NodeDaoImpl extends AbstractDao implements NodeDao {
@@ -236,16 +238,16 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     }
 
     @Override
-    public boolean hasProcs(Node node) {
-        return jdbc.queryForObject("SELECT COUNT(1) FROM proc WHERE pk_node=?", Integer.class, node.getNodeId()) > 0;
+    public boolean hasProcs(Node node, boolean lock) {
+        String query = "SELECT int_cores - int_idle_cores FROM plow.node_dsp WHERE pk_node=?";
+        if (lock) {
+            query = query + " FOR UPDATE";
+        }
+        return jdbc.queryForObject(query, Integer.class, node.getNodeId()) != 0;
     }
 
     @Override
     public void setCluster(Node node, Cluster cluster) {
-        // Raise exception if the node has running tasks.
-        if (hasProcs(node)) {
-            throw new PlowWriteException("You cannot move nodes while they have running procs");
-        }
         jdbc.update("UPDATE plow.node SET pk_cluster=? WHERE pk_node=?",
                 cluster.getClusterId(), node.getNodeId());
     }
@@ -270,5 +272,29 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     public boolean setState(Node node, NodeState state) {
         return jdbc.update("UPDATE plow.node SET int_state=? WHERE pk_node=? AND int_state!=?",
                 state.ordinal(), node.getNodeId(), state.ordinal()) == 1;
+    }
+
+    private static final String UPDATE_SLOT_MODE =
+            "UPDATE " +
+                "plow.node " +
+            "SET " +
+                "int_slot_mode=?,"+
+                "int_slot_cores=?,"+
+                "int_slot_ram=? "+
+            "WHERE " +
+                "pk_node=?";
+
+    @Override
+    public void setSlotMode(Node node, SlotMode mode, int cores, int ram) {
+        if (mode.equals(SlotMode.SINGLE) || mode.equals(SlotMode.DYNAMIC)) {
+            cores = 0;
+            ram = 0;
+        }
+        else if (mode.equals(SlotMode.SLOTS)) {
+            Preconditions.checkArgument(cores > 0, "Cores must be greater than 0 in slot mode");
+            Preconditions.checkArgument(ram > 0, "Ram must be greater than 0 in slot mode");
+        }
+
+        jdbc.update(UPDATE_SLOT_MODE, mode.ordinal(), cores, ram, node.getNodeId());
     }
 }

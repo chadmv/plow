@@ -13,6 +13,7 @@ import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.thrift.NodeState;
+import com.breakersoft.plow.thrift.SlotMode;
 
 public interface NodeService {
 
@@ -24,11 +25,11 @@ public interface NodeService {
     void updateNode(Node node, Ping ping);
     void setNodeLocked(Node node, boolean locked);
     Node getNode(UUID id);
-    boolean hasProcs(Node node);
     void setNodeCluster(Node node, Cluster cluster);
     void setTags(Node node, Set<String> tags);
     boolean setNodeState(Node node, NodeState state);
     List<Node> getUnresponsiveNodes();
+    void setNodeSlotMode(Node node, SlotMode mode, int cores, int ram);
 
     /*
      * Quotas

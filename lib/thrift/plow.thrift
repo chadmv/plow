@@ -45,6 +45,27 @@ enum NodeState {
     REPAIR
 }
 
+/**
+* Node slot mode.
+**/
+enum SlotMode {
+
+    /**
+    * Fully dynamic slots driven by job requirements. 
+    **/
+    DYNAMIC,
+
+    /**
+    * Node is treated as a single large resource, all cores and all memory.
+    **/
+    SINGLE,
+    
+    /**
+    * Custom min cores/min ram defined on a per node basis.
+    **/
+    SLOTS
+}
+
 enum DependType {
     JOB_ON_JOB,
     LAYER_ON_LAYER,
@@ -153,15 +174,18 @@ struct NodeT {
     5:string ipaddr,
     6:set<string> tags,
     7:NodeState state,
-    8:bool locked,
-    9:common.Timestamp createdTime,
-    10:common.Timestamp updatedTime,
-    11:common.Timestamp bootTime,
-    12:i32 totalCores,
-    13:i32 idleCores,
-    14:i32 totalRamMb,
-    15:i32 freeRamMb,
-    16:NodeSystemT system
+    8:SlotMode mode,
+    9:bool locked,
+    10:common.Timestamp createdTime,
+    11:common.Timestamp updatedTime,
+    12:common.Timestamp bootTime,
+    13:i32 totalCores,
+    14:i32 idleCores,
+    15:i32 slotCores,
+    16:i32 totalRamMb,
+    17:i32 freeRamMb,
+    18:i32 slotRam,
+    19:NodeSystemT system
 }
 
 struct ProcT {
@@ -506,6 +530,7 @@ service RpcService {
     void setNodeLocked(1:common.Guid id, 2:bool locked) throws (1:PlowException e),
     void setNodeCluster(1:common.Guid id, 2:common.Guid clusterId) throws (1:PlowException e),
     void setNodeTags(1:common.Guid id, 2:set<string> tags) throws (1:PlowException e),
+    void setNodeSlotMode(1:common.Guid id, 2:SlotMode mode, 3:i32 slotCores, 4:i32 slotRam) throws (1:PlowException e),
 
     ClusterT getCluster(1:string name) throws (1:PlowException e),
     list<ClusterT> getClustersByTag(1:string tag) throws (1:PlowException e),
