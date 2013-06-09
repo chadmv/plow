@@ -87,7 +87,7 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
 
         //TODO: make this smarter
         proc.setCores(task.minCores);
-        proc.setMemory(task.minRam);
+        proc.setRam(task.minRam);
 
         // Requery for these in case they have changed.
         // In case we allow moving nodes while cores are running.

@@ -11,13 +11,13 @@ public class DispatchProc extends ProcE implements DispatchResource, JobId {
     private UUID clusterId;
     private UUID quotaId;
     private int cores;
-    private int memory;
+    private int ram;
     private boolean allocated;
     private boolean unbooked;
     private Set<String> tags;
 
     public String toString() {
-        return String.format("Proc: %d/%d [%s] on host: %s", cores, memory, getProcId(), getHostname());
+        return String.format("Proc: %d/%d [%s] on host: %s", cores, ram, getProcId(), getHostname());
     }
 
     public int getIdleCores() {
@@ -29,11 +29,11 @@ public class DispatchProc extends ProcE implements DispatchResource, JobId {
     }
 
     public int getIdleRam() {
-        return memory;
+        return ram;
     }
 
-    public void setMemory(int memory) {
-        this.memory = memory;
+    public void setRam(int ram) {
+        this.ram = ram;
     }
 
     public boolean isAllocated() {
@@ -55,7 +55,7 @@ public class DispatchProc extends ProcE implements DispatchResource, JobId {
 
     public void allocate(int cores, int ram) {
         this.cores = this.cores - cores;
-        this.memory = this.memory - ram;
+        this.ram = this.ram - ram;
     }
 
     public boolean isUnbooked() {

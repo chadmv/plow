@@ -131,7 +131,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             proc.setClusterId((UUID) rs.getObject("pk_cluster"));
             proc.setQuotaId((UUID) rs.getObject("pk_quota"));
             proc.setCores(rs.getInt("int_cores"));
-            proc.setMemory(rs.getInt("int_ram"));
+            proc.setRam(rs.getInt("int_ram"));
             proc.setHostname(rs.getString("node_name"));
             proc.setTags(new HashSet<String>(
                     Arrays.asList((String[])rs.getArray("str_tags").getArray())));
