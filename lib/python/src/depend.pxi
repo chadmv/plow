@@ -39,105 +39,126 @@ cdef class DependSpec:
     Specify the dependency between two types
     
     :var type: :data:`.DependType`
-    :var dependentJob: str
-    :var dependOnJob: str
-    :var dependentLayer: str
-    :var dependOnLayer: str
-    :var dependentTask: str
-    :var dependOnTask: str
+    :var dependentJob: str id or :class:`.Job`
+    :var dependOnJob: str id or :class:`.Job`
+    :var dependentLayer: str id or :class:`.Layer`
+    :var dependOnLayer: str id or :class:`.Layer`
+    :var dependentTask: str id or :class:`.Task`
+    :var dependOnTask: str id or :class:`.Task`
     
     """
-    cdef public DependType_type type
-    cdef string dependentJob, dependOnJob, dependentLayer
-    cdef string dependOnLayer, dependentTask, dependOnTask
-    cdef _DependSpecT__isset __isset
+    cdef DependSpecT spec
 
-    def __init__(self, **kwargs):
-        self.type = kwargs.get('type', 0)
+    def __init__(self, DependType_type type = DependType.JOB_ON_JOB, **kwargs):
+        self.spec.type = type
 
         if 'dependentJob' in kwargs:
-            self.dependentJob = kwargs['dependentJob']
-            self.__isset.dependentJob = True
+            j = kwargs['dependentJob']
+            if isinstance(j, Job):
+                j = j.id
+            self.dependentJob = j
 
         if 'dependOnJob' in kwargs:
-            self.dependOnJob = kwargs['dependOnJob']
-            self.__isset.dependOnJob = True
+            j = kwargs['dependOnJob']
+            if isinstance(j, Job):
+                j = j.id
+            self.dependOnJob = j
 
         if 'dependentLayer' in kwargs:
-            self.dependentLayer = kwargs['dependentLayer']
-            self.__isset.dependentLayer = True
+            l = kwargs['dependentLayer']
+            if isinstance(l, Layer):
+                l = l.id
+            self.dependentLayer = l
 
         if 'dependOnLayer' in kwargs:
-            self.dependOnLayer = kwargs['dependOnLayer']
-            self.__isset.dependOnLayer = True
+            l = kwargs['dependOnLayer']
+            if isinstance(l, Layer):
+                l = l.id
+            self.dependOnLayer = l
 
         if 'dependentTask' in kwargs:
-            self.dependentTask = kwargs['dependentTask']
-            self.__isset.dependentTask = True
+            t = kwargs['dependentTask']
+            if isinstance(t, Task):
+                t = t.id
+            self.dependentTask = t
 
         if 'dependOnTask' in kwargs:
-            self.dependOnTask = kwargs['dependOnTask']
-            self.__isset.dependOnTask = True
+            t = kwargs['dependOnTask']
+            if isinstance(t, Task):
+                t = t.id            
+            self.dependOnTask = t
 
     cdef setDependSpec(self, DependSpecT& t):
-        self.type = t.type
-        self.dependentJob = t.dependentJob
-        self.dependOnJob = t.dependOnJob
-        self.dependentLayer = t.dependentLayer
-        self.dependOnLayer = t.dependOnLayer
-        self.dependentTask = t.dependentTask
-        self.dependOnTask = t.dependOnTask
-        self.__isset = t.__isset
+        self.spec = t
 
     cdef DependSpecT toDependSpecT(self):
-        cdef DependSpecT s
+        return self.spec
 
-        s.type = self.type
-        s.dependentJob = self.dependentJob
-        s.dependOnJob = self.dependOnJob
-        s.dependentLayer = self.dependentLayer
-        s.dependOnLayer = self.dependOnLayer
-        s.dependentTask = self.dependentTask
-        s.dependOnTask = self.dependOnTask
-        s.__isset = self.__isset
-
-        return s
+    property type:
+        def __get__(self): return self.spec.type
+        def __set__(self, DependType_type val): 
+            self.spec.type = val
 
     property dependentJob:
-        def __get__(self): return self.dependentJob
+        def __get__(self): return self.spec.dependentJob
         def __set__(self, val): 
-            self.dependentJob = val
-            self.__isset.dependentJob = True
+            if not isinstance(val, str):
+                raise TypeError("Expecting a job guid string")
+            self.spec.dependentJob = val
+            self.spec.__isset.dependentJob = True
 
     property dependOnJob:
-        def __get__(self): return self.dependOnJob
+        def __get__(self): return self.spec.dependOnJob
         def __set__(self, val): 
-            self.dependOnJob = val
-            self.__isset.dependOnJob = True
+            if not isinstance(val, str):
+                raise TypeError("Expecting a job guid string")
+            self.spec.dependOnJob = val
+            self.spec.__isset.dependOnJob = True
 
     property dependentLayer:
-        def __get__(self): return self.dependentLayer
+        def __get__(self): return self.spec.dependentLayer
         def __set__(self, val): 
-            self.dependentLayer = val
-            self.__isset.dependentLayer = True
+            if not isinstance(val, str):
+                raise TypeError("Expecting a job guid string")
+            self.spec.dependentLayer = val
+            self.spec.__isset.dependentLayer = True
 
     property dependOnLayer:
-        def __get__(self): return self.dependOnLayer
+        def __get__(self): return self.spec.dependOnLayer
         def __set__(self, val): 
-            self.dependOnLayer = val
-            self.__isset.dependOnLayer = True
+            if not isinstance(val, str):
+                raise TypeError("Expecting a job guid string")
+            self.spec.dependOnLayer = val
+            self.spec.__isset.dependOnLayer = True
 
     property dependentTask:
-        def __get__(self): return self.dependentTask
+        def __get__(self): return self.spec.dependentTask
         def __set__(self, val): 
-            self.dependentTask = val
-            self.__isset.dependentTask = True
+            if not isinstance(val, str):
+                raise TypeError("Expecting a job guid string")
+            self.spec.dependentTask = val
+            self.spec.__isset.dependentTask = True
 
     property dependOnTask:
-        def __get__(self): return self.dependOnTask
+        def __get__(self): return self.spec.dependOnTask
         def __set__(self, val): 
-            self.dependOnTask = val
-            self.__isset.dependOnTask = True
+            if not isinstance(val, str):
+                raise TypeError("Expecting a job guid string")
+            self.spec.dependOnTask = val
+            self.spec.__isset.dependOnTask = True
+
+    def create(self):
+        """
+        Create the dependency from the current settings
+        Return the newly created Depend instance.
+
+        Ensure that a valid :data:`.DependType` is set,
+        as well as the corresponding dependent and dependsOn id.
+
+        :returns: :class:`.Depend`
+        """
+        cdef Depend dep = create_depend(self)
+        return dep
 
 
 #######################
@@ -233,14 +254,100 @@ cdef class Depend(PlowBase):
     def drop(self):
         """Drop the dependency """
         conn().proxy().dropDepend(self.id)
-        self.active = False
+        self._depend.active = False
 
     @reconnecting
     def activate(self):
-        """Reactivate the dependency """
+        """Activate the dependency """
         conn().proxy().activateDepend(self.id)
-        self.active = True
+        self._depend.active = True
 
+
+def create_depend(DependSpec spec):
+    """
+    Create a new dependency from a DependSpec
+
+    A DependSpec must have its type set, along with a 
+    corresonding dependent id, and a dependOn id
+
+    :param spec: :class:`.DependSpec` 
+    :returns: :class:`.Depend`
+
+    """
+    cdef:
+        DependT depT
+        Depend dep
+
+    conn().proxy().createDepend(depT, spec.toDependSpecT())
+    dep = initDepend(depT)
+    return dep
+
+@reconnecting
+def create_job_on_job_depend(Job job, Job onJob):
+    """
+    Make one job dependent on another
+    This call is async and does not return anything.
+
+    :param job: the :class:`.Job` which depends on another
+    :param onJob: the :class:`.Job` which must finish first
+    """   
+    conn().proxy().createJobOnJobDepend(job.id, onJob.id)
+
+@reconnecting
+def create_layer_on_layer_depend(Layer layer, Layer onLayer):
+    """
+    Make one layer dependent on another
+    This call is async and does not return anything.
+
+    :param layer: the :class:`.Layer` which depends on another
+    :param onLayer: the :class:`.Layer` which must finish first
+    """   
+    conn().proxy().createLayerOnLayerDepend(layer.id, onLayer.id)
+
+@reconnecting
+def create_layer_on_task_depend(Layer layer, Task onTask):
+    """
+    Make one layer dependent on another task
+    This call is async and does not return anything.
+
+    :param layer: the :class:`.Layer` which depends on a task
+    :param onTask: the :class:`.Task` which must finish first
+    """   
+    conn().proxy().createLayerOnTaskDepend(layer.id, onTask.id)
+
+@reconnecting
+def create_task_by_task_depend(Layer layer, Layer onLayer):
+    """
+    Make each task of a layer dependent on the corresponding task
+    of another layer, one by one.
+    This call is async and does not return anything.
+
+    :param layer: the :class:`.Layer` which depends on another
+    :param onLayer: the :class:`.Layer` which has tasks that must finish first
+    """   
+    conn().proxy().createTaskByTaskDepend(layer.id, onLayer.id)
+
+@reconnecting
+def create_task_on_layer_depend(Task task, Layer onLayer):
+    """
+    Make one task dependent on another layer
+    This call is async and does not return anything.
+
+    :param task: the :class:`.Task` which depends on a layer
+    :param onLayer: the :class:`.Layer` which must finish first
+    """   
+    conn().proxy().createTaskOnLayerDepend(task.id, onLayer.id)
+
+@reconnecting
+def create_task_on_task_depend(Task task, Task onTask):
+    """
+    Make one task dependent on another
+    This call is async and does not return anything.
+
+    :param task: the :class:`.Task` which depends on another
+    :param onTask: the :class:`.Task` which must finish first
+    """   
+    conn().proxy().createTaskOnTaskDepend(task.id, onTask.id)
 
 @reconnecting
 def get_depends_on_job(Job job):
