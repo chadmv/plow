@@ -22,7 +22,6 @@ import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Service;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.event.JobLaunchEvent;
-import com.breakersoft.plow.exceptions.PlowWriteException;
 import com.breakersoft.plow.service.DependService;
 import com.breakersoft.plow.service.FilterService;
 import com.breakersoft.plow.service.JobService;
@@ -153,8 +152,8 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public boolean killJob(String jobId, String reason) throws PlowException {
-        return stateManager.killJob(jobService.getJob(UUID.fromString(jobId)), reason);
+    public void killJob(String jobId, String reason) throws PlowException {
+        stateManager.killJob(jobService.getJob(UUID.fromString(jobId)), reason);
     }
 
     @Override
