@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.NodeE;
+import com.breakersoft.plow.thrift.SlotMode;
 
 public class DispatchNode extends NodeE implements DispatchResource {
 
@@ -11,6 +12,9 @@ public class DispatchNode extends NodeE implements DispatchResource {
     private int memory;
     private Set<String> tags;
     private boolean locked;
+    private SlotMode slotMode;
+    private int slotCores;
+    private int slotRam;
 
     public DispatchNode() { }
 
@@ -77,5 +81,29 @@ public class DispatchNode extends NodeE implements DispatchResource {
 
     public void setLocked(boolean locked) {
         this.locked = locked;
+    }
+
+    public SlotMode getSlotMode() {
+        return slotMode;
+    }
+
+    public void setSlotMode(SlotMode slotMode) {
+        this.slotMode = slotMode;
+    }
+
+    public int getSlotCores() {
+        return slotCores;
+    }
+
+    public void setSlotCores(int slotCores) {
+        this.slotCores = slotCores;
+    }
+
+    public int getSlotRam() {
+        return slotRam;
+    }
+
+    public void setSlotRam(int slotRam) {
+        this.slotRam = slotRam;
     }
 }

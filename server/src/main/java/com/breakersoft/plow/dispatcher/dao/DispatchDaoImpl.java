@@ -24,6 +24,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.thrift.JobState;
+import com.breakersoft.plow.thrift.SlotMode;
 import com.google.common.primitives.Floats;
 
 @Repository
@@ -173,6 +174,9 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             node.setMemory(rs.getInt("int_free_ram"));
             node.setName(rs.getString("str_name"));
             node.setLocked(rs.getBoolean("bool_locked"));
+            node.setSlotMode(SlotMode.findByValue(rs.getInt("int_slot_mode")));
+            node.setSlotCores(rs.getInt("int_slot_cores"));
+            node.setSlotRam(rs.getInt("int_slot_ram"));
             return node;
         }
     };
@@ -184,6 +188,9 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "node.str_name,"+
                 "node.str_tags,"+
                 "node.bool_locked,"+
+                "node.int_slot_mode,"+
+                "node.int_slot_cores,"+
+                "node.int_slot_ram,"+
                 "node_dsp.int_idle_cores,"+
                 "node_dsp.int_free_ram " +
             "FROM " +
