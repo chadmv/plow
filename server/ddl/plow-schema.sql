@@ -1086,15 +1086,6 @@ CREATE TRIGGER trig_before_folder_disp_update BEFORE UPDATE ON plow.folder_dsp
     FOR EACH ROW EXECUTE PROCEDURE plow.before_disp_update();
 
 ---
---- plow.before_node_config_change()
----
---- Verify that the node has no running processes.
----
-CREATE OR REPLACE FUNCTION plow.before_node_config_change() RETURNS TRIGGER AS $$
-BEGIN
-  IF N
-
----
 --- plow.after_task_state_change()
 ---
 --- Handle incrementing/decrementating the frame state counters.
