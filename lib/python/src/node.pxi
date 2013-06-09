@@ -21,6 +21,25 @@ NodeState = _NodeState()
 
 
 #######################
+# SlotMode
+#
+
+@cython.internal
+cdef class _SlotMode:
+    cdef:
+        readonly int DYNAMIC 
+        readonly int SINGLE
+        readonly int SLOTS 
+
+    def __cinit__(self):
+        self.DYNAMIC = SLOTMODE_DYNAMIC
+        self.SINGLE = SLOTMODE_SINGLE
+        self.SLOTS = SLOTMODE_SLOTS
+
+SlotMode = _SlotMode()
+
+
+#######################
 # NodeFilter
 #
 
@@ -107,14 +126,17 @@ cdef class Node(PlowBase):
     :var bootTime: long msec epoch timestamp
     :var totalCores: int
     :var idleCores: int
+    :var slotCores: int
     :var totalRamMb: int
     :var freeRamMb: int
+    :var slotRam: int
     :var tags: set(str)
     :var state: :obj:`.NodeState`
     :var system: :class:`.NodeSystem`
+    :var mode: :data:`.SlotMode`
 
     """
-    cdef NodeT _node
+    cdef NodeT node
     cdef NodeSystem _system
 
     def __init__(self):
@@ -124,56 +146,65 @@ cdef class Node(PlowBase):
         return "<Node: %s>" % self.name
 
     cdef setNode(self, NodeT& n):
-        self._node = n
-        self._system = initNodeSystem(self._node.system)
+        self.node = n
+        self._system = initNodeSystem(self.node.system)
 
     property id:
-        def __get__(self): return self._node.id
+        def __get__(self): return self.node.id
 
     property name:
-        def __get__(self): return self._node.name
+        def __get__(self): return self.node.name
 
     property clusterId:
-        def __get__(self): return self._node.clusterId
+        def __get__(self): return self.node.clusterId
 
     property clusterName:
-        def __get__(self): return self._node.clusterName
+        def __get__(self): return self.node.clusterName
 
     property ipaddr:
-        def __get__(self): return self._node.ipaddr
+        def __get__(self): return self.node.ipaddr
 
     property locked:
-        def __get__(self): return self._node.locked
+        def __get__(self): return self.node.locked
 
     property createdTime:
-        def __get__(self): return long(self._node.createdTime)
+        def __get__(self): return long(self.node.createdTime)
 
     property updatedTime:
-        def __get__(self): return long(self._node.updatedTime)
+        def __get__(self): return long(self.node.updatedTime)
 
     property bootTime:
-        def __get__(self): return long(self._node.bootTime)
+        def __get__(self): return long(self.node.bootTime)
 
     property totalCores:
-        def __get__(self): return self._node.totalCores
+        def __get__(self): return self.node.totalCores
 
     property idleCores:
-        def __get__(self): return self._node.idleCores
+        def __get__(self): return self.node.idleCores
+
+    property slotCores:
+        def __get__(self): return self.node.slotCores
 
     property totalRamMb:
-        def __get__(self): return self._node.totalRamMb
+        def __get__(self): return self.node.totalRamMb
 
     property freeRamMb:
-        def __get__(self): return self._node.freeRamMb
+        def __get__(self): return self.node.freeRamMb
+
+    property slotRam:
+        def __get__(self): return self.node.slotRam
 
     property tags:
-        def __get__(self): return self._node.tags
+        def __get__(self): return self.node.tags
 
     property state:
-        def __get__(self): return self._node.state
+        def __get__(self): return self.node.state
 
     property system:
         def __get__(self): return self._system
+
+    property mode:
+        def __get__(self): return self.node.mode
 
     @reconnecting
     def refresh(self):
@@ -181,7 +212,7 @@ cdef class Node(PlowBase):
         Refresh the attributes from the server
         """
         cdef NodeT node 
-        conn().proxy().getNode(node, self._node.name)
+        conn().proxy().getNode(node, self.node.name)
         self.setNode(node)
 
     def lock(self, bint locked):
@@ -191,6 +222,19 @@ cdef class Node(PlowBase):
         :param locked: bool 
         """
         set_node_locked(self, locked)
+
+    def get_cluster(self):
+        """
+        Get the cluster object to which this node is assigned
+
+        :returns: :class:`.Cluster`
+        """
+        cdef Cluster c 
+        if self.clusterName:
+            c = get_cluster(self.clusterName)
+            return c
+
+        return None
 
     def set_cluster(self, Cluster cluster):
         """
@@ -207,6 +251,16 @@ cdef class Node(PlowBase):
         :param tags: set(str)
         """
         set_node_tags(self, tags)
+
+    def set_slot_mode(self, int mode, int cores, int ram):
+        """
+        Set the slot mode for a node
+
+        :param mode: :data:`.SlotMode`
+        :param cores: int number of cores
+        :param ram: int ram in MB
+        """
+        set_node_slot_mode(self, mode, cores, ram)
 
 
 @reconnecting
@@ -262,6 +316,7 @@ def set_node_locked(Node node, bint locked):
     :param locked: bool 
     """
     conn().proxy().setNodeLocked(node.id, locked)
+    node.node.locked = locked
 
 @reconnecting
 def set_node_cluster(Node node, Cluster cluster):
@@ -272,9 +327,11 @@ def set_node_cluster(Node node, Cluster cluster):
     :param cluster: :class:`.Cluster`
     """
     conn().proxy().setNodeCluster(node.id, cluster.id)
+    node.node.clusterId = cluster.id
+    node.node.clusterName = cluster.name
 
 @reconnecting
-def set_node_tags(Node node, c_set[string]& tags):
+def set_node_tags(Node node, c_set[string] tags):
     """
     Set the tags for the node 
 
@@ -282,5 +339,22 @@ def set_node_tags(Node node, c_set[string]& tags):
     :param tags: set(str) 
     """
     conn().proxy().setNodeTags(node.id, tags)
+    node.node.tags = tags
+
+@reconnecting
+def set_node_slot_mode(Node node, int mode, int cores, int ram):
+    """
+    Set the slot mode for a node
+
+    :param node: :class:`.Node`
+    :param mode: :data:`.SlotMode`
+    :param cores: int number of cores
+    :param ram: int ram in MB
+    """
+    cdef SlotMode_type typ = <SlotMode_type>mode
+    conn().proxy().setNodeSlotMode(node.id, typ, cores, ram)
+    node.node.mode = typ
+    node.node.slotCores = cores
+    node.node.slotRam = ram
 
 

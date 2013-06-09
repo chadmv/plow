@@ -60,7 +60,12 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         MATCH_JOB_NAME "Plow::MatcherField::JOB_NAME"
         MATCH_USER "Plow::MatcherField::USER"
         MATCH_ATTR "Plow::MatcherField::ATTR"
-    
+
+    ctypedef enum SlotMode_type "Plow::SlotMode::type":
+        SLOTMODE_DYNAMIC "Plow::SlotMode::DYNAMIC"
+        SLOTMODE_SINGLE "Plow::SlotMode::SINGLE"
+        SLOTMODE_SLOTS "Plow::SlotMode::SLOTS" 
+
     cdef cppclass MatcherT:
         Guid id
         MatcherType_type type
@@ -164,9 +169,12 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         Timestamp bootTime
         int totalCores
         int idleCores
+        int slotCores
         int totalRamMb
         int freeRamMb
+        int slotRam
         NodeSystemT system
+        SlotMode_type mode
 
     cdef cppclass ProcT:
         Guid id

@@ -67,6 +67,7 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
         void setNodeLocked(Guid& id, bint locked) nogil except +
         void setNodeCluster(Guid& id, Guid& clusterId) nogil except +
         void setNodeTags(Guid& id, c_set[string]& tags) nogil except +
+        void setNodeSlotMode(Guid& id, SlotMode_type mode, int slotCores, int slotRam) nogil except +
 
         void getCluster(ClusterT&, string& name) nogil except +
         void getClustersByTag(vector[ClusterT]&, string& tag) nogil except +
