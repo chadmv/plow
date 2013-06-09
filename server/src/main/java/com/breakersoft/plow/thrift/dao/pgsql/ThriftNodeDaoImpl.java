@@ -106,9 +106,22 @@ public class ThriftNodeDaoImpl extends AbstractDao implements ThriftNodeDao {
     }
 
     private final String GET_BY_ID = GET + " WHERE node.pk_node=?";
+    private final String GET_BY_NAME = GET + " WHERE node.str_name=?";
 
     @Override
     public NodeT getNode(UUID id) {
         return jdbc.queryForObject(GET_BY_ID, MAPPER, id);
+    }
+
+    @Override
+    public NodeT getNode(String name) {
+        if (name.length() == 36) {
+            try {
+                return jdbc.queryForObject(GET_BY_ID, MAPPER, UUID.fromString(name));
+            } catch (IllegalArgumentException e) {
+                //pass
+            }
+        }
+        return jdbc.queryForObject(GET_BY_NAME, MAPPER, name);
     }
 }

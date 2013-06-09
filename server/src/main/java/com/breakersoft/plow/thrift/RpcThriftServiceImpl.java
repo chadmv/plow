@@ -158,7 +158,7 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Override
     public NodeT getNode(String id) throws PlowException {
-        return thriftNodeDao.getNode(UUID.fromString(id));
+        return thriftNodeDao.getNode(id);
     }
 
     @Override
