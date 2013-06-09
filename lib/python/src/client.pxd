@@ -26,7 +26,7 @@ cdef extern from "rpc/RpcService.h" namespace "Plow" nogil:
         void launch(JobT&, JobSpecT& spec) nogil except +
         void getActiveJob(JobT&, string& name) nogil except +
         void getJob(JobT&,  Guid& jobId) nogil except +
-        bint killJob(Guid& jobId, string& reason) nogil except +
+        void killJob(Guid& jobId, string& reason) nogil except +
         void pauseJob(Guid& jobId, bint paused) nogil except +
         void getJobs(vector[JobT]&, JobFilterT& filter) nogil except +
         void getJobOutputs(vector[OutputT]&,  Guid& jobId) nogil except +

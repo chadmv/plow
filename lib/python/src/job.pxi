@@ -345,9 +345,7 @@ cdef class Job(PlowBase):
 
         :param reason: str - reason for killing
         """
-        cdef bint ret = kill_job(self, reason)
-        self.refresh()
-        return ret
+        kill_job(self, reason)
 
     def pause(self, bint paused):
         """
@@ -356,7 +354,6 @@ cdef class Job(PlowBase):
         :param paused: bool
         """
         pause_job(self, paused)
-        self.refresh()
 
     def get_outputs(self):
         """
@@ -373,7 +370,6 @@ cdef class Job(PlowBase):
         :param value: int 
         """
         set_job_min_cores(self, value)
-        self.refresh()
 
     def set_max_cores(self, int value):
         """
@@ -382,7 +378,6 @@ cdef class Job(PlowBase):
         :param value: int 
         """
         set_job_max_cores(self, value)
-        self.refresh()
 
     def get_layers(self):
         """
@@ -546,11 +541,9 @@ def kill_job(Job job, string reason):
 
     :param job: :class:`.Job`
     :param reason: str reason for killing the job 
-    :returns: bool success
     """
-    cdef bint success
-    success = conn().proxy().killJob(job.id, reason)
-    return success
+    conn().proxy().killJob(job.id, reason)
+    job.refresh()
 
 @reconnecting
 def pause_job(Job job, bint paused):
@@ -561,6 +554,7 @@ def pause_job(Job job, bint paused):
     :param paused: bool pause state
     """
     conn().proxy().pauseJob(job.id, paused)
+    job.refresh()
 
 @reconnecting
 def set_job_min_cores(Job job, int value):
@@ -571,6 +565,7 @@ def set_job_min_cores(Job job, int value):
     :param value: int number of cores
     """
     conn().proxy().setJobMinCores(job.id, value)
+    job.refresh()
 
 @reconnecting
 def set_job_max_cores(Job job, int value):
@@ -581,6 +576,7 @@ def set_job_max_cores(Job job, int value):
     :param value: int number of cores
     """
     conn().proxy().setJobMaxCores(job.id, value)
+    job.refresh()
 
 
 
