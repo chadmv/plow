@@ -211,18 +211,18 @@ def get_clusters_by_tag(string tag):
     return ret    
 
 @reconnecting
-def create_cluster(str name, c_set[string] tags):
+def create_cluster(str name):
     """
     Create a Cluster with a name and set of tags 
 
     :param name: str - Name of Cluster 
-    :param tags: set - Set of tags 
+    :returns: :class:`.Cluster` 
     """
     cdef:
         ClusterT clusterT
         Cluster cluster 
 
-    conn().proxy().createCluster(clusterT, name, tags)
+    conn().proxy().createCluster(clusterT, name)
     cluster = initCluster(clusterT)
     return cluster
 
