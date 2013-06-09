@@ -56,14 +56,16 @@ class ProcessLog(object):
         return getattr(self._fileObj, name)
 
     def writeLogHeader(self, rtc):
-        self._fileObj.write(
-            "Render Process Begin\n" \
-            "================================================================\n"
-        )
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
+        self._fileObj.write("[%s] Render Process Begin\n" \
+                            "===============================================\n" % now )
+
         self._fileObj.write("COMMAND: %s\n" % " ".join(rtc.command))
+        
         for key, value in rtc.env.items():
             self._fileObj.write("ENV: %s=%s\n" % (key, value))
-        self._fileObj.write("================================================================\n")
+        
+        self._fileObj.write("===============================================\n")
 
         self._fileObj.flush()
 
@@ -75,15 +77,17 @@ class ProcessLog(object):
             return
 
         self._fileObj.flush()
+
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
         self._fileObj.write(
             "\n\n\n" \
-            "Render Process Complete\n" \
-            "=====================================\n" \
+            "[%s] Render Process Complete\n" \
+            "===============================================\n" \
             "Exit Status: %d\n" \
             "Signal: %d\n" \
             "MaxRSS: %d\n" \
-            "=====================================\n\n" \
-            % (result.exitStatus, result.exitSignal, result.maxRssMb))
+            "===============================================\n\n" \
+            % (now, result.exitStatus, result.exitSignal, result.maxRssMb))
 
         self._fileObj.close() 
 
