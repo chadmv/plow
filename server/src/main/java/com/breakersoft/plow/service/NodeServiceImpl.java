@@ -43,7 +43,7 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public Node createNode(Ping ping) {
-        Cluster cluster = clusterDao.getDefaultCluster();
+        Cluster cluster = clusterDao.getDefault();
         return nodeDao.create(cluster, ping);
     }
 
@@ -74,7 +74,7 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public Quota createQuota(Project project, String cluster, int size, int burst) {
-        final Cluster c = clusterDao.getCluster(cluster);
+        final Cluster c = clusterDao.get(cluster);
         return quotaDao.create(project, c, 10, 15);
     }
 
@@ -116,37 +116,37 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public Cluster getCluster(String name) {
-        return clusterDao.getCluster(name);
+        return clusterDao.get(name);
     }
 
     @Override
     public Cluster getCluster(UUID id) {
-        return clusterDao.getCluster(id);
+        return clusterDao.get(id);
     }
 
     @Override
     public Cluster getDefaultCluster() {
-        return clusterDao.getDefaultCluster();
+        return clusterDao.getDefault();
     }
 
     @Override
     public void setDefaultCluster(Cluster cluster) {
-        clusterDao.setDefaultCluster(cluster);
+        clusterDao.setDefault(cluster);
     }
 
     @Override
     public boolean lockCluster(Cluster cluster, boolean value) {
-        return clusterDao.setClusterLocked(cluster, value);
+        return clusterDao.setLocked(cluster, value);
     }
 
     @Override
     public void setClusterName(Cluster cluster, String name) {
-        clusterDao.setClusterName(cluster, name);
+        clusterDao.setName(cluster, name);
     }
 
     @Override
     public void setClusterTags(Cluster cluster, Set<String> tags) {
-        clusterDao.setClusterTags(cluster, tags.toArray(new String[] {}));
+        clusterDao.setTags(cluster, tags.toArray(new String[] {}));
     }
 
     @Override

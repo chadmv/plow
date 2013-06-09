@@ -45,7 +45,7 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
                 "pk_cluster = ?";
 
     @Override
-    public Cluster getCluster(UUID id) {
+    public Cluster get(UUID id) {
         return jdbc.queryForObject(GET, MAPPER, id);
     }
 
@@ -59,7 +59,7 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
                 "str_name = ?";
 
     @Override
-    public Cluster getCluster(String name) {
+    public Cluster get(String name) {
         return jdbc.queryForObject(GET_BY_NAME, MAPPER, name);
     }
 
@@ -99,12 +99,12 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
             "LIMIT 1";
 
     @Override
-    public Cluster getDefaultCluster() {
+    public Cluster getDefault() {
         return jdbc.queryForObject(GET_BY_DEFAULT, MAPPER);
     }
 
     @Override
-    public void setDefaultCluster(Cluster cluster) {
+    public void setDefault(Cluster cluster) {
         jdbc.update("UPDATE cluster SET bool_default='f' WHERE bool_default='t'");
         jdbc.update("UPDATE cluster SET bool_default='t' WHERE pk_cluster=?", cluster.getClusterId());
     }
@@ -115,13 +115,13 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
     }
 
     @Override
-    public boolean setClusterLocked(Cluster c, boolean value) {
+    public boolean setLocked(Cluster c, boolean value) {
         return jdbc.update("UPDATE plow.cluster SET bool_locked=? WHERE pk_cluster=? AND bool_locked=?",
                 value, c.getClusterId(), !value) == 1;
     }
 
     @Override
-    public void setClusterName(Cluster c, String name) {
+    public void setName(Cluster c, String name) {
         jdbc.update("UPDATE plow.cluster SET str_name=? WHERE pk_cluster=?", name, c.getClusterId());
     }
 
@@ -134,7 +134,7 @@ public class ClusterDaoImpl extends AbstractDao implements ClusterDao {
             "pk_cluster=?";
 
     @Override
-    public void setClusterTags(final Cluster c, final String[] tags) {
+    public void setTags(final Cluster c, final String[] tags) {
         jdbc.update(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {

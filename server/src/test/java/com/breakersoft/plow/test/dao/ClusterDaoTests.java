@@ -46,22 +46,22 @@ public class ClusterDaoTests extends AbstractTest {
     @Test
     public void getByUUID() {
         Cluster c1 = clusterDao.create("default", TAGS);
-        Cluster c2 = clusterDao.getCluster(c1.getClusterId());
+        Cluster c2 = clusterDao.get(c1.getClusterId());
         assertEquals(c1, c2);
     }
 
     @Test
     public void getByName() {
         Cluster c1 = clusterDao.create("default", TAGS);
-        Cluster c2 = clusterDao.getCluster("default");
+        Cluster c2 = clusterDao.get("default");
         assertEquals(c1, c2);
     }
 
     @Test
     public void setClusterLocked() {
         Cluster c1 = clusterDao.create("default", TAGS);
-        assertTrue(clusterDao.setClusterLocked(c1, true));
-        assertTrue(clusterDao.setClusterLocked(c1, false));
-        assertFalse(clusterDao.setClusterLocked(c1, false));
+        assertTrue(clusterDao.setLocked(c1, true));
+        assertTrue(clusterDao.setLocked(c1, false));
+        assertFalse(clusterDao.setLocked(c1, false));
     }
 }

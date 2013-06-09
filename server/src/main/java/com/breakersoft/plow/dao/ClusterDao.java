@@ -6,21 +6,21 @@ import com.breakersoft.plow.Cluster;
 
 public interface ClusterDao {
 
-    Cluster getCluster(UUID id);
+    Cluster get(UUID id);
 
-    Cluster getCluster(String name);
+    Cluster get(String name);
 
-    void setDefaultCluster(Cluster cluster);
+    void setDefault(Cluster cluster);
 
-    Cluster getDefaultCluster();
+    Cluster getDefault();
 
-	Cluster create(String name, String[] tags);
+    Cluster create(String name, String[] tags);
 
-	boolean delete(Cluster c);
+    boolean delete(Cluster cluster);
 
-	boolean setClusterLocked(Cluster c, boolean value);
+    boolean setLocked(Cluster cluster, boolean value);
 
-	void setClusterName(Cluster c, String name);
+    void setName(Cluster cluster, String name);
 
-	void setClusterTags(Cluster c, String[] tags);
+    void setTags(Cluster cluster, String[] tags);
 }
