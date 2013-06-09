@@ -26,11 +26,16 @@ public class ThriftNodeDaoTests  extends AbstractTest {
     }
 
     @Test
-    public void testGetNodeById() {
+    public void testGetNode() {
         Ping ping = getTestNodePing();
         Node node = nodeService.createNode(ping);
         NodeT nodet = thriftNodeDao.getNode(node.getNodeId());
         assertEquals(node.getNodeId().toString(), nodet.id);
-    }
 
+        nodet = thriftNodeDao.getNode(node.getNodeId().toString());
+        assertEquals(node.getNodeId().toString(), nodet.id);
+
+        nodet = thriftNodeDao.getNode(node.getName());
+        assertEquals(node.getNodeId().toString(), nodet.id);
+    }
 }

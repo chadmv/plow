@@ -10,6 +10,7 @@ public interface ThriftNodeDao {
 
     List<NodeT> getNodes(NodeFilterT filter);
 
-    NodeT getNode(UUID id);
+    NodeT getNode(String id);
 
+    NodeT getNode(UUID id);
 }
