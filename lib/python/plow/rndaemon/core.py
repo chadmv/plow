@@ -596,8 +596,12 @@ class _ProcessThread(threading.Thread):
 
 
     def __killProcess(self):
+        pid = self.__pid
+        if pid == -1:
+            return 
+
         try:
-            p = psutil.Process(self.__pid)
+            p = psutil.Process(pid)
         except psutil.NoSuchProcess:
             return
 
