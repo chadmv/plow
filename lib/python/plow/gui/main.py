@@ -193,7 +193,13 @@ class WorkspaceManager(QtCore.QObject):
 
         panelNames = self.__settings.value("main::openPanelNames")
         panelTypes = self.__settings.value("main::openPanelTypes")
-        if panelNames:
+        if panelNames and not isinstance(panelNames, list):
+            # a single panel doesn't return list so we operate directly
+            # on the panelNames
+            p = self.createPanel(panelTypes, panelNames, True)
+            self.parent().restoreDockWidget(p)
+            p.show()
+        elif panelNames:
             for name, ptype in zip(panelNames, panelTypes):
                 p = self.createPanel(ptype, name, True)
                 self.parent().restoreDockWidget(p)
