@@ -26,7 +26,7 @@ def getLocalConnection(port=None):
         port = conf.NETWORK_PORT
     socket = TSocket.TSocket("localhost", port)
     transport = TTransport.TFramedTransport(socket)
-    protocol = TBinaryProtocol.TBinaryProtocol(transport)
+    protocol = TBinaryProtocol.TBinaryProtocolAccelerated(transport)
     service = RndNodeApi.Client(protocol)
     transport.open()
     return (service, transport)
