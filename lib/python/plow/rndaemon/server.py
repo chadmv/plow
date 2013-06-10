@@ -9,7 +9,7 @@ import core
 
 from thrift.transport import TSocket
 from thrift.transport import TTransport
-from thrift.protocol import TBinaryProtocol
+from thrift.protocol.TBinaryProtocol import TBinaryProtocolAccelerated
 from thrift.server import TServer
 
 from rpc import RndNodeApi
@@ -36,7 +36,7 @@ def get_server(api, handler, port, **kwargs):
     processor = api.Processor(handler)
     socket = TSocket.TServerSocket(port=port)
     tfactory = kwargs.get('transport') or TTransport.TFramedTransportFactory()
-    pfactory = kwargs.get('protocol') or TBinaryProtocol.TBinaryProtocolFactory()
+    pfactory = kwargs.get('protocol') or TBinaryProtocolAccelerated(tfactory)
     server = TServer.TThreadedServer(processor, socket, tfactory, pfactory)    
     return server
 
