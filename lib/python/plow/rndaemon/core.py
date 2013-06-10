@@ -68,7 +68,7 @@ class _ResourceManager(object):
         with self.__lock:
             self.__slots.extend(cores)
             avail, total = len(self.__slots), Profiler.physicalCpus
-            logger.info("Checked in CPUS: %s; Now available: %d / %d", cores, avail, total)
+        logger.info("Checked in CPUS: %s; Now available: %d / %d", cores, avail, total)
 
     def getSlots(self):
         return list(xrange(Profiler.physicalCpus))
@@ -318,7 +318,6 @@ class _ProcessThread(threading.Thread):
         self.__logfp = None
         self.__cpus = cpus or set()
 
-        self.__lock = threading.RLock()
         self.__rtc = rtc
         self.__pptr = None
         self.__logfp = None
@@ -330,11 +329,9 @@ class _ProcessThread(threading.Thread):
         self.__hasStarted = threading.Event()
         self.__isShutdown = threading.Event()
 
-        self.__progressLock = threading.Lock()
         self.__progress = 0.0
         self.__lastLog = ""
 
-        self.__metricsLock = threading.Lock()
         self.__metrics = {
             'rssMb': 0,
             'maxRssMb': 0,
@@ -386,27 +383,24 @@ class _ProcessThread(threading.Thread):
             self.__hasStarted.wait(wait)
 
         rt = RunningTask()
-
         rtc = self.__rtc
-        with self.__lock:
-            rt.jobId = rtc.jobId
-            rt.procId = rtc.procId
-            rt.taskId = rtc.taskId
-            rt.layerId = rtc.layerId
-            rt.pid = self.__pid
+
+        rt.jobId = rtc.jobId
+        rt.procId = rtc.procId
+        rt.taskId = rtc.taskId
+        rt.layerId = rtc.layerId
+        rt.pid = self.__pid
 
         metrics = self.__metrics
 
-        with self.__metricsLock:
-            rt.rssMb = metrics['rssMb']
-            rt.cpuPercent = metrics['cpuPercent']
+        rt.rssMb = metrics['rssMb']
+        rt.cpuPercent = metrics['cpuPercent']
 
-            if self._DO_DISK_IO:
-                rt.diskIO = metrics['diskIO']
+        if self._DO_DISK_IO:
+            rt.diskIO = metrics['diskIO']
 
-        with self.__progressLock:
-            rt.progress = self.__progress 
-            rt.lastLog = self.__lastLog or None 
+        rt.progress = self.__progress 
+        rt.lastLog = self.__lastLog or None 
 
         return rt
 
@@ -424,7 +418,7 @@ class _ProcessThread(threading.Thread):
             cpus = self.__cpus 
             
             logger.info("Opening log file: %s", rtc.logFile)
-            self.__logfp = utils.ProcessLog(self.__rtc.logFile, uid=uid)
+            self.__logfp = utils.ProcessLog(self.__rtc.logFile, uid=uid, buffering=1)
             self.__logfp.writeLogHeader(rtc)
 
             env = os.environ.copy()
@@ -447,11 +441,11 @@ class _ProcessThread(threading.Thread):
             cmd, opts = Profiler.getSubprocessOpts(rtc.command, **opts)
 
             logger.info("Running command: %s", rtc.command)
+            self.__logfp.write("[%s] Running process" % time.strftime("%Y-%m-%d %H:%M:%S"))
             p = subprocess.Popen(cmd, **opts)
 
-            with self.__lock:
-                self.__pptr = p
-                self.__pid = p.pid
+            self.__pptr = p
+            self.__pid = p.pid
 
             self.__hasStarted.set()
             logger.info("PID: %d", p.pid)
@@ -460,22 +454,22 @@ class _ProcessThread(threading.Thread):
 
             writeLog = self.__logfp.write
             r_pipe = self.__pptr.stdout 
-            lock = self.__progressLock
 
             for line in iter(r_pipe.readline, ""):
 
                 writeLog(line)
 
-                with lock:
-                    self.__lastLog = line
+                self.__lastLog = line
 
-                    if parser:
-                        prog = parser.parseProgress(line)
-                        if prog is not None:
-                            self.__progress = prog 
+                if parser:
+                    prog = parser.parseProgress(line)
+                    if prog is not None:
+                        self.__progress = prog 
 
                 if self.__isShutdown.is_set():
                     break
+
+            self.__logfp.write("[%s] Process finished" % time.strftime("%Y-%m-%d %H:%M:%S"))
 
             try:
                 retcode = p.wait()
@@ -554,18 +548,16 @@ class _ProcessThread(threading.Thread):
 
         metrics = self.__metrics
 
-        with self.__metricsLock:
+        maxRss = max(rssMb, metrics['maxRssMb'])
+        disk_io_t = ttypes.DiskIO(*disk_io) if do_disk_io else None
 
-            maxRss = max(rssMb, metrics['maxRssMb'])
-            disk_io_t = ttypes.DiskIO(*disk_io) if do_disk_io else None
-
-            metrics.update({
-                'rssMb': rssMb,
-                'maxRssMb': maxRss,
-                'cpuPercent': cpu_perc_int,
-                'diskIO': disk_io_t,
-            })
-            logger.debug("metrics: %r", metrics)
+        metrics.update({
+            'rssMb': rssMb,
+            'maxRssMb': maxRss,
+            'cpuPercent': cpu_perc_int,
+            'diskIO': disk_io_t,
+        })
+        logger.debug("metrics: %r", metrics)
 
     def killProcess(self, block=True):
         """
@@ -670,14 +662,13 @@ class _ProcessThread(threading.Thread):
         return True
 
     def __completed(self, retcode):
-        logger.debug("Process completed: %r, %r", self, self.__isShutdown.is_set())
+        logger.debug("Process completed: %r, (IsShutdown: %r)", self, self.__isShutdown.is_set())
         result = ttypes.RunTaskResult()
         result.maxRssMb = self.__metrics['maxRssMb']
 
-        with self.__lock:
-            result.procId = self.__rtc.procId
-            result.taskId = self.__rtc.taskId
-            result.jobId = self.__rtc.jobId
+        result.procId = self.__rtc.procId
+        result.taskId = self.__rtc.taskId
+        result.jobId = self.__rtc.jobId
 
         if self.__isShutdown.is_set():
             result.exitStatus = 1
