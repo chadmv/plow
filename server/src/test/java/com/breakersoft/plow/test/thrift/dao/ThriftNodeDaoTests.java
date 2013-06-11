@@ -13,7 +13,7 @@ import com.breakersoft.plow.thrift.NodeFilterT;
 import com.breakersoft.plow.thrift.NodeT;
 import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
 
-public class ThriftNodeDaoTests  extends AbstractTest {
+public class ThriftNodeDaoTests extends AbstractTest {
 
     @Resource
     ThriftNodeDao thriftNodeDao;

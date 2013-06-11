@@ -9,7 +9,6 @@ import java.util.UUID;
 import javax.annotation.Resource;
 
 import org.junit.Test;
-import org.springframework.test.annotation.Rollback;
 
 import com.breakersoft.plow.ExitStatus;
 import com.breakersoft.plow.Signal;
