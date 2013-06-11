@@ -190,14 +190,34 @@ struct NodeT {
 
 struct ProcT {
     1:common.Guid id,
-    2:common.Guid hostId,
+    2:common.Guid nodeId,
     3:string jobName,
-    4:string taskName,
-    5:i32 cores,
-    6:i32 ramMb,
-    7:i32 usedRamMb,
-    8:i32 highRamMb,
-    9:bool unbooked
+    4:string layerName,
+    5:string taskName,
+    6:i32 cores,
+    7:double usedCores,
+    8:double highCores,
+    9:i32 ram,
+    10:i32 usedRam,
+    11:i32 highRam,
+    12:list<i64> ioStats,
+    13:common.Timestamp createdTime,
+    14:common.Timestamp updatedTime,
+    15:common.Timestamp startedTime
+}
+
+struct ProcFilterT {
+    1:list<common.Guid> projectIds,
+    2:list<common.Guid> folderIds,
+    3:list<common.Guid> jobIds,
+    4:list<common.Guid> layerIds,
+    5:list<common.Guid> taskIds,
+    6:list<common.Guid> clusterIds,
+    7:list<common.Guid> quotaIds,
+    8:list<common.Guid> nodeIds,
+    20:i64 lastUpdateTime = 0,
+    21:i32 limit = 0,
+    22:i32 offset = 0
 }
 
 struct JobStatsT {
@@ -531,6 +551,9 @@ service RpcService {
     void setNodeCluster(1:common.Guid id, 2:common.Guid clusterId) throws (1:PlowException e),
     void setNodeTags(1:common.Guid id, 2:set<string> tags) throws (1:PlowException e),
     void setNodeSlotMode(1:common.Guid id, 2:SlotMode mode, 3:i32 slotCores, 4:i32 slotRam) throws (1:PlowException e),
+
+    list<ProcT> getProcs(1:ProcFilterT filter) throws (1:PlowException e),
+    ProcT getProc(1:common.Guid id) throws (1:PlowException e),
 
     ClusterT getCluster(1:string name) throws (1:PlowException e),
     list<ClusterT> getClustersByTag(1:string tag) throws (1:PlowException e),

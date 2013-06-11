@@ -39,6 +39,7 @@ import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 import com.breakersoft.plow.thrift.dao.ThriftMatcherDao;
 import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
+import com.breakersoft.plow.thrift.dao.ThriftProcDao;
 import com.breakersoft.plow.thrift.dao.ThriftProjectDao;
 import com.breakersoft.plow.thrift.dao.ThriftQuotaDao;
 import com.breakersoft.plow.thrift.dao.ThriftServiceDao;
@@ -103,6 +104,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     ThriftServiceDao thriftServiceDao;
+
+    @Autowired
+    ThriftProcDao thriftProcDao;
 
     @Autowired
     WranglerService wranglerService;
@@ -773,5 +777,15 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
         final Node node = nodeService.getNode(UUID.fromString(id));
         // isolation=Serializable.
         nodeService.setNodeSlotMode(node, mode, cores, ram);
+    }
+
+    @Override
+    public List<ProcT> getProcs(ProcFilterT filter) throws PlowException {
+        return thriftProcDao.getProcs(filter);
+    }
+
+    @Override
+    public ProcT getProc(String id) throws PlowException, TException {
+        return thriftProcDao.getProc(UUID.fromString(id));
     }
 }
