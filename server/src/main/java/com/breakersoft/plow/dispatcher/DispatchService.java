@@ -2,8 +2,10 @@ package com.breakersoft.plow.dispatcher;
 
 import java.util.List;
 
+import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Proc;
+import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
@@ -69,4 +71,6 @@ public interface DispatchService {
     List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node);
 
     boolean isAtMaxRetries(Task task);
+
+    boolean quotaCheck(Cluster cluster, Project project);
 }

@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.breakersoft.plow.Defaults;
@@ -29,16 +30,23 @@ public class DispatchServiceTests extends AbstractTest {
     @Resource
     NodeService nodeService;
 
-    @Test
-    public void testAllocateDynamicProc() {
+    private List<DispatchTask> tasks;
+    private DispatchNode node;
+
+    @Before
+    public void init() {
         JobSpecT spec = getTestJobSpec();
         JobLaunchEvent event = jobService.launch(spec);
 
-        DispatchNode node = dispatchService.getDispatchNode(
+        node = dispatchService.getDispatchNode(
                 nodeService.createNode(getTestNodePing()).getName());
 
         DispatchJob job = new DispatchJob(event.getJob());
-        List<DispatchTask> tasks = dispatchService.getDispatchableTasks(job, node);
+        tasks = dispatchService.getDispatchableTasks(job, node);
+    }
+
+    @Test
+    public void testAllocateDynamicProc() {
         DispatchTask task = tasks.get(0);
 
         assertTrue(dispatchService.reserveTask(tasks.get(0)));
@@ -50,18 +58,9 @@ public class DispatchServiceTests extends AbstractTest {
 
     @Test
     public void testAllocateSlotProc() {
-        JobSpecT spec = getTestJobSpec();
-        JobLaunchEvent event = jobService.launch(spec);
-
-        DispatchNode node = dispatchService.getDispatchNode(
-                nodeService.createNode(getTestNodePing()).getName());
 
         nodeService.setNodeSlotMode(node, SlotMode.SLOTS, 2, 4096);
-
         node = dispatchService.getDispatchNode(node.getName());
-
-        DispatchJob job = new DispatchJob(event.getJob());
-        List<DispatchTask> tasks = dispatchService.getDispatchableTasks(job, node);
 
         assertTrue(dispatchService.reserveTask(tasks.get(0)));
         DispatchProc proc = dispatchService.allocateProc(node, tasks.get(0));
@@ -71,18 +70,32 @@ public class DispatchServiceTests extends AbstractTest {
     }
 
     @Test
-    public void testAllocateSingleResourceProc() {
-        JobSpecT spec = getTestJobSpec();
-        JobLaunchEvent event = jobService.launch(spec);
+    public void testAllocateRuntSlotProc() {
 
-        DispatchNode node = dispatchService.getDispatchNode(
-                nodeService.createNode(getTestNodePing()).getName());
+        nodeService.setNodeSlotMode(node, SlotMode.SLOTS, 1, 4000);
+        node = dispatchService.getDispatchNode(node.getName());
+
+        assertTrue(dispatchService.reserveTask(tasks.get(0)));
+        DispatchProc proc = dispatchService.allocateProc(node, tasks.get(0));
+
+        assertEquals(1, proc.getCores());
+        assertEquals(4000, proc.getRam());
+
+        // this is usually called by the dispatcher
+        node.allocate(1, 4000);
+
+        assertTrue(dispatchService.reserveTask(tasks.get(1)));
+        proc = dispatchService.allocateProc(node, tasks.get(1));
+
+        assertEquals(1, proc.getCores());
+        assertEquals(3584, proc.getRam());
+    }
+
+    @Test
+    public void testAllocateSingleResourceProc() {
 
         nodeService.setNodeSlotMode(node, SlotMode.SINGLE, 2, 4096);
         node = dispatchService.getDispatchNode(node.getName());
-
-        DispatchJob job = new DispatchJob(event.getJob());
-        List<DispatchTask> tasks = dispatchService.getDispatchableTasks(job, node);
 
         assertTrue(dispatchService.reserveTask(tasks.get(0)));
         DispatchProc proc = dispatchService.allocateProc(node, tasks.get(0));

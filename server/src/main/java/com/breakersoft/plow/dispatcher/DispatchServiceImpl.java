@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.breakersoft.plow.Cluster;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Proc;
+import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dispatcher.dao.DispatchDao;
@@ -138,6 +140,12 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
+    @Transactional(readOnly=true)
+    public boolean quotaCheck(Cluster cluster, Project project) {
+        return quotaDao.check(cluster, project);
+    }
+
+    @Override
     public DispatchProc allocateProc(DispatchNode node, DispatchTask task) {
 
         logger.info("Allocating proc on {}", node);
@@ -161,15 +169,26 @@ public class DispatchServiceImpl implements DispatchService {
             ram = node.getIdleRam();
         }
         else if (node.getSlotMode().equals(SlotMode.SLOTS)) {
-            cores = Math.min(node.getSlotCores(), node.getIdleCores());
-            ram = Math.min(node.getSlotRam(), node.getIdleRam());
+
+            // Check to see if we're dispatching the runt slot (if any) and handle that situation.
+            if (node.getIdleCores() < node.getSlotCores() || node.getIdleRam() < node.getSlotRam()) {
+                cores = Math.min(node.getSlotCores(), node.getIdleCores());
+                ram = Math.min(node.getSlotRam(), node.getIdleRam());
+            }
+            else {
+                int factor = Math.max(
+                        (int) (Math.ceil(task.minCores / (float) node.getSlotCores())),
+                        (int) (Math.ceil(task.minRam / (float) node.getSlotRam())));
+                cores = factor *  node.getSlotCores();
+                ram = factor * node.getSlotRam();
+            }
         }
         else {
             // Dynamic.
 
             // If the ram left on the node is less than the minimum amount of
             // ram for the node to be considered for dispatch, then just take
-            // ther rest of the cores.
+            // the rest of the cores.
             if (node.getIdleRam() - task.minRam < DispatchConfig.MIN_RAM_FOR_DISPATCH) {
                 cores = node.getIdleCores();
             }
@@ -182,23 +201,15 @@ public class DispatchServiceImpl implements DispatchService {
 
         if (cores < task.minCores || ram < task.minRam) {
             throw new PlowDispatcherException(
-                    "Failed to allocate a proc from " + node + ", not enough resources.");
+                    "Failed to allocate a proc from " + node +
+                    ", " + cores + "/" + ram + " not enough to run task " + task.minCores + "/" + task.minRam);
         }
-
 
         proc.setCores(cores);
         proc.setRam(ram);
 
-        // Fast quota check
-        if(!quotaDao.check(node, task, cores)) {
-              throw new PlowDispatcherException(
-                      "Failed to allocatae a proc from " + node.getName() + ", failed quota check.");
-        }
-
         try {
             procDao.create(proc);
-            // Allocate from the node once the proc is actually created.
-            node.allocate(cores, ram);
             return proc;
 
         } catch (Exception e) {
