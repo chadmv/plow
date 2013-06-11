@@ -9,13 +9,11 @@ import javax.annotation.Resource;
 import org.junit.Test;
 
 import com.breakersoft.plow.Filter;
-import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Matcher;
 import com.breakersoft.plow.MatcherFull;
 import com.breakersoft.plow.dao.FilterDao;
 import com.breakersoft.plow.dao.MatcherDao;
 import com.breakersoft.plow.test.AbstractTest;
-import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.MatcherField;
 import com.breakersoft.plow.thrift.MatcherType;
 

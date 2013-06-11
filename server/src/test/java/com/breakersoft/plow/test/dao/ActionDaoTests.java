@@ -1,6 +1,6 @@
 package com.breakersoft.plow.test.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.breakersoft.plow.Action;
 import com.breakersoft.plow.ActionFull;
@@ -16,7 +17,6 @@ import com.breakersoft.plow.dao.ActionDao;
 import com.breakersoft.plow.dao.FilterDao;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.ActionType;
-import org.springframework.dao.EmptyResultDataAccessException;
 
 public class ActionDaoTests extends AbstractTest {
 

@@ -1,6 +1,7 @@
 package com.breakersoft.plow.test.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import javax.annotation.Resource;
 
@@ -16,8 +17,6 @@ import com.breakersoft.plow.service.StateManager;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.TaskFilterT;
 import com.breakersoft.plow.thrift.TaskState;
-import com.breakersoft.plow.thrift.TaskT;
-import com.breakersoft.plow.thrift.dao.ThriftTaskDao;
 import com.google.common.eventbus.Subscribe;
 
 public class StateManagerTests extends AbstractTest {

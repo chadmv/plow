@@ -1,6 +1,7 @@
 package com.breakersoft.plow.test.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import javax.annotation.Resource;
 

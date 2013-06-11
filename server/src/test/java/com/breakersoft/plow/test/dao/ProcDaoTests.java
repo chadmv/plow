@@ -16,7 +16,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Proc;
-import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.NodeDispatcher;
 import com.breakersoft.plow.dispatcher.dao.DispatchDao;

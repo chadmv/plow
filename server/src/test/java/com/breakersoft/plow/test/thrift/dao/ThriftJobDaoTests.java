@@ -1,6 +1,7 @@
 package com.breakersoft.plow.test.thrift.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 
@@ -11,8 +12,8 @@ import org.junit.Test;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.test.AbstractTest;
-import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobFilterT;
+import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobT;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.google.common.collect.Maps;
