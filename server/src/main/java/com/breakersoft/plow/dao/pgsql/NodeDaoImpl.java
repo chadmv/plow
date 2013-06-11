@@ -198,7 +198,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     }
 
     private int getBookableMemory(int memory) {
-        return memory = memory - Defaults.MEMORY_RESERVE_MB;
+        return memory = memory - Defaults.NODE_RESERVE_MEMORY;
     }
 
     private static final String ALLOCATE_RESOURCES =

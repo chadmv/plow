@@ -146,7 +146,7 @@ public class NodeDaoTests extends AbstractTest {
                 simpleJdbcTemplate.queryForInt("SELECT int_idle_cores FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
 
-        assertEquals(ping.hw.totalRamMb - 1024 - Defaults.MEMORY_RESERVE_MB,
+        assertEquals(ping.hw.totalRamMb - 1024 - Defaults.NODE_RESERVE_MEMORY,
                 simpleJdbcTemplate.queryForInt("SELECT int_free_ram FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
 
@@ -171,7 +171,7 @@ public class NodeDaoTests extends AbstractTest {
                 simpleJdbcTemplate.queryForInt("SELECT int_idle_cores FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
 
-        assertEquals(ping.hw.totalRamMb - Defaults.MEMORY_RESERVE_MB,
+        assertEquals(ping.hw.totalRamMb - Defaults.NODE_RESERVE_MEMORY,
                 simpleJdbcTemplate.queryForInt("SELECT int_free_ram FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
     }

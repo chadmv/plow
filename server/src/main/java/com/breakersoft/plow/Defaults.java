@@ -11,7 +11,12 @@ public final class Defaults {
     public static int MEMORY_MIN_MB = 128;
     public static int MEMORY_MAX_MB = 16384;
 
-    public static int MEMORY_RESERVE_MB = 512;
+    /*
+     * The amount of memory reserved on a node for operating
+     * system processes. This is subtracted from the total
+     * memory when a node is created.
+     */
+    public static int NODE_RESERVE_MEMORY = 512;
 
     public static String[] LAYER_TAG_DEFAULT = new String[] { "render" };
 
