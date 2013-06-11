@@ -41,6 +41,7 @@ public class StatsServiceImpl implements StatsService {
 
         // Sort to ensure predictable update order.
         Collections.sort(tasks, SORT_BY_PROC);
+
         for (RunningTask task: tasks) {
             logger.info("Updating stats {}", task);
             statsDao.updateProcRuntimeStats(task);
