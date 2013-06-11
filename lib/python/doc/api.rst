@@ -246,6 +246,14 @@ Constants
     .. data:: plow.client.NodeState.DOWN
     .. data:: plow.client.NodeState.REPAIR
 
+.. data:: plow.client.SlotMode
+
+    Constants representing the slot mode of a Node 
+
+    .. data:: plow.client.NodeState.DYNAMIC
+    .. data:: plow.client.NodeState.SLOTS
+    .. data:: plow.client.NodeState.SINGLE
+
 Classes
 ^^^^^^^^^
 
