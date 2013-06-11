@@ -121,7 +121,7 @@ class Panel(QtGui.QDockWidget):
         self.attrs[prop] = value
 
     def getAttr(self, prop, default=None):
-        return self.attrs.get(prop)
+        return self.attrs.get(prop, default)
 
     def _openPanelSettingsDialog(self):
         pass

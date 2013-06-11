@@ -25,6 +25,7 @@ class LogsPanel(Panel):
         self.setWindowTitle(name)
 
         self.setAttr("fontSize", DEFAULT_FONT_SIZE)
+        self.setAttr("multiTabMode", 0)
 
         tabbedViewer.fontSizeChanged.connect(self.__fontSizeChanged)
         EventManager.bind("TASK_OF_INTEREST", self.__handleTaskOfInterestEvent)
@@ -38,12 +39,27 @@ class LogsPanel(Panel):
     def restore(self, *args, **kwargs):
         super(LogsPanel, self).restore(*args, **kwargs)
 
+        tabbedViewer = self.widget()
+
         size = int(self.getAttr("fontSize"))
         if MIN_FONT_SIZE <= size <= MAX_FONT_SIZE:
-            self.widget().setFontSize(size)
+            tabbedViewer.setFontSize(size)
+
+        multi = int(self.getAttr("multiTabMode"))
+        tabbedViewer.setMultiTabMode(multi)
 
     def _openPanelSettingsDialog(self):
-        pass
+        w = self.widget()
+        if not w:
+            return
+
+        pos = QtGui.QCursor.pos()
+        menu = QtGui.QMenu(w)
+        action = menu.addAction("Multi-Tab Mode")
+        action.setCheckable(True)
+        action.setChecked(int(self.getAttr("multiTabMode")))
+        action.toggled.connect(self.__multiTabModeChanged)
+        menu.popup(pos + QtCore.QPoint(5,5))
 
     def __handleTaskOfInterestEvent(self, *args, **kwargs):
         task = plow.client.get_task(args[0])
@@ -54,6 +70,11 @@ class LogsPanel(Panel):
     def __fontSizeChanged(self, size):
         self.setAttr("fontSize", size)
 
+    def __multiTabModeChanged(self, enabled):
+        tabbedViewer = self.widget()
+        self.setAttr("multiTabMode", int(enabled))
+        tabbedViewer.setMultiTabMode(enabled)
+
 
 class TabbedLogVieweWidget(QtGui.QWidget):
 
@@ -62,8 +83,8 @@ class TabbedLogVieweWidget(QtGui.QWidget):
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        self.__tasks = {}
         self.__interval = 1000
+        self.__multiTab = True
 
         self.__tabs = QtGui.QTabWidget(self)
         self.__tabs.setTabsClosable(True)
@@ -82,33 +103,36 @@ class TabbedLogVieweWidget(QtGui.QWidget):
 
     def addTask(self, job, task):
         tabs = self.__tabs
-        index = self.__tasks.get(task.id, None)
+        index = self.indexOfTaskId(task.id)
 
-        if index is not None:
+        # We just want to refresh an existing log view
+        if index > -1:
             tabs.setCurrentIndex(index)
-            logView = tabs.currentWidget()
-            logView.setCurrentTask(task)
+            viewer = tabs.currentWidget()
+            viewer.setCurrentTask(task)
+            return
 
-        else:
-            viewer = LogViewerWidget(job, task, {}, self)
-            viewer.setFontSize(self.__fontSize)
-            viewer.setInterval(self.__interval)
-            index = tabs.addTab(viewer, task.name)
-            tabs.setTabToolTip(index, viewer.logPath)
-            tabs.setCurrentIndex(index)
-            self.__tasks[task.id] = index
+        # We are in single tab mode and need to replace with a new one
+        if self.__tabs.count() and not self.__multiTab:
+            self.closeAllTabs()
 
-            viewer.fontSizeChanged.connect(self.setFontSize)
-            
+        viewer = LogViewerWidget(job, task, attrs={}, parent=self)
+        viewer.setFontSize(self.__fontSize)
+        viewer.setInterval(self.__interval)
+        viewer.fontSizeChanged.connect(self.setFontSize)
+
+        index = tabs.addTab(viewer, task.name)
+
+        tabs.setTabToolTip(index, viewer.logPath)
+        tabs.setCurrentIndex(index)
+           
     def closeTab(self, index):
-        taskId = None
-        for k, v in self.__tasks.iteritems():
-            if v == index:
-                taskId = k
-                break
-        if taskId:
-            del self.__tasks[taskId]
-        self.__tabs.removeTab(index)
+        if index > -1:
+            widget = self.__tabs.widget(index)
+            if widget:
+                widget.deleteLater()
+
+            self.__tabs.removeTab(index)
 
     def closeAllTabs(self):
         while self.__tabs.count():
@@ -128,6 +152,30 @@ class TabbedLogVieweWidget(QtGui.QWidget):
             tab.setFontSize(size)
 
         self.fontSizeChanged.emit(size)
+
+    def setMultiTabMode(self, enabled):
+        if enabled == self.__multiTab:
+            return
+
+        self.__multiTab = enabled
+
+        if not enabled:
+            tabs = self.__tabs
+            currentIndex = tabs.currentIndex()
+            for i in reversed(xrange(tabs.count())):
+                if i == currentIndex:
+                    continue
+                self.closeTab(i)
+
+    def indexOfTaskId(self, taskId):
+        tabs = self.__tabs
+
+        for i in xrange(tabs.count()):
+            viewer = tabs.widget(i)
+            if viewer and viewer.taskId == taskId:
+                return i
+
+        return -1
 
 
 class LogViewerWidget(QtGui.QWidget):
@@ -283,20 +331,25 @@ class LogViewerWidget(QtGui.QWidget):
         if not task.id:
             return
 
-        if task.id == self.taskId:
-            if self.isTailing(): 
-                self.scrollToBottom()
-            else:
-                self.readMore()
-            return 
-
         logPath = task.get_log_path()
-        if not os.path.exists(logPath):
-            LOGGER.warn("Failed to open log file: '%s'", logPath)
-            return
+        if logPath:
+            self._touchLogFile(logPath)
+
+        if logPath != self.logPath:
+
+            if not os.path.exists(logPath):
+                LOGGER.warn("Failed to open log file: '%s'", logPath)
+                return
+
+            self.setLogPath(logPath)
+
+        if self.isTailing(): 
+            self.scrollToBottom()
+        else:
+            self.readMore()
 
         self.__task = task
-        self.setLogPath(logPath)
+
 
     def setLogPath(self, path):
         self.stopLogTail()
@@ -315,7 +368,6 @@ class LogViewerWidget(QtGui.QWidget):
 
         if self.__chk_tail.isChecked():
             self.startLogTail()
-
 
     def setJobName(self, name):
         self.__jobNameLabel.setText(name)
@@ -395,6 +447,13 @@ class LogViewerWidget(QtGui.QWidget):
             self.startLogTail()
         else:
             self.stopLogTail()
+
+    @staticmethod
+    def _touchLogFile(path):
+        try:
+            os.utime(os.path.dirname(os.path.dirname(path)), None)
+        except:
+            pass
 
  
 class FileWatcher(QtCore.QObject):
