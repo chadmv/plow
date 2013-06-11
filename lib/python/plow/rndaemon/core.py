@@ -442,6 +442,7 @@ class _ProcessThread(threading.Thread):
 
             logger.info("Running command: %s", rtc.command)
             self.__logfp.write("[%s] Running process" % time.strftime("%Y-%m-%d %H:%M:%S"))
+            self.__logfp.flush()
             p = subprocess.Popen(cmd, **opts)
 
             self.__pptr = p
@@ -470,7 +471,8 @@ class _ProcessThread(threading.Thread):
                     break
 
             self.__logfp.write("[%s] Process finished" % time.strftime("%Y-%m-%d %H:%M:%S"))
-
+            self.__logfp.flush()
+            
             try:
                 retcode = p.wait()
             except OSError, e:
