@@ -420,7 +420,8 @@ CREATE TABLE plow.node_sys (
   int_free_swap INTEGER NOT NULL,
   time_booted BIGINT NOT NULL,
   str_cpu_model TEXT NOT NULL,
-  str_platform TEXT NOT NULL
+  str_platform TEXT NOT NULL,
+  flt_load REAL[] NOT NULL
 ) WITHOUT OIDS;
 
 ---

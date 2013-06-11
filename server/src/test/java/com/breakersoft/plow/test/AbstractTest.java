@@ -264,6 +264,7 @@ public abstract class AbstractTest extends AbstractTransactionalJUnit4SpringCont
         hw.physicalCpus = 2;
         hw.totalRamMb = 8096;
         hw.totalSwapMb = 8096;
+        hw.load = Lists.newArrayList(0.1, 0.2, 0.3);
 
         Ping ping = new Ping();
         ping.bootTime = System.currentTimeMillis() - 1000;

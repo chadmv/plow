@@ -22,6 +22,7 @@ import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.thrift.NodeState;
 import com.breakersoft.plow.thrift.SlotMode;
 import com.breakersoft.plow.util.JdbcUtils;
+import com.breakersoft.plow.util.PlowUtils;
 import com.google.common.base.Preconditions;
 
 @Repository
@@ -45,7 +46,8 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                 "int_free_swap",
                 "time_booted",
                 "str_cpu_model",
-                "str_platform"),
+                "str_platform",
+                "flt_load"),
 
         JdbcUtils.Insert("plow.node_dsp",
                 "pk_node",
@@ -75,16 +77,30 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
             }
         });
 
-        jdbc.update(INSERT[1], id,
-                ping.hw.physicalCpus,
-                ping.hw.logicalCpus,
-                ping.hw.totalRamMb,
-                ping.hw.freeRamMb,
-                ping.hw.totalSwapMb,
-                ping.hw.freeSwapMb,
-                ping.bootTime * 1000,
-                ping.hw.cpuModel,
-                ping.hw.platform);
+        jdbc.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
+                final PreparedStatement ps = conn.prepareStatement(INSERT[1]);
+                ps.setObject(1, id);
+                ps.setInt(2, ping.hw.physicalCpus);
+                ps.setInt(3, ping.hw.logicalCpus);
+                ps.setInt(4, ping.hw.totalRamMb);
+                ps.setInt(5, ping.hw.freeRamMb);
+                ps.setInt(6, ping.hw.totalSwapMb);
+                ps.setInt(7, ping.hw.freeSwapMb);
+                ps.setLong(8, ping.bootTime * 1000);
+                ps.setString(9, ping.hw.cpuModel);
+                ps.setString(10, ping.hw.platform);
+
+                if (!PlowUtils.isValid(ping.hw.load)) {
+                    ps.setArray(11, conn.createArrayOf("float", new Float[] { 0.0f, 0.0f, 0.0f }));
+                }
+                else {
+                    ps.setArray(11, conn.createArrayOf("float",  ping.hw.load.toArray()));
+                }
+                return ps;
+            }
+        });
 
         final int memMb =
                 getBookableMemory(ping.hw.totalRamMb);
