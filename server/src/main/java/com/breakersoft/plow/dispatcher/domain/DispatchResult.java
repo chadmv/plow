@@ -19,14 +19,10 @@ public class DispatchResult {
     public int ram = 0;
     public boolean dispatch = true;
     public boolean isTest = false;
-    public int maxProcs = 8;
-    public int maxCores = DispatchConfig.MAX_CORES_PER_JOB;
 
     public List<DispatchProc> procs = Lists.newArrayList();
 
-    public void setMaxCores(int max) {
-        this.maxCores = Math.min(max, DispatchConfig.MAX_CORES_PER_JOB);
-    }
+
 
     public DispatchResult(DispatchResource resource) {
         this.resource = resource;
@@ -39,18 +35,13 @@ public class DispatchResult {
      */
     public boolean continueDispatching() {
 
-        if (procs.size() >= maxProcs) {
-            logger.info("Stopped dispatching by procs/maxprocs {} >= {}", procs.size(), maxProcs);
+        if (procs.size() >= DispatchConfig.MAX_PROCS_PER_JOB) {
+            logger.info("Stopped dispatching by procs/maxprocs {} >= {}", procs.size(),  DispatchConfig.MAX_PROCS_PER_JOB);
             return false;
         }
 
-        if (cores >= maxCores) {
-            logger.info("Stopped dispatching by cores/maxcores {} >= {}", cores, maxCores);
-        }
-
-        if (procs.size() >= DispatchConfig.MAX_PROCS_PER_JOB) {
-            logger.info("Stopped dispatching by procs/max_per_job {} >= {}",
-                    procs.size(), DispatchConfig.MAX_PROCS_PER_JOB);
+        if (cores >= DispatchConfig.MAX_CORES_PER_JOB) {
+            logger.info("Stopped dispatching by cores/maxcores {} >= {}", cores, DispatchConfig.MAX_CORES_PER_JOB);
             return false;
         }
 
