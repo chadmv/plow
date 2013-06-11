@@ -1,7 +1,11 @@
 package com.breakersoft.plow.scheduler.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.UUID;
 
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.dao.AbstractDao;
@@ -22,6 +26,7 @@ public class StatsDaoImpl extends AbstractDao implements StatsDao {
                 "flt_cores_used=?,"+
                 "flt_cores_high=?,"+
                 "str_last_log_line=?, " +
+                "int_io_stats=?,"+
                 "time_updated=plow.txTimeMillis() " +
             "WHERE " +
                 "pk_proc=? " +
@@ -29,10 +34,32 @@ public class StatsDaoImpl extends AbstractDao implements StatsDao {
                 "pk_task=?";
 
     @Override
-    public boolean updateProcRuntimeStats(RunningTask task) {
-        float cores_used = task.cpuPercent / 100.0f;
-        return jdbc.update(UPDATE_RUNTIME, task.rssMb, task.rssMb, task.progress, cores_used, cores_used, task.lastLog,
-                UUID.fromString(task.procId), UUID.fromString(task.taskId)) == 1;
+    public boolean updateProcRuntimeStats(final RunningTask task) {
+
+        return jdbc.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
+                final float cores_used = task.cpuPercent / 100.0f;
+                final Long[] io_stats = {
+                    task.diskIO.readCount,
+                    task.diskIO.writeCount,
+                    task.diskIO.readBytes,
+                    task.diskIO.writeBytes
+                };
+
+                final PreparedStatement ret = conn.prepareStatement(UPDATE_RUNTIME);
+                ret.setInt(1,  task.rssMb);
+                ret.setInt(2,  task.rssMb);
+                ret.setInt(3,  (int) Math.min(100, Math.round(task.progress)));
+                ret.setFloat(4, cores_used);
+                ret.setFloat(5, cores_used);
+                ret.setString(6, task.lastLog);
+                ret.setArray(7,  conn.createArrayOf("bigint", io_stats));
+                ret.setObject(8, UUID.fromString(task.procId));
+                ret.setObject(9, UUID.fromString(task.taskId));
+                return ret;
+            }
+        }) == 1;
     }
 
     private static final String UPDATE_TASK =

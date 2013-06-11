@@ -475,7 +475,8 @@ CREATE TABLE plow.proc (
   int_ram_used INTEGER NOT NULL DEFAULT 0,
   int_ram_high INTEGER NOT NULL DEFAULT 0,
   int_progress SMALLINT DEFAULT 0 NOT NULL,
-  str_last_log_line TEXT
+  str_last_log_line TEXT,
+  int_io_stats BIGINT ARRAY[4] NOT NULL DEFAULT '{0,0,0,0}'
 ) WITHOUT OIDS;
 
 CREATE INDEX proc_pk_node_idx ON plow.proc (pk_node);

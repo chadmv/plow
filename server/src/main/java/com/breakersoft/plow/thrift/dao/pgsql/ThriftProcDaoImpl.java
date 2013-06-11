@@ -17,6 +17,7 @@ import com.breakersoft.plow.thrift.ProcT;
 import com.breakersoft.plow.thrift.dao.ThriftProcDao;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.breakersoft.plow.util.PlowUtils;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 @Repository
@@ -41,8 +42,8 @@ public class ThriftProcDaoImpl extends AbstractDao implements ThriftProcDao {
             proc.setRam(rs.getInt("int_ram"));
             proc.setHighRam(rs.getInt("int_ram_high"));
             proc.setUsedRam(rs.getInt("int_ram_used"));
-            // TODO: fix io stats
-            proc.setIoStats(new ArrayList<Long>(4));
+
+            proc.setIoStats(ImmutableList.copyOf((Long[])rs.getArray("int_io_stats").getArray()));
             proc.setCreatedTime(rs.getLong("time_created"));
             proc.setUpdatedTime(rs.getLong("time_updated"));
             proc.setStartedTime(rs.getLong("time_started"));
@@ -65,6 +66,7 @@ public class ThriftProcDaoImpl extends AbstractDao implements ThriftProcDao {
             "proc.time_updated,"+
             "proc.time_started,"+
             "proc.int_progress,"+
+            "proc.int_io_stats,"+
             "job.str_name AS job_name,"+
             "layer.str_name AS layer_name,"+
             "task.str_name AS task_name "+

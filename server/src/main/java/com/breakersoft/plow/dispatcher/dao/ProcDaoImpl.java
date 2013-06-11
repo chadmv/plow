@@ -13,9 +13,7 @@ import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.ProcE;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
-import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
-import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.util.JdbcUtils;
 
 @Repository
@@ -110,6 +108,13 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
             "SET " +
                 "pk_task = ?, " +
                 "pk_layer = ?, " +
+                "int_io_stats = '{0,0,0,0}',"+
+                "flt_cores_used = 0.0,"+
+                "flt_cores_high = 0.0," +
+                "int_ram_used = 0,"+
+                "int_ram_high = 0,"+
+                "int_progress = 0,"+
+                "str_last_log_line = NULL,"+
                 "time_updated = plow.txTimeMillis(), " +
                 "time_started = plow.txTimeMillis()  " +
             "WHERE " +
