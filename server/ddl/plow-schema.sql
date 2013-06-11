@@ -1070,7 +1070,7 @@ CREATE TRIGGER trig_before_task_ping_update BEFORE UPDATE ON plow.task
 CREATE OR REPLACE FUNCTION plow.before_disp_update() RETURNS TRIGGER AS $$
 BEGIN
   IF NEW.int_cores_min = 0 THEN
-    NEW.float_tier := 0;
+    NEW.float_tier := NEW.int_cores_run::real;
   ELSE
     NEW.float_tier := NEW.int_cores_run / NEW.int_cores_min::real;
   END IF;
