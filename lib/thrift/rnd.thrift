@@ -15,10 +15,10 @@ exception RndException {
 }
 
 struct DiskIO {
-    1:i64 read_count = 0,
-    2:i64 write_count = 0,
-    3:i64 read_bytes = 0,
-    4:i64 write_bytes = 0,
+    1:i64 readCount = 0,
+    2:i64 writeCount = 0,
+    3:i64 readBytes = 0,
+    4:i64 writeBytes = 0,
 }
 
 struct RunTaskCommand {
@@ -44,8 +44,8 @@ struct RunningTask {
     6:i32 pid,
     7:optional double progress = 0.0,
     8:optional string lastLog = "",
-    9:i16 cpuPercent
-    10:optional DiskIO diskIO
+    9:i16 cpuPercent,
+    10:DiskIO diskIO
 }
 
 struct RunTaskResult {
