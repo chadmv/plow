@@ -22,16 +22,25 @@ public class StatsServiceImpl implements StatsService {
     @Autowired
     StatsDao statsDao;
 
+    private static final Comparator<RunningTask> SORT_BY_PROC = new Comparator<RunningTask>() {
+        @Override
+        public int compare(RunningTask o1, RunningTask o2) {
+            return o1.procId.compareTo(o2.procId);
+        }
+    };
+
+    private static final Comparator<RunningTask> SORT_BY_TASK = new Comparator<RunningTask>() {
+        @Override
+        public int compare(RunningTask o1, RunningTask o2) {
+            return o1.taskId.compareTo(o2.taskId);
+        }
+    };
+
     @Override
     public void updateProcRuntimeStats(List<RunningTask> tasks) {
 
         // Sort to ensure predictable update order.
-        Collections.sort(tasks, new Comparator<RunningTask>() {
-            @Override
-            public int compare(RunningTask o1, RunningTask o2) {
-                return o1.procId.compareTo(o2.procId);
-            }
-        });
+        Collections.sort(tasks, SORT_BY_PROC);
         for (RunningTask task: tasks) {
             logger.info("Updating stats {}", task);
             statsDao.updateProcRuntimeStats(task);
@@ -42,12 +51,7 @@ public class StatsServiceImpl implements StatsService {
     public void updateTaskRuntimeStats(List<RunningTask> tasks) {
 
         // Sort to ensure predictable update order.
-        Collections.sort(tasks, new Comparator<RunningTask>() {
-            @Override
-            public int compare(RunningTask o1, RunningTask o2) {
-                return o1.taskId.compareTo(o2.taskId);
-            }
-        });
+        Collections.sort(tasks, SORT_BY_TASK);
 
         for (RunningTask task: tasks) {
             statsDao.updateTaskRuntimeStats(task);
