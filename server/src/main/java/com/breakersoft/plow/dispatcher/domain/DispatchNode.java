@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.NodeE;
+import com.breakersoft.plow.dispatcher.DispatchConfig;
 import com.breakersoft.plow.thrift.SlotMode;
 
 public class DispatchNode extends NodeE implements DispatchResource {
@@ -54,7 +55,7 @@ public class DispatchNode extends NodeE implements DispatchResource {
      * @return
      */
     public boolean isDispatchable() {
-        if (cores == 0 || memory <= Defaults.MEMORY_MIN_MB) {
+        if (cores == 0 || memory <= DispatchConfig.MIN_RAM_FOR_DISPATCH) {
             return false;
         }
 

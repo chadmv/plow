@@ -18,6 +18,12 @@ public class DispatchConfig {
     public static int MAX_CORES_PER_JOB = 16;
 
     /*
+     * The minimum amount of idle ram required for a node to be considered
+     * dispatchable.
+     */
+    public static int MIN_RAM_FOR_DISPATCH = 512;
+
+    /*
      * Set to true once dispatching should start to happen.
      */
     public static AtomicBoolean IS_ENABLED = new AtomicBoolean(true);
