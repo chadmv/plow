@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 
 import plow.client
@@ -205,6 +206,9 @@ class LogViewerWidget(QtGui.QWidget):
         nxt.setToolTip("Find Next Match")
         nxt.setIcon(QtGui.QIcon(":/images/right_arrow.png"))
 
+        self.__logSelector = sel = QtGui.QComboBox(self)
+        sel.setToolTip("Choose logs from previous retries")
+
         self.__jobNameLabel = label = QtGui.QLabel(self)
         label.setIndent(10)
         # label.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
@@ -228,6 +232,7 @@ class LogViewerWidget(QtGui.QWidget):
         tb.addAction(self.__findPrevBtn)
         tb.addAction(self.__findNextBtn)
         tb.addWidget(stretch)
+        tb.addWidget(self.__logSelector)
         tb.addAction(self.__chk_tail)
         tb.addWidget(spacer(4))
 
@@ -258,6 +263,7 @@ class LogViewerWidget(QtGui.QWidget):
         self.__searchLine.returnPressed.connect(self.findNext)
         self.__findPrevBtn.triggered.connect(self.findPrev)
         self.__findNextBtn.triggered.connect(self.findNext)
+        self.__logSelector.activated[int].connect(self.__logVersionChanged)
         openAction.triggered.connect(self.openLogFile)
 
         # Optional args
@@ -277,7 +283,6 @@ class LogViewerWidget(QtGui.QWidget):
                 self.decrementFontSize()
 
         super(LogViewerWidget, self).keyPressEvent(event)
-
 
     @property 
     def logPath(self):
@@ -335,8 +340,9 @@ class LogViewerWidget(QtGui.QWidget):
         if logPath:
             self._touchLogFile(logPath)
 
-        if logPath != self.logPath:
+        self.updateLogSelector(task)
 
+        if logPath != self.logPath:
             if not os.path.exists(logPath):
                 LOGGER.warn("Failed to open log file: '%s'", logPath)
                 return
@@ -350,6 +356,31 @@ class LogViewerWidget(QtGui.QWidget):
 
         self.__task = task
 
+    def updateLogSelector(self, task=None):
+        task = task or self.__task
+        retries = task.retries
+
+        combo = self.__logSelector
+        combo.clear()
+        if retries == -1:
+            combo.setVisible(False)
+            return
+
+        combo.setVisible(True)
+        path = task.get_log_path()
+        pattern = re.sub(r'\.-?\d+\.log$', r'.{num}.log', path)
+
+        for i in xrange(retries+1):
+            logNum = i-1
+            logpath = pattern.format(num=i)
+            logname = os.path.basename(logpath)
+            combo.addItem(logname, logpath)
+            
+            idx = combo.count()-1
+            combo.setItemData(idx, logpath, QtCore.Qt.ToolTipRole)
+
+            if logpath == path:
+                combo.setCurrentIndex(idx)
 
     def setLogPath(self, path):
         self.stopLogTail()
@@ -423,6 +454,9 @@ class LogViewerWidget(QtGui.QWidget):
             self.scrollToBottom()
 
     def scrollToBottom(self):
+        QtCore.QTimer.singleShot(0, self.__scrollToBottom)
+
+    def __scrollToBottom(self):
         bar = self.__view.verticalScrollBar()
         bar.setValue(bar.maximum())
 
@@ -447,6 +481,12 @@ class LogViewerWidget(QtGui.QWidget):
             self.startLogTail()
         else:
             self.stopLogTail()
+
+    def __logVersionChanged(self, index):
+        path = self.__logSelector.itemData(index)
+        if path != self.logPath:
+            self.setLogPath(path)
+            self.scrollToBottom()
 
     @staticmethod
     def _touchLogFile(path):
