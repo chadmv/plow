@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,9 +14,6 @@ import com.breakersoft.plow.scheduler.dao.StatsDao;
 @Service
 @Transactional
 public class StatsServiceImpl implements StatsService {
-
-    private static final Logger logger =
-            org.slf4j.LoggerFactory.getLogger(StatsServiceImpl.class);
 
     @Autowired
     StatsDao statsDao;
@@ -43,7 +39,6 @@ public class StatsServiceImpl implements StatsService {
         Collections.sort(tasks, SORT_BY_PROC);
 
         for (RunningTask task: tasks) {
-            logger.info("Updating stats {}", task);
             statsDao.updateProcRuntimeStats(task);
         }
     }
