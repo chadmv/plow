@@ -47,11 +47,10 @@ public class QuotaDaoTests extends AbstractTest {
 
     @Test
     public void testCheck() {
-        quotaDao.create(TEST_PROJECT, cluster, 10, 100);
-        assertTrue(quotaDao.check(cluster, TEST_PROJECT, 99));
-        assertFalse(quotaDao.check(cluster, TEST_PROJECT, 100));
-        assertFalse(quotaDao.check(cluster, TEST_PROJECT, 101));
-        assertTrue(quotaDao.check(cluster, TEST_PROJECT, 0));
+        Quota q = quotaDao.create(TEST_PROJECT, cluster, 10, 100);
+        assertTrue(quotaDao.check(cluster, TEST_PROJECT));
+        simpleJdbcTemplate.update("UPDATE quota SET int_cores_run=100 WHERE pk_quota=?", q.getQuotaId());
+        assertFalse(quotaDao.check(cluster, TEST_PROJECT));
     }
 
     @Test

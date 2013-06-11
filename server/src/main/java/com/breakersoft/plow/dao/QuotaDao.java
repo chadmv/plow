@@ -29,6 +29,6 @@ public interface QuotaDao {
 
     void allocate(Cluster cluster, Project project, int cores);
 
-    boolean check(Cluster cluster, Project project, int cores);
+    boolean check(Cluster cluster, Project project);
 
 }

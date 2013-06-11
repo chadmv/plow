@@ -118,6 +118,12 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
             if (!result.canDispatch(task)) {
                 continue;
             }
+
+            if (!dispatchService.quotaCheck(node, task)) {
+                result.dispatch = false;
+                break;
+            }
+
             dispatch(result, node, task);
             if (!result.continueDispatching()) {
                 break;

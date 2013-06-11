@@ -162,11 +162,11 @@ public class QuotaDaoImpl extends AbstractDao implements QuotaDao {
         "AND " +
             "quota.pk_cluster = ? " +
         "AND " +
-            "int_cores_run + ? < int_burst ";
+            "int_cores_run < int_burst";
 
     @Override
-    public boolean check(Cluster cluster, Project project, int cores) {
-        return jdbc.queryForObject(QUOTA_CHECK, Integer.class, project.getProjectId(), cluster.getClusterId(), cores) == 1;
+    public boolean check(Cluster cluster, Project project) {
+        return jdbc.queryForObject(QUOTA_CHECK, Integer.class, project.getProjectId(), cluster.getClusterId()) == 1;
     }
 
     @Override
