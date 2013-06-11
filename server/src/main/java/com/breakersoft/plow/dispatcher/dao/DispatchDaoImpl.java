@@ -65,7 +65,8 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             "folder_dsp.int_cores_max < folder_dsp.int_cores_run " +
         "ORDER BY " +
             "job_dsp.float_tier ASC, " +
-            "folder_dsp.float_tier ASC";
+            "folder_dsp.float_tier ASC " +
+        "LIMIT 100 ";
 
     public static final RowMapper<DispatchJob> DISPATCH_JOB_MAPPER =
             new RowMapper<DispatchJob>() {
