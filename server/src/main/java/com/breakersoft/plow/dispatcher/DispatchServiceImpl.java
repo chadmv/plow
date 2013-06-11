@@ -25,6 +25,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.exceptions.PlowDispatcherException;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
+import com.breakersoft.plow.thrift.SlotMode;
 import com.breakersoft.plow.thrift.TaskState;
 
 @Service
@@ -141,20 +142,69 @@ public class DispatchServiceImpl implements DispatchService {
 
         logger.info("Allocating proc on {}", node);
 
+        final DispatchProc proc = new DispatchProc();
+        proc.setJobId(task.jobId);
+        proc.setTaskId(task.taskId);
+        proc.setLayerId(task.getLayerId());
+        proc.setHostname(node.getName());
+        proc.setNodeId(node.getNodeId());
+        proc.setAllocated(true);
+        proc.setTags(node.getTags());
+        proc.setClusterId(node.getClusterId());
+        proc.setQuotaId(quotaDao.getQuota(node, task).getQuotaId());
+
+        int cores;
+        int ram;
+
+        if (node.getSlotMode().equals(SlotMode.SINGLE)) {
+            cores = node.getIdleCores();
+            ram = node.getIdleRam();
+        }
+        else if (node.getSlotMode().equals(SlotMode.SLOTS)) {
+            cores = Math.min(node.getSlotCores(), node.getIdleCores());
+            ram = Math.min(node.getSlotRam(), node.getIdleRam());
+        }
+        else {
+            // Dynamic.
+
+            // If the ram left on the node is less than the minimum amount of
+            // ram for the node to be considered for dispatch, then just take
+            // ther rest of the cores.
+            if (node.getIdleRam() - task.minRam < DispatchConfig.MIN_RAM_FOR_DISPATCH) {
+                cores = node.getIdleCores();
+            }
+            else {
+                cores = task.minCores;
+            }
+
+            ram = task.minRam;
+        }
+
+        if (cores < task.minCores || ram < task.minRam) {
+            throw new PlowDispatcherException(
+                    "Failed to allocate a proc from " + node + ", not enough resources.");
+        }
+
+
+        proc.setCores(cores);
+        proc.setRam(ram);
+
         // Fast quota check
-        if(!quotaDao.check(node, task, task.minCores)) {
+        if(!quotaDao.check(node, task, cores)) {
               throw new PlowDispatcherException(
                       "Failed to allocatae a proc from " + node.getName() + ", failed quota check.");
         }
 
         try {
-            return procDao.create(node, task);
+            procDao.create(proc);
+            // Allocate from the node once the proc is actually created.
+            node.allocate(cores, ram);
+            return proc;
 
         } catch (Exception e) {
             throw new PlowDispatcherException(
                     "Failed to allocatae a proc from " + node.getName() + "," + e, e);
         }
-
     }
 
     @Override

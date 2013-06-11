@@ -73,45 +73,19 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                     "int_ram");
 
     @Override
-    public DispatchProc create(DispatchNode node, DispatchTask task) {
-
-        DispatchProc proc = new DispatchProc();
+    public void create(DispatchProc proc) {
         proc.setProcId(UUID.randomUUID());
-        proc.setJobId(task.jobId);
-        proc.setTaskId(task.taskId);
-        proc.setLayerId(task.getLayerId());
-        proc.setHostname(node.getName());
-        proc.setNodeId(node.getNodeId());
-        proc.setAllocated(true);
-        proc.setTags(node.getTags());
-
-        //TODO: make this smarter
-        proc.setCores(task.minCores);
-        proc.setRam(task.minRam);
-
-        // Requery for these in case they have changed.
-        // In case we allow moving nodes while cores are running.
-        UUID clusterId = jdbc.queryForObject("SELECT pk_cluster FROM plow.node WHERE pk_node=?", UUID.class, node.getNodeId());
-        UUID quotaId = jdbc.queryForObject(
-                "SELECT pk_quota FROM plow.quota WHERE quota.pk_project=? AND quota.pk_cluster = ?",
-                UUID.class, task.getProjectId(), clusterId);
-
-        proc.setClusterId(clusterId);
-        proc.setQuotaId(quotaId);
 
         jdbc.update(INSERT,
                 proc.getProcId(),
-                node.getNodeId(),
-                clusterId,
-                quotaId,
-                task.taskId,
-                task.layerId,
-                task.jobId,
-                task.minCores,
-                task.minRam);
-
-        return proc;
-
+                proc.getNodeId(),
+                proc.getClusterId(),
+                proc.getQuotaId(),
+                proc.getTaskId(),
+                proc.getLayerId(),
+                proc.getJobId(),
+                proc.getIdleCores(),
+                proc.getIdleRam());
     }
 
     private static final String UNASSIGN =

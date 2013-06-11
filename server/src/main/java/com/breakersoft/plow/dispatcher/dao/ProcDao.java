@@ -6,9 +6,7 @@ import java.util.UUID;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Task;
-import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
-import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 
 public interface ProcDao {
 
@@ -22,7 +20,7 @@ public interface ProcDao {
 
     boolean setProcUnbooked(Proc proc, boolean unbooked);
 
-    DispatchProc create(DispatchNode node, DispatchTask task);
+    public void create(DispatchProc proc);
 
     boolean unassign(Proc proc);
 

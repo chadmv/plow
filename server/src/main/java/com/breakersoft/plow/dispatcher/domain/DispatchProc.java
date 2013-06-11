@@ -20,20 +20,32 @@ public class DispatchProc extends ProcE implements DispatchResource, JobId {
         return String.format("Proc: %d/%d [%s] on host: %s", cores, ram, getProcId(), getHostname());
     }
 
+    // From DispatchResource
+    @Override
     public int getIdleCores() {
         return cores;
+    }
+
+    // From DispatchResource
+    @Override
+    public int getIdleRam() {
+        return ram;
     }
 
     public void setCores(int cores) {
         this.cores = cores;
     }
 
-    public int getIdleRam() {
-        return ram;
-    }
-
     public void setRam(int ram) {
         this.ram = ram;
+    }
+
+    public int getCores() {
+        return cores;
+    }
+
+    public int getRam() {
+        return this.ram;
     }
 
     public boolean isAllocated() {

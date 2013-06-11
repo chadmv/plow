@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.breakersoft.plow.ExitStatus;
 import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.Task;
+import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.NodeDispatcher;
 import com.breakersoft.plow.dispatcher.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.dao.DispatchTaskDao;
@@ -42,6 +43,9 @@ public class DispatchTaskDaoTests extends AbstractTest {
     @Resource
     NodeDispatcher nodeDispatcher;
 
+    @Resource
+    DispatchService dispatchService;
+
     DispatchNode node;
     DispatchJob job;
     List<DispatchTask> tasks;
@@ -58,7 +62,7 @@ public class DispatchTaskDaoTests extends AbstractTest {
     @Test
     public void testStart() {
         assertTrue(dispatchTaskDao.reserve(tasks.get(0)));
-        DispatchProc proc = procDao.create(node, tasks.get(0));
+        DispatchProc proc = dispatchService.allocateProc(node, tasks.get(0));
         assertTrue(dispatchTaskDao.start(tasks.get(0), proc));
     }
 
@@ -70,7 +74,7 @@ public class DispatchTaskDaoTests extends AbstractTest {
     @Test
     public void testStopWithAbort() {
         dispatchTaskDao.reserve(tasks.get(0));
-        DispatchProc proc = procDao.create(node, tasks.get(0));
+        DispatchProc proc = dispatchService.allocateProc(node, tasks.get(0));
         assertEquals(-1, jdbc().queryForInt("SELECT int_retry FROM plow.task WHERE pk_task=?", tasks.get(0).getTaskId()));
         assertTrue(dispatchTaskDao.start(tasks.get(0), proc));
         assertTrue(dispatchTaskDao.stop(tasks.get(0), TaskState.DEAD, ExitStatus.FAIL, Signal.ABORTED_TASK));

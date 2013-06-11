@@ -14,6 +14,7 @@ import org.springframework.test.annotation.Rollback;
 import com.breakersoft.plow.ExitStatus;
 import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.Task;
+import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.dao.DispatchTaskDao;
 import com.breakersoft.plow.dispatcher.dao.ProcDao;
@@ -47,6 +48,10 @@ public class ThriftTaskDaoTests extends AbstractTest {
 
     @Resource
     ProcDao procDao;
+
+    @Resource
+    DispatchService dispatchService;
+
 
     @Test
     public void testGetTask() {
@@ -85,7 +90,7 @@ public class ThriftTaskDaoTests extends AbstractTest {
         List<DispatchTask> tasks = dispatchTaskDao.getDispatchableTasks(job, node);
 
         assertTrue(dispatchTaskDao.reserve(tasks.get(0)));
-        DispatchProc proc = procDao.create(node, tasks.get(0));
+        DispatchProc proc = dispatchService.allocateProc(node, tasks.get(0));
         dispatchTaskDao.start(tasks.get(0), proc);
 
         TaskFilterT filter = new TaskFilterT();
@@ -107,7 +112,7 @@ public class ThriftTaskDaoTests extends AbstractTest {
         List<DispatchTask> tasks = dispatchTaskDao.getDispatchableTasks(job, node);
 
         assertTrue(dispatchTaskDao.reserve(tasks.get(0)));
-        DispatchProc proc = procDao.create(node, tasks.get(0));
+        DispatchProc proc = dispatchService.allocateProc(node, tasks.get(0));
         dispatchTaskDao.start(tasks.get(0), proc);
 
         TaskFilterT filter = new TaskFilterT();
@@ -137,7 +142,7 @@ public class ThriftTaskDaoTests extends AbstractTest {
         Task t =  tasks.get(0);
 
         assertTrue(dispatchTaskDao.reserve(tasks.get(0)));
-        DispatchProc proc = procDao.create(node, tasks.get(0));
+        DispatchProc proc = dispatchService.allocateProc(node, tasks.get(0));
         dispatchTaskDao.start(tasks.get(0), proc);
 
         List<TaskStatsT> stats = thriftTaskDao.getTaskStats(tasks.get(0).getTaskId());
