@@ -298,14 +298,23 @@ cdef class Task(PlowBase):
         conn().proxy().getTask(task, self._task.id)
         self.setTask(task)
 
-    def get_log_path(self):
+    def get_log_path(self, retryNum=-1):
         """
-        Get the log path for the task 
+        Get a log path for the task 
 
-        :returns: string path 
+        Optionally you may request a log from a specific retry 
+        of the task. The default is 0, which is the first run of
+        a task. Subsequent retries will produce new log files.
+
+        If the task never started, then a log will not have been 
+        created yet, and this function will return an invalid path 
+        using a -1 as the retry number.
+
+        :param retryNum: int task.retries number (default -1 == latest)
+        :returns: str log path
         """
         cdef string path 
-        path = get_task_log_path(self)
+        path = get_task_log_path(self, retryNum)
         return path
 
     def retry(self):
@@ -436,14 +445,26 @@ def get_tasks(**kwargs):
     return ret
 
 @reconnecting
-def get_task_log_path(Task task):
+def get_task_log_path(Task task, int retryNum=-1):
     """
     Get a log path by task 
 
+    Optionally you may request a log from a specific retry 
+    of the task. The default is 0, which is the first run of
+    a task. Subsequent retries will produce new log files.
+
+    If the task never started, then a log will not have been 
+    created yet, and this function will return an invalid path 
+    using a -1 as the retry number.
+
     :param task: :class:`.Task`
+    :param retryNum: int Task.retries number (default -1 == latest)
     :returns: str log path
     """
-    cdef string path
+    cdef:
+        string path
+        int retries, i, logNum
+        list tokens
 
     if not task.id:
         return path
@@ -452,6 +473,14 @@ def get_task_log_path(Task task):
         conn().proxy().getTaskLogPath(path, task.id)
     except RuntimeError:
         return path
+
+    if retryNum == -1:
+        return path 
+
+    retries = max(min(retryNum, task.retries), 0)
+    tokens = path.rsplit('.', 2)
+    tokens = [tokens[0], str(retries), tokens[2]]
+    path = '.'.join(tokens)
 
     return path
 

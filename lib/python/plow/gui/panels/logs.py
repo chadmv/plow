@@ -103,6 +103,10 @@ class TabbedLogVieweWidget(QtGui.QWidget):
             yield self.__tabs.widget(i)
 
     def addTask(self, job, task):
+        if task.retries == -1:
+            LOGGER.debug("Task %r has not started yet. No log available", task)
+            return 
+
         tabs = self.__tabs
         index = self.indexOfTaskId(task.id)
 
@@ -342,17 +346,18 @@ class LogViewerWidget(QtGui.QWidget):
 
         self.updateLogSelector(task)
 
-        if logPath != self.logPath:
-            if not os.path.exists(logPath):
-                LOGGER.warn("Failed to open log file: '%s'", logPath)
-                return
+        if task.retries > -1:
+            if logPath != self.logPath:
+                if not os.path.exists(logPath):
+                    LOGGER.warn("Failed to open log file: '%s'", logPath)
+                    return
 
-            self.setLogPath(logPath)
+                self.setLogPath(logPath)
 
-        if self.isTailing(): 
-            self.scrollToBottom()
-        else:
-            self.readMore()
+            if self.isTailing(): 
+                self.scrollToBottom()
+            else:
+                self.readMore()
 
         self.__task = task
 
@@ -367,19 +372,16 @@ class LogViewerWidget(QtGui.QWidget):
             return
 
         combo.setVisible(True)
-        path = task.get_log_path()
-        pattern = re.sub(r'\.-?\d+\.log$', r'.{num}.log', path)
 
         for i in xrange(retries+1):
-            logNum = i-1
-            logpath = pattern.format(num=i)
+            logpath = task.get_log_path(i)
             logname = os.path.basename(logpath)
             combo.addItem(logname, logpath)
             
             idx = combo.count()-1
             combo.setItemData(idx, logpath, QtCore.Qt.ToolTipRole)
 
-            if logpath == path:
+            if i == retries:
                 combo.setCurrentIndex(idx)
 
     def setLogPath(self, path):
