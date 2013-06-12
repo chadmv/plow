@@ -1,6 +1,5 @@
 package com.breakersoft.plow.thrift;
 
-import org.apache.thrift.TException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.dispatcher.RndEventHandler;
