@@ -43,7 +43,7 @@ The plow server code compiles to a Web Application Archive file, or WAR file.  T
 must be hosted by within a Java application server. For convinience an executable 
 binary distribution with a current WAR can be found here:
 
-http://code.google.com/p/plow/downloads
+http://code.google.com/p/plow/downloads 
 
 If your developing Plow, you will also need to compile your own WAR file at times.
 
@@ -62,7 +62,7 @@ your local Maven repository.
 
 Next step, must build the Plow thrift bindings for Java and install those in your local Maven repo.
 
-    $ cd client/thrift
+    $ cd lib/thrift
     $ ./generate-sources.sh
     $ cd ../java
     $ mvn install
@@ -75,7 +75,7 @@ Now you can actually build the server.
     $ mvn package
 
 This will create a file named target/plow.war.  Replace the plow.war file in the executable server package you
-downloaded and your now on the latest version.  You can also copy plow.war into dist/webapps and run
+downloaded and your now on the latest version.  You can also copy (or symlink) plow.war into dist/webapps and run
 start it using dist/start-plow.sh.
 
 If the thrift files change at all, you have to re-generate + install the thrift bindings and recompile
@@ -92,7 +92,7 @@ set password: plow
 
 Execute the sql file:
 
-    $ psql -h <hostname> -U <username> -d <dbname> -f ddl/plow-schema.sql
+    $ psql -h <hostname> -U <username> -d <dbname> -f server/ddl/plow-schema.sql
 
 Install the Python Library and Tools
 ====================================
@@ -106,15 +106,24 @@ The latest Python client can be install from the source checkout using the follo
 > python setup.py install
 ```
 
-You will still want to manually copy the `etc/*.cfg` files to either `/usr/local/etc/plow/` or `~/.plow/`
+This will attempt to also copy the `etc/plow/*.cfg` files to `/usr/local/etc/plow/`. You may also manually copy them to 
+`~/.plow/` instead if you want.
 
-You can set the PYTHONPATH path environment variable for development.
+For Development...
+
+```
+> cd lib/python
+> python setup.py develop
+```
+
+This will build the source files in place, and put a linked egg in your PYTHONPATH.
+
+You can also set the PYTHONPATH path environment variable for development.
 
 Starting the Server
 -------------------
 
-    > tar -zxvf plow-server-bin-0.0.5-alpha.tar.gz
-    > cd plow-server-bin-0.0.5-alpha
+    > cd <plow source directory>/server/dist/
     > ./start-plow.sh
 
     If Java7 is not in your path, plow will pick it up if the JAVA_HOME env var is set.  On Mac, this will
@@ -133,11 +142,10 @@ First thing you need to do if you are using a git checkout of plow is setup your
     $ export PYTHONPATH="/path/to/plow/checkout/lib/python"
     $ export PATH="$PATH:$PLOW_ROOT/bin"
 
-(OR if you are in bash, you can just source setup_env.sh located on the root level.
- This should set all your environment variables, including all config env variables.
-  > source setup_env.sh
-)
+OR if you are in bash, you can just source setup_env.sh located on the root level.
+This should set all your environment variables, including all config env variables.
 
+    $ source  <plow source directory>/setup_env.sh
 
 
 Running the Render Node Daemon
@@ -151,7 +159,7 @@ If you have installed the client tools using the `setup.py`, then you should now
 
 Otherwise, you can launch rndaemon from your git checkout (after setting your environment variables and ensuring you have all python dependencies installed).
 
-    $ bin/rndaemon
+    $ <plow source directory>/bin/rndaemon
 
 The daemon will first look for an optional config file explicitely set with the `PLOW_RNDAEMON_CFG` environment variable:
 
@@ -160,3 +168,11 @@ The daemon will first look for an optional config file explicitely set with the 
 Otherwise, it will search for: `/usr/local/etc/rndaemon.cfg`, `$PLOW_ROOT/etc/plow/rndaemon.cfg`, and then `~/.plow/rndaemon.cfg`
 
 
+Running plow-wrangler GUI
+------------------------------
+
+After installing the python client, and having PySide installed, you should be able to run:
+
+    $ plow-wrangler
+    
+    
