@@ -466,6 +466,14 @@ cdef class Job(PlowBase):
             if callback:
                 callback()
 
+    def get_procs(self):
+        """
+        Get current procs 
+
+        :returns: list[:class:`.Proc`]
+        """
+        return get_procs(jobIds=[self.id])
+
 
 def launch_job(JobSpec spec):
     """

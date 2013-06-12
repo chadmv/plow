@@ -262,6 +262,14 @@ cdef class Node(PlowBase):
         """
         set_node_slot_mode(self, mode, cores, ram)
 
+    def get_procs(self):
+        """
+        Get current procs 
+
+        :returns: list[:class:`.Proc`]
+        """
+        return get_procs(nodeIds=[self.id])
+
 
 @reconnecting
 def get_node(string name):
@@ -356,5 +364,169 @@ def set_node_slot_mode(Node node, int mode, int cores, int ram):
     node.node.mode = typ
     node.node.slotCores = cores
     node.node.slotRam = ram
+
+
+
+
+#######################
+# ProcFilter
+#
+@cython.internal
+cdef class ProcFilter:
+
+    cdef ProcFilterT value
+
+    def __init__(self, **kwargs):
+        self.value.projectIds = kwargs.get('projectIds', [])
+        self.value.folderIds = kwargs.get('folderIds', [])
+        self.value.jobIds = kwargs.get('jobIds', [])
+        self.value.layerIds = kwargs.get('layerIds', [])
+        self.value.taskIds = kwargs.get('taskIds', [])
+        self.value.clusterIds = kwargs.get('clusterIds', [])
+        self.value.quotaIds = kwargs.get('quotaIds', [])
+        self.value.nodeIds = kwargs.get('nodeIds', [])
+
+        self.value.lastUpdateTime = kwargs.get('lastUpdateTime', 0)
+        self.value.limit = kwargs.get('limit', 0)
+        self.value.offset = kwargs.get('offset', 0)
+
+
+#######################
+# Node
+#
+
+cdef inline Proc initProc(ProcT& p):
+    cdef Proc proc = Proc()
+    proc.setProc(p)
+    return proc
+
+
+cdef class Proc(PlowBase):
+    """
+    Represents an existing Proc on a Node
+
+    :var id: str
+    :var nodeId: str
+    :var jobName: str
+    :var layerName: str
+    :var taskName: str
+    :var cores: int
+    :var usedCores: float
+    :var highCores: float
+    :var ram: int
+    :var usedRam: int
+    :var highRam: int
+    :var ioStats: list[long]
+    :var createdTime: long msec epoch
+    :var updatedTime: long msec epoch
+    :var startedTime: long msec epoch
+
+    """
+    cdef ProcT proc
+
+    cdef setProc(self, ProcT& p):
+        self.proc = p
+
+    property id:
+        def __get__(self): return self.proc.id
+
+    property nodeId:
+        def __get__(self): return self.proc.nodeId
+
+    property jobName:
+        def __get__(self): return self.proc.jobName
+
+    property layerName:
+        def __get__(self): return self.proc.layerName
+
+    property taskName:
+        def __get__(self): return self.proc.taskName
+
+    property cores:
+        def __get__(self): return self.proc.cores
+
+    property usedCores:
+        def __get__(self): return self.proc.usedCores
+
+    property highCores:
+        def __get__(self): return self.proc.highCores
+
+    property ram:
+        def __get__(self): return self.proc.ram
+
+    property usedRam:
+        def __get__(self): return self.proc.usedRam
+
+    property highRam:
+        def __get__(self): return self.proc.highRam
+
+    property ioStats:
+        def __get__(self): 
+            cdef:
+                int i
+                long val
+                vector[long] ret
+
+            for i in range(self.proc.ioStats.size()):
+                val = self.proc.ioStats.at(i)
+                ret.push_back(val)
+
+            return ret
+
+    property createdTime:
+        def __get__(self): return long(self.proc.createdTime)
+
+    property updatedTime:
+        def __get__(self): return long(self.proc.updatedTime)
+
+    property startedTime:
+        def __get__(self): return long(self.proc.startedTime)        
+
+
+@reconnecting
+def get_proc(Guid& id):
+    """
+    Get a proc by id 
+
+    :param id: str :class:`.Proc` id 
+    :returns: :class:`.Proc`
+    """
+    cdef: 
+        ProcT procT
+        Proc proc
+
+    conn().proxy().getProc(procT, id)
+    proc = initProc(procT)
+    return proc
+
+@reconnecting
+def get_procs(**kwargs):
+    """
+    Get a list of procs matching a criteria.
+
+    :param projectIds: list[str :class:`.Project` ids]
+    :param folderIds: list[str :class:`.Folder` ids]
+    :param jobIds: list[str :class:`.Job` ids]
+    :param layerIds: list[str :class:`.Layer` ids]
+    :param taskIds: list[str :class:`.Task` ids]
+    :param clusterIds: list[str :class:`.Cluster` ids]
+    :param quotaIds: list[str :class:`.Quota` ids]
+    :param nodeIds: list[str :class:`.Node` ids]
+    :param lastUpdateTime: long msec epoch
+    :param limit: int
+    :param offset: int
+    :returns: list[:class:`.Proc`]
+    """
+    cdef: 
+        vector[ProcT] procs 
+        ProcT procT
+        list ret 
+        ProcFilter filter = ProcFilter(**kwargs)
+        ProcFilterT f = filter.value
+
+    conn().proxy().getProcs(procs, f)
+    ret = [initProc(procT) for procT in procs]
+    return ret
+
 
 

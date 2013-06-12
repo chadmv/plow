@@ -47,11 +47,7 @@ def main():
     logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
 
     import server
-
-    try:
-        server.start()
-    except KeyboardInterrupt:
-        sys.exit(2)
+    server.start()
 
 
 if __name__ == "__main__":

@@ -178,14 +178,20 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
 
     cdef cppclass ProcT:
         Guid id
-        Guid hostId
+        Guid nodeId
         string jobName
+        string layerName
         string taskName
         int cores
-        int ramMb
-        int usedRamMb
-        int highRamMb
-        bint unbooked
+        float usedCores
+        float highCores
+        int ram
+        int usedRam
+        int highRam
+        vector[long] ioStats
+        Timestamp createdTime
+        Timestamp updatedTime
+        Timestamp startedTime
 
     cdef cppclass JobT:
         Guid id
@@ -420,5 +426,17 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         string path 
         Attrs attrs
 
+    cdef cppclass ProcFilterT:
+        vector[Guid] projectIds
+        vector[Guid] folderIds
+        vector[Guid] jobIds
+        vector[Guid] layerIds
+        vector[Guid] taskIds
+        vector[Guid] clusterIds
+        vector[Guid] quotaIds
+        vector[Guid] nodeIds
+        int lastUpdateTime 
+        int limit 
+        int offset 
 
 

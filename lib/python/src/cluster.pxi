@@ -163,6 +163,14 @@ cdef class Cluster(PlowBase):
         set_default_cluster(self)
         self._cluster.isDefault = True
 
+    def get_procs(self):
+        """
+        Get current procs 
+
+        :returns: list[:class:`.Proc`]
+        """
+        return get_procs(clusterIds=[self.id])
+
 
 @reconnecting
 def get_cluster(string name):

@@ -376,6 +376,14 @@ cdef class Task(PlowBase):
         cdef Layer layer = get_layer_by_id(self.layerId)
         return layer
 
+    def get_procs(self):
+        """
+        Get current procs 
+
+        :returns: list[:class:`.Proc`]
+        """
+        return get_procs(taskIds=[self.id])
+
 
 cdef inline TaskFilterT dict_to_taskFilter(dict d):
     cdef:

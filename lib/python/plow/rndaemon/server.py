@@ -2,6 +2,7 @@
 
 import logging
 import sys
+import os
 import signal
 
 import conf
@@ -42,20 +43,24 @@ def get_server(api, handler, port, **kwargs):
     return server
 
 
-def exit_handler(signum, frame):
-    logger.info("Caught SIGTERM. Shutting down...")
+def exit_handler(*args):
+    logger.info("Caught SIGTERM. Shutting down Process Manager...")
     core.ProcessMgr.shutdown()
-    sys.exit(0)
+    logger.info("Process Manager finished shutting down")
+    os._exit(0)
 
+signal.signal(signal.SIGTERM, exit_handler)
 
 def start():
-    signal.signal(signal.SIGTERM, exit_handler)
-
     logger.info("Staring Render Node Daemon on TCP port %d" % conf.NETWORK_PORT)
     server = get_server(RndNodeApi, RndProcessHandler(), conf.NETWORK_PORT)
 
     try:
         server.serve()
     except KeyboardInterrupt:
-        exit_handler(None,None)
-        sys.exit(2)
+        exit_handler()
+
+    sys.exit(0)
+
+
+
