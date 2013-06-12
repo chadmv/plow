@@ -49,7 +49,7 @@ cdef class DependSpec:
     """
     cdef DependSpecT spec
 
-    def __init__(self, int type, **kwargs):
+    def __init__(self, int type = 0, **kwargs):
         self.spec.type = <DependType_type>type
 
         if 'dependentJob' in kwargs:
