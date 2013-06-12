@@ -1,9 +1,14 @@
 
 package com.breakersoft.plow;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import com.google.common.collect.ImmutableList;
 
 public final class Defaults {
+
+    public static final ObjectMapper MAPPER = new ObjectMapper();
+
     /*
      * The amount of memory reserved on a node for operating
      * system processes. This is subtracted from the total

@@ -1,11 +1,11 @@
 package com.breakersoft.plow.dispatcher;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.breakersoft.plow.ExitStatus;
@@ -37,16 +37,12 @@ public class ProcDispatcher implements Dispatcher<DispatchProc> {
     @Autowired
     private DispatchService dispatchService;
 
-    // Threads for dispatching.
-    private ExecutorService dispatchThreads = Executors.newFixedThreadPool(16);
-
-
-    public ProcDispatcher() {
-
-    }
+    @Autowired
+    @Qualifier("procDispatcherExecutor")
+    private ThreadPoolTaskExecutor procDispatcherExecutor;
 
     public void book(DispatchProc proc) {
-        dispatchThreads.execute(new BookProcCommand(proc, this));
+        procDispatcherExecutor.execute(new BookProcCommand(proc, this));
     }
 
     public void dispatch(DispatchResult result, DispatchProc proc) {
