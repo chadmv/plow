@@ -601,6 +601,15 @@ cdef class Layer(PlowBase):
         cdef list ret = get_layer_depends_on(self)
         return ret
 
+    def get_procs(self):
+        """
+        Get current procs 
+
+        :returns: list[:class:`.Proc`]
+        """
+        return get_procs(layerIds=[self.id])
+
+
 @reconnecting
 def get_layer_by_id(Guid& layerId):
     """

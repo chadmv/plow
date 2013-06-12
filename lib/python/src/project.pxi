@@ -83,6 +83,14 @@ cdef class Project(PlowBase):
         cdef list board = get_job_board(self)
         return board
 
+    def get_procs(self):
+        """
+        Get current procs 
+
+        :returns: list[:class:`.Proc`]
+        """
+        return get_procs(projectIds=[self.id])
+
 
 @reconnecting
 def get_project(Guid& guid):

@@ -267,6 +267,8 @@ Classes
 .. autoclass:: plow.client.NodeSystem
     :members:
 
+.. _node:
+
 Functions
 ^^^^^^^^^
 
@@ -275,6 +277,26 @@ Functions
 .. autofunction:: plow.client.set_node_locked
 .. autofunction:: plow.client.set_node_cluster
 .. autofunction:: plow.client.set_node_tags
+
+
+
+Proc
+===================
+
+.. _proc:
+
+Classes
+^^^^^^^^^
+
+.. autoclass:: plow.client.Proc
+    :members:
+
+
+Functions
+^^^^^^^^^
+
+.. autofunction:: plow.client.get_proc
+.. autofunction:: plow.client.get_procs
 
 
 .. _cluster:

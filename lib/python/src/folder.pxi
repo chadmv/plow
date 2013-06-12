@@ -104,6 +104,15 @@ cdef class Folder(PlowBase):
         """
         delete_folder(self)
 
+    def get_procs(self):
+        """
+        Get current procs 
+
+        :returns: list[:class:`.Proc`]
+        """
+        return get_procs(folderIds=[self.id])
+
+
 @reconnecting
 def get_folder(Guid& folderId):
     """

@@ -102,6 +102,14 @@ cdef class Quota(PlowBase):
         set_quota_locked(self, locked)
         self._quota.isLocked = locked
 
+    def get_procs(self):
+        """
+        Get current procs 
+
+        :returns: list[:class:`.Proc`]
+        """
+        return get_procs(quotaIds=[self.id])
+
 
 @reconnecting
 def get_quota(Guid& id):
