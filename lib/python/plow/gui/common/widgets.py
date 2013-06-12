@@ -93,7 +93,7 @@ class FilterableListBox(QtGui.QWidget):
     valueClicked = QtCore.Signal(object)
 
     def __init__(self, filt=None, items=None, data=None, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        super(FilterableListBox, self).__init__(parent)
 
         self.__data = {}
 
@@ -124,11 +124,13 @@ class FilterableListBox(QtGui.QWidget):
 
         layout.addLayout(hlayout)
         layout.addWidget(self.__list)
-
+        
         # connections
         self.__list.doubleClicked.connect(self._itemDoubleClicked)
         self.__list.clicked.connect(self._itemClicked)
-        self.__list.selectionModel().selectionChanged.connect(self._selectionChanged)
+        
+        self.__selModel = self.__list.selectionModel()
+        self.__selModel.selectionChanged.connect(self._selectionChanged)
 
         if items:
             self.setStringList(items)
