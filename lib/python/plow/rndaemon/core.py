@@ -223,6 +223,8 @@ class _ProcessManager(object):
             if not t.wait(10):
                 logger.warn("Thread failed to close down after waiting 10 seconds: %r", t) 
 
+        self.__threads.clear()
+        del threads
         logger.debug("Done waiting on task shutdown")
 
     def reboot(self, now=False):
