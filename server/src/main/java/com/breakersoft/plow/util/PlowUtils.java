@@ -3,6 +3,7 @@ package com.breakersoft.plow.util;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public final class PlowUtils {
 
@@ -29,6 +30,27 @@ public final class PlowUtils {
             return false;
         }
         return !s.isEmpty();
+    }
+
+    public static final Pattern ALPHA_NUM = Pattern.compile("[\\w\\.\\-]+");
+
+    public static void alpahNumCheck(String str, String errMsg) {
+
+        if (str == null) {
+            throw new IllegalArgumentException(errMsg);
+        }
+
+        if (str.isEmpty()) {
+            throw new IllegalArgumentException(errMsg);
+        }
+
+        if (!ALPHA_NUM.matcher(str).matches()) {
+            throw new IllegalArgumentException(errMsg);
+        }
+    }
+
+    public static String bytesToMb(long bytes) {
+        return String.format("%0.2fmb", bytes / 1024.0 / 1024.0 / 1024.0);
     }
 
     /**

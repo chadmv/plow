@@ -37,8 +37,10 @@ public class StatsController {
         result.put("jvm", JvmStats.getJvmStats());
 
         final Map<String, Object> pools =  Maps.newLinkedHashMap();
-        pools.put("nodeDispatcher", collectThreadPoolStats(plowThreadPools.nodeDispatcherExecutor()));
-        pools.put("procDispatcher", collectThreadPoolStats(plowThreadPools.procDispatcherExecutor()));
+        pools.put("node", collectThreadPoolStats(plowThreadPools.nodeDispatcherExecutor()));
+        pools.put("proc", collectThreadPoolStats(plowThreadPools.procDispatcherExecutor()));
+        pools.put("async", collectThreadPoolStats(plowThreadPools.stateChangeExecutor()));
+
         result.put("threadpools", pools);
 
         Defaults.MAPPER.writeValue(response.getOutputStream(), result);

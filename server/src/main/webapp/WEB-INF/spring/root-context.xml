@@ -55,9 +55,6 @@
 
   <task:annotation-driven/>
 
-  <!-- A task executor for running commands from the thrift interface -->
-  <task:executor id="stateChangeExecutor" pool-size="8" queue-capacity="100" rejection-policy="CALLER_RUNS"/>
-
   <bean id="orphanProcChecker" class="com.breakersoft.plow.crond.OrphanProcChecker"/>
   <bean id="downNodeChecker" class="com.breakersoft.plow.crond.DownNodeChecker"/>
 

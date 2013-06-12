@@ -160,6 +160,8 @@ public class JobServiceImpl implements JobService {
                 continue;
             }
 
+            PlowUtils.alpahNumCheck(blayer.name, "The layer name must be alpha numeric:" + blayer.getName());
+
             if (blayer.isSetRange()) {
                 logger.info("Creating layer {}, range: {}", blayer.name, blayer.range);
 
@@ -177,6 +179,7 @@ public class JobServiceImpl implements JobService {
 
                 int taskOrder = 0;
                 for (TaskSpecT task: blayer.getTasks()) {
+                    PlowUtils.alpahNumCheck(task.getName(), "Task name must be alpha numeric: " + task.getName());
                     taskDao.create(layer, task.getName(), 0, taskOrder, layerOrder, blayer.minRam);
                 }
             }

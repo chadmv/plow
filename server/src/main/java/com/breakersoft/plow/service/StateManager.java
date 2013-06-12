@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.breakersoft.plow.Depend;
@@ -51,9 +50,6 @@ public class StateManager {
 
     @Autowired
     RndProcessManager processManager;
-
-    @Autowired
-    ThreadPoolTaskExecutor stateChangeExecutor;
 
     public void killProc(Task task, boolean unbook) {
         final Proc proc = nodeService.getProc(task);
