@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -96,7 +97,7 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
                     ps.setArray(11, conn.createArrayOf("float", new Float[] { 0.0f, 0.0f, 0.0f }));
                 }
                 else {
-                    ps.setArray(11, conn.createArrayOf("float",  ping.hw.load.toArray()));
+                    ps.setArray(11, conn.createArrayOf("float", ping.hw.load.toArray()));
                 }
                 return ps;
             }

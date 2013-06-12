@@ -2,7 +2,7 @@ import conf
 
 from thrift.transport import TSocket
 from thrift.transport import TTransport
-from thrift.protocol import TCompactProtocol, TBinaryProtocol
+from thrift.protocol import TBinaryProtocol
 
 from rpc import RndServiceApi, RndNodeApi
 
@@ -15,7 +15,7 @@ def getPlowConnection(host=None, port=None):
         port = conf_port
     socket = TSocket.TSocket(host, int(port))
     transport = TTransport.TFramedTransport(socket)
-    protocol = TCompactProtocol.TCompactProtocol(transport)
+    protocol = TBinaryProtocol.TBinaryProtocolAccelerated(transport)
     service = RndServiceApi.Client(protocol)
     transport.open()
     return (service, transport)
