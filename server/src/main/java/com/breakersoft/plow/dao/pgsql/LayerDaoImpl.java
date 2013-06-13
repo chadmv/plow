@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
@@ -81,12 +82,30 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
     }
 
     private static final String INSERT =
-        JdbcUtils.Insert("plow.layer",
-                "pk_layer", "pk_job", "str_name", "str_range",
-                "str_command", "str_tags", "int_chunk_size", "int_order",
-                "int_cores_min", "int_cores_max", "int_ram_min",
-                "int_ram_max", "int_retries_max", "bool_threadable",
-                "hstore_env", "str_service");
+        "INSERT INTO " +
+            "plow.layer " +
+        "(" +
+            "pk_layer,"+
+            "pk_job,"+
+            "str_name,"+
+            "str_range,"+
+            "str_command,"+
+            "str_tags,"+
+            "int_chunk_size,"+
+            "int_order,"+
+            "int_cores_min,"+
+            "int_cores_max,"+
+            "int_ram_min,"+
+            "int_ram_max,"+
+            "int_retries_max,"+
+            "bool_threadable,"+
+            "hstore_env,"+
+            "str_service,"+
+            "int_ram_range " +
+        ") " +
+        "VALUES (" +
+            StringUtils.repeat("?",",",16) + ",?::int4range" +
+        ")";
 
     @Override
     public Layer create(final Job job, final LayerSpecT layer, final int order) {
@@ -113,6 +132,7 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
                 ret.setBoolean(14, layer.isThreadable());
                 ret.setObject(15, layer.getEnv());
                 ret.setString(16, layer.getServ());
+                ret.setString(17, JdbcUtils.toIntRange(new int[] { layer.getMinRam(), layer.getMinRam() }));
                 return ret;
             }
         });

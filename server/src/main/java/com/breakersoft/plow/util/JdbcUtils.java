@@ -73,6 +73,10 @@ public final class JdbcUtils {
         return conn.createArrayOf("text", col.toArray());
     }
 
+    public static final String toIntRange(int[] range) throws SQLException {
+        return String.format("[%d,%d]", range[0], range[1]);
+    }
+
     public static final ImmutableList<String> toList(Array sqlArray) {
         if (sqlArray == null) {
             return ImmutableList.of();

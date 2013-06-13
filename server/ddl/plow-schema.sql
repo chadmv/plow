@@ -242,6 +242,11 @@ CREATE table plow.layer (
   --- this to a sane value may stop processes from going crazy.
   int_ram_max INTEGER NOT NULL DEFAULT -1,
 
+  ---
+  --- The memory range of tasks.
+  ---
+  int_ram_range INT4RANGE NOT NULL DEFAULT '[0, 1]',
+
   int_retries_max INTEGER NOT NULL DEFAULT 1,
   bool_threadable BOOLEAN DEFAULT 'f' NOT NULL,
   hstore_env hstore
@@ -249,7 +254,7 @@ CREATE table plow.layer (
 ) WITHOUT OIDS;
 
 CREATE INDEX layer_str_tags_gin_idx ON plow.layer USING gin(str_tags);
-CREATE INDEX layer_dispatch_idx ON plow.layer (int_cores_min, int_ram_min);
+CREATE INDEX layer_int_ram_range_gist_idx ON plow.layer USING gist(int_ram_range);
 CREATE UNIQUE INDEX layer_pk_job_str_name_uniq_idx ON plow.layer (pk_job, str_name);
 
 
@@ -1093,6 +1098,8 @@ CREATE OR REPLACE FUNCTION plow.before_disp_update() RETURNS TRIGGER AS $$
 BEGIN
   IF NEW.int_cores_min = 0 THEN
     NEW.float_tier := NEW.int_cores_run::real;
+  ELSEIF NEW.int_cores_run = 0 THEN
+    NEW.float_tier := NEW.int_cores_min::real * -1.0;
   ELSE
     NEW.float_tier := NEW.int_cores_run / NEW.int_cores_min::real;
   END IF;

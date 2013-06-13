@@ -62,7 +62,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         "AND " +
             "layer.int_cores_min <= ? " +
         "AND " +
-            "layer.int_ram_min <= ? " +
+            "layer.int_ram_range && int4range(0, ?) " +
         "AND " +
             "(job_dsp.int_cores_run < job_dsp.int_cores_max OR job_dsp.int_cores_max = -1) " +
         "AND " +
