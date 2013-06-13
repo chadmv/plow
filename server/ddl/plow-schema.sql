@@ -119,6 +119,7 @@ CREATE TABLE plow.folder_dsp (
 ) WITHOUT OIDS;
 
 CREATE INDEX folder_dsp_float_tier_idx ON plow.folder_dsp (float_tier);
+CREATE INDEX folder_dsp_int_cores_max_idx ON plow.folder_dsp (int_cores_max);
 
 ----------------------------------------------------------
 
@@ -145,8 +146,9 @@ CREATE TABLE plow.job (
 ) WITHOUT OIDS;
 
 CREATE UNIQUE INDEX job_str_active_name_uniq_idx ON plow.job (str_active_name);
-CREATE INDEX job_int_state_pk_project_idx ON plow.job (int_state, pk_project);
 CREATE INDEX job_pk_project_idx ON plow.job (pk_project);
+CREATE INDEX job_int_state_idx ON plow.job (int_state);
+CREATE INDEX job_pk_folder_idx ON plow.job (pk_folder);
 
 ---
 
@@ -159,6 +161,7 @@ CREATE TABLE plow.job_dsp (
 );
 
 CREATE INDEX job_dsp_float_tier_idx ON plow.job_dsp (float_tier);
+CREATE INDEX job_dsp_int_cores_max_idx ON plow.folder_dsp (int_cores_max);
 
 ---
 
@@ -173,7 +176,7 @@ CREATE TABLE plow.job_count (
   int_depend INTEGER NOT NULL DEFAULT 0
 ) WITHOUT OIDS;
 
-CREATE INDEX job_count_int_waiting_idx ON plow.job_count (int_waiting);
+CREATE INDEX job_count_int_waiting_idx ON plow.job_count (int_waiting DESC);
 
 ---
 --- plow.job_stat - job statistics
@@ -227,7 +230,7 @@ CREATE table plow.layer (
   int_cores_min SMALLINT NOT NULL CHECK (int_cores_min > 0),
 
   --- The maximum number of cores per task.
-  int_cores_max SMALLINT NOT NULL DEFAULT 32767,
+  int_cores_max SMALLINT NOT NULL DEFAULT -1,
   
   --- The minumum amount of RAM a node must have free to be
   --- dispatched to the layer.  This can be raised or lowered 
@@ -237,7 +240,7 @@ CREATE table plow.layer (
   --- The maximum amount of memory a task can use.  Anything
   --- over this and the task will not be dispatched.  Setting
   --- this to a sane value may stop processes from going crazy.
-  int_ram_max INTEGER NOT NULL DEFAULT 2147483647,
+  int_ram_max INTEGER NOT NULL DEFAULT -1,
 
   int_retries_max INTEGER NOT NULL DEFAULT 1,
   bool_threadable BOOLEAN DEFAULT 'f' NOT NULL,
@@ -263,7 +266,7 @@ CREATE TABLE plow.layer_count (
   int_depend INTEGER NOT NULL DEFAULT 0
 ) WITHOUT OIDS;
 
-CREATE INDEX layer_count_int_waiting_idx ON plow.layer_count (int_waiting);
+CREATE INDEX layer_count_int_waiting_idx ON plow.layer_count (int_waiting DESC);
 
 ---
 

@@ -50,19 +50,23 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         "AND " +
             "layer.pk_layer = layer_count.pk_layer " +
         "AND " +
+            "job.pk_project = ? " +
+        "AND " +
             "job.int_state  = ? " +
         "AND " +
-            "bool_paused = 'f' " +
-        "AND " +
-            "job.pk_project = ? " +
+            "job.bool_paused = 'f' " +
         "AND " +
             "layer_count.int_waiting > 0 " +
         "AND " +
             "layer.str_tags && ? " +
         "AND " +
-            "job_dsp.int_cores_max < job_dsp.int_cores_run " +
+            "layer.int_cores_min <= ? " +
         "AND " +
-            "folder_dsp.int_cores_max < folder_dsp.int_cores_run " +
+            "layer.int_ram_min <= ? " +
+        "AND " +
+            "(job_dsp.int_cores_run < job_dsp.int_cores_max OR job_dsp.int_cores_max = -1) " +
+        "AND " +
+            "(folder_dsp.int_cores_run < folder_dsp.int_cores_max OR  folder_dsp.int_cores_max = -1) " +
         "ORDER BY " +
             "job_dsp.float_tier ASC, " +
             "folder_dsp.float_tier ASC " +
@@ -85,9 +89,11 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                 final PreparedStatement ps = conn.prepareStatement(BIG_DISPATCH_QUERY);
-                ps.setInt(1, JobState.RUNNING.ordinal());
-                ps.setObject(2, project.getProjectId());
+                ps.setObject(1, project.getProjectId());
+                ps.setInt(2, JobState.RUNNING.ordinal());
                 ps.setArray(3, conn.createArrayOf("text", node.getTags().toArray()));
+                ps.setInt(4, node.getIdleCores());
+                ps.setInt(5, node.getIdleRam());
                 return ps;
             }
         },DISPATCH_JOB_MAPPER);
