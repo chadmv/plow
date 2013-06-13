@@ -20,7 +20,9 @@ def formatMaxValue(value):
 def formatDateTime(epoch):
     if not epoch:
         return "-"
+
     date = datetime.fromtimestamp(epoch / 1000).strftime("%Y-%m-%d %H:%M:%S")
+
     return str(date)
 
 def formatDuration(startTime, stopTime=0):
@@ -29,11 +31,14 @@ def formatDuration(startTime, stopTime=0):
     """
     if startTime == 0:
         return constants.TIME_NO_DURATION
+
     if stopTime == 0:
         stopTime = int(time.time()) * 1000
+
     duration = max((stopTime - startTime) / 1000, 0)
     m, s = divmod(duration, 60)
     h, m = divmod(m, 60)
+
     return "%02d:%02d:%02d" % (h, m, s)
 
 def clipText(text, size):
@@ -44,6 +49,7 @@ def clipText(text, size):
         return text[0:size-2] + "..."
     else:
         return text
+
 def formatCoreTime(core_time_ms):
     """
     Format core time in millis to core hours.

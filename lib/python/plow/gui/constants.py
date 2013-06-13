@@ -1,5 +1,6 @@
 
 from manifest import QtGui
+from plow.tools.constants import *
 
 """
 The job status is not the same as the job state.  A job only has 2 states
@@ -35,26 +36,6 @@ COLOR_TASK_STATE = [
     PURPLE,
     GREEN
 ]
-
-#
-# Display names
-#
-TIME_NO_TIME = "__-__ __:__:__"
-
-TIME_NO_DURATION = "__:__:__"
-
-TASK_STATES = ["INITIALIZE", 
-               "WAITING",
-               "RUNNING",
-               "DEAD",
-               "EATEN",
-               "DEPEND",
-               "SUCCEEDED"]
-
-JOB_STATES = ["INITIALIZE", 
-              "RUNNING",
-              "FINISHED"]
-
 
 #
 # Sizes

@@ -17,7 +17,7 @@ from ast import literal_eval
 
 import psutil
 
-from thrift.protocol import TCompactProtocol
+from thrift.protocol import TBinaryProtocol
 
 from plow.rndaemon import conf 
 conf.NETWORK_DISABLED = True
@@ -167,9 +167,9 @@ class TestProcessManager(unittest.TestCase):
     def testFailedTask(self):
         D = {'result': None}
 
-        def processFinished(d, rtc):
-            d['result'] = rtc 
-            self._processmgr_processFinished(rtc)
+        def processFinished(d, *args):
+            d['result'] = args[0] 
+            self._processmgr_processFinished(*args)
 
         core.ProcessMgr.processFinished = partial(processFinished, D)
 
@@ -208,8 +208,8 @@ class TestProcessManager(unittest.TestCase):
 
         D = {'result': None}
 
-        def processFinished(d, rtc):
-            d['result'] = rtc 
+        def processFinished(d, *args):
+            d['result'] = args[0] 
 
         conf.TASK_PROGRESS_PATTERNS = {
             'blender': '^Fra:\\d+ .*? \\| Rendering \\| .*? (\\d+/\\d+)$',
@@ -345,7 +345,7 @@ class TestCommunications(unittest.TestCase):
         self.server_port = 21212
 
         handler = _ServiceHandler(self.event)
-        prot = TCompactProtocol.TCompactProtocolFactory()
+        prot = TBinaryProtocol.TBinaryProtocolAcceleratedFactory()
 
         self.server = server.get_server(RndServiceApi, 
                                         handler, 

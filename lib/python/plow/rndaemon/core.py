@@ -124,14 +124,15 @@ class _ProcessManager(object):
 
         return task
 
-    def processFinished(self, processResult):
+    def processFinished(self, processResult, cpus=None):
         """
         Callback for when a process has finished running. 
         Receives the RunTaskResult object. 
         Deallocates the resources.
         """
         with self.__lock:
-            cpus = self.__threads[processResult.procId].cpus
+            if cpus is None:
+                cpus = self.__threads[processResult.procId].cpus
             ResourceMgr.checkin(cpus)
             try:
                 del self.__threads[processResult.procId]
@@ -703,7 +704,7 @@ class _ProcessThread(threading.Thread):
                     logger.warn("Error talking to plow server, %s, sleeping for 30 seconds", e)
                     time.sleep(30)
 
-        ProcessMgr.processFinished(result)
+        ProcessMgr.processFinished(result, self.__cpus)
         if self.__logfp is not None:
             self.__logfp.writeLogFooterAndClose(result)
             self.__logfp = None
