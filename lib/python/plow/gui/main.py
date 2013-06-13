@@ -3,12 +3,11 @@ import os
 import logging 
 
 from manifest import QtCore, QtGui
-from panels import *
-from event import EventManager
 from util import loadTheme 
+from panels import *
 
 
-LOGGER = logging.getLogger("plow-wrangle")
+LOGGER = logging.getLogger("plow-wrangler")
 
 
 class DefaultConfig(object):
@@ -33,7 +32,6 @@ class MainWindow(QtGui.QMainWindow):
                             self.AllowTabbedDocks |
                             self.VerticalTabs)
 
-        self.session = QtGui.QSessionManager(self)
         self.settings = QtCore.QSettings("plow", appname)
         self.workspace = WorkspaceManager(self)
 
@@ -60,7 +58,7 @@ class MainWindow(QtGui.QMainWindow):
         menu_window.addSeparator()
 
         self.setMenuBar(menubar)
-        self.restoreApplicationState()
+        QtCore.QTimer.singleShot(0, self.restoreApplicationState)
 
     def contextMenuEvent(self, e):
         # Stops the context menu on the dock
@@ -88,137 +86,6 @@ class MainWindow(QtGui.QMainWindow):
         self.workspace.saveState()
 
 
-class WorkspaceManager(QtCore.QObject):
-    
-    Defaults = ["Wrangler", "Systems", "Artist", "Production"]
-
-    def __init__(self, parent):
-        QtCore.QObject.__init__(self, parent)
-        # Fix later
-        self.__active = None
-        self.__settings = None
-        self.__panel_types = { }
-        self.__panels = []
-        self.__workspaces = list(self.Defaults)
-
-        # TODO: a more official way to register panels.
-        self.registerPanelType("JobWrangler", JobWranglerPanel)
-        self.registerPanelType("Render Watch", RenderJobWatchPanel)
-        self.registerPanelType("Tasks", TaskPanel)
-        self.registerPanelType("Clusters", ClusterPanel)
-        self.registerPanelType("Nodes", NodePanel)
-        self.registerPanelType("Logs", LogsPanel)
-        self.registerPanelType("Properties", PropertiesPanel)
-
-        EventManager.bind("GLOBAL_REFRESH", self.refresh)
-
-    def activeWorkspace(self):
-        return self.__active
-
-    def registerPanelType(self, ptype, klass):
-        if self.__panel_types.has_key(ptype):
-            return
-        self.__panel_types[ptype] = klass
-
-    def settings(self):
-        return self.__settings
-
-    def refresh(self):
-        for panel in self.__panels:
-            panel.refresh()
-
-    def addPanelCreationMenu(self, obj):
-        menu = obj.addMenu("Panels")
-        for ptype in self.__panel_types.keys():
-            a = menu.addAction(ptype)
-        menu.triggered.connect(self.__panelMenuTriggered)
-
-    def addWorkspaceSelectionMenu(self, obj):
-        menu = QtGui.QMenu(obj)
-        [menu.addAction(s) for s in self.__workspaces]
-        # TODO add custom workspaces
-        menu.addSeparator()
-        menu.addAction("Reset")
-        menu.addAction("New Workspace")
-        menu.triggered.connect(self.__menuItemTriggered)
-
-        self.btn = QtGui.QToolButton(obj)
-        self.btn.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.btn.setText("")
-        self.btn.setPopupMode(QtGui.QToolButton.InstantPopup)
-        self.btn.setMenu(menu)
-        obj.addWidget(self.btn)
-
-    def createPanel(self, ptype, name=None, restore=True):
-        klass = self.__panel_types[ptype]
-        p = klass(name or ptype, self.parent())
-        p.restore(self.__settings)
-        p.panelClosed.connect(self.__panelClosed)
-        self.__panels.append(p)
-        if restore:
-            self.parent().restoreDockWidget(p)
-        else:
-            self.parent().addDockWidget(QtCore.Qt.TopDockWidgetArea, p)
-        return p
-
-    def saveState(self, close=False):
-        if not self.__settings:
-            return
-
-        self.__settings.setValue("main::windowState", self.parent().saveState());
-        self.__settings.setValue("main::openPanelNames", [p.name() for p in self.__panels])
-        self.__settings.setValue("main::openPanelTypes", [p.type() for p in self.__panels])
-        
-        for panel in self.__panels:
-            panel.save(self.__settings)
-            if close:
-                self.parent().removeDockWidget(panel)
-        del self.__panels[0:len(self.__panels)]
-        self.__settings.sync()
-
-    def setWorkspace(self, name):
-        if name == self.__active:
-            return
-
-        if self.__settings:
-            self.saveState(close=True)
-
-        self.__active = name
-        self.__settings = QtCore.QSettings("plow", "ws_%s" % name)
-        self.btn.setText(name)
-
-        winstate = self.__settings.value("main::windowState")
-        if winstate:
-            self.parent().restoreState(winstate)
-
-        panelNames = self.__settings.value("main::openPanelNames")
-        panelTypes = self.__settings.value("main::openPanelTypes")
-        if panelNames:
-            # a single panel doesn't return list so we operate directly
-            # on the panelNames
-            if isinstance(panelNames, (str, unicode)):
-                panelNames = [panelNames]
-
-            if isinstance(panelTypes, (str, unicode)):
-                panelTypes = [panelTypes]
-
-            for name, ptype in zip(panelNames, panelTypes):
-                p = self.createPanel(ptype, name, True)
-                self.parent().restoreDockWidget(p)
-                p.show()
-
-    def __menuItemTriggered(self, action):
-        name = action.text()
-        if name in self.__workspaces:
-            self.setWorkspace(name)
-
-    def __panelClosed(self, panel):
-        self.parent().removeDockWidget(panel)
-        self.__panels.remove(panel)   
-
-    def __panelMenuTriggered(self, action):
-        ptype = str(action.text())
-        self.createPanel(ptype, None, False)
 
 
 def launch(argv, name, layout=None):

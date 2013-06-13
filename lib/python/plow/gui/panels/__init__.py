@@ -1,4 +1,4 @@
-from base import Panel
+from base import Panel, WorkspaceManager
 
 from watch import RenderJobWatchPanel
 from tasks import TaskPanel
@@ -9,6 +9,7 @@ from props import PropertiesPanel
 from wrangle import JobWranglerPanel
 
 __all__ = [
+    "WorkspaceManager",
     "RenderJobWatchPanel",
     "TaskPanel",
     "ClusterPanel",
@@ -17,4 +18,18 @@ __all__ = [
     "PropertiesPanel",
     "JobWranglerPanel"
 ]
+
+# Register the panels
+_panels = [
+    ('JobWrangler', JobWranglerPanel),
+    ('Render Watch', RenderJobWatchPanel),
+    ('Tasks', TaskPanel),
+    ('Clusters', ClusterPanel),
+    ('Nodes', NodePanel),
+    ('Logs', LogsPanel),
+    ('Properties', PropertiesPanel),
+]
+
+for _p in _panels:
+    WorkspaceManager.registerPanelType(*_p)
 
