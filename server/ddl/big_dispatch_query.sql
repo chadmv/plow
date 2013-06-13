@@ -28,7 +28,7 @@
         AND  
             layer.int_cores_min <= 8
         AND  
-            layer.int_ram_range && int4range(0, 8096)
+            layer.int_ram_min <= 512
         AND  
             (job_dsp.int_cores_run < job_dsp.int_cores_max OR job_dsp.int_cores_max = -1)  
         AND  

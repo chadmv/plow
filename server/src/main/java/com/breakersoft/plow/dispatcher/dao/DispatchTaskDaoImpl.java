@@ -125,7 +125,7 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
                 "task.pk_layer,"+
                 "task.pk_job,"+
                 "task.str_name," +
-                "task.int_ram_min,  " +
+                "layer.int_ram_min,  " +
                 "layer.int_cores_min,"+
                 "job.pk_project " +
             "FROM " +
@@ -139,16 +139,16 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
             "AND " +
                 "layer.int_cores_min <= ? " +
             "AND " +
+                "layer.int_ram_min <= ? " +
+            "AND " +
                 "layer.str_tags && ? " +
             "AND " +
                 "task.int_state = ? " +
             "AND " +
-                "task.int_ram_min <= ? " +
-            "AND " +
                 "task.bool_reserved IS FALSE " +
             "ORDER BY " +
                 "task.int_task_order, task.int_layer_order ASC " +
-            "LIMIT 10";
+            "LIMIT 20";
 
     public static final RowMapper<DispatchTask> DISPATCHABLE_TASK_MAPPER =
             new RowMapper<DispatchTask>() {
@@ -175,9 +175,9 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
                 final PreparedStatement ps = conn.prepareStatement(GET_DISPATCHABLE_TASKS);
                 ps.setObject(1, job.getJobId());
                 ps.setInt(2, resource.getIdleCores());
-                ps.setArray(3, conn.createArrayOf("text", resource.getTags().toArray()));
-                ps.setInt(4, TaskState.WAITING.ordinal());
-                ps.setInt(5, resource.getIdleRam());
+                ps.setInt(3, resource.getIdleRam());
+                ps.setArray(4, conn.createArrayOf("text", resource.getTags().toArray()));
+                ps.setInt(5, TaskState.WAITING.ordinal());
                 return ps;
             }
         }, DISPATCHABLE_TASK_MAPPER);

@@ -100,11 +100,10 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
             "int_retries_max,"+
             "bool_threadable,"+
             "hstore_env,"+
-            "str_service,"+
-            "int_ram_range " +
+            "str_service " +
         ") " +
         "VALUES (" +
-            StringUtils.repeat("?",",",16) + ",?::int4range" +
+            StringUtils.repeat("?",",",16) +
         ")";
 
     @Override
@@ -132,7 +131,6 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
                 ret.setBoolean(14, layer.isThreadable());
                 ret.setObject(15, layer.getEnv());
                 ret.setString(16, layer.getServ());
-                ret.setString(17, JdbcUtils.toIntRange(new int[] { layer.getMinRam(), layer.getMinRam() }));
                 return ret;
             }
         });

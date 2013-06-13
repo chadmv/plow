@@ -226,26 +226,21 @@ CREATE table plow.layer (
   str_service TEXT NOT NULL,
   int_chunk_size INTEGER NOT NULL DEFAULT 1 CHECK (int_chunk_size > 0),
   
-  --- The minimim number of cores per task.
+  --- The default minimim number of cores per task.
   int_cores_min SMALLINT NOT NULL CHECK (int_cores_min > 0),
 
   --- The maximum number of cores per task.
   int_cores_max SMALLINT NOT NULL DEFAULT -1,
   
   --- The minumum amount of RAM a node must have free to be
-  --- dispatched to the layer.  This can be raised or lowered 
-  --- automatically by the dispatcher.
+  --- dispatched to the layer.  This can be raised by RND
+  --- pings, and lowered by the completed tasks.
   int_ram_min INTEGER NOT NULL CHECK (int_ram_min > 0),
 
   --- The maximum amount of memory a task can use.  Anything
   --- over this and the task will not be dispatched.  Setting
   --- this to a sane value may stop processes from going crazy.
   int_ram_max INTEGER NOT NULL DEFAULT -1,
-
-  ---
-  --- The memory range of tasks.
-  ---
-  int_ram_range INT4RANGE NOT NULL DEFAULT '[0, 1]',
 
   int_retries_max INTEGER NOT NULL DEFAULT 1,
   bool_threadable BOOLEAN DEFAULT 'f' NOT NULL,
@@ -254,9 +249,8 @@ CREATE table plow.layer (
 ) WITHOUT OIDS;
 
 CREATE INDEX layer_str_tags_gin_idx ON plow.layer USING gin(str_tags);
-CREATE INDEX layer_int_ram_range_gist_idx ON plow.layer USING gist(int_ram_range);
+CREATE INDEX layer_dispatch_idx ON plow.layer (int_cores_min, int_ram_min);
 CREATE UNIQUE INDEX layer_pk_job_str_name_uniq_idx ON plow.layer (pk_job, str_name);
-
 
 ---
 
@@ -281,7 +275,8 @@ CREATE TABLE plow.layer_dsp (
 );
 
 ---
---- plow.layer_stat - layer statistics
+--- plow.layer_stat
+--- Layer statistics are calculated when a task is stopped.
 ---
 CREATE TABLE plow.layer_stat (
   pk_layer UUID NOT NULL PRIMARY KEY,
