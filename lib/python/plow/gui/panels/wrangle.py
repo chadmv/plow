@@ -117,11 +117,7 @@ class JobWranglerWidget(QtGui.QWidget):
         layout = QtGui.QVBoxLayout(self)
         layout.setContentsMargins(4,0,4,4)
 
-        # DEBUG
-        if not "projects" in attrs:
-            attrs['projects'] = plow.client.get_projects()
-
-        self.__model = model = JobModel(attrs, self)
+        self.__model = model = JobModel(parent=self)
         self.__proxy = proxy = models.AlnumSortProxyModel(self)
         proxy.setSourceModel(model)
 
@@ -150,7 +146,14 @@ class JobWranglerWidget(QtGui.QWidget):
         timer.setInterval(1500)
         timer.timeout.connect(self.refresh)
 
+        QtCore.QTimer.singleShot(0, self.__initDeferred)
 
+    def __initDeferred(self):
+        # DEBUG
+        if not "projects" in self.__attrs:
+            self.__attrs['projects'] = plow.client.get_projects()
+
+        self.setProjects(self.__attrs['projects'])
         
     def model(self):
         return self.proxyModel().sourceModel()
@@ -346,6 +349,10 @@ class JobModel(tree.TreeModel):
             return None 
 
         return item
+
+    def setProjects(self, projects):
+        self.__attrs['projects'] = projects
+        self.reload()
 
     def setFolderList(self, folders):
         self.beginResetModel()
