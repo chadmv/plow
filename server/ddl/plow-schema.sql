@@ -214,10 +214,14 @@ CREATE table plow.layer (
   str_name TEXT NOT NULL,
   str_range TEXT,
   str_command TEXT[] NOT NULL,
+  int_order INTEGER NOT NULL,
+  
+  ---
+  --- The layer configuration options.
+  ---
   str_tags TEXT[] NOT NULL,
   str_service TEXT NOT NULL,
   int_chunk_size INTEGER NOT NULL DEFAULT 1 CHECK (int_chunk_size > 0),
-  int_order INTEGER NOT NULL,
   int_cores_min SMALLINT NOT NULL CHECK (int_cores_min > 0),
   int_cores_max SMALLINT NOT NULL DEFAULT -1,
   int_ram_min INTEGER NOT NULL CHECK (int_ram_min > 0),
@@ -225,6 +229,7 @@ CREATE table plow.layer (
   int_retries_max INTEGER NOT NULL DEFAULT 1,
   bool_threadable BOOLEAN DEFAULT 'f' NOT NULL,
   hstore_env hstore
+
 ) WITHOUT OIDS;
 
 CREATE INDEX layer_str_tags_gin_idx ON plow.layer USING gin(str_tags);
