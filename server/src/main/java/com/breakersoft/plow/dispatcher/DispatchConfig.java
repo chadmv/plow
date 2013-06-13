@@ -21,7 +21,7 @@ public class DispatchConfig {
      * The minimum amount of idle ram required for a node to be considered
      * dispatchable.
      */
-    public static int MIN_RAM_FOR_DISPATCH = 512;
+    public static int MIN_RAM_FOR_DISPATCH = 256;
 
     /*
      * Set to true once dispatching should start to happen.
