@@ -222,10 +222,23 @@ CREATE table plow.layer (
   str_tags TEXT[] NOT NULL,
   str_service TEXT NOT NULL,
   int_chunk_size INTEGER NOT NULL DEFAULT 1 CHECK (int_chunk_size > 0),
+  
+  --- The minimim number of cores per task.
   int_cores_min SMALLINT NOT NULL CHECK (int_cores_min > 0),
-  int_cores_max SMALLINT NOT NULL DEFAULT -1,
+
+  --- The maximum number of cores per task.
+  int_cores_max SMALLINT NOT NULL DEFAULT 32767,
+  
+  --- The minumum amount of RAM a node must have free to be
+  --- dispatched to the layer.  This can be raised or lowered 
+  --- automatically by the dispatcher.
   int_ram_min INTEGER NOT NULL CHECK (int_ram_min > 0),
-  int_ram_max INTEGER NOT NULL DEFAULT -1,
+
+  --- The maximum amount of memory a task can use.  Anything
+  --- over this and the task will not be dispatched.  Setting
+  --- this to a sane value may stop processes from going crazy.
+  int_ram_max INTEGER NOT NULL DEFAULT 2147483647,
+
   int_retries_max INTEGER NOT NULL DEFAULT 1,
   bool_threadable BOOLEAN DEFAULT 'f' NOT NULL,
   hstore_env hstore
@@ -233,8 +246,9 @@ CREATE table plow.layer (
 ) WITHOUT OIDS;
 
 CREATE INDEX layer_str_tags_gin_idx ON plow.layer USING gin(str_tags);
-CREATE INDEX layer_pk_job_int_cores_min_idx ON plow.layer (pk_job, int_cores_min);
-CREATE UNIQUE INDEX layer_str_name_pk_job_uniq_idx ON plow.layer (str_name, pk_job);
+CREATE INDEX layer_dispatch_idx ON plow.layer (int_cores_min, int_ram_min);
+CREATE UNIQUE INDEX layer_pk_job_str_name_uniq_idx ON plow.layer (pk_job, str_name);
+
 
 ---
 

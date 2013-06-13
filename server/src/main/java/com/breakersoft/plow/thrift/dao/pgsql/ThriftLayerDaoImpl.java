@@ -112,11 +112,11 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
     }
 
     private static final String GET_BY_NAME =
-            GET + " WHERE layer.str_name=? AND layer.pk_job=?";
+            GET + " WHERE layer.pk_job=? AND layer.str_name=?";
 
     @Override
     public LayerT getLayer(UUID jobId, String name) {
-        return jdbc.queryForObject(GET_BY_NAME, MAPPER, name, jobId);
+        return jdbc.queryForObject(GET_BY_NAME, MAPPER, jobId, name);
     }
 
     private static final String GET_BY_JOB =
