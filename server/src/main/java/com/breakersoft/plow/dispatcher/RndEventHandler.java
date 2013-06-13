@@ -16,8 +16,6 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
-import com.breakersoft.plow.scheduler.SchedulerService;
-import com.breakersoft.plow.scheduler.StatsService;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.StateManager;

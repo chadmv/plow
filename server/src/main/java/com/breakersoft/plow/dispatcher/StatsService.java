@@ -1,4 +1,4 @@
-package com.breakersoft.plow.scheduler;
+package com.breakersoft.plow.dispatcher;
 
 import java.util.List;
 

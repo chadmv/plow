@@ -1,4 +1,4 @@
-package com.breakersoft.plow.scheduler;
+package com.breakersoft.plow.dispatcher;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
