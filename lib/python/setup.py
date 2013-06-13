@@ -330,7 +330,8 @@ setup(
             "*.dat", "*.bp", "*.ini", "*.sh",
             'rndaemon/profile/*.dylib',
             'gui/resources/*.css',
-            'gui/resources/icons.py'
+            'gui/resources/icons.py',
+            'gui/panels/defaults/*.*',
         ],
     },
 
