@@ -8,9 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.rnd.thrift.RunningTask;
 import com.breakersoft.plow.scheduler.dao.StatsDao;
 
+/**
+ * Service for updating/maintaining statistics.
+ *
+ */
 @Service
 @Transactional
 public class StatsServiceImpl implements StatsService {
@@ -52,5 +57,21 @@ public class StatsServiceImpl implements StatsService {
         for (RunningTask task: tasks) {
             statsDao.updateTaskRuntimeStats(task);
         }
+    }
+
+    @Override
+    public void updateLayerRuntimeStats(List<RunningTask> tasks) {
+
+
+    }
+
+    @Override
+    public void recalculateLayerMinimumRam(Layer layer) {
+
+    }
+
+    @Override
+    public void recalculateLayerMinimumCores(Layer layer) {
+
     }
 }
