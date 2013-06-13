@@ -137,7 +137,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
         }
 
         if (PlowUtils.isValid(filter.regex)) {
-            clauses.add("str_name ~ ?");
+            clauses.add("job.str_name ~ ?");
             values.add(filter.regex);
         }
 
