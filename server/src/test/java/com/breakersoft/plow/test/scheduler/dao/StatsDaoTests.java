@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.breakersoft.plow.dispatcher.DispatchService;
+import com.breakersoft.plow.dispatcher.dao.StatsDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
@@ -18,7 +19,6 @@ import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.rnd.thrift.DiskIO;
 import com.breakersoft.plow.rnd.thrift.RunningTask;
-import com.breakersoft.plow.scheduler.dao.StatsDao;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.JobSpecT;

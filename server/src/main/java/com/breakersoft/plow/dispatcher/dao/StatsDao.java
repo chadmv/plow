@@ -1,4 +1,4 @@
-package com.breakersoft.plow.scheduler.dao;
+package com.breakersoft.plow.dispatcher.dao;
 
 import com.breakersoft.plow.rnd.thrift.RunningTask;
 

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Layer;
+import com.breakersoft.plow.dispatcher.dao.StatsDao;
 import com.breakersoft.plow.rnd.thrift.RunningTask;
-import com.breakersoft.plow.scheduler.dao.StatsDao;
 
 /**
  * Service for updating/maintaining statistics.
