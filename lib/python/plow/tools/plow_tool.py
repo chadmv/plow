@@ -31,6 +31,8 @@ def main():
         display_job_names(regex=args.ljn, finished=args.all)
     elif isinstance(args.lj, str):
         display_jobs(regex=args.lj, finished=args.all)
+    else:
+        parser.print_help()
 
 def build_job_query(**kwargs):
     q = {
