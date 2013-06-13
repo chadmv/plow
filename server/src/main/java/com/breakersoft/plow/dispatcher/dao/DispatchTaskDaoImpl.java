@@ -124,8 +124,8 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
                 "task.pk_task,"+
                 "task.pk_layer,"+
                 "task.pk_job,"+
-                "task.int_ram_min,  " +
                 "task.str_name," +
+                "task.int_ram_min,  " +
                 "layer.int_cores_min,"+
                 "job.pk_project " +
             "FROM " +
