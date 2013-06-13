@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.FrameRange;
 import com.breakersoft.plow.FrameSet;
 import com.breakersoft.plow.Job;
@@ -20,6 +21,7 @@ import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.LayerE;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.LayerDao;
+import com.breakersoft.plow.dispatcher.DispatchConfig;
 import com.breakersoft.plow.thrift.LayerSpecT;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.breakersoft.plow.util.PlowUtils;
@@ -172,19 +174,25 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
     @Override
     public void setMinCores(Layer layer, int cores) {
         jdbc.update("UPDATE plow.layer SET int_cores_min=? WHERE pk_layer=?",
-                cores, layer.getLayerId());
+                 Math.max(cores, Defaults.LAYER_MIN_MIN_CORES), layer.getLayerId());
     }
 
     @Override
     public void setMaxCores(Layer layer, int cores) {
         jdbc.update("UPDATE plow.layer SET int_cores_max=? WHERE pk_layer=?",
-                cores, layer.getLayerId());
+                Math.min(cores, Defaults.LAYER_MAX_MAX_CORES), layer.getLayerId());
     }
 
     @Override
     public void setMinRam(Layer layer, int memory) {
         jdbc.update("UPDATE plow.layer SET int_ram_min=? WHERE pk_layer=?",
-                memory, layer.getLayerId());
+                Math.max(memory, Defaults.LAYER_MIN_MIN_RAM), layer.getLayerId());
+    }
+
+    @Override
+    public void setMaxRam(Layer layer, int memory) {
+        jdbc.update("UPDATE plow.layer SET int_ram_max=? WHERE pk_layer=?",
+                Math.min(memory, Defaults.LAYER_MAX_MAX_RAM), layer.getLayerId());
     }
 
     @Override

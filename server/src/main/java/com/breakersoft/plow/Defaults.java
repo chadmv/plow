@@ -33,6 +33,28 @@ public final class Defaults {
     public static boolean DEFAULT_THREADABLE = false;
     public static String DEFAULT_SERVICE = "default";
 
+
+    /*
+     * The highest possible value for the layer maxCores property.
+     */
+    public static int LAYER_MAX_MAX_CORES = 32767;
+
+    /*
+     * The lowest possible value for the layer minCores property.
+     */
+    public static int LAYER_MIN_MIN_CORES = 1;
+
+    /*
+     * The lowest possible value for the layer minRam property.
+     */
+    public static int LAYER_MIN_MIN_RAM = 256;
+
+    /*
+     * The highest possible value for the layer maxRam property.
+     */
+    public static int LAYER_MAX_MAX_RAM = 2147483647;
+
+
     // Amount of time a Node can go without communication before
     // plow determines the node is down.
     public static long NODE_UNRESPONSIVE_MS = 60000 * 5;

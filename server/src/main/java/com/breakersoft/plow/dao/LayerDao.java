@@ -34,4 +34,6 @@ public interface LayerDao {
     void setThreadable(Layer layer, boolean threadable);
 
     void setTags(Layer layer, List<String> tags);
+
+    void setMaxRam(Layer layer, int memory);
 }
