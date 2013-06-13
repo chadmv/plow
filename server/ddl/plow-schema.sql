@@ -346,11 +346,9 @@ CREATE TABLE plow.task (
 ) WITHOUT OIDS;
 
 CREATE INDEX task_pk_layer_idx ON plow.task (pk_layer);
-CREATE INDEX task_pk_job_idx ON plow.task (pk_job);
+CREATE UNIQUE INDEX task_pk_job_uniq_idx ON plow.task (pk_job, str_name);
 CREATE INDEX task_dispatch_state_idx ON plow.task (int_state, int_ram_min);
 CREATE INDEX task_time_updated_idx ON plow.task (time_updated);
-CREATE UNIQUE INDEX task_str_name_pk_job_idx_uniq ON plow.task (str_name, pk_job);
-
 CREATE INDEX task_order_idx ON plow.task(int_task_order, int_layer_order);
 
 ----------------------------------------------------------
