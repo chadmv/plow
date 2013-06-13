@@ -8,4 +8,6 @@ public interface StatsDao {
 
     boolean updateTaskRuntimeStats(RunningTask task);
 
+    void updateLayerRuntimeStats(RunningTask task);
+
 }

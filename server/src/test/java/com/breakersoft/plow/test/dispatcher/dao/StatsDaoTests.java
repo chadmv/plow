@@ -1,4 +1,4 @@
-package com.breakersoft.plow.test.scheduler.dao;
+package com.breakersoft.plow.test.dispatcher.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -100,5 +100,35 @@ public class StatsDaoTests extends AbstractTest {
 
         Map<String, Object> record = jdbc().queryForMap(
                 "SELECT * FROM plow.task WHERE pk_task=?", proc.getTaskId());
+    }
+
+    @Test
+    public void testUpdateLayeRuntimeStats() {
+
+        RunningTask r_task = new RunningTask();
+        r_task.taskId = task.getTaskId().toString();
+        r_task.procId = proc.getProcId().toString();
+        r_task.jobId = job.getJobId().toString();
+        r_task.layerId = task.getLayerId().toString();
+        r_task.rssMb = 2048;
+        r_task.pid = 101;
+        r_task.lastLog = "foo bar";
+        r_task.cpuPercent = 50;
+        r_task.diskIO = new DiskIO(10l, 10l, 100l, 200l);
+
+        statsDao.updateLayerRuntimeStats(r_task);
+
+        int result = jdbc().queryForObject("SELECT int_ram_min FROM plow.layer WHERE pk_layer=?", Integer.class, task.getLayerId());
+        assertEquals(2048, result);
+
+        r_task.rssMb = 1024;
+        statsDao.updateLayerRuntimeStats(r_task);
+        result = jdbc().queryForObject("SELECT int_ram_min FROM plow.layer WHERE pk_layer=?", Integer.class, task.getLayerId());
+        assertEquals(2048, result);
+
+        r_task.rssMb = 4096;
+        statsDao.updateLayerRuntimeStats(r_task);
+        result = jdbc().queryForObject("SELECT int_ram_min FROM plow.layer WHERE pk_layer=?", Integer.class, task.getLayerId());
+        assertEquals(4096, result);
     }
 }

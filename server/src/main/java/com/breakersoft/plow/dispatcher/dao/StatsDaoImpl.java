@@ -80,4 +80,19 @@ public class StatsDaoImpl extends AbstractDao implements StatsDao {
         return jdbc.update(UPDATE_TASK, task.rssMb, cores_used,
                 UUID.fromString(task.taskId), TaskState.RUNNING.ordinal()) == 1;
     }
+
+    private static final String UPDATE_LAYER =
+            "UPDATE " +
+                "plow.layer " +
+            "SET " +
+                "int_ram_min=? " +
+            "WHERE " +
+                "pk_layer = ? " +
+            "AND " +
+                "int_ram_min < ?";
+
+    @Override
+    public void updateLayerRuntimeStats(RunningTask task) {
+        jdbc.update(UPDATE_LAYER, task.rssMb, UUID.fromString(task.layerId), task.rssMb);
+    }
 }
