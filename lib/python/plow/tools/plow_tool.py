@@ -40,7 +40,7 @@ def build_job_query(**kwargs):
         "regex": kwargs.get("regex")
     }
     if kwargs.get("finished"):
-        q["states"].append(plow.JobState.Finished)
+        q["states"].append(plow.JobState.FINISHED)
     logger.debug("Job query: %s" % q)
     return q
 
@@ -52,8 +52,8 @@ def display_job_names(**kwargs):
 def display_jobs(**kwargs):
     q = build_job_query(**kwargs)
 
-    header = "%-30s %16s %16s  %4s  [%2s %2s %2s]  [%4s  ]  %8s  %-20s  %s"
-    format = "%-30s %16s %16s  %04d  [%03d %03d %03d]  [%04dMB]  %8s  %-20s  %s"
+    header = "%-40s   %16s %16s  %4s  [%2s %2s %2s]  [%4s  ]  %8s  %-20s  %s"
+    format = "%-40s   %16s %16s  %04d  [%03d %03d %03d]  [%04dMB]  %8s  %-20s  %s"
 
     print header % (
         "Job",
@@ -68,9 +68,10 @@ def display_jobs(**kwargs):
         "Start Time",
         "End Time"
     )
+    print "-" * 160
     for job in plow.client.get_jobs(**q):
         print format % (
-            job.name, 
+            util.clipText(job.name, 40),
             constants.JOB_STATES[job.state],
             job.username,
             job.totals.waiting + job.totals.depend,

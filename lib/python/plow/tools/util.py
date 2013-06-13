@@ -36,6 +36,14 @@ def formatDuration(startTime, stopTime=0):
     h, m = divmod(m, 60)
     return "%02d:%02d:%02d" % (h, m, s)
 
+def clipText(text, size):
+    """
+    Returns text clipped to a particular size.
+    """
+    if len(text) >= size:
+        return text[0:size-2] + "..."
+    else:
+        return text
 def formatCoreTime(core_time_ms):
     """
     Format core time in millis to core hours.
