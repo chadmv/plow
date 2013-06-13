@@ -38,4 +38,4 @@
         ORDER BY  
             job_dsp.float_tier ASC,  
             folder_dsp.float_tier ASC  
-        LIMIT 100 ;
+        LIMIT 100;
