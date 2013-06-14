@@ -111,12 +111,24 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
 
     @Override
     public boolean stop(Task task, TaskState newState, int exitStatus, int exitSignal) {
-        return jdbc.update(STOP_TASK,
+        if (jdbc.update(STOP_TASK,
                 newState.ordinal(),
                 exitStatus,
                 exitSignal,
                 task.getTaskId(),
-                TaskState.RUNNING.ordinal()) == 1;
+                TaskState.RUNNING.ordinal()) == 1) {
+            if (newState.equals(TaskState.SUCCEEDED)) {
+                jdbc.update("INSERT INTO depend_queue (pk_job, pk_layer, pk_task) VALUES (?,?,?)",
+                        task.getJobId(), task.getLayerId(), task.getTaskId());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean dependQueueProcessed(Task task) {
+        return jdbc.update("DELETE FROM depend_queue WHERE pk_task=?", task.getTaskId()) == 1;
     }
 
     private static final String GET_DISPATCHABLE_TASKS =

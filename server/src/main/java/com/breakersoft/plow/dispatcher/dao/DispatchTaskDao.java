@@ -25,4 +25,6 @@ public interface DispatchTaskDao {
     List<DispatchTask> getDispatchableTasks(JobId job, DispatchResource resource);
 
     boolean isAtMaxRetries(Task task);
+
+    boolean dependQueueProcessed(Task task);
 }

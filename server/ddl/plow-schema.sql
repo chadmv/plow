@@ -376,7 +376,7 @@ CREATE TABLE plow.depend (
   str_dependon_task_name TEXT,
   time_created BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   time_satisfied BIGINT NOT NULL DEFAULT 0
-);
+) WITHOUT OIDS;
 
 CREATE UNIQUE INDEX depend_uuid_sig_idx ON plow.depend (uuid_sig);
 
@@ -386,6 +386,15 @@ CREATE INDEX depend_dependent_layer_idx ON plow.depend (pk_dependent_layer);
 CREATE INDEX depend_dependon_layer_idx ON plow.depend (pk_dependon_layer);
 CREATE INDEX depend_dependent_task_idx ON plow.depend (pk_dependent_task);
 CREATE INDEX depend_dependon_task_idx ON plow.depend (pk_dependon_task);
+
+----------------------------------------------------------
+
+CREATE TABLE plow.depend_queue (
+  id BIGSERIAL NOT NULL PRIMARY KEY,
+  pk_job UUID,
+  pk_layer UUID,
+  pk_task UUID
+) WITHOUT OIDS;
 
 ----------------------------------------------------------
 
