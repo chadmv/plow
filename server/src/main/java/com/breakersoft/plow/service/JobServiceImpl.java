@@ -341,16 +341,25 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    @Transactional(readOnly=true)
     public boolean hasWaitingFrames(Job job) {
         return jobDao.hasWaitingFrames(job);
     }
 
     @Override
+    @Transactional(readOnly=true)
     public boolean isFinished(JobId job) {
         return jobDao.isFinished(job);
     }
 
     @Override
+    @Transactional(readOnly=true)
+    public boolean isDispatchable(JobId job) {
+        return jobDao.isDispatchable(job);
+    }
+
+    @Override
+    @Transactional(readOnly=true)
     public Task getTask(UUID id) {
         return taskDao.get(id);
     }

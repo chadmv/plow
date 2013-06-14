@@ -114,6 +114,13 @@ public interface JobService {
      */
     Job getActiveJob(UUID id);
 
+    /**
+     * Return true if the job is unpaused, active, and has waiting frames.
+     * @param job
+     * @return
+     */
+    boolean isDispatchable(JobId job);
+
     /*
      * Layers
      */

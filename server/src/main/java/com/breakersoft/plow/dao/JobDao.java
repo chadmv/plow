@@ -54,4 +54,6 @@ public interface JobDao {
     void tiePostJob(JobId parentJob, JobId postJob);
 
     boolean flipPostJob(Job job);
+
+    boolean isDispatchable(JobId job);
 }

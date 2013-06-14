@@ -373,7 +373,8 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
     private static final String HAS_PENDING_FRAMES =
             "SELECT " +
                 "job_count.int_total - (job_count.int_eaten + job_count.int_succeeded) AS pending, " +
-                "job.int_state " +
+                "job.int_state, " +
+                "job.bool_paused " +
             "FROM " +
                 "plow.job " +
                     "INNER JOIN " +
@@ -392,6 +393,24 @@ public final class JobDaoImpl extends AbstractDao implements JobDao {
             return true;
         }
         if (row.getInt("pending") == 0) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isDispatchable(JobId job) {
+        SqlRowSet row =  jdbc.queryForRowSet(HAS_PENDING_FRAMES, job.getJobId());
+        if (!row.first()) {
+            return true;
+        }
+        if (row.getInt("int_state") == JobState.FINISHED.ordinal()) {
+            return true;
+        }
+        if (row.getInt("pending") == 0) {
+            return true;
+        }
+        if (!row.getBoolean("bool_paused")) {
             return true;
         }
         return false;
