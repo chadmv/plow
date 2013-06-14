@@ -7,4 +7,4 @@ else
     JAVA=${JAVA_HOME}/bin/java
 fi
 echo "Using Java: $JAVA"
-$JAVA -jar winstone.jar --webappsDir=webapps --httpPort=${PORT}
+$JAVA -Dplow.cfg.path=${PWD}/resources/plow.properties -jar winstone.jar --webappsDir=webapps --httpPort=${PORT}
