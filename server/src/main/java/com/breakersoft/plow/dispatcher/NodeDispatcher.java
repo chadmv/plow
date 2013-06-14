@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.breakersoft.plow.ExitStatus;
 import com.breakersoft.plow.Signal;
-import com.breakersoft.plow.dispatcher.command.BookNodeCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
@@ -46,12 +45,36 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
      * Queues node to be dispatched.
      * @param node
      */
-    public void book(DispatchNode node) {
-        if (!DispatchConfig.IS_ENABLED.get()) {
-            return;
-        }
-        nodeDispatcherExecutor.execute(new BookNodeCommand(node, this));
-        DispatchStats.totalDispatchCount.incrementAndGet();
+    public void asyncDispatch(final DispatchNode node) {
+
+        nodeDispatcherExecutor.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                if (!DispatchConfig.IS_ENABLED.get()) {
+                    return;
+                }
+                final DispatchResult result = new DispatchResult(node);
+                try {
+
+                    dispatch(result, node);
+                    if (result.cores > 0) {
+                        DispatchStats.nodeDispatchHit.incrementAndGet();
+                    }
+                    else {
+                        DispatchStats.nodeDispatchMiss.incrementAndGet();
+                    }
+                }
+                catch (Exception e) {
+                    logger.warn("Unexpected dispatching excpetion, " + e);
+                }
+                finally {
+                    logger.info("NodeDispatcher dispatched: {} procs - {}/{}MB from {}",
+                            new Object[] { result.cores, result.procs.size(),
+                            result.ram, node.getName()});
+                }
+            }
+        });
     }
 
     /*
@@ -171,6 +194,7 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
     public void dispatchFailed(DispatchResult result, DispatchProc proc, DispatchTask task, String message) {
 
         logger.info("Unable to dispatch {}/{}, {}", new Object[] {proc, task, message});
+            DispatchStats.nodeDispatchFail.incrementAndGet();
 
         if (task != null) {
             if (task.started) {

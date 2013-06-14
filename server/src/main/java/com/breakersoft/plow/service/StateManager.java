@@ -13,6 +13,7 @@ import com.breakersoft.plow.Depend;
 import com.breakersoft.plow.ExitStatus;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
+import com.breakersoft.plow.LayerE;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.Task;
@@ -163,13 +164,13 @@ public class StateManager {
 
     public boolean shutdownJob(Job job) {
         if (jobService.shutdown(job)) {
+            logger.info("Shutting down job {}", job);
             satisfyDependsOn(job);
             eventManager.post(new JobFinishedEvent(job));
             return true;
         }
         return false;
     }
-
 
     @Async(value="stateChangeExecutor")
     public void createDepend(DependSpecT depend) {
@@ -209,6 +210,20 @@ public class StateManager {
         logger.info("{} has {} dependencies.", layer, depends.size());
         for (Depend depend: depends) {
             dependService.satisfyDepend(depend);
+        }
+    }
+
+    @Async(value="stateChangeExecutor")
+    public void asyncTaskSucceeded(Task task) {
+        Job job = null;
+        try {
+            if (jobService.isFinished(task)) {
+                job = jobService.getJob(task.getJobId());
+                shutdownJob(job);
+            }
+            dispatchService.dependQueueProcessed(task);
+        } catch (Exception e) {
+            logger.warn("Failed to shutdown job {} after task complete {}", job, task);
         }
     }
 }

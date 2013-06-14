@@ -73,4 +73,6 @@ public interface DispatchService {
     boolean isAtMaxRetries(Task task);
 
     boolean quotaCheck(Cluster cluster, Project project);
+
+    boolean dependQueueProcessed(Task task);
 }

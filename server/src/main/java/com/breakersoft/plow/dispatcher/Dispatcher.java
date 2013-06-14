@@ -8,6 +8,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 
 public interface Dispatcher<T> {
 
+    void asyncDispatch(T resource);
     void dispatch(DispatchResult result, T resource);
     void dispatch(DispatchResult result, T resource, DispatchProject project);
     void dispatch(DispatchResult result, T resource, DispatchJob job);

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 
-import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.LayerE;
 import com.breakersoft.plow.Node;
@@ -52,7 +51,7 @@ public class RndEventHandler {
     JobService jobService;
 
     @Autowired
-    StateManager jobStateManager;
+    StateManager stateManager;
 
     @Autowired
     ProcDispatcher procDispatcher;
@@ -81,7 +80,7 @@ public class RndEventHandler {
         }
 
         if (node.isDispatchable()) {
-            nodeDispatcher.book(node);
+            nodeDispatcher.asyncDispatch(node);
         }
     }
 
@@ -112,38 +111,33 @@ public class RndEventHandler {
             }
         }
 
-        logger.info("{} new state {}", task, newState.toString());
+        if (dispatchService.stopTask(
+                task, newState, result.exitStatus, result.exitSignal)) {
 
-        if (dispatchService.stopTask(task, newState, result.exitStatus, result.exitSignal)) {
+            logger.info("{} new state {}", task, newState.toString());
             dispatchService.unassignProc(proc);
 
             if (newState.equals(TaskState.SUCCEEDED)) {
-                jobStateManager.satisfyDependsOn(task);
+                stateManager.satisfyDependsOn(task);
                 final Layer layer = new LayerE(task);
                 if (jobService.isLayerComplete(layer)) {
-                    jobStateManager.satisfyDependsOn(layer);
+                    stateManager.satisfyDependsOn(layer);
                 }
+                // Async
+                stateManager.asyncTaskSucceeded(task);
             }
         }
-
-        if (proc.isUnbooked()) {
-            dispatchService.deallocateProc(proc, "Proc was unbooked");
-        }
-
-        if (jobService.isJobPaused(task)) {
-            dispatchService.deallocateProc(proc,
-                    "The job for task '" + task + "' was paused.");
+        else {
+            logger.error("{} NO NEW STATE, was not able to stop task", task);
+            // Not sure what happened to the proc here.
+            dispatchService.deallocateProc(proc, "Returned result for an already compelted task.");
             return;
         }
 
-        if (jobService.isFinished(task)) {
-            Job job = jobService.getJob(UUID.fromString(result.jobId));
-            dispatchService.deallocateProc(proc,
-                    "Job is finished " + task.getJobId());
-            jobStateManager.shutdownJob(job);
-            return;
+        try {
+            procDispatcher.asyncDispatch(proc);
+        } catch (Exception e) {
+             dispatchService.deallocateProc(proc, "Unable to execute async proc dispatch:" + e);
         }
-
-        procDispatcher.book(proc);
     }
 }

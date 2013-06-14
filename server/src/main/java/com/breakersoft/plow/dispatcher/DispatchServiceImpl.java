@@ -128,6 +128,11 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
+    public boolean dependQueueProcessed(Task task) {
+        return dispatchTaskDao.dependQueueProcessed(task);
+    }
+
+    @Override
     public void unassignProc(DispatchProc proc) {
         procDao.unassign(proc);
         proc.setTaskId(null);

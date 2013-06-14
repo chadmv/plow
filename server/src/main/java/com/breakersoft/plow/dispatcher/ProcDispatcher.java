@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.breakersoft.plow.ExitStatus;
 import com.breakersoft.plow.Signal;
-import com.breakersoft.plow.dispatcher.command.BookProcCommand;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
@@ -18,6 +17,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.rndaemon.RndClient;
+import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.thrift.TaskState;
 
 /**
@@ -38,11 +38,35 @@ public class ProcDispatcher implements Dispatcher<DispatchProc> {
     private DispatchService dispatchService;
 
     @Autowired
+    private JobService jobService;
+
+    @Autowired
     @Qualifier("procDispatcherExecutor")
     private ThreadPoolTaskExecutor procDispatcherExecutor;
 
-    public void book(DispatchProc proc) {
-        procDispatcherExecutor.execute(new BookProcCommand(proc, this));
+    public void asyncDispatch(final DispatchProc proc) {
+
+        procDispatcherExecutor.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                if (!jobService.isDispatchable(proc)) {
+                    dispatchService.deallocateProc(proc, "Job was no longer dispatchable");
+                    return;
+                }
+
+                final DispatchResult result = new DispatchResult(proc);
+
+                try {
+                    dispatch(result, proc);
+                } finally {
+                    if (result.procs.isEmpty()) {
+                       dispatchFailed(result, proc, null, "No tasks to dipsatch.");
+                    }
+                }
+            }
+        });
     }
 
     public void dispatch(DispatchResult result, DispatchProc proc) {
