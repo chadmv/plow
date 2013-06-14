@@ -6,13 +6,13 @@ import java.util.Properties;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PlowProperties {
+public class PlowCfg {
 
     private static final String PROPERTIES_FILE = "plow.properties";
 
     private final Properties props = new Properties();
 
-    public PlowProperties() throws IOException {
+    public PlowCfg() throws IOException {
         props.load(getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE));
     }
 
