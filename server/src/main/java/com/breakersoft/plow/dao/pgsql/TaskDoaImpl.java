@@ -21,6 +21,7 @@ import com.breakersoft.plow.TaskE;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.thrift.TaskFilterT;
+import com.breakersoft.plow.thrift.TaskSpecT;
 import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.breakersoft.plow.util.PlowUtils;
@@ -139,6 +140,30 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         }
         update.flush();
     }
+
+    @Override
+    public void batchCreate(Layer layer, List<TaskSpecT> tasks, int layerOrder, int minRam) {
+
+          final BatchSqlUpdate update = new BatchSqlUpdate(
+                  jdbc.getDataSource(), INSERT, BATCH_TYPES);
+
+          int taskOrderCounter = 0;
+          for (TaskSpecT task: tasks) {
+              PlowUtils.alpahNumCheck(task.getName(), "The task name must be alpha numeric:");
+
+              update.update(UUIDGen.random(),
+                      layer.getLayerId(),
+                      layer.getJobId(),
+                      task.getName(),
+                      0,
+                      taskOrderCounter,
+                      layerOrder,
+                      minRam);
+              taskOrderCounter++;
+          }
+          update.flush();
+    }
+
 
     @Override
     public boolean updateState(Task task, TaskState currentState, TaskState newState) {

@@ -29,6 +29,7 @@ import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.exceptions.JobSpecException;
+import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
@@ -78,27 +79,33 @@ public class JobServiceImpl implements JobService {
 
         logger.info("launching job spec: {} ", jobspec);
 
-        final Project project = projectDao.get(jobspec.getProject());
-        final FilterableJob job = jobDao.create(project, jobspec, false);
-        final Folder folder = filterJob(job, project);
+        try {
+            final Project project = projectDao.get(jobspec.getProject());
+            final FilterableJob job = jobDao.create(project, jobspec, false);
+            final Folder folder = filterJob(job, project);
 
-        createJobTopology(job, project, jobspec, false);
-        createDependencies(job, jobspec, false);
+            createJobTopology(job, project, jobspec, false);
+            createDependencies(job, jobspec, false);
 
-        jobDao.updateFrameStatesForLaunch(job);
-        jobDao.updateFrameCountsForLaunch(job);
-        jobDao.setJobState(job, JobState.RUNNING);
+            jobDao.updateFrameStatesForLaunch(job);
+            jobDao.updateFrameCountsForLaunch(job);
+            jobDao.setJobState(job, JobState.RUNNING);
 
-        createPostJob(job, jobspec);
+            createPostJob(job, jobspec);
 
-        //TODO: do this someplace else. (tranny hook or aspect)
-        // Don't want to add jobs to the dispatcher that fail to
-        // commit to the DB.
-        JobLaunchEvent event = new JobLaunchEvent(job, folder, jobspec);
-        eventManager.post(event);
+            //TODO: do this someplace else. (tranny hook or aspect)
+            // Don't want to add jobs to the dispatcher that fail to
+            // commit to the DB.
+            JobLaunchEvent event = new JobLaunchEvent(job, folder, jobspec);
+            eventManager.post(event);
 
-        logger.info("{} launch success", job.getName());
-        return event;
+            logger.info("{} launch success", job.getName());
+            PlowStats.jobLaunchCount.incrementAndGet();
+            return event;
+        } catch (Exception e) {
+            PlowStats.jobLaunchFailCount.incrementAndGet();
+            throw new JobSpecException("Failed to launch job: " + e, e);
+        }
     }
 
     private void createPostJob(Job parentJob, JobSpecT jobspec) {
@@ -160,8 +167,6 @@ public class JobServiceImpl implements JobService {
                 continue;
             }
 
-            PlowUtils.alpahNumCheck(blayer.name, "The layer name must be alpha numeric:" + blayer.getName());
-
             if (blayer.isSetRange()) {
                 logger.info("Creating layer {}, range: {}", blayer.name, blayer.range);
 
@@ -175,13 +180,9 @@ public class JobServiceImpl implements JobService {
                 logger.info("Creating tasks in layer: {}", blayer.name);
 
                 prepLayer(blayer, null);
-                final Layer layer = layerDao.create(job, blayer, layerOrder);
 
-                int taskOrder = 0;
-                for (TaskSpecT task: blayer.getTasks()) {
-                    PlowUtils.alpahNumCheck(task.getName(), "Task name must be alpha numeric: " + task.getName());
-                    taskDao.create(layer, task.getName(), 0, taskOrder, layerOrder, blayer.minRam);
-                }
+                final Layer layer = layerDao.create(job, blayer, layerOrder);
+                taskDao.batchCreate(layer, blayer.getTasks(), layerOrder, blayer.minRam);
             }
             else {
                 throw new JobSpecException(

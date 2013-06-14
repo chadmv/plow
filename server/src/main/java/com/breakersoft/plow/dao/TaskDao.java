@@ -8,6 +8,7 @@ import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.thrift.TaskFilterT;
+import com.breakersoft.plow.thrift.TaskSpecT;
 import com.breakersoft.plow.thrift.TaskState;
 
 public interface TaskDao {
@@ -31,4 +32,7 @@ public interface TaskDao {
     boolean setTaskState(Task task, TaskState newState, TaskState oldState);
 
     void batchCreate(Layer layer, FrameRange frameRange, int layerOrder, int minRam);
+
+    void batchCreate(Layer layer, List<TaskSpecT> tasks, int layerOrder,
+            int minRam);
 }
