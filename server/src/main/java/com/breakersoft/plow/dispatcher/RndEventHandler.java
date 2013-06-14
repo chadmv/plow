@@ -13,6 +13,7 @@ import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
 import com.breakersoft.plow.service.JobService;
@@ -74,6 +75,8 @@ public class RndEventHandler {
             node = dispatchService.getDispatchNode(newNode.getName());
         }
 
+        PlowStats.rndPingCount.incrementAndGet();
+
         if (!ping.tasks.isEmpty()) {
             statsService.updateProcRuntimeStats(ping.tasks);
             statsService.updateTaskRuntimeStats(ping.tasks);
@@ -96,6 +99,8 @@ public class RndEventHandler {
             logger.error("Bad task complete ping Job:" + result.jobId + ", Task: " + result.taskId, e);
             return;
         }
+
+        PlowStats.rndTaskComplete.incrementAndGet();
 
         TaskState newState;
         if (result.exitStatus == 0) {

@@ -15,6 +15,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.rndaemon.RndClient;
 import com.breakersoft.plow.service.JobService;
@@ -57,12 +58,17 @@ public class ProcDispatcher implements Dispatcher<DispatchProc> {
                 }
 
                 final DispatchResult result = new DispatchResult(proc);
-
                 try {
                     dispatch(result, proc);
+                    if (!result.procs.isEmpty()) {
+                        PlowStats.procDispatchHit.incrementAndGet();
+                    }
+                    else {
+                        PlowStats.procDispatchMiss.incrementAndGet();
+                    }
                 } finally {
                     if (result.procs.isEmpty()) {
-                       dispatchFailed(result, proc, null, "No tasks to dipsatch.");
+                        dispatchService.deallocateProc(proc, "No tasks to dispatch.");
                     }
                 }
             }
@@ -133,6 +139,7 @@ public class ProcDispatcher implements Dispatcher<DispatchProc> {
             DispatchTask task, String message) {
 
         logger.info("Unable to dispatch {}/{}, {}", new Object[] {resource, task, message});
+        PlowStats.procDispatchFail.incrementAndGet();
 
         dispatchService.deallocateProc(resource, message);
         if (task != null) {

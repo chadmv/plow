@@ -109,6 +109,8 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
     @Override
     public Layer create(final Job job, final LayerSpecT layer, final int order) {
 
+        PlowUtils.alpahNumCheck(layer.getName(), "The layer name must be alpha numeric.");
+
         final UUID id = UUID.randomUUID();
 
         jdbc.update(new PreparedStatementCreator() {

@@ -15,9 +15,9 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
-import com.breakersoft.plow.dispatcher.domain.DispatchStats;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
+import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.rndaemon.RndClient;
 import com.breakersoft.plow.thrift.TaskState;
@@ -59,10 +59,10 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
 
                     dispatch(result, node);
                     if (result.cores > 0) {
-                        DispatchStats.nodeDispatchHit.incrementAndGet();
+                        PlowStats.nodeDispatchHit.incrementAndGet();
                     }
                     else {
-                        DispatchStats.nodeDispatchMiss.incrementAndGet();
+                        PlowStats.nodeDispatchMiss.incrementAndGet();
                     }
                 }
                 catch (Exception e) {
@@ -194,7 +194,7 @@ public class NodeDispatcher implements Dispatcher<DispatchNode>{
     public void dispatchFailed(DispatchResult result, DispatchProc proc, DispatchTask task, String message) {
 
         logger.info("Unable to dispatch {}/{}, {}", new Object[] {proc, task, message});
-            DispatchStats.nodeDispatchFail.incrementAndGet();
+            PlowStats.nodeDispatchFail.incrementAndGet();
 
         if (task != null) {
             if (task.started) {

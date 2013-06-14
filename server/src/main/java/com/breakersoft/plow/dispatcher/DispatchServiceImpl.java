@@ -22,10 +22,10 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
-import com.breakersoft.plow.dispatcher.domain.DispatchStats;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.exceptions.PlowDispatcherException;
+import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.SlotMode;
 import com.breakersoft.plow.thrift.TaskState;
@@ -108,10 +108,10 @@ public class DispatchServiceImpl implements DispatchService {
         if (dispatchTaskDao.start(task, proc)) {
             logger.info("Started {}", task);
             task.started = true;
-            DispatchStats.taskStartedCount.incrementAndGet();
+            PlowStats.taskStartedCount.incrementAndGet();
             return true;
         }
-        DispatchStats.taskStartedFailureCount.incrementAndGet();
+        PlowStats.taskStartedFailCount.incrementAndGet();
         return false;
     }
 
@@ -120,10 +120,10 @@ public class DispatchServiceImpl implements DispatchService {
         if (dispatchTaskDao.stop(task, state, exitStatus, exitSignal)) {
             logger.info("Stopping {}, new state: {}", task, state.toString());
 
-            DispatchStats.taskStoppedCount.incrementAndGet();
+            PlowStats.taskStoppedCount.incrementAndGet();
             return true;
         }
-        DispatchStats.taskStoppedFailureCount.incrementAndGet();
+        PlowStats.taskStoppedFailCount.incrementAndGet();
         return false;
     }
 
@@ -215,9 +215,11 @@ public class DispatchServiceImpl implements DispatchService {
 
         try {
             procDao.create(proc);
+            PlowStats.procAllocCount.incrementAndGet();
             return proc;
 
         } catch (Exception e) {
+            PlowStats.procAllocFailCount.incrementAndGet();
             throw new PlowDispatcherException(
                     "Failed to allocatae a proc from " + node.getName() + "," + e, e);
         }
@@ -231,9 +233,12 @@ public class DispatchServiceImpl implements DispatchService {
         }
 
         logger.info("deallocating {}, {}", proc, why);
-
         if (!procDao.delete(proc)) {
+            PlowStats.procUnallocFailCount.incrementAndGet();
             logger.warn("{} was alredy deallocated.", proc);
+        }
+        else {
+            PlowStats.procUnallocCount.incrementAndGet();
         }
     }
 

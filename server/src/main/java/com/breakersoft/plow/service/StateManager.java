@@ -22,6 +22,7 @@ import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.event.JobFinishedEvent;
 import com.breakersoft.plow.exceptions.PlowException;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
+import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.rndaemon.RndClient;
 import com.breakersoft.plow.thrift.DependSpecT;
 import com.breakersoft.plow.thrift.TaskFilterT;
@@ -158,6 +159,7 @@ public class StateManager {
     public void killJob(Job job, String reason) {
         final boolean killResult = shutdownJob(job);
         if (killResult) {
+            PlowStats.jobKillCount.incrementAndGet();
             processManager.killProcs(job, reason);
         }
     }
@@ -165,6 +167,7 @@ public class StateManager {
     public boolean shutdownJob(Job job) {
         if (jobService.shutdown(job)) {
             logger.info("Shutting down job {}", job);
+            PlowStats.jobFinishCount.incrementAndGet();
             satisfyDependsOn(job);
             eventManager.post(new JobFinishedEvent(job));
             return true;
