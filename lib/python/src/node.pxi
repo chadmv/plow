@@ -463,7 +463,7 @@ cdef class Proc(PlowBase):
     property ioStats:
         def __get__(self): 
             cdef:
-                int i
+                size_t i
                 long val
                 vector[long] ret
 
