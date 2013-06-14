@@ -48,10 +48,10 @@ public class PlowThreadPools {
     public ThreadPoolTaskExecutor stateChangeExecutor() {
         ThreadPoolTaskExecutor t = new ThreadPoolTaskExecutor();
         t.setCorePoolSize(16);
-        t.setMaxPoolSize(16);
-        t.setThreadNamePrefix("ProcDispatcher");
+        t.setMaxPoolSize(32);
+        t.setThreadNamePrefix("StateChange");
         t.setDaemon(false);
-        t.setQueueCapacity(250);
+        t.setQueueCapacity(1000);
         t.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         return t;
     }
