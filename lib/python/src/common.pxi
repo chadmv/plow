@@ -9,10 +9,12 @@ from client cimport getClient, resetClient, PlowClient
 import uuid
 import time
 import logging 
+import random
 
+__HOST = None
+__PORT = None
 
-__HOST = "localhost"
-__PORT = 11336
+PLOW_HOSTS = [("localhost", 11336)]
 
 LOGGER = logging.getLogger("client")
 
@@ -28,18 +30,28 @@ cdef class PlowBase:
 
 
 
-cdef inline PlowClient* conn(bint reset=0) except *:
+cdef PlowClient* conn(bint reset=0) except *:
     cdef:
         PlowClient* c
-        int i
+        string host
+        int port
+
+    global __HOST, __PORT
+
+    if __HOST is None or __PORT is None:
+        host, port = random.choice(PLOW_HOSTS)
+    else:
+        host, port = __HOST, __PORT
 
     try:
-        c = getClient(__HOST, __PORT, reset)
+        c = getClient(host, port, reset)
     except RuntimeError:
         try:
             c = getClient(__HOST, __PORT, True)
         except RuntimeError, e:
             raise PlowConnectionError(*e.args)
+
+    __HOST, __PORT = host, port
 
     return c
 
@@ -48,6 +60,10 @@ def reconnect():
     """
     Re-establish the connection to the Plow server
     """
+    global __HOST, __PORT
+    __HOST = None
+    __PORT = None
+
     cdef PlowClient* c = conn(True)
     c.reconnect()
 

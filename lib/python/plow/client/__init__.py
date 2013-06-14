@@ -1,20 +1,17 @@
-from plow import *
+from .plow import *
 
 def _init():
     import conf
+    from . import plow
 
-    hosts = conf.get('plow', 'hosts')
+    # Split the host name list and set it on the client module
+    hosts = (h.split(":") for h in conf.PLOW_HOSTS)
+    hosts = [(h[0], int(h[1])) for h in hosts if h[1].isdigit()]
+    
     if not hosts:
         return
 
-    tokens = hosts.split(',')[0].split(':')
-
-    if len(tokens) == 2 and tokens[1].isdigit():
-        host, port = tokens 
-        set_host(host, int(port))
-    else:
-        host = tokens[0]
-        set_host(host)
+    plow.PLOW_HOSTS = hosts
 
 _init()
 del _init

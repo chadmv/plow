@@ -1,4 +1,5 @@
 
+import sys
 import os
 import ConfigParser
 
@@ -9,6 +10,8 @@ def _init():
     """
     Parse an initalize the Config object
     """
+    mod = sys.modules[__name__]
+
     if os.environ.get("PLOW_CFG"):
         _Config.read([os.environ["PLOW_CFG"]])
     else:
@@ -16,10 +19,9 @@ def _init():
             os.path.join(os.environ.get("PLOW_ROOT", "/usr/local"), "etc/plow/plow.cfg"),
             os.path.expanduser("~/.plow/plow.cfg")])
 
-# run as a function to avoid polluting module with temp variables
-_init()
+    host_list = [h.strip() for h in get('plow', 'hosts').strip(',').split(',')]
+    setattr(mod, 'PLOW_HOSTS', host_list or ["localhost:11336"])
 
-assert _Config.has_section("plow")
 
 def get(section, key, default=None):
     """
@@ -31,4 +33,7 @@ def get(section, key, default=None):
         return default
 
 
+# run as a function to avoid polluting module with temp variables
+_init()
+assert _Config.has_section("plow"), "Configuration is missing a 'plow' section"
  
