@@ -40,12 +40,14 @@ public class StatsDaoImpl extends AbstractDao implements StatsDao {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
                 final float cores_used = task.cpuPercent / 100.0f;
-                final Long[] io_stats = {
-                    task.diskIO.readCount,
-                    task.diskIO.writeCount,
-                    task.diskIO.readBytes,
-                    task.diskIO.writeBytes
-                };
+
+                final Long[] io_stats = new Long[] { 0L, 0L, 0L, 0L };
+                if (task.diskIO != null) {
+                    io_stats[0] = task.diskIO.readCount;
+                    io_stats[1] = task.diskIO.writeCount;
+                    io_stats[2] =  task.diskIO.readBytes;
+                    io_stats[3] =  task.diskIO.writeBytes;;
+                }
 
                 final PreparedStatement ret = conn.prepareStatement(UPDATE_RUNTIME);
                 ret.setInt(1,  task.rssMb);
