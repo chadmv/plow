@@ -4,6 +4,7 @@ import time
 import re
 import errno
 import logging
+import socket
 from ast import literal_eval
 
 import conf
@@ -56,30 +57,34 @@ class ProcessLog(object):
         return getattr(self._fileObj, name)
 
     def writeLogHeader(self, rtc):
-        now = time.strftime("%Y-%m-%d %H:%M:%S")
-        self._fileObj.write("[%s] Render Process Begin\n" \
-                            "===============================================\n" % now )
+        fileObj = self._fileObj
 
-        self._fileObj.write("COMMAND: %s\n" % " ".join(rtc.command))
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
+        fileObj.write("[%s] Render Process Begin\n" \
+                      "===============================================\n" % now )
+
+        fileObj.write("HOST: %s\n" % socket.getfqdn())
+        fileObj.write("COMMAND: %s\n" % " ".join(rtc.command))
         
         for key, value in rtc.env.items():
-            self._fileObj.write("ENV: %s=%s\n" % (key, value))
+            fileObj.write("ENV: %s=%s\n" % (key, value))
         
-        self._fileObj.write("===============================================\n")
+        fileObj.write("===============================================\n")
 
-        self._fileObj.flush()
+        fileObj.flush()
 
     def writeLogFooterAndClose(self, result):
         # TODO: Add more stuff here
         # Check to ensure the log is not None, which it would be
         # if the thread failed to open the log file.
-        if self._fileObj.closed:
+        fileObj = self._fileObj
+        if fileObj.closed:
             return
 
-        self._fileObj.flush()
+        fileObj.flush()
 
         now = time.strftime("%Y-%m-%d %H:%M:%S")
-        self._fileObj.write(
+        fileObj.write(
             "\n\n\n" \
             "[%s] Render Process Complete\n" \
             "===============================================\n" \
@@ -89,7 +94,7 @@ class ProcessLog(object):
             "===============================================\n\n" \
             % (now, result.exitStatus, result.exitSignal, result.maxRssMb))
 
-        self._fileObj.close() 
+        fileObj.close() 
 
     @staticmethod 
     def makeLogDir(path):
