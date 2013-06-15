@@ -35,22 +35,49 @@ cdef PlowClient* conn(bint reset=0) except *:
         PlowClient* c
         string host
         int port
+        tuple host_port
+        list available
+        bint is_custom = False
+        bint first_loop = True
 
     global __HOST, __PORT
 
     if __HOST is None or __PORT is None:
-        host, port = random.choice(PLOW_HOSTS)
+        host_port = random.choice(PLOW_HOSTS)
+        host, port = host_port
     else:
+        is_custom = True
         host, port = __HOST, __PORT
 
-    try:
-        c = getClient(host, port, reset)
-    except RuntimeError:
-        try:
-            c = getClient(__HOST, __PORT, True)
-        except RuntimeError, e:
-            raise PlowConnectionError(*e.args)
+    while True:
 
+        try:
+            c = getClient(host, port, reset)
+        except RuntimeError:
+            try:
+                c = getClient(host, port, True)
+            except RuntimeError, e:
+                msg = "Failed to connect to Plow server %s:%s" % (host, port)
+                LOGGER.warn(msg)
+                if is_custom:
+                    raise PlowConnectionError(*e.args)
+            else:
+                break
+        else:
+            break
+        
+        if first_loop:
+            available = PLOW_HOSTS[:]
+            first_loop = False
+
+        available.remove(host_port)
+        if not available:
+            raise PlowConnectionError("No available Plow host. Connection attempts all failed", 0)
+
+        host_port = random.choice(available)
+        host, port = host_port
+
+    LOGGER.debug("Connected to %s:%d", host, port)
     __HOST, __PORT = host, port
 
     return c

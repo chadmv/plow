@@ -71,7 +71,6 @@ static void __Pyx_CppExn2PyErr() {
     PyErr_SetString(PyExc_ArithmeticError, exn.what());
   } 
   catch (const std::exception& exn) {
-    // PyErr_SetString(PyExc_RuntimeError, "foo");
     PyErr_SetString(PyExc_RuntimeError, exn.what());
   }
   catch (...)
