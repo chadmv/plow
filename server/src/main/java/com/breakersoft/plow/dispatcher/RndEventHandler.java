@@ -20,6 +20,7 @@ import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
 import com.breakersoft.plow.service.StateManager;
 import com.breakersoft.plow.thrift.TaskState;
+import com.breakersoft.plow.util.PlowUtils;
 
 /**
  * Manages the the running procs on a node.
@@ -77,7 +78,7 @@ public class RndEventHandler {
 
         PlowStats.rndPingCount.incrementAndGet();
 
-        if (!ping.tasks.isEmpty()) {
+        if (PlowUtils.isValid(ping.tasks)) {
             statsService.updateProcRuntimeStats(ping.tasks);
             statsService.updateTaskRuntimeStats(ping.tasks);
         }
