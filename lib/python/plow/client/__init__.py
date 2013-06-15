@@ -11,7 +11,7 @@ def _init():
     if not hosts:
         return
 
-    plow.PLOW_HOSTS = hosts
+    PLOW_HOSTS[:] = hosts
 
 _init()
 del _init
