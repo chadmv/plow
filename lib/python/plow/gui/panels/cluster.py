@@ -90,7 +90,7 @@ class ClusterWidget(QtGui.QWidget):
 
         self.__model = ClusterModel(self)
         tree.setModel(self.__model)
-        self.__model.refresh()
+        # self.__model.refresh()
 
         for i,v in enumerate(self.Width):
             tree.setColumnWidth(i, v) 
@@ -127,8 +127,8 @@ class ClusterModel(QtCore.QAbstractTableModel):
 
     def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
-        self.__items = plow.client.get_clusters()
-        self.__index = dict([(item.id, i) for i, item in enumerate(self.__items)])
+        self.__items = []
+        self.__index = {}
         self.__lastUpdateTime = 0;
 
         self.__iconLocked = QtGui.QIcon(":/images/locked.png")
@@ -146,13 +146,16 @@ class ClusterModel(QtCore.QAbstractTableModel):
                 self.__items[idx] = cluster
                 updated.add(cluster.id)
                 self.dataChanged.emit(self.index(idx,0), self.index(idx, len(ClusterWidget.Header)-1))
-            except IndexError:
+            except (IndexError, KeyError):
                 self.__items.append(cluster)
                 self.__index[cluster.id] = len(self.__items) - 1
 
         # TODO: remove non updated clusters
         for removed in frozenset(self.__index.keys()).difference(updated):
             pass
+
+        self.__index = dict(((item.id, i) for i, item in enumerate(self.__items)))
+
 
     def rowCount(self, parent):
         if parent.isValid():

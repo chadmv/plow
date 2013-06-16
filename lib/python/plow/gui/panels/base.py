@@ -1,6 +1,7 @@
 
 import os
 import logging
+import traceback 
 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui import event
@@ -124,7 +125,11 @@ class WorkspaceManager(QtCore.QObject):
 
         if panels:
             for name, ptype in panels:
-                p = self.createPanel(ptype, name)      
+                try:
+                    p = self.createPanel(ptype, name)  
+                except Exception, e:
+                    err = traceback.format_exc(3)
+                    LOGGER.error("Error creating panel %r (%r): %s", name, ptype, err)
 
             self.parent().setUpdatesEnabled(False)
             QtCore.QTimer.singleShot(0, self.restoreState)

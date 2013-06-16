@@ -141,6 +141,7 @@ class NodeModel(QtCore.QAbstractTableModel):
     def __init__(self, parent=None):
         super(NodeModel, self).__init__(parent)
         self.__items = []
+        self.__index = {}
 
     def hasChildren(self, parent):
         return False
