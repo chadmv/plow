@@ -1,4 +1,5 @@
 import os
+import logging
 from functools import partial 
 
 import plow.client
@@ -8,12 +9,16 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.util import formatPercentage
 from plow.gui.event import EventManager
+from plow.gui.common import models
 from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelegate, \
                                     ManagedListWidget, BooleanCheckBox, FormWidgetLabel, \
                                     TreeWidget
 
 IdRole = QtCore.Qt.UserRole
 ObjectRole = QtCore.Qt.UserRole + 1
+
+LOGGER = logging.getLogger(__name__)
+
 
 class ClusterPanel(Panel):
 
@@ -89,8 +94,13 @@ class ClusterWidget(QtGui.QWidget):
         tree.setItemDelegateForColumn(1, SimplePercentageBarDelegate(self))
 
         self.__model = ClusterModel(self)
-        tree.setModel(self.__model)
-        # self.__model.refresh()
+        self.__proxy = proxy = models.AlnumSortProxyModel(self)
+        proxy.setDynamicSortFilter(True)
+        proxy.setSortRole(QtCore.Qt.DisplayRole)
+        proxy.setSourceModel(self.__model)
+
+        tree.setModel(proxy)
+        tree.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
         for i,v in enumerate(self.Width):
             tree.setColumnWidth(i, v) 
@@ -138,21 +148,40 @@ class ClusterModel(QtCore.QAbstractTableModel):
 
     def refresh(self):
         updated = set()
+        to_add = set()
+        cluster_ids = set()
+
+        parent = QtCore.QModelIndex()
 
         clusters = plow.client.get_clusters()
         for cluster in clusters:
+            cluster_ids.add(cluster.id)
+
             try:
                 idx = self.__index[cluster.id]
                 self.__items[idx] = cluster
                 updated.add(cluster.id)
                 self.dataChanged.emit(self.index(idx,0), self.index(idx, len(ClusterWidget.Header)-1))
+            
             except (IndexError, KeyError):
-                self.__items.append(cluster)
-                self.__index[cluster.id] = len(self.__items) - 1
+                to_add.add(cluster) 
 
-        # TODO: remove non updated clusters
-        for removed in frozenset(self.__index.keys()).difference(updated):
-            pass
+        if to_add:
+            size = len(to_add)
+            start = len(self.__items)
+            end = start + size - 1
+            self.beginInsertRows(parent, start, end)
+            self.__items.extend(to_add)
+            self.endInsertRows()
+            LOGGER.debug("adding %d new clusters", size)
+
+        # Remove
+        to_remove = set(self.__index.iterkeys()).difference(cluster_ids)
+        for row, old_id in sorted(((rows[old_id], old_id) for old_id in to_remove), reverse=True):
+            self.beginRemoveRows(parent, row, row)
+            cluster = self.__items.pop(row)
+            self.endRemoveRows()
+            LOGGER.debug("removing %s %s", old_id, cluster.name)
 
         self.__index = dict(((item.id, i) for i, item in enumerate(self.__items)))
 
