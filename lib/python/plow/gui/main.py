@@ -1,5 +1,6 @@
 """MainWindow"""
 import os
+import sys
 import logging 
 
 from manifest import QtCore, QtGui
@@ -94,16 +95,19 @@ def launch(argv, name, layout=None):
     app.setAttribute(QtCore.Qt.AA_DontShowIconsInMenus, False)
     loadTheme()
 
-    win = MainWindow(name, layout)
-    app.lastWindowClosed.connect(win.saveApplicationState)
-    win.show()
-    win.raise_()
-    app.exec_()
+    try:
+        win = MainWindow(name, layout)
+        app.lastWindowClosed.connect(win.saveApplicationState)
+        win.show()
+        win.raise_()
+        app.exec_()
+        
+    except plow.PlowConnectionError, e:
+        logging.error(e)
 
 
 def main():
     import signal
-    import sys
     import argparse
 
     parser = argparse.ArgumentParser(
