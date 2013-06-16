@@ -105,7 +105,7 @@ class JobWranglerPanel(Panel):
         
         if self.attrs.has_key("refreshSeconds"):
             self.setRefreshTime(self.attrs["refreshSeconds"])
-            self.refresh()
+            QtCore.QTimer.singleShot(0, self.refresh)
 
 
 class JobWranglerWidget(QtGui.QWidget):
