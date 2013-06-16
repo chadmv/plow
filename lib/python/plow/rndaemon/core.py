@@ -105,11 +105,11 @@ class _ProcessManager(object):
     def runProcess(self, processCmd, wait=-1):
         """
         Takes a RunTaskCommand object, reserves resources, 
-        and starts the process.
+        and starts the process. Default mode is to return None
 
         Optionally, a wait time may be specified in float
         seconds, to wait until the job has fully started, 
-        before returning.
+        before returning. If wait > -1, return a RunningTask object
         """
         cpus = ResourceMgr.checkout(processCmd.cores)
         pthread = _ProcessThread(processCmd, cpus)
@@ -118,9 +118,12 @@ class _ProcessManager(object):
             self.__threads[processCmd.procId] = _RunningProc(processCmd, pthread, cpus)
 
         pthread.start()
+        logger.info("process thread started")
+
+        if wait == -1:
+            return 
 
         task = pthread.getRunningTask(wait)
-        logger.info("process thread started")
 
         return task
 
