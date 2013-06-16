@@ -73,8 +73,8 @@ class TaskPanel(Panel):
 
 class TaskWidget(QtGui.QWidget):
 
-    Width = [250, 90, 125, 100, 100, 65]
-    Refresh = 1500
+    WIDTH = [250, 90, 125, 100, 100, 65]
+    REFRESH = 1500
 
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -140,7 +140,7 @@ class TaskWidget(QtGui.QWidget):
         
         if new_model:
             table = self.__table
-            for i, w in enumerate(self.Width):
+            for i, w in enumerate(self.WIDTH):
                 table.setColumnWidth(i, w)
     
     def __showContextMenu(self, pos):
@@ -183,19 +183,19 @@ class TaskWidget(QtGui.QWidget):
         tasks = self.getSelectedTaskIds()
         if tasks:
             plow.client.retry_tasks(taskIds=tasks)
-            self.queueRefresh(self.Refresh, True)
+            self.queueRefresh(self.REFRESH, True)
 
     def killSelected(self):
         tasks = self.getSelectedTaskIds()
         if tasks:
             plow.client.kill_tasks(taskIds=tasks)
-            self.queueRefresh(self.Refresh, True)
+            self.queueRefresh(self.REFRESH, True)
 
     def eatSelected(self):
         tasks = self.getSelectedTaskIds()
         if tasks:
             plow.client.eat_tasks(taskIds=tasks)
-            self.queueRefresh(self.Refresh, True)
+            self.queueRefresh(self.REFRESH, True)
 
     def getSelectedTaskIds(self):
         ids = []
