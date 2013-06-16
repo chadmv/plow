@@ -1,4 +1,7 @@
 
+from collections import deque
+from itertools import izip 
+
 from plow.gui.manifest import QtCore, QtGui
 
 
@@ -12,6 +15,9 @@ class AlnumSortProxyModel(QtGui.QSortFilterProxyModel):
     def __init__(self, *args, **kwargs):
         super(AlnumSortProxyModel, self).__init__(*args, **kwargs)
         self.setSortRole(DATA_ROLE)
+
+        self._leftList = deque()
+        self._rightList =  deque()
 
     def lessThan(self, left, right):
         sortRole = self.sortRole()
@@ -27,8 +33,12 @@ class AlnumSortProxyModel(QtGui.QSortFilterProxyModel):
             return False 
 
         alnums = self.RX_ALNUMS
-        leftList = []
-        rightList = []
+
+        leftList = self._leftList
+        rightList = self._rightList
+
+        leftList.clear()
+        rightList.clear()
 
         pos = 0
         while True:
@@ -48,7 +58,7 @@ class AlnumSortProxyModel(QtGui.QSortFilterProxyModel):
             rightList.append(alnums.cap(1))
             pos += alnums.matchedLength()
 
-        for leftItem, rightItem in zip(leftList, rightList):
+        for leftItem, rightItem in izip(leftList, rightList):
             if leftItem != rightItem and leftItem.isdigit() and rightItem.isdigit():
                 return int(leftItem) < int(rightItem)
 
