@@ -10,7 +10,7 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.common import models
-from plow.gui.common.widgets import TableWidget, ResourceDelegate
+from plow.gui.common.widgets import TableWidget, ResourceDelegate, CheckableComboBox
 from plow.gui.util import formatDuration
 
 NODE_STATES = {}
@@ -26,6 +26,9 @@ ObjectRole = QtCore.Qt.UserRole + 1
 LOGGER = logging.getLogger(__name__)
 
 
+#########################
+# NodePanel
+#########################
 class NodePanel(Panel):
 
     def __init__(self, name="Nodes", parent=None):
@@ -39,15 +42,29 @@ class NodePanel(Panel):
     def init(self):
         titleBar = self.titleBarWidget() 
         titleBar.addAction(QtGui.QIcon(":/images/locked.png"), 
-                                       "Lock Selected Clusters", 
+                                       "Lock Selected Nodes", 
                                        partial(self.__setNodesLocked, True))
 
         titleBar.addAction(QtGui.QIcon(":/images/unlocked.png"), 
-                                       "Unlock Selected Clusters", 
+                                       "Unlock Selected Nodes", 
                                        partial(self.__setNodesLocked, False))
 
+        self.__cluster_filter = CheckableComboBox("Clusters", [], parent=self)
+        titleBar.addWidget(self.__cluster_filter)
+        self.__cluster_filter.optionSelected.connect(self.__clusterFilterChanged)
+
     def refresh(self):
-        self.widget().refresh()
+        clusters = plow.client.get_clusters()
+
+        nodeWidget = self.widget()
+        nodeWidget.refresh()
+        nodeWidget.setClusterList(clusters)
+
+        filt = self.__cluster_filter
+
+        sel = filt.selectedOptions()
+        names = sorted(c.name for c in clusters)
+        filt.setOptions(names, selected=sel)
 
     def __setNodesLocked(self, locked):
         try:
@@ -56,9 +73,16 @@ class NodePanel(Panel):
         finally:
             self.refresh()
 
+    def __clusterFilterChanged(self):
+        sel = self.__cluster_filter.selectedOptions()
+        self.widget().setClusterFilters(sel)
 
+
+#########################
+# NodeWidget
+#########################
 class NodeWidget(QtGui.QWidget):
-
+    
     def __init__(self, attrs, parent=None):
         super(NodeWidget, self).__init__(parent)
         self.__attrs = attrs
@@ -66,8 +90,11 @@ class NodeWidget(QtGui.QWidget):
         layout = QtGui.QVBoxLayout(self)
         layout.setContentsMargins(4,0,4,4)
 
+        self.__clusters = {}
+
         self.__model = model = NodeModel(self)
-        self.__proxy = proxy = models.AlnumSortProxyModel(self)
+        self.__proxy = proxy = NodeFilterProxyModel(self)
+        proxy.setDynamicSortFilter(True)
         proxy.setSourceModel(model)
 
         self.__view = view = TableWidget(self)
@@ -89,6 +116,9 @@ class NodeWidget(QtGui.QWidget):
         view.setItemDelegateForColumn(model.HEADERS.index('Swap (Free)'), 
                                       ResourceDelegate(warn=.75, critical=.25, parent=self))
 
+        view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+
+        view.customContextMenuRequested.connect(self.__showContextMenu)
         view.doubleClicked.connect(self.__itemDoubleClicked)
 
         
@@ -109,11 +139,68 @@ class NodeWidget(QtGui.QWidget):
         rows = self.__view.selectionModel().selectedRows()
         return [index.data(ObjectRole) for index in rows]
 
+    def setClusterFilters(self, clusters):
+        cluster_set = set()
+
+        for c in clusters:
+
+            if isinstance(c, plow.client.Cluster):
+                cluster_set.add(c.name)
+
+            elif isinstance(c, (str, unicode)):
+                cluster_set.add(c)
+
+        self.__proxy.setFilters(clusterNames=cluster_set)
+
+    def setClusterList(self, clusters):
+        self.__clusters = dict((c.name, c) for c in clusters)
+
+    def assignClusterToSelected(self, cluster):
+        nodes = self.getSelectedNodes()
+        if nodes:
+            did_set = False
+            for node in nodes:
+                if node.clusterName != cluster.name:
+                    node.set_cluster(cluster)
+                    did_set = True
+
+            if did_set:
+                EventManager.emit("GLOBAL_REFRESH")
+
+    def lockSelected(self, locked):
+        nodes = self.getSelectedNodes()
+        if nodes:
+            did_lock = False
+            for node in nodes:
+                if node.locked != locked:
+                    node.lock(locked)
+                    did_lock = True
+
+            if did_lock:
+                EventManager.emit("GLOBAL_REFRESH")
+
     def __itemDoubleClicked(self, index):
         uid = index.data(ObjectRole).id
         EventManager.emit("NODE_OF_INTEREST", uid)
 
+    def __showContextMenu(self, pos):
+        menu = QtGui.QMenu()
+        menu.addAction(QtGui.QIcon(":/images/locked.png"), 
+                        "Lock Nodes", partial(self.lockSelected, True))
+        menu.addAction(QtGui.QIcon(":/images/unlocked.png"), 
+                        "Unlock Nodes", partial(self.lockSelected, False))
 
+        cluster_menu = menu.addMenu("Set Cluster")
+        for name, cluster in sorted(self.__clusters.iteritems()):
+            action = cluster_menu.addAction(name)
+            action.triggered.connect(partial(self.assignClusterToSelected, cluster))
+
+        menu.exec_(self.mapToGlobal(pos))
+
+
+#########################
+# NodeModel
+#########################
 class NodeModel(QtCore.QAbstractTableModel):
 
     HEADERS = [
@@ -142,6 +229,7 @@ class NodeModel(QtCore.QAbstractTableModel):
         super(NodeModel, self).__init__(parent)
         self.__items = []
         self.__index = {}
+        self.__clusters = {}
 
     def hasChildren(self, parent):
         return False
@@ -266,3 +354,41 @@ class NodeModel(QtCore.QAbstractTableModel):
         self.endResetModel()
 
 
+#########################
+# NodeFilterProxyModel
+#########################
+class NodeFilterProxyModel(models.AlnumSortProxyModel):
+
+    def __init__(self, *args, **kwargs):
+        super(NodeFilterProxyModel, self).__init__(*args, **kwargs)
+        self.__clusters = set()
+
+        self.__all_filters = (self.__clusters, )
+        self.__customFilterEnabled = False
+
+    def setFilters(self, clusterNames=None):
+        if clusterNames is not None:
+            self.__clusters.clear()
+            self.__clusters.update(clusterNames)
+
+        self.__customFilterEnabled = any(self.__all_filters)
+        self.invalidateFilter()
+
+    def filterAcceptsRow(self, row, parent):
+        if not self.__customFilterEnabled:
+            return super(NodeFilterProxyModel, self).filterAcceptsRow(row, parent)
+
+        model = self.sourceModel()          
+        idx = model.index(row, 0, parent)
+        if not idx.isValid():
+            return False
+
+        node = model.data(idx, ObjectRole)
+        if not node:
+            return False
+
+        clusters = self.__clusters
+        if clusters and node.clusterName not in clusters:
+            return False
+
+        return True
