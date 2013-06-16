@@ -463,16 +463,16 @@ class PlowNode(tree.NodeContainer):
 class FolderNode(PlowNode):
 
     TYPE = FOLDER_TYPE
-    HEADERS = ["Name", "Running"]
+    HEADERS = ["Name", "Tasks"]
 
     DISPLAY_CALLBACKS = [
         lambda f: f.name,
-        lambda f: "{0} / {1}".format(f.totals.running, f.totals.total),
+        lambda f: "{0} / {1}".format(f.totals.succeeded, f.totals.total),
     ]
 
     DATA_CALLBACKS = [
         lambda f: f.name,
-        lambda f: (f.totals.running / float(f.totals.total)) if f.totals.total else 0,
+        lambda f: (f.totals.succeeded / float(f.totals.total)) if f.totals.total else 0,
     ]
 
     def data(self, column, role=QtCore.Qt.DisplayRole):
@@ -492,7 +492,7 @@ class JobNode(PlowNode):
 
     TYPE = JOB_TYPE
     HEADERS = [
-                "Name", "Running", "State", "Owner", 
+                "Name", "Tasks", "State", "Owner", 
                 "Duration", "maxRam",
                ]
 
