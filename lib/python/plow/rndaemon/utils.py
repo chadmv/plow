@@ -31,20 +31,24 @@ class ProcessLog(object):
         self._fileObj = open(name, mode, buffering)
         os.umask(old_mask)
 
-        if uid is not None:
-            folder = os.path.dirname(name)
-            gid = os.getgid()
+        self.__host = socket.getfqdn()
 
-            for elem in (folder, name):
-                try:
-                    os.chmod(elem, 0777)
-                except Exception, e:
-                    logger.warn("Failed to chmod path %r to 0777: %s", elem, e)
+        if uid is None:
+            return
 
-                try:
-                    os.chown(elem, uid, gid)
-                except Exception, e:
-                    logger.warn("Failed to chown path %r to uid %r / gid %r: %s", elem, uid, gid, e)
+        folder = os.path.dirname(name)
+        gid = os.getgid()
+
+        for elem in (folder, name):
+            try:
+                os.chmod(elem, 0777)
+            except Exception, e:
+                logger.warn("Failed to chmod path %r to 0777: %s", elem, e)
+
+            try:
+                os.chown(elem, uid, gid)
+            except Exception, e:
+                logger.warn("Failed to chown path %r to uid %r / gid %r: %s", elem, uid, gid, e)
 
 
     def __del__(self):
@@ -63,36 +67,55 @@ class ProcessLog(object):
         fileObj.write("[%s] Render Process Begin\n" \
                       "===============================================\n" % now )
 
-        fileObj.write("HOST: %s\n" % socket.getfqdn())
+        fileObj.write("HOST: %s\n" % self.__host)
         fileObj.write("COMMAND: %s\n" % " ".join(rtc.command))
         
         for key, value in rtc.env.items():
             fileObj.write("ENV: %s=%s\n" % (key, value))
         
-        fileObj.write("===============================================\n")
+        fileObj.write("===============================================\n\n")
 
         fileObj.flush()
 
-    def writeLogFooterAndClose(self, result):
-        # TODO: Add more stuff here
-        # Check to ensure the log is not None, which it would be
-        # if the thread failed to open the log file.
+    def writeLogFooterAndClose(self, result, attrs=None):
+        """
+        writeLogFooterAndClose(RunTaskResult, result, dict attrs=None)
+        
+        Write out the log footer, from a RunTaskResult object,
+        adding any optional key:value data passed in an attr dictionary. 
+
+        Closes the log file when done.
+        """
         fileObj = self._fileObj
-        if fileObj.closed:
+        if not fileObj or fileObj.closed:
             return
 
         fileObj.flush()
 
+        if attrs:
+            extra = '\n'.join('%s: %s' % (k,v) for k,v in attrs.iteritems()) + "\n"
+        else:
+            extra = ''
+
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         fileObj.write(
             "\n\n\n" \
-            "[%s] Render Process Complete\n" \
+            "[{now}] Render Process Complete\n" \
             "===============================================\n" \
-            "Exit Status: %d\n" \
-            "Signal: %d\n" \
-            "MaxRSS: %d\n" \
-            "===============================================\n\n" \
-            % (now, result.exitStatus, result.exitSignal, result.maxRssMb))
+            "Host: {host}\n" \
+            "Exit Status: {status}\n" \
+            "Signal: {signal}\n" \
+            "MaxRSS: {maxRss}\n" \
+            "{extra}" \
+            "===============================================\n\n"\
+            .format(
+                now = now, 
+                host = self.__host, 
+                status = result.exitStatus, 
+                signal = result.exitSignal, 
+                maxRss = result.maxRssMb,
+                extra = extra,
+            ))
 
         fileObj.close() 
 

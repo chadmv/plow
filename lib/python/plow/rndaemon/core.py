@@ -708,8 +708,15 @@ class _ProcessThread(threading.Thread):
                     time.sleep(30)
 
         ProcessMgr.processFinished(result, self.__cpus)
+
         if self.__logfp is not None:
-            self.__logfp.writeLogFooterAndClose(result)
+
+            attrs = {
+                'DiskIO': self.__metrics['diskIO'],
+                'Cpus': len(self.__cpus),
+            }
+
+            self.__logfp.writeLogFooterAndClose(result, attrs)
             self.__logfp = None
 
 

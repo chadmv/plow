@@ -10,6 +10,7 @@ TESTS = []
 # rndaemon tests
 TESTS += ['.'.join(['plowapp.rndaemon.test', p]) for p in (
     'test_profile',
+    'test_logging',
     'test_run.TestCommunications',
     'test_run.TestResourceManager',
     'test_run.TestProcessManager',
