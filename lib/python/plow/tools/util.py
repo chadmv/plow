@@ -9,7 +9,7 @@ def formatPercentage(value, total):
     if total == 0:
         return "0.00%"
     else:
-        return "%0.2f%%" % (value / float(total))
+        return "%0.2f%%" % ((value / float(total)) * 100)
 
 def formatMaxValue(value):
     if value == -1:
