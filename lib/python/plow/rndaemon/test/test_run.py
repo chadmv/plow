@@ -253,7 +253,7 @@ class TestProcessManager(unittest.TestCase):
         for slot in core.ResourceMgr.getOpenSlots():
             process = self.getNewTaskCommand()
             process.command = [CMDS_UTIL, 'hard_to_kill']
-            core.ProcessMgr.runProcess(process)
+            core.ProcessMgr.runProcess(process, wait=1)
             procs.append(process)
 
         time.sleep(1)
