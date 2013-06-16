@@ -196,7 +196,7 @@ class _ProcessManager(object):
                 # fail quietly?
                 raise ttypes.RndException(1, err)
 
-        _, not_killed = pthread.killProcess()
+        _, not_killed = pthread.killProcess(reason=reason)
 
         if not_killed:
             err = "Failed to kill the following pids for prodId %s: %s" % \
@@ -338,6 +338,8 @@ class _ProcessThread(threading.Thread):
         self.__progress = 0.0
         self.__lastLog = ""
 
+        self.__killReason = ""
+
         self.__metrics = {
             'rssMb': 0,
             'maxRssMb': 0,
@@ -358,7 +360,7 @@ class _ProcessThread(threading.Thread):
         """
         logger.debug("Shutdown request received. Killing %r", self)
         self.__isShutdown.set()
-        self.killProcess(block=False)
+        self.killProcess(block=False, reason="rndaemon shutdown request received")
 
     def wait(self, timeout=None):
         """
@@ -567,9 +569,9 @@ class _ProcessThread(threading.Thread):
         })
         logger.debug("metrics: %r", metrics)
 
-    def killProcess(self, block=True):
+    def killProcess(self, block=True, reason=''):
         """
-        killProcess(bool block=True) -> (list killed_pids, list not_killed)
+        killProcess(bool block=True, reason='') -> (list killed_pids, list not_killed)
 
         Stop the entire process tree
 
@@ -580,7 +582,12 @@ class _ProcessThread(threading.Thread):
 
         By default the call blocks until the attempt to kill 
         has completed. Set block=False to issue the kill async. 
+
+        If the reason for killing the process is passes as a string,
+        it will be added to the log footer.
         """
+        self.__killReason = reason 
+
         if block:
             return self.__killProcess()
 
@@ -715,6 +722,9 @@ class _ProcessThread(threading.Thread):
                 'DiskIO': self.__metrics['diskIO'],
                 'Cpus': len(self.__cpus),
             }
+
+            if self.__killReason:
+                attrs['Reason Killed'] = self.__killReason
 
             self.__logfp.writeLogFooterAndClose(result, attrs)
             self.__logfp = None
