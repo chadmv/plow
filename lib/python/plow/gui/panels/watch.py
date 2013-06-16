@@ -62,22 +62,29 @@ class RenderJobWatchPanel(Panel):
                 widget.addJob(job) 
 
     def _openPanelSettingsDialog(self):
-        # Older PySide QSettings may serialize a single item
-        # list to just a string
-        users = self.attrs['users']
-        if isinstance(users, (str, unicode)):
-            self.attrs['users'] = [users]
+        self.__fixAttrs() 
 
         d = RenderJobWatchSettingsDialog(self.attrs)
         if d.exec_():
             self.attrs.update(d.getAttrs())
             self.setRefreshTime(self.attrs["refreshSeconds"])
 
+    def restore(self, settings):
+        super(RenderJobWatchPanel, self).restore(settings)
+        self.__fixAttrs() 
+
     def removeFinishedJobs(self):
          self.widget().removeFinishedJobs()
 
     def refresh(self):
         self.widget().refresh()
+
+    def __fixAttrs(self):
+        # Older PySide QSettings may serialize a single item
+        # list to just a string
+        users = self.attrs['users']
+        if isinstance(users, (str, unicode)):
+            self.attrs['users'] = [users]           
 
 
 class RenderJobWatchWidget(QtGui.QWidget):
@@ -94,7 +101,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         layout.setContentsMargins(4,0,4,4)
 
         self.attrs = attrs
-        self.__jobs = { }
+        self.__jobs = {}
 
         self.__tree = tree = QtGui.QTreeWidget(self)
         tree.setHeaderLabels(self.Header)
@@ -221,16 +228,20 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__updateJobs(plow.client.get_jobs(**req))
 
     def __findNewJobs(self):
-        req = { }
+        req = {}
         req["matchingOnly"] = True
         req["user"] = []
         req["states"] = [JobState.RUNNING]
+        
         if self.attrs["loadMine"]:
             req["user"].append(os.environ["USER"])
+        
         if self.attrs["users"]:
             req["user"].extend(self.attrs["users"])
+       
         if self.attrs["projects"]:
             req["projects"] = self.attrs["projects"]
+
         self.__updateJobs(plow.client.get_jobs(**req))
 
     def __showContextMenu(self, pos):
