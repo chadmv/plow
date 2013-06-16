@@ -298,13 +298,24 @@ class TaskModel(QtCore.QAbstractTableModel):
         task = self.__tasks[row]
         stats = task.stats 
 
+        BG = QtCore.Qt.BackgroundRole
+        FG = QtCore.Qt.ForegroundRole
+
         if role == QtCore.Qt.DisplayRole:
             cbk = self.DISPLAY_CALLBACKS.get(col)
             if cbk is not None:
                 return cbk(task)
         
-        elif role == QtCore.Qt.BackgroundRole and col == 1:
-            return constants.COLOR_TASK_STATE[task.state]
+        elif col == 1 and (role == BG or role == FG):
+            color = QtCore.Qt.black
+            bgcolor = constants.COLOR_TASK_STATE[task.state]
+            if bgcolor is constants.YELLOW:
+                color = QtCore.Qt.white 
+                
+            if role == BG:
+                return bgcolor
+            else:
+                return color
 
         elif role == QtCore.Qt.TextAlignmentRole:
             if 0 < col < 6:
