@@ -21,13 +21,18 @@ logger = logging.getLogger(__name__)
 class RndProcessHandler(object):
 
     def runTask(self, rtc):
+        logger.debug("starting core.ProcessMgr.runProcess(rtc): %s", rtc.taskId)
         core.ProcessMgr.runProcess(rtc)
+        logger.debug("finished core.ProcessMgr.runProcess(rtc): %s", rtc.taskId)
 
     def killRunningTask(self, procId, reason):
         core.ProcessMgr.killRunningTask(procId, reason)
 
     def getRunningTasks(self):
-        return core.ProcessMgr.getRunningTasks()
+        logger.debug("starting core.ProcessMgr.getRunningTasks()")
+        tasks = core.ProcessMgr.getRunningTasks()
+        logger.debug("finished core.ProcessMgr.getRunningTasks()")
+        return tasks
 
     def reboot(self, now=False):
         core.ProcessMgr.reboot(now)
