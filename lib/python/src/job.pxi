@@ -528,6 +528,7 @@ def get_jobs(**kwargs):
     :param user: list[str] of matching user names
     :param jobIds: list[str] of matching job ids
     :param name: list[str] of matching job names
+    :param states: list[:obj:`.JobState`] 
 
     :returns: list[:class:`.Job`]
     """

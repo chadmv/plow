@@ -36,6 +36,7 @@ class RenderJobWatchPanel(Panel):
         self.setAttr("allProjects", True)
         self.setAttr("refreshSeconds", 5)
         self.setAttr("users", [])
+        self.setAttr("loadedJobs", [])
 
         self.setWidget(RenderJobWatchWidget(self.attrs, self))
         self.setWindowTitle(name)
@@ -62,12 +63,25 @@ class RenderJobWatchPanel(Panel):
 
         d = RenderJobWatchSettingsDialog(self.attrs)
         if d.exec_():
-            self.attrs.update(d.getAttrs())
+            attrs = d.getAttrs()
+            attrs['allProjects'] = int(attrs['allProjects'])
+            self.attrs.update(attrs)
             self.setRefreshTime(self.attrs["refreshSeconds"])
+
+    def save(self, settings):
+        widget = self.widget()
+        ids = [j.id for j in widget.jobs()]
+        self.setAttr("loadedJobs", ids)
+        self.setAttr("allProjects", int(self.attrs["allProjects"]))
+        super(RenderJobWatchPanel, self).save(settings)
 
     def restore(self, settings):
         super(RenderJobWatchPanel, self).restore(settings)
         self.__fixAttrs() 
+
+        jobIds = self.getAttr("loadedJobs")
+        if jobIds:
+            QtCore.QTimer.singleShot(0, partial(self.__loadJobList, jobIds))
 
     def removeFinishedJobs(self):
          self.widget().removeFinishedJobs()
@@ -78,9 +92,18 @@ class RenderJobWatchPanel(Panel):
     def __fixAttrs(self):
         # Older PySide QSettings may serialize a single item
         # list to just a string
-        users = self.attrs['users']
-        if isinstance(users, (str, unicode)):
-            self.attrs['users'] = [users]           
+        for attr in ('users', 'projects', 'loadedJobs'):
+            val = self.attrs[attr]
+            if isinstance(val, (str, unicode)):
+                self.attrs[attr] = [val]  
+
+        self.attrs['allProjects'] = int(self.attrs['allProjects'])
+
+    def __loadJobList(self, jobIds):
+        widget = self.widget()
+        jobs = plow.client.get_jobs(jobIds=jobIds)      
+        for job in jobs:
+            widget.addJob(job)
 
 
 class RenderJobWatchWidget(QtGui.QWidget):
@@ -185,9 +208,15 @@ class RenderJobWatchWidget(QtGui.QWidget):
         try:
             del self.__jobs[jobid]
         except Exception, e:
-            print e
+            LOGGER.error(e)
         idx = self.__tree.indexOfTopLevelItem(item)
         self.__tree.takeTopLevelItem(idx)
+
+    def jobs(self):
+        tree = self.__tree
+        items = tree.findItems("", QtCore.Qt.MatchContains|QtCore.Qt.MatchRecursive)
+        jobs = [item.data(0, JOB_ROLE) for item in items]      
+        return jobs  
 
     def selectedJobs(self):
         tree = self.__tree
@@ -237,7 +266,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
             req["user"].extend(self.attrs["users"])
        
         if self.attrs["projects"]:
-            req["projects"] = self.attrs["projects"]
+            req["project"] = self.attrs["projects"]
 
         self.__updateJobs(plow.client.get_jobs(**req))
 
@@ -296,8 +325,11 @@ class RenderJobWatchSettingsDialog(QtGui.QDialog):
         self.checkboxLoadErrors = QtGui.QCheckBox(self)
 
         projects = [project.code for project in plow.client.get_projects()]
-        self.listProjects = CheckableListBox("Projects", projects,
-            attrs["projects"], bool(attrs["allProjects"]), self)
+        self.listProjects = CheckableListBox("Projects", 
+                                                projects,
+                                                attrs["projects"], 
+                                                bool(attrs["allProjects"]), 
+                                                self)
 
         group_box1 = QtGui.QGroupBox("Auto Load Jobs", self)
 

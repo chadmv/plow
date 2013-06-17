@@ -296,9 +296,8 @@ class CheckableListBox(QtGui.QWidget):
             self.listItems.addItem(item)
 
         self.checkBoxAll = QtGui.QCheckBox("All %s" % title, self)
-        if allSelected:
-            self.listItems.setDisabled(True)
-            self.checkBoxAll.setCheckState(QtCore.Qt.Checked)
+        self.checkBoxAll.setChecked(allSelected)
+        self.listItems.setDisabled(allSelected)
         self.checkBoxAll.stateChanged.connect(self.__allSelectedToggled)
 
         layout.addWidget(self.checkBoxAll)
