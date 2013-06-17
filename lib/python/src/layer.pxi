@@ -227,7 +227,7 @@ cdef class LayerSpec:
 
     :var name: str
     :var range: str 
-    :var serv: str
+    :var service: str
     :var chunk: int 
     :var minCores: int 
     :var maxCores: int 
@@ -259,6 +259,7 @@ cdef class LayerSpec:
         self.depends = kwargs.get('depends', [])
         self.tasks = kwargs.get('tasks', [])
         self.env = kwargs.get('env', {})
+        self.chunk = kwargs.get('chunk', 1)
 
         if 'range' in kwargs:
             self.range = kwargs.get('range')
@@ -281,11 +282,14 @@ cdef class LayerSpec:
         if 'threadable' in kwargs:
             self.threadable = kwargs.get('threadable')
 
-        if 'maxReties' in kwargs:
+        if 'maxRetries' in kwargs:
             self.maxRetries = kwargs.get('maxRetries') 
 
         if 'tags' in kwargs:
             self.tags = kwargs.get('tags')
+
+        if 'isPost' in kwargs:
+            self.isPost = kwargs.get('isPost')
 
     def __repr__(self):
         return "<LayerSpec: %s>" % self.name
@@ -298,6 +302,8 @@ cdef class LayerSpec:
         self.minCores = t.minCores
         self.maxCores = t.maxCores
         self.minRam = t.minRam
+        self.maxRam = t.maxRam
+        self.maxRetries = t.maxRetries
         self.threadable = t.threadable
         self.command = t.command
         self.tags = t.tags
@@ -318,7 +324,6 @@ cdef class LayerSpec:
         s.name = self.name 
         s.serv = self.serv 
         s.range = self.range
-        s.serv = self.serv
         s.chunk = self.chunk
         s.minCores = self.minCores
         s.maxCores = self.maxCores
@@ -327,73 +332,79 @@ cdef class LayerSpec:
         s.maxRetries = self.maxRetries
         s.threadable = self.threadable
         s.command = self.command
-        s.tags = self.tags
         s.env = self.env
         s.isPost = self.isPost
+
+        if self.tags:
+            s.tags = self.tags
         
         s.__isset = self.__isset
 
         cdef: 
             DependSpecT dSpecT
             DependSpec dSpec
-        for dSpec in self.depends:
-            dSpecT = dSpec.toDependSpecT()
-            s.depends.push_back(dSpecT) 
+        
+        if self.depends:
+            for dSpec in self.depends:
+                dSpecT = dSpec.toDependSpecT()
+                s.depends.push_back(dSpecT) 
 
         cdef: 
             TaskSpecT tSpecT
             TaskSpec tSpec
-        for tSpec in self.tasks:
-            tSpecT = tSpec.toTaskSpecT()
-            s.tasks.push_back(tSpecT) 
+
+        if self.tasks:
+            for tSpec in self.tasks:
+                tSpecT = tSpec.toTaskSpecT()
+                s.tasks.push_back(tSpecT) 
 
         return s
 
     property minCores:
         def __get__(self): return self.minCores
-        def __set__(self, val): 
+        def __set__(self, int val): 
             self.minCores = val
             self.__isset.minCores = True
 
     property maxCores:
         def __get__(self): return self.maxCores
-        def __set__(self, val): 
+        def __set__(self, int val): 
             self.maxCores = val
             self.__isset.maxCores = True
 
     property minRam:
         def __get__(self): return self.minRam
-        def __set__(self, val): 
+        def __set__(self, int val): 
             self.minRam = val
             self.__isset.minRam = True
     
     property maxRam:
         def __get__(self): return self.maxRam
-        def __set__(self, val): 
+        def __set__(self, int val): 
             self.maxRam = val
             self.__isset.maxRam = True
 
     property maxRetries:
         def __get__(self): return self.maxRetries
-        def __set__(self, val): 
+        def __set__(self, int val): 
             self.maxRetries = val
             self.__isset.maxRetries = True
 
     property threadable:
         def __get__(self): return self.maxRam
-        def __set__(self, val): 
+        def __set__(self, int val): 
             self.maxRam = val
             self.__isset.maxRam = True
 
     property range:
         def __get__(self): return self.range
-        def __set__(self, val): 
+        def __set__(self, str val): 
             self.range = val
             self.__isset.range = True
 
     property service:
         def __get__(self): return self.serv
-        def __set__(self, val): 
+        def __set__(self, str val): 
             self.serv = val
             self.__isset.serv = True
 
@@ -417,7 +428,7 @@ cdef class LayerSpec:
 
     property env:
         def __get__(self): return self.env
-        def __set__(self, val): self.env = val
+        def __set__(self, dict val): self.env = val
 
 
 cdef inline Layer initLayer(LayerT& l):
@@ -433,7 +444,7 @@ cdef class Layer(PlowBase):
     :var id: str
     :var jobId: str
     :var name: str
-    :var serv: str
+    :var service: str
     :var range: str
     :var chunk: int
     :var minCores: int
@@ -472,7 +483,7 @@ cdef class Layer(PlowBase):
     property name:
         def __get__(self): return self._layer.name
 
-    property serv:
+    property service:
         def __get__(self): return self._layer.serv
 
     property range:
