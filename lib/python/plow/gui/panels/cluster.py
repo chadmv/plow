@@ -151,6 +151,7 @@ class ClusterModel(QtCore.QAbstractTableModel):
         to_add = set()
         cluster_ids = set()
 
+        rows = self.__index
         parent = QtCore.QModelIndex()
 
         clusters = plow.client.get_clusters()
