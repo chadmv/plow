@@ -339,7 +339,7 @@ class JobStateWidget(QtGui.QWidget):
 
 
 
-def jobContextMenu(jobs, refreshCallback=None, parent=None):
+def JobContextMenu(jobs, refreshCallback=None, parent=None):
     """
     Get a job context QMenu with common operations
     """

@@ -13,7 +13,7 @@ from plow.client import JobState, TaskState
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox, SpinSliderWidget, ManagedListWidget
-from plow.gui.common.job import JobProgressBar, JobSelectionDialog, JobStateWidget, jobContextMenu
+from plow.gui.common.job import JobProgressBar, JobSelectionDialog, JobStateWidget, JobContextMenu
 from plow.gui import constants 
 from plow.gui.util import formatMaxValue, formatDateTime, formatDuration
 from plow.gui.event import EventManager
@@ -251,7 +251,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
             return 
             
         job = item.data(0, JOB_ROLE)
-        menu = jobContextMenu(job, parent=tree)
+        menu = JobContextMenu(job, parent=tree)
         menu.popup(tree.mapToGlobal(pos))
 
     def __setJobStateAndColor(self, item):

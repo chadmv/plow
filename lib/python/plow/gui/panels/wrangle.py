@@ -14,7 +14,7 @@ from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.common import tree, models
 from plow.gui.common.widgets import TreeWidget
-from plow.gui.common.job import jobContextMenu
+from plow.gui.common.job import JobContextMenu
 from plow.gui.util import formatDateTime, formatDuration
 
 JOB_STATES = {}
@@ -215,7 +215,7 @@ class JobWranglerWidget(QtGui.QWidget):
                 pass
             jobs.insert(0, job)
 
-        menu = jobContextMenu(jobs, partial(self.queueRefresh, True), tree)
+        menu = JobContextMenu(jobs, partial(self.queueRefresh, True), tree)
         menu.popup(tree.mapToGlobal(pos))
 
     def queueRefresh(self, full=False):
