@@ -85,6 +85,10 @@ class TestProcessManager(unittest.TestCase):
         print "\n"
         print "="*60, "\n"
 
+    #
+    # Tests
+    #
+
     def testRunTaskCommand(self):
         process = self.getNewTaskCommand()
         process.command = [CMDS_UTIL, 'cpu_affinity']
@@ -265,6 +269,28 @@ class TestProcessManager(unittest.TestCase):
             self.assertEqual(status, 1, "Expected 1 Exit Status, but got %s" % status)
             self.assertEqual(sig, 86, "Expected 86 Exit Signal, but got %s" % sig)
 
+    def testPingPong(self):
+        process = self.getNewTaskCommand()
+        process.command = ["sleep", ".25"]
+        core.ProcessMgr.runProcess(process)
+
+        handler = server.RndProcessHandler()
+
+        ping = handler.pingPong()
+        self.assertFalse(ping.tasks, "Expected and empty task list")
+
+        ping = handler.pingPong(withTasks=True)
+        self.assertTrue(ping.tasks, "Expected to find a running task in ping result")
+
+        logging.debug("PingPong: %r", ping)
+
+        while core.ProcessMgr.getRunningTasks():
+            time.sleep(.1)
+
+
+    #
+    # Utils
+    #
 
     def getNewTaskCommand(self):
         process = ttypes.RunTaskCommand()

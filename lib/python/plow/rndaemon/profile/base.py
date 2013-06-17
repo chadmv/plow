@@ -3,6 +3,8 @@ import platform
 import socket
 import logging
 
+from threading import RLock 
+
 from .. import conf
 from .. import client
 from ..rpc import ttypes
@@ -19,6 +21,7 @@ class AbstractProfiler(object):
             "load": (-1.0, -1.0, -1.0)
         }
 
+        self.__updateLock = RLock()
         self.update()
 
         logCpu = self.data.get('logicalCpus', 1)
@@ -27,7 +30,7 @@ class AbstractProfiler(object):
         self.hyperthread_factor = max(ht_factor, 1)
 
         for key, value in self.data.iteritems():
-            logger.info("%s = %s" % (key, value))
+            logger.debug("%s = %s" % (key, value))
 
     def __getattr__(self, k):
         return self.data[k]
@@ -35,12 +38,9 @@ class AbstractProfiler(object):
     def __str__(self):
         return str(self.data)
 
-    def sendPing(self, tasks, isReboot=False):
-        # Update the values (calls subclass impl)
-        self.update()
-
-        if conf.NETWORK_DISABLED:
-            return
+    def getPing(self, update=False):
+        if update:
+            self.update()
 
         # Create the hardware profile
         hw = ttypes.Hardware()
@@ -57,10 +57,19 @@ class AbstractProfiler(object):
         # Create a ping
         ping = ttypes.Ping()
         ping.hostname = socket.getfqdn()
-        ping.ipAddr = socket.gethostbyname(socket.getfqdn())
-        ping.isReboot = isReboot
+        ping.ipAddr = socket.gethostbyname(ping.hostname)
         ping.bootTime = self.bootTime
         ping.hw = hw
+
+        return ping
+
+    def sendPing(self, tasks, isReboot=False):
+        if conf.NETWORK_DISABLED:
+            self.update()
+            return
+
+        ping = self.getPing(update=True)
+        ping.isReboot = isReboot
         ping.tasks = tasks
 
         logger.info("Sending ping: %s" % ping)
@@ -88,26 +97,27 @@ class AbstractProfiler(object):
         Instead, re-implement the protected _update().
         This method will be called after running _update().
         """
-        try:
-            self.data['load'] = os.getloadavg()
-        except OSError:
-            self.data['load'] = (-1.0, -1.0, -1.0)
+        with self.__updateLock:
+            try:
+                self.data['load'] = os.getloadavg()
+            except OSError:
+                self.data['load'] = (-1.0, -1.0, -1.0)
 
-        self._update()
+            self._update()
 
-        for name in ('logicalCpus', 'physicalCpus', 'totalRamMb'):
-            val = conf.getint('profile', name)
-            if val is not None and val > 0:
+            for name in ('logicalCpus', 'physicalCpus', 'totalRamMb'):
+                val = conf.getint('profile', name)
+                if val is not None and val > 0:
 
-                # Limit the total ram value, and also
-                # adjust the free ram to cap out as well.
-                if name == 'totalRamMb':
-                    if val >= self.totalRamMb:
-                        continue
-                    self.freeRamMb = min(val, self.freeRamMb)
+                    # Limit the total ram value, and also
+                    # adjust the free ram to cap out as well.
+                    if name == 'totalRamMb':
+                        if val >= self.totalRamMb:
+                            continue
+                        self.freeRamMb = min(val, self.freeRamMb)
 
-                setattr(self, name, val)
-                logger.debug("Using profile override: %s = %s" % (name, val))
+                    setattr(self, name, val)
+                    logger.debug("Using profile override: %s = %s" % (name, val))
 
     def reboot(self):
         """

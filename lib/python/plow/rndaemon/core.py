@@ -102,6 +102,10 @@ class _ProcessManager(object):
 
         self.sendPing(True)
 
+    @property 
+    def isReboot(self):
+        return self.__isReboot.is_set()
+
     def runProcess(self, processCmd, wait=-1):
         """
         Takes a RunTaskCommand object, reserves resources, 
@@ -156,8 +160,7 @@ class _ProcessManager(object):
         # reboot state.
         isReboot = self.__isReboot.is_set()
 
-        with self.__lock:
-            tasks = self.getRunningTasks()
+        tasks = self.getRunningTasks()
         Profiler.sendPing(tasks, isReboot)
 
         # TODO: Maybe there needs to be a seperate thread for this check
@@ -206,7 +209,10 @@ class _ProcessManager(object):
 
     def getRunningTasks(self):
         """ Get a list of all running task objects """
-        return [t.pthread.getRunningTask() for t in self.__threads.itervalues()]
+        with self.__lock:
+            tasks = [t.pthread.getRunningTask() for t in self.__threads.itervalues()]
+
+        return tasks
 
     def shutdown(self):
         """

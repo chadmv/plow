@@ -37,6 +37,15 @@ class RndProcessHandler(object):
     def reboot(self, now=False):
         core.ProcessMgr.reboot(now)
 
+    def pingPong(self, withTasks=False):
+        ping = core.Profiler.getPing() 
+        ping.isReboot = core.ProcessMgr.isReboot
+
+        if withTasks:
+            ping.tasks = self.getRunningTasks()
+
+        return ping
+
 
 def get_server(api, handler, port, **kwargs):
     processor = api.Processor(handler)
