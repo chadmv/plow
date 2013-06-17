@@ -15,7 +15,7 @@ class TableWidget(QtGui.QTableView):
         self.setSelectionBehavior(self.SelectRows)
         self.setSelectionMode(self.ExtendedSelection)
         self.setSortingEnabled(True)
-        self.setAlternatingRowColors(False)
+        self.setAlternatingRowColors(True)
         self.setAutoFillBackground(False)
         self.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
         
@@ -35,7 +35,7 @@ class TreeWidget(QtGui.QTreeView):
         self.setSelectionBehavior(self.SelectRows)
         self.setSelectionMode(self.ExtendedSelection)
         self.setUniformRowHeights(True)
-        self.setAlternatingRowColors(False)
+        self.setAlternatingRowColors(True)
         self.setAutoFillBackground(True)
         self.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
         # self.setVerticalScrollMode(self.ScrollPerPixel)

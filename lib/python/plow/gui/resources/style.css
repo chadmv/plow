@@ -17,6 +17,7 @@ QWidget
 QWidget::item
 {
   selection-background-color: #9D9D9D;
+  /*selection-color: #CF6700;*/
   /*selection-background-color: #F37321;*/
 }
 
@@ -79,7 +80,7 @@ QWidget:disabled
 QAbstractItemView
 {
     background-color: #4d4d4d;
-    alternate-background-color: #414141;
+    alternate-background-color: #454545;
 }
 
 QTableView

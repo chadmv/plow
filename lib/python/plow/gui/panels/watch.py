@@ -106,7 +106,8 @@ class RenderJobWatchWidget(QtGui.QWidget):
         tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
         tree.header().setStretchLastSection(True)
         tree.setSelectionMode(tree.ExtendedSelection)
-
+        tree.setAlternatingRowColors(True)
+        
         for i, v in enumerate(self.WIDTH):
             tree.setColumnWidth(i, v) 
 
