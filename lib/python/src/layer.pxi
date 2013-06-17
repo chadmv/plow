@@ -242,7 +242,9 @@ cdef class LayerSpec:
     :var env: dict
     :var isPost: bool
     """
-    cdef LayerSpecT _spec
+    cdef:
+        LayerSpecT _spec
+        list tasks, depends
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
@@ -250,11 +252,9 @@ cdef class LayerSpec:
         self.isPost = kwargs.get('isPost', False)
 
         self.command = kwargs.get('command', [])
+        self.tasks = kwargs.get('tasks', [])
         self.depends = kwargs.get('depends', [])
         self.env = kwargs.get('env', {})
-
-        if 'tasks' in kwargs:
-            self.tasks = kwargs['tasks']
 
         if 'range' in kwargs:
             self.range = kwargs['range']
@@ -289,7 +289,37 @@ cdef class LayerSpec:
     cdef setLayerSpec(self, LayerSpecT& t):
         self._spec = t
 
-    cdef LayerSpecT toLayerSpecT(self):
+        cdef TaskSpecT task
+        self.tasks = [initTaskSpec(task) for task in t.tasks]
+
+        cdef DependSpecT dep
+        self.depends = [initDependSpec(dep) for dep in t.depends]
+
+    cdef LayerSpecT toLayerSpecT(self) except +:
+        cdef: 
+            TaskSpecT tSpecT
+            TaskSpec tSpec
+            vector[TaskSpecT] tvec
+
+        tvec.reserve(len(self.tasks))
+        for tSpec in self.tasks:
+            tSpecT = tSpec.toTaskSpecT()
+            tvec.push_back(tSpecT) 
+
+        self._spec.tasks = tvec
+
+        cdef: 
+            DependSpecT dSpecT
+            DependSpec dSpec
+            vector[DependSpecT] dvec
+
+        dvec.reserve(len(self.depends))
+        for dSpec in self.depends:
+            dSpecT = dSpec.toDependSpecT()
+            dvec.push_back(dSpecT) 
+
+        self._spec.depends = dvec
+
         return self._spec
 
     property name:
@@ -357,46 +387,12 @@ cdef class LayerSpec:
         def __set__(self, val): self._spec.command = val
 
     property depends:
-        def __get__(self): 
-            cdef: 
-                DependSpecT dep
-                list ret 
-
-            ret = [initDependSpec(dep) for dep in self._spec.depends]
-            return ret
-
-        def __set__(self, val): 
-            cdef: 
-                DependSpecT dSpecT
-                DependSpec dSpec
-                vector[DependSpecT] vec
-
-            for dSpec in val:
-                dSpecT = dSpec.toDependSpecT()
-                vec.push_back(dSpecT) 
-
-            self._spec.depends = vec
+        def __get__(self): return self.depends
+        def __set__(self, val): self.depends = val
 
     property tasks:
-        def __get__(self):
-            cdef:
-                TaskSpecT task
-                list ret 
-
-            ret = [initTaskSpec(task) for task in self._spec.tasks]
-            return ret
-
-        def __set__(self, val): 
-            cdef: 
-                TaskSpecT tSpecT
-                TaskSpec tSpec
-                vector[TaskSpecT] vec
-
-            for tSpec in val:
-                tSpecT = tSpec.toTaskSpecT()
-                vec.push_back(tSpecT) 
-
-            self._spec.tasks = vec
+        def __get__(self): return self.tasks
+        def __set__(self, val): self.tasks = val
 
     property tags:
         def __get__(self): return self._spec.tags
