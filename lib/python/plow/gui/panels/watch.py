@@ -42,10 +42,6 @@ class RenderJobWatchPanel(Panel):
 
     def init(self):
         # TODO
-        # sweep button (remove finished)
-        # refresh button
-        # seperator
-        # kill button (multi-select)
         # comment button (multi-select)
         # 
         self.titleBarWidget().addAction(
@@ -89,8 +85,8 @@ class RenderJobWatchPanel(Panel):
 
 class RenderJobWatchWidget(QtGui.QWidget):
 
-    Header = ["Job", "State", "Run", "Wait", "Min", "Max", "Duration", "Progress"]
-    Width = [400, 75, 60, 60, 60, 60, 100, 125]
+    HEADER = ["Job", "State", "Run", "Wait", "Min", "Max", "Duration", "Progress"]
+    WIDTH = [400, 75, 60, 60, 60, 60, 100, 125]
 
     COLOR_DEAD = constants.COLOR_TASK_STATE[TaskState.DEAD]
     COLOR_PAUSED = constants.BLUE
@@ -104,22 +100,15 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__jobs = {}
 
         self.__tree = tree = QtGui.QTreeWidget(self)
-        tree.setHeaderLabels(self.Header)
-        tree.setColumnCount(len(self.Header))
+        tree.setHeaderLabels(self.HEADER)
+        tree.setColumnCount(len(self.HEADER))
         tree.setUniformRowHeights(True)
         tree.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
         tree.header().setStretchLastSection(True)
+        tree.setSelectionMode(tree.ExtendedSelection)
 
-        for i, v in enumerate(self.Width):
+        for i, v in enumerate(self.WIDTH):
             tree.setColumnWidth(i, v) 
-
-        def treeMousePress(event):
-            item = self.__tree.itemAt(event.pos())
-            if not item:
-                self.__tree.clearSelection()
-            QtGui.QTreeWidget.mousePressEvent(self.__tree, event)
-
-        tree.mousePressEvent = treeMousePress
 
         layout.addWidget(tree)
 
@@ -148,6 +137,8 @@ class RenderJobWatchWidget(QtGui.QWidget):
 
         self.__jobs[job.id] = item
 
+        item.setToolTip(0, job.name)
+
         item.setToolTip(6, "Started: %s\nStopped:%s" % 
             (formatDateTime(job.startTime), formatDateTime(job.stopTime)))
 
@@ -157,7 +148,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         self.__tree.addTopLevelItem(item)
 
         progress = JobProgressBar(job.totals, self.__tree)
-        self.__tree.setItemWidget(item, len(self.Header)-1, progress);
+        self.__tree.setItemWidget(item, len(self.HEADER)-1, progress);
 
         self.__setJobStateAndColor(item)
 
@@ -176,7 +167,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         item.setToolTip(6, "Started: %s\nStopped:%s" % 
             (formatDateTime(job.startTime), formatDateTime(job.stopTime)))
 
-        self.__tree.itemWidget(item, len(self.Header)-1).setTotals(job.totals)
+        self.__tree.itemWidget(item, len(self.HEADER)-1).setTotals(job.totals)
         self.__setJobStateAndColor(item)
 
     def removeFinishedJobs(self):
@@ -196,6 +187,11 @@ class RenderJobWatchWidget(QtGui.QWidget):
             print e
         idx = self.__tree.indexOfTopLevelItem(item)
         self.__tree.takeTopLevelItem(idx)
+
+    def selectedJobs(self):
+        tree = self.__tree
+        jobs = [item.data(0, JOB_ROLE) for item in tree.selectedItems()]
+        return jobs
 
     def __updateJobs(self, jobs):
         for job in jobs:
@@ -249,9 +245,10 @@ class RenderJobWatchWidget(QtGui.QWidget):
         item = tree.itemAt(pos)
         if not item:
             return 
-            
-        job = item.data(0, JOB_ROLE)
-        menu = JobContextMenu(job, parent=tree)
+        
+        jobs = self.selectedJobs()
+
+        menu = JobContextMenu(jobs, parent=tree)
         menu.popup(tree.mapToGlobal(pos))
 
     def __setJobStateAndColor(self, item):
