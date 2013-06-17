@@ -242,193 +242,171 @@ cdef class LayerSpec:
     :var env: dict
     :var isPost: bool
     """
-    cdef public string name
-    cdef public int chunk
-    cdef public bint isPost
-    
-    cdef int minCores, maxCores, minRam, maxRam, maxRetries
-    cdef bint threadable
-    cdef string range, serv
-    cdef list command, depends, tasks, tags
-    cdef dict env
-    cdef _LayerSpecT__isset __isset
+    cdef LayerSpecT _spec
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', '')
+        self.chunk = kwargs.get('chunk', 1)
+        self.isPost = kwargs.get('isPost', False)
+
         self.command = kwargs.get('command', [])
         self.depends = kwargs.get('depends', [])
-        self.tasks = kwargs.get('tasks', [])
         self.env = kwargs.get('env', {})
-        self.chunk = kwargs.get('chunk', 1)
+
+        if 'tasks' in kwargs:
+            self.tasks = kwargs['tasks']
 
         if 'range' in kwargs:
-            self.range = kwargs.get('range')
+            self.range = kwargs['range']
 
         if 'service' in kwargs:
-            self.service = kwargs.get('service')
+            self.service = kwargs['service']
 
         if 'minCores' in kwargs:
-            self.minCores = kwargs.get('minCores')
+            self.minCores = kwargs['minCores']
 
         if 'maxCores' in kwargs:
-            self.maxCores = kwargs.get('maxCores')
+            self.maxCores = kwargs['maxCores']
 
         if 'minRam' in kwargs:
-            self.minRam = kwargs.get('minRam')
+            self.minRam = kwargs['minRam']
 
         if 'maxRam' in kwargs:
-            self.maxRam = kwargs.get('maxRam')
+            self.maxRam = kwargs['maxRam']
 
         if 'threadable' in kwargs:
-            self.threadable = kwargs.get('threadable')
+            self.threadable = kwargs['threadable']
 
         if 'maxRetries' in kwargs:
-            self.maxRetries = kwargs.get('maxRetries') 
+            self.maxRetries = kwargs['maxRetries']
 
         if 'tags' in kwargs:
-            self.tags = kwargs.get('tags')
-
-        if 'isPost' in kwargs:
-            self.isPost = kwargs.get('isPost')
+            self.tags = kwargs['tags']
 
     def __repr__(self):
         return "<LayerSpec: %s>" % self.name
 
     cdef setLayerSpec(self, LayerSpecT& t):
-        self.name  = t.name 
-        self.serv = t.serv 
-        self.range = t.range
-        self.chunk = t.chunk
-        self.minCores = t.minCores
-        self.maxCores = t.maxCores
-        self.minRam = t.minRam
-        self.maxRam = t.maxRam
-        self.maxRetries = t.maxRetries
-        self.threadable = t.threadable
-        self.command = t.command
-        self.tags = t.tags
-        self.env = t.env
-        self.isPost = t.isPost
-
-        self.__isset = t.__isset
-
-        cdef DependSpecT dep
-        self.depends = [initDependSpec(dep) for d in t.depends]
-
-        cdef TaskSpecT task
-        self.tasks = [initTaskSpec(task) for task in t.tasks]
+        self._spec = t
 
     cdef LayerSpecT toLayerSpecT(self):
-        cdef LayerSpecT s
+        return self._spec
 
-        s.name = self.name 
-        s.serv = self.serv 
-        s.range = self.range
-        s.chunk = self.chunk
-        s.minCores = self.minCores
-        s.maxCores = self.maxCores
-        s.minRam = self.minRam
-        s.maxRam = self.maxRam
-        s.maxRetries = self.maxRetries
-        s.threadable = self.threadable
-        s.command = self.command
-        s.env = self.env
-        s.isPost = self.isPost
+    property name:
+        def __get__(self): return self._spec.name
+        def __set__(self, str val): self._spec.name = val
 
-        if self.tags:
-            s.tags = self.tags
-        
-        s.__isset = self.__isset
+    property chunk:
+        def __get__(self): return self._spec.chunk
+        def __set__(self, int val): self._spec.chunk = val
 
-        cdef: 
-            DependSpecT dSpecT
-            DependSpec dSpec
-        
-        if self.depends:
-            for dSpec in self.depends:
-                dSpecT = dSpec.toDependSpecT()
-                s.depends.push_back(dSpecT) 
-
-        cdef: 
-            TaskSpecT tSpecT
-            TaskSpec tSpec
-
-        if self.tasks:
-            for tSpec in self.tasks:
-                tSpecT = tSpec.toTaskSpecT()
-                s.tasks.push_back(tSpecT) 
-
-        return s
+    property isPost:
+        def __get__(self): return self._spec.isPost
+        def __set__(self, bint val): self._spec.isPost = val
 
     property minCores:
-        def __get__(self): return self.minCores
+        def __get__(self): return self._spec.minCores
         def __set__(self, int val): 
-            self.minCores = val
-            self.__isset.minCores = True
+            self._spec.minCores = val
+            self._spec.__isset.minCores = True
 
     property maxCores:
-        def __get__(self): return self.maxCores
+        def __get__(self): return self._spec.maxCores
         def __set__(self, int val): 
-            self.maxCores = val
-            self.__isset.maxCores = True
+            self._spec.maxCores = val
+            self._spec.__isset.maxCores = True
 
     property minRam:
-        def __get__(self): return self.minRam
+        def __get__(self): return self._spec.minRam
         def __set__(self, int val): 
-            self.minRam = val
-            self.__isset.minRam = True
+            self._spec.minRam = val
+            self._spec.__isset.minRam = True
     
     property maxRam:
-        def __get__(self): return self.maxRam
+        def __get__(self): return self._spec.maxRam
         def __set__(self, int val): 
-            self.maxRam = val
-            self.__isset.maxRam = True
+            self._spec.maxRam = val
+            self._spec.__isset.maxRam = True
 
     property maxRetries:
-        def __get__(self): return self.maxRetries
+        def __get__(self): return self._spec.maxRetries
         def __set__(self, int val): 
-            self.maxRetries = val
-            self.__isset.maxRetries = True
+            self._spec.maxRetries = val
+            self._spec.__isset.maxRetries = True
 
     property threadable:
-        def __get__(self): return self.maxRam
-        def __set__(self, int val): 
-            self.maxRam = val
-            self.__isset.maxRam = True
+        def __get__(self): return self._spec.maxRam
+        def __set__(self, bint val): 
+            self._spec.maxRam = val
+            self._spec.__isset.maxRam = True
 
     property range:
-        def __get__(self): return self.range
+        def __get__(self): return self._spec.range
         def __set__(self, str val): 
-            self.range = val
-            self.__isset.range = True
+            self._spec.range = val
+            self._spec.__isset.range = True
 
     property service:
-        def __get__(self): return self.serv
+        def __get__(self): return self._spec.serv
         def __set__(self, str val): 
-            self.serv = val
-            self.__isset.serv = True
+            self._spec.serv = val
+            self._spec.__isset.serv = True
 
     property command:
-        def __get__(self): return self.command
-        def __set__(self, val): self.command = val
+        def __get__(self): return self._spec.command
+        def __set__(self, val): self._spec.command = val
 
     property depends:
-        def __get__(self): return self.depends
-        def __set__(self, val): self.depends = val
+        def __get__(self): 
+            cdef: 
+                DependSpecT dep
+                list ret 
+
+            ret = [initDependSpec(dep) for dep in self._spec.depends]
+            return ret
+
+        def __set__(self, val): 
+            cdef: 
+                DependSpecT dSpecT
+                DependSpec dSpec
+                vector[DependSpecT] vec
+
+            for dSpec in val:
+                dSpecT = dSpec.toDependSpecT()
+                vec.push_back(dSpecT) 
+
+            self._spec.depends = vec
 
     property tasks:
-        def __get__(self): return self.tasks
-        def __set__(self, val): self.tasks = val
+        def __get__(self):
+            cdef:
+                TaskSpecT task
+                list ret 
+
+            ret = [initTaskSpec(task) for task in self._spec.tasks]
+            return ret
+
+        def __set__(self, val): 
+            cdef: 
+                TaskSpecT tSpecT
+                TaskSpec tSpec
+                vector[TaskSpecT] vec
+
+            for tSpec in val:
+                tSpecT = tSpec.toTaskSpecT()
+                vec.push_back(tSpecT) 
+
+            self._spec.tasks = vec
 
     property tags:
-        def __get__(self): return self.tags
+        def __get__(self): return self._spec.tags
         def __set__(self, val):
-            self.tags = val
-            self.__isset.tags = True
+            self._spec.tags = val
+            self._spec.__isset.tags = True
 
     property env:
-        def __get__(self): return self.env
-        def __set__(self, dict val): self.env = val
+        def __get__(self): return self._spec.env
+        def __set__(self, dict val): self._spec.env = val
 
 
 cdef inline Layer initLayer(LayerT& l):
