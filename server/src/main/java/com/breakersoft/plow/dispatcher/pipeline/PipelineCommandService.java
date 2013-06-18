@@ -15,7 +15,6 @@ import com.breakersoft.plow.rnd.thrift.RunTaskResult;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.StateManager;
 import com.breakersoft.plow.thrift.TaskState;
-import com.breakersoft.plow.util.PlowUtils;
 
 @Component
 public class PipelineCommandService {
@@ -51,12 +50,8 @@ public class PipelineCommandService {
         }
 
         boolean deallocateProc = false;
-
-        final long startTime = System.currentTimeMillis();
         if (dispatchService.stopTask(
                 task, newState, result.exitStatus, result.exitSignal)) {
-
-            PlowUtils.logTime(startTime, "Task Stopped DB Update", true);
             dispatchService.unassignProc(proc);
 
             if (newState.equals(TaskState.SUCCEEDED)) {
