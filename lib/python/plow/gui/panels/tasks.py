@@ -11,6 +11,7 @@ from plow.gui.event import EventManager
 from plow.gui import constants 
 from plow.gui.common.widgets import CheckableComboBox, TableWidget
 from plow.gui.common import models
+from plow.gui.dialogs.depends import DependencyWizard
 
 IdRole = QtCore.Qt.UserRole
 ObjectRole = QtCore.Qt.UserRole + 1
@@ -148,6 +149,12 @@ class TaskWidget(QtGui.QWidget):
         menu.addAction(QtGui.QIcon(":/images/retry.png"), "Retry", self.retrySelected)
         menu.addAction(QtGui.QIcon(":/images/kill.png"), "Kill", self.killSelected)
         menu.addAction(QtGui.QIcon(":/images/eat.png"), "Eat", self.eatSelected)
+
+        total = self.__selectedCount()
+        if total == 1:
+            depend = menu.addAction("Add Dependencies")
+            depend.triggered.connect(self.__addDepends)
+
         menu.exec_(self.mapToGlobal(pos))
         
     def __rowDoubleClicked(self, index):
@@ -157,6 +164,10 @@ class TaskWidget(QtGui.QWidget):
     def __updateLayers(self):
         if self.__jobId:
             self.__layers = dict((l.name, l) for l in plow.client.get_layers(self.__jobId))
+
+    def __selectedCount(self):
+        s_model = self.__table.selectionModel()
+        return len(s_model.selectedRows())
 
     def setStateFilters(self, states):
         self.__proxy.setFilters(states=states)
@@ -197,12 +208,30 @@ class TaskWidget(QtGui.QWidget):
             plow.client.eat_tasks(taskIds=tasks)
             self.queueRefresh(self.REFRESH, True)
 
+    def __addDepends(self):
+        tasks = self.getSelectedTasks()
+        if tasks:
+            aTask = tasks[0]
+            aJobSpec = plow.client.get_job_spec(aTask.jobId)
+
+            wizard = DependencyWizard(self.parent(), project=aJobSpec.project)
+            wizard.resize(wizard.width(), 600)
+            wizard.setSourceObject(aTask)
+            wizard.show()
+
     def getSelectedTaskIds(self):
         ids = []
         s_model = self.__table.selectionModel()
         for row in s_model.selectedRows():
             ids.append(row.data(IdRole))
         return ids
+
+    def getSelectedTasks(self):
+        tasks = []
+        s_model = self.__table.selectionModel()
+        for row in s_model.selectedRows():
+            tasks.append(row.data(ObjectRole))
+        return tasks
 
     def queueRefresh(self, ms, full=False):
         QtCore.QTimer.singleShot(ms, self.refresh)
