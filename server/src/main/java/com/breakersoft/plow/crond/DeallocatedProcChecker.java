@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.monitor.PlowStats;
 
 public class DeallocatedProcChecker extends AbstractCrondTask {
 
@@ -19,8 +20,14 @@ public class DeallocatedProcChecker extends AbstractCrondTask {
     protected void run() {
         List<DispatchProc> procs = dispatchService.getDeallocatedProcs();
         for(DispatchProc proc: procs) {
-            logger.info("Deallocating proc: {}", proc);
-            dispatchService.deallocateProc(proc, "Deallocated by the dispatcher, no longer needed.");
+            try {
+                logger.info("Deallocating proc: {}", proc);
+                dispatchService.deallocateProc(proc, "Deallocated by the dispatcher, no longer needed.");
+                PlowStats.procUnallocCount.incrementAndGet();
+            } catch (RuntimeException e) {
+                logger.warn("Failed to deallocate proc: {}, unexepected: {}", proc, e);
+                PlowStats.procUnallocFailCount.incrementAndGet();
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.rndaemon.RndClientPool;
 
 /**
@@ -32,8 +33,11 @@ public class ProcDispatcher extends AbstractDispatcher implements Dispatcher<Dis
         dispatch(result, proc);
         if (result.procs == 0) {
             dispatchService.markAsDeallocated(proc);
+            PlowStats.procDispatchMiss.incrementAndGet();
         }
-
+        else {
+            PlowStats.procDispatchHit.incrementAndGet();
+        }
         return result;
     }
 
@@ -63,6 +67,7 @@ public class ProcDispatcher extends AbstractDispatcher implements Dispatcher<Dis
             dispatchService.assignProc(proc, task);
         } catch (RuntimeException e) {
             dispatchFailed(result, proc, task, "Unable to assign proc to a resereved task.");
+            PlowStats.procDispatchFail.incrementAndGet();
             return;
         }
 
@@ -71,9 +76,12 @@ public class ProcDispatcher extends AbstractDispatcher implements Dispatcher<Dis
             if (!result.isTest) {
                 rndClientPool.executeProcess(proc, task);
             }
+            PlowStats.taskStartedCount.incrementAndGet();
         }
         else {
             dispatchFailed(result, proc, task, "Critical, was able to reserve task but not start it.");
+            PlowStats.procDispatchFail.incrementAndGet();
+            PlowStats.taskStartedFailCount.incrementAndGet();
         }
     }
 

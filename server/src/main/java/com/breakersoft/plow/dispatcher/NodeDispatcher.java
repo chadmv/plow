@@ -13,6 +13,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.rndaemon.RndClientPool;
 import com.google.common.util.concurrent.RateLimiter;
 
@@ -34,7 +35,13 @@ public class NodeDispatcher extends AbstractDispatcher implements Dispatcher<Dis
         nodeDispatchExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                 dispatch(node);
+                final DispatchResult result = dispatch(node);
+                if (result.procs > 0) {
+                    PlowStats.nodeDispatchHit.incrementAndGet();
+                }
+                else {
+                    PlowStats.nodeDispatchMiss.incrementAndGet();
+                }
             }
         });
     }
@@ -127,9 +134,12 @@ public class NodeDispatcher extends AbstractDispatcher implements Dispatcher<Dis
         DispatchProc proc = null;
         try {
             proc = dispatchService.allocateProc(node, task);
+            PlowStats.procAllocCount.incrementAndGet();
         }
         catch (RuntimeException e) {
             dispatchFailed(result, proc, task, "Unable to allocate proc " + e);
+            PlowStats.nodeDispatchFail.incrementAndGet();
+            PlowStats.procAllocFailCount.incrementAndGet();
             return;
         }
 
@@ -138,9 +148,12 @@ public class NodeDispatcher extends AbstractDispatcher implements Dispatcher<Dis
             if (!result.isTest) {
                 rndClientPool.executeProcess(proc, task);
             }
+            PlowStats.taskStartedCount.incrementAndGet();
         }
         else {
             dispatchFailed(result, proc, task, "Critical, was able to reserve task but not start it.");
+            PlowStats.nodeDispatchFail.incrementAndGet();
+            PlowStats.taskStartedFailCount.incrementAndGet();
         }
     }
 }

@@ -97,6 +97,8 @@ public class RndEventHandler {
             return;
         }
 
+        PlowStats.rndTaskComplete.incrementAndGet();
+
         // May throw back to RND if the job's pipeline is full.
         // Will internally spawn a dispatch proc command.
         pipelineController.execute(

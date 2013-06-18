@@ -11,6 +11,7 @@ import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.ProcDispatcher;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.StateManager;
@@ -53,8 +54,10 @@ public class PipelineCommandService {
         if (dispatchService.stopTask(
                 task, newState, result.exitStatus, result.exitSignal)) {
             dispatchService.unassignProc(proc);
+            PlowStats.taskStoppedCount.incrementAndGet();
 
             if (newState.equals(TaskState.SUCCEEDED)) {
+
                 stateManager.satisfyDependsOn(task);
                 final Layer layer = new LayerE(task);
                 if (jobService.isLayerComplete(layer)) {
@@ -67,16 +70,18 @@ public class PipelineCommandService {
                         final Job job = jobService.getJob(task.getJobId());
                         stateManager.shutdownJob(job);
                     }
-
-                    //TODO: do I even need this anymore once durable pipeline works?
-                    dispatchService.dependQueueProcessed(task);
                 } catch (RuntimeException e) {
+                    deallocateProc = true;
                     logger.warn("Failed to shutdown job after task complete {}", task);
                 }
+
+                //TODO: do I even need this anymore once durable pipeline works?
+                dispatchService.dependQueueProcessed(task);
             }
         }
         else {
             deallocateProc = true;
+            PlowStats.taskStoppedFailCount.incrementAndGet();
             logger.error("Unable to stop stop task {}", task);
         }
 

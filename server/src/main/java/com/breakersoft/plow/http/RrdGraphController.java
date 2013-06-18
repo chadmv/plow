@@ -268,7 +268,7 @@ public class RrdGraphController {
     private RrdGraphDef baseGraph(String title, String vertLabel) {
         final long now = System.currentTimeMillis() / 1000;
         RrdGraphDef graphDef = new RrdGraphDef();
-        graphDef.setTimeSpan(now - 86400 , now);
+        graphDef.setTimeSpan(now - 3600 , now);
         graphDef.setTitle(title);
         graphDef.setVerticalLabel(vertLabel);
         graphDef.setImageFormat("png");
