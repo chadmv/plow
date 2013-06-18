@@ -11,6 +11,7 @@ import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.exceptions.RndClientExecuteException;
 import com.breakersoft.plow.rndaemon.RndClient;
+import com.breakersoft.plow.rndaemon.RndClientPool;
 
 /**
  * Component for handling operations that require talking to
@@ -27,13 +28,16 @@ public class RndProcessManager {
     @Autowired
     NodeService nodeService;
 
+    @Autowired
+    RndClientPool rndClientPool;
+
     public void killProcs(Job job, String reason) {
         final List<Proc> procs = nodeService.getProcs(job);
 
         for (Proc proc: procs) {
             nodeService.setProcUnbooked(proc, true);
 
-            RndClient client = new RndClient(proc.getHostname());
+            RndClient client = rndClientPool.get(proc.getHostname());
             try {
                 client.kill(proc, reason);
             }
