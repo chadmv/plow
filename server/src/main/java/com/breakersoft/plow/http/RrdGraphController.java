@@ -125,7 +125,7 @@ public class RrdGraphController {
         graphDef.datasource("lineb", path, "nodeDispatchMiss", ConsolFun.AVERAGE);
         graphDef.datasource("linec", path, "nodeDispatchFail", ConsolFun.AVERAGE);
         graphDef.area("linea", new Color(152, 175, 54), "Hit");
-        graphDef.line("lineb", new Color(74, 104, 15), "Miss",1);
+        graphDef.line("lineb", new Color(74, 104, 15), "Miss", 1);
         graphDef.line("linec", new Color(164, 11, 23), "Error", 1);
 
         return createImage(graphDef);
@@ -142,10 +142,10 @@ public class RrdGraphController {
         graphDef.datasource("lineb", path, "taskStartedFailCount", ConsolFun.AVERAGE);
         graphDef.datasource("linec", path, "taskStoppedCount", ConsolFun.AVERAGE);
         graphDef.datasource("lined", path, "taskStoppedFailCount", ConsolFun.AVERAGE);
-        graphDef.area("linea", new Color(152, 175, 54), "Started");
-        graphDef.line("lineb", new Color(91, 40, 44), "Error Started",1);
-        graphDef.area("linec", new Color(164, 11, 23), "Stopped");
-        graphDef.line("lined", new Color(164, 11, 23), "Error Stopped", 1);
+        graphDef.area("linea", new Color(8, 175, 193), "Started");
+        graphDef.stack("linec", new Color(133, 225, 224), "Stopped");
+        graphDef.line("lineb", new Color(243, 165, 41), "Error Started", 2);
+        graphDef.line("lined", new Color(241, 93, 5), "Error Stopped", 2);
 
         return createImage(graphDef);
     }
@@ -161,10 +161,10 @@ public class RrdGraphController {
         graphDef.datasource("lineb", path, "jobLaunchFailCount", ConsolFun.AVERAGE);
         graphDef.datasource("linec", path, "jobFinishCount", ConsolFun.AVERAGE);
         graphDef.datasource("lined", path, "jobKillCount", ConsolFun.AVERAGE);
-        graphDef.area("linea", new Color(152, 175, 54), "Launched");
-        graphDef.line("lineb", new Color(91, 40, 44), "Launch Fail",1);
-        graphDef.area("linec", new Color(164, 11, 23), "Finished");
-        graphDef.line("lined", new Color(191, 104, 15), "Jobs Killed", 1);
+        graphDef.area("linea", new Color(8, 175, 193), "Launched");
+        graphDef.stack("linec", new Color(133, 225, 224), "Finished");
+        graphDef.line("lineb", new Color(241, 93, 5), "Launch Fail", 2);
+        graphDef.line("lined",  new Color(243, 165, 41), "Jobs Killed", 2);
 
         return createImage(graphDef);
     }
@@ -176,10 +176,18 @@ public class RrdGraphController {
         final String path = rrdPath(PLOW_RRD);
         final RrdGraphDef graphDef = baseGraph("Rnd Traffic", "ops/sec");
 
-        graphDef.datasource("linea", path, "rndPingCount", ConsolFun.AVERAGE);
-        graphDef.datasource("lineb", path, "rndTaskComplete", ConsolFun.AVERAGE);
-        graphDef.area("linea", new Color(152, 175, 54), "Ping");
-        graphDef.area("lineb", new Color(164, 11, 23), "Task Complete");
+        graphDef.datasource("ping", path, "rndPingCount", ConsolFun.AVERAGE);
+        graphDef.datasource("task", path, "rndTaskComplete", ConsolFun.AVERAGE);
+        graphDef.area("ping", new Color(179, 96, 157), "Ping");
+        graphDef.stack("task", new Color(255, 163, 231), "Task Complete");
+
+        graphDef.comment("\\r");
+
+        graphDef.gprint("ping", MAX, "Max Pings = %.3f%S");
+        graphDef.gprint("ping", AVERAGE, "Avg Pings = %.3f%S\n");
+
+        graphDef.gprint("task", MAX, "Max Task Complate = %.3f%s");
+        graphDef.gprint("task", AVERAGE, "Avg Task Complete = %.3f%S\n");
 
         return createImage(graphDef);
     }
@@ -191,10 +199,19 @@ public class RrdGraphController {
         final String path = rrdPath(THREAD_RRD);
         final RrdGraphDef graphDef = baseGraph("Node Dispatcher Queue", "threads/sec");
 
-        graphDef.datasource("linea", path, "nodeActiveThreads", ConsolFun.AVERAGE);
-        graphDef.datasource("lineb", path, "nodeWaiting", ConsolFun.AVERAGE);
-        graphDef.line("linea", new Color(152, 175, 54), "Active Threads");
-        graphDef.area("lineb", new Color(74, 104, 15), "Queued Work");
+        graphDef.datasource("threads", path, "nodeActiveThreads", ConsolFun.AVERAGE);
+        graphDef.datasource("queue", path, "nodeWaiting", ConsolFun.AVERAGE);
+
+        graphDef.line("threads", new Color(152, 175, 54), "Active Threads");
+        graphDef.area("queue", new Color(74, 104, 15), "Queued Work");
+
+        graphDef.comment("\\r");
+
+        graphDef.gprint("threads", MAX, "Max Threads = %.3f%S");
+        graphDef.gprint("threads", AVERAGE, "Avg Threads = %.3f%S\n");
+
+        graphDef.gprint("queue", MAX, "Max Queued = %.3f%s");
+        graphDef.gprint("queue", AVERAGE, "Avg Queued = %.3f%S\n");
 
         return createImage(graphDef);
     }
@@ -208,8 +225,8 @@ public class RrdGraphController {
 
         graphDef.datasource("linea", path, "procActiveThreads", ConsolFun.AVERAGE);
         graphDef.datasource("lineb", path, "procWaiting", ConsolFun.AVERAGE);
-        graphDef.line("linea", new Color(152, 175, 54), "Active Threads");
         graphDef.area("lineb", new Color(74, 104, 15), "Queued Work");
+        graphDef.line("linea", new Color(152, 175, 54), "Active Threads");
 
         return createImage(graphDef);
     }
@@ -219,12 +236,12 @@ public class RrdGraphController {
     public byte[] asyncWorkQueueThreads() throws IOException {
 
         final String path = rrdPath(THREAD_RRD);
-        final RrdGraphDef graphDef = baseGraph("Async Work Queue Threads", "threads/sec");
+        final RrdGraphDef graphDef = baseGraph("Async Work Queue", "threads/sec");
 
         graphDef.datasource("linea", path, "asyncActiveThreads", ConsolFun.AVERAGE);
         graphDef.datasource("lineb", path, "asyncWaiting", ConsolFun.AVERAGE);
-        graphDef.line("linea", new Color(152, 175, 54), "Active Threads");
         graphDef.area("lineb", new Color(74, 104, 15), "Queued Work");
+        graphDef.line("linea", new Color(152, 175, 54), "Active Threads");
 
         return createImage(graphDef);
     }
@@ -283,11 +300,11 @@ public class RrdGraphController {
                  (long) plowThreadPools.nodeDispatcherExecutor().getThreadPoolExecutor().getQueue().size(),
                  (long) plowThreadPools.nodeDispatcherExecutor().getThreadPoolExecutor().getQueue().remainingCapacity(),
 
-                 plowThreadPools.procDispatcherExecutor().getThreadPoolExecutor().getPoolSize(),
-                 plowThreadPools.procDispatcherExecutor().getActiveCount(),
-                 plowThreadPools.procDispatcherExecutor().getThreadPoolExecutor().getCompletedTaskCount(),
-                 (long) plowThreadPools.procDispatcherExecutor().getThreadPoolExecutor().getQueue().size(),
-                 (long) plowThreadPools.procDispatcherExecutor().getThreadPoolExecutor().getQueue().remainingCapacity(),
+                 plowThreadPools.pipelineExecutor().getThreadPoolExecutor().getPoolSize(),
+                 plowThreadPools.pipelineExecutor().getActiveCount(),
+                 plowThreadPools.pipelineExecutor().getThreadPoolExecutor().getCompletedTaskCount(),
+                 (long) plowThreadPools.pipelineExecutor().getThreadPoolExecutor().getQueue().size(),
+                 (long) plowThreadPools.pipelineExecutor().getThreadPoolExecutor().getQueue().remainingCapacity(),
 
                  plowThreadPools.stateChangeExecutor().getThreadPoolExecutor().getPoolSize(),
                  plowThreadPools.stateChangeExecutor().getActiveCount(),
@@ -356,21 +373,21 @@ public class RrdGraphController {
         rrdDef.addArchive(MAX, 0.5, 1, 1440);
         rrdDef.addArchive(MAX, 0.5, 5, 288);
 
-        rrdDef.addDatasource("nodeThreads", DERIVE, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("nodeThreads", COUNTER, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("nodeActiveThreads", GAUGE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("nodeExecuted", DERIVE, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("nodeExecuted", COUNTER, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("nodeWaiting", GAUGE, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("nodeCapacity", GAUGE, 600, Double.NaN, Double.NaN);
 
-        rrdDef.addDatasource("procThreads", DERIVE, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("procThreads", COUNTER, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("procActiveThreads", GAUGE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("procExecuted", DERIVE, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("procExecuted", COUNTER, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("procWaiting", GAUGE, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("procCapacity", GAUGE, 600, Double.NaN, Double.NaN);
 
-        rrdDef.addDatasource("asyncThreads", DERIVE, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("asyncThreads", COUNTER, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("asyncActiveThreads", GAUGE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("asyncExecuted", DERIVE, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("asyncExecuted", COUNTER, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("asyncWaiting", GAUGE, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("asyncCapacity", GAUGE, 600, Double.NaN, Double.NaN);
 
@@ -387,30 +404,30 @@ public class RrdGraphController {
         rrdDef.addArchive(MAX, 0.5, 1, 1440);
         rrdDef.addArchive(MAX, 0.5, 5, 288);
 
-        rrdDef.addDatasource("nodeDispatchHit", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("nodeDispatchMiss", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("nodeDispatchFail", DERIVE, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("nodeDispatchHit", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("nodeDispatchMiss", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("nodeDispatchFail", COUNTER, 600, Double.NaN, Double.NaN);
 
-        rrdDef.addDatasource("procDispatchHit", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("procDispatchMiss", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("procDispatchFail", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("procAllocCount", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("procUnallocCount", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("procAllocFailCount", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("procUnallocFailCount", DERIVE, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("procDispatchHit", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("procDispatchMiss", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("procDispatchFail", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("procAllocCount", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("procUnallocCount", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("procAllocFailCount", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("procUnallocFailCount", COUNTER, 600, Double.NaN, Double.NaN);
 
-        rrdDef.addDatasource("taskStartedCount", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("taskStartedFailCount", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("taskStoppedCount", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("taskStoppedFailCount", DERIVE, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("taskStartedCount", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("taskStartedFailCount", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("taskStoppedCount", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("taskStoppedFailCount", COUNTER, 600, Double.NaN, Double.NaN);
 
-        rrdDef.addDatasource("jobLaunchCount", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("jobLaunchFailCount", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("jobFinishCount", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("jobKillCount", DERIVE, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("jobLaunchCount", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("jobLaunchFailCount", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("jobFinishCount", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("jobKillCount", COUNTER, 600, Double.NaN, Double.NaN);
 
-        rrdDef.addDatasource("rndPingCount", DERIVE, 600, Double.NaN, Double.NaN);
-        rrdDef.addDatasource("rndTaskComplete", DERIVE, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("rndPingCount", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("rndTaskComplete", COUNTER, 600, Double.NaN, Double.NaN);
 
         saveRrdDef(rrdDef);
     }
