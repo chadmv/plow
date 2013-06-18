@@ -20,49 +20,86 @@ public class RndClient {
     private static final Logger logger =
             org.slf4j.LoggerFactory.getLogger(RndClient.class);
 
+    private static final int MAX_RETRIES = 3;
+
     private final String host;
     private final int port;
 
-    private TSocket socket;
-    private TTransport transport;
-    private TProtocol protocol;
+    private TSocket socket = null;
+    private TTransport transport = null;
+    private TProtocol protocol = null;
+    private RndNodeApi.Client service = null;
 
     public RndClient(String host) {
         this.host = host;
         this.port = 11338;
     }
 
-    public RndNodeApi.Client connect() throws TTransportException {
+    public String getHostname() {
+        return this.host;
+    }
+
+    public void connect() throws TTransportException {
+
+        if (socket!= null) {
+            socket.close();
+        }
+
         socket = new TSocket(host, port);
         socket.setTimeout(Defaults.RND_CLIENT_SOCKET_TIMEOUT_MS);
         transport = new TFramedTransport(socket);
         protocol = new TBinaryProtocol(transport);
         transport.open();
-        return new RndNodeApi.Client(protocol);
+        service = new RndNodeApi.Client(protocol);
     }
 
-    //TODO change to runTask
-    public void runProcess(RunTaskCommand command) {
-        try {
-            connect().runTask(command);
-        } catch (TException e) {
-            logger.warn("Failed to run task " + command, e);
-            throw new RndClientExecuteException(e);
-        }
-        finally {
-            socket.close();
+    public synchronized void runProcess(RunTaskCommand command) {
+        int retries = 0;
+        while (true) {
+
+            try {
+                service.runTask(command);
+                return;
+            } catch (TTransportException e) {
+                if (retries>=MAX_RETRIES) {
+                    throw new RndClientExecuteException(e);
+                }
+                try {
+                    connect();
+                } catch (TTransportException te) {
+                    logger.warn("Failed to reconnect to " + getHostname());
+                }
+            } catch (TException e) {
+                logger.warn("Failed to run task " + command, e);
+                throw new RndClientExecuteException(e);
+            }
+
+            retries++;
         }
     }
 
-    public void kill(Proc proc, String reason) {
-        try {
-            connect().killRunningTask(proc.getProcId().toString(), reason);
-        } catch (TException e) {
-            logger.warn("Failed to kill proc " + proc, e);
-            throw new RndClientExecuteException(e);
-        }
-        finally {
-            socket.close();
+    public synchronized void kill(Proc proc, String reason) {
+        int retries = 0;
+        while (true) {
+
+            try {
+                service.killRunningTask(proc.getProcId().toString(), reason);
+                return;
+            } catch (TTransportException e) {
+                if (retries>=MAX_RETRIES) {
+                    throw new RndClientExecuteException(e);
+                }
+                try {
+                    connect();
+                } catch (TTransportException te) {
+                    logger.warn("Failed to reconnect to " + getHostname());
+                }
+            } catch (TException e) {
+                logger.warn("Failed to kill proc " + proc, e);
+                throw new RndClientExecuteException(e);
+            }
+
+            retries++;
         }
     }
 }
