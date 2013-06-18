@@ -1,1 +1,4 @@
 .classpath
+dist/logs
+!dist/webapps/ROOT/dashboard
+!dist/webapps/ROOT/clusters
