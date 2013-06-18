@@ -168,6 +168,14 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
         return jdbc.query(GET_ORPHAN_DISPATCH_PROCS, DPROC_MAPPER, Defaults.PROC_ORPHAN_CHECK_MILLIS);
     }
 
+    private static final String GET_DEALLOCATED_DISPATCH_PROCS =
+            GET_DISPATCH_PROC +  "WHERE proc.bool_dealloc='t' ORDER BY proc.pk_node";
+
+    @Override
+    public List<DispatchProc> getDeallocatedProcs() {
+        return jdbc.query(GET_DEALLOCATED_DISPATCH_PROCS, DPROC_MAPPER);
+    }
+
     public static final RowMapper<DispatchNode> DNODE_MAPPER = new RowMapper<DispatchNode>() {
         @Override
         public DispatchNode mapRow(ResultSet rs, int rowNum)

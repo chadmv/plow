@@ -12,7 +12,6 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
-import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.TaskState;
@@ -79,5 +78,7 @@ public interface DispatchService {
 
     List<DispatchTask> getDispatchableTasks(JobId job, DispatchResource resource);
 
-    void setProcDeallocated(Proc proc);
+    void markAsDeallocated(Proc proc);
+
+    List<DispatchProc> getDeallocatedProcs();
 }

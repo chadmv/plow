@@ -56,19 +56,27 @@
 
   <bean id="orphanProcChecker" class="com.breakersoft.plow.crond.OrphanProcChecker"/>
   <bean id="downNodeChecker" class="com.breakersoft.plow.crond.DownNodeChecker"/>
+  <bean id="deallocatedProcChecker" class="com.breakersoft.plow.crond.DeallocatedProcChecker"/>
 
   <task:scheduler id="crondScheduler" pool-size="4"/>
   <task:scheduled-tasks scheduler="crondScheduler">
+
     <!--
         Run the orphan proc checker every 30 seconds, after 2 min startup delay
         that allows all nodes to ping in after server downtime.
      -->
     <task:scheduled ref="orphanProcChecker" method="start" fixed-delay="30000" initial-delay="120000"/>
+
     <!--
         Run the orphan proc checker every 30 seconds, after 2 min startup delay
         that allows all nodes to ping in after server downtime.
     -->
     <task:scheduled ref="downNodeChecker" method="start" fixed-delay="30000" initial-delay="120000"/>
+
+    <!--
+        Run the proc deallocator every 100ms with a 5s start delay
+    -->
+    <task:scheduled ref="deallocatedProcChecker" method="start" fixed-delay="100" initial-delay="5000"/>
 
   </task:scheduled-tasks>
 

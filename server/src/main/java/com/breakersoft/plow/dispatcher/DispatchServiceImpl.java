@@ -6,15 +6,12 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Cluster;
-import com.breakersoft.plow.ExitStatus;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Project;
-import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dispatcher.dao.DispatchDao;
@@ -25,7 +22,6 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
-import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.exceptions.PlowDispatcherException;
@@ -33,7 +29,6 @@ import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.SlotMode;
 import com.breakersoft.plow.thrift.TaskState;
-import com.breakersoft.plow.util.PlowUtils;
 
 @Service
 @Transactional
@@ -106,6 +101,12 @@ public class DispatchServiceImpl implements DispatchService {
     @Transactional(readOnly=true)
     public List<DispatchProc> getOrphanProcs() {
         return dispatchDao.getOrphanProcs();
+    }
+
+    @Override
+    @Transactional(readOnly=true)
+    public List<DispatchProc> getDeallocatedProcs() {
+        return dispatchDao.getDeallocatedProcs();
     }
 
     @Override
@@ -244,7 +245,7 @@ public class DispatchServiceImpl implements DispatchService {
     }
 
     @Override
-    public void setProcDeallocated(Proc proc) {
+    public void markAsDeallocated(Proc proc) {
         procDao.setProcDeallocated(proc);
     }
 

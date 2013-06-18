@@ -497,6 +497,7 @@ CREATE TABLE plow.proc (
   time_updated BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   time_started BIGINT NOT NULL DEFAULT plow.txTimeMillis(),
   bool_unbooked BOOLEAN NOT NULL DEFAULT 'f',
+  bool_dealloc BOOLEAN NOT NULL DEFAULT 'f',
   int_cores SMALLINT NOT NULL,
   flt_cores_used REAL NOT NULL DEFAULT 0.0,
   flt_cores_high REAL NOT NULL DEFAULT 0.0,
@@ -514,6 +515,8 @@ CREATE INDEX proc_pk_job_idx ON plow.proc (pk_job);
 CREATE INDEX proc_pk_layer_idx ON plow.proc (pk_layer);
 CREATE INDEX proc_pk_cluster_idx ON plow.proc (pk_cluster);
 CREATE INDEX proc_pk_quota_idx ON plow.proc (pk_quota);
+CREATE INDEX proc_bool_dealloc_idx ON plow.proc (bool_dealloc);
+CREATE INDEX proc_time_updated_idx ON plow.proc (time_updated);
 
 ----------------------------------------------------------
 
@@ -1218,6 +1221,7 @@ AS
 ---
 INSERT INTO plow.crond (str_name) VALUES ('ORPHAN_PROC_CHECK');
 INSERT INTO plow.crond (str_name) VALUES ('DOWN_NODE_CHECK');
+INSERT INTO plow.crond (str_name) VALUES ('DEALLOC_PROC_CHECK');
 
 ---
 --- Test Project

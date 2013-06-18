@@ -90,7 +90,7 @@ public class PipelineCommandService {
         }
 
         if (deallocateProc) {
-            dispatchService.setProcDeallocated(proc);
+            dispatchService.markAsDeallocated(proc);
         }
         else {
             procDispatcher.dispatch(proc);

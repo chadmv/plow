@@ -15,7 +15,7 @@ import com.breakersoft.plow.dao.CrondDao;
  */
 public abstract class AbstractCrondTask {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractCrondTask.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractCrondTask.class);
 
     @Resource
     CrondDao crondDao;

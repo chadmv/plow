@@ -17,7 +17,6 @@ import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.exceptions.PlowDispatcherException;
 import com.breakersoft.plow.util.JdbcUtils;
-import com.breakersoft.plow.util.PlowUtils;
 
 @Repository
 public class ProcDaoImpl extends AbstractDao implements ProcDao {

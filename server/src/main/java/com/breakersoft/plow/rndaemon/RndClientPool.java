@@ -92,7 +92,7 @@ public class RndClientPool {
 
             // Already returned on success, handling failure by marking the proc
             // as an orphan.
-            dispatchService.setProcDeallocated(proc);
+            dispatchService.markAsDeallocated(proc);
         }
     }
 }

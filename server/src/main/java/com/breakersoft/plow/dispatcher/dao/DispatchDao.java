@@ -31,4 +31,6 @@ public interface DispatchDao {
     List<DispatchProc> getOrphanProcs();
 
     DispatchProc getDispatchProc(Task task);
+
+    List<DispatchProc> getDeallocatedProcs();
 }
