@@ -18,7 +18,7 @@
         AND  
             layer.pk_layer = layer_count.pk_layer  
         AND  
-            job.pk_project = '00000000-0000-0000-0000-000000000000'::uuid
+            job.pk_project = '00000000-0000-0000-0000-000000000001'::uuid
         AND  
             job.int_state  = 1
         AND  

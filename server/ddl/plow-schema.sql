@@ -131,8 +131,8 @@ CREATE TABLE plow.job (
   pk_job UUID NOT NULL PRIMARY KEY,
   pk_project UUID NOT NULL REFERENCES plow.project(pk_project),
   pk_folder UUID REFERENCES plow.folder(pk_folder),
-  str_name VARCHAR(160) NOT NULL,
-  str_active_name VARCHAR(160),
+  str_name VARCHAR(255) NOT NULL,
+  str_active_name VARCHAR(255),
   str_username VARCHAR(100) NOT NULL,
   str_log_path TEXT,
   int_uid INTEGER NOT NULL,
@@ -885,7 +885,7 @@ BEGIN
         task_history.int_exit_status = 0
       ORDER BY
         task_history.time_stopped DESC
-      LIMIT 20) q;
+      LIMIT 10) q;
 
     UPDATE
       layer_stat
@@ -939,14 +939,6 @@ DECLARE
   proc RECORD;
 BEGIN
 
-  /*
-  * Don't let frames flip to running that don't have procs.
-  **/
-  SELECT int_cores, int_ram INTO proc FROM plow.proc WHERE pk_task=NEW.pk_task;
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'proc % not found for task', NEW.pk_task;
-  END IF;
-
   INSERT INTO
     task_history
   (
@@ -964,8 +956,8 @@ BEGIN
     NEW.str_name,
     NEW.int_number,
     NEW.int_retry,
-    proc.int_cores,
-    proc.int_ram,
+    NEW.int_last_cores,
+    NEW.int_last_ram,
     NEW.int_ram_min
   );
   RETURN NEW;
@@ -989,7 +981,7 @@ BEGIN
   UPDATE plow.quota SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_quota=NEW.pk_quota;
   UPDATE plow.node_dsp SET int_idle_cores = int_idle_cores - NEW.int_cores WHERE pk_node=NEW.pk_node;
   UPDATE plow.folder_dsp SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_folder=
-    (SELECT pk_folder FROM job WHERE pk_job=NEW.pk_job);
+    (SELECT pk_folder FROM plow.job WHERE pk_job=NEW.pk_job);
   UPDATE plow.job_dsp SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_job=NEW.pk_job;
   UPDATE plow.layer_dsp SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_layer=NEW.pk_layer;
   RETURN NEW;
@@ -1009,7 +1001,7 @@ BEGIN
   UPDATE plow.quota SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_quota=OLD.pk_quota;
   UPDATE plow.node_dsp SET int_idle_cores = int_idle_cores + OLD.int_cores WHERE pk_node=OLD.pk_node;
   UPDATE plow.folder_dsp SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_folder=
-    (SELECT pk_folder FROM job WHERE pk_job=OLD.pk_job);
+    (SELECT pk_folder FROM plow.job WHERE pk_job=OLD.pk_job);
   UPDATE plow.job_dsp SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_job=OLD.pk_job;
   UPDATE plow.layer_dsp SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_layer= OLD.pk_layer;
   RETURN OLD;
