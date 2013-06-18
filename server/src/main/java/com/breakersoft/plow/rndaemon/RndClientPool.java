@@ -9,13 +9,12 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.breakersoft.plow.dispatcher.DispatchService;
-import com.breakersoft.plow.dispatcher.domain.DispatchPair;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
-import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
+import com.breakersoft.plow.dispatcher.pipeline.AbortedTaskCommand;
+import com.breakersoft.plow.dispatcher.pipeline.PipelineController;
 import com.breakersoft.plow.exceptions.RndClientConnectionError;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
-import com.breakersoft.plow.util.PlowUtils;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -31,6 +30,9 @@ public class RndClientPool {
 
     @Autowired
     private DispatchService dispatchService;
+
+    @Autowired
+    private PipelineController pipelineController;
 
     @Autowired
     @Qualifier("rndCommandExecutor")
@@ -90,9 +92,8 @@ public class RndClientPool {
                 logger.error("Failed to execute run process on host: " + proc.getHostname() + "," + e);
             }
 
-            // Already returned on success, handling failure by marking the proc
-            // as an orphan.
-            dispatchService.markAsDeallocated(proc);
+            // Handle case where task is rejected from rndaemon.
+            pipelineController.execute(new AbortedTaskCommand(proc, task, dispatchService));
         }
     }
 }
