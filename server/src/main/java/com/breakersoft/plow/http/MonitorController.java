@@ -15,6 +15,8 @@ import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.PlowThreadPools;
 import com.breakersoft.plow.monitor.JvmStats;
 import com.breakersoft.plow.monitor.PlowStats;
+import com.breakersoft.plow.thrift.ClusterT;
+import com.breakersoft.plow.thrift.dao.ThriftClusterDao;
 import com.google.common.collect.Maps;
 
 /**
@@ -30,6 +32,9 @@ public class MonitorController {
     @Autowired
     PlowThreadPools plowThreadPools;
 
+    @Autowired
+    ThriftClusterDao thriftClusterDao;
+
     @RequestMapping(value = "/monitor", method = RequestMethod.GET)
     public void home(HttpServletResponse response) throws IOException {
 
@@ -39,8 +44,9 @@ public class MonitorController {
 
         final Map<String, Object> pools =  Maps.newLinkedHashMap();
         pools.put("node_dsp", collectThreadPoolStats(plowThreadPools.nodeDispatcherExecutor()));
-        pools.put("proc_dsp", collectThreadPoolStats(plowThreadPools.procDispatcherExecutor()));
+        pools.put("pipeline_dsp", collectThreadPoolStats(plowThreadPools.pipelineExecutor()));
         pools.put("async_command", collectThreadPoolStats(plowThreadPools.stateChangeExecutor()));
+        pools.put("rnd_command", collectThreadPoolStats(plowThreadPools.rndCommandExecutor()));
 
         result.put("threadpools", pools);
 
@@ -85,6 +91,18 @@ public class MonitorController {
         jobs.put("killed", PlowStats.jobKillCount.get());
         general.put("jobs", jobs);
 
+        final Map<String, Object> clusters =  Maps.newLinkedHashMap();
+
+        for (ClusterT cluster: thriftClusterDao.getClusters()) {
+            final Map<String, Object> cstats =  Maps.newLinkedHashMap();
+            cstats.put("running", cluster.total.runCores);
+            cstats.put("idle", cluster.total.idleCores);
+            cstats.put("total", cluster.total.idleCores + cluster.total.runCores);
+            clusters.put(cluster.name, cstats);
+        }
+        result.put("clusters", clusters);
+
+        response.setContentType("application/json");
         Defaults.MAPPER.writeValue(response.getOutputStream(), result);
     }
 
