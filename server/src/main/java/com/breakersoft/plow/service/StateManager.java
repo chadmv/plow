@@ -182,7 +182,7 @@ public class StateManager {
 
     @Async(value="stateChangeExecutor")
     public void satisfyDepend(Depend depend) {
-        logger.info("Satisfying dependency {}", depend);
+        logger.trace("Satisfying dependency {}", depend);
         dependService.satisfyDepend(depend);
     }
 
@@ -194,7 +194,7 @@ public class StateManager {
 
     public void satisfyDependsOn(Job job) {
         final List<Depend> depends = dependService.getOnJobDepends(job);
-        logger.info("{} has {} dependencies.", job, depends.size());
+        logger.trace("{} has {} dependencies.", job, depends.size());
         for (Depend depend: depends) {
             dependService.satisfyDepend(depend);
         }
@@ -202,7 +202,7 @@ public class StateManager {
 
     public void satisfyDependsOn(Task task) {
         final List<Depend> depends = dependService.getOnTaskDepends(task);
-        logger.info("{} has {} dependencies.", task, depends.size());
+        logger.trace("{} has {} dependencies.", task, depends.size());
         for (Depend depend: depends) {
             dependService.satisfyDepend(depend);
         }
@@ -210,23 +210,9 @@ public class StateManager {
 
     public void satisfyDependsOn(Layer layer) {
         final List<Depend> depends = dependService.getOnLayerDepends(layer);
-        logger.info("{} has {} dependencies.", layer, depends.size());
+        logger.trace("{} has {} dependencies.", layer, depends.size());
         for (Depend depend: depends) {
             dependService.satisfyDepend(depend);
-        }
-    }
-
-    @Async(value="stateChangeExecutor")
-    public void asyncTaskSucceeded(Task task) {
-        Job job = null;
-        try {
-            if (jobService.isFinished(task)) {
-                job = jobService.getJob(task.getJobId());
-                shutdownJob(job);
-            }
-            dispatchService.dependQueueProcessed(task);
-        } catch (Exception e) {
-            logger.warn("Failed to shutdown job {} after task complete {}", job, task);
         }
     }
 }
