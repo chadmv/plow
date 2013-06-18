@@ -3,7 +3,7 @@
 from itertools import izip_longest
 
 from plow.gui.manifest import QtGui, QtCore
-from plow.gui.common.help import getHelp, getHelpTextWidget
+from plow.gui.common import help
 from plow.gui import constants 
 
 
@@ -97,9 +97,19 @@ class FilterableListBox(QtGui.QWidget):
 
         self.__data = {}
 
+        height = 20
+
         self.__txt_label = QtGui.QLabel(self)
         self.__txt_filter = QtGui.QLineEdit(self)
+        self.__txt_filter.setFixedHeight(height)
         self.__txt_filter.textChanged.connect(self.__filterChanged)
+
+        style = QtGui.qApp.style()
+        self.__txt_clear = btn = QtGui.QPushButton(self)
+        btn.setIcon(style.standardIcon(style.SP_DialogResetButton))
+        btn.setFlat(True)
+        btn.setFixedSize(height,height)
+        btn.setVisible(False)
 
         self.__model = QtGui.QStringListModel(self)
 
@@ -118,9 +128,12 @@ class FilterableListBox(QtGui.QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         hlayout = QtGui.QHBoxLayout()
+        hlayout.setSpacing(0)
         hlayout.setContentsMargins(0, 0, 0, 0)
         hlayout.addWidget(self.__txt_label)
+        hlayout.addSpacing(2)
         hlayout.addWidget(self.__txt_filter)
+        hlayout.addWidget(self.__txt_clear)
 
         layout.addLayout(hlayout)
         layout.addWidget(self.__list)
@@ -131,6 +144,9 @@ class FilterableListBox(QtGui.QWidget):
         
         self.__selModel = self.__list.selectionModel()
         self.__selModel.selectionChanged.connect(self._selectionChanged)
+
+        self.__txt_filter.textChanged.connect(lambda v: self.__txt_clear.setVisible(bool(v)))
+        self.__txt_clear.clicked.connect(lambda: self.setFilter(''))
 
         if items:
             self.setStringList(items)
@@ -433,7 +449,7 @@ class FormWidgetLabel(QtGui.QWidget):
         frame.move(QtGui.QCursor.pos())
         
         layout = QtGui.QVBoxLayout(frame)
-        layout.addWidget(getHelpTextWidget(self.__help))
+        layout.addWidget(help.getHelpTextWidget(self.__help))
         frame.show()
 
 

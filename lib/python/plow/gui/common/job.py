@@ -1,5 +1,6 @@
 """Commonly used Job widgets."""
 
+import os
 from functools import partial 
 from itertools import chain
 
@@ -10,7 +11,6 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.form import FormWidget, FormWidgetFactory
 from plow.gui.util import ask
 from plow.gui.common.widgets import FilterableListBox
-
 
 
 class JobProgressFormWidget(FormWidget):
@@ -98,7 +98,7 @@ class JobColumnWidget(QtGui.QScrollArea):
 
     selectionChanged = QtCore.Signal(list)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, project=None):
         super(JobColumnWidget, self).__init__(parent)
 
         self.__currentJob = None
@@ -113,7 +113,7 @@ class JobColumnWidget(QtGui.QScrollArea):
 
         mainLayout = QtGui.QHBoxLayout(contentWidget)
 
-        self._jobWidget = job = JobSelectionWidget(self)
+        self._jobWidget = job = JobSelectionWidget(self, project=project)
         job.setMinimumWidth(220)
 
         self._layerWidget = layer = FilterableListBox(parent=self)
@@ -151,14 +151,14 @@ class JobColumnWidget(QtGui.QScrollArea):
         self._clearLayer()
         self._clearJob()
 
-    def setJobFilter(self, val):
-        self._jobWidget.setFilter(val, selectFirst=True)
+    def setJobFilter(self, val, selectFirst=True):
+        self._jobWidget.setFilter(val, selectFirst)
 
-    def setLayerFilter(self, val):
-        self._layerWidget.setFilter(val, selectFirst=True)
+    def setLayerFilter(self, val, selectFirst=True):
+        self._layerWidget.setFilter(val, selectFirst)
 
-    def setTaskFilter(self, val):
-        self._taskWidget.setFilter(val, selectFirst=True)
+    def setTaskFilter(self, val, selectFirst=True):
+        self._taskWidget.setFilter(val, selectFirst)
 
     def setSingleSelections(self, enabled):
         for w in (self._jobWidget, self._layerWidget, self._taskWidget):
@@ -245,7 +245,7 @@ class JobColumnWidget(QtGui.QScrollArea):
 
 class JobSelectionWidget(FilterableListBox):
 
-    def __init__(self, parent=None, **kwargs):
+    def __init__(self, parent, project=None, **kwargs):
         super(JobSelectionWidget, self).__init__(parent=parent)
         self.setLabel("Job:")
 
@@ -254,6 +254,11 @@ class JobSelectionWidget(FilterableListBox):
 
         kwargs['matchingOnly'] = True
         self.__opts = kwargs
+
+        if project:
+            if isinstance(project, (str, unicode)):
+                project = [project]
+            self.__opts['project'] = project
 
         self.refresh()
 
@@ -265,10 +270,10 @@ class JobSelectionWidget(FilterableListBox):
 
 class JobSelectionDialog(QtGui.QDialog):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, project=None):
         QtGui.QDialog.__init__(self, parent)
         layout = QtGui.QVBoxLayout(self)
-        self.__jobSelector = JobSelectionWidget(self)
+        self.__jobSelector = JobSelectionWidget(self, project=project)
 
         self.__btns = QtGui.QDialogButtonBox(
             QtGui.QDialogButtonBox.Ok | 
@@ -284,10 +289,8 @@ class JobSelectionDialog(QtGui.QDialog):
 
     def getSelectedJobs(self):
         names = self.__jobSelector.getSelectedValues()
-        jobs = plow.client.get_jobs(matchingOnly=True, 
-                                    name=names, 
-                                    states=[plow.JobState.RUNNING])
-
+        opts = dict(matchingOnly=True, name=names, states=[plow.JobState.RUNNING])
+        jobs = plow.client.get_jobs(**opts)
         return jobs
 
 
@@ -339,29 +342,58 @@ class JobStateWidget(QtGui.QWidget):
 
 
 
-def JobContextMenu(jobs, refreshCallback=None, parent=None):
+class JobContextMenu(QtGui.QMenu):
     """
-    Get a job context QMenu with common operations
+    A job context QMenu with common operations
+
+    :var jobs: a Job or list of Jobs
+    :var refreshCallback: an optional callable to post-run, if any actions are carried out
+    :var parent: The parent widget for this menu
+
     """
-    menu = QtGui.QMenu(parent)
 
-    if not isinstance(jobs, (tuple, set, list, dict)):
-        jobs = [jobs]
+    def __init__(self, jobs, refreshCallback=None, parent=None):
+        super(JobContextMenu, self).__init__(parent)
 
-    total = len(jobs)
-    isPaused = jobs[0].paused
+        if not isinstance(jobs, (tuple, set, list, dict)):
+            jobs = [jobs]
 
-    pause = menu.addAction(QtGui.QIcon(":/images/pause.png"), "Un-Pause" if isPaused else "Pause")
-    kill = menu.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Job%s" % 's' if total else '')
+        self.__jobs = jobs
+        self.__callback = refreshCallback
 
-    menu.addSeparator()
+        total = len(jobs)
+        plural = 's' if total > 1 else ''
+        isPaused = jobs[0].paused
 
-    kill_tasks = menu.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Tasks")
-    eat_tasks = menu.addAction(QtGui.QIcon(":/images/eat.png"), "Eat Dead Tasks")
-    retry_tasks = menu.addAction(QtGui.QIcon(":/images/retry.png"), "Retry Dead Tasks")
+        pause = self.addAction(QtGui.QIcon(":/images/pause.png"), "Un-Pause" if isPaused else "Pause")
+        kill = self.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Job%s" % plural)
 
+        if total == 1:
+            depend = self.addAction("Add Dependencies")
+            depend.triggered.connect(partial(self._depend, jobs))
 
-    def action_on_tasks(fn, job_list, dead=False):
+        self.addSeparator()
+
+        kill_tasks = self.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Tasks")
+        eat_tasks = self.addAction(QtGui.QIcon(":/images/eat.png"), "Eat Dead Tasks")
+        retry_tasks = self.addAction(QtGui.QIcon(":/images/retry.png"), "Retry Dead Tasks")
+
+        #
+        # Connections
+        #
+        cbk = partial(self._action_on_tasks, plow.client.eat_tasks, jobs, dead=True)
+        eat_tasks.triggered.connect(cbk)
+
+        cbk = partial(self._action_on_tasks, plow.client.retry_tasks, jobs, dead=True)
+        retry_tasks.triggered.connect(cbk)
+
+        cbk = partial(self._action_on_tasks, plow.client.kill_tasks, jobs, dead=False)
+        kill_tasks.triggered.connect(cbk)
+
+        pause.triggered.connect(partial(self._pause, jobs, not isPaused))
+        kill.triggered.connect(partial(self._kill, jobs))
+
+    def _action_on_tasks(self, fn, job_list, dead=False):
         if dead:
             states = [plow.client.TaskState.DEAD]
         else:
@@ -373,54 +405,42 @@ def JobContextMenu(jobs, refreshCallback=None, parent=None):
             return
 
         msg = "Run %r on %d jobs  (%d tasks) ?" % (fn.__name__, len(job_list), len(tasks))
-        if not ask(msg, parent=parent):
+        if not ask(msg, parent=self.parent()):
             return
 
         if tasks:
             fn(tasks=tasks)
-            if refreshCallback:
-                refreshCallback()  
 
+            if self.__callback:
+                self.__callback()  
 
-    eat_tasks.triggered.connect(partial(action_on_tasks, 
-                                        plow.client.eat_tasks, 
-                                        jobs, 
-                                        dead=True))
-
-    retry_tasks.triggered.connect(partial(action_on_tasks, 
-                                          plow.client.retry_tasks, 
-                                          jobs, 
-                                          dead=True))
-
-    kill_tasks.triggered.connect(partial(action_on_tasks, 
-                                         plow.client.kill_tasks, 
-                                         jobs, 
-                                         dead=False))
-
-    def pause_fn(job_list, pause):
+    def _pause(self, job_list, pause):
         for j in job_list:
             j.pause(pause)
 
-        if refreshCallback:
-            refreshCallback()
+        if self.__callback:
+            self.__callback()  
 
-    pause.triggered.connect(partial(pause_fn, jobs, not isPaused))
-
-    def kill_fn(job_list):
-        if not ask("Kill %d job(s) ?" %  len(job_list), parent=parent):
+    def _kill(self, job_list):
+        if not ask("Kill %d job(s) ?" %  len(job_list), parent=self.parent()):
             return
 
+        user = os.getenv('USER', '<USER?>')
+        reason = 'plow-wrangler - %s' % user
+
         for j in job_list:
-            j.kill('plow-wrangler')
+            j.kill(reason)
 
-        if refreshCallback:
-            refreshCallback()
+        if self.__callback:
+            self.__callback()  
 
-    kill.triggered.connect(partial(kill_fn, jobs))
+    def _depend(self, jobs):
+        from plow.gui.dialogs.depends import DependencyWizard
 
-    return menu
+        aJob = jobs[0]
+        aJobSpec = plow.client.get_job_spec(aJob.id)
 
-
-
-
-
+        wizard = DependencyWizard(self.parent(), project=aJobSpec.project)
+        wizard.resize(wizard.width(), 600)
+        wizard.setSourceObject(aJob)
+        wizard.show()

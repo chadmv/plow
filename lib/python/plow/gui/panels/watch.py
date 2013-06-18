@@ -52,7 +52,7 @@ class RenderJobWatchPanel(Panel):
             QtGui.QIcon(":/images/sweep.png"), "Remove Finished Jobs", self.removeFinishedJobs)
 
     def openLoadDialog(self):
-        dialog = JobSelectionDialog(self)
+        dialog = JobSelectionDialog(parent=self)
         if dialog.exec_():
             widget = self.widget()
             for job in dialog.getSelectedJobs():

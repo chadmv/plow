@@ -108,7 +108,7 @@ cdef class JobSpec:
     launching a job
 
     :var name: str
-    :var project: :class:`.Project`.id
+    :var project: str`.Project` code
     :var username: str - owner
     :var logPath: str - path to logfile
     :var paused: bool ; if True, submit in a paused state 
