@@ -5,7 +5,12 @@ import java.util.LinkedHashSet;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+
 public final class PlowUtils {
+
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(PlowUtils.class);
 
     public static boolean isUuid(String s) {
         try {
@@ -78,5 +83,23 @@ public final class PlowUtils {
             return null;
         }
         return new LinkedHashSet<String>(c).toArray(new String[] {});
+    }
+
+    public static void logTime(long startTime, String message) {
+        final double time = (System.currentTimeMillis() - startTime) / 1000.0;
+        if (time > 1) {
+            logger.warn("LONGTIME: {} took {}", message, (System.currentTimeMillis() - startTime) / 1000.0);
+        } else {
+            logger.trace("TIME: {} took {}", message, (System.currentTimeMillis() - startTime) / 1000.0);
+        }
+    }
+
+    public static void logTime(long startTime, String message, boolean info) {
+        final double time = (System.currentTimeMillis() - startTime) / 1000.0;
+        if (time > 1) {
+            logger.warn("LONGTIME: {} took {}", message, (System.currentTimeMillis() - startTime) / 1000.0);
+        } else {
+            logger.info("TIME: {} took {}", message, (System.currentTimeMillis() - startTime) / 1000.0);
+        }
     }
 }
