@@ -34,9 +34,13 @@ public class Pipeline implements JobId, Runnable {
 
     @Override
     public void run() {
+        if (queue.isEmpty()) {
+            return;
+        }
         if (!isRunning.compareAndSet(false, true)){
             return;
         }
+
         try {
             while (true) {
                 PipelineCommand command = queue.poll();
