@@ -31,7 +31,7 @@ public class AbstractDispatcher {
                 dispatchService.unreserveTask(task);
             }
         }
-        dispatchService.deallocateProc(proc, message);
+        dispatchService.markAsDeallocated(proc);
         result.continueDispatch = false;
     }
 }
