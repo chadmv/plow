@@ -17,12 +17,14 @@ public class DispatchResult {
 
     public int cores = 0;
     public int ram = 0;
-    public boolean dispatch = true;
+    public int procs = 0;
+    public boolean continueDispatch = true;
     public boolean isTest = false;
+    public long startTime = System.currentTimeMillis();
+    public int reservationFailures = 0;
 
-    public List<DispatchProc> procs = Lists.newArrayList();
-
-
+    public final List<DispatchPair> pairs =
+            Lists.newArrayListWithExpectedSize(DispatchConfig.MAX_PROCS_PER_JOB);
 
     public DispatchResult(DispatchResource resource) {
         this.resource = resource;
@@ -35,33 +37,38 @@ public class DispatchResult {
      */
     public boolean continueDispatching() {
 
-        if (procs.size() >= DispatchConfig.MAX_PROCS_PER_JOB) {
-            logger.info("Stopped dispatching by procs/maxprocs {} >= {}", procs.size(),  DispatchConfig.MAX_PROCS_PER_JOB);
+        if (reservationFailures >= 5) {
+            logger.trace("Stopped dispatching due to contention.");
+            return false;
+        }
+
+        if (pairs.size() >= DispatchConfig.MAX_PROCS_PER_JOB) {
+            logger.trace("Stopped dispatching by procs/maxprocs {} >= {}", pairs.size(),  DispatchConfig.MAX_PROCS_PER_JOB);
             return false;
         }
 
         if (cores >= DispatchConfig.MAX_CORES_PER_JOB) {
-            logger.info("Stopped dispatching by cores/maxcores {} >= {}", cores, DispatchConfig.MAX_CORES_PER_JOB);
+            logger.trace("Stopped dispatching by cores/maxcores {} >= {}", cores, DispatchConfig.MAX_CORES_PER_JOB);
             return false;
         }
 
         if (resource.getIdleCores() < 1) {
-            logger.info("Stopped dispatching resource cores {} < 1", resource.getIdleCores());
+            logger.trace("Stopped dispatching resource cores {} < 1", resource.getIdleCores());
             return false;
         }
 
         if (resource.getIdleRam() <=  0) {
-            logger.info("Stopped dispatching resource ram {} <=0", resource.getIdleRam());
+            logger.trace("Stopped dispatching resource ram {} <=0", resource.getIdleRam());
             return false;
         }
 
-        return dispatch;
+        return continueDispatch;
     }
 
     public boolean canDispatch(DispatchTask task) {
 
         if (resource.getIdleCores() < task.minCores) {
-            logger.info("Stopped dispatching by cores {} < {}", resource.getIdleCores(), task.minCores);
+            logger.trace("Stopped dispatching by cores {} < {}", resource.getIdleCores(), task.minCores);
             return false;
         }
 
@@ -73,16 +80,12 @@ public class DispatchResult {
         return true;
     }
 
-    public void dispatched(DispatchProc proc, DispatchTask task) {
-        // Here is why all ram gets eaten up.
+    public void addDispatchPair(DispatchProc proc, DispatchTask task) {
         cores+=task.minCores;
         ram+=task.minRam;
+        procs++;
 
-        procs.add(proc);
+        pairs.add(new DispatchPair(proc, task));
         resource.allocate(task.minCores, task.minRam);
-
-        logger.info("Dispatched {}, cores left: {} - ram left: {}",
-                new Object[] { proc.getHostname(), resource.getIdleCores(),
-                resource.getIdleRam()});
     }
 }
