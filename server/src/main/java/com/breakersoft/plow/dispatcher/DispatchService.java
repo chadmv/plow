@@ -12,6 +12,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
+import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.TaskState;
@@ -48,7 +49,7 @@ public interface DispatchService {
 
     // New stuff.
 
-    List<DispatchTask> getDispatchableTasks(JobId job, DispatchResource resource);
+    List<DispatchTask> getDispatchableTasks(JobId job, DispatchResource resource, int limit);
 
     /**
      * Removes the proc from the proc table and updates proc counts.
@@ -75,4 +76,8 @@ public interface DispatchService {
     boolean quotaCheck(Cluster cluster, Project project);
 
     boolean dependQueueProcessed(Task task);
+
+    List<DispatchTask> getDispatchableTasks(JobId job, DispatchResource resource);
+
+    void setProcDeallocated(Proc proc);
 }

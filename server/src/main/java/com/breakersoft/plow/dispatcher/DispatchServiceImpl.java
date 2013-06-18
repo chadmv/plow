@@ -6,12 +6,15 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.Cluster;
+import com.breakersoft.plow.ExitStatus;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Project;
+import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.QuotaDao;
 import com.breakersoft.plow.dispatcher.dao.DispatchDao;
@@ -22,6 +25,7 @@ import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResource;
+import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
 import com.breakersoft.plow.event.EventManager;
 import com.breakersoft.plow.exceptions.PlowDispatcherException;
@@ -29,6 +33,7 @@ import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
 import com.breakersoft.plow.thrift.SlotMode;
 import com.breakersoft.plow.thrift.TaskState;
+import com.breakersoft.plow.util.PlowUtils;
 
 @Service
 @Transactional
@@ -50,15 +55,15 @@ public class DispatchServiceImpl implements DispatchService {
     private QuotaDao quotaDao;
 
     @Autowired
-    EventManager eventManager;
+    private EventManager eventManager;
 
     @Override
     @Transactional(readOnly=true)
-
     public List<DispatchJob> getDispatchJobs(DispatchProject project, DispatchNode node) {
         return dispatchDao.getDispatchJobs(project, node);
     }
 
+    @Transactional(readOnly=true)
     public DispatchJob getDispatchJob(UUID id) {
         return dispatchDao.getDispatchJob(id);
     }
@@ -106,24 +111,22 @@ public class DispatchServiceImpl implements DispatchService {
     @Override
     public boolean startTask(DispatchTask task, DispatchProc proc) {
         if (dispatchTaskDao.start(task, proc)) {
-            logger.info("Started {}", task);
             task.started = true;
-            PlowStats.taskStartedCount.incrementAndGet();
+            //PlowStats.taskStartedCount.incrementAndGet();
             return true;
         }
-        PlowStats.taskStartedFailCount.incrementAndGet();
+        //PlowStats.taskStartedFailCount.incrementAndGet();
         return false;
     }
 
     @Override
     public boolean stopTask(Task task, TaskState state, int exitStatus, int exitSignal) {
         if (dispatchTaskDao.stop(task, state, exitStatus, exitSignal)) {
-            logger.info("Stopping {}, new state: {}", task, state.toString());
 
-            PlowStats.taskStoppedCount.incrementAndGet();
+            //PlowStats.taskStoppedCount.incrementAndGet();
             return true;
         }
-        PlowStats.taskStoppedFailCount.incrementAndGet();
+        //PlowStats.taskStoppedFailCount.incrementAndGet();
         return false;
     }
 
@@ -152,8 +155,6 @@ public class DispatchServiceImpl implements DispatchService {
 
     @Override
     public DispatchProc allocateProc(DispatchNode node, DispatchTask task) {
-
-        logger.info("Allocating proc on {}", node);
 
         final DispatchProc proc = new DispatchProc();
         proc.setJobId(task.jobId);
@@ -215,11 +216,11 @@ public class DispatchServiceImpl implements DispatchService {
 
         try {
             procDao.create(proc);
-            PlowStats.procAllocCount.incrementAndGet();
+            //PlowStats.procAllocCount.incrementAndGet();
             return proc;
 
         } catch (Exception e) {
-            PlowStats.procAllocFailCount.incrementAndGet();
+            //PlowStats.procAllocFailCount.incrementAndGet();
             throw new PlowDispatcherException(
                     "Failed to allocatae a proc from " + node.getName() + "," + e, e);
         }
@@ -232,23 +233,37 @@ public class DispatchServiceImpl implements DispatchService {
             return;
         }
 
-        logger.info("deallocating {}, {}", proc, why);
         if (!procDao.delete(proc)) {
             PlowStats.procUnallocFailCount.incrementAndGet();
             logger.warn("{} was alredy deallocated.", proc);
         }
         else {
+            logger.info("deallocating {}, {}", proc, why);
             PlowStats.procUnallocCount.incrementAndGet();
         }
     }
 
     @Override
-    public List<DispatchTask> getDispatchableTasks(JobId job,
-            DispatchResource resource) {
-        return dispatchTaskDao.getDispatchableTasks(job, resource);
+    public void setProcDeallocated(Proc proc) {
+        procDao.setProcDeallocated(proc);
     }
 
     @Override
+    @Transactional(readOnly=true)
+    public List<DispatchTask> getDispatchableTasks(JobId job,
+            DispatchResource resource, int limit) {
+        return dispatchTaskDao.getDispatchableTasks(job, resource, limit);
+    }
+
+    @Override
+    @Transactional(readOnly=true)
+    public List<DispatchTask> getDispatchableTasks(JobId job,
+            DispatchResource resource) {
+        return dispatchTaskDao.getDispatchableTasks(job, resource, 10);
+    }
+
+    @Override
+    @Transactional(readOnly=true)
     public RunTaskCommand getRuntaskCommand(Task task) {
         return dispatchTaskDao.getRunTaskCommand(task);
     }
