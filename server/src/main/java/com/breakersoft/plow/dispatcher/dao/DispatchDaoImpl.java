@@ -107,6 +107,7 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
     private static final String GET_DISPATCH_PROC =
             "SELECT " +
                 "proc.pk_proc,"+
+                "proc.pk_job,"+
                 "proc.pk_task,"+
                 "proc.pk_node,"+
                 "proc.pk_quota,"+
@@ -115,13 +116,10 @@ public class DispatchDaoImpl extends AbstractDao implements DispatchDao {
                 "proc.int_ram, " +
                 "proc.bool_unbooked, " +
                 "node.str_tags,"+
-                "node.str_name AS node_name, " +
-                "task.str_name AS task_name, " +
-                "task.pk_job " +
+                "node.str_name AS node_name " +
             "FROM " +
                 "proc " +
-            "INNER JOIN node ON proc.pk_node = node.pk_node " +
-            "INNER JOIN task ON proc.pk_task = task.pk_task ";
+            "INNER JOIN node ON proc.pk_node = node.pk_node ";
 
     private static final String GET_DISPATCH_PROC_BY_ID =
             GET_DISPATCH_PROC + " WHERE proc.pk_proc=?";
