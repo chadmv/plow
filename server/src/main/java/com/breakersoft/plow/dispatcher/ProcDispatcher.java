@@ -31,7 +31,7 @@ public class ProcDispatcher extends AbstractDispatcher implements Dispatcher<Dis
         final DispatchResult result = new DispatchResult(proc);
         dispatch(result, proc);
         if (result.procs == 0) {
-            dispatchService.deallocateProc(proc, "Unable to find a suitable task");
+            dispatchService.markAsDeallocated(proc);
         }
 
         return result;
