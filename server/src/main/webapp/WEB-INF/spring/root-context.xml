@@ -36,10 +36,10 @@
     <property name="username" value="${plow.jdbc.username}" />
     <property name="password" value="${plow.jdbc.password}" />
     <property name="maxConnectionsPerPartition" value="50" />
-    <property name="minConnectionsPerPartition" value="10" />
-    <property name="partitionCount" value="3" />
-    <property name="acquireIncrement" value="5" />
-    <property name="statementsCacheSize" value="100" />
+    <property name="minConnectionsPerPartition" value="25" />
+    <property name="partitionCount" value="4" />
+    <property name="acquireIncrement" value="10" />
+    <property name="statementsCacheSize" value="200" />
   </bean>
 
   <bean id="transactionManager"
