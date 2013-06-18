@@ -349,7 +349,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional(readOnly=true)
-    public boolean isFinished(JobId job) {
+    public boolean isJobFinished(JobId job) {
         return jobDao.isFinished(job);
     }
 

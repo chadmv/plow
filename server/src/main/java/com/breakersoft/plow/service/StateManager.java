@@ -89,7 +89,7 @@ public class StateManager {
 
         if (checkFinished) {
             Job job = jobService.getJob(task.getJobId());
-            if (jobService.isFinished(job)) {
+            if (jobService.isJobFinished(job)) {
                   shutdownJob(job);
             }
         }
@@ -140,7 +140,7 @@ public class StateManager {
 
         for (UUID jobId: jobIds) {
             Job job = jobService.getJob(jobId);
-            if (jobService.isFinished(job)) {
+            if (jobService.isJobFinished(job)) {
                 shutdownJob(job);
             }
         }

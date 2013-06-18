@@ -65,7 +65,7 @@ public class PipelineCommandService {
                 }
 
                 try {
-                    if (jobService.isFinished(task)) {
+                    if (jobService.isJobFinished(task)) {
                         deallocateProc = true;
                         final Job job = jobService.getJob(task.getJobId());
                         stateManager.shutdownJob(job);

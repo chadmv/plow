@@ -150,7 +150,7 @@ public interface JobService {
      * @param job
      * @return
      */
-    boolean isFinished(JobId job);
+    boolean isJobFinished(JobId job);
     Task getTask(Layer layer, int number);
     List<Task> getTasks(TaskFilterT filter);
     boolean setTaskState(Task task, TaskState currentState, TaskState newState);
