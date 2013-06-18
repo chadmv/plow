@@ -283,9 +283,9 @@ class ChooseTargetsPage(BaseDepPage):
         dst = self.__destSelector
         self.__initSelector(dst)
 
-        if depType == DependType.JOB_ON_JOB:
-            src.setLayersEnabled(False)
-            dst.setLayersEnabled(False)
+        layers = depType != DependType.JOB_ON_JOB
+        src.setLayersEnabled(layers)
+        dst.setLayersEnabled(layers)
 
     def __initSelector(self, selector):
         src = self.sourceObject()
