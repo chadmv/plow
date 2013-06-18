@@ -151,7 +151,7 @@ class TaskWidget(QtGui.QWidget):
         menu.addAction(QtGui.QIcon(":/images/eat.png"), "Eat", self.eatSelected)
 
         total = self.__selectedCount()
-        if total == 1:
+        if 1 <= total <= 2:
             depend = menu.addAction("Add Dependencies")
             depend.triggered.connect(self.__addDepends)
 
@@ -217,6 +217,10 @@ class TaskWidget(QtGui.QWidget):
             wizard = DependencyWizard(self.parent(), project=aJobSpec.project)
             wizard.resize(wizard.width(), 600)
             wizard.setSourceObject(aTask)
+
+            if len(tasks) > 1:
+                wizard.setDestObject(tasks[1])
+
             wizard.show()
 
     def getSelectedTaskIds(self):

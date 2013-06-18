@@ -368,7 +368,7 @@ class JobContextMenu(QtGui.QMenu):
         pause = self.addAction(QtGui.QIcon(":/images/pause.png"), "Un-Pause" if isPaused else "Pause")
         kill = self.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Job%s" % plural)
 
-        if total == 1:
+        if 1 <= total <= 2:
             depend = self.addAction("Add Dependencies")
             depend.triggered.connect(partial(self._depend, jobs))
 
@@ -443,4 +443,10 @@ class JobContextMenu(QtGui.QMenu):
         wizard = DependencyWizard(self.parent(), project=aJobSpec.project)
         wizard.resize(wizard.width(), 600)
         wizard.setSourceObject(aJob)
+
+        if len(jobs) > 1:
+            wizard.setDestObject(jobs[1])
+
         wizard.show()
+
+
