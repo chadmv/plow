@@ -26,7 +26,7 @@ public class NodeDispatcher extends AbstractDispatcher implements Dispatcher<Dis
     @Qualifier("nodeDispatchExecutor")
     private ThreadPoolTaskExecutor nodeDispatchExecutor;
 
-    private final RateLimiter rateLimiter = RateLimiter.create(8.0);
+    private final RateLimiter rateLimiter = RateLimiter.create(12.0);
 
     public NodeDispatcher() { }
 
@@ -44,7 +44,7 @@ public class NodeDispatcher extends AbstractDispatcher implements Dispatcher<Dis
 
         final DispatchResult result = new DispatchResult(node);
 
-        if (rateLimiter.tryAcquire()) {
+        if (!rateLimiter.tryAcquire()) {
             return result;
         }
 
