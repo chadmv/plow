@@ -17,6 +17,7 @@ public class ThriftServer {
     private Logger logger = org.slf4j.LoggerFactory.getLogger(ThriftServer.class);
 
     private final int port;
+    private int threads;
     private final String name;
     private final TProcessor processor;
     private final Thread thread;
@@ -25,11 +26,12 @@ public class ThriftServer {
     private TNonblockingServerSocket transport;
     private TServer server;
 
-    public ThriftServer(TProcessor processor, TProtocolFactory protocolFactory, int port) {
+    public ThriftServer(TProcessor processor, TProtocolFactory protocolFactory, int threads, int port) {
         this.port = port;
         this.name = processor.toString();
         this.processor = processor;
         this.protocolFactory = protocolFactory;
+        this.threads = threads;
         thread = new ServerThread();
     }
 
@@ -42,8 +44,8 @@ public class ThriftServer {
             server = new TThreadedSelectorServer(
                     new TThreadedSelectorServer.Args(transport)
                 .processor(processor)
-                .workerThreads(64)
-                .selectorThreads(4)
+                .workerThreads(threads)
+                .selectorThreads(2)
                 .protocolFactory(protocolFactory)
                 .transportFactory(new TFramedTransport.Factory()));
             thread.start();
