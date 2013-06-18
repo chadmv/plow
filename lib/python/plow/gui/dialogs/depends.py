@@ -66,6 +66,7 @@ class DependencyWizard(QtGui.QWizard):
         self.resize(650, self.height())
 
         self.__src = None
+        self.__dst = None
         self.__project = project
 
         self.__targetsPage = ChooseTargetsPage(project=project, parent=self)
@@ -79,10 +80,32 @@ class DependencyWizard(QtGui.QWizard):
         return self.__src
 
     def setSourceObject(self, obj):
+        """
+        Set the initial source object, as the one that
+        depends on something else. 
+
+        `obj` must be one of Job, Layer, Task
+        """
         if not isinstance(obj, (client.Job, client.Layer, client.Task)):
             raise ValueError("Source object must be an instance of Job/Layer/Task")
 
         self.__src = obj
+        self.restart()
+
+    def destObject(self):
+        return self.__dst
+
+    def setDestObject(self, obj):
+        """
+        Set the initial destination object, as the one that
+        something else depends upon. 
+
+        `obj` must be one of Job, Layer, Task
+        """
+        if not isinstance(obj, (client.Job, client.Layer, client.Task)):
+            raise ValueError("Destination object must be an instance of Job/Layer/Task")
+
+        self.__dst = obj
         self.restart()
 
     @property 
@@ -117,6 +140,13 @@ class BaseDepPage(QtGui.QWizardPage):
             return None 
 
         return wiz.sourceObject()
+
+    def destObject(self):
+        wiz = self.wizard()
+        if not wiz:
+            return None 
+
+        return wiz.destObject()
 
     @property 
     def dependantObjects(self):
@@ -163,24 +193,26 @@ class ChooseTypeDepPage(BaseDepPage):
 
     def initializePage(self):
         src = self.sourceObject()
-        typ = src.__class__.__name__.lower() if src else None
+        srcTyp = src.__class__.__name__.lower() if src else None
 
         buttons = self.__radioGroup.buttons()
         defaultSelection = False
         for button in buttons:
             text = button.text().lower()
             button.setEnabled(bool(src))
-            if src and text.startswith(typ):
-                button.setChecked(True)
-                break
 
+            if src and text.startswith(srcTyp):
+                if not defaultSelection:
+                    button.setChecked(True)
+                    defaultSelection = True
+                
         if not src:
             msg = "<font color='red'>No Plow object given to apply dependencies</font>"
             self.__title.setText(msg)
             return
 
         name = src.name 
-        txt = "Dependency Options for <strong>%s</strong> %r" % (typ.title(), name)
+        txt = "Dependency Options for <strong>%s</strong> %r" % (srcTyp.title(), name)
         self.__title.setText(txt)
 
     def isComplete(self):
@@ -257,29 +289,42 @@ class ChooseTargetsPage(BaseDepPage):
 
     def __initSelector(self, selector):
         src = self.sourceObject()
+        dst = self.destObject()
         name = src.name
         
+        if selector is self.__sourceSelector:
+            obj = src
+            name = src.name 
+            select = True
+        elif dst:
+            obj = dst
+            name = dst.name 
+            select = True
+        else:
+            obj = src
+            select = False
+            try:
+                name = src.username
+            except:
+                name = src.name
+
         isDest = selector is self.__destSelector 
 
-        if isinstance(src, client.Job):
-            if isDest:
-                name = src.username
-            selector.setJobFilter(name, selectFirst=not isDest)
+        if isinstance(obj, client.Job):
+            selector.setJobFilter(name, selectFirst=select)
             return
 
-        job = src.get_job()
+        job = obj.get_job()
         selector.setJobFilter(job.name)
 
-        if isinstance(src, client.Layer):
-            if not isDest:
-                selector.setLayerFilter(name)
+        if isinstance(obj, client.Layer):
+            selector.setLayerFilter(name)
             return
 
-        if isinstance(src, client.Task):
-            layer = client.get_layer_by_id(src.layerId)
+        if isinstance(obj, client.Task):
+            layer = client.get_layer_by_id(obj.layerId)
             selector.setLayerFilter(layer.name)
-            if not isDest:
-                selector.setTaskFilter(name)
+            selector.setTaskFilter(name)
 
     def validatePage(self):
         src = self.sourceSelection 
