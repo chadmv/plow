@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +15,9 @@ import com.breakersoft.plow.ProcE;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.exceptions.PlowDispatcherException;
 import com.breakersoft.plow.util.JdbcUtils;
+import com.breakersoft.plow.util.PlowUtils;
 
 @Repository
 public class ProcDaoImpl extends AbstractDao implements ProcDao {
@@ -73,7 +76,6 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
     @Override
     public void create(DispatchProc proc) {
         proc.setProcId(UUID.randomUUID());
-
         jdbc.update(INSERT,
                 proc.getProcId(),
                 proc.getNodeId(),
@@ -123,8 +125,13 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
                 "pk_task IS NULL";
 
     public boolean assign(Proc proc, Task task) {
-         return jdbc.update(ASSIGN,
-                 task.getTaskId(), task.getLayerId(), proc.getProcId()) == 1;
+        try {
+            return jdbc.update(ASSIGN,
+                    task.getTaskId(), task.getLayerId(), proc.getProcId()) == 1;
+        } catch (DataAccessException e) {
+            throw new PlowDispatcherException(
+                    "Unable to assign proc " + proc + " to task " + task + "," + e, e);
+        }
     }
 
     @Override
@@ -144,5 +151,12 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
         return jdbc.update(
                 "UPDATE plow.proc SET bool_unbooked=? WHERE proc.pk_proc=?",
                 unbooked, proc.getProcId()) == 1;
+    }
+
+    @Override
+    public boolean setProcDeallocated(Proc proc) {
+        return jdbc.update(
+                "UPDATE plow.proc SET bool_dealloc=? WHERE proc.pk_proc=?",
+                true, proc.getProcId()) == 1;
     }
 }

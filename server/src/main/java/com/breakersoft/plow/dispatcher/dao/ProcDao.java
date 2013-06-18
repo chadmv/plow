@@ -25,4 +25,13 @@ public interface ProcDao {
     boolean unassign(Proc proc);
 
     boolean assign(Proc proc, Task task);
+
+    /**
+     * Marks the proc as deallocated, the sweeper will remove it
+     * and possibly redispatch the node if its scheduled.
+     *
+     * @param proc
+     * @return
+     */
+    boolean setProcDeallocated(Proc proc);
 }

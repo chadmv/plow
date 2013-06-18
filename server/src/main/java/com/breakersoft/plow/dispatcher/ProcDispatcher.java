@@ -2,24 +2,15 @@ package com.breakersoft.plow.dispatcher;
 
 import java.util.List;
 
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import com.breakersoft.plow.ExitStatus;
-import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
 import com.breakersoft.plow.dispatcher.domain.DispatchTask;
-import com.breakersoft.plow.monitor.PlowStats;
-import com.breakersoft.plow.rnd.thrift.RunTaskCommand;
-import com.breakersoft.plow.rndaemon.RndClient;
-import com.breakersoft.plow.service.JobService;
-import com.breakersoft.plow.thrift.TaskState;
+import com.breakersoft.plow.rndaemon.RndClientPool;
 
 /**
  *
@@ -30,66 +21,38 @@ import com.breakersoft.plow.thrift.TaskState;
  *
  */
 @Component
-public class ProcDispatcher implements Dispatcher<DispatchProc> {
-
-    private static final Logger logger =
-            org.slf4j.LoggerFactory.getLogger(ProcDispatcher.class);
+public class ProcDispatcher extends AbstractDispatcher implements Dispatcher<DispatchProc> {
 
     @Autowired
-    private DispatchService dispatchService;
+    private RndClientPool rndClientPool;
 
-    @Autowired
-    private JobService jobService;
+    @Override
+    public DispatchResult dispatch(DispatchProc proc) {
+        final DispatchResult result = new DispatchResult(proc);
+        dispatch(result, proc);
+        if (result.procs == 0) {
+            dispatchService.deallocateProc(proc, "Unable to find a suitable task");
+        }
 
-    @Autowired
-    @Qualifier("procDispatcherExecutor")
-    private ThreadPoolTaskExecutor procDispatcherExecutor;
-
-    public void asyncDispatch(final DispatchProc proc) {
-
-        procDispatcherExecutor.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                if (!jobService.isDispatchable(proc)) {
-                    dispatchService.deallocateProc(proc, "Job was no longer dispatchable");
-                    return;
-                }
-
-                final DispatchResult result = new DispatchResult(proc);
-                try {
-                    dispatch(result, proc);
-                    if (!result.procs.isEmpty()) {
-                        PlowStats.procDispatchHit.incrementAndGet();
-                    }
-                    else {
-                        PlowStats.procDispatchMiss.incrementAndGet();
-                    }
-                } finally {
-                    if (result.procs.isEmpty()) {
-                        dispatchService.deallocateProc(proc, "No tasks to dispatch.");
-                    }
-                }
-            }
-        });
+        return result;
     }
 
-    public void dispatch(DispatchResult result, DispatchProc proc) {
+    public void dispatch(final DispatchResult result, DispatchProc proc) {
 
         final List<DispatchTask> tasks =
-                dispatchService.getDispatchableTasks(proc, proc);
+                dispatchService.getDispatchableTasks(proc, proc, 25);
 
         for (DispatchTask task: tasks) {
-            dispatch(result, proc, task);
-            // Only continue if the task failed due to a
-            // reservation problem.
+
             if (!result.continueDispatching()) {
                 break;
             }
+
+            dispatch(result, proc, task);
         }
     }
 
+    @Override
     public void dispatch(DispatchResult result, DispatchProc proc, DispatchTask task) {
 
         if (!dispatchService.reserveTask(task)) {
@@ -98,25 +61,19 @@ public class ProcDispatcher implements Dispatcher<DispatchProc> {
 
         try {
             dispatchService.assignProc(proc, task);
-            if (dispatchService.startTask(task, proc)) {
-                RunTaskCommand command =
-                        dispatchService.getRuntaskCommand(task);
-                RndClient client = new RndClient(proc.getHostname());
-                client.runProcess(command);
-                result.dispatched(proc, task);
-                // Don't continue to dispatch.
-                result.dispatch = false;
-            }
-            else {
-                /*
-                 * We had reserved the task but were somehow unable to start it,
-                 */
-                dispatchFailed(result, proc, task, "Critical, unable to start reserved task.");
+        } catch (RuntimeException e) {
+            dispatchFailed(result, proc, task, "Unable to assign proc to a resereved task.");
+            return;
+        }
+
+        if (dispatchService.startTask(task, proc)) {
+            result.addDispatchPair(proc, task);
+            if (!result.isTest) {
+                rndClientPool.executeProcess(proc, task);
             }
         }
-        catch (Exception e) {
-            logger.warn("Unexpected task dipatching error, " + e, e);
-            dispatchFailed(result, proc, task, e.getMessage());
+        else {
+            dispatchFailed(result, proc, task, "Critical, was able to reserve task but not start it.");
         }
     }
 
@@ -134,22 +91,5 @@ public class ProcDispatcher implements Dispatcher<DispatchProc> {
 
     }
 
-    @Override
-    public void dispatchFailed(DispatchResult result, DispatchProc resource,
-            DispatchTask task, String message) {
 
-        logger.info("Unable to dispatch {}/{}, {}", new Object[] {resource, task, message});
-        PlowStats.procDispatchFail.incrementAndGet();
-
-        dispatchService.deallocateProc(resource, message);
-        if (task != null) {
-            if (task.started) {
-                dispatchService.stopTask(task, TaskState.WAITING, ExitStatus.FAIL, Signal.ABORTED_TASK);
-            }
-            else {
-                dispatchService.unreserveTask(task);
-            }
-        }
-        result.dispatch = false;
-    }
 }

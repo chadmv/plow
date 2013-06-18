@@ -9,37 +9,29 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class PlowThreadPools {
 
-    /**
-     * The NodeDispatcherExecutor
-     *
-     * @return
-     */
-    @Bean(name="nodeDispatcherExecutor")
+    public static final int THIFT_RND_POOL_SIZE = 24;
+
+    @Bean(name="nodeDispatchExecutor")
     public ThreadPoolTaskExecutor nodeDispatcherExecutor() {
         ThreadPoolTaskExecutor t = new ThreadPoolTaskExecutor();
-        t.setCorePoolSize(16);
-        t.setMaxPoolSize(16);
-        t.setThreadNamePrefix("NodeDispatcher");
+        t.setCorePoolSize(4);
+        t.setMaxPoolSize(4);
+        t.setThreadNamePrefix("nodeDispatchExecutor");
         t.setDaemon(false);
-        t.setQueueCapacity(1000);
+        t.setQueueCapacity(10000);
         return t;
     }
 
-    /**
-     * The ProcDispatcherExecutor
-     *
-     * @return
-     */
-    @Bean(name="procDispatcherExecutor")
-    public ThreadPoolTaskExecutor procDispatcherExecutor() {
-        ThreadPoolTaskExecutor t = new ThreadPoolTaskExecutor();
-        t.setCorePoolSize(16);
-        t.setMaxPoolSize(16);
-        t.setThreadNamePrefix("ProcDispatcher");
-        t.setDaemon(false);
-        t.setQueueCapacity(5000);
-        return t;
-    }
+   @Bean(name="pipelineExecutor")
+   public ThreadPoolTaskExecutor pipelineExecutor() {
+       ThreadPoolTaskExecutor t = new ThreadPoolTaskExecutor();
+       t.setCorePoolSize(32);
+       t.setMaxPoolSize(32);
+       t.setThreadNamePrefix("pipelineExecutor");
+       t.setDaemon(false);
+       t.setQueueCapacity(10000);
+       return t;
+   }
 
     /**
      * Handles Async commands from the API.
@@ -47,9 +39,24 @@ public class PlowThreadPools {
     @Bean(name="stateChangeExecutor")
     public ThreadPoolTaskExecutor stateChangeExecutor() {
         ThreadPoolTaskExecutor t = new ThreadPoolTaskExecutor();
-        t.setCorePoolSize(16);
-        t.setMaxPoolSize(32);
+        t.setCorePoolSize(8);
+        t.setMaxPoolSize(16);
         t.setThreadNamePrefix("StateChange");
+        t.setDaemon(false);
+        t.setQueueCapacity(1000);
+        t.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        return t;
+    }
+
+    /**
+     * Handles communication with RNDaemon.
+     */
+    @Bean(name="rndCommandExecutor")
+    public ThreadPoolTaskExecutor rndCommandExecutor() {
+        ThreadPoolTaskExecutor t = new ThreadPoolTaskExecutor();
+        t.setCorePoolSize(24);
+        t.setMaxPoolSize(25);
+        t.setThreadNamePrefix("RndRun");
         t.setDaemon(false);
         t.setQueueCapacity(1000);
         t.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());

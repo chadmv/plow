@@ -7,19 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 
-import com.breakersoft.plow.Layer;
-import com.breakersoft.plow.LayerE;
 import com.breakersoft.plow.Node;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.dispatcher.pipeline.PipelineCommandService;
+import com.breakersoft.plow.dispatcher.pipeline.PipelineController;
+import com.breakersoft.plow.dispatcher.pipeline.StopTaskCommand;
 import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.rnd.thrift.RunTaskResult;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.service.NodeService;
-import com.breakersoft.plow.service.StateManager;
-import com.breakersoft.plow.thrift.TaskState;
 import com.breakersoft.plow.util.PlowUtils;
 
 /**
@@ -33,9 +32,6 @@ public class RndEventHandler {
 
     private static final Logger logger =
             org.slf4j.LoggerFactory.getLogger(RndEventHandler.class);
-
-    @Autowired
-    SchedulerService schedulerService;
 
     @Autowired
     StatsService statsService;
@@ -53,10 +49,10 @@ public class RndEventHandler {
     JobService jobService;
 
     @Autowired
-    StateManager stateManager;
+    PipelineCommandService pipelineCommandService;
 
     @Autowired
-    ProcDispatcher procDispatcher;
+    PipelineController pipelineController;
 
     /**
      * This is a oneway method, the RNDaemon is not listening for a response.
@@ -65,7 +61,7 @@ public class RndEventHandler {
      */
     public void handleNodePing(Ping ping) {
 
-        logger.info("{} node reporting in.", ping.getHostname());
+        logger.trace("{} node reporting in.", ping.getHostname());
 
         DispatchNode node;
         try {
@@ -101,49 +97,9 @@ public class RndEventHandler {
             return;
         }
 
-        PlowStats.rndTaskComplete.incrementAndGet();
-
-        TaskState newState;
-        if (result.exitStatus == 0) {
-            newState = TaskState.SUCCEEDED;
-        }
-        else {
-
-            if (dispatchService.isAtMaxRetries(task)) {
-                newState = TaskState.DEAD;
-            }
-            else {
-                newState = TaskState.WAITING;
-            }
-        }
-
-        if (dispatchService.stopTask(
-                task, newState, result.exitStatus, result.exitSignal)) {
-
-            logger.info("{} new state {}", task, newState.toString());
-            dispatchService.unassignProc(proc);
-
-            if (newState.equals(TaskState.SUCCEEDED)) {
-                stateManager.satisfyDependsOn(task);
-                final Layer layer = new LayerE(task);
-                if (jobService.isLayerComplete(layer)) {
-                    stateManager.satisfyDependsOn(layer);
-                }
-                // Async
-                stateManager.asyncTaskSucceeded(task);
-            }
-        }
-        else {
-            logger.error("{} NO NEW STATE, was not able to stop task", task);
-            // Not sure what happened to the proc here.
-            dispatchService.deallocateProc(proc, "Returned result for an already compelted task.");
-            return;
-        }
-
-        try {
-            procDispatcher.asyncDispatch(proc);
-        } catch (Exception e) {
-             dispatchService.deallocateProc(proc, "Unable to execute async proc dispatch:" + e);
-        }
+        // May throw back to RND if the job's pipeline is full.
+        // Will internally spawn a dispatch proc command.
+        pipelineController.execute(
+                new StopTaskCommand(result, task, proc, pipelineCommandService));
     }
 }
