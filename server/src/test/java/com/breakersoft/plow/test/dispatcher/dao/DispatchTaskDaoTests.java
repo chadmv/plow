@@ -56,7 +56,7 @@ public class DispatchTaskDaoTests extends AbstractTest {
                 nodeService.createNode(getTestNodePing()).getName());
         JobLaunchEvent event = jobService.launch(getTestJobSpec());
         job = new DispatchJob(event.getJob());
-        tasks = dispatchTaskDao.getDispatchableTasks(job, node);
+        tasks = dispatchTaskDao.getDispatchableTasks(job, node, 10);
     }
 
     @Test
@@ -106,9 +106,9 @@ public class DispatchTaskDaoTests extends AbstractTest {
         result.isTest = true;
         nodeDispatcher.dispatch(result, node);
 
-        assertFalse(result.procs.isEmpty());
+        assertTrue(result.procs > 0);
 
-        DispatchProc proc = result.procs.get(0);
+        DispatchProc proc = result.pairs.get(0).proc;
         Task t = jobService.getTask(proc.getTaskId());
 
         RunTaskCommand command = dispatchTaskDao.getRunTaskCommand(t);

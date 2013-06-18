@@ -21,6 +21,7 @@ import com.breakersoft.plow.dispatcher.dao.DispatchDao;
 import com.breakersoft.plow.dispatcher.dao.ProcDao;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
+import com.breakersoft.plow.dispatcher.domain.DispatchPair;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
 import com.breakersoft.plow.dispatcher.domain.DispatchProject;
 import com.breakersoft.plow.dispatcher.domain.DispatchResult;
@@ -108,9 +109,10 @@ public class DispatcherDaoTests extends AbstractTest {
         result.isTest = true;
         nodeDispatcher.dispatch(result, node);
 
-        assertFalse(result.procs.isEmpty());
+        assertFalse(result.pairs.isEmpty());
 
-        for (DispatchProc proc: result.procs) {
+        for (DispatchPair pair: result.pairs) {
+            DispatchProc proc = pair.proc;
             DispatchProc dbProc = dispatchDao.getDispatchProc(proc.getProcId());
             assertEquals(proc.getProcId(), dbProc.getProcId());
             assertEquals(proc.getJobId(), dbProc.getJobId());

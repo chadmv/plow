@@ -86,7 +86,7 @@ public class ThriftTaskDaoTests extends AbstractTest {
                 nodeService.createNode(getTestNodePing()).getName());
 
         DispatchJob job = new DispatchJob(event.getJob());
-        List<DispatchTask> tasks = dispatchTaskDao.getDispatchableTasks(job, node);
+        List<DispatchTask> tasks = dispatchTaskDao.getDispatchableTasks(job, node, 10);
 
         assertTrue(dispatchTaskDao.reserve(tasks.get(0)));
         DispatchProc proc = dispatchService.allocateProc(node, tasks.get(0));
@@ -108,7 +108,7 @@ public class ThriftTaskDaoTests extends AbstractTest {
                 nodeService.createNode(getTestNodePing()).getName());
 
         DispatchJob job = new DispatchJob(event.getJob());
-        List<DispatchTask> tasks = dispatchTaskDao.getDispatchableTasks(job, node);
+        List<DispatchTask> tasks = dispatchTaskDao.getDispatchableTasks(job, node, 10);
 
         assertTrue(dispatchTaskDao.reserve(tasks.get(0)));
         DispatchProc proc = dispatchService.allocateProc(node, tasks.get(0));
@@ -136,7 +136,7 @@ public class ThriftTaskDaoTests extends AbstractTest {
                 nodeService.createNode(getTestNodePing()).getName());
 
         DispatchJob job = new DispatchJob(event.getJob());
-        List<DispatchTask> tasks = dispatchTaskDao.getDispatchableTasks(job, node);
+        List<DispatchTask> tasks = dispatchTaskDao.getDispatchableTasks(job, node, 10);
 
         Task t =  tasks.get(0);
 

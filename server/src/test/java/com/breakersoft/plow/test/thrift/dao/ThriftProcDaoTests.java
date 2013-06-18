@@ -58,7 +58,7 @@ public class ThriftProcDaoTests extends AbstractTest {
                 nodeService.createNode(getTestNodePing()).getName());
 
         job = new DispatchJob(event.getJob());
-        task = dispatchTaskDao.getDispatchableTasks(job, node).get(0);
+        task = dispatchTaskDao.getDispatchableTasks(job, node, 10).get(0);
 
         assertTrue(dispatchTaskDao.reserve(task));
         proc = dispatchService.allocateProc(node, task);
