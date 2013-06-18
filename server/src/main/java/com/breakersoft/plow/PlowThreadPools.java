@@ -25,8 +25,8 @@ public class PlowThreadPools {
    @Bean(name="pipelineExecutor")
    public ThreadPoolTaskExecutor pipelineExecutor() {
        ThreadPoolTaskExecutor t = new ThreadPoolTaskExecutor();
-       t.setCorePoolSize(32);
-       t.setMaxPoolSize(32);
+       t.setCorePoolSize(48);
+       t.setMaxPoolSize(48);
        t.setThreadNamePrefix("pipelineExecutor");
        t.setDaemon(false);
        t.setQueueCapacity(10000);
