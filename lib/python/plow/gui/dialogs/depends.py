@@ -1,7 +1,9 @@
 
 import logging
+from cgi import escape
 from itertools import chain
 from functools import partial 
+from cStringIO import StringIO 
 
 from plow import client 
 from plow.client import DependType
@@ -248,7 +250,7 @@ class ChooseTargetsPage(BaseDepPage):
         groupLayout1 = QtGui.QVBoxLayout(group1)
         groupLayout1.setContentsMargins(0, 0, 0, 0)
         self.__sourceSelector = src = common.job.JobColumnWidget(project=project, parent=self)
-        src.setSingleSelections(True)
+        # src.setSingleSelections(True)
         groupLayout1.addWidget(src)
 
         self.group2 = group2 = QtGui.QGroupBox("Item Depends On", self)
@@ -338,7 +340,7 @@ class ChooseTargetsPage(BaseDepPage):
                             "target selections are required</font>")
             return False
 
-        if src[0] in dst:
+        if set(src).intersection(dst):
             errText.setText("<font color=red>Dependant item cannot "\
                             "be set to depend on itself</font>")
             return False
@@ -386,8 +388,9 @@ class ConfirmApplyPage(BaseDepPage):
 
         self.__depOpts = []
 
-        self.__text = text = QtGui.QPlainTextEdit(self)
+        self.__text = text = QtGui.QTextEdit(self)
         text.setReadOnly(True)
+        text.setWordWrapMode(QtGui.QTextOption.NoWrap)
 
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(self.__text)
@@ -411,7 +414,11 @@ class ConfirmApplyPage(BaseDepPage):
 
         jobIds = set()
         jobs = {}
+        layers = {}
 
+        # Build a list of job and layer ids
+        # so that we can map display names to
+        # them in our confirmation output
         for d in chain(deps, depsOn[0:1]):
             if isinstance(d, client.Job):
                 jobs[d.id] = d
@@ -420,33 +427,52 @@ class ConfirmApplyPage(BaseDepPage):
 
         for job in client.get_jobs(jobIds=jobIds):
             jobs[job.id] = job
+            for layer in job.get_layers():
+                layers[layer.id] = layer
 
+        # init a list allocated with the size of
+        # the total number of dependency callbacks
         opts = [0] * (len(deps) * len(depsOn))
+
+        buf = StringIO()
+
+        def writeObject(obj):
+            try:
+                job = jobs[obj.jobId]
+                buf.write(escape('%s : ' % job, quote=True))
+            except AttributeError:
+                pass
+
+            try:
+                layer = layers[obj.layerId]
+                buf.write(escape('%s : ' % layer, quote=True))
+            except AttributeError:
+                pass
+
+            buf.write(escape(str(obj), quote=True))            
+
+        buf.write('<div style="font-size: 12px;">')
 
         i = 0
         for dep in deps:
 
-            try:
-                job = jobs[dep.jobId]
-                msg = "\nMake %s : %s depend upon:" % (job, dep)
-            except AttributeError:
-                msg = "\nMake %s depend upon:" % dep
-            
-            text.appendPlainText(msg)
+            buf.write("<br><br>Make ")
+            writeObject(dep)
+            buf.write(" depend upon:")
 
             for depOn in depsOn:
 
-                try:
-                    job = jobs[depOn.jobId]
-                    msg = "\t%s : %s" % (job, depOn)
-                except AttributeError:
-                    msg = "\t%s" % depOn
+                buf.write('<br>&nbsp;&nbsp;')
+                writeObject(depOn)
 
-                text.appendPlainText(msg)
-
+                # save the callback operation to run later
                 opts[i] = partial(callback, dep, depOn)
+
                 i += 1
-            
+
+        buf.write('</div>')
+        text.setHtml(buf.getvalue())
+
         self.__depOpts = opts
 
     def applyDeps(self):
@@ -478,5 +504,3 @@ class ConfirmApplyPage(BaseDepPage):
 
         progress.setValue(size)
         return completed 
-
-
