@@ -45,7 +45,7 @@ public class ThriftServer {
                     new TThreadedSelectorServer.Args(transport)
                 .processor(processor)
                 .workerThreads(threads)
-                .selectorThreads(2)
+                .selectorThreads(4)
                 .protocolFactory(protocolFactory)
                 .transportFactory(new TFramedTransport.Factory()));
             thread.start();

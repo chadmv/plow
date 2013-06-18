@@ -9,7 +9,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class PlowThreadPools {
 
-    public static final int THIFT_RND_POOL_SIZE = 24;
+    public static final int THIFT_RND_POOL_SIZE = 32;
 
     @Bean(name="nodeDispatchExecutor")
     public ThreadPoolTaskExecutor nodeDispatcherExecutor() {
