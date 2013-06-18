@@ -23,7 +23,6 @@ lib/python/__dist__
 plow.cpp
 plow.html
 lib/cython/doc/_build
-server/dist
 lib/python/blueprint
 lib/python/fileseq
 lib/python/build
