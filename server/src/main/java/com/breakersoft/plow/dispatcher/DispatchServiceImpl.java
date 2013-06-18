@@ -113,21 +113,16 @@ public class DispatchServiceImpl implements DispatchService {
     public boolean startTask(DispatchTask task, DispatchProc proc) {
         if (dispatchTaskDao.start(task, proc)) {
             task.started = true;
-            //PlowStats.taskStartedCount.incrementAndGet();
             return true;
         }
-        //PlowStats.taskStartedFailCount.incrementAndGet();
         return false;
     }
 
     @Override
     public boolean stopTask(Task task, TaskState state, int exitStatus, int exitSignal) {
         if (dispatchTaskDao.stop(task, state, exitStatus, exitSignal)) {
-
-            //PlowStats.taskStoppedCount.incrementAndGet();
             return true;
         }
-        //PlowStats.taskStoppedFailCount.incrementAndGet();
         return false;
     }
 
