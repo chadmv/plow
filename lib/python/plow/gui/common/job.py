@@ -369,7 +369,7 @@ class JobContextMenu(QtGui.QMenu):
         kill = self.addAction(QtGui.QIcon(":/images/kill.png"), "Kill Job%s" % plural)
 
         if 1 <= total <= 2:
-            depend = self.addAction("Add Dependencies")
+            depend = self.addAction(QtGui.QIcon(":/images/depend.png"), "Add Dependencies")
             depend.triggered.connect(partial(self._depend, jobs))
 
         self.addSeparator()

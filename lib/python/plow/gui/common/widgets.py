@@ -104,11 +104,11 @@ class FilterableListBox(QtGui.QWidget):
         self.__txt_filter.setFixedHeight(height)
         self.__txt_filter.textChanged.connect(self.__filterChanged)
 
-        style = QtGui.qApp.style()
         self.__txt_clear = btn = QtGui.QPushButton(self)
-        btn.setIcon(style.standardIcon(style.SP_DialogResetButton))
+        btn.setIcon(QtGui.QIcon(":/images/delete.png"))
         btn.setFlat(True)
         btn.setFixedSize(height,height)
+        btn.setIconSize(QtCore.QSize(14,14))
         btn.setVisible(False)
 
         self.__model = QtGui.QStringListModel(self)

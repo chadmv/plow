@@ -152,7 +152,7 @@ class TaskWidget(QtGui.QWidget):
 
         total = self.__selectedCount()
         if 1 <= total <= 2:
-            depend = menu.addAction("Add Dependencies")
+            depend = menu.addAction(QtGui.QIcon(":/images/depend.png"), "Add Dependencies")
             depend.triggered.connect(self.__addDepends)
 
         menu.exec_(self.mapToGlobal(pos))

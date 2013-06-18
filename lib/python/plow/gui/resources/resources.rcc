@@ -5,6 +5,8 @@
     <file alias="images/up_arrow.png">images/up_arrow_16.png</file>
     <file alias="images/left_arrow.png">images/left_arrow_16.png</file>
     <file alias="images/right_arrow.png">images/right_arrow_16.png</file>
+    <file alias="images/delete.png">images/round_delete_icon_16.png</file>
+    <file alias="images/depend.png">images/clock_icon_16.png</file>
     <file>images/handle.png</file>
     <file>images/close.png</file>
     <file>images/float.png</file>
