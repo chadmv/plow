@@ -70,9 +70,12 @@ class AbstractProfiler(object):
 
         ping = self.getPing(update=True)
         ping.isReboot = isReboot
-        ping.tasks = tasks
 
-        logger.info("Sending ping: %s" % ping)
+        logger.info("Sending ping with %d running tasks: %s", len(tasks), ping)
+
+        ping.tasks = tasks
+        logger.debug("Running tasks sent with ping: %s", tasks)
+
         try:
             service, transport = client.getPlowConnection()
             service.sendPing(ping)
