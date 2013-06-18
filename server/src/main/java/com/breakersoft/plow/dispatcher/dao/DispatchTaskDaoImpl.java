@@ -50,7 +50,6 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
             return jdbc.update("UPDATE plow.task SET bool_reserved='t' " +
                     "WHERE pk_task=? AND int_state=? AND bool_reserved='f'", task.getTaskId(), TaskState.WAITING.ordinal()) == 1;
         } catch (Exception e) {
-            System.out.println("Could not reserve: "  + e.toString());
             return false;
         }
     }
@@ -160,7 +159,7 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
                 "task.bool_reserved IS FALSE " +
             "ORDER BY " +
                 "task.int_task_order, task.int_layer_order ASC " +
-            "LIMIT 20";
+            "LIMIT ?";
 
     public static final RowMapper<DispatchTask> DISPATCHABLE_TASK_MAPPER =
             new RowMapper<DispatchTask>() {
@@ -180,7 +179,7 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
     };
 
     @Override
-    public List<DispatchTask> getDispatchableTasks(final JobId job, final DispatchResource resource) {
+    public List<DispatchTask> getDispatchableTasks(final JobId job, final DispatchResource resource, final int limit) {
         return jdbc.query(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
@@ -190,6 +189,7 @@ public class DispatchTaskDaoImpl extends AbstractDao implements DispatchTaskDao 
                 ps.setInt(3, resource.getIdleRam());
                 ps.setArray(4, conn.createArrayOf("text", resource.getTags().toArray()));
                 ps.setInt(5, TaskState.WAITING.ordinal());
+                ps.setInt(6, limit);
                 return ps;
             }
         }, DISPATCHABLE_TASK_MAPPER);

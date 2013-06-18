@@ -22,7 +22,7 @@ public interface DispatchTaskDao {
 
     RunTaskCommand getRunTaskCommand(Task task);
 
-    List<DispatchTask> getDispatchableTasks(JobId job, DispatchResource resource);
+    List<DispatchTask> getDispatchableTasks(JobId job, DispatchResource resource, int limit);
 
     boolean isAtMaxRetries(Task task);
 
