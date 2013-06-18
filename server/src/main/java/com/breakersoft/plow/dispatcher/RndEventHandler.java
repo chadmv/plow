@@ -90,10 +90,21 @@ public class RndEventHandler {
         DispatchProc proc = null;
         try {
             task = jobService.getTask(UUID.fromString(result.taskId));
+        }
+        catch (EmptyResultDataAccessException e) {
+            logger.error("The task {} no longer exists, on job: {}. Ignoring RunTaskResult.",
+                    result.taskId, result.jobId);
+        }
+
+        try {
             proc = dispatchService.getDispatchProc(result.procId);
         }
         catch (EmptyResultDataAccessException e) {
-            logger.error("Bad task complete ping Job:" + result.jobId + ", Task: " + result.taskId, e);
+            logger.error("The proc {} no longer exists, was running task {}. Ignoring RunTaskResult.",
+                    result.procId, result.taskId);
+        }
+
+        if (proc == null || task == null) {
             return;
         }
 
