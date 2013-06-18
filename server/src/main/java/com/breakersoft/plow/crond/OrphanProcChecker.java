@@ -56,7 +56,7 @@ public class OrphanProcChecker extends AbstractCrondTask {
                 }
 
                 logger.warn("Deallocating orphan {}", proc);
-                dispatchService.deallocateProc(proc, "orphaned");
+                dispatchService.markAsDeallocated(proc);
 
             } catch (Exception e) {
                 logger.warn("Failed to handled orphaned proc, " + e.getMessage(), e);
