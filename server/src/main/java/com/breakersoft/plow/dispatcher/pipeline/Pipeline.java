@@ -5,9 +5,14 @@ import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+
 import com.breakersoft.plow.JobId;
 
 public class Pipeline implements JobId, Runnable {
+
+    private static final Logger logger =
+            org.slf4j.LoggerFactory.getLogger(Pipeline.class);
 
     private final UUID jobId;
     private final LinkedBlockingQueue<PipelineCommand> queue;
@@ -47,7 +52,11 @@ public class Pipeline implements JobId, Runnable {
                 if (command == null) {
                     return;
                 }
-                command.process();
+                try {
+                    command.process();
+                } catch (RuntimeException e) {
+                    logger.warn("{} pipeline exception, unexpected exception: {}", jobId, e);
+                }
             }
         }
         finally {
