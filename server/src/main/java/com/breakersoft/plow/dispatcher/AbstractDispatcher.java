@@ -29,7 +29,12 @@ public class AbstractDispatcher {
                 dispatchService.unreserveTask(task);
             }
         }
+
+        dispatchService.unassignProc(proc);
         dispatchService.markAsDeallocated(proc);
-        result.continueDispatch = false;
+
+        if (result != null) {
+            result.continueDispatch = false;
+        }
     }
 }
