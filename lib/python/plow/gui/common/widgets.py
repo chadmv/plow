@@ -17,6 +17,7 @@ class TableWidget(QtGui.QTableView):
         self.setSortingEnabled(True)
         self.setAlternatingRowColors(True)
         self.setAutoFillBackground(False)
+        self.setShowGrid(False)
         self.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
         
         self.horizontalHeader().setStretchLastSection(True)
