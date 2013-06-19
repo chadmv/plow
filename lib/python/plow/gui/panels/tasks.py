@@ -243,7 +243,7 @@ class TaskWidget(QtGui.QWidget):
             EventManager.emit("GLOBAL_REFRESH")
 
 
-class TaskModel(QtCore.QAbstractTableModel):
+class TaskModel(models.PlowTableModel):
 
     HEADERS = ["Name", "State", "Node", "Resources", "Duration", "Retries", "Log"]
 
@@ -268,9 +268,8 @@ class TaskModel(QtCore.QAbstractTableModel):
     }
 
     def __init__(self, parent=None):
-        QtCore.QAbstractTableModel.__init__(self, parent)
-        self.__tasks = []
-        self.__index = {}
+        super(TaskModel, self).__init__(parent)
+
         self.__jobId = None
         self.__lastUpdateTime = 0
 
@@ -286,17 +285,18 @@ class TaskModel(QtCore.QAbstractTableModel):
 
         self.beginResetModel()
 
-        self.__tasks = []
-        self.__index.clear()
+        self._items = []
+        self._index.clear()
+
         self.__jobId = jobid
         self.__lastUpdateTime = 0
 
         try:
-            self.__tasks = plow.client.get_tasks(jobId=jobid)
+            self._items = plow.client.get_tasks(jobId=jobid)
             self.__lastUpdateTime = plow.client.get_plow_time()
 
-            for i, task in enumerate(self.__tasks):
-                self.__index[task.id] = i
+            for i, task in enumerate(self._items):
+                self._index[task.id] = i
 
         finally:
             self.endResetModel()
@@ -315,31 +315,30 @@ class TaskModel(QtCore.QAbstractTableModel):
 
         count = len(self.HEADERS)-1
         for task in tasks:
-            row = self.__index[task.id]
-            self.__tasks[row] = task
+            row = self._index[task.id]
+            self._items[row] = task
             self.dataChanged.emit(self.index(row, 0), self.index(row, count))
 
-    def rowCount(self, parent=None):
-        return len(self.__tasks)
-
-    def columnCount(self, parent=None):
-        return len(self.HEADERS)
 
     def data(self, index, role):
         row = index.row()
         col = index.column()
-        task = self.__tasks[row]
+
+        if role == QtCore.Qt.TextAlignmentRole:
+            if 0 < col < 6:
+                return QtCore.Qt.AlignCenter
+
+        data = super(TaskModel, self).data(index, role)
+        if data is not None:
+            return data
+
+        task = self._items[row]
         stats = task.stats 
 
         BG = QtCore.Qt.BackgroundRole
         FG = QtCore.Qt.ForegroundRole
 
-        if role == QtCore.Qt.DisplayRole:
-            cbk = self.DISPLAY_CALLBACKS.get(col)
-            if cbk is not None:
-                return cbk(task)
-        
-        elif col == 1 and (role == BG or role == FG):
+        if col == 1 and (role == BG or role == FG):
             color = QtCore.Qt.black
             bgcolor = constants.COLOR_TASK_STATE[task.state]
             if bgcolor is constants.YELLOW:
@@ -349,10 +348,6 @@ class TaskModel(QtCore.QAbstractTableModel):
                 return bgcolor
             else:
                 return color
-
-        elif role == QtCore.Qt.TextAlignmentRole:
-            if 0 < col < 6:
-                return QtCore.Qt.AlignCenter
 
         elif role == SortRole:
             cbk = self.SORT_CALLBACKS.get(col)
@@ -365,21 +360,9 @@ class TaskModel(QtCore.QAbstractTableModel):
             return tip % (stats.cores, stats.usedCores, stats.highCores, 
                           stats.ram, stats.usedRam, stats.highRam)
 
-        elif role == IdRole:
-            return task.id
-        
-        elif role == ObjectRole:
-            return task
-
-        return
-
-    def headerData(self, section, orientation, role):
-        if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
-            return self.HEADERS[section]
-
     def __durationRefreshTimer(self):
         RUNNING = plow.client.TaskState.RUNNING
-        for idx, t in enumerate(self.__tasks):
+        for idx, t in enumerate(self._items):
             if t.state == RUNNING:
                 self.dataChanged.emit(self.index(idx, 4),  self.index(idx, 4))
 

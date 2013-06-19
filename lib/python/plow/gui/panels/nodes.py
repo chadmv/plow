@@ -21,8 +21,6 @@ for a in dir(plow.client.NodeState):
     NODE_STATES[val] = a
 
 
-ObjectRole = QtCore.Qt.UserRole + 1
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -95,6 +93,7 @@ class NodeWidget(QtGui.QWidget):
         self.__model = model = NodeModel(self)
         self.__proxy = proxy = NodeFilterProxyModel(self)
         proxy.setDynamicSortFilter(True)
+        proxy.setSortRole(model.DataRole)
         proxy.setSourceModel(model)
 
         self.__view = view = TableWidget(self)
@@ -137,7 +136,7 @@ class NodeWidget(QtGui.QWidget):
 
     def getSelectedNodes(self):
         rows = self.__view.selectionModel().selectedRows()
-        return [index.data(ObjectRole) for index in rows]
+        return [index.data(self.__model.ObjectRole) for index in rows]
 
     def setClusterFilters(self, clusters):
         cluster_set = set()
@@ -180,7 +179,7 @@ class NodeWidget(QtGui.QWidget):
                 EventManager.emit("GLOBAL_REFRESH")
 
     def __itemDoubleClicked(self, index):
-        uid = index.data(ObjectRole).id
+        uid = index.data(self.__model.ObjectRole).id
         EventManager.emit("NODE_OF_INTEREST", uid)
 
     def __showContextMenu(self, pos):
@@ -201,7 +200,7 @@ class NodeWidget(QtGui.QWidget):
 #########################
 # NodeModel
 #########################
-class NodeModel(QtCore.QAbstractTableModel):
+class NodeModel(models.PlowTableModel):
 
     HEADERS = [
                 "Name", "Cluster", 
@@ -210,7 +209,7 @@ class NodeModel(QtCore.QAbstractTableModel):
                 "Swap (Free)", "Ping", "Uptime"
                ]
 
-    HEADER_CALLBACKS = {
+    DISPLAY_CALLBACKS = {
         0 : lambda n: n.name,
         1 : lambda n: n.clusterName,
         2 : lambda n: NODE_STATES.get(n.state, ''),
@@ -227,91 +226,37 @@ class NodeModel(QtCore.QAbstractTableModel):
 
     def __init__(self, parent=None):
         super(NodeModel, self).__init__(parent)
-        self.__items = []
-        self.__index = {}
-        self.__clusters = {}
 
-    def hasChildren(self, parent):
-        return False
+    def fetchObjects(self):
+        return plow.client.get_nodes()
 
     def reload(self):
         nodes = plow.client.get_nodes()
         self.setNodeList(nodes)
 
     def refresh(self):
-        if not self.__items:
+        if not self._items:
             self.reload()
             return 
 
-        rows = self.__index
-        colCount = self.columnCount()
-        parent = QtCore.QModelIndex()
-
-        nodes = plow.client.get_nodes()
-        nodes_ids = set()
-        to_add = set()
-
-        # Update
-        for node in nodes:
-            nodes_ids.add(node.id)
-            if node.id in self.__index:
-                row = rows[node.id]
-                self.__items[row] = node
-                start = self.index(row, 0)
-                end = self.index(row, colCount-1)
-                self.dataChanged.emit(start, end)
-                LOGGER.debug("updating %s %s", node.id, node.name)
-            else:
-                to_add.add(node)
-        
-        # Add new
-        if to_add:
-            size = len(to_add)
-            start = len(self.__items)
-            end = start + size - 1
-            self.beginInsertRows(parent, start, end)
-            self.__items.extend(to_add)
-            self.endInsertRows()
-            LOGGER.debug("adding %d new nodes", size)
-
-        # Remove
-        to_remove = set(self.__index.iterkeys()).difference(nodes_ids)
-        for row, old_id in sorted(((rows[old_id], old_id) for old_id in to_remove), reverse=True):
-            self.beginRemoveRows(parent, row, row)
-            node = self.__items.pop(row)
-            self.endRemoveRows()
-            LOGGER.debug("removing %s %s", old_id, node.name)
-
-        self.__index = dict((n.id, row) for row, n in enumerate(self.__items))
-
-    def rowCount(self, parent):
-        return len(self.__items)
-
-    def columnCount(self, parent=None):
-        return len(self.HEADERS)
+        super(NodeModel, self).refresh()
 
     def data(self, index, role):
-        if not index.isValid():
-            return
+        data = super(NodeModel, self).data(index, role)
+        if data is not None:
+            return data
 
         row = index.row()
         col = index.column()
-        node = self.__items[row]
+        node = self._items[row]
 
-        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.ToolTipRole:
-            return self.HEADER_CALLBACKS[col](node)
-
-        elif role == QtCore.Qt.UserRole:
+        if role == self.DataRole:
             if col == 7:
                 return node.system.freeRamMb / float(node.system.totalRamMb)
             elif col == 9:
                 return node.system.freeSwapMb / float(node.system.totalSwapMb)
             else:
-                return self.HEADER_CALLBACKS[col](node) 
-
-        elif role == QtCore.Qt.TextAlignmentRole:
-            if col != 0:
-                return QtCore.Qt.AlignCenter
+                return self.DISPLAY_CALLBACKS[col](node) 
 
         elif role == QtCore.Qt.BackgroundRole:
             if node.state == plow.client.NodeState.DOWN:
@@ -319,11 +264,6 @@ class NodeModel(QtCore.QAbstractTableModel):
 
             if node.locked:
                 return constants.BLUE
-
-            return None
-
-        elif role == ObjectRole:
-            return node
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.TextAlignmentRole:
@@ -344,13 +284,13 @@ class NodeModel(QtCore.QAbstractTableModel):
         if not idx.isValid():
             return None 
 
-        node = self.__items[idx.row()]
+        node = self._items[idx.row()]
         return node
 
     def setNodeList(self, nodeList):
         self.beginResetModel()
-        self.__items = nodeList
-        self.__index = dict((n.id, row) for row, n in enumerate(nodeList))
+        self._items = nodeList
+        self._index = dict((n.id, row) for row, n in enumerate(nodeList))
         self.endResetModel()
 
 
