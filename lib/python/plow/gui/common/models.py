@@ -1,9 +1,11 @@
 
+import logging
 from collections import deque
 from itertools import izip 
 
 from plow.gui.manifest import QtCore, QtGui
 
+LOGGER = logging.getLogger(__name__)
 
 DATA_ROLE = QtCore.Qt.UserRole 
 
@@ -66,3 +68,120 @@ class AlnumSortProxyModel(QtGui.QSortFilterProxyModel):
                 return leftItem < rightItem
 
         return left < right
+
+
+
+class PlowTableModel(QtCore.QAbstractTableModel):
+
+    # A list of string headers for the model
+    HEADERS = []
+
+    # Map column number => callback that provides a string display val
+    # for a given plow object
+    DISPLAY_CALLBACKS = {}
+
+    IdRole = QtCore.Qt.UserRole
+    ObjectRole = QtCore.Qt.UserRole + 1
+    DataRole = QtCore.Qt.UserRole + 2
+
+    def __init__(self, parent=None):
+        QtCore.QAbstractTableModel.__init__(self, parent)
+        self._items = []
+        self._index = {}
+
+    def fetchObjects(self):
+        """
+        Method that should be defined in subclasses, 
+        to fetch new data that will be applied to the model. 
+
+        Should return a list of objects
+        """
+        return []
+
+    def hasChildren(self, parent):
+        return False
+
+    def refresh(self):
+        updated = set()
+        to_add = set()
+        object_ids = set()
+
+        rows = self._index
+        columnCount = self.columnCount()
+
+        parent = QtCore.QModelIndex()
+
+        objects = self.fetchObjects()
+
+        for obj in objects:
+            object_ids.add(obj.id)
+
+            try:
+                idx = self._index[obj.id]
+                self._items[idx] = obj
+                updated.add(obj.id)
+                self.dataChanged.emit(self.index(idx,0), self.index(idx, columnCount-1))
+            
+            except (IndexError, KeyError):
+                to_add.add(obj) 
+
+        if to_add:
+            size = len(to_add)
+            start = len(self._items)
+            end = start + size - 1
+            self.beginInsertRows(parent, start, end)
+            self._items.extend(to_add)
+            self.endInsertRows()
+            LOGGER.debug("adding %d new objects", size)
+
+        # Remove
+        to_remove = set(self._index.iterkeys()).difference(object_ids)
+        for row, old_id in sorted(((rows[old_id], old_id) for old_id in to_remove), reverse=True):
+            self.beginRemoveRows(parent, row, row)
+            obj = self._items.pop(row)
+            self.endRemoveRows()
+            LOGGER.debug("removing %s %s", old_id, obj.name)
+
+        self._index = dict(((item.id, i) for i, item in enumerate(self._items)))
+
+    def rowCount(self, parent):
+        if parent and parent.isValid():
+            return 0
+        return len(self._items)
+
+    def columnCount(self, parent=None):
+        if parent and parent.isValid():
+            return 0
+        return len(self.HEADERS)
+
+    def data(self, index, role):
+        row = index.row()
+        col = index.column()
+        obj = self._items[row]
+
+        if role == QtCore.Qt.DisplayRole:
+            cbk = self.DISPLAY_CALLBACKS.get(col)
+            if cbk is not None:
+                return cbk(obj)
+        
+        elif role == QtCore.Qt.TextAlignmentRole:
+            if col != 0:
+                return QtCore.Qt.AlignCenter
+
+        elif role == self.IdRole:
+            return obj.id
+       
+        elif role == self.ObjectRole:
+            return obj
+
+        return None
+
+    def headerData(self, section, orientation, role):
+        if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
+            return self.HEADERS[section]
+
+        elif role == QtCore.Qt.TextAlignmentRole:
+            if section == 0:
+                return QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter 
+            else:
+                return QtCore.Qt.AlignCenter
