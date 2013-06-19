@@ -13,7 +13,6 @@ import com.breakersoft.plow.Depend;
 import com.breakersoft.plow.ExitStatus;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
-import com.breakersoft.plow.LayerE;
 import com.breakersoft.plow.Proc;
 import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.Task;
