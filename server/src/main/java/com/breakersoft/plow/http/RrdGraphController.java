@@ -121,9 +121,9 @@ public class RrdGraphController {
         final String path = rrdPath(PLOW_RRD);
         final RrdGraphDef graphDef = baseGraph("Proc Dispatcher Traffic", "dps/sec");
 
-        graphDef.datasource("linea", path, "nodeDispatchHit", ConsolFun.AVERAGE);
-        graphDef.datasource("lineb", path, "nodeDispatchMiss", ConsolFun.AVERAGE);
-        graphDef.datasource("linec", path, "nodeDispatchFail", ConsolFun.AVERAGE);
+        graphDef.datasource("linea", path, "procDispatchHit", ConsolFun.AVERAGE);
+        graphDef.datasource("lineb", path, "procDispatchMiss", ConsolFun.AVERAGE);
+        graphDef.datasource("linec", path, "procDispatchFail", ConsolFun.AVERAGE);
         graphDef.area("linea", new Color(152, 175, 54), "Hit");
         graphDef.line("lineb", new Color(74, 104, 15), "Miss", 1);
         graphDef.line("linec", new Color(164, 11, 23), "Error", 1);
