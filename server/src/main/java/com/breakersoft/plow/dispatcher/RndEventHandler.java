@@ -104,6 +104,10 @@ public class RndEventHandler {
                     result.procId, result.taskId);
         }
 
+        // TODO: might be possible to recover task rather than just returning.
+        // in one of two ways.  If the task is waiting then we accept a good
+        // RunTaskResult and mark it succeeded.  If its running, we can kill
+        // the existing process and mark as succeeded.
         if (proc == null || task == null) {
             return;
         }
