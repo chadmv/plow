@@ -46,13 +46,17 @@ class JobProgressBar(QtGui.QWidget):
     
     def setTotals(self, totals):
         self.__totals = totals
+
+        colors = constants.COLOR_TASK_STATE
+        state = plow.client.TaskState
+
         self.__values =  [
-            totals.waiting,
-            totals.running,
-            totals.dead, 
-            totals.eaten,
-            totals.depend,
-            totals.succeeded
+            (totals.dead, colors[state.DEAD]),
+            (totals.eaten, colors[state.EATEN]),
+            (totals.waiting, colors[state.WAITING]),
+            (totals.depend, colors[state.DEPEND]),
+            (totals.running, colors[state.RUNNING]),
+            (totals.succeeded, colors[state.SUCCEEDED]),
         ]
         self.update()
 
@@ -62,11 +66,8 @@ class JobProgressBar(QtGui.QWidget):
         total_height = self.height() - self.Margins[3]
         total_tasks = float(self.__totals.total)
 
-        bar = []
-        for i, v in enumerate(self.__values):
-            if v == 0:
-                continue
-            bar.append((total_width * (v / total_tasks), constants.COLOR_TASK_STATE[i + 1]))
+        vals = self.__values
+        bar = [(total_width * (val / total_tasks), color) for val, color in vals if val != 0]
 
         painter = QtGui.QPainter()
         painter.begin(self)
@@ -77,13 +78,10 @@ class JobProgressBar(QtGui.QWidget):
         painter.setPen(self.__PEN)
 
         move = 0
-        for width, color in bar:
+        x, y = self.Margins[:2]
+        for width, color in reversed(bar):
             painter.setBrush(color)
-            rect = QtCore.QRectF(
-                self.Margins[0],
-                self.Margins[1],
-                total_width,
-                total_height)
+            rect = QtCore.QRectF(x, y, total_width, total_height)
             if move:
                 rect.setLeft(move)
             move+=width
