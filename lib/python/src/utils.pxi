@@ -24,7 +24,7 @@ def reconnecting(object func):
                 
             LOGGER.exception("Error running %r", func)
 
-            if str(e) in EX_CONNECTION:
+            if str(e).strip() in EX_CONNECTION:
                 # print "reconnecting!"
                 LOGGER.debug("Connection lost. Retrying call")
                 reconnect()

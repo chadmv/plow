@@ -634,13 +634,7 @@ def get_layer(object job, string name):
     else:
         jobId = job
         
-    try:
-        conn().proxy().getLayer(layerT, job.id, name)
-    except RuntimeError, e:
-        if str(e) in EX_CONNECTION:
-            raise
-        return None
-
+    conn().proxy().getLayer(layerT, job.id, name)
     layer = initLayer(layerT)
     return layer
 
@@ -664,14 +658,7 @@ def get_layers(object job):
     else:
         jobId = job
 
-    try:
-        conn().proxy().getLayers(layers, jobId)
-    except RuntimeError, e:
-        if str(e) in EX_CONNECTION:
-            raise
-        ret = []
-        return ret
-
+    conn().proxy().getLayers(layers, jobId)
     ret = [initLayer(layerT) for layerT in layers]
     return ret
 
@@ -699,14 +686,7 @@ def get_layer_outputs(Layer layer):
         Output output 
         list ret 
 
-    try:
-        conn().proxy().getLayerOutputs(outputs, layer.id)
-    except RuntimeError, e:
-        if str(e) in EX_CONNECTION:
-            raise
-        ret = []
-        return ret 
-
+    conn().proxy().getLayerOutputs(outputs, layer.id)
     ret = [initOutput(outT) for outT in outputs]
     return ret
 
