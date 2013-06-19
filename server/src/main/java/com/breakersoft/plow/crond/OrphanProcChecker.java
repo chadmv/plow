@@ -12,6 +12,7 @@ import com.breakersoft.plow.Signal;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dispatcher.DispatchService;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
+import com.breakersoft.plow.monitor.PlowStats;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.thrift.TaskState;
 
@@ -51,6 +52,8 @@ public class OrphanProcChecker extends AbstractCrondTask {
                     final Task task = jobService.getTask(taskId);
 
                     logger.warn("Found orphaned {}", task);
+                    PlowStats.procOrphaned.incrementAndGet();
+
                     dispatchService.stopTask(task, TaskState.WAITING,
                             ExitStatus.FAIL, Signal.ORPANED_TASK);
                 }

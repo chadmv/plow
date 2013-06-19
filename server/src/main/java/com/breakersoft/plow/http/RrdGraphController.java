@@ -2,7 +2,8 @@ package com.breakersoft.plow.http;
 
 import static org.rrd4j.ConsolFun.AVERAGE;
 import static org.rrd4j.ConsolFun.MAX;
-import static org.rrd4j.DsType.*;
+import static org.rrd4j.DsType.COUNTER;
+import static org.rrd4j.DsType.GAUGE;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -14,7 +15,6 @@ import java.io.IOException;
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 
-import org.apache.commons.lang3.StringUtils;
 import org.rrd4j.ConsolFun;
 import org.rrd4j.core.RrdDb;
 import org.rrd4j.core.RrdDef;
@@ -279,7 +279,7 @@ public class RrdGraphController {
         graphDef.setColor(RrdGraphConstants.COLOR_FONT, new Color(240, 240, 240));
         graphDef.setColor(RrdGraphConstants.COLOR_FRAME, new Color(55, 55, 55));
         graphDef.setColor(RrdGraphConstants.COLOR_CANVAS, new Color(55, 55, 55));
-        graphDef.setColor(RrdGraphConstants.COLOR_GRID, new Color(82, 82, 82));
+        graphDef.setColor(RrdGraphConstants.COLOR_GRID, new Color(82, 82, 82, 155));
         graphDef.setColor(RrdGraphConstants.COLOR_SHADEA, new Color(44, 44, 44));
         graphDef.setColor(RrdGraphConstants.COLOR_SHADEB, new Color(44, 44, 44));
         graphDef.setGridStroke(dottedStroke);
@@ -341,6 +341,7 @@ public class RrdGraphController {
                  PlowStats.procUnallocCount.get(),
                  PlowStats.procAllocFailCount.get(),
                  PlowStats.procUnallocFailCount.get(),
+                 PlowStats.procOrphaned.get(),
                  PlowStats.taskStartedCount.get(),
                  PlowStats.taskStartedFailCount.get(),
                  PlowStats.taskStoppedCount.get(),
@@ -415,6 +416,7 @@ public class RrdGraphController {
         rrdDef.addDatasource("procUnallocCount", COUNTER, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("procAllocFailCount", COUNTER, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("procUnallocFailCount", COUNTER, 600, Double.NaN, Double.NaN);
+        rrdDef.addDatasource("procOrphan", COUNTER, 600, Double.NaN, Double.NaN);
 
         rrdDef.addDatasource("taskStartedCount", COUNTER, 600, Double.NaN, Double.NaN);
         rrdDef.addDatasource("taskStartedFailCount", COUNTER, 600, Double.NaN, Double.NaN);

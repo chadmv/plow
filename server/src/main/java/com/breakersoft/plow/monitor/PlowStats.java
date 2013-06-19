@@ -74,6 +74,11 @@ public class PlowStats {
      */
     public static final AtomicLong procUnallocFailCount = new AtomicLong(0L);
 
+    /*
+     * Procs unallocated failed
+     */
+    public static final AtomicLong procOrphaned = new AtomicLong(0L);
+
     /**
      * Tasks
      */
