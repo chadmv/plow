@@ -267,8 +267,6 @@ Classes
 .. autoclass:: plow.client.NodeSystem
     :members:
 
-.. _node:
-
 Functions
 ^^^^^^^^^
 
