@@ -46,7 +46,7 @@ cdef class Output:
             raise ValueError("Output has not been created yet. The outputId is empty")
 
         cdef Attrs attrs = dict_to_attrs(self.attrs)
-        update_output_attrs(self.outputId, attrs)
+        set_output_attrs(self.outputId, attrs)
         self.attrs = attrs
 
 
