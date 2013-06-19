@@ -89,6 +89,10 @@ class PlowTableModel(QtCore.QAbstractTableModel):
         self._items = []
         self._index = {}
 
+        # Should the refresh operation remove existing
+        # items that are not found in each new update?
+        self.refreshShouldRemove = True
+
     def fetchObjects(self):
         """
         Method that should be defined in subclasses, 
@@ -108,11 +112,11 @@ class PlowTableModel(QtCore.QAbstractTableModel):
 
         rows = self._index
         columnCount = self.columnCount()
-
         parent = QtCore.QModelIndex()
 
         objects = self.fetchObjects()
 
+        # Update existing
         for obj in objects:
             object_ids.add(obj.id)
 
@@ -125,6 +129,7 @@ class PlowTableModel(QtCore.QAbstractTableModel):
             except (IndexError, KeyError):
                 to_add.add(obj) 
 
+        # Add new
         if to_add:
             size = len(to_add)
             start = len(self._items)
@@ -134,14 +139,21 @@ class PlowTableModel(QtCore.QAbstractTableModel):
             self.endInsertRows()
             LOGGER.debug("adding %d new objects", size)
 
-        # Remove
-        to_remove = set(self._index.iterkeys()).difference(object_ids)
-        for row, old_id in sorted(((rows[old_id], old_id) for old_id in to_remove), reverse=True):
-            self.beginRemoveRows(parent, row, row)
-            obj = self._items.pop(row)
-            self.endRemoveRows()
-            LOGGER.debug("removing %s %s", old_id, obj.name)
+        # Remove missing
+        if self.refreshShouldRemove:
+            to_remove = set(self._index.iterkeys()).difference(object_ids)
+            if to_remove:
+                row_ids = ((rows[old_id], old_id) for old_id in to_remove)
+                
+                for row, old_id in sorted(row_ids, reverse=True):
 
+                    self.beginRemoveRows(parent, row, row)
+                    obj = self._items.pop(row)
+                    self.endRemoveRows()
+
+                    LOGGER.debug("removing %s %s", old_id, obj.name)
+
+        # reindex the items
         self._index = dict(((item.id, i) for i, item in enumerate(self._items)))
 
     def rowCount(self, parent):
@@ -176,12 +188,30 @@ class PlowTableModel(QtCore.QAbstractTableModel):
 
         return None
 
-    def headerData(self, section, orientation, role):
-        if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
-            return self.HEADERS[section]
+    def setItemList(self, itemList):
+        self.beginResetModel()
+        self._items = itemList
+        self._index = dict((n.id, row) for row, n in enumerate(itemList))
+        self.endResetModel()
 
-        elif role == QtCore.Qt.TextAlignmentRole:
+    def itemFromIndex(self, idx):
+        if not idx.isValid():
+            return None 
+
+        item = self._items[idx.row()]
+        return item
+
+    def headerData(self, section, orientation, role):
+        if role == QtCore.Qt.TextAlignmentRole:
             if section == 0:
                 return QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter 
             else:
                 return QtCore.Qt.AlignCenter
+
+        if role != QtCore.Qt.DisplayRole:
+            return None 
+
+        if orientation == QtCore.Qt.Vertical:
+            return section 
+
+        return self.HEADERS[section]
