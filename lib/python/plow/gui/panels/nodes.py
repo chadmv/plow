@@ -110,10 +110,11 @@ class NodeWidget(QtGui.QWidget):
         view.setColumnHidden(model.HEADERS.index('Ram (Total)'), True)
         view.setColumnHidden(model.HEADERS.index('Swap (Total)'), True)
 
-        view.setItemDelegateForColumn(model.HEADERS.index('Ram (Free)'), 
-                                      ResourceDelegate(parent=self))
-        view.setItemDelegateForColumn(model.HEADERS.index('Swap (Free)'), 
-                                      ResourceDelegate(warn=.75, critical=.25, parent=self))
+        delegate = ResourceDelegate(dataRole=model.DataRole, parent=self)
+        view.setItemDelegateForColumn(model.HEADERS.index('Ram (Free)'), delegate)
+
+        delegate = ResourceDelegate(warn=.75, critical=.25, dataRole=model.DataRole, parent=self)
+        view.setItemDelegateForColumn(model.HEADERS.index('Swap (Free)'), delegate)
 
         view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
@@ -232,7 +233,7 @@ class NodeModel(models.PlowTableModel):
 
     def reload(self):
         nodes = plow.client.get_nodes()
-        self.setNodeList(nodes)
+        self.setItemList(nodes)
 
     def refresh(self):
         if not self._items:
@@ -265,33 +266,6 @@ class NodeModel(models.PlowTableModel):
             if node.locked:
                 return constants.BLUE
 
-    def headerData(self, section, orientation, role):
-        if role == QtCore.Qt.TextAlignmentRole:
-            if section == 0:
-                return QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter 
-            else:
-                return QtCore.Qt.AlignCenter
-
-        if role != QtCore.Qt.DisplayRole:
-            return None 
-
-        if orientation == QtCore.Qt.Vertical:
-            return section 
-
-        return self.HEADERS[section]
-
-    def nodeFromIndex(self, idx):
-        if not idx.isValid():
-            return None 
-
-        node = self._items[idx.row()]
-        return node
-
-    def setNodeList(self, nodeList):
-        self.beginResetModel()
-        self._items = nodeList
-        self._index = dict((n.id, row) for row, n in enumerate(nodeList))
-        self.endResetModel()
 
 
 #########################

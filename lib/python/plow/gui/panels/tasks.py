@@ -13,10 +13,6 @@ from plow.gui.common.widgets import CheckableComboBox, TableWidget
 from plow.gui.common import models
 from plow.gui.dialogs.depends import DependencyWizard
 
-IdRole = QtCore.Qt.UserRole
-ObjectRole = QtCore.Qt.UserRole + 1
-SortRole = QtCore.Qt.UserRole + 2
-
 
 class TaskPanel(Panel):
 
@@ -74,7 +70,7 @@ class TaskPanel(Panel):
 
 class TaskWidget(QtGui.QWidget):
 
-    WIDTH = [250, 90, 125, 100, 100, 65]
+    WIDTH = [250, 90, 125, 100, 100, 65, 140]
     REFRESH = 1500
 
     def __init__(self, attrs, parent=None):
@@ -92,7 +88,7 @@ class TaskWidget(QtGui.QWidget):
         self.__layers = {}
         self.__model = None
         self.__proxy = proxy = TaskFilterProxyModel(self)
-        proxy.setSortRole(SortRole)
+        proxy.setSortRole(TaskModel.SortRole)
         proxy.setDynamicSortFilter(True)
         proxy.sort(0, QtCore.Qt.AscendingOrder)
         table.setModel(proxy)
@@ -158,7 +154,7 @@ class TaskWidget(QtGui.QWidget):
         menu.exec_(self.mapToGlobal(pos))
         
     def __rowDoubleClicked(self, index):
-        uid = index.data(IdRole)
+        uid = index.data(self.__model.IdRole)
         EventManager.emit("TASK_OF_INTEREST", uid, self.__jobId)
 
     def __updateLayers(self):
@@ -227,14 +223,14 @@ class TaskWidget(QtGui.QWidget):
         ids = []
         s_model = self.__table.selectionModel()
         for row in s_model.selectedRows():
-            ids.append(row.data(IdRole))
+            ids.append(row.data(self.__model.IdRole))
         return ids
 
     def getSelectedTasks(self):
         tasks = []
         s_model = self.__table.selectionModel()
         for row in s_model.selectedRows():
-            tasks.append(row.data(ObjectRole))
+            tasks.append(row.data(self.__model.ObjectRole))
         return tasks
 
     def queueRefresh(self, ms, full=False):
@@ -267,58 +263,60 @@ class TaskModel(models.PlowTableModel):
         6: DISPLAY_CALLBACKS[6],
     }
 
+    SortRole = models.PlowTableModel.DataRole
+
     def __init__(self, parent=None):
         super(TaskModel, self).__init__(parent)
 
         self.__jobId = None
         self.__lastUpdateTime = 0
 
+        # Tasks are updated incrementally, so don't 
+        # remove missing ones
+        self.refreshShouldRemove = False
+
         # A timer for refreshing duration column.
         self.__timer = QtCore.QTimer(self)
         self.__timer.setInterval(1000)
         self.__timer.timeout.connect(self.__durationRefreshTimer)
+
+    def fetchObjects(self):
+        if not self.__jobId:
+            return []
+
+        opts = { "jobId": self.__jobId }
+        if self.__lastUpdateTime:
+            opts["lastUpdateTime"] = self.__lastUpdateTime 
+
+        t = plow.client.get_plow_time()
+        tasks = plow.client.get_tasks(**opts)
+        self.__lastUpdateTime = t     
+
+        return tasks   
+
+    def getJobId(self):
+        return self.__jobId
 
     def setJob(self, jobid):
         ## Clear out existing tasks.
         ## TODO make sure to emit right signals
         self.__timer.stop()
 
-        self.beginResetModel()
-
-        self._items = []
-        self._index.clear()
-
         self.__jobId = jobid
         self.__lastUpdateTime = 0
 
         try:
-            self._items = plow.client.get_tasks(jobId=jobid)
-            self.__lastUpdateTime = plow.client.get_plow_time()
-
-            for i, task in enumerate(self._items):
-                self._index[task.id] = i
+            tasks = self.fetchObjects()
+            self.setItemList(tasks)
 
         finally:
-            self.endResetModel()
             self.__timer.start()
-
-    def getJobId(self):
-        return self.__jobId
 
     def refresh(self):
         if not self.__jobId:
             return
 
-        t = plow.client.get_plow_time()
-        tasks = plow.client.get_tasks(jobId=self.__jobId, lastUpdateTime=self.__lastUpdateTime)
-        self.__lastUpdateTime = t
-
-        count = len(self.HEADERS)-1
-        for task in tasks:
-            row = self._index[task.id]
-            self._items[row] = task
-            self.dataChanged.emit(self.index(row, 0), self.index(row, count))
-
+        super(TaskModel, self).refresh()
 
     def data(self, index, role):
         row = index.row()
@@ -349,7 +347,7 @@ class TaskModel(models.PlowTableModel):
             else:
                 return color
 
-        elif role == SortRole:
+        elif role == TaskModel.SortRole:
             cbk = self.SORT_CALLBACKS.get(col)
             if cbk is not None:
                 return cbk(task)
@@ -401,7 +399,7 @@ class TaskFilterProxyModel(models.AlnumSortProxyModel):
         if not idx.isValid():
             return False
 
-        task = model.data(idx, ObjectRole)
+        task = model.data(idx, TaskModel.ObjectRole)
         if not task:
             return False
 
