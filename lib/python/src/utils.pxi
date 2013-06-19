@@ -45,3 +45,13 @@ def reconnecting(object func):
 
     return wrapper
 
+
+cdef Attrs dict_to_attrs(dict d):
+    """
+    Convert a python dictionary to an Attrs object
+    """
+    cdef Attrs attrs
+    for key, val in d.iteritems():
+        attrs[str(key)] = str(val)
+
+    return attrs

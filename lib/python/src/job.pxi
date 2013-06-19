@@ -587,45 +587,10 @@ def set_job_max_cores(Job job, int value):
     conn().proxy().setJobMaxCores(job.id, value)
     job.refresh()
 
-
-
-#######################
-# Output
-#
-
-cdef Output initOutput(OutputT& o):
-    cdef Output out = Output()
-    out.setOutput(o)
-    return out
-
-
-cdef class Output:
-    """
-    Represents an output of a :class:`.Job`
-
-    :var path: str path 
-    :var attrs: dict attributes 
-    
-    """
-    cdef public string path 
-    cdef dict attrs
-
-    def __init__(self):
-        self.path = ''
-        self.attrs = {} 
-
-    cdef setOutput(self, OutputT& o):
-        self.path = o.path
-        self.attrs = o.attrs
-
-    property attrs:
-        def __get__(self): return self.attrs
-
-
 @reconnecting
 def get_job_outputs(Job job):
     """
-    Get the outputs of a :class:`.Job`
+    Get the outputs of all layers of a :class:`.Job`
 
     :param job: :class:`.Job`
     :returns: list[:class:`.Output`]

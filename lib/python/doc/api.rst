@@ -103,11 +103,6 @@ Classes
 .. autoclass:: plow.client.JobStats
     :members:
 
-.. _job_output:
-
-.. autoclass:: plow.client.Output
-    :members:
-
 Functions
 ^^^^^^^^^
 
@@ -120,9 +115,7 @@ Functions
 .. autofunction:: plow.client.get_job_outputs
 .. autofunction:: plow.client.set_job_min_cores
 .. autofunction:: plow.client.set_job_max_cores
-
 .. autofunction:: plow.client.get_job_spec
-
 .. autofunction:: plow.client.get_job_outputs
 
 
@@ -228,6 +221,26 @@ Functions
 .. autofunction:: plow.client.set_layer_max_cores_per_task
 .. autofunction:: plow.client.set_layer_min_ram_per_task
 .. autofunction:: plow.client.set_layer_threadable
+
+
+.. _output:
+
+Output
+===================
+
+Classes
+^^^^^^^^^
+
+.. autoclass:: plow.client.Output
+    :members:
+
+Functions
+^^^^^^^^^
+
+.. autofunction:: plow.client.update_output_attrs
+.. autofunction:: plow.client.set_output_attrs
+.. autofunction:: plow.client.get_output_attrs
+
 
 
 .. _node:

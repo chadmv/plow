@@ -529,14 +529,16 @@ cdef class Layer(PlowBase):
         cdef list ret = get_layer_outputs(self)
         return ret
 
-    def add_output(self, string path, Attrs& attrs):
+    def add_output(self, string path, dict attrs):
         """
         Add an output to the layer 
 
         :param path: str 
         :param attrs: dict
+        :returns: :class:`.Output`
         """
-        add_layer_output(self, path, attrs)
+        cdef Output out = add_layer_output(self, path, attrs)
+        return out
 
     def set_tags(self, vector[string]& tags):
         """
@@ -662,15 +664,22 @@ def get_layers(object job):
     ret = [initLayer(layerT) for layerT in layers]
     return ret
 
-def add_layer_output(Layer layer, string path, Attrs& attrs):
+def add_layer_output(Layer layer, string path, dict attrs):
     """
     A an output to a layer 
 
     :param layer: :class:`.Layer`
     :param path: str 
     :param attrs: dict
+    :returns: :class:`.Output`
     """
-    conn().proxy().addOutput(layer.id, path, attrs)
+    cdef:
+        OutputT outT
+        Output out
+
+    conn().proxy().addOutput(outT, layer.id, path, dict_to_attrs(attrs))
+    out = initOutput(outT)
+    return out
 
 @reconnecting
 def get_layer_outputs(Layer layer):

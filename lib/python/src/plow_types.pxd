@@ -423,6 +423,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[Guid] cluster
 
     cdef cppclass OutputT:
+        Guid outputId
         string path 
         Attrs attrs
 
