@@ -108,8 +108,8 @@ public class RrdGraphController {
         graphDef.datasource("lineb", path, "nodeDispatchMiss", ConsolFun.AVERAGE);
         graphDef.datasource("linec", path, "nodeDispatchFail", ConsolFun.AVERAGE);
         graphDef.area("linea", new Color(152, 175, 54), "Hit");
-        graphDef.line("lineb", new Color(74, 104, 15), "Miss",1);
-        graphDef.line("linec", new Color(164, 11, 23), "Error", 1);
+        graphDef.area("lineb", new Color(74, 104, 15), "Miss");
+        graphDef.area("linec", new Color(164, 11, 23), "Error");
 
         return createImage(graphDef);
     }
@@ -125,8 +125,8 @@ public class RrdGraphController {
         graphDef.datasource("lineb", path, "procDispatchMiss", ConsolFun.AVERAGE);
         graphDef.datasource("linec", path, "procDispatchFail", ConsolFun.AVERAGE);
         graphDef.area("linea", new Color(152, 175, 54), "Hit");
-        graphDef.line("lineb", new Color(74, 104, 15), "Miss", 1);
-        graphDef.line("linec", new Color(164, 11, 23), "Error", 1);
+        graphDef.area("lineb", new Color(74, 104, 15), "Miss");
+        graphDef.area("linec", new Color(164, 11, 23), "Error");
 
         return createImage(graphDef);
     }
@@ -275,6 +275,7 @@ public class RrdGraphController {
         graphDef.setWidth(800);
         graphDef.setHeight(150);
         graphDef.setAntiAliasing(true);
+        graphDef.setTextAntiAliasing(true);
         graphDef.setColor(RrdGraphConstants.COLOR_BACK, new Color(44, 44, 44));
         graphDef.setColor(RrdGraphConstants.COLOR_FONT, new Color(240, 240, 240));
         graphDef.setColor(RrdGraphConstants.COLOR_FRAME, new Color(55, 55, 55));
@@ -341,7 +342,7 @@ public class RrdGraphController {
                  PlowStats.procUnallocCount.get(),
                  PlowStats.procAllocFailCount.get(),
                  PlowStats.procUnallocFailCount.get(),
-                 PlowStats.procOrphaned.get(),
+                 PlowStats.procOrphanedCount.get(),
                  PlowStats.taskStartedCount.get(),
                  PlowStats.taskStartedFailCount.get(),
                  PlowStats.taskStoppedCount.get(),

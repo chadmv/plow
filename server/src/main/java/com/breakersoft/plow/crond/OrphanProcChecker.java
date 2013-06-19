@@ -52,7 +52,7 @@ public class OrphanProcChecker extends AbstractCrondTask {
                     final Task task = jobService.getTask(taskId);
 
                     logger.warn("Found orphaned {}", task);
-                    PlowStats.procOrphaned.incrementAndGet();
+                    PlowStats.procOrphanedCount.incrementAndGet();
 
                     dispatchService.stopTask(task, TaskState.WAITING,
                             ExitStatus.FAIL, Signal.ORPANED_TASK);

@@ -75,6 +75,7 @@ public class MonitorController {
         procs.put("alloc_fail", PlowStats.procAllocFailCount.get());
         procs.put("unalloc", PlowStats.procUnallocCount.get());
         procs.put("unalloc_fail", PlowStats.procUnallocFailCount.get());
+        procs.put("orphaned", PlowStats.procOrphanedCount.get());
         general.put("procs", procs);
 
         final Map<String, Object> tasks =  Maps.newLinkedHashMap();
