@@ -469,8 +469,9 @@ struct QuotaFilterT {
 }
 
 struct OutputT {
-    1:string path,
-    2:common.Attrs attrs
+    1:common.Guid outputId,
+    2:string path,
+    3:common.Attrs attrs
 }
 
 service RpcService {
@@ -503,6 +504,10 @@ service RpcService {
     list<DependT> getJobDependsOn(1:common.Guid jobId) throws (1:PlowException e),
     JobSpecT getJobSpec(1:common.Guid jobId) throws (1:PlowException e),
     void createJobOnJobDepend(1:common.Guid jobId, 2:common.Guid onJobId) throws (1:PlowException e),
+
+    void updateOutputAttrs(1:common.Guid outputId, 2:common.Attrs attrs) throws (1:PlowException e),
+    void setOutputAttrs(1:common.Guid outputId, 2:common.Attrs attrs) throws (1:PlowException e),
+    common.Attrs getOutputAttrs(1:common.Guid outputId, 2:common.Attrs attrs) throws (1:PlowException e),
 
     FolderT createFolder(1:string projectId, 2:string name) throws (1:PlowException e),
     FolderT getFolder(1:string id) throws (1:PlowException e),

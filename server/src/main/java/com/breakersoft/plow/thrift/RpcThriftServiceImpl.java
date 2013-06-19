@@ -788,4 +788,25 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     public ProcT getProc(String id) throws PlowException, TException {
         return thriftProcDao.getProc(UUID.fromString(id));
     }
+
+    @Override
+    public Map<String, String> getOutputAttrs(String arg0,
+            Map<String, String> arg1) throws PlowException, TException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setOutputAttrs(String arg0, Map<String, String> arg1)
+            throws PlowException, TException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void updateOutputAttrs(String arg0, Map<String, String> arg1)
+            throws PlowException, TException {
+        // TODO Auto-generated method stub
+
+    }
 }
