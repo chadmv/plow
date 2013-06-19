@@ -40,7 +40,7 @@ class JobProgressBar(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.setTotals(totals)
         self.setSizePolicy(QtGui.QSizePolicy.Expanding,
-            QtGui.QSizePolicy.Preferred)
+                            QtGui.QSizePolicy.Preferred)
 
         ## Missing ability to detect size
     
@@ -88,6 +88,69 @@ class JobProgressBar(QtGui.QWidget):
             painter.drawRoundedRect(rect, 3, 3)
         painter.end()
         event.accept()
+
+
+class JobProgressDelegate(QtGui.QItemDelegate):
+    """
+    A custom QItemDelegate that paints the progress 
+    from a Job's TaskStats
+    """
+
+    PEN = QtGui.QColor(33, 33, 33)
+    MARGINS = [5, 2, 10, 4]
+
+    def __init__(self, dataRole=QtCore.Qt.UserRole, parent=None):
+        super(JobProgressDelegate, self).__init__(parent)
+        self._role = dataRole
+
+    def paint(self, painter, opts, index):
+        job = index.data(self._role)
+        if not job:
+            super(JobProgressDelegate, self).paint(painter, opts, index)
+            return 
+
+        state = plow.client.TaskState
+        colors = constants.COLOR_TASK_STATE
+        totals = job.totals 
+
+        values =  [
+            (totals.dead, colors[state.DEAD]),
+            (totals.eaten, colors[state.EATEN]),
+            (totals.waiting, colors[state.WAITING]),
+            (totals.depend, colors[state.DEPEND]),
+            (totals.running, colors[state.RUNNING]),
+            (totals.succeeded, colors[state.SUCCEEDED]),
+        ]
+
+        rect = opts.rect
+        total_width = rect.width() - self.MARGINS[2]
+        total_height = rect.height() - self.MARGINS[3]
+        total_tasks = float(totals.total)
+
+        bar = [(total_width * (val / total_tasks), color) for val, color in values if val != 0]
+
+        painter.setRenderHints(
+            painter.HighQualityAntialiasing |
+            painter.SmoothPixmapTransform |
+            painter.Antialiasing)
+
+        # self.drawBackground(painter, opt, index)
+
+        painter.setPen(self.PEN)
+
+        x, y = rect.x(), rect.y()
+        x += self.MARGINS[0]
+        y += self.MARGINS[1]
+
+        move = 0
+
+        for width, color in reversed(bar):
+            painter.setBrush(color)
+            rect = QtCore.QRectF(x, y, total_width, total_height)
+            if move:
+                rect.setLeft(x + move)
+            move += width
+            painter.drawRoundedRect(rect, 3, 3)
 
 
 class JobColumnWidget(QtGui.QScrollArea):
