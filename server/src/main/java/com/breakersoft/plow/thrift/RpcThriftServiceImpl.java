@@ -17,6 +17,7 @@ import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Matcher;
 import com.breakersoft.plow.Node;
+import com.breakersoft.plow.Output;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.Quota;
 import com.breakersoft.plow.Service;
@@ -39,6 +40,7 @@ import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.thrift.dao.ThriftLayerDao;
 import com.breakersoft.plow.thrift.dao.ThriftMatcherDao;
 import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
+import com.breakersoft.plow.thrift.dao.ThriftOutputDao;
 import com.breakersoft.plow.thrift.dao.ThriftProcDao;
 import com.breakersoft.plow.thrift.dao.ThriftProjectDao;
 import com.breakersoft.plow.thrift.dao.ThriftQuotaDao;
@@ -107,6 +109,9 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
 
     @Autowired
     ThriftProcDao thriftProcDao;
+
+    @Autowired
+    ThriftOutputDao thriftOutputDao;
 
     @Autowired
     WranglerService wranglerService;
@@ -180,20 +185,21 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     @Override
     public List<OutputT> getJobOutputs(String jobId) throws PlowException,
             TException {
-        return thriftJobDao.getOutputs(UUID.fromString(jobId));
+        return thriftOutputDao.getJobOutputs(UUID.fromString(jobId));
     }
 
     @Override
     public List<OutputT> getLayerOutputs(String layerId) throws PlowException,
             TException {
-        return thriftLayerDao.getOutputs(UUID.fromString(layerId));
+        return thriftOutputDao.getLayerOutputs(UUID.fromString(layerId));
     }
 
     @Override
-    public void addOutput(String layerId, String path, Map<String,String> attrs) throws PlowException {
-        jobService.addLayerOutput(
+    public OutputT addOutput(String layerId, String path, Map<String,String> attrs) throws PlowException {
+        final Output output = jobService.addLayerOutput(
                 jobService.getLayer(UUID.fromString(layerId)),
                 path, attrs);
+        return new OutputT(output.getId().toString(), output.getPath(), output.getAttrs());
     }
 
     @Override
@@ -790,23 +796,17 @@ public class RpcThriftServiceImpl implements RpcService.Iface {
     }
 
     @Override
-    public Map<String, String> getOutputAttrs(String arg0,
-            Map<String, String> arg1) throws PlowException, TException {
-        // TODO Auto-generated method stub
-        return null;
+    public Map<String, String> getOutputAttrs(String id) throws PlowException {
+        return jobService.getOutputAttrs(UUID.fromString(id));
     }
 
     @Override
-    public void setOutputAttrs(String arg0, Map<String, String> arg1)
-            throws PlowException, TException {
-        // TODO Auto-generated method stub
-
+    public void setOutputAttrs(String id, Map<String, String> attrs) throws PlowException {
+        jobService.setOutputAttrs(UUID.fromString(id), attrs);
     }
 
     @Override
-    public void updateOutputAttrs(String arg0, Map<String, String> arg1)
-            throws PlowException, TException {
-        // TODO Auto-generated method stub
-
+    public void updateOutputAttrs(String id, Map<String, String> attrs) throws PlowException {
+        jobService.updateOutputAttrs(UUID.fromString(id), attrs);
     }
 }

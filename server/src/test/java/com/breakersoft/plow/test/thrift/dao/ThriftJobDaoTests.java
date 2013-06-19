@@ -3,20 +3,16 @@ package com.breakersoft.plow.test.thrift.dao;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Map;
-
 import javax.annotation.Resource;
 
 import org.junit.Test;
 
-import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.JobFilterT;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobT;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
-import com.google.common.collect.Maps;
 
 public class ThriftJobDaoTests extends AbstractTest {
 
@@ -73,18 +69,6 @@ public class ThriftJobDaoTests extends AbstractTest {
 
         JobT job = thriftJobDao.getRunningJob(jobName);
         assertEquals(job.name, jobName);
-    }
-
-    @Test
-    public void getJobOutputs() {
-        JobSpecT spec = getTestJobSpec();
-        JobLaunchEvent event = jobService.launch(spec);
-
-        Layer layer = jobService.getLayer(event.getJob(), 0);
-        Map<String,String> attrs = Maps.newHashMap();
-        jobService.addLayerOutput(layer, "/foo/bar.#.exr", attrs);
-
-        assertEquals(1, thriftJobDao.getOutputs(event.getJob().getJobId()).size());
     }
 
     @Test

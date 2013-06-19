@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -23,7 +22,6 @@ import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.LayerSpecT;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public class LayerDaoTests extends AbstractTest {
 
@@ -52,21 +50,6 @@ public class LayerDaoTests extends AbstractTest {
         Job job = jobDao.get(spec.getName(), JobState.INITIALIZE);
         Layer layer1 = layerDao.get(job, "test_ls");
         assertEquals(layer, layer1);
-    }
-
-    @Test
-    public void testAddOutput() {
-        testCreate();
-
-        Map<String,String> attrs = Maps.newHashMap();
-        attrs.put("res_x", "1024");
-        attrs.put("res_y", "768");
-
-        layerDao.addOutput(layer, "/tmp/foo_v1.#.exr", attrs);
-        layerDao.addOutput(layer, "/tmp/bar_v2.#.exr", attrs);
-
-        jdbc().queryForInt(
-                "SELECT COUNT(1) FROM output WHERE pk_layer=?", layer.getLayerId());
     }
 
     @Test

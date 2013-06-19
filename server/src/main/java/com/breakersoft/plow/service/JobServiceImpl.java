@@ -17,12 +17,14 @@ import com.breakersoft.plow.Job;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.MatcherFull;
+import com.breakersoft.plow.Output;
 import com.breakersoft.plow.Project;
 import com.breakersoft.plow.ServiceFull;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.dao.FolderDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
+import com.breakersoft.plow.dao.OutputDao;
 import com.breakersoft.plow.dao.ProjectDao;
 import com.breakersoft.plow.dao.ServiceDao;
 import com.breakersoft.plow.dao.TaskDao;
@@ -64,6 +66,9 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     FolderDao folderDao;
+
+    @Autowired
+    OutputDao outputDao;
 
     @Autowired
     EventManager eventManager;
@@ -391,8 +396,8 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void addLayerOutput(Layer layer, String path, Map<String,String> attrs) {
-        layerDao.addOutput(layer, path, attrs);
+    public Output addLayerOutput(Layer layer, String path, Map<String,String> attrs) {
+        return outputDao.addOutput(layer, path, attrs);
     }
 
     @Override
@@ -450,5 +455,21 @@ public class JobServiceImpl implements JobService {
     @Override
     public void setLayerThreadable(Layer layer, boolean threadable) {
         layerDao.setThreadable(layer, threadable);
+    }
+
+    @Override
+    public void updateOutputAttrs(UUID outputId, Map<String,String> attrs) {
+        outputDao.updateAttrs(outputId, attrs);
+    }
+
+    @Override
+    public void setOutputAttrs(UUID outputId, Map<String,String> attrs) {
+        outputDao.setAttrs(outputId, attrs);
+    }
+
+    @Override
+    @Transactional(readOnly=true)
+    public Map<String,String> getOutputAttrs(UUID outputId) {
+        return outputDao.getAttrs(outputId);
     }
 }

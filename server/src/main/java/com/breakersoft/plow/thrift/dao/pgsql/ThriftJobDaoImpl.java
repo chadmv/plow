@@ -11,20 +11,17 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TDeserializer;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TJSONProtocol;
-import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.exceptions.JobSpecException;
-import com.breakersoft.plow.service.DependServiceImpl;
 import com.breakersoft.plow.thrift.JobFilterT;
 import com.breakersoft.plow.thrift.JobSpecT;
 import com.breakersoft.plow.thrift.JobState;
 import com.breakersoft.plow.thrift.JobStatsT;
 import com.breakersoft.plow.thrift.JobT;
-import com.breakersoft.plow.thrift.OutputT;
 import com.breakersoft.plow.thrift.dao.ThriftJobDao;
 import com.breakersoft.plow.util.JdbcUtils;
 import com.breakersoft.plow.util.PlowUtils;
@@ -33,8 +30,6 @@ import com.google.common.collect.Lists;
 @Repository
 @Transactional(readOnly=true)
 public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
-
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DependServiceImpl.class);
 
     public static final RowMapper<JobT> MAPPER = new RowMapper<JobT>() {
 
@@ -186,12 +181,6 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
     }
 
     @Override
-    public List<OutputT> getOutputs(UUID jobId) {
-        return jdbc.query("SELECT str_path, attrs FROM plow.output WHERE pk_job=?",
-                ThriftLayerDaoImpl.OUT_MAPPER, jobId);
-    }
-
-    @Override
     public JobSpecT getJobSpec(UUID jobId) {
 
         final String json = jdbc.queryForObject("SELECT str_thrift_spec FROM job_history WHERE pk_job=?",
@@ -206,6 +195,4 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             throw new JobSpecException("Failed to parse job spec " + e, e);
         }
     }
-
-
 }

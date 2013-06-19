@@ -507,7 +507,7 @@ service RpcService {
 
     void updateOutputAttrs(1:common.Guid outputId, 2:common.Attrs attrs) throws (1:PlowException e),
     void setOutputAttrs(1:common.Guid outputId, 2:common.Attrs attrs) throws (1:PlowException e),
-    common.Attrs getOutputAttrs(1:common.Guid outputId, 2:common.Attrs attrs) throws (1:PlowException e),
+    common.Attrs getOutputAttrs(1:common.Guid outputId) throws (1:PlowException e),
 
     FolderT createFolder(1:string projectId, 2:string name) throws (1:PlowException e),
     FolderT getFolder(1:string id) throws (1:PlowException e),
@@ -521,7 +521,7 @@ service RpcService {
     LayerT getLayerById(1:common.Guid layerId) throws (1:PlowException e),
     LayerT getLayer(1:common.Guid jobId, 2:string name) throws (1:PlowException e),
     list<LayerT> getLayers(1:common.Guid jobId) throws (1:PlowException e),
-    void addOutput(1:common.Guid layerId, 2:string path, 3:common.Attrs attrs) throws (1:PlowException e)
+    OutputT addOutput(1:common.Guid layerId, 2:string path, 3:common.Attrs attrs) throws (1:PlowException e)
     list<OutputT> getLayerOutputs(1:common.Guid layerId) throws (1:PlowException e),
     void setLayerTags(1:common.Guid guid, 2:list<string> tags) throws (1:PlowException e),
     void setLayerMinCoresPerTask(1:common.Guid guid, 2:i32 minCores) throws (1:PlowException e),

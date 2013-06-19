@@ -170,27 +170,6 @@ public class LayerDaoImpl extends AbstractDao implements LayerDao {
                 RANGE_MAPPER, layer.getLayerId());
     }
 
-    private static final String INSERT_OUTPUT =
-            JdbcUtils.Insert("plow.output",
-                    "pk_output", "pk_layer", "pk_job",
-                    "str_path", "attrs");
-
-    @Override
-    public void addOutput(final Layer layer, final String path, final Map<String,String> attrs) {
-        jdbc.update(new PreparedStatementCreator() {
-            @Override
-            public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
-                final PreparedStatement ret = conn.prepareStatement(INSERT_OUTPUT);
-                ret.setObject(1, UUID.randomUUID());
-                ret.setObject(2, layer.getLayerId());
-                ret.setObject(3, layer.getJobId());
-                ret.setString(4, path);
-                ret.setObject(5, attrs);
-                return ret;
-            }
-        });
-    }
-
     @Override
     public void setMinCores(Layer layer, int cores) {
         jdbc.update("UPDATE plow.layer SET int_cores_min=? WHERE pk_layer=?",

@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.JobId;
 import com.breakersoft.plow.Layer;
+import com.breakersoft.plow.Output;
 import com.breakersoft.plow.Task;
 import com.breakersoft.plow.event.JobLaunchEvent;
 import com.breakersoft.plow.thrift.JobSpecT;
@@ -134,7 +135,6 @@ public interface JobService {
     Layer getLayer(Job job, int idx);
     boolean isLayerComplete(Layer layer);
     Layer getLayer(UUID id);
-    void addLayerOutput(Layer layer, String path, Map<String, String> attrs);
 
     /*
      * Tasks
@@ -155,4 +155,13 @@ public interface JobService {
     List<Task> getTasks(TaskFilterT filter);
     boolean setTaskState(Task task, TaskState currentState, TaskState newState);
     boolean setTaskState(Task task, TaskState state);
+
+    /*
+     * Outputs
+     */
+
+    Output addLayerOutput(Layer layer, String path, Map<String, String> attrs);
+    void updateOutputAttrs(UUID outputId, Map<String, String> attrs);
+    void setOutputAttrs(UUID outputId, Map<String, String> attrs);
+    Map<String, String> getOutputAttrs(UUID outputId);
 }
