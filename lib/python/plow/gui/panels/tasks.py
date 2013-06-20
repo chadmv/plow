@@ -265,6 +265,7 @@ class TaskModel(models.PlowTableModel):
 
     SortRole = models.PlowTableModel.DataRole
 
+
     def __init__(self, parent=None):
         super(TaskModel, self).__init__(parent)
 
@@ -332,16 +333,14 @@ class TaskModel(models.PlowTableModel):
         BG = QtCore.Qt.BackgroundRole
         FG = QtCore.Qt.ForegroundRole
 
-        if col == 1 and (role == BG or role == FG):
-            color = QtCore.Qt.black
-            bgcolor = constants.COLOR_TASK_STATE[task.state]
-            if bgcolor is constants.YELLOW:
-                color = QtCore.Qt.white 
-                
+        if col == 1:
             if role == BG:
-                return bgcolor
-            else:
-                return color
+                return constants.COLOR_TASK_STATE[task.state]
+            elif role == FG:
+                if task.state == TaskState.RUNNING:
+                    return constants.BLACK
+                else:
+                    return constants.WHITE
 
         elif role == TaskModel.SortRole:
             cbk = self.SORT_CALLBACKS.get(col)
