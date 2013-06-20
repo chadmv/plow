@@ -140,7 +140,7 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 job.setStats(stats);
 
                 folder.totals.deadTaskCount += job.totals.deadTaskCount;
-                folder.totals.dependTaskCount += job.totals.deadTaskCount;
+                folder.totals.dependTaskCount += job.totals.dependTaskCount;
                 folder.totals.eatenTaskCount += job.totals.eatenTaskCount;
                 folder.totals.runningTaskCount += job.totals.runningTaskCount;
                 folder.totals.succeededTaskCount += job.totals.succeededTaskCount;
