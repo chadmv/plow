@@ -185,12 +185,12 @@ class JobWranglerWidget(QtGui.QWidget):
     def __itemDoubleClicked(self, index):
         if index.data(TYPE_ROLE) == JOB_TYPE:
             uid = index.data(ID_ROLE)
-            EventManager.emit("JOB_OF_INTEREST", uid)
+            EventManager.JobOfInterest.emit(uid)
 
     def __itemClicked(self, index):
         if index.data(TYPE_ROLE) == FOLDER_TYPE:
             uid = index.data(ID_ROLE)
-            EventManager.emit("FOLDER_OF_INTEREST", uid)
+            EventManager.FolderOfInterest.emit(uid)
 
     def __showContextMenu(self, pos):
         tree = self.__view
@@ -221,7 +221,7 @@ class JobWranglerWidget(QtGui.QWidget):
     def queueRefresh(self, full=False):
         self.__refreshTimer.start()
         if full:
-            EventManager.emit("GLOBAL_REFRESH")
+            EventManager.GlobalRefresh.emit()
 
 
 class JobModel(tree.TreeModel):

@@ -17,8 +17,8 @@ class PropertiesPanel(Panel):
         self.setRefreshTime(30)
         self.setWindowTitle(name)
 
-        EventManager.bind("JOB_OF_INTEREST", self.__handleJobOfInterestEvent)
-        EventManager.bind("NODE_OF_INTEREST", self.__handleNodeOfInterestEvent)
+        EventManager.JobOfInterest.connect(self.__handleJobOfInterestEvent)
+        EventManager.NodeOfInterest.connect(self.__handleNodeOfInterestEvent)
 
         self.__object = None
 

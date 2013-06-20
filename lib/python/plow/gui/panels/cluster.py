@@ -113,7 +113,7 @@ class ClusterWidget(QtGui.QWidget):
 
     def __itemDoubleClicked(self, index):
         uid = index.data(self.__model.IdRole)
-        EventManager.emit("CLUSTER_OF_INTEREST", uid)
+        EventManager.ClusterOfInterest.emit(uid)
 
 
 class ClusterModel(models.PlowTableModel):

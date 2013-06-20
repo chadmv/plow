@@ -26,7 +26,7 @@ class TaskPanel(Panel):
 
         self.__lastJobId = None
 
-        EventManager.bind("JOB_OF_INTEREST", self.__handleJobOfInterestEvent)
+        EventManager.JobOfInterest.connect(self.__handleJobOfInterestEvent)
 
     def init(self):
         titleBar = self.titleBarWidget()
@@ -155,7 +155,7 @@ class TaskWidget(QtGui.QWidget):
         
     def __rowDoubleClicked(self, index):
         uid = index.data(self.__model.IdRole)
-        EventManager.emit("TASK_OF_INTEREST", uid, self.__jobId)
+        EventManager.TaskOfInterest.emit(uid, self.__jobId)
 
     def __updateLayers(self):
         if self.__jobId:
@@ -236,7 +236,7 @@ class TaskWidget(QtGui.QWidget):
     def queueRefresh(self, ms, full=False):
         QtCore.QTimer.singleShot(ms, self.refresh)
         if full:
-            EventManager.emit("GLOBAL_REFRESH")
+            EventManager.GlobalRefresh.emit()
 
 
 class TaskModel(models.PlowTableModel):

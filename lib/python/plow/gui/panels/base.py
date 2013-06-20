@@ -37,7 +37,7 @@ class WorkspaceManager(QtCore.QObject):
 
         self.__initDefaultWorkspaces()
 
-        event.EventManager.bind("GLOBAL_REFRESH", self.refresh)
+        event.EventManager.GlobalRefresh.connect(self.refresh)
 
     def __initDefaultWorkspaces(self):
         for space in self.DEFAULTS: 

@@ -26,7 +26,7 @@ class LayerPanel(Panel):
         self.setWidget(LayerWidget(self.attrs, self))
         self.setWindowTitle(name)
 
-        EventManager.bind("JOB_OF_INTEREST", self.__handleJobOfInterestEvent)
+        EventManager.JobOfInterest.connect(self.__handleJobOfInterestEvent)
 
     def refresh(self):
         self.widget().refresh()
@@ -98,7 +98,7 @@ class LayerWidget(QtGui.QWidget):
 
     def __itemDoubleClicked(self, index):
         uid = index.data(self.__model.ObjectRole).id
-        EventManager.emit("LAYER_OF_INTEREST", uid)
+        EventManager.LayerOfInterest.emit(uid)
 
     def __showContextMenu(self, pos):
         print "__showContextMenu", pos

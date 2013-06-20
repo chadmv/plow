@@ -305,7 +305,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
 
     def __itemDoubleClicked(self, item, col):
         uid = item.data(0, JOBID_ROLE)
-        EventManager.emit("JOB_OF_INTEREST", uid)
+        EventManager.JobOfInterest.emit(uid)
 
 
 

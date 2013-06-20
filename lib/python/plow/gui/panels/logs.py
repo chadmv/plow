@@ -29,7 +29,7 @@ class LogsPanel(Panel):
         self.setAttr("multiTabMode", 0)
 
         tabbedViewer.fontSizeChanged.connect(self.__fontSizeChanged)
-        EventManager.bind("TASK_OF_INTEREST", self.__handleTaskOfInterestEvent)
+        EventManager.TaskOfInterest.connect(self.__handleTaskOfInterestEvent)
         
     def init(self):
         pass
@@ -215,6 +215,7 @@ class LogViewerWidget(QtGui.QWidget):
 
         self.__jobNameLabel = label = QtGui.QLabel(self)
         label.setIndent(10)
+        label.setWordWrap(True)
         # label.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
         label.hide()
         self.__jobNameSpacer = QtGui.QWidget(self)

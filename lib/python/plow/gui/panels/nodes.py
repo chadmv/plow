@@ -165,7 +165,7 @@ class NodeWidget(QtGui.QWidget):
                     did_set = True
 
             if did_set:
-                EventManager.emit("GLOBAL_REFRESH")
+                EventManager.GlobalRefresh.emit()
 
     def lockSelected(self, locked):
         nodes = self.getSelectedNodes()
@@ -177,11 +177,11 @@ class NodeWidget(QtGui.QWidget):
                     did_lock = True
 
             if did_lock:
-                EventManager.emit("GLOBAL_REFRESH")
+                EventManager.GlobalRefresh.emit()
 
     def __itemDoubleClicked(self, index):
         uid = index.data(self.__model.ObjectRole).id
-        EventManager.emit("NODE_OF_INTEREST", uid)
+        EventManager.NodeOfInterest.emit(uid)
 
     def __showContextMenu(self, pos):
         menu = QtGui.QMenu()
