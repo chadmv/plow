@@ -157,13 +157,13 @@ class LayerModel(models.PlowTableModel):
         super(LayerModel, self).refresh()
 
     def data(self, index, role):
-        data = super(LayerModel, self).data(index, role)
-        if data is not None:
-            return data
-
         row = index.row()
         col = index.column()
         layer = self._items[row]
 
-        return None
+        if col == 6 and role == QtCore.Qt.BackgroundRole:
+            dead = plow.client.TaskState.DEAD
+            return constants.COLOR_TASK_STATE[dead]
+
+        return super(LayerModel, self).data(index, role)
 
