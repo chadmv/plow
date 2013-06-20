@@ -109,8 +109,8 @@ class LayerWidget(QtGui.QWidget):
 class LayerModel(models.PlowTableModel):
 
     HEADERS = [
-        "Name", "Run Cores", "Min Cores", "T. Total", "T. Pend", 
-        "T. Run", "T. Dead", "Avg. Core Hrs", "Progress"
+        "Name", "Run Cores", "Min Cores", "Total", "Pend.", 
+        "Run", "Dead", "Avg. Core Hrs", "Progress"
     ]
 
     DISPLAY_CALLBACKS = {
