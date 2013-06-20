@@ -1,13 +1,17 @@
 
+import re
 import logging
-from collections import deque
-from itertools import izip 
 
 from plow.gui.manifest import QtCore, QtGui
 
 LOGGER = logging.getLogger(__name__)
 
 DATA_ROLE = QtCore.Qt.UserRole 
+
+_ALNUM_RX = re.compile('([0-9]+)')
+
+def alphaNumericKey(aString):
+    return [ int(c) if c.isdigit() else c for c in _ALNUM_RX.split(aString) ]
 
 
 class AlnumSortProxyModel(QtGui.QSortFilterProxyModel):
@@ -16,59 +20,24 @@ class AlnumSortProxyModel(QtGui.QSortFilterProxyModel):
 
     def __init__(self, *args, **kwargs):
         super(AlnumSortProxyModel, self).__init__(*args, **kwargs)
-        self.setSortRole(DATA_ROLE)
 
-        self._leftList = deque()
-        self._rightList =  deque()
+        self.setSortRole(DATA_ROLE)
+        self.__validAlnum = (str, unicode)
 
     def lessThan(self, left, right):
         sortRole = self.sortRole()
         leftData = left.data(sortRole)
-        if isinstance(leftData, (str, unicode)):
+
+        if isinstance(leftData, self.__validAlnum):
+            
             rightData = right.data(sortRole)
-            return self.lessThanAlphaNumeric(leftData, rightData)
+
+            if leftData == rightData:
+                return False
+
+            return alphaNumericKey(leftData) < alphaNumericKey(rightData)
 
         return super(AlnumSortProxyModel, self).lessThan(left, right)
-
-    def lessThanAlphaNumeric(self, left, right):
-        if left == right:
-            return False 
-
-        alnums = self.RX_ALNUMS
-
-        leftList = self._leftList
-        rightList = self._rightList
-
-        leftList.clear()
-        rightList.clear()
-
-        pos = 0
-        while True:
-            pos = alnums.indexIn(left, pos)
-            if pos == -1:
-                break
-
-            leftList.append(alnums.cap(1))
-            pos += alnums.matchedLength()
-
-        pos = 0
-        while True:
-            pos = alnums.indexIn(right, pos)
-            if pos == -1:
-                break
-
-            rightList.append(alnums.cap(1))
-            pos += alnums.matchedLength()
-
-        for leftItem, rightItem in izip(leftList, rightList):
-            if leftItem != rightItem and leftItem.isdigit() and rightItem.isdigit():
-                return int(leftItem) < int(rightItem)
-
-            if leftItem != rightItem:
-                return leftItem < rightItem
-
-        return left < right
-
 
 
 class PlowTableModel(QtCore.QAbstractTableModel):
@@ -88,6 +57,8 @@ class PlowTableModel(QtCore.QAbstractTableModel):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self._items = []
         self._index = {}
+
+        self.__columnCount = len(self.HEADERS)
 
         # Should the refresh operation remove existing
         # items that are not found in each new update?
@@ -164,7 +135,7 @@ class PlowTableModel(QtCore.QAbstractTableModel):
     def columnCount(self, parent=None):
         if parent and parent.isValid():
             return 0
-        return len(self.HEADERS)
+        return self.__columnCount
 
     def data(self, index, role):
         row = index.row()
