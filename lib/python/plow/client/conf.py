@@ -19,7 +19,7 @@ def _init():
             os.path.join(os.environ.get("PLOW_ROOT", "/usr/local"), "etc/plow/plow.cfg"),
             os.path.expanduser("~/.plow/plow.cfg")])
 
-    host_list = [h.strip() for h in get('plow', 'hosts').strip(',').split(',')]
+    host_list = [h.strip() for h in get('plow', 'hosts', '').strip(',').split(',')]
     setattr(mod, 'PLOW_HOSTS', host_list or ["localhost:11336"])
 
 
