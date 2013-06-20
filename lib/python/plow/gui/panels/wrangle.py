@@ -424,6 +424,8 @@ class PlowNode(tree.NodeContainer):
         self.row = row
         self.ref = ref
 
+        self.__colCount = len(self.HEADERS)
+
     def _getChildren(self):
         return []
 
@@ -431,7 +433,7 @@ class PlowNode(tree.NodeContainer):
         return self._parent
 
     def columnCount(self):
-        return len(self.HEADERS)
+        return self.__colCount
 
     def data(self, column, role=QtCore.Qt.DisplayRole):
         if column >= self.columnCount():
@@ -446,6 +448,9 @@ class PlowNode(tree.NodeContainer):
         if (role == QtCore.Qt.DisplayRole or role == QtCore.Qt.ToolTipRole): 
             if self.DISPLAY_CALLBACKS:
                 return self.DISPLAY_CALLBACKS[column](self.ref)
+
+        elif role == QtCore.Qt.TextAlignmentRole and column > 0:
+            return QtCore.Qt.AlignCenter
 
         elif role == TYPE_ROLE:
             return self.TYPE
@@ -463,24 +468,18 @@ class PlowNode(tree.NodeContainer):
 class FolderNode(PlowNode):
 
     TYPE = FOLDER_TYPE
-    HEADERS = ["Name", "Tasks"]
+    HEADERS = ["Name", "Run Cores", "Min Cores", "Total", "Pend.", "Run"]
 
     DISPLAY_CALLBACKS = [
         lambda f: f.name,
-        lambda f: "{0} / {1}".format(f.totals.succeeded, f.totals.total),
+        lambda f: f.runCores,
+        lambda f: f.minCores,
+        lambda f: f.totals.total,
+        lambda f: f.totals.waiting + f.totals.depend,
+        lambda f: f.totals.running,
     ]
 
-    DATA_CALLBACKS = [
-        lambda f: f.name,
-        lambda f: (f.totals.succeeded / float(f.totals.total)) if f.totals.total else 0,
-    ]
-
-    def data(self, column, role=QtCore.Qt.DisplayRole):
-        if role == QtCore.Qt.TextAlignmentRole:
-            if column > 0:
-                return QtCore.Qt.AlignCenter
-
-        return super(FolderNode, self).data(column, role)
+    DATA_CALLBACKS = DISPLAY_CALLBACKS[:]
 
     def _getChildren(self):
         if not self.ref:
@@ -492,24 +491,29 @@ class JobNode(PlowNode):
 
     TYPE = JOB_TYPE
     HEADERS = [
-                "Name", "Tasks", "State", "Owner", 
-                "Duration", "maxRam",
+                "Name", "Run Cores", "Min Cores", "Total", "Pend.", "Run", 
+                "State", "Owner", "Duration", "maxRam",
                ]
 
-    HEADER_WIDTHS = (400,75,80,80,100,50)
+    HEADER_WIDTHS = (300,75,75,60,60,60,80,80,100)
 
     DISPLAY_CALLBACKS = [
         lambda j: j.name,
-        lambda j: "{0} / {1}".format(j.totals.succeeded, j.totals.total),
+        lambda j: j.runCores,
+        lambda j: j.minCores,
+        lambda j: j.totals.total,
+        lambda j: j.totals.waiting + j.totals.depend,
+        lambda j: j.totals.running,
         lambda j: "Paused" if j.paused else JOB_STATES.get(j.state, '').title(),
         lambda j: j.username,
-        lambda j: formatDateTime(j.startTime),
+        lambda j: formatDuration(j.startTime, j.stopTime),
         lambda j: j.stats.highRam,
     ]
 
     DATA_CALLBACKS = DISPLAY_CALLBACKS[:]
-    DATA_CALLBACKS[2] = lambda j: (j.totals.succeeded / float(j.totals.total)) if j.totals.total else 0
-    DATA_CALLBACKS[4] = lambda j: j.startTime
+    DATA_CALLBACKS[6] = lambda j: j.state
+    DATA_CALLBACKS[8] = lambda j: j.startTime
+
 
     def data(self, column, role=QtCore.Qt.DisplayRole):
         job = self.ref 
@@ -519,12 +523,8 @@ class JobNode(PlowNode):
         BG = QtCore.Qt.BackgroundRole
         FG = QtCore.Qt.ForegroundRole
 
-        if role == QtCore.Qt.TextAlignmentRole:
-            if column > 0:
-                return QtCore.Qt.AlignCenter
-
         # State
-        if column == 2:
+        if column == 6:
             if role == DISP or role == BG or role == FG:
                 totals = job.totals
                 color = QtCore.Qt.black 
@@ -549,13 +549,10 @@ class JobNode(PlowNode):
                     return text
 
         # Start time
-        elif column == 4:
-            if role == DISP:
-                return formatDuration(job.startTime, job.stopTime)
-            elif role == TOOL:
-                return "Started: {0}\nStopped:{1}".format(
-                            formatDateTime(job.startTime), 
-                            formatDateTime(job.stopTime) )
+        elif column == 8 and role == TOOL:
+            start = formatDateTime(job.startTime)
+            stop = formatDateTime(job.stopTime)
+            return "Started: {0}\nStopped:{1}".format(start, stop)
 
         return super(JobNode, self).data(column, role)
 
