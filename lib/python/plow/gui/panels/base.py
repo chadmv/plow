@@ -229,7 +229,7 @@ class Panel(QtGui.QDockWidget):
         # Note: the widet in the panel adds more buttons
         # to this toolbar.
         titleBar = QtGui.QWidget(self)
-        barLayout = QtGui.QVBoxLayout(titleBar)
+        barLayout = QtGui.QHBoxLayout(titleBar)
         barLayout.setSpacing(0)
         barLayout.setContentsMargins(0, 0, 0, 0)
 
@@ -248,8 +248,10 @@ class Panel(QtGui.QDockWidget):
 
         toolbar.addSeparator()
 
-        barLayout.addWidget(self.__label)
         barLayout.addWidget(toolbar)
+        barLayout.addStretch()
+        barLayout.addWidget(self.__label)
+        barLayout.addSpacing(4)
 
         self.setTitleBarWidget(titleBar)
         self.init()
