@@ -261,13 +261,13 @@ class Panel(QtGui.QDockWidget):
 
     def setRefreshTime(self, value):
         value = int(value)
+
         if self.__refreshTimer is None:
             self.__refreshTimer = QtCore.QTimer(self)
-            self.__refreshTimer.timeout.connect(self.refresh)
-        if value < 1:
-            value = 1
+            self.__refreshTimer.timeout.connect(self.__refresh)
+
         self.__refreshTimer.stop()
-        self.__refreshTimer.start(value * 1000)
+        self.__refreshTimer.start(max(value, 1) * 1000)
 
     def type(self):
         """
@@ -295,6 +295,20 @@ class Panel(QtGui.QDockWidget):
         Initialization function implemented by subclass.
         """
         pass
+
+    def __refresh(self):
+        """
+        Wrap the public refresh method in calls 
+        that stop and start the timer
+        """
+        timer = self.__refreshTimer
+        if timer:
+            timer.stop()
+
+        self.refresh()
+
+        if timer:
+            timer.start()
 
     def refresh(self):
         """
