@@ -588,19 +588,25 @@ def set_job_max_cores(Job job, int value):
     job.refresh()
 
 @reconnecting
-def get_job_outputs(Job job):
+def get_job_outputs(object job):
     """
     Get the outputs of all layers of a :class:`.Job`
 
-    :param job: :class:`.Job`
+    :param job: :class:`.Job` or str id
     :returns: list[:class:`.Output`]
     """
     cdef:
         OutputT outT
         vector[OutputT] outputs
-        list ret = []
+        Guid jobId
+        list ret
 
-    conn().proxy().getJobOutputs(outputs, job.id)
+    if isinstance(job, Job):
+        jobId = job.id
+    else:
+        jobId = job
+
+    conn().proxy().getJobOutputs(outputs, jobId)
 
     ret = [initOutput(outT) for outT in outputs]
     return ret

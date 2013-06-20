@@ -636,7 +636,7 @@ def get_layer(object job, string name):
     else:
         jobId = job
         
-    conn().proxy().getLayer(layerT, job.id, name)
+    conn().proxy().getLayer(layerT, jobId, name)
     layer = initLayer(layerT)
     return layer
 
@@ -682,20 +682,26 @@ def add_layer_output(Layer layer, string path, dict attrs):
     return out
 
 @reconnecting
-def get_layer_outputs(Layer layer):
+def get_layer_outputs(object layer):
     """
     Get the outputs for a layer 
 
-    :param layer: :class:`.Layer`
+    :param layer: :class:`.Layer` or str id
     :returns: list[:class:`.Layer`]
     """
     cdef:
         vector[OutputT] outputs
         OutputT outT 
         Output output 
-        list ret 
+        Guid layerId
+        list ret
 
-    conn().proxy().getLayerOutputs(outputs, layer.id)
+    if isinstance(layer, Layer):
+        layerId = layer.id
+    else:
+        layerId = layer
+
+    conn().proxy().getLayerOutputs(outputs, layerId)
     ret = [initOutput(outT) for outT in outputs]
     return ret
 
