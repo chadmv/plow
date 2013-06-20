@@ -162,8 +162,9 @@ class LayerModel(models.PlowTableModel):
         layer = self._items[row]
 
         if col == 6 and role == QtCore.Qt.BackgroundRole:
-            dead = plow.client.TaskState.DEAD
-            return constants.COLOR_TASK_STATE[dead]
+            if layer.totals.dead:
+                dead = plow.client.TaskState.DEAD
+                return constants.COLOR_TASK_STATE[dead]
 
         return super(LayerModel, self).data(index, role)
 
