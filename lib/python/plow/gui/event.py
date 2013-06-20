@@ -1,23 +1,19 @@
 
+from manifest import QtCore
 
-class EventManager(object):
 
-    __Binds = { }
+class _EventManager(QtCore.QObject):
 
-    @classmethod
-    def bind(cls, name, function):
-        funcs = cls.__Binds.get(name)
-        if not funcs:
-            funcs = [function]
-            cls.__Binds[name] = funcs
-        else:
-            funcs.append(function)
+    GlobalRefresh = QtCore.Signal()
 
-    @classmethod
-    def emit(cls, name, *args, **kwargs):
-        funcs = cls.__Binds.get(name)
-        if not funcs:
-            return
-        for func in funcs:
-            func(*args, **kwargs)
+    ProjectOfInterest = QtCore.Signal(str)
+    FolderOfInterest = QtCore.Signal(str)
+    JobOfInterest = QtCore.Signal(str)
+    LayerOfInterest = QtCore.Signal(str)
+    TaskOfInterest = QtCore.Signal(str, str) # taskId, optional jobId
 
+    ClusterOfInterest = QtCore.Signal(str)
+    NodeOfInterest = QtCore.Signal(str)
+
+
+EventManager = _EventManager()
