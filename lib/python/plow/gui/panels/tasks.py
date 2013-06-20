@@ -81,7 +81,6 @@ class TaskWidget(QtGui.QWidget):
         self.__attrs = attrs
 
         self.__table = table = TableWidget(self)
-        table.sortByColumn(0, QtCore.Qt.AscendingOrder)
         table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
         self.__jobId = None
@@ -89,8 +88,6 @@ class TaskWidget(QtGui.QWidget):
         self.__model = None
         self.__proxy = proxy = TaskFilterProxyModel(self)
         proxy.setSortRole(TaskModel.SortRole)
-        proxy.setDynamicSortFilter(True)
-        proxy.sort(0, QtCore.Qt.AscendingOrder)
         table.setModel(proxy)
 
         self.layout().addWidget(table)
@@ -118,9 +115,13 @@ class TaskWidget(QtGui.QWidget):
         self.__updateLayers()
 
         if self.__model:
+            self.__table.setSortingEnabled(False)
             self.__model.refresh()
+            self.__table.setSortingEnabled(True)
 
     def setJobId(self, jobid):
+        self.__table.sortByColumn(-1, QtCore.Qt.AscendingOrder)
+
         new_model = False
         if not self.__model:
             self.__model = TaskModel(self)

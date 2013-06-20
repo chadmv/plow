@@ -89,7 +89,6 @@ class ClusterWidget(QtGui.QWidget):
 
         self.__model = ClusterModel(self)
         self.__proxy = proxy = models.AlnumSortProxyModel(self)
-        proxy.setDynamicSortFilter(True)
         proxy.setSortRole(QtCore.Qt.DisplayRole)
         proxy.setSourceModel(self.__model)
 
@@ -109,7 +108,9 @@ class ClusterWidget(QtGui.QWidget):
         return [index.data(self.__model.ObjectRole) for index in rows]
 
     def refresh(self):
+        self.__tree.setSortingEnabled(False)
         self.__model.refresh()
+        self.__tree.setSortingEnabled(True)
 
     def __itemDoubleClicked(self, index):
         uid = index.data(self.__model.IdRole)

@@ -23,7 +23,6 @@ for a in dir(plow.client.NodeState):
 
 LOGGER = logging.getLogger(__name__)
 
-
 #########################
 # NodePanel
 #########################
@@ -53,15 +52,14 @@ class NodePanel(Panel):
 
     def refresh(self):
         clusters = plow.client.get_clusters()
+        names = sorted(c.name for c in clusters)
 
         nodeWidget = self.widget()
         nodeWidget.refresh()
         nodeWidget.setClusterList(clusters)
 
         filt = self.__cluster_filter
-
         sel = filt.selectedOptions()
-        names = sorted(c.name for c in clusters)
         filt.setOptions(names, selected=sel)
 
     def __setNodesLocked(self, locked):
@@ -88,17 +86,17 @@ class NodeWidget(QtGui.QWidget):
         layout = QtGui.QVBoxLayout(self)
         layout.setContentsMargins(4,0,4,4)
 
+        self.__refreshEnabled = True
         self.__clusters = {}
 
         self.__model = model = NodeModel(self)
         self.__proxy = proxy = NodeFilterProxyModel(self)
-        proxy.setDynamicSortFilter(True)
         proxy.setSortRole(model.DataRole)
         proxy.setSourceModel(model)
 
         self.__view = view = TableWidget(self)
         view.setModel(proxy)
-        view.sortByColumn(0, QtCore.Qt.AscendingOrder)
+        # view.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
         layout.addWidget(view)
 
@@ -121,19 +119,11 @@ class NodeWidget(QtGui.QWidget):
         view.customContextMenuRequested.connect(self.__showContextMenu)
         view.doubleClicked.connect(self.__itemDoubleClicked)
 
-        
-    def model(self):
-        return self.proxyModel().sourceModel()
-
-    def setModel(self, model):
-        try:
-            self.proxyModel().sourceModel().deleteLater()
-        except:
-            pass 
-        self.proxyModel().setSourceModel(model)
-
     def refresh(self):
-        self.__model.refresh()
+        if self.__refreshEnabled:
+            self.__view.setSortingEnabled(False)
+            self.__model.refresh()
+            self.__view.setSortingEnabled(True)
 
     def getSelectedNodes(self):
         rows = self.__view.selectionModel().selectedRows()
@@ -157,15 +147,37 @@ class NodeWidget(QtGui.QWidget):
 
     def assignClusterToSelected(self, cluster):
         nodes = self.getSelectedNodes()
-        if nodes:
-            did_set = False
-            for node in nodes:
-                if node.clusterName != cluster.name:
-                    node.set_cluster(cluster)
-                    did_set = True
+        if not nodes:
+            return
 
-            if did_set:
-                EventManager.GlobalRefresh.emit()
+        size = len(nodes)
+        progress = QtGui.QProgressDialog("Setting cluster to %s..." % cluster.name, 
+                                         "Cancel", 0, size, self)
+
+        progress.setMinimumDuration(3)
+        completed = True
+        did_set = False
+
+        for i, node in enumerate(nodes):
+            progress.setValue(i)
+
+            if progress.wasCanceled():
+                completed = False
+                break
+
+            if node.clusterName != cluster.name:
+                node.set_cluster(cluster)
+                did_set = True
+
+            if i % 10 == 0:
+                QtGui.qApp.processEvents()
+
+        progress.setValue(size)
+        QtGui.qApp.processEvents()
+
+        if did_set:
+            print 'emit global refresh'
+            EventManager.GlobalRefresh.emit()
 
     def lockSelected(self, locked):
         nodes = self.getSelectedNodes()
@@ -177,6 +189,7 @@ class NodeWidget(QtGui.QWidget):
                     did_lock = True
 
             if did_lock:
+                print 'emit global refresh'
                 EventManager.GlobalRefresh.emit()
 
     def __itemDoubleClicked(self, index):
@@ -184,19 +197,21 @@ class NodeWidget(QtGui.QWidget):
         EventManager.NodeOfInterest.emit(uid)
 
     def __showContextMenu(self, pos):
-        menu = QtGui.QMenu()
-        menu.addAction(QtGui.QIcon(":/images/locked.png"), 
-                        "Lock Nodes", partial(self.lockSelected, True))
-        menu.addAction(QtGui.QIcon(":/images/unlocked.png"), 
-                        "Unlock Nodes", partial(self.lockSelected, False))
+        menu = QtGui.QMenu(self)
 
         cluster_menu = menu.addMenu("Set Cluster")
         for name, cluster in sorted(self.__clusters.iteritems()):
             action = cluster_menu.addAction(name)
             action.triggered.connect(partial(self.assignClusterToSelected, cluster))
 
-        menu.exec_(self.mapToGlobal(pos))
+        menu.addAction(QtGui.QIcon(":/images/locked.png"), 
+                        "Lock Nodes", partial(self.lockSelected, True))
+        menu.addAction(QtGui.QIcon(":/images/unlocked.png"), 
+                        "Unlock Nodes", partial(self.lockSelected, False))
 
+        self.__refreshEnabled = False
+        menu.exec_(self.mapToGlobal(pos))
+        self.__refreshEnabled = True
 
 #########################
 # NodeModel
@@ -241,6 +256,7 @@ class NodeModel(models.PlowTableModel):
             return 
 
         super(NodeModel, self).refresh()
+
 
     def data(self, index, role):
         row = index.row()
@@ -294,7 +310,7 @@ class NodeFilterProxyModel(models.AlnumSortProxyModel):
         if not idx.isValid():
             return False
 
-        node = model.data(idx, ObjectRole)
+        node = model.data(idx, NodeModel.ObjectRole)
         if not node:
             return False
 

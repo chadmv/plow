@@ -14,10 +14,13 @@ class TableWidget(QtGui.QTableView):
         self.setEditTriggers(self.NoEditTriggers)
         self.setSelectionBehavior(self.SelectRows)
         self.setSelectionMode(self.ExtendedSelection)
-        self.setSortingEnabled(True)
         self.setAlternatingRowColors(True)
         self.setAutoFillBackground(False)
         self.setShowGrid(False)
+
+        self.setSortingEnabled(True)
+        self.sortByColumn(-1, QtCore.Qt.AscendingOrder)
+        
         self.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
         
         self.horizontalHeader().setStretchLastSection(True)
@@ -32,6 +35,7 @@ class TreeWidget(QtGui.QTreeView):
         super(TreeWidget, self).__init__(*args, **kwargs)
 
         self.setSortingEnabled(True)
+        self.sortByColumn(-1, QtCore.Qt.AscendingOrder)
         self.setEditTriggers(self.NoEditTriggers)
         self.setSelectionBehavior(self.SelectRows)
         self.setSelectionMode(self.ExtendedSelection)

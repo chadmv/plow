@@ -50,7 +50,6 @@ class LayerWidget(QtGui.QWidget):
         self.__attrs = attrs
 
         self.__view = table = TableWidget(self)
-        table.sortByColumn(0, QtCore.Qt.AscendingOrder)
         table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
         delegate = JobProgressDelegate(dataRole=LayerModel.ObjectRole, parent=self)
@@ -61,8 +60,7 @@ class LayerWidget(QtGui.QWidget):
 
         self.__proxy = proxy = models.AlnumSortProxyModel(self)
         proxy.setSortRole(LayerModel.DataRole)
-        proxy.setDynamicSortFilter(True)
-        proxy.sort(0, QtCore.Qt.AscendingOrder)
+        # proxy.sort(0, QtCore.Qt.AscendingOrder)
         table.setModel(proxy)
 
         layout = QtGui.QVBoxLayout(self)
@@ -75,13 +73,17 @@ class LayerWidget(QtGui.QWidget):
 
     def refresh(self):
         if self.__model:
+            self.__view.setSortingEnabled(False)
             self.__model.refresh()
+            self.__view.setSortingEnabled(True)
 
     def getSelectedLayers(self):
         rows = self.__view.selectionModel().selectedRows()
         return [index.data(self.__model.ObjectRole) for index in rows]
 
     def setJobId(self, jobid):
+        self.__view.sortByColumn(1, QtCore.Qt.AscendingOrder)
+
         new_model = False
         if not self.__model:
             self.__model = LayerModel(self)

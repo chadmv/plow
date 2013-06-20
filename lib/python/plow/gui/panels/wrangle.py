@@ -123,7 +123,6 @@ class JobWranglerWidget(QtGui.QWidget):
 
         self.__view = view = TreeWidget(self)
         view.setModel(proxy)
-        view.sortByColumn(4, QtCore.Qt.DescendingOrder)
 
         for i, width in enumerate(JobNode.HEADER_WIDTHS):
             view.setColumnWidth(i, width)
