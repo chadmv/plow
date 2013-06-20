@@ -19,11 +19,20 @@ logger = logging.getLogger(__name__)
 __all__ = ["SystemProfiler"]
 
 
+HOST_NAME = ''
+IP_ADDRESS = socket.gethostbyname(socket.getfqdn())
+
+
 class SystemProfiler(AbstractProfiler):
 
     def __init__(self):
-        rand = ''.join(random.choice(string.ascii_letters+string.digits+'-_') for ch in xrange(6))
-        host = "{0}.{1}".format(socket.getfqdn(), rand)
+
+        if HOST_NAME:
+            host = HOST_NAME
+        else:
+            rand = ''.join(random.choice(string.ascii_letters+string.digits+'-_') for ch in xrange(6))
+            host = "{0}.{1}".format(socket.getfqdn(), rand)
+        
         self.__hostname = host
 
         uptime = datetime.now() - timedelta(hours=random.randint(1,250))
@@ -84,7 +93,7 @@ class SystemProfiler(AbstractProfiler):
         # Create a ping
         ping = ttypes.Ping()
         ping.hostname = self.__hostname
-        ping.ipAddr = socket.gethostbyname(socket.getfqdn())
+        ping.ipAddr = IP_ADDRESS
         ping.isReboot = isReboot
         ping.bootTime = self.bootTime
         ping.hw = hw
