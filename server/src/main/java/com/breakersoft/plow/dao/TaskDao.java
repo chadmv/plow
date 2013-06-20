@@ -1,6 +1,7 @@
 package com.breakersoft.plow.dao;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.breakersoft.plow.FrameRange;
@@ -35,4 +36,6 @@ public interface TaskDao {
 
     void batchCreate(Layer layer, List<TaskSpecT> tasks, int layerOrder,
             int minRam);
+
+    Map<Integer, UUID> buildTaskCache(Layer layer, int size);
 }

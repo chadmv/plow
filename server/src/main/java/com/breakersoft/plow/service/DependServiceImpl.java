@@ -3,6 +3,7 @@ package com.breakersoft.plow.service;
 import static com.breakersoft.plow.util.PlowUtils.checkEmpty;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,12 +18,14 @@ import com.breakersoft.plow.FrameRange;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
+import com.breakersoft.plow.TaskOnTaskBatch;
 import com.breakersoft.plow.dao.DependDao;
 import com.breakersoft.plow.dao.JobDao;
 import com.breakersoft.plow.dao.LayerDao;
 import com.breakersoft.plow.dao.TaskDao;
 import com.breakersoft.plow.exceptions.DependencyException;
 import com.breakersoft.plow.thrift.DependSpecT;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 @Service
@@ -189,6 +192,16 @@ public class DependServiceImpl implements DependService {
         final FrameRange dependOnRange = layerDao.getFrameRange(dependOnLayer);
         final Set<Integer> dependOnTaskNumbers = Sets.newLinkedHashSet();
 
+        final Map<Integer, UUID> dependentTaskCache = taskDao.buildTaskCache(dependentLayer, dependentRange.numFrames);
+        final Map<Integer, UUID> dependOnTaskCache = taskDao.buildTaskCache(dependOnLayer, dependOnRange.numFrames);
+
+        final TaskOnTaskBatch batch = new TaskOnTaskBatch(
+                dependentRange.frameSet.size() / dependentRange.chunkSize);
+        batch.dependentJob = dependentJob;
+        batch.dependentLayer = dependentLayer;
+        batch.dependOnJob = dependOnJob;
+        batch.dependOnLayer = dependOnLayer;
+
         for (int i=0; i<dependentRange.frameSet.size(); i=i+dependentRange.chunkSize) {
             dependOnTaskNumbers.clear();
 
@@ -213,30 +226,30 @@ public class DependServiceImpl implements DependService {
                 }
             }
 
-            //TODO: handle chunks
-            //TODO: handle the care where the layer is chunked to 1 frame.
-
             if (dependOnTaskNumbers.isEmpty()) {
                 continue;
             }
 
-            logger.info("Creating depend on " + dependOnTaskNumbers.size() + " tasks");
+            final UUID[] dependOns = new UUID[dependOnTaskNumbers.size()];
+            final int[] dependOnNumbers = new int[dependOnTaskNumbers.size()];
 
-            Task dependentTask = taskDao.get(dependentLayer, depTaskNum);
+            int index = 0;
             for (int taskNum: dependOnTaskNumbers) {
-                try {
-                    Task dependOnTask = taskDao.get(dependOnLayer, taskNum);
-                    Depend dep = dependDao.createTaskOnTask(
-                            dependentJob, dependentLayer, dependentTask,
-                            dependOnJob, dependOnLayer, dependOnTask);
-                    dependDao.incrementDependCounts(dep);
-
-                } catch (DataAccessException e) {
-                    throw new DependencyException(
-                            "Unable to find task " + taskNum + " in " + dependOnLayer.getName() + ", while setting up dependencies.");
+                final UUID dependOnId = dependOnTaskCache.get(taskNum);
+                if (dependOnId == null) {
+                    throw new DependencyException("Unable to find task " +
+                            "" + taskNum + " in " + dependOnLayer.getName() + ", " +
+                                    "while setting up dependencies.");
                 }
-
+                dependOns[index] = dependOnId;
+                dependOnNumbers[index] = taskNum;
+                index++;
             }
+
+            batch.addEntry(dependentTaskCache.get(depTaskNum), depTaskNum, dependOns, dependOnNumbers);
         }
+
+        dependDao.batchCreateTaskOnTask(batch);
+        dependDao.batchIncrementDependCounts(batch);
     }
 }

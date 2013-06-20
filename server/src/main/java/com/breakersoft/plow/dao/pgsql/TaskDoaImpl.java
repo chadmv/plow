@@ -4,10 +4,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.object.BatchSqlUpdate;
 import org.springframework.stereotype.Repository;
@@ -27,6 +29,7 @@ import com.breakersoft.plow.util.JdbcUtils;
 import com.breakersoft.plow.util.PlowUtils;
 import com.breakersoft.plow.util.UUIDGen;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 @Repository
 public class TaskDoaImpl extends AbstractDao implements TaskDao {
@@ -164,6 +167,17 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
           update.flush();
     }
 
+    @Override
+    public Map<Integer, UUID> buildTaskCache(Layer layer, int size) {
+        final Map<Integer, UUID> result = Maps.newHashMapWithExpectedSize(size);
+        jdbc.query("SELECT int_number, pk_task FROM plow.task WHERE task.pk_layer=?", new RowCallbackHandler() {
+            @Override
+            public void processRow(ResultSet rs) throws SQLException {
+                result.put(rs.getInt(1), (UUID)rs.getObject(2));
+            }
+        }, layer.getLayerId());
+        return result;
+    }
 
     @Override
     public boolean updateState(Task task, TaskState currentState, TaskState newState) {
