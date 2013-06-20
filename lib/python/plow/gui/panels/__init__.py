@@ -8,6 +8,7 @@ from nodes import NodePanel
 from props import PropertiesPanel
 from wrangle import JobWranglerPanel
 from layers import LayerPanel
+from outputs import OutputPanel
 
 __all__ = [
     "WorkspaceManager",
@@ -19,6 +20,7 @@ __all__ = [
     "NodePanel",
     "PropertiesPanel",
     "JobWranglerPanel",
+    "OutputPanel",
 ]
 
 # Register the panels
@@ -31,6 +33,7 @@ _panels = [
     ('Properties', PropertiesPanel),
     ('Clusters', ClusterPanel),
     ('Nodes', NodePanel),
+    ('Outputs', OutputPanel),
 ]
 
 for _p in _panels:
