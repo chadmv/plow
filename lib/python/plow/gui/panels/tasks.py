@@ -326,10 +326,6 @@ class TaskModel(models.PlowTableModel):
             if 0 < col < 6:
                 return QtCore.Qt.AlignCenter
 
-        data = super(TaskModel, self).data(index, role)
-        if data is not None:
-            return data
-
         task = self._items[row]
         stats = task.stats 
 
@@ -357,6 +353,8 @@ class TaskModel(models.PlowTableModel):
                   "Max CPU Perc:%d\nAllocated RAM:%dMB\nCurrent RSS:%dMB\nMaxRSS:%dMB"
             return tip % (stats.cores, stats.usedCores, stats.highCores, 
                           stats.ram, stats.usedRam, stats.highRam)
+
+        return super(TaskModel, self).data(index, role)
 
     def __durationRefreshTimer(self):
         RUNNING = plow.client.TaskState.RUNNING

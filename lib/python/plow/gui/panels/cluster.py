@@ -141,10 +141,6 @@ class ClusterModel(models.PlowTableModel):
         return plow.client.get_clusters()
 
     def data(self, index, role):
-        data = super(ClusterModel, self).data(index, role)
-        if data is not None:
-            return data
-
         row = index.row()
         col = index.column()
         cluster = self._items[row]
@@ -190,6 +186,7 @@ class ClusterModel(models.PlowTableModel):
                     "Locked Nodes: %d" % cluster.total.lockedNodes,
                 ])
 
+        return super(ClusterModel, self).data(index, role)
 
 
 class ClusterWidgetConfigDialog(QtGui.QDialog):

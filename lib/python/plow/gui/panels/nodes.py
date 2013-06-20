@@ -243,10 +243,6 @@ class NodeModel(models.PlowTableModel):
         super(NodeModel, self).refresh()
 
     def data(self, index, role):
-        data = super(NodeModel, self).data(index, role)
-        if data is not None:
-            return data
-
         row = index.row()
         col = index.column()
         node = self._items[row]
@@ -266,6 +262,7 @@ class NodeModel(models.PlowTableModel):
             if node.locked:
                 return constants.BLUE
 
+        return super(NodeModel, self).data(index, role)
 
 
 #########################
