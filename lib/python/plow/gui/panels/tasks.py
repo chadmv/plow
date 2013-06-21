@@ -27,6 +27,7 @@ class TaskPanel(Panel):
         self.__lastJobId = None
 
         EventManager.JobOfInterest.connect(self.__handleJobOfInterestEvent)
+        EventManager.LayerOfInterest.connect(self.__handleLayerOfInterestEvent)
 
     def init(self):
         titleBar = self.titleBarWidget()
@@ -49,15 +50,21 @@ class TaskPanel(Panel):
     def refresh(self):
         self.widget().refresh()
 
-    def __handleJobOfInterestEvent(self, *args, **kwargs):
-        jobId = args[0]
+    def __handleJobOfInterestEvent(self, jobId, *args, **kwargs):
         taskWidget = self.widget()
-        taskWidget.setJobId(args[0])
+        taskWidget.setJobId(jobId)
 
         if jobId != self.__lastJobId:
             self.__layer_filter.setOptions(taskWidget.layerNames)
 
         self.__lastJobId = jobId
+
+    def __handleLayerOfInterestEvent(self, layerId, *args, **kwargs):
+        taskWidget = self.widget()
+        taskWidget.setLayerFilters(layers=[layerId])
+        name = taskWidget.layerIdToName(layerId)
+        if name:
+            self.__layer_filter.setSelected([name])
 
     def __stateFilterChanged(self):
         sel = self.__state_filter.selectedOptions()
@@ -101,6 +108,10 @@ class TaskWidget(QtGui.QWidget):
         return self.__layers.values()
 
     @property 
+    def layerIds(self):
+        return [l.id for l in self.__layers.itervalues()]
+
+    @property 
     def layerNames(self):
         return sorted(self.__layers.keys())
 
@@ -110,6 +121,13 @@ class TaskWidget(QtGui.QWidget):
             return layer.id 
         else:
             return ''
+
+    def layerIdToName(self, layerId):
+        for layer in self.__layers.itervalues():
+            if layer.id == layerId:
+                return layer.name 
+
+        return None
 
     def refresh(self):
         self.__updateLayers()
@@ -172,18 +190,24 @@ class TaskWidget(QtGui.QWidget):
     def setLayerFilters(self, layers):
         layer_set = set()
         allLayers = self.__layers
+        allLayerIds = set(self.layerIds)
 
         for l in layers:
 
             obj = allLayers.get(l)
             if obj:
                 layer_set.add(obj.id)
+                continue
 
-            elif isinstance(l, plow.client.Layer):
-                layer_set.add(l.id)
+            l_id = None
+            if isinstance(l, plow.client.Layer):
+                l_id = l.id
 
-            elif plow.client.is_uuid(l):
-                layer_set.add(l)
+            elif plow.client.is_uuid(str(l)):
+                l_id = l
+
+            if l in allLayerIds:
+                layer_set.add(l_id)
 
         self.__proxy.setFilters(layerIds=layer_set)
 

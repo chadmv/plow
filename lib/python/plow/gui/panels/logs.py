@@ -202,16 +202,19 @@ class LogViewerWidget(QtGui.QWidget):
         self.__chk_tail = QtGui.QAction("Tail log", self)
         self.__chk_tail.setCheckable(True)
 
-        self.__findPrevBtn = prev = QtGui.QAction(self)
-        prev.setToolTip("Find Previous Match")
+        prev = QtGui.QToolButton(self)
         prev.setIcon(QtGui.QIcon(":/images/left_arrow.png"))
+        prev.setToolTip("Find Previous Match")
+        prev.setFixedSize(20,20)
 
-        self.__findNextBtn = nxt = QtGui.QAction(self)
+        nxt = QtGui.QToolButton(self)
         nxt.setToolTip("Find Next Match")
         nxt.setIcon(QtGui.QIcon(":/images/right_arrow.png"))
+        nxt.setFixedSize(20,20)
 
         self.__logSelector = sel = QtGui.QComboBox(self)
         sel.setToolTip("Choose logs from previous retries")
+        sel.setMaximumWidth(100)
 
         self.__jobNameLabel = label = QtGui.QLabel(self)
         label.setIndent(10)
@@ -234,8 +237,8 @@ class LogViewerWidget(QtGui.QWidget):
         tb.addWidget(spacer(4))
         tb.addWidget(QtGui.QLabel("Find: ", self))
         tb.addWidget(self.__searchLine)
-        tb.addAction(self.__findPrevBtn)
-        tb.addAction(self.__findNextBtn)
+        self.__findPrevBtn = tb.addWidget(prev)
+        self.__findNextBtn = tb.addWidget(nxt)
         tb.addWidget(stretch)
         tb.addWidget(self.__logSelector)
         tb.addAction(self.__chk_tail)
@@ -373,11 +376,15 @@ class LogViewerWidget(QtGui.QWidget):
             return
 
         combo.setVisible(True)
+        metrics = combo.fontMetrics()
+        width = combo.maximumWidth() - 8
 
         for i in xrange(retries+1):
             logpath = task.get_log_path(i)
             logname = os.path.basename(logpath)
-            combo.addItem(logname, logpath)
+
+            elided = metrics.elidedText(logname, QtCore.Qt.ElideLeft, width)
+            combo.addItem(elided, logpath)
             
             idx = combo.count()-1
             combo.setItemData(idx, logpath, QtCore.Qt.ToolTipRole)

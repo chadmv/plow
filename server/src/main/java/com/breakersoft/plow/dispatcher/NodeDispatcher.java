@@ -1,12 +1,16 @@
 package com.breakersoft.plow.dispatcher;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
+import com.breakersoft.plow.PlowCfg;
 import com.breakersoft.plow.dispatcher.domain.DispatchJob;
 import com.breakersoft.plow.dispatcher.domain.DispatchNode;
 import com.breakersoft.plow.dispatcher.domain.DispatchProc;
@@ -24,12 +28,22 @@ public class NodeDispatcher extends AbstractDispatcher implements Dispatcher<Dis
     private RndClientPool rndClientPool;
 
     @Autowired
+    private PlowCfg plowCfg;
+
+    @Autowired
     @Qualifier("nodeDispatchExecutor")
     private ThreadPoolTaskExecutor nodeDispatchExecutor;
 
-    private final RateLimiter rateLimiter = RateLimiter.create(12.0);
+    private RateLimiter rateLimiter;
 
-    public NodeDispatcher() { }
+    public NodeDispatcher() {
+    }
+
+    @PostConstruct
+    public void init() {
+        rateLimiter = RateLimiter.create(
+                plowCfg.get("plow.dispatcher.node.procRateLimit", 4.0));
+    }
 
     public void asyncDispatch(final DispatchNode node) {
         nodeDispatchExecutor.execute(new Runnable() {
@@ -37,6 +51,7 @@ public class NodeDispatcher extends AbstractDispatcher implements Dispatcher<Dis
             public void run() {
                 final DispatchResult result = dispatch(node);
                 if (result.procs > 0) {
+                    rateLimiter.tryAcquire(result.procs, 5, TimeUnit.SECONDS);
                     PlowStats.nodeDispatchHit.incrementAndGet();
                 }
                 else {
@@ -48,13 +63,7 @@ public class NodeDispatcher extends AbstractDispatcher implements Dispatcher<Dis
 
     @Override
     public DispatchResult dispatch(DispatchNode node) {
-
         final DispatchResult result = new DispatchResult(node);
-
-        if (!rateLimiter.tryAcquire()) {
-            return result;
-        }
-
         dispatch(result, node);
         return result;
     }

@@ -7,6 +7,7 @@ import com.breakersoft.plow.Depend;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
+import com.breakersoft.plow.TaskOnTaskBatch;
 
 public interface DependDao {
 
@@ -41,4 +42,8 @@ public interface DependDao {
     List<Depend> getOnTaskDepends(Task task);
     List<Depend> getOnLayerDepends(Layer layer);
     List<Depend> getOnJobDepends(Job job);
+
+    void batchCreateTaskOnTask(TaskOnTaskBatch batch);
+
+    void batchIncrementDependCounts(TaskOnTaskBatch batch);
 }

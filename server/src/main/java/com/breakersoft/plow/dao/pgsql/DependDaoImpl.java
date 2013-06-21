@@ -1,12 +1,15 @@
 package com.breakersoft.plow.dao.pgsql;
 
+import java.nio.ByteBuffer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.object.BatchSqlUpdate;
 import org.springframework.stereotype.Repository;
 
 import com.breakersoft.plow.Depend;
@@ -14,11 +17,14 @@ import com.breakersoft.plow.DependE;
 import com.breakersoft.plow.Job;
 import com.breakersoft.plow.Layer;
 import com.breakersoft.plow.Task;
+import com.breakersoft.plow.TaskOnTaskBatch;
+import com.breakersoft.plow.TaskOnTaskBatch.TaskOnTaskBatchEntry;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.DependDao;
 import com.breakersoft.plow.exceptions.DependencyException;
 import com.breakersoft.plow.thrift.DependType;
 import com.breakersoft.plow.util.JdbcUtils;
+import com.breakersoft.plow.util.UUIDGen;
 
 @Repository
 public class DependDaoImpl extends AbstractDao implements DependDao {
@@ -378,6 +384,89 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
 
         return result;
     }
+
+
+    private static final int[] BATCH_TYPES = new int[] {
+        Types.OTHER,
+        Types.OTHER,
+        Types.INTEGER,
+        Types.OTHER,
+        Types.OTHER,
+        Types.OTHER,
+        Types.OTHER,
+        Types.OTHER,
+        Types.OTHER,
+        Types.VARCHAR,
+        Types.VARCHAR,
+        Types.VARCHAR,
+        Types.VARCHAR,
+        Types.VARCHAR,
+        Types.VARCHAR
+    };
+
+    @Override
+    public void batchCreateTaskOnTask(TaskOnTaskBatch batch) {
+
+        final BatchSqlUpdate update = new BatchSqlUpdate(
+                jdbc.getDataSource(), INSERT, BATCH_TYPES);
+
+        final int type = DependType.TASK_ON_TASK.ordinal();
+        final ByteBuffer buffer = ByteBuffer.allocate(12);
+
+        for (TaskOnTaskBatchEntry entry: batch.entries) {
+
+            final String dependentTaskName = String.format("%04d-%s",
+                    entry.dependentTaskNumber, batch.dependentLayer.getName());
+
+            for (int i=0; i<entry.dependOnTasksIds.length; i++) {
+
+                buffer.clear();
+                buffer.putInt(type);
+                buffer.putInt(entry.dependentTask.hashCode());
+                buffer.putInt(entry.dependOnTasksIds[i].hashCode());
+
+                update.update(
+                        UUIDGen.random(),
+                        UUID.nameUUIDFromBytes(buffer.array()),
+                        type,
+                        batch.dependentJob.getJobId(),
+                        batch.dependOnJob.getJobId(),
+                        batch.dependentLayer.getLayerId(),
+                        batch.dependOnLayer.getLayerId(),
+                        entry.dependentTask,
+                        entry.dependOnTasksIds[i],
+                        batch.dependentJob.getName(),
+                        batch.dependOnJob.getName(),
+                        batch.dependentLayer.getName(),
+                        batch.dependOnLayer.getName(),
+                        dependentTaskName,
+                        String.format("%04d-%s", entry.dependOnTaskNumbers[i], batch.dependOnLayer.getName()));
+            }
+        }
+
+        update.flush();
+    }
+
+    private static final int[] INC_BATCH_TYPES = new int[] {
+        Types.INTEGER,
+        Types.OTHER
+    };
+
+    private static final String TASK_INC =
+            "UPDATE plow.task SET int_depend_count=int_depend_count + ? WHERE task.pk_task=?";
+
+    @Override
+    public void batchIncrementDependCounts(TaskOnTaskBatch batch) {
+        final BatchSqlUpdate update = new BatchSqlUpdate(
+                jdbc.getDataSource(), TASK_INC, INC_BATCH_TYPES);
+
+        for (TaskOnTaskBatchEntry entry: batch.entries) {
+              update.update(entry.dependOnTaskNumbers.length, entry.dependentTask);
+        }
+
+        update.flush();
+    }
+
 
     @Override
     public Depend createTaskOnTask(

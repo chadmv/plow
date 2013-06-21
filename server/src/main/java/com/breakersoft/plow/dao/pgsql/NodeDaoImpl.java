@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.slf4j.Logger;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -19,6 +18,7 @@ import com.breakersoft.plow.Node;
 import com.breakersoft.plow.NodeE;
 import com.breakersoft.plow.dao.AbstractDao;
 import com.breakersoft.plow.dao.NodeDao;
+import com.breakersoft.plow.exceptions.PlowWriteException;
 import com.breakersoft.plow.rnd.thrift.Ping;
 import com.breakersoft.plow.thrift.NodeState;
 import com.breakersoft.plow.thrift.SlotMode;
@@ -262,10 +262,29 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
         return jdbc.queryForObject(query, Integer.class, node.getNodeId()) != 0;
     }
 
+
+    private static final String SET_CLUSTER = "UPDATE plow.node SET pk_cluster=?, str_tags=? WHERE pk_node=?";
+
     @Override
-    public void setCluster(Node node, Cluster cluster) {
-        jdbc.update("UPDATE plow.node SET pk_cluster=? WHERE pk_node=?",
-                cluster.getClusterId(), node.getNodeId());
+    public void setCluster(final Node node, final Cluster cluster) {
+
+        final List<String> tags = jdbc.queryForList("SELECT unnest(str_tags) " +
+                "FROM plow.cluster WHERE pk_cluster=?", String.class, cluster.getClusterId());
+
+        if (tags.isEmpty()) {
+            throw new PlowWriteException("Cannot assign node, the cluster " + cluster + " has no tags.");
+        }
+
+        jdbc.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(final Connection conn) throws SQLException {
+                final PreparedStatement ret = conn.prepareStatement(SET_CLUSTER);
+                ret.setObject(1, cluster.getClusterId());
+                ret.setObject(2, JdbcUtils.toArray(conn, tags));
+                ret.setObject(3, node.getNodeId());
+                return ret;
+            }
+        });
     }
 
     private static final String UPDATE_TAGS =
