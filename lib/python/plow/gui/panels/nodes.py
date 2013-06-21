@@ -176,7 +176,6 @@ class NodeWidget(QtGui.QWidget):
         QtGui.qApp.processEvents()
 
         if did_set:
-            print 'emit global refresh'
             EventManager.GlobalRefresh.emit()
 
     def lockSelected(self, locked):
@@ -189,7 +188,6 @@ class NodeWidget(QtGui.QWidget):
                     did_lock = True
 
             if did_lock:
-                print 'emit global refresh'
                 EventManager.GlobalRefresh.emit()
 
     def __itemDoubleClicked(self, index):
