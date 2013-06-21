@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Bootstrap, from Twitter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content=""><!-- Le styles -->
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="bootstrap/css/tags.css" rel="stylesheet" type="text/css">
+    <link href="bootstrap/css/win8.css" rel="stylesheet">
+    <link href="bootstrap/css/custom.css" rel="stylesheet">
+    <style type="text/css">
+	body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+      
+      #boxArray {
+      	-webkit-user-select:none;
+      	-moz-user-select:none;
+      }
+      
+      .rightFooter {
+      	margin-top:20px;
+      }
+      
+	      
+    </style>
+    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet" type="text/css"><!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="bootstrap/js/html5shiv.js"></script>
+    <![endif]-->
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="bootstrap/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="bootstrap/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="bootstrap/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="bootstrap/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="bootstrap/ico/favicon.png">
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
+    <script src="bootstrap/js/thrift.js"></script>
+    <script src="bootstrap/js/plow_types.js"></script>
+    <script src="bootstrap/js/RpcService.js"></script>
+    
+    <script type="text/javascript">
+ $(function() {
+            
+            var $tr = $("table.data tr:eq(1)").clone();
+            for(var i=0;i<50;i++) {
+                $tr = $("table.data tr:eq(1)").clone();
+                $("table.data").append($tr);
+            }
+            
+            var $cont = $(".table-container");
+			var $body = $("body");
+			var $win = $(window);
+            var $boxes = $("#boxArray");
+            
+            // paul irish animation loopage
+            window.requestAnimFrame = (function(){
+			  return  window.requestAnimationFrame       ||
+			          window.webkitRequestAnimationFrame ||
+			          window.mozRequestAnimationFrame    ||
+			          function( callback ){
+			            window.setTimeout(callback, 1000 / 60);
+			          };
+			})();
+            
+            // main obj
+            window.plow = {};
+            plow.data = [];
+            
+            function getProjects() {
+				var transport = new Thrift.Transport("/plow/api");
+				var protocol  = new Thrift.Protocol(transport);
+				var client    = new RpcServiceClient(protocol);
+				return client.getProjects();
+			}
+			
+			$(document).ready(function() {
+				$("#cpuMode").click(function() {
+					data = getProjects()
+					console.log(data);
+				});
+				
+			});
+            
+            
+			for(var i=0;i<800;i++) {
+				plow.data.push({
+					color: "#CA4242",
+					selected: false
+				});
+			}
+			for(var i=0;i<100;i++) {
+				plow.data.push({
+					color: "#465764",
+					selected: false
+				});
+			}
+			for(var i=0;i<50;i++) {
+				plow.data.push({
+					color: "#78D178",
+					selected: false
+				});
+			}
+			for(var i=0;i<350;i++) {
+				plow.data.push({
+					color: "#FD7239",
+					selected: false
+				});
+			}
+			
+			var lastColor = 0;
+            var c = $boxes[0];
+	        var ctx = c.getContext("2d");
+            
+            // run our animation
+            (function animloop(){
+			  requestAnimFrame(animloop);
+			  render();
+			})();
+			
+			
+			
+			function render() {
+
+	            var W = c.width;
+	            var H = c.height;
+	            var n = plow.data.length;
+	            var m = plow.m = 1;
+	            
+	            var w = Math.ceil(Math.sqrt((W * H) / n));
+	            var h = w;
+				
+				var y=0,x=0,total;
+				w++;h++;
+				
+				do {
+					// decrement size by 1
+					w--;h--;
+					// calculate x and y for area
+	            	y = Math.floor((H-y-2) / h);
+	            	x = Math.floor((W-x-2) / w);
+	            	// area taken up at this size
+	            	total = x * y;
+	            	// were not too small and area is < number of squares area
+				} while (total < n && h > 5 && w > 5);
+	            
+	            plow.x = x;
+	            plow.y = y;
+	            plow.w = w;
+	            plow.h = h;
+	            
+	            var drawn = 0;
+	            //cols
+	            for(var j=0;j<y;j++) {
+	            	// rows
+	            	for(var i=0;i<x;i++) {
+	            		// only draw the correct number of squares
+	            		if(drawn < n ) {
+	            			// lookup color for this box
+	            			var color = plow.data[drawn].color;
+	            			
+	            			if(plow.data[drawn].selected) color = "green";
+	            			
+	            			// don't change fillStyle if its the same as it was
+	            			if(lastColor != color) {
+	            				lastColor = color;
+	            				ctx.fillStyle = color;
+	            			}
+	            			// x,y.width.height of each box
+	            			ctx.fillRect(i*w+m*i,j*h+m*j,w,h);
+	            			drawn++;
+	            		}
+	            	}
+	            }
+			}
+            
+            // resize some stuff
+            $footer = $(".rightFooter");
+            $top = $(".navbar.top");
+            $column = $(".column");
+            var height;
+            $(window).resize(function() {
+            	$footer.width( $top.width());
+            	$cont.height($win.height() - 225 );
+            	height = $win.height() - 225;
+            	c.width = $column.width();
+            	c.height = height;
+            }).resize();
+            
+            
+           
+            $boxes.on("mousedown",function(e1) {
+            	plow.selection = {};
+            	$boxes.on("mousemove",selection);
+            	selection(e1);
+            });
+            
+            $boxes.on("dblclick",function(e1) {
+            	selection(e1,true);
+            });
+            
+            // mouse up deslects
+            $("body").on("mouseup",function() {
+            	$boxes.off("mousemove");
+            	plow.data.forEach(function(item,i) {
+            		item.selected = false;
+            	});
+            });
+            
+            function getIndex(row,col) {
+            	return plow.x * (row - plow.m) + (col - plow.m);
+            }
+            function getBox(row,col) {
+            	var index = getIndex(row,col);
+            	var box = plow.data[index];
+            	if(typeof box != "undefined") {
+            		return box;
+            	} else {
+            		return false;
+            	}
+            }
+            
+            function selection(e,cluster) {
+            	var x = e.offsetX;
+            	var y = e.offsetY;
+            	var margin = (plow.m * plow.x) - 1;
+            	var allSquaresWidth = plow.x * plow.w;
+            	
+            	// can't go past this point
+            	var maxW = allSquaresWidth + margin;
+            	
+            	// within x bounds
+            	if(x <= maxW) {
+            	
+	            	// block number
+	            	var thisCol = Math.ceil(x/(plow.w + plow.m));
+	            	var thisRow = Math.ceil(y/(plow.h + plow.m));
+	            	var node = getBox(thisRow,thisCol);
+	            	
+	            	// store this as the selection start col/rw
+	            	if(typeof plow.selection.startCol == "undefined") {
+	            		plow.selection.startCol = thisCol;
+	            		plow.selection.startRow = thisRow;
+	            	}
+	            	
+	            	if(e.altKey) {
+		            	// fill in the square within the squres
+		            	// loop over x diff
+		            	var sx = plow.selection.startCol;
+		            	var sy = plow.selection.startRow;
+		            	var xDiff = thisCol - sx;
+		            	var yDiff = thisRow - sy;
+		            	
+		            	// all direction select
+		            	// this is the eqivelant to do doing 4 diff for loop
+		        		for(var i=sx; xDiff < 0 ? (i>=sx+xDiff) : (i<=sx+xDiff) ;i+= xDiff < 0 ? -1 : 1) {
+		            		for(var j=sy; yDiff < 0 ? (j>=sy+yDiff) : (j<=sy+yDiff) ;j+= yDiff < 0 ? -1 : 1) {
+			            		var box = getBox(j,i);
+			            		if(box) box.selected = true;
+			            	}
+		            	}
+		            }
+		            
+	            	// change new color
+	            	if(node) node.selected = true;
+	            	
+	            	// select this cluster
+		            if(cluster) {
+		            	plow.data.forEach(function(item,i) {
+		            		if(item.color === node.color) {
+		            			item.selected = true;
+		            		}
+		            	});	
+		            }
+	            	
+            	}
+        	}
+        });
+    </script>
+</head>
+
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container-fluid">
+                <a class="brand" href="#">Project name</a>
+
+                <div class="nav-collapse collapse">
+                    <p class="navbar-text pull-right">Logged in as <a href="#" class="navbar-link">Username</a></p>
+
+                    <ul class="nav">
+                        <li class="active"><a href="#">Home</a></li>
+
+                        <li><a href="#about">About</a></li>
+
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div><!--/.nav-collapse -->
+            </div>
+        </div>
+    </div>
+    
+   
+
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span6 column">
+	            
+	             <div class="navbar">
+			        <div class="navbar-inner">
+			            <div class="container-fluid">
+			                <ul class="nav">
+							  <li class="active"><a href="#">Memory Mode</a></li>
+							  <li><a href="#" id="cpuMode">CPU Mode</a></li>
+							  <li><a href="#">Load Avg</a></li>
+							  <li><a href="#">CPU Temp</a></li>
+							</ul>
+			            </div>
+			        </div>
+			    </div>
+			    
+			    <div class="table-container">
+			   	 <canvas id="boxArray" width="700" height="600"></canvas>
+			   	</div>
+	            
+	            
+            </div>
+
+            <div class="span6">
+                <div class="navbar top">
+                    <div class="navbar-inner">
+                        <div class="container-fluid">
+                            <form class="navbar-search pull-left">
+                                <input type="text" class="search-query" placeholder="Search">
+                            </form>
+
+                            <ul class="nav">
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Groups <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#one">one</a></li>
+                                        <li><a href="#two">two</a></li>
+                                        <li><a href="#three">three</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">User <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#one">one</a></li>
+                                        <li><a href="#two">two</a></li>
+                                        <li><a href="#three">three</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="table table-striped data">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>User</th>
+                                <th>State</th>
+                                <th>Progress</th>
+                                <th>Group</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>Mark</td>
+                                <td>Otto</td>
+                                <td>@mdo</td>
+                                <td>Otto</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <div class="navbar rightFooter">
+                    <div class="navbar-inner">
+                        <div class="container-fluid">
+                            <ul class="nav">
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Groups <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#one">one</a></li>
+                                        <li><a href="#two">two</a></li>
+                                        <li><a href="#three">three</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">User <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#one">one</a></li>
+                                        <li><a href="#two">two</a></li>
+                                        <li><a href="#three">three</a></li>
+                                    </ul>
+                                </li>
+
+                            </ul>
+                            
+                            <form class="navbar-form pull-right">
+							  <input class="input-tag" type="text">
+							</form>
+
+                        </div>
+                    </div>
+                </div>
+                
+                
+            </div>
+        </div><!--/row-->
+   
+
+        <footer>
+            <p>&copy; Company 2013</p>
+        </footer>
+    </div><!--/.fluid-container-->
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="bootstrap/js/bootstrap.js" type="text/javascript"></script>
+    <script src="bootstrap/js/tags.js" type="text/javascript"></script>
+</script>
+</body>
+</html>

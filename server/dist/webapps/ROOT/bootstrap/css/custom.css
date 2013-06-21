@@ -1,0 +1,21 @@
+.table-container {
+	height:500px;
+	overflow-x:hidden;
+	border: 1px solid #D4D4D4;
+}
+.navbar-inner {
+	background: #999999;
+}
+.navbar.navbar-inverse .navbar-inner {
+	background: #5e5e5e;
+}
+
+.navbar .navbar-search .search-query {
+	border-radius: 0;
+}
+.navbar .nav>li>a:focus, .navbar .nav>li>a:hover, li.dropdown.open a.dropdown-toggle, li.active a {
+	color: #333 !important;
+	text-shadow:none !important;
+	text-decoration: none;
+	background-color: rgba(255,255,255, 0.9) !important;
+}
