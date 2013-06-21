@@ -205,15 +205,15 @@ class PropertiesPanel(Panel):
                         "readOnly": True
                     },
                     {
-                        "title": "Cluster",
-                        "widget": "text",
-                        "value": node.clusterName,
-                        "readOnly": True
-                    },
-                    {
                         "title": "IP Addr",
                         "widget": "text",
                         "value": node.ipaddr,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Cluster",
+                        "widget": "text",
+                        "value": node.clusterName,
                         "readOnly": True
                     },
                     {
@@ -223,6 +223,21 @@ class PropertiesPanel(Panel):
                         "readOnly": True
                     },
                     {
+                        "title": "Created Time",
+                        "widget": "datetime",
+                        "value": node.createdTime
+                    },
+                    {
+                        "title": "Updated Time",
+                        "widget": "datetime",
+                        "value": node.updatedTime
+                    },
+                    {
+                        "title": "Boot Time",
+                        "widget": "datetime",
+                        "value": node.bootTime
+                    },
+                    {
                         "title": "Locked",
                         "widget": "lockToggle",
                         "value": node.locked,
@@ -230,7 +245,28 @@ class PropertiesPanel(Panel):
                 ]
             },
             {
-                "title": "System",
+                "title": "Dispatchable Resources",
+                "children": [
+                    {
+                        "title": "Total Cores",
+                        "value": node.totalCores
+                    },
+                    {
+                        "title": "Idle Cores",
+                        "value": node.idleCores
+                    },
+                    {
+                        "title": "Total Memory (MB)",
+                        "value": node.totalRamMb
+                    },
+                    {
+                        "title": "Free Memory (MB)",
+                        "value": node.freeRamMb
+                    },
+                ]
+            },
+            {
+                "title": "System Info",
                 "children": [
                     {
                         "title": "CPU Model",
@@ -239,11 +275,47 @@ class PropertiesPanel(Panel):
                         "readOnly": True
                     },
                     {
-                        "title": "Platform",
+                        "title": "Kernel",
                         "widget": "text",
                         "value": node.system.platform,
                         "readOnly": True
                     },
+                    {
+                        "title": "Load",
+                        "value": node,
+                        "widget": "loadFactor",
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Physical CPUs",
+                        "value": node.system.physicalCores,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Logical CPUs",
+                        "value": node.system.logicalCores,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Total Memory (MB)",
+                        "value": node.system.totalRamMb,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Free Memory (MB)",
+                        "value": node.system.freeRamMb,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Total Swap (MB)",
+                        "value": node.system.totalSwapMb,
+                        "readOnly": True
+                    },
+                    {
+                        "title": "Free Swap (MB)",
+                        "value": node.system.freeSwapMb,
+                        "readOnly": True
+                    }
                 ]
             }
         ]
