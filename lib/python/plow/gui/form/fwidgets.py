@@ -65,8 +65,10 @@ class Number(FormWidget):
     def __init__(self, value, parent=None):
         FormWidget.__init__(self, parent)
         widget = QtGui.QSpinBox(self)
-        widget.setValue(value)
+        widget.setMinimum(0)
+        widget.setMaximum(1000000)
         widget.setMinimumWidth(100)
+        widget.setValue(value)
         self.setWidget(widget)
         self._widget.setFocusPolicy(QtCore.Qt.NoFocus)
 
