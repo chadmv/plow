@@ -1,1 +1,1 @@
-/Users/sean/plow/lib/js/plow_types.js
+../../../../../../lib/js/plow_types.js

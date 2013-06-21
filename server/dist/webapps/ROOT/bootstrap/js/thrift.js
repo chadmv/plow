@@ -1,1 +1,1 @@
-/Users/sean/plow/lib/js/thrift.js
+../../../../../../lib/js/thrift.js
