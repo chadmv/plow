@@ -290,7 +290,13 @@ class CheckableComboBox(QtGui.QWidget):
                 a.setChecked(True)
             if icon:
                 a.setIcon(icons[i])
-            menu.addAction(a)        
+            menu.addAction(a)  
+
+    def setSelected(self, options):
+        opts = set(options)
+        for action in self.__menu.actions():
+            checked = action.text() in opts
+            action.setChecked(checked)
 
     def selectedOptions(self):
         return [a.text() for a in self.__menu.actions() if a.isChecked()]
