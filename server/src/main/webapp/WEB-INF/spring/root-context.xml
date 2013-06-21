@@ -35,9 +35,9 @@
     <property name="jdbcUrl" value="${plow.jdbc.url}" />
     <property name="username" value="${plow.jdbc.username}" />
     <property name="password" value="${plow.jdbc.password}" />
-    <property name="maxConnectionsPerPartition" value="50" />
-    <property name="minConnectionsPerPartition" value="25" />
-    <property name="partitionCount" value="4" />
+    <property name="maxConnectionsPerPartition" value="${plow.jdbc.maxConnectionsPerPartition}" />
+    <property name="minConnectionsPerPartition" value="${plow.jdbc.minConnectionsPerPartition}" />
+    <property name="partitionCount" value="${plow.jdbc.partitionCount}" />
     <property name="acquireIncrement" value="10" />
     <property name="statementsCacheSize" value="200" />
   </bean>
