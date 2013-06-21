@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.breakersoft.plow.thrift.TaskTotalsT;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 public final class JdbcUtils {
 
@@ -88,6 +89,19 @@ public final class JdbcUtils {
             return ImmutableList.of();
         }
     }
+
+    public static final ImmutableSet<String> toSet(Array sqlArray) {
+        if (sqlArray == null) {
+            return ImmutableSet.of();
+        }
+
+        try {
+            return ImmutableSet.copyOf((String[])sqlArray.getArray());
+        } catch (SQLException e) {
+            return ImmutableSet.of();
+        }
+    }
+
 
     public static final RowMapper<String> STRING_MAPPER = new RowMapper<String>() {
         @Override
