@@ -96,23 +96,27 @@ class NodeWidget(QtGui.QWidget):
 
         self.__view = view = TableWidget(self)
         view.setModel(proxy)
-        # view.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
         layout.addWidget(view)
 
+        headers = model.HEADERS
         view.setColumnWidth(0, 150)
-        view.setColumnWidth(model.HEADERS.index('Locked'), 60)
-        view.setColumnWidth(model.HEADERS.index('Cores (Total)'), 90)
-        view.setColumnWidth(model.HEADERS.index('Cores (Idle)'), 90)
+        view.setColumnWidth(headers.index('Locked'), 55)
+        view.setColumnWidth(headers.index('State'), 75)
+        view.setColumnWidth(headers.index('Total Cores'), 90)
+        view.setColumnWidth(headers.index('Idle Cores'), 90)
+        view.setColumnWidth(headers.index('Tags'), 100)
+        view.setColumnWidth(headers.index('Ping'), 80)
+        view.setColumnWidth(headers.index('Uptime'), 80)
 
-        view.setColumnHidden(model.HEADERS.index('Ram (Total)'), True)
-        view.setColumnHidden(model.HEADERS.index('Swap (Total)'), True)
+        view.setColumnHidden(headers.index('Total Ram'), True)
+        view.setColumnHidden(headers.index('Total Swap'), True)
 
         delegate = ResourceDelegate(dataRole=model.DataRole, parent=self)
-        view.setItemDelegateForColumn(model.HEADERS.index('Ram (Free)'), delegate)
+        view.setItemDelegateForColumn(headers.index('Free Ram'), delegate)
 
         delegate = ResourceDelegate(warn=.75, critical=.25, dataRole=model.DataRole, parent=self)
-        view.setItemDelegateForColumn(model.HEADERS.index('Swap (Free)'), delegate)
+        view.setItemDelegateForColumn(headers.index('Free Swap'), delegate)
 
         view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
@@ -218,9 +222,9 @@ class NodeModel(models.PlowTableModel):
 
     HEADERS = [
                 "Name", "Cluster", 
-                "State", "Locked", "Cores (Total)", "Cores (Idle)",
-                "Ram (Total)", "Ram (Free)", "Swap (Total)",
-                "Swap (Free)", "Ping", "Uptime"
+                "State", "Locked", "Total Cores", "Idle Cores",
+                "Total Ram", "Free Ram", "Total Swap",
+                "Free Swap", "Ping", "Uptime", "Tags",
                ]
 
     DISPLAY_CALLBACKS = {
@@ -236,6 +240,7 @@ class NodeModel(models.PlowTableModel):
         9 : lambda n: n.system.freeSwapMb,
         10: lambda n: formatDuration(n.updatedTime), 
         11: lambda n: formatDuration(n.bootTime), 
+        12: lambda n: ', '.join(n.tags), 
     }
 
     def __init__(self, parent=None):
