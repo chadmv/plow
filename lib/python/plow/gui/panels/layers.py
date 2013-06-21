@@ -42,7 +42,7 @@ class LayerPanel(Panel):
 #########################
 class LayerWidget(QtGui.QWidget):
     
-    WIDTH = [220, 80, 80, 60, 60, 60, 60, 110, 140]
+    WIDTH = [220, 80, 80, 60, 60, 60, 60, 110, 120, 120]
 
     def __init__(self, attrs, parent=None):
         super(LayerWidget, self).__init__(parent)
@@ -60,7 +60,6 @@ class LayerWidget(QtGui.QWidget):
 
         self.__proxy = proxy = models.AlnumSortProxyModel(self)
         proxy.setSortRole(LayerModel.DataRole)
-        # proxy.sort(0, QtCore.Qt.AscendingOrder)
         table.setModel(proxy)
 
         layout = QtGui.QVBoxLayout(self)
@@ -82,7 +81,7 @@ class LayerWidget(QtGui.QWidget):
         return [index.data(self.__model.ObjectRole) for index in rows]
 
     def setJobId(self, jobid):
-        self.__view.sortByColumn(1, QtCore.Qt.AscendingOrder)
+        self.__view.sortByColumn(-1, QtCore.Qt.AscendingOrder)
 
         new_model = False
         if not self.__model:
@@ -112,7 +111,7 @@ class LayerModel(models.PlowTableModel):
 
     HEADERS = [
         "Name", "Run Cores", "Min Cores", "Total", "Pend.", 
-        "Run", "Dead", "Avg. Core Hrs", "Progress"
+        "Run", "Dead", "Avg. Core Hrs", "Tags", "Progress"
     ]
 
     DISPLAY_CALLBACKS = {
@@ -124,6 +123,7 @@ class LayerModel(models.PlowTableModel):
         5 : lambda l: l.totals.running,
         6 : lambda l: l.totals.dead,
         7 : lambda l: "{0:.1f}".format(l.stats.avgCoreTime / 3600000.0), # msec => hour
+        8 : lambda l: ', '.join(l.tags),
     }
 
     def __init__(self, parent=None):
@@ -167,6 +167,12 @@ class LayerModel(models.PlowTableModel):
             if layer.totals.dead:
                 dead = plow.client.TaskState.DEAD
                 return constants.COLOR_TASK_STATE[dead]
+
+        if role == QtCore.Qt.ToolTipRole:
+            try:
+                return self.DISPLAY_CALLBACKS[col](layer)
+            except KeyError:
+                pass
 
         return super(LayerModel, self).data(index, role)
 
