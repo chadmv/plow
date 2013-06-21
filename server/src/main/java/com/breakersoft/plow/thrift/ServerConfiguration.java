@@ -2,15 +2,20 @@ package com.breakersoft.plow.thrift;
 
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TCompactProtocol;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.breakersoft.plow.PlowThreadPools;
+import com.breakersoft.plow.Defaults;
+import com.breakersoft.plow.PlowCfg;
 import com.breakersoft.plow.rnd.thrift.RndServiceApi;
 
 
 @Configuration
 public class ServerConfiguration {
+
+    @Autowired
+    private PlowCfg plowCfg;
 
     /*
      * RND server handles communication with
@@ -21,7 +26,9 @@ public class ServerConfiguration {
     public ThriftServer getRndThriftServer() {
         return new ThriftServer(
                 new RndServiceApi.Processor<RndServiceApi.Iface>(
-                        getRndService()), new TBinaryProtocol.Factory(), PlowThreadPools.THIFT_RND_POOL_SIZE, 11337);
+                        getRndService()), new TBinaryProtocol.Factory(),
+                        plowCfg.get("plow.rnd.network.threads", Defaults.RND_NETWORK_THREADS),
+                        plowCfg.get("plow.rnd.network.port", Defaults.RND_NETWORK_PORT));
     }
 
     @Bean
@@ -39,7 +46,9 @@ public class ServerConfiguration {
     public ThriftServer getRpcThriftServer() {
         return new ThriftServer(
                 new RpcService.Processor<RpcService.Iface>(
-                        getRpcService()), new TCompactProtocol.Factory(), 32, 11336);
+                        getRpcService()), new TCompactProtocol.Factory(),
+                        plowCfg.get("plow.rpc.network.threads", Defaults.RPC_NETWORK_THREADS),
+                        plowCfg.get("plow.rpc.network.port", Defaults.RPC_NETWORK_PORT));
     }
 
     @Bean
