@@ -57,7 +57,7 @@ class Text(FormWidget):
         FormWidget.__init__(self, parent)
         self.setWidget(QtGui.QLineEdit(text, self))
         self._widget.setFocusPolicy(QtCore.Qt.NoFocus)
-
+        self._widget.setCursorPosition(1)
     def _setReadOnly(self, value):
         self._widget.setReadOnly(value)
 
