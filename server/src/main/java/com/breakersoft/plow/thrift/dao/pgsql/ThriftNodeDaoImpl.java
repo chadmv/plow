@@ -2,7 +2,6 @@ package com.breakersoft.plow.thrift.dao.pgsql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +17,7 @@ import com.breakersoft.plow.thrift.NodeT;
 import com.breakersoft.plow.thrift.SlotMode;
 import com.breakersoft.plow.thrift.dao.ThriftNodeDao;
 import com.breakersoft.plow.util.JdbcUtils;
+import com.google.common.collect.Lists;
 
 @Repository
 @Transactional(readOnly=true)
@@ -63,7 +63,11 @@ public class ThriftNodeDaoImpl extends AbstractDao implements ThriftNodeDao {
             system.setTotalRamMb(rs.getInt("int_ram_sys"));
             system.setFreeRamMb(rs.getInt("int_free_ram_sys"));
 
-            system.setLoad(new ArrayList<Integer>());
+            final List<Integer> loadFactor = Lists.newArrayListWithCapacity(3);
+            for (final Float load: (Float[])rs.getArray("flt_load").getArray()) {
+                loadFactor.add((int) (load * 100));
+            }
+            system.setLoad(loadFactor);
             system.setLogicalCores(rs.getInt("int_log_cores"));
             system.setPhysicalCores(rs.getInt("int_phys_cores"));
 
@@ -98,6 +102,7 @@ public class ThriftNodeDaoImpl extends AbstractDao implements ThriftNodeDao {
                 "node_sys.time_booted,"+
                 "node_sys.str_cpu_model,"+
                 "node_sys.str_platform, " +
+                "node_sys.flt_load::float4[], " +
 
                 "node_dsp.int_cores, "+
                 "node_dsp.int_idle_cores, "+
