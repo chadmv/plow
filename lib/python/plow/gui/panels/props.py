@@ -320,7 +320,6 @@ class PropertiesPanel(Panel):
     def displayLayer(self, layerid):
         layer = pc.get_layer_by_id(layerid)
         self.__object = ("layer",  layerid)
-
         widgets = [ 
             {
                 "title": "Layer",
@@ -329,17 +328,6 @@ class PropertiesPanel(Panel):
                     { "title": "Service", "widget": "text", "value": layer.service, "readOnly": True },
                     { "title": "Range", "widget": "text", "value": layer.range, "readOnly": True },
                     { "title": "Chunk", "value": layer.chunk, "readOnly": True },
-                ]
-            },
-            {
-                "title": "Task Settings",
-                "children": [
-                    { "title": "Tags", "value": ",".join(layer.tags), "readOnly": True },
-                    { "title": "Min Cores", "value": layer.minCores, "readOnly": True },
-                    { "title": "Max Cores", "value": layer.maxCores, "readOnly": True },
-                    { "title": "Min Memory (MB)", "value": layer.minRam, "readOnly": True },
-                    { "title": "Max Memory (MB)", "value": layer.maxRam, "readOnly": True },
-                    { "title": "Threadable", "value": layer.threadable, "readOnly": True },
                 ]
             },
             {
@@ -383,9 +371,33 @@ class PropertiesPanel(Panel):
                             { "title": "Avg Task", "value": formatCoreTime(layer.stats.avgCoreTime), "readOnly": True },
                             { "title": "Low Task", "value": formatCoreTime(abs(layer.stats.lowCoreTime)), "readOnly": True },
                         ]
+                    },
+                    {
+                        "title": "Clock Hours",
+                        "children": [
+                            { "title": "Total", "value": formatCoreTime(layer.stats.totalClockTime), "readOnly": True },
+                            { "title": "Succeeded", "value": [formatCoreTime(layer.stats.totalSuccessClockTime), "rgba(76, 115, 0, 192)"],
+                                "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
+                            { "title": "Failed", "value":  [formatCoreTime(layer.stats.totalFailClockTime), "rgba(177, 24, 0, 192)"],
+                                "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
+                            { "title": "High Task", "value": formatCoreTime(layer.stats.highClockTime), "readOnly": True },
+                            { "title": "Avg Task", "value": formatCoreTime(layer.stats.avgClockTime), "readOnly": True },
+                            { "title": "Low Task", "value": formatCoreTime(abs(layer.stats.lowClockTime)), "readOnly": True },
+                        ]
                     }
                 ]
             },
+            {
+                "title": "Task Settings",
+                "children": [
+                    { "title": "Tags", "value": ",".join(layer.tags), "readOnly": True },
+                    { "title": "Min Cores", "value": layer.minCores, "readOnly": True },
+                    { "title": "Max Cores", "value": layer.maxCores, "readOnly": True },
+                    { "title": "Min Memory (MB)", "value": layer.minRam, "readOnly": True },
+                    { "title": "Max Memory (MB)", "value": layer.maxRam, "readOnly": True },
+                    { "title": "Threadable", "value": layer.threadable, "readOnly": True },
+                ]
+            }
         ]
         
         form = PlowForm(widgets)

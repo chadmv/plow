@@ -41,6 +41,14 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             stats.totalFailCoreTime = rs.getLong("int_total_core_time_fail");
             stats.totalCoreTime = stats.totalSuccessCoreTime + stats.totalFailCoreTime;
 
+            stats.highClockTime = rs.getInt("int_clock_time_high");
+            stats.lowClockTime = rs.getInt("int_clock_time_low");
+            stats.avgClockTime = rs.getInt("int_clock_time_avg");
+            stats.stdDevClockTime = rs.getDouble("flt_clock_time_std");
+            stats.totalSuccessClockTime = rs.getLong("int_total_clock_time_success");
+            stats.totalFailClockTime = rs.getLong("int_total_clock_time_fail");
+            stats.totalClockTime = stats.totalSuccessClockTime + stats.totalFailClockTime;
+
             final LayerT layer = new LayerT();
             layer.setStats(stats);
             layer.setTotals(JdbcUtils.getTaskTotals(rs));
@@ -94,7 +102,13 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer_stat.int_core_time_avg, " +
                 "layer_stat.flt_core_time_std, " +
                 "layer_stat.int_total_core_time_success, " +
-                "layer_stat.int_total_core_time_fail " +
+                "layer_stat.int_total_core_time_fail, " +
+                "layer_stat.int_clock_time_high, " +
+                "layer_stat.int_clock_time_low, " +
+                "layer_stat.int_clock_time_avg, " +
+                "layer_stat.flt_clock_time_std, " +
+                "layer_stat.int_total_clock_time_success, " +
+                "layer_stat.int_total_clock_time_fail " +
             "FROM " +
                 "layer " +
             "INNER JOIN layer_count ON layer.pk_layer = layer_count.pk_layer " +

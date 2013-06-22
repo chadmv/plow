@@ -295,6 +295,11 @@ CREATE TABLE plow.layer_stat (
   int_core_time_avg BIGINT NOT NULL DEFAULT 0,
   flt_core_time_std REAL NOT NULL DEFAULT 0,
 
+  int_clock_time_high BIGINT NOT NULL DEFAULT 0,
+  int_clock_time_low BIGINT NOT NULL DEFAULT -1,
+  int_clock_time_avg BIGINT NOT NULL DEFAULT 0,
+  flt_clock_time_std REAL NOT NULL DEFAULT 0,
+
   int_total_core_time_success BIGINT NOT NULL DEFAULT 0,
   int_total_core_time_fail BIGINT NOT NULL DEFAULT 0,
   int_total_clock_time_success BIGINT NOT NULL DEFAULT 0,
@@ -647,6 +652,7 @@ CREATE INDEX task_history_exit_status ON plow.task_history (int_exit_status NULL
 ---
 CREATE OR REPLACE FUNCTION plow.before_layer_stat_updated() RETURNS TRIGGER AS $$
 BEGIN
+  
   IF NEW.int_ram_high < OLD.int_ram_high THEN
     NEW.int_ram_high := OLD.int_ram_high;
   END IF;
@@ -662,6 +668,16 @@ BEGIN
   IF OLD.int_core_time_low != -1 THEN
     IF NEW.int_core_time_low > OLD.int_core_time_low THEN
       NEW.int_core_time_low := OLD.int_core_time_low;
+    END IF;
+  END IF;
+
+  IF NEW.int_clock_time_high < OLD.int_clock_time_high THEN
+    NEW.int_clock_time_high := OLD.int_clock_time_high;
+  END IF;
+
+  IF OLD.int_clock_time_low != -1 THEN
+    IF NEW.int_clock_time_low > OLD.int_clock_time_low THEN
+      NEW.int_clock_time_low := OLD.int_clock_time_low;
     END IF;
   END IF;
 
@@ -843,7 +859,6 @@ BEGIN
     WHERE
       pk_job = NEW.pk_job;
 
-
   ELSE
 
     UPDATE task_history
@@ -904,6 +919,10 @@ BEGIN
       int_core_time_avg=stats.core_time_avg,
       flt_core_time_std=COALESCE(stats.core_time_stddev, 0),
       int_total_core_time_success=int_total_core_time_success+core_time,
+      int_clock_time_high=clock_time,
+      int_clock_time_low=clock_time,
+      int_clock_time_avg=stats.clock_time_avg,
+      flt_clock_time_std=COALESCE(stats.clock_time_stddev, 0),
       int_total_clock_time_success=int_total_clock_time_success+clock_time
     WHERE
       pk_layer=NEW.pk_layer;

@@ -166,6 +166,13 @@ cdef class LayerStats:
     :var totalCoreTime: long
     :var totalSuccessCoreTime: long
     :var totalFailCoreTime: long
+    :var highClockTime: int
+    :var avgClockTime: int
+    :var lowClockTime: int
+    :var stdDevClockTime: float
+    :var totalClockTime: long
+    :var totalSuccessClockTime: long
+    :var totalFailClockTime: long
 
     """
     cdef LayerStatsT _stats
@@ -212,6 +219,26 @@ cdef class LayerStats:
     property totalFailCoreTime:
         def __get__(self): return long(self._stats.totalFailCoreTime)
 
+    property highClockTime:
+        def __get__(self): return self._stats.highClockTime
+    
+    property avgClockTime:
+        def __get__(self): return self._stats.avgClockTime
+    
+    property lowClockTime:
+        def __get__(self): return self._stats.lowClockTime
+    
+    property stdDevClockTime:
+        def __get__(self): return self._stats.stdDevClockTime
+    
+    property totalClockTime:
+        def __get__(self): return long(self._stats.totalClockTime)
+    
+    property totalSuccessClockTime:
+        def __get__(self): return long(self._stats.totalSuccessClockTime)
+    
+    property totalFailClockTime:
+        def __get__(self): return long(self._stats.totalFailClockTime)
 
 #######################
 # Layers

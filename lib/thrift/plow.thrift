@@ -260,7 +260,14 @@ struct LayerStatsT {
     10:double stdDevCoreTime,
     11:i64 totalCoreTime,
     12:i64 totalSuccessCoreTime,
-    13:i64 totalFailCoreTime
+    13:i64 totalFailCoreTime,
+    14:i32 highClockTime,
+    15:i32 avgClockTime,
+    16:i32 lowClockTime,
+    17:double stdDevClockTime,
+    18:i64 totalClockTime,
+    19:i64 totalSuccessClockTime,
+    20:i64 totalFailClockTime
 }
 
 struct ServiceT {

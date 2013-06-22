@@ -358,7 +358,14 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         long totalCoreTime
         long totalSuccessCoreTime
         long totalFailCoreTime
-
+        int highClockTime
+        int avgClockTime
+        int lowClockTime
+        float stdDevClockTime
+        long totalClockTime
+        long totalSuccessClockTime
+        long totalFailClockTime
+        
     cdef cppclass JobSpecT:
         string name
         string project
