@@ -12,7 +12,8 @@ class FormWidgetFactory(object):
         "decimal": fwidgets.Decimal,
         "datetime": fwidgets.DateTime,
         "duration": fwidgets.Duration,
-        "pillWidget": fwidgets.PillWidget
+        "pillWidget": fwidgets.PillWidget,
+        "checkbox": fwidgets.Checkbox
     }
 
     @classmethod
@@ -24,6 +25,8 @@ class FormWidgetFactory(object):
                 widget = "number"
             elif isinstance(value, float):
                 widget = "decimal"
+            elif isinstance(value, bool):
+                widget = "checkbox"
             else:
                 widget = "text"
                 value = str(value)

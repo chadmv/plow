@@ -6,7 +6,8 @@ __all__ = [
     "Number",
     "Decimal",
     "DateTime",
-    "PillWidget"
+    "PillWidget",
+    "Checkbox"
 ]
 
 class FormWidget(QtGui.QWidget):
@@ -114,3 +115,12 @@ class PillWidget(FormWidget):
         self.label.setStyleSheet("border: 1px solid #222222; background-color: %s; border-radius: 6px;" % color)
         self.label.setMinimumWidth(100)
         self.setWidget(self.label)
+
+class Checkbox(FormWidget):
+    def __init__(self, bvalue, parent=None):
+        FormWidget.__init__(self, parent)
+        self.setWidget(QtGui.QCheckBox(self))
+        self._widget.setCheckState(QtCore.Qt.Checked if bvalue else QtCore.Qt.Unchecked)
+        self._widget.setFocusPolicy(QtCore.Qt.NoFocus)
+    def _setReadOnly(self, value):
+        self._widget.setReadOnly(value)
