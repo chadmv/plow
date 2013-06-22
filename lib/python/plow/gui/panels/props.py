@@ -49,104 +49,33 @@ class PropertiesPanel(Panel):
         widgets = [ {
                 "title": "Job Status",
                 "children": [
-                    {
-                        "title": "Name",
-                        "widget": "text",
-                        "value": job.name,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "ID",
-                        "widget": "text",
-                        "value": job.id,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "User",
-                        "widget": "text",
-                        "value": job.username,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "UID",
-                        "value": str(job.uid),
-                        "widget": "text",
-                        "readOnly": True
-                    },
-                    {
-                        "title": "State",
-                        "widget": "jobState",
-                        "value": job.state
-                    },
-                    {
-                        "title": "Progress",
-                        "widget": "jobProgressBar",
-                        "value": job.totals
-                    },
-                    {
-                        "title": "Start Time",
-                        "widget": "datetime",
-                        "value": job.startTime
-                    },
-                    {
-                        "title": "Stop Time",
-                        "widget": "datetime",
-                        "value": job.stopTime
-                    },
-                    {
-                        "title": "Duration",
-                        "widget": "duration",
-                        "value": [job.startTime, job.stopTime]
-                    },
-
+                    { "title": "Name", "widget": "text", "value": job.name, "readOnly": True },
+                    { "title": "ID", "widget": "text", "value": job.id, "readOnly": True }, 
+                    { "title": "User", "widget": "text", "value": job.username, "readOnly": True },
+                    { "title": "UID", "value": str(job.uid), "widget": "text", "readOnly": True },
+                    { "title": "State", "widget": "jobState", "value": job.state },
+                    { "title": "Progress", "widget": "jobProgressBar", "value": job.totals },
+                    { "title": "Start Time", "widget": "datetime", "value": job.startTime },
+                    { "title": "Stop Time", "widget": "datetime", "value": job.stopTime },
+                    { "title": "Duration", "widget": "duration", "value": [job.startTime, job.stopTime] },
                 ]
             },
             {
                 "title": "Core Totals",
                 "children": [
-                    {
-                        "title": "Min Cores",
-                        "value": job.minCores,
-                    },
-                    {
-                        "title": "Max Cores",
-                        "value": job.maxCores,
-                    },
-                    {
-                        "title": "Run Cores",
-                        "value": job.runCores,
-                        "readOnly": True,
-                    }
+                    { "title": "Min Cores", "value": job.minCores },
+                    { "title": "Max Cores", "value": job.maxCores },
+                    { "title": "Run Cores", "value": job.runCores, "readOnly": True, }
                 ]
             },
             {
                 "title": "Task Totals",
                 "children": [
-                    {
-                        "title": "Running",
-                        "value": job.totals.running,
-                        "readOnly": True,
-                    },
-                    {
-                        "title": "Succeeded",
-                        "value": job.totals.succeeded,
-                        "readOnly": True,
-                    },
-                    {
-                        "title": "Depend",
-                        "value": job.totals.depend,
-                        "readOnly": True,
-                    },
-                    {
-                        "title": "Dead",
-                        "value": job.totals.dead,
-                        "readOnly": True,       
-                    },
-                                    {
-                        "title": "Waiting",
-                        "value": job.totals.waiting,
-                        "readOnly": True,
-                    }
+                    { "title": "Running", "value": job.totals.running, "readOnly": True },
+                    { "title": "Succeeded", "value": job.totals.succeeded, "readOnly": True },
+                    { "title": "Depend", "value": job.totals.depend, "readOnly": True },
+                    { "title": "Dead", "value": job.totals.dead, "readOnly": True },
+                    { "title": "Waiting", "value": job.totals.waiting, "readOnly": True }
                 ]
             },
             {
@@ -192,124 +121,37 @@ class PropertiesPanel(Panel):
             {
                 "title": "Node",
                 "children": [
-                    {
-                        "title": "Name",
-                        "widget": "text",
-                        "value": node.name,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "IP Addr",
-                        "widget": "text",
-                        "value": node.ipaddr,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Cluster",
-                        "widget": "text",
-                        "value": node.clusterName,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Tags",
-                        "widget": "text",
-                        "value": ",".join(node.tags),
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Created Time",
-                        "widget": "datetime",
-                        "value": node.createdTime
-                    },
-                    {
-                        "title": "Updated Time",
-                        "widget": "datetime",
-                        "value": node.updatedTime
-                    },
-                    {
-                        "title": "Boot Time",
-                        "widget": "datetime",
-                        "value": node.bootTime
-                    },
-                    {
-                        "title": "Locked",
-                        "widget": "lockToggle",
-                        "value": node.locked,
-                    }
+                    { "title": "Name", "widget": "text", "value": node.name, "readOnly": True },
+                    { "title": "IP Addr", "widget": "text", "value": node.ipaddr, "readOnly": True },
+                    { "title": "Cluster", "widget": "text", "value": node.clusterName, "readOnly": True },
+                    { "title": "Tags", "widget": "text", "value": ",".join(node.tags), "readOnly": True },
+                    { "title": "Created Time", "widget": "datetime", "value": node.createdTime },
+                    { "title": "Updated Time", "widget": "datetime", "value": node.updatedTime },
+                    { "title": "Boot Time", "widget": "datetime", "value": node.bootTime },
+                    { "title": "Locked", "widget": "lockToggle", "value": node.locked }
                 ]
             },
             {
                 "title": "Dispatchable Resources",
                 "children": [
-                    {
-                        "title": "Total Cores",
-                        "value": node.totalCores
-                    },
-                    {
-                        "title": "Idle Cores",
-                        "value": node.idleCores
-                    },
-                    {
-                        "title": "Total Memory (MB)",
-                        "value": node.totalRamMb
-                    },
-                    {
-                        "title": "Free Memory (MB)",
-                        "value": node.freeRamMb
-                    },
+                    { "title": "Total Cores", "value": node.totalCores },
+                    { "title": "Idle Cores", "value": node.idleCores },
+                    { "title": "Total Memory (MB)", "value": node.totalRamMb },
+                    { "title": "Free Memory (MB)", "value": node.freeRamMb },
                 ]
             },
             {
                 "title": "System Info",
                 "children": [
-                    {
-                        "title": "CPU Model",
-                        "widget": "text",
-                        "value": node.system.cpuModel,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Kernel",
-                        "widget": "text",
-                        "value": node.system.platform,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Load",
-                        "value": node,
-                        "widget": "loadFactor",
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Physical CPUs",
-                        "value": node.system.physicalCores,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Logical CPUs",
-                        "value": node.system.logicalCores,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Total Memory (MB)",
-                        "value": node.system.totalRamMb,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Free Memory (MB)",
-                        "value": node.system.freeRamMb,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Total Swap (MB)",
-                        "value": node.system.totalSwapMb,
-                        "readOnly": True
-                    },
-                    {
-                        "title": "Free Swap (MB)",
-                        "value": node.system.freeSwapMb,
-                        "readOnly": True
-                    }
+                    { "title": "CPU Model", "widget": "text", "value": node.system.cpuModel, "readOnly": True },
+                    { "title": "Kernel", "widget": "text", "value": node.system.platform, "readOnly": True },
+                    { "title": "Load", "value": node, "widget": "loadFactor", "readOnly": True },
+                    { "title": "Physical CPUs", "value": node.system.physicalCores, "readOnly": True },
+                    { "title": "Logical CPUs", "value": node.system.logicalCores, "readOnly": True },
+                    { "title": "Total Memory (MB)", "value": node.system.totalRamMb, "readOnly": True },
+                    { "title": "Free Memory (MB)", "value": node.system.freeRamMb, "readOnly": True },
+                    { "title": "Total Swap (MB)", "value": node.system.totalSwapMb, "readOnly": True },
+                    { "title": "Free Swap (MB)", "value": node.system.freeSwapMb, "readOnly": True }
                 ]
             }
         ]
