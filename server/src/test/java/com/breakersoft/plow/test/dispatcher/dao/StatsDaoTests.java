@@ -130,5 +130,13 @@ public class StatsDaoTests extends AbstractTest {
         statsDao.updateLayerRuntimeStats(r_task);
         result = jdbc().queryForObject("SELECT int_ram_min FROM plow.layer WHERE pk_layer=?", Integer.class, task.getLayerId());
         assertEquals(4096, result);
+
+        r_task.rssMb = 4096;
+        statsDao.updateLayerRuntimeStats(r_task);
+        result = jdbc().queryForObject("SELECT int_ram_high FROM plow.layer_stat WHERE pk_layer=?", Integer.class, task.getLayerId());
+        assertEquals(4096, result);
+
+        result = jdbc().queryForObject("SELECT flt_cores_high FROM plow.layer_stat WHERE pk_layer=?", Integer.class, task.getLayerId());
+        assertEquals(50, result);
     }
 }

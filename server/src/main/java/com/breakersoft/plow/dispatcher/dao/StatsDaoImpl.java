@@ -93,8 +93,18 @@ public class StatsDaoImpl extends AbstractDao implements StatsDao {
             "AND " +
                 "int_ram_min < ?";
 
+    private static final String UPDATE_LAYER_STAT =
+            "UPDATE " +
+                "plow.layer_stat " +
+            "SET " +
+                "int_ram_high=?, " +
+                "flt_cores_high=? " +
+            "WHERE " +
+                "pk_layer = ? ";
+
     @Override
     public void updateLayerRuntimeStats(RunningTask task) {
         jdbc.update(UPDATE_LAYER, task.rssMb, UUID.fromString(task.layerId), task.rssMb);
+        jdbc.update(UPDATE_LAYER_STAT, task.rssMb, task.cpuPercent, UUID.fromString(task.layerId));
     }
 }

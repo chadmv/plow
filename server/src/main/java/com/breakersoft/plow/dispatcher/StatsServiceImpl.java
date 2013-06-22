@@ -79,7 +79,7 @@ public class StatsServiceImpl implements StatsService {
                 continue;
             }
             updated.add(task.layerId);
-            statsDao.updateTaskRuntimeStats(task);
+            statsDao.updateLayerRuntimeStats(task);
         }
     }
 
