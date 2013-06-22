@@ -110,20 +110,21 @@ class LayerWidget(QtGui.QWidget):
 class LayerModel(models.PlowTableModel):
 
     HEADERS = [
-        "Name", "Run Cores", "Min Cores", "Total", "Pend.", 
-        "Run", "Dead", "Avg. Core Hrs", "Tags", "Progress"
+        "Name", "Range", "Service", "Tags", "Pend", "Run", 
+        "Cores", "Total", "Dead", "AvgTime", "Progress"
     ]
 
     DISPLAY_CALLBACKS = {
-        0 : lambda l: l.name,
-        1 : lambda l: l.runCores,
-        2 : lambda l: l.minCores,
-        3 : lambda l: l.totals.total,
-        4 : lambda l: l.totals.waiting + l.totals.depend,
-        5 : lambda l: l.totals.running,
-        6 : lambda l: l.totals.dead,
-        7 : lambda l: "{0:.1f}".format(l.stats.avgCoreTime / 3600000.0), # msec => hour
-        8 : lambda l: ', '.join(l.tags),
+        0: lambda l: l.name,
+        1: lambda l: "%s (%d)" % (l.range or "-", l.chunk),
+        2: lambda l: l.service,
+        3: lambda l: ', '.join(l.tags),
+        4: lambda l: l.totals.waiting + l.totals.depend,
+        5: lambda l: l.totals.running,
+        6: lambda l: l.runCores,
+        7: lambda l: l.totals.total,
+        8: lambda l: l.totals.dead,
+        9: lambda l: "{0:.1f}".format(l.stats.avgClockTime / 3600000.0), # msec => hour
     }
 
     def __init__(self, parent=None):
@@ -163,7 +164,7 @@ class LayerModel(models.PlowTableModel):
         col = index.column()
         layer = self._items[row]
 
-        if col == 6 and role == QtCore.Qt.BackgroundRole:
+        if col == 8 and role == QtCore.Qt.BackgroundRole:
             if layer.totals.dead:
                 dead = plow.client.TaskState.DEAD
                 return constants.COLOR_TASK_STATE[dead]
