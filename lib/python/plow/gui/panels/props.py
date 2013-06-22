@@ -419,9 +419,10 @@ class PropertiesWidget(QtGui.QWidget):
         self.__scroll.setFocusPolicy(QtCore.Qt.NoFocus)
         self.layout().addWidget(self.__scroll)
 
-
     def setWidget(self, widget):
+        sp = self.__scroll.verticalScrollBar().value()
         self.__scroll.setWidget(widget)
+        self.__scroll.verticalScrollBar().setValue(sp)
 
     def refresh(self):
         pass
