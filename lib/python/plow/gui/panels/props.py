@@ -150,39 +150,28 @@ class PropertiesPanel(Panel):
                 ]
             },
             {
-                "title": "Resource Stats",
+                "title": "Stats",
                 "children": [
                     {
-                        "title": "High RAM (MB)",
-                        "value": str(job.stats.highRam),
-                        "maximumWidth": 125,
-                        "readOnly": True,
+                        "title": "Memory",
+                        "children": [
+                            { "title": "High Memory (MB)", "value": job.stats.highRam, "readOnly": True },
+                        ]
                     },
                     {
-                        "title": "High CPU",
-                        "value": str(job.stats.highCores),
-                        "readOnly": True,
-                        "maximumWidth": 125,
+                        "title": "CPU Usage",
+                        "children": [
+                            { "title": "High CPU%", "value": job.stats.highCores, "readOnly": True },
+                        ]
                     },
                     {
-                        "title": "High Core Time",
-                        "value": formatCoreTime(job.stats.highCoreTime),
-                        "readOnly": True,
-                        "maximumWidth": 125,                  
-                    },
-                    {
-                        "title": "Success Core Hours",
-                        "value": [formatCoreTime(job.stats.totalSuccessCoreTime), "rgba(76, 115, 0, 192)"],
-                        "widget": "pillWidget",                                 
-                        "readOnly": True,
-                        "maximumWidth": 125,    
-                    },
-                    {
-                        "title": "Fail Core Hours",
-                        "value":  [formatCoreTime(job.stats.totalFailCoreTime), "rgba(177, 24, 0, 192)"], 
-                        "widget": "pillWidget",
-                        "readOnly": True,
-                        "maximumWidth": 125,
+                        "title": "Core Hours",
+                        "children": [
+                            { "title": "Total", "value": formatCoreTime(job.stats.totalCoreTime), "readOnly": True },
+                            { "title": "Succeeded", "value": [formatCoreTime(job.stats.totalSuccessCoreTime), "rgba(76, 115, 0, 192)"], "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
+                            { "title": "Failed", "value":  [formatCoreTime(job.stats.totalFailCoreTime), "rgba(177, 24, 0, 192)"],  "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
+                            { "title": "High Task", "value": formatCoreTime(job.stats.highCoreTime), "readOnly": True },
+                        ]
                     }
                 ]
             }
