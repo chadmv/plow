@@ -168,8 +168,10 @@ class PropertiesPanel(Panel):
                         "title": "Core Hours",
                         "children": [
                             { "title": "Total", "value": formatCoreTime(job.stats.totalCoreTime), "readOnly": True },
-                            { "title": "Succeeded", "value": [formatCoreTime(job.stats.totalSuccessCoreTime), "rgba(76, 115, 0, 192)"], "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
-                            { "title": "Failed", "value":  [formatCoreTime(job.stats.totalFailCoreTime), "rgba(177, 24, 0, 192)"],  "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
+                            { "title": "Succeeded", "value": [formatCoreTime(job.stats.totalSuccessCoreTime), 
+                                "rgba(76, 115, 0, 192)"], "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
+                            { "title": "Failed", "value":  [formatCoreTime(job.stats.totalFailCoreTime), "rgba(177, 24, 0, 192)"],
+                                "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
                             { "title": "High Task", "value": formatCoreTime(job.stats.highCoreTime), "readOnly": True },
                         ]
                     }
@@ -373,8 +375,10 @@ class PropertiesPanel(Panel):
                         "title": "Core Hours",
                         "children": [
                             { "title": "Total", "value": formatCoreTime(layer.stats.totalCoreTime), "readOnly": True },
-                            { "title": "Succeeded", "value": [formatCoreTime(layer.stats.totalSuccessCoreTime), "rgba(76, 115, 0, 192)"], "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
-                            { "title": "Failed", "value":  [formatCoreTime(layer.stats.totalFailCoreTime), "rgba(177, 24, 0, 192)"],  "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
+                            { "title": "Succeeded", "value": [formatCoreTime(layer.stats.totalSuccessCoreTime), "rgba(76, 115, 0, 192)"],
+                                "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
+                            { "title": "Failed", "value":  [formatCoreTime(layer.stats.totalFailCoreTime), "rgba(177, 24, 0, 192)"],
+                                "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
                             { "title": "High Task", "value": formatCoreTime(layer.stats.highCoreTime), "readOnly": True },
                             { "title": "Avg Task", "value": formatCoreTime(layer.stats.avgCoreTime), "readOnly": True },
                             { "title": "Low Task", "value": formatCoreTime(abs(layer.stats.lowCoreTime)), "readOnly": True },
