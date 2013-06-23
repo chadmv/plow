@@ -40,10 +40,11 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             final JobStatsT stats = new JobStatsT();
             stats.highRam = rs.getInt("int_ram_high");
             stats.highCores = rs.getDouble("flt_cores_high");
-            stats.highCoreTime = rs.getInt("int_core_time_high");
+            stats.highCoreTime = rs.getLong("int_core_time_high");
             stats.totalSuccessCoreTime = rs.getLong("int_total_core_time_success");
             stats.totalFailCoreTime = rs.getLong("int_total_core_time_fail");
             stats.totalCoreTime = stats.totalSuccessCoreTime + stats.totalFailCoreTime;
+            stats.highClockTime = rs.getLong("int_clock_time_high");
 
             final JobT job = new JobT();
             job.id = rs.getString("pk_job");
