@@ -453,6 +453,7 @@ cdef class Layer(PlowBase):
     :var runCores: int
     :var minRam: int
     :var maxRam: int
+    :var maxRetries: int
     :var threadable: bool
     :var totals: list[:class:`.TaskTotals`]
     :var tags: list(str)
@@ -510,6 +511,9 @@ cdef class Layer(PlowBase):
 
     property maxRam:
         def __get__(self): return self._layer.maxRam
+
+    property maxRetries:
+        def __get__(self): return self._layer.maxRetries
 
     property threadable:
         def __get__(self): return self._layer.threadable

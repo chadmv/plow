@@ -238,6 +238,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int maxRam
         int runCores
         int runProcs
+        int maxRetries
         TaskTotalsT totals
         LayerStatsT stats
 
