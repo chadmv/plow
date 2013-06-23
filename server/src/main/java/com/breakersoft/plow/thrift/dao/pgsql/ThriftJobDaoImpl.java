@@ -54,6 +54,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             job.setUsername(rs.getString("str_username"));
             job.setPaused(rs.getBoolean("bool_paused"));
             job.setRunCores(rs.getInt("int_cores_run"));
+            job.setRunProcs(rs.getInt("int_procs_run"));
             job.setMaxCores(rs.getInt("int_cores_max"));
             job.setMinCores(rs.getInt("int_cores_min"));
             job.setStartTime(rs.getLong("time_started"));
@@ -83,6 +84,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             "job_dsp.int_cores_max,"+
             "job_dsp.int_cores_min,"+
             "job_dsp.int_cores_run, " +
+            "job_dsp.int_procs_run, "+
             "job_count.int_total, "+
             "job_count.int_succeeded,"+
             "job_count.int_running,"+

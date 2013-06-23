@@ -66,6 +66,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             layer.maxRam = rs.getInt("int_ram_max");
             layer.maxRetries = rs.getInt("int_retries_max");
             layer.runCores = rs.getInt("int_cores_run");
+            layer.runProcs = rs.getInt("int_procs_run");
             layer.serv = rs.getString("str_service");
             return layer;
         }
@@ -94,6 +95,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer_count.int_waiting,"+
                 "layer_count.int_depend, "+
                 "layer_dsp.int_cores_run,"+
+                "layer_dsp.int_procs_run, " +
                 "layer_stat.int_ram_high,"+
                 "layer_stat.int_ram_avg, " +
                 "layer_stat.flt_ram_std, " +

@@ -241,11 +241,12 @@ struct JobT {
     8:i32 minCores,
     9:i32 maxCores,
     10:i32 runCores,
-    11:common.Timestamp startTime,
-    12:common.Timestamp stopTime,
-    13:TaskTotalsT totals,
-    14:JobStatsT stats,
-    15:Attrs attrs
+    11:i32 runProcs,
+    12:common.Timestamp startTime,
+    13:common.Timestamp stopTime,
+    14:TaskTotalsT totals,
+    15:JobStatsT stats,
+    16:Attrs attrs
 }
 
 struct LayerStatsT {
@@ -298,8 +299,9 @@ struct LayerT {
     12:i32 maxRam,
     13:i32 runCores,
     14:i32 maxRetries,
-    15:TaskTotalsT totals,
-    16:LayerStatsT stats
+    15:i32 runProcs,
+    16:TaskTotalsT totals,
+    17:LayerStatsT stats
 }
 
 struct TaskStatsT {
@@ -340,9 +342,10 @@ struct FolderT {
     3:i32 minCores,
     4:i32 maxCores,
     5:i32 runCores,
-    6:i32 order,
-    7:TaskTotalsT totals,
-    8:optional list<JobT> jobs
+    6:i32 runProcs,
+    7:i32 order,
+    8:TaskTotalsT totals,
+    9:optional list<JobT> jobs
 }
 
 enum MatcherType {

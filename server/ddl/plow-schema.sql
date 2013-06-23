@@ -115,7 +115,8 @@ CREATE TABLE plow.folder_dsp (
   int_cores_max INTEGER NOT NULL DEFAULT -1,
   int_cores_min INTEGER NOT NULL DEFAULT 0,
   int_cores_run INTEGER NOT NULL DEFAULT 0,
-  float_tier REAL NOT NULL DEFAULT 0.0
+  float_tier REAL NOT NULL DEFAULT 0.0,
+  int_procs_run INTEGER NOT NULL DEFAULT 0
 ) WITHOUT OIDS;
 
 CREATE INDEX folder_dsp_float_tier_idx ON plow.folder_dsp (float_tier);
@@ -154,10 +155,11 @@ CREATE INDEX job_pk_folder_idx ON plow.job (pk_folder);
 
 CREATE TABLE plow.job_dsp (
   pk_job UUID NOT NULL PRIMARY KEY,
-  int_cores_max INTEGER NOT NULL DEFAULT -1,
+  int_cores_max INTEGER NOT NULL DEFAULT 200,
   int_cores_min INTEGER NOT NULL DEFAULT 0,
   int_cores_run INTEGER NOT NULL DEFAULT 0,
-  float_tier REAL NOT NULL DEFAULT 0.0
+  float_tier REAL NOT NULL DEFAULT 0.0,
+  int_procs_run INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX job_dsp_float_tier_idx ON plow.job_dsp (float_tier);
@@ -268,7 +270,8 @@ CREATE INDEX layer_count_int_waiting_idx ON plow.layer_count (int_waiting DESC);
 
 CREATE TABLE plow.layer_dsp (
   pk_layer UUID NOT NULL PRIMARY KEY,
-  int_cores_run INTEGER NOT NULL DEFAULT 0
+  int_cores_run INTEGER NOT NULL DEFAULT 0,
+  int_procs_run INTEGER NOT NULL DEFAULT 0
 );
 
 ---
@@ -1002,10 +1005,20 @@ CREATE OR REPLACE FUNCTION plow.after_proc_insert() RETURNS TRIGGER AS $$
 BEGIN
   UPDATE plow.quota SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_quota=NEW.pk_quota;
   UPDATE plow.node_dsp SET int_idle_cores = int_idle_cores - NEW.int_cores WHERE pk_node=NEW.pk_node;
-  UPDATE plow.folder_dsp SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_folder=
-    (SELECT pk_folder FROM plow.job WHERE pk_job=NEW.pk_job);
-  UPDATE plow.job_dsp SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_job=NEW.pk_job;
-  UPDATE plow.layer_dsp SET int_cores_run = int_cores_run + NEW.int_cores WHERE pk_layer=NEW.pk_layer;
+  UPDATE plow.folder_dsp SET
+    int_cores_run = int_cores_run + NEW.int_cores,
+    int_procs_run = int_procs_run + 1
+  WHERE pk_folder=(SELECT pk_folder FROM plow.job WHERE pk_job=NEW.pk_job);
+  
+  UPDATE plow.job_dsp SET 
+    int_cores_run = int_cores_run + NEW.int_cores,
+    int_procs_run = int_procs_run + 1
+  WHERE pk_job=NEW.pk_job;
+  
+  UPDATE plow.layer_dsp SET 
+    int_cores_run = int_cores_run + NEW.int_cores,
+    int_procs_run = int_procs_run + 1
+  WHERE pk_layer=NEW.pk_layer;
   RETURN NEW;
 END
 $$
@@ -1022,10 +1035,22 @@ CREATE OR REPLACE FUNCTION plow.after_proc_delete() RETURNS TRIGGER AS $$
 BEGIN
   UPDATE plow.quota SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_quota=OLD.pk_quota;
   UPDATE plow.node_dsp SET int_idle_cores = int_idle_cores + OLD.int_cores WHERE pk_node=OLD.pk_node;
-  UPDATE plow.folder_dsp SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_folder=
+  
+  UPDATE plow.folder_dsp SET
+    int_cores_run = int_cores_run - OLD.int_cores,
+    int_procs_run = int_procs_run - 1
+  WHERE pk_folder=
     (SELECT pk_folder FROM plow.job WHERE pk_job=OLD.pk_job);
-  UPDATE plow.job_dsp SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_job=OLD.pk_job;
-  UPDATE plow.layer_dsp SET int_cores_run = int_cores_run - OLD.int_cores WHERE pk_layer= OLD.pk_layer;
+ 
+  UPDATE plow.job_dsp SET
+    int_cores_run = int_cores_run - OLD.int_cores,
+    int_procs_run = int_procs_run - 1
+  WHERE pk_job=OLD.pk_job;
+  
+  UPDATE plow.layer_dsp SET 
+    int_cores_run = int_cores_run - OLD.int_cores,
+    int_procs_run = int_procs_run -1 
+  WHERE pk_layer= OLD.pk_layer;
   RETURN OLD;
 END
 $$
