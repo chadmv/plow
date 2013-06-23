@@ -397,6 +397,20 @@ cdef class Job(PlowBase):
         ret = get_layers(self)
         return ret
 
+    def get_folder(self):
+        """
+        Get the folder that contains this Job
+
+        :returns: :class:`.Folder`
+        """
+        cdef Folder f
+        
+        if self.folderId:
+            f = get_folder(self.folderId)
+            return f 
+
+        return None
+
     cpdef inline list get_tasks(self, list states=None):
         """
         Get a list of tasks for this job, optionally
