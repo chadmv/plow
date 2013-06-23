@@ -6,7 +6,7 @@ from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.form import PlowForm
-from plow.gui.util import formatCoreTime
+from plow.gui.util import formatCoreTime, formatDuration
 
 class PropertiesPanel(Panel):
 
@@ -102,6 +102,12 @@ class PropertiesPanel(Panel):
                             { "title": "Failed", "value":  [formatCoreTime(job.stats.totalFailCoreTime), "rgba(177, 24, 0, 192)"],
                                 "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
                             { "title": "High Task", "value": formatCoreTime(job.stats.highCoreTime), "readOnly": True },
+                        ]
+                    },
+                    {
+                        "title": "Clock Hours",
+                        "children": [
+                            { "title": "High Task", "value": formatDuration(job.stats.highClockTime, -1), "readOnly": True },
                         ]
                     }
                 ]
@@ -217,14 +223,14 @@ class PropertiesPanel(Panel):
                     {
                         "title": "Clock Hours",
                         "children": [
-                            { "title": "Total", "value": formatCoreTime(layer.stats.totalClockTime), "readOnly": True },
-                            { "title": "Succeeded", "value": [formatCoreTime(layer.stats.totalSuccessClockTime), "rgba(76, 115, 0, 192)"],
+                            { "title": "Total", "value": formatDuration(layer.stats.totalClockTime, -1), "readOnly": True },
+                            { "title": "Succeeded", "value": [formatDuration(layer.stats.totalSuccessClockTime, -1), "rgba(76, 115, 0, 192)"],
                                 "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
-                            { "title": "Failed", "value":  [formatCoreTime(layer.stats.totalFailClockTime), "rgba(177, 24, 0, 192)"],
+                            { "title": "Failed", "value":  [formatDuration(layer.stats.totalFailClockTime, -1), "rgba(177, 24, 0, 192)"],
                                 "widget": "pillWidget", "readOnly": True, "maximumWidth": 125 },
-                            { "title": "High Task", "value": formatCoreTime(layer.stats.highClockTime), "readOnly": True },
-                            { "title": "Avg Task", "value": formatCoreTime(layer.stats.avgClockTime), "readOnly": True },
-                            { "title": "Low Task", "value": formatCoreTime(abs(layer.stats.lowClockTime)), "readOnly": True },
+                            { "title": "High Task", "value": formatDuration(layer.stats.highClockTime, -1), "readOnly": True },
+                            { "title": "Avg Task", "value": formatDuration(layer.stats.avgClockTime, -1), "readOnly": True },
+                            { "title": "Low Task", "value": formatDuration(abs(layer.stats.lowClockTime), -1), "readOnly": True },
                         ]
                     }
                 ]

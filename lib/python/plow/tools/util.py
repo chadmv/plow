@@ -41,6 +41,26 @@ def formatDuration(startTime, stopTime=0):
 
     return "%02d:%02d:%02d" % (h, m, s)
 
+def formatDuration(startTime, stopTime=0):
+    """
+    Format a duration to hh:mm::ss
+    """
+    if startTime == 0:
+        return constants.TIME_NO_DURATION
+
+    if stopTime == 0:
+        stopTime = int(time.time()) * 1000
+    elif stopTime == -1:
+        # Then the startTime is a duration
+        stopTime = startTime
+        startTime = 0
+
+    duration = max((stopTime - startTime) / 1000, 0)
+    m, s = divmod(duration, 60)
+    h, m = divmod(m, 60)
+
+    return "%02d:%02d:%02d" % (h, m, s)
+
 def clipText(text, size):
     """
     Returns text clipped to a particular size.
