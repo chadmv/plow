@@ -250,6 +250,7 @@ CREATE table plow.layer (
 CREATE INDEX layer_str_tags_gin_idx ON plow.layer USING gin(str_tags);
 CREATE INDEX layer_dispatch_idx ON plow.layer (int_cores_min, int_ram_min);
 CREATE UNIQUE INDEX layer_pk_job_str_name_uniq_idx ON plow.layer (pk_job, str_name);
+CREATE INDEX layer_int_order_idx ON plow.layer(int_order);
 
 ---
 
@@ -908,39 +909,41 @@ BEGIN
         task_history.time_stopped DESC
       LIMIT 10) q;
 
-    UPDATE
-      layer_stat
-    SET
-      int_ram_high=NEW.int_last_ram_high,
-      int_ram_avg=stats.ram_avg,
-      flt_ram_std=COALESCE(stats.ram_stddev, 0),
-      flt_cores_high=NEW.flt_last_cores_high,
-      flt_cores_avg=stats.cores_avg,
-      flt_cores_std=COALESCE(stats.cores_stddev, 0),
-      int_core_time_high=core_time,
-      int_core_time_low=core_time,
-      int_core_time_avg=stats.core_time_avg,
-      flt_core_time_std=COALESCE(stats.core_time_stddev, 0),
-      int_total_core_time_success=int_total_core_time_success+core_time,
-      int_clock_time_high=clock_time,
-      int_clock_time_low=clock_time,
-      int_clock_time_avg=stats.clock_time_avg,
-      flt_clock_time_std=COALESCE(stats.clock_time_stddev, 0),
-      int_total_clock_time_success=int_total_clock_time_success+clock_time
-    WHERE
-      pk_layer=NEW.pk_layer;
+    IF FOUND THEN
+      UPDATE
+        layer_stat
+      SET
+        int_ram_high=NEW.int_last_ram_high,
+        int_ram_avg=stats.ram_avg,
+        flt_ram_std=COALESCE(stats.ram_stddev, 0),
+        flt_cores_high=NEW.flt_last_cores_high,
+        flt_cores_avg=stats.cores_avg,
+        flt_cores_std=COALESCE(stats.cores_stddev, 0),
+        int_core_time_high=core_time,
+        int_core_time_low=core_time,
+        int_core_time_avg=stats.core_time_avg,
+        flt_core_time_std=COALESCE(stats.core_time_stddev, 0),
+        int_total_core_time_success=int_total_core_time_success+core_time,
+        int_clock_time_high=clock_time,
+        int_clock_time_low=clock_time,
+        int_clock_time_avg=stats.clock_time_avg,
+        flt_clock_time_std=COALESCE(stats.clock_time_stddev, 0),
+        int_total_clock_time_success=int_total_clock_time_success+clock_time
+      WHERE
+        pk_layer=NEW.pk_layer;
 
 
-    UPDATE
-      job_stat
-    SET
-      int_ram_high=NEW.int_last_ram_high,
-      flt_cores_high=NEW.flt_last_cores_high,
-      int_core_time_high=core_time,
-      int_clock_time_high=clock_time,
-      int_total_core_time_success=int_total_core_time_success+core_time
-    WHERE
-      pk_job=NEW.pk_job;
+      UPDATE
+        job_stat
+      SET
+        int_ram_high=NEW.int_last_ram_high,
+        flt_cores_high=NEW.flt_last_cores_high,
+        int_core_time_high=core_time,
+        int_clock_time_high=clock_time,
+        int_total_core_time_success=int_total_core_time_success+core_time
+      WHERE
+        pk_job=NEW.pk_job;
+    END IF;
   END IF;
 
   RETURN NEW;

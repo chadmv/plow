@@ -85,6 +85,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer.int_cores_max,"+
                 "layer.int_ram_min, " +
                 "layer.int_ram_max, " +
+                "layer.int_order,"+
                 "layer.bool_threadable,"+
                 "layer.int_retries_max,"+
                 "layer_count.int_total, "+
@@ -137,7 +138,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
     }
 
     private static final String GET_BY_JOB =
-            GET + " WHERE layer.pk_job = ?";
+            GET + " WHERE layer.pk_job = ? ORDER BY layer.int_order ASC";
 
     @Override
     public List<LayerT> getLayers(UUID jobId) {
