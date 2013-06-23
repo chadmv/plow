@@ -42,7 +42,7 @@ class LayerPanel(Panel):
 #########################
 class LayerWidget(QtGui.QWidget):
     
-    WIDTH = [220, 80, 80, 60, 60, 60, 60, 110, 120, 120]
+    WIDTH = [220, 90, 90, 90, 60, 60, 60, 60, 60, 60]
 
     def __init__(self, attrs, parent=None):
         super(LayerWidget, self).__init__(parent)
