@@ -205,6 +205,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int minCores
         int maxCores
         int runCores
+        int runProcs
         Timestamp startTime
         Timestamp stopTime
         TaskTotalsT totals
@@ -236,6 +237,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int minRam
         int maxRam
         int runCores
+        int runProcs
         TaskTotalsT totals
         LayerStatsT stats
 
@@ -252,6 +254,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int minCores
         int maxCores
         int runCores
+        int runProcs
         int order
         TaskTotalsT totals
         vector[JobT] jobs

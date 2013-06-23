@@ -266,6 +266,7 @@ cdef class Job(PlowBase):
     :var minCores: int 
     :var maxCores: int 
     :var runCores: int 
+    :var runProcs: int 
     :var startTime: long - msec since epoch
     :var stopTime: long - msec since epoch
     :var totals: :class:`.TaskTotals`
@@ -318,6 +319,9 @@ cdef class Job(PlowBase):
 
     property runCores:
         def __get__(self): return self._job.runCores
+
+    property runProcs:
+        def __get__(self): return self._job.runProcs
 
     property startTime:
         def __get__(self): return long(self._job.startTime)

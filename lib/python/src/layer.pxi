@@ -502,6 +502,9 @@ cdef class Layer(PlowBase):
     property runCores:
         def __get__(self): return self._layer.runCores
 
+    property runProcs:
+        def __get__(self): return self._layer.runProcs
+
     property minRam:
         def __get__(self): return self._layer.minRam
 
