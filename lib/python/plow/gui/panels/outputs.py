@@ -74,6 +74,7 @@ class OutputWidget(QtGui.QWidget):
         tree.itemDoubleClicked.connect(self.__itemDoubleClicked)
         tree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         tree.customContextMenuRequested.connect(self.__showContextMenu)
+        tree.itemClicked.connect(self.__copyValueToClipboard)
 
     def refresh(self):
         if self.__jobId:
@@ -108,11 +109,16 @@ class OutputWidget(QtGui.QWidget):
             item.setToolTip(0, path)
             item.setData(0, ID_ROLE, output.outputId)
             item.setData(0, OBJECT_ROLE, output)
+            item.setIcon(0, QtGui.QIcon(":/images/resume.png"))
+            item.setForeground(0, QtGui.QColor(255, 255, 255))
 
             for key, val in output.attrs.iteritems():
                 child = QtGui.QTreeWidgetItem(item, [key, val], self.ATTR_TYPE)
 
             tree.addTopLevelItem(item)
+            tree.setFirstItemColumnSpanned(item, True)
+
+            print "foo"
 
     def __startDrag(self, actions):
         texts = set()
@@ -140,6 +146,15 @@ class OutputWidget(QtGui.QWidget):
 
     def __showContextMenu(self, pos):
         print "__showContextMenu", pos
+
+    def __copyValueToClipboard(self, item, col):
+        clipboard = QtGui.QApplication.instance().clipboard()
+        if item.childCount() == 0:
+            value = item.text(1)
+        else:
+            value = item.text(0)
+        clipboard.setText(value, clipboard.Selection)
+        clipboard.setText(value, clipboard.Clipboard)
 
 
 
