@@ -116,7 +116,7 @@ class LayerModel(models.PlowTableModel):
 
     DISPLAY_CALLBACKS = {
         0: lambda l: l.name,
-        1: lambda l: "%s (%d)" % (l.range or "-", l.chunk),
+        1: lambda l: "%s (%d)" % (l.range, l.chunk) if l.range else "-",
         2: lambda l: l.service,
         3: lambda l: ', '.join(l.tags),
         4: lambda l: l.totals.waiting + l.totals.depend,
