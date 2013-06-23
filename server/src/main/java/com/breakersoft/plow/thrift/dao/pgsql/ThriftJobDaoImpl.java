@@ -94,7 +94,8 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             "job_stat.flt_cores_high, "+
             "job_stat.int_core_time_high, "+
             "job_stat.int_total_core_time_success, "+
-            "job_stat.int_total_core_time_fail "+
+            "job_stat.int_total_core_time_fail, "+
+            "job_stat.int_clock_time_high "+
         "FROM " +
             "job " +
         "INNER JOIN " +

@@ -53,7 +53,8 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 "job_stat.flt_cores_high, "+
                 "job_stat.int_core_time_high, "+
                 "job_stat.int_total_core_time_success, "+
-                "job_stat.int_total_core_time_fail "+
+                "job_stat.int_total_core_time_fail, "+
+                "job_stat.int_clock_time_high "+
             "FROM " +
                 "job " +
             "INNER JOIN " +
@@ -120,6 +121,7 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 stats.highCoreTime = rs.getInt("int_core_time_high");
                 stats.totalSuccessCoreTime = rs.getLong("int_total_core_time_success");
                 stats.totalFailCoreTime = rs.getLong("int_total_core_time_fail");
+                stats.highClockTime = rs.getLong("int_clock_time_high");
                 stats.totalCoreTime = stats.totalSuccessCoreTime + stats.totalFailCoreTime;
 
                 final JobT job = new JobT();
