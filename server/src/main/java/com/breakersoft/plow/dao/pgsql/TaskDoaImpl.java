@@ -127,6 +127,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
         final int size = frameRange.frameSet.size();
         final BatchSqlUpdate update = new BatchSqlUpdate(
                 jdbc.getDataSource(), INSERT, BATCH_TYPES);
+        update.setBatchSize(Defaults.JDBC_DEFAULT_BATCH_SIZE);
 
         int frameOrderCounter = 0;
         for (int i=0; i<size; i=i+frameRange.chunkSize) {
@@ -149,6 +150,7 @@ public class TaskDoaImpl extends AbstractDao implements TaskDao {
 
           final BatchSqlUpdate update = new BatchSqlUpdate(
                   jdbc.getDataSource(), INSERT, BATCH_TYPES);
+          update.setBatchSize(Defaults.JDBC_DEFAULT_BATCH_SIZE);
 
           int taskOrderCounter = 0;
           for (TaskSpecT task: tasks) {

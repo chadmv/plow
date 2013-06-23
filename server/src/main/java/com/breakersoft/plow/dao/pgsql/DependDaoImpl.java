@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.object.BatchSqlUpdate;
 import org.springframework.stereotype.Repository;
 
+import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.Depend;
 import com.breakersoft.plow.DependE;
 import com.breakersoft.plow.Job;
@@ -409,6 +410,7 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
 
         final BatchSqlUpdate update = new BatchSqlUpdate(
                 jdbc.getDataSource(), INSERT, BATCH_TYPES);
+        update.setBatchSize(Defaults.JDBC_DEFAULT_BATCH_SIZE);
 
         final int type = DependType.TASK_ON_TASK.ordinal();
         final ByteBuffer buffer = ByteBuffer.allocate(12);
@@ -459,11 +461,10 @@ public class DependDaoImpl extends AbstractDao implements DependDao {
     public void batchIncrementDependCounts(TaskOnTaskBatch batch) {
         final BatchSqlUpdate update = new BatchSqlUpdate(
                 jdbc.getDataSource(), TASK_INC, INC_BATCH_TYPES);
-
+        update.setBatchSize(Defaults.JDBC_DEFAULT_BATCH_SIZE);
         for (TaskOnTaskBatchEntry entry: batch.entries) {
               update.update(entry.dependOnTaskNumbers.length, entry.dependentTask);
         }
-
         update.flush();
     }
 

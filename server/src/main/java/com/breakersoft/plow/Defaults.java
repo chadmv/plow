@@ -17,6 +17,8 @@ public final class Defaults {
 
     public static final int RPC_NETWORK_THREADS = 8;
 
+    public static final int JDBC_DEFAULT_BATCH_SIZE = 5000;
+
     /*
      * The amount of memory reserved on a node for operating
      * system processes. This is subtracted from the total
