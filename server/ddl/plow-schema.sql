@@ -185,7 +185,7 @@ CREATE TABLE plow.job_stat (
   pk_job UUID NOT NULL PRIMARY KEY,
   int_ram_high INTEGER NOT NULL DEFAULT 0,
   flt_cores_high REAL NOT NULL DEFAULT 0.0,
-  int_core_time_high INTEGER NOT NULL DEFAULT 0,
+  int_core_time_high BIGINT NOT NULL DEFAULT 0,
 
   int_total_core_time_success BIGINT NOT NULL DEFAULT 0,
   int_total_core_time_fail BIGINT NOT NULL DEFAULT 0,
