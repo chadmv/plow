@@ -199,13 +199,13 @@ cdef class LayerStats:
         def __get__(self): return self._stats.stdDevCores
     
     property highCoreTime:
-        def __get__(self): return self._stats.highCoreTime
+        def __get__(self): return long(self._stats.highCoreTime)
     
     property avgCoreTime:
-        def __get__(self): return self._stats.avgCoreTime
+        def __get__(self): return long(self._stats.avgCoreTime)
     
     property lowCoreTime:
-        def __get__(self): return self._stats.lowCoreTime
+        def __get__(self): return long(self._stats.lowCoreTime)
     
     property stdDevCoreTime:
         def __get__(self): return self._stats.stdDevCoreTime
@@ -220,13 +220,13 @@ cdef class LayerStats:
         def __get__(self): return long(self._stats.totalFailCoreTime)
 
     property highClockTime:
-        def __get__(self): return self._stats.highClockTime
+        def __get__(self): return long(self._stats.highClockTime)
     
     property avgClockTime:
-        def __get__(self): return self._stats.avgClockTime
+        def __get__(self): return long(self._stats.avgClockTime)
     
     property lowClockTime:
-        def __get__(self): return self._stats.lowClockTime
+        def __get__(self): return long(self._stats.lowClockTime)
     
     property stdDevClockTime:
         def __get__(self): return self._stats.stdDevClockTime

@@ -33,10 +33,10 @@ cdef class JobStats:
         def __get__(self): return self._stats.highCores
 
     property highCoreTime:
-        def __get__(self): return self._stats.highCoreTime
+        def __get__(self): return long(self._stats.highCoreTime)
 
     property highClockTime:
-        def __get__(self): return self._stats.highClockTime
+        def __get__(self): return long(self._stats.highClockTime)
 
     property totalCoreTime:
         def __get__(self): return long(self._stats.totalCoreTime)
