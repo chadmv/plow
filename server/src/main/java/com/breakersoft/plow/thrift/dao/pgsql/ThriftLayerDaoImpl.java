@@ -33,17 +33,17 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             stats.avgCores = rs.getDouble("flt_cores_avg");
             stats.stdDevCores = rs.getDouble("flt_cores_std");
 
-            stats.highCoreTime = rs.getInt("int_core_time_high");
-            stats.lowCoreTime = rs.getInt("int_core_time_low");
-            stats.avgCoreTime = rs.getInt("int_core_time_avg");
+            stats.highCoreTime = rs.getLong("int_core_time_high");
+            stats.lowCoreTime = rs.getLong("int_core_time_low");
+            stats.avgCoreTime = rs.getLong("int_core_time_avg");
             stats.stdDevCoreTime = rs.getDouble("flt_core_time_std");
             stats.totalSuccessCoreTime = rs.getLong("int_total_core_time_success");
             stats.totalFailCoreTime = rs.getLong("int_total_core_time_fail");
             stats.totalCoreTime = stats.totalSuccessCoreTime + stats.totalFailCoreTime;
 
-            stats.highClockTime = rs.getInt("int_clock_time_high");
-            stats.lowClockTime = rs.getInt("int_clock_time_low");
-            stats.avgClockTime = rs.getInt("int_clock_time_avg");
+            stats.highClockTime = rs.getLong("int_clock_time_high");
+            stats.lowClockTime = rs.getLong("int_clock_time_low");
+            stats.avgClockTime = rs.getLong("int_clock_time_avg");
             stats.stdDevClockTime = rs.getDouble("flt_clock_time_std");
             stats.totalSuccessClockTime = rs.getLong("int_total_clock_time_success");
             stats.totalFailClockTime = rs.getLong("int_total_clock_time_fail");

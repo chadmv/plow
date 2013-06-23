@@ -14,10 +14,11 @@ cdef class JobStats:
 
     :var highRam: int
     :var highCores: float
-    :var highCoreTime: int
+    :var highCoreTime: long
     :var totalCoreTime: long
     :var totalSuccessCoreTime: long
     :var totalFailCoreTime: long
+    :var highClockTime: long
      
     """
     cdef JobStatsT _stats
@@ -33,6 +34,9 @@ cdef class JobStats:
 
     property highCoreTime:
         def __get__(self): return self._stats.highCoreTime
+
+    property highClockTime:
+        def __get__(self): return self._stats.highClockTime
 
     property totalCoreTime:
         def __get__(self): return long(self._stats.totalCoreTime)

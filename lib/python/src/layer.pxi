@@ -159,16 +159,16 @@ cdef class LayerStats:
     :var highCores: float
     :var avgCores: float
     :var stdDevCores: float
-    :var highCoreTime: int
-    :var avgCoreTime: int
-    :var lowCoreTime: int
+    :var highCoreTime: long
+    :var avgCoreTime: long
+    :var lowCoreTime: long
     :var stdDevCoreTime: float
     :var totalCoreTime: long
     :var totalSuccessCoreTime: long
     :var totalFailCoreTime: long
-    :var highClockTime: int
-    :var avgClockTime: int
-    :var lowClockTime: int
+    :var highClockTime: long
+    :var avgClockTime: long
+    :var lowClockTime: long
     :var stdDevClockTime: float
     :var totalClockTime: long
     :var totalSuccessClockTime: long

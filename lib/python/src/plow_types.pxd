@@ -351,16 +351,16 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         float highCores
         float avgCores
         float stdDevCores
-        int highCoreTime
-        int avgCoreTime
-        int lowCoreTime
+        long highCoreTime
+        long avgCoreTime
+        long lowCoreTime
         float stdDevCoreTime
         long totalCoreTime
         long totalSuccessCoreTime
         long totalFailCoreTime
-        int highClockTime
-        int avgClockTime
-        int lowClockTime
+        long highClockTime
+        long avgClockTime
+        long lowClockTime
         float stdDevClockTime
         long totalClockTime
         long totalSuccessClockTime
@@ -390,11 +390,11 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
     cdef cppclass JobStatsT:
         int highRam
         float highCores
-        int highCoreTime
+        long highCoreTime
         long totalCoreTime
         long totalSuccessCoreTime
-        long totalFailCoreTime
-
+        long totalFailCoreTime,
+        long highClockTime
 
     cdef struct _TaskFilterT__isset:
         bint jobId
