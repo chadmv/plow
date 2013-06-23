@@ -223,10 +223,11 @@ struct ProcFilterT {
 struct JobStatsT {
     1:i32 highRam,
     2:double highCores,
-    3:i32 highCoreTime,
+    3:i64 highCoreTime,
     4:i64 totalCoreTime,
     5:i64 totalSuccessCoreTime,
-    6:i64 totalFailCoreTime
+    6:i64 totalFailCoreTime,
+    7:i64 highClockTime
 }
 
 struct JobT {

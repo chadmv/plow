@@ -186,12 +186,9 @@ CREATE TABLE plow.job_stat (
   int_ram_high INTEGER NOT NULL DEFAULT 0,
   flt_cores_high REAL NOT NULL DEFAULT 0.0,
   int_core_time_high BIGINT NOT NULL DEFAULT 0,
-
   int_total_core_time_success BIGINT NOT NULL DEFAULT 0,
   int_total_core_time_fail BIGINT NOT NULL DEFAULT 0,
-
-  int_total_clock_time_success BIGINT NOT NULL DEFAULT 0,
-  int_total_clock_time_fail BIGINT NOT NULL DEFAULT 0
+  int_clock_time_high BIGINT NOT NULL DEFAULT 0
 );
 
 ---
@@ -706,6 +703,10 @@ BEGIN
     NEW.int_core_time_high := OLD.int_core_time_high;
   END IF;
 
+  IF NEW.int_clock_time_high < OLD.int_clock_time_high THEN
+    NEW.int_clock_time_high := OLD.int_clock_time_high;
+  END IF;
+
   RETURN NEW;
 END
 $$
@@ -854,8 +855,7 @@ BEGIN
     UPDATE
       job_stat
     SET
-      int_total_core_time_fail=int_total_core_time_fail+core_time,
-      int_total_clock_time_fail=int_total_clock_time_fail+clock_time
+      int_total_core_time_fail=int_total_core_time_fail+core_time
     WHERE
       pk_job = NEW.pk_job;
 
@@ -934,8 +934,8 @@ BEGIN
       int_ram_high=NEW.int_last_ram_high,
       flt_cores_high=NEW.flt_last_cores_high,
       int_core_time_high=core_time,
-      int_total_core_time_success=int_total_core_time_success+core_time,
-      int_total_clock_time_success=int_total_clock_time_success+clock_time
+      int_clock_time_high=clock_time,
+      int_total_core_time_success=int_total_core_time_success+core_time
     WHERE
       pk_job=NEW.pk_job;
   END IF;
