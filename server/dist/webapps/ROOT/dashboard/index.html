@@ -101,11 +101,23 @@
 		
 		// setup google charts
 		google.load('visualization', '1.0', {'packages':['corechart']});
- 
+		
 		$(function() {
+			
+			// some variables we need througout
+			var $folders = $("tbody.folders"),
+				$cont = $(".table-container"),
+				$win = $(window),
+				$subProgressContainer = $(".progressSubContainer"),
+				$mainProgress = $(".progress.main"),
+				$jobList = $(".jobList");
+			
+			
+			
 			window.Plow = Root.inherit({
 				client: null,
 				time: 0,
+				fake: false,
 				_init : function() {
 					var self = this;
 					
@@ -117,6 +129,7 @@
 					// templates
 					this.jobListItemTemplate = Handlebars.compile($("#jobListItemTemplate").text());
 					this.quotaTemplate = Handlebars.compile($("#quotaTemplate").text());
+					this.folderTemplate = Handlebars.compile($("#folderListItemTemplate").text());
 					
 					// get 1 project to use
 					this.project = self.client.getProjects()[0];
@@ -139,8 +152,6 @@
 					this.render();
 					
 					// resize function
-					var $cont = $(".table-container");
-					var $win = $(window);
 					$win.resize(function() {
 						$cont.height($win.height() - 570 );
 						self.coresChart.redraw();
@@ -161,13 +172,24 @@
 					this.renderJobList();
 					this.renderCoresChart();
 					this.renderQuotaGraphs();
+					this.renderFoldersChart();
+				},
+				
+				// folders chart
+				renderFoldersChart: function() {
+					var html = "", self = this;
+					
+					// go through the folders
+					this.folders.forEach(function(folder) {
+						html += self.folderTemplate(folder);
+					});
+					// place the folders
+					$folders.html(html);
 				},
 				
 				// bar graphs at the top
 				renderQuotaGraphs: function() {
 					var self = this,
-						$sub = $(".prog"),
-						$main = $(".progress.main"),
 						html = "",
 						totalUsed = 0,
 						totalSize = 0;
@@ -186,10 +208,10 @@
 					});
 					
 					// set the chart
-					$sub.html(html); 
+					$subProgressContainer.html(html); 
 					
 					// update main
-					$main.replaceWith(self.quotaTemplate({
+					$mainProgress.replaceWith(self.quotaTemplate({
 						main: true,
 						green: ~~((totalUsed / totalSize) * 100),
 						red: ~~((1 - (totalUsed / totalSize)) * 100)
@@ -199,8 +221,9 @@
 				
 				// main job table
 				renderJobList: function() {
+
 					// vars
-					var self = this, jobs = [], stop = 0, $jobList = $(".jobList");
+					var self = this, jobs = [], stop = 0;
 
 					// start clean
 					$jobList.html("");
@@ -218,7 +241,6 @@
 							// stop time or now
 							var momentStart = moment(job.startTime);
 							var momentStop = !!job.stopTime ? moment(job.stopTime) : moment(new Date());
-							//job.duration = Math.abs(stop.getTime() - job.startTime.getTime());
 							job.duration = 
 								moment.duration(momentStop-momentStart).hours() + ":" +
 								moment.duration(momentStop-momentStart).minutes() + ":" +
@@ -227,7 +249,6 @@
 							
 							// stop time or not stopped
 							job.stopTime = !!job.stopTime ? new Date(job.stopTime) : "Not Stopped";
-							
 							//
 							// add to list
 							$jobList.append(self.jobListItemTemplate(job));
@@ -253,7 +274,9 @@
 					// push each quota
 					self.quotas.forEach(function(q) {
 						// fake a random number
-						//q.runCores = ~~(Math.random() * (q.size - 1 + 1)) + 1;
+						if(self.fake) {
+							q.runCores = ~~(Math.random() * (q.size - 1 + 1)) + 1;
+						}
 						// push the quota
 						line.push(q.runCores);
 						// add the title for this item as well
@@ -353,43 +376,27 @@
 				  <div class="bar bar-danger" style="width: 20%;"></div>
 				</div>
 				
-				<blockquote class="prog">
+				<blockquote class="progressSubContainer">
 					<!-- bar graphs go here -->
 				</blockquote>
 				
               </li>
               <li class="nav-header">Cores Over Time</li>
               <li id="line"></li>
-              <li class="nav-header">Groups</li>
+              <li class="nav-header">Folders</li>
 			<li>
             <table class="table table-striped groups">
 				  <thead>
 					<tr>
 					  <th>Title</th>
-					  <th>Core</th>
-					  <th>P. Tasks</th>
-					  <th>P. Jobs</th>
+					  <th>Cores</th>
+					  <th>Procs</th>
+					  <th>Tasks</th>
+					  <th>Waiting</th>
 					</tr>
 				  </thead>
-				  <tbody>
-					<tr>
-					  <td>FX</td>
-					  <td>5</td>
-					  <td>5</td>
-					  <td>5</td>
-					</tr>
-					<tr>
-					  <td>Lighting</td>
-					  <td>0</td>
-					  <td>500</td>
-					  <td>20</td>
-					</tr>
-					<tr>
-					  <td>Comp</td>
-					  <td>2</td>
-					  <td>5</td>
-					  <td>2</td>
-					</tr>
+				  <tbody class="folders">
+					<!-- folders here -->
 				  </tbody>
 				</table>
 				</li>
@@ -496,6 +503,16 @@
     		<td>{{paused}}</td>
     		<td>{{totals.totalTaskCount}}</td>
     		<td>{{state}}</td>
+    	</tr>
+    </script>
+    
+    <script type="template/handlebars" id="folderListItemTemplate">
+    	<tr class="folderListItem" data-folder="{{id}}">
+    		<td>{{name}}</td>
+    		<td>{{runCores}}</td>
+    		<td>{{runProcs}}</td>
+    		<td>{{totals.totalTaskCount}}</td>
+    		<td>{{totals.waitingTaskCount}}</td>
     	</tr>
     </script>
     

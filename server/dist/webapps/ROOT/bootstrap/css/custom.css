@@ -19,3 +19,10 @@
 	text-decoration: none;
 	background-color: rgba(255,255,255, 0.9) !important;
 }
+
+.navbar .brand:hover {
+	color: #eee;
+}
+.navbar-inner {
+	padding-left: 0px;
+}
