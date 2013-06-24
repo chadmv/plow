@@ -81,4 +81,6 @@ public interface DispatchService {
     void markAsDeallocated(Proc proc);
 
     List<DispatchProc> getDeallocatedProcs();
+
+    void unassignAndMarkForDeallocation(Proc proc);
 }

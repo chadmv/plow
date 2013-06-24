@@ -30,8 +30,9 @@ public class AbstractDispatcher {
             }
         }
 
-        dispatchService.unassignProc(proc);
-        dispatchService.markAsDeallocated(proc);
+        if (proc != null) {
+            dispatchService.unassignAndMarkForDeallocation(proc);
+        }
 
         if (result != null) {
             result.continueDispatch = false;

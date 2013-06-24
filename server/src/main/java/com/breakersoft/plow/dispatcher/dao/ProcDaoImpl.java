@@ -100,6 +100,9 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
 
     @Override
     public boolean unassign(Proc proc) {
+        if (proc == null) {
+            return false;
+        }
         return jdbc.update(UNASSIGN, proc.getProcId()) == 1;
     }
 
@@ -156,6 +159,13 @@ public class ProcDaoImpl extends AbstractDao implements ProcDao {
     public boolean setProcDeallocated(Proc proc) {
         return jdbc.update(
                 "UPDATE plow.proc SET bool_dealloc=? WHERE proc.pk_proc=?",
+                true, proc.getProcId()) == 1;
+    }
+
+    @Override
+    public boolean unassignAndMarkForDeallocation(Proc proc) {
+        return jdbc.update(
+                "UPDATE plow.proc SET pk_task=NULL, bool_dealloc=?, time_updated=plow.txTimeMillis() WHERE proc.pk_proc=?",
                 true, proc.getProcId()) == 1;
     }
 }
