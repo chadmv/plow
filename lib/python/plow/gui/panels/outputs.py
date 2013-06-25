@@ -111,14 +111,13 @@ class OutputWidget(QtGui.QWidget):
             item.setData(0, OBJECT_ROLE, output)
             item.setIcon(0, QtGui.QIcon(":/images/resume.png"))
             item.setForeground(0, QtGui.QColor(255, 255, 255))
+            item.setExpanded(True)
 
             for key, val in output.attrs.iteritems():
                 child = QtGui.QTreeWidgetItem(item, [key, val], self.ATTR_TYPE)
 
             tree.addTopLevelItem(item)
             tree.setFirstItemColumnSpanned(item, True)
-
-            print "foo"
 
     def __startDrag(self, actions):
         texts = set()
