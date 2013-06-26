@@ -108,8 +108,8 @@ class RenderJobWatchPanel(Panel):
 
 class RenderJobWatchWidget(QtGui.QWidget):
 
-    HEADER = ["Job", "State", "Run", "Pend.", "Min", "Max", "Duration", "Progress"]
-    WIDTH = [400, 75, 60, 60, 60, 60, 100, 125]
+    HEADER = ["Job", "State", "Run", "Pend.", "Min", "Max", "Max MB", "Duration", "Progress"]
+    WIDTH = [400, 75, 60, 60, 60, 60, 65, 100, 125]
 
     COLOR_DEAD = constants.COLOR_TASK_STATE[TaskState.DEAD]
     COLOR_PAUSED = constants.BLUE
@@ -157,6 +157,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
             "%02d" % (job.totals.waiting + job.totals.depend),
             "%02d" % job.minCores,
             formatMaxValue(job.maxCores),
+            formatMaxValue(job.stats.highRam),
             formatDuration(job.startTime, job.stopTime)
         ])
 
@@ -191,9 +192,10 @@ class RenderJobWatchWidget(QtGui.QWidget):
         item.setText(3, "%02d" % job.totals.waiting)
         item.setText(4, "%02d" % job.minCores)
         item.setText(5, formatMaxValue(job.maxCores))
-        item.setText(6, formatDuration(job.startTime, job.stopTime))
+        item.setText(6, formatMaxValue(job.stats.highRam))
+        item.setText(7, formatDuration(job.startTime, job.stopTime))
 
-        item.setToolTip(6, "Started: %s\nStopped:%s" % 
+        item.setToolTip(7, "Started: %s\nStopped:%s" % 
             (formatDateTime(job.startTime), formatDateTime(job.stopTime)))
 
         self.__tree.itemWidget(item, len(self.HEADER)-1).setTotals(job.totals)

@@ -495,7 +495,7 @@ class JobNode(PlowNode):
     TYPE = JOB_TYPE
     HEADERS = [
                 "Name", "Run Cores", "Min Cores", "Total", "Pend.", "Run", 
-                "State", "Owner", "Duration", "maxRam",
+                "State", "Owner", "Duration", "Max MB",
                ]
 
     HEADER_WIDTHS = (300,75,75,60,60,60,80,80,100)
