@@ -15,7 +15,7 @@ from plow.gui.event import EventManager
 from plow.gui.common import tree, models
 from plow.gui.common.widgets import TreeWidget
 from plow.gui.common.job import JobContextMenu
-from plow.gui.util import formatDateTime, formatDuration
+from plow.gui.util import formatDateTime, formatDuration, copyToClipboard
 
 JOB_STATES = {}
 TASK_STATES = {}
@@ -136,7 +136,7 @@ class JobWranglerWidget(QtGui.QWidget):
         # Connections
         #
         view.doubleClicked.connect(self.__itemDoubleClicked)
-        view.activated.connect(self.__itemClicked)
+        view.clicked.connect(self.__itemClicked)
 
         model.modelReset.connect(view.expandAll)
 
@@ -187,9 +187,13 @@ class JobWranglerWidget(QtGui.QWidget):
             EventManager.JobOfInterest.emit(uid)
 
     def __itemClicked(self, index):
-        if index.data(TYPE_ROLE) == FOLDER_TYPE:
+        typ = index.data(TYPE_ROLE)
+        if typ == FOLDER_TYPE:
             uid = index.data(ID_ROLE)
             EventManager.FolderOfInterest.emit(uid)
+
+        elif typ == JOB_TYPE:
+            copyToClipboard(index.data(OBJECT_ROLE).name)
 
     def __showContextMenu(self, pos):
         tree = self.__view

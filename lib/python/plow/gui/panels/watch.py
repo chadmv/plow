@@ -10,12 +10,12 @@ from functools import partial
 import plow.client
 from plow.client import JobState, TaskState
 
+from plow.gui import constants 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.common.widgets import CheckableListBox, BooleanCheckBox, SpinSliderWidget, ManagedListWidget
 from plow.gui.common.job import JobProgressBar, JobSelectionDialog, JobStateWidget, JobContextMenu
-from plow.gui import constants 
-from plow.gui.util import formatMaxValue, formatDateTime, formatDuration
+from plow.gui.util import formatMaxValue, formatDateTime, formatDuration, copyToClipboard
 from plow.gui.event import EventManager
 
 
@@ -137,6 +137,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
         layout.addWidget(tree)
 
         # connections
+        tree.itemClicked.connect(lambda item: copyToClipboard(item.text(0)))
         tree.itemDoubleClicked.connect(self.__itemDoubleClicked)
         tree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         tree.customContextMenuRequested.connect(self.__showContextMenu)

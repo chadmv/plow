@@ -29,3 +29,23 @@ def ask(msg, title='Confirm?', parent=None):
    
     return ret == QtGui.QMessageBox.Ok
 
+
+def copyToClipboard(item):
+    """
+    Handle the copying of different item types 
+    to the global clipboard. 
+    """
+    clipboard = QtGui.QApplication.clipboard()
+
+    if isinstance(item, QtGui.QPixmap):
+        action = clipboard.setPixmap 
+    elif isinstance(item, QtGui.QImage):
+        action = clipboard.setImage 
+    elif isinstance(item, QtCore.QMimeData):
+        action = clipboard.setMimeData 
+    else:
+        action = clipboard.setText 
+        item = str(item)
+
+    action(item, clipboard.Selection)
+    action(item, clipboard.Clipboard)

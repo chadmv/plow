@@ -11,7 +11,7 @@ from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.common import models
 from plow.gui.common.widgets import TableWidget, ResourceDelegate, CheckableComboBox
-from plow.gui.util import formatDuration
+from plow.gui.util import formatDuration, copyToClipboard
 
 NODE_STATES = {}
 for a in dir(plow.client.NodeState):
@@ -121,6 +121,7 @@ class NodeWidget(QtGui.QWidget):
         view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
         view.customContextMenuRequested.connect(self.__showContextMenu)
+        view.clicked.connect(self.__itemClicked)
         view.doubleClicked.connect(self.__itemDoubleClicked)
 
     def refresh(self):
@@ -193,6 +194,9 @@ class NodeWidget(QtGui.QWidget):
 
             if did_lock:
                 EventManager.GlobalRefresh.emit()
+
+    def __itemClicked(self, index):
+        copyToClipboard(index.data(self.__model.ObjectRole).name)
 
     def __itemDoubleClicked(self, index):
         uid = index.data(self.__model.ObjectRole).id

@@ -7,7 +7,7 @@ from plow.client import TaskState
 from plow.gui import constants 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
-from plow.gui.util import formatDuration
+from plow.gui.util import formatDuration, copyToClipboard
 from plow.gui.event import EventManager
 from plow.gui.common.widgets import CheckableComboBox, TableWidget
 from plow.gui.common import models, actions
@@ -100,6 +100,7 @@ class TaskWidget(QtGui.QWidget):
 
         # connections
         table.customContextMenuRequested.connect(self.__showContextMenu)
+        table.clicked.connect(self.__rowClicked)
         table.doubleClicked.connect(self.__rowDoubleClicked)
 
     @property 
@@ -172,7 +173,10 @@ class TaskWidget(QtGui.QWidget):
         menu.addAction(QtGui.QIcon(":/images/depend.png"), "Drop Depends", self.__dropDepends)
 
         menu.exec_(self.mapToGlobal(pos))
-        
+    
+    def __rowClicked(self, index):
+        copyToClipboard(index.data(self.__model.ObjectRole).name)
+
     def __rowDoubleClicked(self, index):
         uid = index.data(self.__model.IdRole)
         EventManager.TaskOfInterest.emit(uid, self.__jobId)

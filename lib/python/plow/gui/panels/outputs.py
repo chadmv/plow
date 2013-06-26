@@ -8,7 +8,7 @@ from plow.gui.panels import Panel
 from plow.gui.event import EventManager
 from plow.gui.common import models
 from plow.gui.common.widgets import TableWidget
-                                    
+from plow.gui.util import copyToClipboard                                    
 
 LOGGER = logging.getLogger(__name__)
 
@@ -146,14 +146,12 @@ class OutputWidget(QtGui.QWidget):
     def __showContextMenu(self, pos):
         print "__showContextMenu", pos
 
-    def __copyValueToClipboard(self, item, col):
-        clipboard = QtGui.QApplication.instance().clipboard()
+    def __copyValueToClipboard(self, item):
         if item.childCount() == 0:
             value = item.text(1)
         else:
             value = item.text(0)
-        clipboard.setText(value, clipboard.Selection)
-        clipboard.setText(value, clipboard.Clipboard)
+        copyToClipboard(value)
 
 
 

@@ -9,7 +9,7 @@ from plow.gui.event import EventManager
 from plow.gui.common import models, actions
 from plow.gui.common.widgets import TableWidget
 from plow.gui.common.job import JobProgressDelegate
-                                    
+from plow.gui.util import copyToClipboard
 
 LOGGER = logging.getLogger(__name__)
 
@@ -68,6 +68,7 @@ class LayerWidget(QtGui.QWidget):
 
         # connections
         table.customContextMenuRequested.connect(self.__showContextMenu)
+        table.clicked.connect(self.__itemClicked)
         table.doubleClicked.connect(self.__itemDoubleClicked)
 
     def refresh(self):
@@ -100,6 +101,9 @@ class LayerWidget(QtGui.QWidget):
     def __selectedCount(self):
         s_model = self.__view.selectionModel()
         return len(s_model.selectedRows())
+
+    def __itemClicked(self, index):
+        copyToClipboard(index.data(self.__model.ObjectRole).name)
 
     def __itemDoubleClicked(self, index):
         uid = index.data(self.__model.ObjectRole).id
