@@ -14,8 +14,6 @@ from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelega
                                     ManagedListWidget, BooleanCheckBox, FormWidgetLabel, \
                                     TreeWidget
 
-IdRole = QtCore.Qt.UserRole
-ObjectRole = QtCore.Qt.UserRole + 1
 
 LOGGER = logging.getLogger(__name__)
 
@@ -74,14 +72,10 @@ class ClusterPanel(Panel):
         finally:
             self.refresh()
 
-    def __handleJobOfInterestEvent(self, *args, **kwargs):
-        self.widget().setJobId(args[0])
-
 
 class ClusterWidget(QtGui.QWidget):
 
-    Header = ["Name", "Usage", "Nodes", "Locked", "Repair", "Down", "Cores", "Tags"]
-    Width = [250, 90, 70, 70, 70, 70, 70, 150]
+    WIDTH = [250, 90, 70, 70, 70, 70, 70, 150]
 
     def __init__(self, attrs, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -95,14 +89,13 @@ class ClusterWidget(QtGui.QWidget):
 
         self.__model = ClusterModel(self)
         self.__proxy = proxy = models.AlnumSortProxyModel(self)
-        proxy.setDynamicSortFilter(True)
         proxy.setSortRole(QtCore.Qt.DisplayRole)
         proxy.setSourceModel(self.__model)
 
         tree.setModel(proxy)
         tree.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
-        for i,v in enumerate(self.Width):
+        for i,v in enumerate(self.WIDTH):
             tree.setColumnWidth(i, v) 
 
         self.layout().addWidget(self.__tree)
@@ -112,19 +105,23 @@ class ClusterWidget(QtGui.QWidget):
 
     def getSelectedClusters(self):
         rows = self.__tree.selectionModel().selectedRows()
-        return [index.data(ObjectRole) for index in rows]
+        return [index.data(self.__model.ObjectRole) for index in rows]
 
     def refresh(self):
+        self.__tree.setSortingEnabled(False)
         self.__model.refresh()
+        self.__tree.setSortingEnabled(True)
 
     def __itemDoubleClicked(self, index):
-        uid = index.data(IdRole)
-        EventManager.emit("CLUSTER_OF_INTEREST", uid)
+        uid = index.data(self.__model.IdRole)
+        EventManager.ClusterOfInterest.emit(uid)
 
 
-class ClusterModel(QtCore.QAbstractTableModel):
+class ClusterModel(models.PlowTableModel):
 
-    HEADER_CALLBACKS = {
+    HEADERS = ["Name", "Usage", "Nodes", "Locked", "Repair", "Down", "Cores", "Tags"]
+
+    DISPLAY_CALLBACKS = {
         0 : lambda c: c.name,
         1 : lambda c: [c.total.runCores, c.total.cores],
         2 : lambda c: c.total.nodes,
@@ -136,78 +133,20 @@ class ClusterModel(QtCore.QAbstractTableModel):
     }
 
     def __init__(self, parent=None):
-        QtCore.QAbstractTableModel.__init__(self, parent)
-        self.__items = []
-        self.__index = {}
-        self.__lastUpdateTime = 0;
+        super(ClusterModel, self).__init__(parent)
 
+        self.__lastUpdateTime = 0;
         self.__iconLocked = QtGui.QIcon(":/images/locked.png")
 
-    def hasChildren(self, parent):
-        return False
-
-    def refresh(self):
-        updated = set()
-        to_add = set()
-        cluster_ids = set()
-
-        rows = self.__index
-        parent = QtCore.QModelIndex()
-
-        clusters = plow.client.get_clusters()
-        for cluster in clusters:
-            cluster_ids.add(cluster.id)
-
-            try:
-                idx = self.__index[cluster.id]
-                self.__items[idx] = cluster
-                updated.add(cluster.id)
-                self.dataChanged.emit(self.index(idx,0), self.index(idx, len(ClusterWidget.Header)-1))
-            
-            except (IndexError, KeyError):
-                to_add.add(cluster) 
-
-        if to_add:
-            size = len(to_add)
-            start = len(self.__items)
-            end = start + size - 1
-            self.beginInsertRows(parent, start, end)
-            self.__items.extend(to_add)
-            self.endInsertRows()
-            LOGGER.debug("adding %d new clusters", size)
-
-        # Remove
-        to_remove = set(self.__index.iterkeys()).difference(cluster_ids)
-        for row, old_id in sorted(((rows[old_id], old_id) for old_id in to_remove), reverse=True):
-            self.beginRemoveRows(parent, row, row)
-            cluster = self.__items.pop(row)
-            self.endRemoveRows()
-            LOGGER.debug("removing %s %s", old_id, cluster.name)
-
-        self.__index = dict(((item.id, i) for i, item in enumerate(self.__items)))
-
-
-    def rowCount(self, parent):
-        if parent.isValid():
-            return 0
-        return len(self.__items)
-
-    def columnCount(self, parent=None):
-        if parent.isValid():
-            return 0
-        return len(ClusterWidget.Header)
+    def fetchObjects(self):
+        return plow.client.get_clusters()
 
     def data(self, index, role):
         row = index.row()
         col = index.column()
-        cluster = self.__items[row]
-
-        if role == QtCore.Qt.DisplayRole:
-            cbk = self.HEADER_CALLBACKS.get(col)
-            if cbk is not None:
-                return cbk(cluster)
+        cluster = self._items[row]
         
-        elif role == QtCore.Qt.BackgroundColorRole:
+        if role == QtCore.Qt.BackgroundColorRole:
             if cluster.isLocked:
                 return constants.BLUE
             elif col == 3 and cluster.total.lockedNodes:
@@ -217,19 +156,9 @@ class ClusterModel(QtCore.QAbstractTableModel):
             elif col == 5 and cluster.total.downNodes:
                 return constants.RED
 
-        elif role == QtCore.Qt.TextAlignmentRole:
-            if col != 0:
-                return QtCore.Qt.AlignCenter
-
         elif role == QtCore.Qt.DecorationRole and col == 0:
             if cluster.isLocked:
                 return self.__iconLocked
-
-        elif role == IdRole:
-            return cluster.id
-       
-        elif role == ObjectRole:
-            return cluster
 
         elif role == QtCore.Qt.ToolTipRole:
             if col == 1:
@@ -258,16 +187,7 @@ class ClusterModel(QtCore.QAbstractTableModel):
                     "Locked Nodes: %d" % cluster.total.lockedNodes,
                 ])
 
-
-    def headerData(self, section, orientation, role):
-        if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
-            return ClusterWidget.Header[section]
-
-        elif role == QtCore.Qt.TextAlignmentRole:
-            if section == 0:
-                return QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter 
-            else:
-                return QtCore.Qt.AlignCenter
+        return super(ClusterModel, self).data(index, role)
 
 
 class ClusterWidgetConfigDialog(QtGui.QDialog):

@@ -108,7 +108,7 @@ class RenderJobWatchPanel(Panel):
 
 class RenderJobWatchWidget(QtGui.QWidget):
 
-    HEADER = ["Job", "State", "Run", "Wait", "Min", "Max", "Duration", "Progress"]
+    HEADER = ["Job", "State", "Run", "Pend.", "Min", "Max", "Duration", "Progress"]
     WIDTH = [400, 75, 60, 60, 60, 60, 100, 125]
 
     COLOR_DEAD = constants.COLOR_TASK_STATE[TaskState.DEAD]
@@ -153,11 +153,15 @@ class RenderJobWatchWidget(QtGui.QWidget):
             job.name,
             "",
             "%02d" % job.totals.running,
-            "%02d" % job.totals.waiting,
+            "%02d" % (job.totals.waiting + job.totals.depend),
             "%02d" % job.minCores,
             formatMaxValue(job.maxCores),
             formatDuration(job.startTime, job.stopTime)
         ])
+
+        center = QtCore.Qt.AlignCenter
+        for i in xrange(2, item.columnCount()):
+            item.setTextAlignment(i, center)
 
         self.__jobs[job.id] = item
 
@@ -305,7 +309,7 @@ class RenderJobWatchWidget(QtGui.QWidget):
 
     def __itemDoubleClicked(self, item, col):
         uid = item.data(0, JOBID_ROLE)
-        EventManager.emit("JOB_OF_INTEREST", uid)
+        EventManager.JobOfInterest.emit(uid)
 
 
 

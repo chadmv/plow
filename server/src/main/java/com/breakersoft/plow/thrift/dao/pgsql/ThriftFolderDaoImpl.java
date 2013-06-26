@@ -30,6 +30,7 @@ public class ThriftFolderDaoImpl extends AbstractDao implements ThriftFolderDao 
              folder.setMinCores(rs.getInt("int_cores_min"));
              folder.setMaxCores(rs.getInt("int_cores_max"));
              folder.setRunCores(rs.getInt("int_cores_run"));
+             folder.setRunProcs(rs.getInt("int_procs_run"));
              return folder;
          }
     };
@@ -64,7 +65,8 @@ public class ThriftFolderDaoImpl extends AbstractDao implements ThriftFolderDao 
             "folder.int_order, " +
             "folder_dsp.int_cores_min,"+
             "folder_dsp.int_cores_max,"+
-            "folder_dsp.int_cores_run " +
+            "folder_dsp.int_cores_run, " +
+            "folder_dsp.int_procs_run " +
         "FROM " +
             "folder " +
         "INNER JOIN folder_dsp ON folder.pk_folder = folder_dsp.pk_folder ";

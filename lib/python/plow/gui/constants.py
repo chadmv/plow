@@ -20,6 +20,8 @@ ORANGE = QtGui.QColor(243, 115, 33)
 GREEN = QtGui.QColor(76, 115, 0)
 YELLOW = QtGui.QColor(195, 174, 45)
 GRAY = QtGui.QColor(66, 66, 66)
+BLACK = QtGui.QColor(0, 0, 0)
+WHITE = QtGui.QColor(255, 255, 255)
 
 COLOR_JOB_STATE = [
     GRAY,

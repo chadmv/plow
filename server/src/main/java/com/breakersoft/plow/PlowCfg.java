@@ -56,6 +56,14 @@ public class PlowCfg {
         return value;
     }
 
+    public double get(String key, double defaultValue) {
+        String value = props.getProperty(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        return Double.parseDouble(value);
+    }
+
     public int get(String key, int defaultValue) {
         String value = props.getProperty(key);
         if (value == null) {

@@ -22,9 +22,9 @@ Server
 Client and Tools
 ----------------
 
-* Python 2.7
+* Python 2.6/2.7
 * [Qt](http://qt-project.org/downloads) 4.8
-* [PySide](http://qt-project.org/wiki/Get-PySide) 1.1.x
+* [PySide](http://qt-project.org/wiki/Get-PySide) >= 1.1.x
 * [Cython](http://www.cython.org/) >= 0.19 
 * [Thrift](http://thrift.apache.org/) 0.9
 

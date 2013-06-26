@@ -7,27 +7,33 @@ from logs import LogsPanel
 from nodes import NodePanel
 from props import PropertiesPanel
 from wrangle import JobWranglerPanel
+from layers import LayerPanel
+from outputs import OutputPanel
 
 __all__ = [
     "WorkspaceManager",
     "RenderJobWatchPanel",
+    "LayerPanel",
     "TaskPanel",
     "ClusterPanel",
     "LogsPanel",
     "NodePanel",
     "PropertiesPanel",
-    "JobWranglerPanel"
+    "JobWranglerPanel",
+    "OutputPanel",
 ]
 
 # Register the panels
 _panels = [
     ('JobWrangler', JobWranglerPanel),
     ('Render Watch', RenderJobWatchPanel),
+    ('Layers', LayerPanel),
     ('Tasks', TaskPanel),
-    ('Clusters', ClusterPanel),
-    ('Nodes', NodePanel),
     ('Logs', LogsPanel),
     ('Properties', PropertiesPanel),
+    ('Clusters', ClusterPanel),
+    ('Nodes', NodePanel),
+    ('Outputs', OutputPanel),
 ]
 
 for _p in _panels:

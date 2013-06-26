@@ -14,9 +14,13 @@ class TableWidget(QtGui.QTableView):
         self.setEditTriggers(self.NoEditTriggers)
         self.setSelectionBehavior(self.SelectRows)
         self.setSelectionMode(self.ExtendedSelection)
-        self.setSortingEnabled(True)
         self.setAlternatingRowColors(True)
         self.setAutoFillBackground(False)
+        self.setShowGrid(False)
+
+        self.setSortingEnabled(True)
+        self.sortByColumn(-1, QtCore.Qt.AscendingOrder)
+        
         self.viewport().setFocusPolicy(QtCore.Qt.NoFocus)
         
         self.horizontalHeader().setStretchLastSection(True)
@@ -31,6 +35,7 @@ class TreeWidget(QtGui.QTreeView):
         super(TreeWidget, self).__init__(*args, **kwargs)
 
         self.setSortingEnabled(True)
+        self.sortByColumn(-1, QtCore.Qt.AscendingOrder)
         self.setEditTriggers(self.NoEditTriggers)
         self.setSelectionBehavior(self.SelectRows)
         self.setSelectionMode(self.ExtendedSelection)
@@ -285,7 +290,13 @@ class CheckableComboBox(QtGui.QWidget):
                 a.setChecked(True)
             if icon:
                 a.setIcon(icons[i])
-            menu.addAction(a)        
+            menu.addAction(a)  
+
+    def setSelected(self, options):
+        opts = set(options)
+        for action in self.__menu.actions():
+            checked = action.text() in opts
+            action.setChecked(checked)
 
     def selectedOptions(self):
         return [a.text() for a in self.__menu.actions() if a.isChecked()]
@@ -535,8 +546,14 @@ class ResourceDelegate(QtGui.QItemDelegate):
 
     """
     COLOR_CRITICAL = constants.RED
+    COLOR_CRITICAL_DARK = COLOR_CRITICAL.darker(120)
+
     COLOR_WARN = constants.YELLOW
+    COLOR_WARN_DARK = COLOR_WARN.darker(125)
+
     COLOR_OK = constants.GREEN
+    COLOR_OK_DARK = COLOR_OK.darker(125)
+
     COLOR_BG = constants.GRAY
 
     def __init__(self, warn=0.15, critical=0.05, dataRole=QtCore.Qt.UserRole, parent=None):
@@ -558,23 +575,23 @@ class ResourceDelegate(QtGui.QItemDelegate):
         opt.displayAlignment = QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter
 
         grad = QtGui.QLinearGradient(opt.rect.topLeft(), opt.rect.topRight())
-        # darkEnd = QtCore.Qt.transparent
+
         darkEnd = self.COLOR_BG
         end = darkEnd 
 
         if ratio == 1:
-            darkEnd = self.COLOR_OK
-            end = darkEnd
+            end = self.COLOR_OK
+            darkEnd = end
 
         elif ratio <= self._crit:
-            darkEnd = self.COLOR_CRITICAL
             end = self.COLOR_CRITICAL
+            darkEnd = self.COLOR_CRITICAL_DARK
 
         elif ratio <= self._warn:
-            darkEnd = self.COLOR_WARN
             end = self.COLOR_WARN
+            darkEnd = self.COLOR_WARN_DARK
 
-        grad.setColorAt(0.0, self.COLOR_OK)
+        grad.setColorAt(0.0, self.COLOR_OK_DARK)
         grad.setColorAt(min(ratio, 1.0), self.COLOR_OK)
         grad.setColorAt(min(ratio + .01, 1.0), end)
         grad.setColorAt(1.0, darkEnd)

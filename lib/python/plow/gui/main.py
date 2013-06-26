@@ -7,6 +7,7 @@ from manifest import QtCore, QtGui
 from util import loadTheme 
 from panels import *
 
+from plow.client import PlowConnectionError
 
 LOGGER = logging.getLogger("plow-wrangler")
 
@@ -102,7 +103,7 @@ def launch(argv, name, layout=None):
         win.raise_()
         app.exec_()
         
-    except plow.PlowConnectionError, e:
+    except PlowConnectionError, e:
         logging.error(e)
 
 

@@ -22,6 +22,7 @@ import com.breakersoft.plow.rnd.thrift.RunningTask;
 import com.breakersoft.plow.service.JobService;
 import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.JobSpecT;
+import com.google.common.collect.Lists;
 
 public class StatsDaoTests extends AbstractTest {
 
@@ -69,7 +70,7 @@ public class StatsDaoTests extends AbstractTest {
         r_task.cpuPercent = 50;
         r_task.diskIO = new DiskIO(10l, 10l, 100l, 200l);
 
-        statsDao.updateProcRuntimeStats(r_task);
+        statsDao.batchUpdateProcRuntimeStats(Lists.newArrayList(r_task));
 
         Map<String, Object> record = jdbc().queryForMap(
                 "SELECT * FROM plow.proc WHERE pk_proc=?", proc.getProcId());
@@ -96,14 +97,39 @@ public class StatsDaoTests extends AbstractTest {
         r_task.cpuPercent = 50;
         r_task.diskIO = new DiskIO(10l, 10l, 100l, 200l);
 
-        statsDao.updateTaskRuntimeStats(r_task);
+        statsDao.batchUpdateTaskRuntimeStats(Lists.newArrayList(r_task));
 
         Map<String, Object> record = jdbc().queryForMap(
                 "SELECT * FROM plow.task WHERE pk_task=?", proc.getTaskId());
     }
 
     @Test
-    public void testUpdateLayeRuntimeStats() {
+    public void testUpdateJobRuntimeStats() {
+
+        RunningTask r_task = new RunningTask();
+        r_task.taskId = task.getTaskId().toString();
+        r_task.procId = proc.getProcId().toString();
+        r_task.jobId = job.getJobId().toString();
+        r_task.layerId = task.getLayerId().toString();
+        r_task.rssMb = 4096;
+        r_task.pid = 101;
+        r_task.lastLog = "foo bar";
+        // This is converted to a float in DB.
+        r_task.cpuPercent = 50;
+        r_task.diskIO = new DiskIO(10l, 10l, 100l, 200l);
+
+        statsDao.batchUpdateJobRuntimeStats(Lists.newArrayList(r_task));
+
+
+        long memory = jdbc().queryForObject("SELECT int_ram_high FROM plow.job_stat WHERE pk_job=?", Integer.class, task.getJobId());
+        assertEquals(4096, memory);
+
+        float cpu = jdbc().queryForObject("SELECT flt_cores_high FROM plow.job_stat WHERE pk_job=?", Float.class, task.getJobId());
+        assertEquals(0.5f, cpu, 0.01);
+    }
+
+    @Test
+    public void testUpdateLayerRuntimeStats() {
 
         RunningTask r_task = new RunningTask();
         r_task.taskId = task.getTaskId().toString();
@@ -116,18 +142,46 @@ public class StatsDaoTests extends AbstractTest {
         r_task.cpuPercent = 50;
         r_task.diskIO = new DiskIO(10l, 10l, 100l, 200l);
 
-        statsDao.updateLayerRuntimeStats(r_task);
+        statsDao.batchUpdateLayerRuntimeStats(Lists.newArrayList(r_task));
 
-        int result = jdbc().queryForObject("SELECT int_ram_min FROM plow.layer WHERE pk_layer=?", Integer.class, task.getLayerId());
-        assertEquals(2048, result);
+        int result;
 
-        r_task.rssMb = 1024;
-        statsDao.updateLayerRuntimeStats(r_task);
+        r_task.rssMb = 4096;
+        statsDao.batchUpdateLayerRuntimeStats(Lists.newArrayList(r_task));
+        result = jdbc().queryForObject("SELECT int_ram_high FROM plow.layer_stat WHERE pk_layer=?", Integer.class, task.getLayerId());
+        assertEquals(4096, result);
+
+        float memory = jdbc().queryForObject("SELECT flt_cores_high FROM plow.layer_stat WHERE pk_layer=?", Float.class, task.getLayerId());
+        assertEquals(.5, memory, 0.01);
+    }
+
+    @Test
+    public void testUpdateLayerMinMemory() {
+
+        RunningTask r_task = new RunningTask();
+        r_task.taskId = task.getTaskId().toString();
+        r_task.procId = proc.getProcId().toString();
+        r_task.jobId = job.getJobId().toString();
+        r_task.layerId = task.getLayerId().toString();
+        r_task.rssMb = 2048;
+        r_task.pid = 101;
+        r_task.lastLog = "foo bar";
+        r_task.cpuPercent = 50;
+        r_task.diskIO = new DiskIO(10l, 10l, 100l, 200l);
+
+        int result;
+
+        statsDao.batchUpdateLayerMinimumMemory(Lists.newArrayList(r_task));
         result = jdbc().queryForObject("SELECT int_ram_min FROM plow.layer WHERE pk_layer=?", Integer.class, task.getLayerId());
         assertEquals(2048, result);
 
         r_task.rssMb = 4096;
-        statsDao.updateLayerRuntimeStats(r_task);
+        statsDao.batchUpdateLayerMinimumMemory(Lists.newArrayList(r_task));
+        result = jdbc().queryForObject("SELECT int_ram_min FROM plow.layer WHERE pk_layer=?", Integer.class, task.getLayerId());
+        assertEquals(4096, result);
+
+        r_task.rssMb = 1024;
+        statsDao.batchUpdateLayerMinimumMemory(Lists.newArrayList(r_task));
         result = jdbc().queryForObject("SELECT int_ram_min FROM plow.layer WHERE pk_layer=?", Integer.class, task.getLayerId());
         assertEquals(4096, result);
     }

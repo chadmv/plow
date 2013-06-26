@@ -32,6 +32,27 @@ QPushButton#Unlocked:checked
 
 """
 
+class LoadFactorWidget(QtGui.QWidget):
+    def __init__(self, node, parent):
+        QtGui.QWidget.__init__(self, parent)
+        l = QtGui.QHBoxLayout(self)
+
+        for load in node.system.load:
+            box = QtGui.QDoubleSpinBox(parent)
+            box.setValue(load / 100.0)
+            if box.value() > node.system.physicalCores + (node.system.logicalCores * .2):
+                box.setStyleSheet("background-color: rgba(177, 24, 0, 192)")
+            box.setReadOnly(True)
+            box.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+            box.setFocusPolicy(QtCore.Qt.NoFocus)
+            l.addWidget(box)
+
+class LoadFactorFormWidget(FormWidget):
+    def __init__(self, value, parent=None):
+        FormWidget.__init__(self, parent)
+        w = LoadFactorWidget(value, self)
+        self.setWidget(w)
+
 class LockToggleWidget(QtGui.QWidget):
     def __init__(self, value, parent):
         QtGui.QWidget.__init__(self, parent)
@@ -67,5 +88,6 @@ class LockToggleFormWidget(FormWidget):
         self.setWidget(w)
 
 
+FormWidgetFactory.register("loadFactor", LoadFactorFormWidget)
 FormWidgetFactory.register("lockToggle", LockToggleFormWidget)
 

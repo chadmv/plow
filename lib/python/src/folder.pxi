@@ -18,6 +18,7 @@ cdef class Folder(PlowBase):
     :var minCores: int
     :var maxCores: int
     :var runCores: int
+    :var runProcs: int
     :var order: int
     :var totals: :class:`.TaskTotals`
     :var jobs: list[:class:`.Job`]
@@ -57,6 +58,9 @@ cdef class Folder(PlowBase):
 
     property runCores:
         def __get__(self): return self.folder.runCores
+
+    property runProcs:
+        def __get__(self): return self.folder.runProcs
 
     property order:
         def __get__(self): return self.folder.order

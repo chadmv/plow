@@ -54,14 +54,7 @@ cdef class Project(PlowBase):
             FolderT foldT 
             list results
 
-        try:
-            conn().proxy().getFolders(folders, self.project.id)
-        except RuntimeError, e:
-            if str(e) in EX_CONNECTION:
-                raise
-            results = []
-            return results
-
+        conn().proxy().getFolders(folders, self.project.id)
         results = [initFolder(foldT) for foldT in folders]
         return results
 
@@ -138,14 +131,7 @@ def get_projects():
         ProjectT projT
         list results
 
-    try:
-        conn().proxy().getProjects(projects)
-    except RuntimeError, e:
-        if str(e) in EX_CONNECTION:
-            raise
-        results = []
-        return results
-
+    conn().proxy().getProjects(projects)
     results = [initProject(projT) for projT in projects] 
     return results
 
@@ -161,14 +147,7 @@ def get_active_projects():
         ProjectT projT
         list results
 
-    try:
-        conn().proxy().getActiveProjects(projects)
-    except RuntimeError, e:
-        if str(e) in EX_CONNECTION:
-            raise
-        results = []
-        return results
-
+    conn().proxy().getActiveProjects(projects)
     results = [initProject(projT) for projT in projects] 
     return results    
 

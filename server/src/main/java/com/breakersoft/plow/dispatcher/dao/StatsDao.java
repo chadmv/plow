@@ -1,13 +1,19 @@
 package com.breakersoft.plow.dispatcher.dao;
 
+import java.util.List;
+
 import com.breakersoft.plow.rnd.thrift.RunningTask;
 
 public interface StatsDao {
 
-    boolean updateProcRuntimeStats(RunningTask task);
+    void batchUpdateProcRuntimeStats(List<RunningTask> tasks);
 
-    boolean updateTaskRuntimeStats(RunningTask task);
+    void batchUpdateTaskRuntimeStats(List<RunningTask> tasks);
 
-    void updateLayerRuntimeStats(RunningTask task);
+    void batchUpdateJobRuntimeStats(List<RunningTask> tasks);
+
+    void batchUpdateLayerRuntimeStats(List<RunningTask> tasks);
+
+    void batchUpdateLayerMinimumMemory(List<RunningTask> tasks);
 
 }

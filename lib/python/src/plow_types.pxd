@@ -205,6 +205,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int minCores
         int maxCores
         int runCores
+        int runProcs
         Timestamp startTime
         Timestamp stopTime
         TaskTotalsT totals
@@ -236,6 +237,8 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int minRam
         int maxRam
         int runCores
+        int runProcs
+        int maxRetries
         TaskTotalsT totals
         LayerStatsT stats
 
@@ -252,6 +255,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         int minCores
         int maxCores
         int runCores
+        int runProcs
         int order
         TaskTotalsT totals
         vector[JobT] jobs
@@ -351,14 +355,21 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         float highCores
         float avgCores
         float stdDevCores
-        int highCoreTime
-        int avgCoreTime
-        int lowCoreTime
+        long highCoreTime
+        long avgCoreTime
+        long lowCoreTime
         float stdDevCoreTime
         long totalCoreTime
         long totalSuccessCoreTime
         long totalFailCoreTime
-
+        long highClockTime
+        long avgClockTime
+        long lowClockTime
+        float stdDevClockTime
+        long totalClockTime
+        long totalSuccessClockTime
+        long totalFailClockTime
+        
     cdef cppclass JobSpecT:
         string name
         string project
@@ -383,11 +394,11 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
     cdef cppclass JobStatsT:
         int highRam
         float highCores
-        int highCoreTime
+        long highCoreTime
         long totalCoreTime
         long totalSuccessCoreTime
-        long totalFailCoreTime
-
+        long totalFailCoreTime,
+        long highClockTime
 
     cdef struct _TaskFilterT__isset:
         bint jobId
@@ -423,6 +434,7 @@ cdef extern from "rpc/plow_types.h" namespace "Plow":
         vector[Guid] cluster
 
     cdef cppclass OutputT:
+        Guid outputId
         string path 
         Attrs attrs
 

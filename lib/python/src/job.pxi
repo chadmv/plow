@@ -14,10 +14,11 @@ cdef class JobStats:
 
     :var highRam: int
     :var highCores: float
-    :var highCoreTime: int
+    :var highCoreTime: long
     :var totalCoreTime: long
     :var totalSuccessCoreTime: long
     :var totalFailCoreTime: long
+    :var highClockTime: long
      
     """
     cdef JobStatsT _stats
@@ -32,7 +33,10 @@ cdef class JobStats:
         def __get__(self): return self._stats.highCores
 
     property highCoreTime:
-        def __get__(self): return self._stats.highCoreTime
+        def __get__(self): return long(self._stats.highCoreTime)
+
+    property highClockTime:
+        def __get__(self): return long(self._stats.highClockTime)
 
     property totalCoreTime:
         def __get__(self): return long(self._stats.totalCoreTime)
@@ -262,6 +266,7 @@ cdef class Job(PlowBase):
     :var minCores: int 
     :var maxCores: int 
     :var runCores: int 
+    :var runProcs: int 
     :var startTime: long - msec since epoch
     :var stopTime: long - msec since epoch
     :var totals: :class:`.TaskTotals`
@@ -314,6 +319,9 @@ cdef class Job(PlowBase):
 
     property runCores:
         def __get__(self): return self._job.runCores
+
+    property runProcs:
+        def __get__(self): return self._job.runProcs
 
     property startTime:
         def __get__(self): return long(self._job.startTime)
@@ -388,6 +396,20 @@ cdef class Job(PlowBase):
         cdef list ret 
         ret = get_layers(self)
         return ret
+
+    def get_folder(self):
+        """
+        Get the folder that contains this Job
+
+        :returns: :class:`.Folder`
+        """
+        cdef Folder f
+        
+        if self.folderId:
+            f = get_folder(self.folderId)
+            return f 
+
+        return None
 
     cpdef inline list get_tasks(self, list states=None):
         """
@@ -587,55 +609,26 @@ def set_job_max_cores(Job job, int value):
     conn().proxy().setJobMaxCores(job.id, value)
     job.refresh()
 
-
-
-#######################
-# Output
-#
-
-cdef Output initOutput(OutputT& o):
-    cdef Output out = Output()
-    out.setOutput(o)
-    return out
-
-
-cdef class Output:
-    """
-    Represents an output of a :class:`.Job`
-
-    :var path: str path 
-    :var attrs: dict attributes 
-    
-    """
-    cdef public string path 
-    cdef dict attrs
-
-    def __init__(self):
-        self.path = ''
-        self.attrs = {} 
-
-    cdef setOutput(self, OutputT& o):
-        self.path = o.path
-        self.attrs = o.attrs
-
-    property attrs:
-        def __get__(self): return self.attrs
-
-
 @reconnecting
-def get_job_outputs(Job job):
+def get_job_outputs(object job):
     """
-    Get the outputs of a :class:`.Job`
+    Get the outputs of all layers of a :class:`.Job`
 
-    :param job: :class:`.Job`
+    :param job: :class:`.Job` or str id
     :returns: list[:class:`.Output`]
     """
     cdef:
         OutputT outT
         vector[OutputT] outputs
-        list ret = []
+        Guid jobId
+        list ret
 
-    conn().proxy().getJobOutputs(outputs, job.id)
+    if isinstance(job, Job):
+        jobId = job.id
+    else:
+        jobId = job
+
+    conn().proxy().getJobOutputs(outputs, jobId)
 
     ret = [initOutput(outT) for outT in outputs]
     return ret

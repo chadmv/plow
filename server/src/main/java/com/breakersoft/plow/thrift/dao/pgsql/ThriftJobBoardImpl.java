@@ -42,6 +42,7 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 "job_dsp.int_cores_max,"+
                 "job_dsp.int_cores_min,"+
                 "job_dsp.int_cores_run, " +
+                "job_dsp.int_procs_run, " +
                 "job_count.int_total, "+
                 "job_count.int_succeeded,"+
                 "job_count.int_running,"+
@@ -53,7 +54,8 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 "job_stat.flt_cores_high, "+
                 "job_stat.int_core_time_high, "+
                 "job_stat.int_total_core_time_success, "+
-                "job_stat.int_total_core_time_fail "+
+                "job_stat.int_total_core_time_fail, "+
+                "job_stat.int_clock_time_high "+
             "FROM " +
                 "job " +
             "INNER JOIN " +
@@ -74,7 +76,8 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 "folder.int_order, " +
                 "folder_dsp.int_cores_max, " +
                 "folder_dsp.int_cores_min, " +
-                "folder_dsp.int_cores_run  " +
+                "folder_dsp.int_cores_run,  " +
+                "folder_dsp.int_procs_run " +
             "FROM " +
                 "folder " +
             "INNER JOIN folder_dsp ON folder.pk_folder = folder_dsp.pk_folder " +
@@ -101,7 +104,7 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 folder.setMaxCores(rs.getInt("int_cores_max"));
                 folder.setMinCores(rs.getInt("int_cores_min"));
                 folder.setRunCores(rs.getInt("int_cores_run"));
-
+                folder.setRunProcs(rs.getInt("int_procs_run"));
                 result.add(folder);
                 folders.put(folder.getId(), folder);
 
@@ -120,6 +123,7 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 stats.highCoreTime = rs.getInt("int_core_time_high");
                 stats.totalSuccessCoreTime = rs.getLong("int_total_core_time_success");
                 stats.totalFailCoreTime = rs.getLong("int_total_core_time_fail");
+                stats.highClockTime = rs.getLong("int_clock_time_high");
                 stats.totalCoreTime = stats.totalSuccessCoreTime + stats.totalFailCoreTime;
 
                 final JobT job = new JobT();
@@ -130,6 +134,7 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 job.setUsername(rs.getString("str_username"));
                 job.setPaused(rs.getBoolean("bool_paused"));
                 job.setRunCores(rs.getInt("int_cores_run"));
+                job.setRunProcs(rs.getInt("int_procs_run"));
                 job.setMaxCores(rs.getInt("int_cores_max"));
                 job.setMinCores(rs.getInt("int_cores_min"));
                 job.setStartTime(rs.getLong("time_started"));
@@ -140,7 +145,7 @@ public class ThriftJobBoardImpl extends AbstractDao implements ThriftJobBoardDao
                 job.setStats(stats);
 
                 folder.totals.deadTaskCount += job.totals.deadTaskCount;
-                folder.totals.dependTaskCount += job.totals.deadTaskCount;
+                folder.totals.dependTaskCount += job.totals.dependTaskCount;
                 folder.totals.eatenTaskCount += job.totals.eatenTaskCount;
                 folder.totals.runningTaskCount += job.totals.runningTaskCount;
                 folder.totals.succeededTaskCount += job.totals.succeededTaskCount;

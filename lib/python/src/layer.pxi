@@ -159,13 +159,20 @@ cdef class LayerStats:
     :var highCores: float
     :var avgCores: float
     :var stdDevCores: float
-    :var highCoreTime: int
-    :var avgCoreTime: int
-    :var lowCoreTime: int
+    :var highCoreTime: long
+    :var avgCoreTime: long
+    :var lowCoreTime: long
     :var stdDevCoreTime: float
     :var totalCoreTime: long
     :var totalSuccessCoreTime: long
     :var totalFailCoreTime: long
+    :var highClockTime: long
+    :var avgClockTime: long
+    :var lowClockTime: long
+    :var stdDevClockTime: float
+    :var totalClockTime: long
+    :var totalSuccessClockTime: long
+    :var totalFailClockTime: long
 
     """
     cdef LayerStatsT _stats
@@ -192,13 +199,13 @@ cdef class LayerStats:
         def __get__(self): return self._stats.stdDevCores
     
     property highCoreTime:
-        def __get__(self): return self._stats.highCoreTime
+        def __get__(self): return long(self._stats.highCoreTime)
     
     property avgCoreTime:
-        def __get__(self): return self._stats.avgCoreTime
+        def __get__(self): return long(self._stats.avgCoreTime)
     
     property lowCoreTime:
-        def __get__(self): return self._stats.lowCoreTime
+        def __get__(self): return long(self._stats.lowCoreTime)
     
     property stdDevCoreTime:
         def __get__(self): return self._stats.stdDevCoreTime
@@ -212,6 +219,26 @@ cdef class LayerStats:
     property totalFailCoreTime:
         def __get__(self): return long(self._stats.totalFailCoreTime)
 
+    property highClockTime:
+        def __get__(self): return long(self._stats.highClockTime)
+    
+    property avgClockTime:
+        def __get__(self): return long(self._stats.avgClockTime)
+    
+    property lowClockTime:
+        def __get__(self): return long(self._stats.lowClockTime)
+    
+    property stdDevClockTime:
+        def __get__(self): return self._stats.stdDevClockTime
+    
+    property totalClockTime:
+        def __get__(self): return long(self._stats.totalClockTime)
+    
+    property totalSuccessClockTime:
+        def __get__(self): return long(self._stats.totalSuccessClockTime)
+    
+    property totalFailClockTime:
+        def __get__(self): return long(self._stats.totalFailClockTime)
 
 #######################
 # Layers
@@ -426,6 +453,7 @@ cdef class Layer(PlowBase):
     :var runCores: int
     :var minRam: int
     :var maxRam: int
+    :var maxRetries: int
     :var threadable: bool
     :var totals: list[:class:`.TaskTotals`]
     :var tags: list(str)
@@ -475,11 +503,17 @@ cdef class Layer(PlowBase):
     property runCores:
         def __get__(self): return self._layer.runCores
 
+    property runProcs:
+        def __get__(self): return self._layer.runProcs
+
     property minRam:
         def __get__(self): return self._layer.minRam
 
     property maxRam:
         def __get__(self): return self._layer.maxRam
+
+    property maxRetries:
+        def __get__(self): return self._layer.maxRetries
 
     property threadable:
         def __get__(self): return self._layer.threadable
@@ -529,14 +563,16 @@ cdef class Layer(PlowBase):
         cdef list ret = get_layer_outputs(self)
         return ret
 
-    def add_output(self, string path, Attrs& attrs):
+    def add_output(self, string path, dict attrs):
         """
         Add an output to the layer 
 
         :param path: str 
         :param attrs: dict
+        :returns: :class:`.Output`
         """
-        add_layer_output(self, path, attrs)
+        cdef Output out = add_layer_output(self, path, attrs)
+        return out
 
     def set_tags(self, vector[string]& tags):
         """
@@ -634,13 +670,7 @@ def get_layer(object job, string name):
     else:
         jobId = job
         
-    try:
-        conn().proxy().getLayer(layerT, job.id, name)
-    except RuntimeError, e:
-        if str(e) in EX_CONNECTION:
-            raise
-        return None
-
+    conn().proxy().getLayer(layerT, jobId, name)
     layer = initLayer(layerT)
     return layer
 
@@ -664,49 +694,48 @@ def get_layers(object job):
     else:
         jobId = job
 
-    try:
-        conn().proxy().getLayers(layers, jobId)
-    except RuntimeError, e:
-        if str(e) in EX_CONNECTION:
-            raise
-        ret = []
-        return ret
-
+    conn().proxy().getLayers(layers, jobId)
     ret = [initLayer(layerT) for layerT in layers]
     return ret
 
-def add_layer_output(Layer layer, string path, Attrs& attrs):
+def add_layer_output(Layer layer, string path, dict attrs):
     """
     A an output to a layer 
 
     :param layer: :class:`.Layer`
     :param path: str 
     :param attrs: dict
+    :returns: :class:`.Output`
     """
-    conn().proxy().addOutput(layer.id, path, attrs)
+    cdef:
+        OutputT outT
+        Output out
+
+    conn().proxy().addOutput(outT, layer.id, path, dict_to_attrs(attrs))
+    out = initOutput(outT)
+    return out
 
 @reconnecting
-def get_layer_outputs(Layer layer):
+def get_layer_outputs(object layer):
     """
     Get the outputs for a layer 
 
-    :param layer: :class:`.Layer`
+    :param layer: :class:`.Layer` or str id
     :returns: list[:class:`.Layer`]
     """
     cdef:
         vector[OutputT] outputs
         OutputT outT 
         Output output 
-        list ret 
+        Guid layerId
+        list ret
 
-    try:
-        conn().proxy().getLayerOutputs(outputs, layer.id)
-    except RuntimeError, e:
-        if str(e) in EX_CONNECTION:
-            raise
-        ret = []
-        return ret 
+    if isinstance(layer, Layer):
+        layerId = layer.id
+    else:
+        layerId = layer
 
+    conn().proxy().getLayerOutputs(outputs, layerId)
     ret = [initOutput(outT) for outT in outputs]
     return ret
 

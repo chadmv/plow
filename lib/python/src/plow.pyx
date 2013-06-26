@@ -12,6 +12,7 @@ include "cluster.pxi"
 include "filter.pxi"
 include "quota.pxi"
 include "depend.pxi"
+include "output.pxi"
 
 #
 # Module Init

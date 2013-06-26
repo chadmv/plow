@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Bootstrap, from Twitter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+ 
+    <!-- Le styles -->
+    
+    <link href="../bootstrap/css/win8.css" rel="stylesheet">
+    <link href="../bootstrap/css/custom.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+ 
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../bootstrap/js/html5shiv.js"></script>
+    <![endif]-->
+                                   
+	
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script src="../bootstrap/js/root.js"></script>
+	<script src="../bootstrap/js/handlebars.js"></script>
+	<script src="../bootstrap/js/interval.js"></script>
+	<script src="../bootstrap/js/moment.js"></script>
+	<script src="../bootstrap/js/thrift.js"></script>
+    <script src="../bootstrap/js/plow_types.js"></script>
+    <script src="../bootstrap/js/RpcService.js"></script>
+	<script>
+		
+		
+		// setup google charts
+		google.load('visualization', '1.0', {'packages':['corechart']});
+		
+		$(function() {
+			
+			// some variables we need througout
+			var $folders = $("tbody.folders"),
+				$cont = $(".table-container"),
+				$win = $(window),
+				$subProgressContainer = $(".progressSubContainer"),
+				$mainProgress = $(".progress.main"),
+				$jobList = $(".jobList");
+			
+			
+			
+			window.Plow = Root.inherit({
+				client: null,
+				time: 0,
+				fake: false,
+				_init : function() {
+					var self = this;
+					
+					// plow api init
+					var transport = new Thrift.Transport("/plow/api");
+					var protocol  = new Thrift.Protocol(transport);
+					this.client   = window.client = new RpcServiceClient(protocol);
+					
+					// templates
+					this.jobListItemTemplate = Handlebars.compile($("#jobListItemTemplate").text());
+					this.quotaTemplate = Handlebars.compile($("#quotaTemplate").text());
+					this.folderTemplate = Handlebars.compile($("#folderListItemTemplate").text());
+					
+					// get 1 project to use
+					this.project = self.client.getProjects()[0];
+					
+					// create a filter for that 1 project
+					this.filter = new QuotaFilterT({project:[self.project.id]});
+					
+					// setup some fake clusters for multiple quotas
+					//this.fakeClusters();
+					
+					// set the title
+					$(".project-name").text(self.project.title);
+					
+					// spin up the render loop
+					requestInterval(function() {
+						self.render();
+						self.time += 5;
+					},5000);
+					// first redner
+					this.render();
+					
+					// resize function
+					$win.resize(function() {
+						if($win.width() <= 1024) {
+							$cont.height("auto");
+						} else {
+							$cont.height($win.height() - 570 );
+						}
+						self.coresChart.redraw();
+					}).resize();
+				},
+				
+
+				// render loop
+				// get and save some data that the render methods needs like jobs and quotas
+				render: function() {
+
+					// get quotas
+					this.quotas = this.client.getQuotas(this.filter);
+					// get folders
+					this.folders = this.client.getJobBoard(this.project.id);
+					
+					// render methods
+					this.renderJobList();
+					this.renderCoresChart();
+					this.renderQuotaGraphs();
+					this.renderFoldersChart();
+				},
+				
+				// folders chart
+				renderFoldersChart: function() {
+					var html = "", self = this;
+					
+					// go through the folders
+					this.folders.forEach(function(folder) {
+						html += self.folderTemplate(folder);
+					});
+					// place the folders
+					$folders.html(html);
+				},
+				
+				// bar graphs at the top
+				renderQuotaGraphs: function() {
+					var self = this,
+						html = "",
+						totalUsed = 0,
+						totalSize = 0;
+					
+					// loop through quotas
+					this.quotas.forEach(function(q) {
+						
+						// for rollup
+						totalUsed += q.runCores;
+						totalSize += q.size;
+						
+						html += self.quotaTemplate({
+							green: ~~((q.runCores / q.size) * 100),
+							red: ~~((1 - (q.runCores / q.size)) * 100)
+						});
+					});
+					
+					// set the chart
+					$subProgressContainer.html(html); 
+					
+					// update main
+					$mainProgress.replaceWith(self.quotaTemplate({
+						main: true,
+						green: ~~((totalUsed / totalSize) * 100),
+						red: ~~((1 - (totalUsed / totalSize)) * 100)
+					}));
+					
+				},
+				
+				// main job table
+				renderJobList: function() {
+
+					// vars
+					var self = this, jobs = [], stop = 0;
+
+					// start clean
+					$jobList.html("");
+	
+					// loop over folders
+					self.folders.forEach(function(folder) {
+						jobs = folder.jobs;
+						
+						// loop over jobs
+						jobs.forEach(function(job) {
+							// some text re-arrange
+							
+							job.startTime = !!job.startTime ? new Date(job.startTime) : "Not Started";
+							
+							// stop time or now
+							var momentStart = moment(job.startTime);
+							var momentStop = !!job.stopTime ? moment(job.stopTime) : moment(new Date());
+							job.duration = 
+								moment.duration(momentStop-momentStart).hours() + ":" +
+								moment.duration(momentStop-momentStart).minutes() + ":" +
+								moment.duration(momentStop-momentStart).seconds();
+							
+							
+							// stop time or not stopped
+							job.stopTime = !!job.stopTime ? new Date(job.stopTime) : "Not Stopped";
+							//
+							// add to list
+							$jobList.append(self.jobListItemTemplate(job));
+						});
+					});
+				},
+				
+				// historical cores chart
+				renderCoresChart: function() {
+					var self = this;
+
+					// init the persistent graph data
+					if(!self.coreGraphData) self.coreGraphData = [];
+					
+					// create the title
+					var title = ['Seconds'];
+
+					// create data line
+					var line = [];
+					// push the time to start
+					line.push(self.time);
+					
+					// push each quota
+					self.quotas.forEach(function(q) {
+						// fake a random number
+						if(self.fake) {
+							q.runCores = ~~(Math.random() * (q.size - 1 + 1)) + 1;
+						}
+						// push the quota
+						line.push(q.runCores);
+						// add the title for this item as well
+						title.push(q.name.replace(/^[^\.]+\./,''));
+					});
+					
+					// save this line to the object
+					self.coreGraphData.push(line);
+					
+					// if we already have 10 items, delete one
+					if(self.coreGraphData.length > 10) {
+						self.coreGraphData.shift();
+					}	
+					
+					// combine into 2d array for google
+					var ar = [title].concat(self.coreGraphData);
+					
+					// Create the data table.
+					var data = google.visualization.arrayToDataTable(ar);
+				
+					var options = {
+					  title: 'Run Cores Over Time'
+					};
+				
+					// Instantiate and draw our chart, passing in some options.
+					self.coresChart = new google.visualization.LineChart($("#line")[0]);
+					self.coresChart.draw(data, options);
+					
+					// define our own redraw method
+					self.coresChart.redraw = function() {
+						self.coresChart.draw(data,options);
+					}
+					
+				},
+				
+				
+				// fakeish data
+				fakeClusters: function() {
+					var self = this;
+					
+					// create some fake clusters
+					var c1 = this.client.createCluster("c1");
+						this.client.setClusterTags(c1.id,["c1"]);
+					var c2 = this.client.createCluster("c2");
+						this.client.setClusterTags(c1.id,["c2"]);
+						
+					// create some quotas
+					this.client.createQuota(self.project.id, c1.id, 20,20);
+					this.client.createQuota(self.project.id, c2.id, 20,20);
+					
+				}
+				
+				
+			});
+		  	
+		  	
+			// set google callback
+		  	google.setOnLoadCallback(Plow.renderCoresChart.call(Plow));
+ 
+		});
+		
+		
+		
+	</script>
+	
+  </head>
+ 
+  <body>
+ 
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner nav-grey">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand project-name" href="#">Project name</a>
+          <div class="nav-collapse collapse">
+            <p class="navbar-text pull-right">
+              Logged in as <a href="#" class="navbar-link">Username</a>
+            </p>
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+ 
+    <div class="container-fluid">
+      <div class="row-fluid main-row">
+        <div class="span3">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              <li class="nav-header project-name">Sidebar</li>
+              <li>
+              	<div class="progress main">
+				  <div class="bar bar-success" style="width: 80%;"></div>
+				  <div class="bar bar-danger" style="width: 20%;"></div>
+				</div>
+				
+				<blockquote class="progressSubContainer">
+					<!-- bar graphs go here -->
+				</blockquote>
+				
+              </li>
+              <li class="nav-header">Cores Over Time</li>
+              <li id="line"></li>
+              <li class="nav-header">Folders</li>
+			<li>
+            <table class="table table-striped groups">
+				  <thead>
+					<tr>
+					  <th>Title</th>
+					  <th>Cores</th>
+					  <th>Procs</th>
+					  <th>Tasks</th>
+					  <th>Waiting</th>
+					</tr>
+				  </thead>
+				  <tbody class="folders">
+					<!-- folders here -->
+				  </tbody>
+				</table>
+				</li>
+			</ul>
+            
+            
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9">
+          <div class="hero-unit">
+            <h1>Welcome to Plow</h1>
+            <p>Plow is render farm management software specifically designed for VFX workloads Plow is render farm management software specifically designed for VFX workloads..</p>
+            <p><a href="#" class="btn btn-primary btn-large">New Project &raquo;</a></p>
+          </div>
+          <div class="row-fluid table-row">
+           		
+           	
+           	<div class="navbar">
+			  <div class="navbar-inner">
+				<div class="container-fluid">
+					<a class="brand" href="#">Active Running Jobs</a>
+					<form class="navbar-search pull-left">
+					  <input type="text" class="search-query" placeholder="Search">
+					</form>
+					
+					<ul class="nav">
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Groups <b class="caret"></b></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="#one">one</a></li>
+                        <li><a href="#two">two</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#three">three</a></li>
+                      </ul>
+                    </li>
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">User <b class="caret"></b></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="#one">one</a></li>
+                        <li><a href="#two">two</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#three">three</a></li>
+                      </ul>
+                    </li>
+                    
+                  </ul>
+                  
+                  <ul class="nav pull-right">
+                  	<li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Priority Chanage <b class="caret"></b></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="#one">one</a></li>
+                        <li><a href="#two">two</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#three">three</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+					
+				</div>
+			</div>
+        </div>
+        
+        <div class="table-container">
+			<table class="table table-striped data">
+			  <thead>
+				<tr>
+				  <th>Name</th>
+				  <th>User</th>
+				  <th>Start Time</th>
+				  <th>Stop Time</th>
+				  <th>Duration</th>
+				  <th>Paused</th>
+				  <th>Tasks</th>
+				  <th>State</th>
+				</tr>
+			  </thead>
+			  <tbody class="jobList">
+
+			  </tbody>
+			</table>
+		</div>
+        
+      </div><!--/row-->
+
+      <footer>
+        <p>&copy; Company 2013</p>
+      </footer>
+ 
+    </div><!--/.fluid-container-->
+ 
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="../bootstrap/js/bootstrap.js"></script>
+    
+    <script type="template/handlebars" id="jobListItemTemplate">
+    	<tr class="jobListItem" data-job="{{id}}">
+    		<td>{{name}}</td>
+    		<td>{{username}}</td>
+    		<td>{{startTime}}</td>
+    		<td>{{stopTime}}</td>
+    		<td>{{duration}}</td>
+    		<td>{{paused}}</td>
+    		<td>{{totals.totalTaskCount}}</td>
+    		<td>{{state}}</td>
+    	</tr>
+    </script>
+    
+    <script type="template/handlebars" id="folderListItemTemplate">
+    	<tr class="folderListItem" data-folder="{{id}}">
+    		<td>{{name}}</td>
+    		<td>{{runCores}}</td>
+    		<td>{{runProcs}}</td>
+    		<td>{{totals.totalTaskCount}}</td>
+    		<td>{{totals.waitingTaskCount}}</td>
+    	</tr>
+    </script>
+    
+    <script type="template/handlebars" id="quotaTemplate">
+    	<div class="progress {{#if main}}main{{/if}}">
+		  <div class="bar bar-success" style="width: {{green}}%;"></div>
+		  <div class="bar bar-danger" style="width: {{red}}%;"></div>
+		</div>
+    </script>
+
+  </body>
+</html>

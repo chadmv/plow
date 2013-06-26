@@ -6,7 +6,8 @@ __all__ = [
     "Number",
     "Decimal",
     "DateTime",
-    "PillWidget"
+    "PillWidget",
+    "Checkbox"
 ]
 
 class FormWidget(QtGui.QWidget):
@@ -57,7 +58,7 @@ class Text(FormWidget):
         FormWidget.__init__(self, parent)
         self.setWidget(QtGui.QLineEdit(text, self))
         self._widget.setFocusPolicy(QtCore.Qt.NoFocus)
-
+        self._widget.setCursorPosition(1)
     def _setReadOnly(self, value):
         self._widget.setReadOnly(value)
 
@@ -65,8 +66,10 @@ class Number(FormWidget):
     def __init__(self, value, parent=None):
         FormWidget.__init__(self, parent)
         widget = QtGui.QSpinBox(self)
-        widget.setValue(value)
+        widget.setMinimum(0)
+        widget.setMaximum(1000000)
         widget.setMinimumWidth(100)
+        widget.setValue(value)
         self.setWidget(widget)
         self._widget.setFocusPolicy(QtCore.Qt.NoFocus)
 
@@ -112,3 +115,12 @@ class PillWidget(FormWidget):
         self.label.setStyleSheet("border: 1px solid #222222; background-color: %s; border-radius: 6px;" % color)
         self.label.setMinimumWidth(100)
         self.setWidget(self.label)
+
+class Checkbox(FormWidget):
+    def __init__(self, bvalue, parent=None):
+        FormWidget.__init__(self, parent)
+        self.setWidget(QtGui.QCheckBox(self))
+        self._widget.setCheckState(QtCore.Qt.Checked if bvalue else QtCore.Qt.Unchecked)
+        self._widget.setFocusPolicy(QtCore.Qt.NoFocus)
+    def _setReadOnly(self, value):
+        self._widget.setReadOnly(value)

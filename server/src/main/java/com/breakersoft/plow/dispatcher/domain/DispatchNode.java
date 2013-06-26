@@ -2,7 +2,6 @@ package com.breakersoft.plow.dispatcher.domain;
 
 import java.util.Set;
 
-import com.breakersoft.plow.Defaults;
 import com.breakersoft.plow.NodeE;
 import com.breakersoft.plow.dispatcher.DispatchConfig;
 import com.breakersoft.plow.thrift.SlotMode;

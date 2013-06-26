@@ -244,6 +244,13 @@ public class DispatchServiceImpl implements DispatchService {
         procDao.setProcDeallocated(proc);
     }
 
+
+    @Override
+    public void unassignAndMarkForDeallocation(Proc proc) {
+        procDao.unassignAndMarkForDeallocation(proc);
+    }
+
+
     @Override
     @Transactional(readOnly=true)
     public List<DispatchTask> getDispatchableTasks(JobId job,

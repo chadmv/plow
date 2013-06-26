@@ -77,6 +77,9 @@ public class RndEventHandler {
         if (PlowUtils.isValid(ping.tasks)) {
             statsService.updateProcRuntimeStats(ping.tasks);
             statsService.updateTaskRuntimeStats(ping.tasks);
+            statsService.updateLayerRuntimeStats(ping.tasks);
+            statsService.recalculateLayerMinimumMemory(ping.tasks);
+            statsService.updateJobRuntimeStats(ping.tasks);
         }
 
         if (node.isDispatchable()) {

@@ -37,7 +37,7 @@ class WorkspaceManager(QtCore.QObject):
 
         self.__initDefaultWorkspaces()
 
-        event.EventManager.bind("GLOBAL_REFRESH", self.refresh)
+        event.EventManager.GlobalRefresh.connect(self.refresh)
 
     def __initDefaultWorkspaces(self):
         for space in self.DEFAULTS: 
@@ -229,7 +229,7 @@ class Panel(QtGui.QDockWidget):
         # Note: the widet in the panel adds more buttons
         # to this toolbar.
         titleBar = QtGui.QWidget(self)
-        barLayout = QtGui.QVBoxLayout(titleBar)
+        barLayout = QtGui.QHBoxLayout(titleBar)
         barLayout.setSpacing(0)
         barLayout.setContentsMargins(0, 0, 0, 0)
 
@@ -248,8 +248,10 @@ class Panel(QtGui.QDockWidget):
 
         toolbar.addSeparator()
 
-        barLayout.addWidget(self.__label)
         barLayout.addWidget(toolbar)
+        barLayout.addStretch()
+        barLayout.addWidget(self.__label)
+        barLayout.addSpacing(4)
 
         self.setTitleBarWidget(titleBar)
         self.init()
@@ -259,13 +261,13 @@ class Panel(QtGui.QDockWidget):
 
     def setRefreshTime(self, value):
         value = int(value)
+
         if self.__refreshTimer is None:
             self.__refreshTimer = QtCore.QTimer(self)
-            self.__refreshTimer.timeout.connect(self.refresh)
-        if value < 1:
-            value = 1
+            self.__refreshTimer.timeout.connect(self.__refresh)
+
         self.__refreshTimer.stop()
-        self.__refreshTimer.start(value * 1000)
+        self.__refreshTimer.start(max(value, 1) * 1000)
 
     def type(self):
         """
@@ -293,6 +295,20 @@ class Panel(QtGui.QDockWidget):
         Initialization function implemented by subclass.
         """
         pass
+
+    def __refresh(self):
+        """
+        Wrap the public refresh method in calls 
+        that stop and start the timer
+        """
+        timer = self.__refreshTimer
+        if timer:
+            timer.stop()
+
+        self.refresh()
+
+        if timer:
+            timer.start()
 
     def refresh(self):
         """

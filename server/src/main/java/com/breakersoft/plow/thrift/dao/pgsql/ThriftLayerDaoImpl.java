@@ -33,13 +33,21 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             stats.avgCores = rs.getDouble("flt_cores_avg");
             stats.stdDevCores = rs.getDouble("flt_cores_std");
 
-            stats.highCoreTime = rs.getInt("int_core_time_high");
-            stats.lowCoreTime = rs.getInt("int_core_time_low");
-            stats.avgCoreTime = rs.getInt("int_core_time_avg");
+            stats.highCoreTime = rs.getLong("int_core_time_high");
+            stats.lowCoreTime = rs.getLong("int_core_time_low");
+            stats.avgCoreTime = rs.getLong("int_core_time_avg");
             stats.stdDevCoreTime = rs.getDouble("flt_core_time_std");
             stats.totalSuccessCoreTime = rs.getLong("int_total_core_time_success");
             stats.totalFailCoreTime = rs.getLong("int_total_core_time_fail");
             stats.totalCoreTime = stats.totalSuccessCoreTime + stats.totalFailCoreTime;
+
+            stats.highClockTime = rs.getLong("int_clock_time_high");
+            stats.lowClockTime = rs.getLong("int_clock_time_low");
+            stats.avgClockTime = rs.getLong("int_clock_time_avg");
+            stats.stdDevClockTime = rs.getDouble("flt_clock_time_std");
+            stats.totalSuccessClockTime = rs.getLong("int_total_clock_time_success");
+            stats.totalFailClockTime = rs.getLong("int_total_clock_time_fail");
+            stats.totalClockTime = stats.totalSuccessClockTime + stats.totalFailClockTime;
 
             final LayerT layer = new LayerT();
             layer.setStats(stats);
@@ -57,6 +65,9 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
             layer.minRam = rs.getInt("int_ram_min");
             layer.maxRam = rs.getInt("int_ram_max");
             layer.maxRetries = rs.getInt("int_retries_max");
+            layer.runCores = rs.getInt("int_cores_run");
+            layer.runProcs = rs.getInt("int_procs_run");
+            layer.serv = rs.getString("str_service");
             return layer;
         }
     };
@@ -68,11 +79,13 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer.str_name,"+
                 "layer.str_range,"+
                 "layer.str_tags, " +
+                "layer.str_service, "+
                 "layer.int_chunk_size,"+
                 "layer.int_cores_min,"+
                 "layer.int_cores_max,"+
                 "layer.int_ram_min, " +
                 "layer.int_ram_max, " +
+                "layer.int_order,"+
                 "layer.bool_threadable,"+
                 "layer.int_retries_max,"+
                 "layer_count.int_total, "+
@@ -83,6 +96,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer_count.int_waiting,"+
                 "layer_count.int_depend, "+
                 "layer_dsp.int_cores_run,"+
+                "layer_dsp.int_procs_run, " +
                 "layer_stat.int_ram_high,"+
                 "layer_stat.int_ram_avg, " +
                 "layer_stat.flt_ram_std, " +
@@ -94,7 +108,13 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
                 "layer_stat.int_core_time_avg, " +
                 "layer_stat.flt_core_time_std, " +
                 "layer_stat.int_total_core_time_success, " +
-                "layer_stat.int_total_core_time_fail " +
+                "layer_stat.int_total_core_time_fail, " +
+                "layer_stat.int_clock_time_high, " +
+                "layer_stat.int_clock_time_low, " +
+                "layer_stat.int_clock_time_avg, " +
+                "layer_stat.flt_clock_time_std, " +
+                "layer_stat.int_total_clock_time_success, " +
+                "layer_stat.int_total_clock_time_fail " +
             "FROM " +
                 "layer " +
             "INNER JOIN layer_count ON layer.pk_layer = layer_count.pk_layer " +
@@ -118,7 +138,7 @@ public class ThriftLayerDaoImpl extends AbstractDao implements ThriftLayerDao {
     }
 
     private static final String GET_BY_JOB =
-            GET + " WHERE layer.pk_job = ?";
+            GET + " WHERE layer.pk_job = ? ORDER BY layer.int_order ASC";
 
     @Override
     public List<LayerT> getLayers(UUID jobId) {

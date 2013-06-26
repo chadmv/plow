@@ -34,4 +34,6 @@ public interface ProcDao {
      * @return
      */
     boolean setProcDeallocated(Proc proc);
+
+    boolean unassignAndMarkForDeallocation(Proc proc);
 }

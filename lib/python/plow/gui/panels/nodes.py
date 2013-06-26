@@ -21,10 +21,7 @@ for a in dir(plow.client.NodeState):
     NODE_STATES[val] = a
 
 
-ObjectRole = QtCore.Qt.UserRole + 1
-
 LOGGER = logging.getLogger(__name__)
-
 
 #########################
 # NodePanel
@@ -55,15 +52,14 @@ class NodePanel(Panel):
 
     def refresh(self):
         clusters = plow.client.get_clusters()
+        names = sorted(c.name for c in clusters)
 
         nodeWidget = self.widget()
         nodeWidget.refresh()
         nodeWidget.setClusterList(clusters)
 
         filt = self.__cluster_filter
-
         sel = filt.selectedOptions()
-        names = sorted(c.name for c in clusters)
         filt.setOptions(names, selected=sel)
 
     def __setNodesLocked(self, locked):
@@ -90,54 +86,52 @@ class NodeWidget(QtGui.QWidget):
         layout = QtGui.QVBoxLayout(self)
         layout.setContentsMargins(4,0,4,4)
 
+        self.__refreshEnabled = True
         self.__clusters = {}
 
         self.__model = model = NodeModel(self)
         self.__proxy = proxy = NodeFilterProxyModel(self)
-        proxy.setDynamicSortFilter(True)
+        proxy.setSortRole(model.DataRole)
         proxy.setSourceModel(model)
 
         self.__view = view = TableWidget(self)
         view.setModel(proxy)
-        view.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
         layout.addWidget(view)
 
+        headers = model.HEADERS
         view.setColumnWidth(0, 150)
-        view.setColumnWidth(model.HEADERS.index('Locked'), 60)
-        view.setColumnWidth(model.HEADERS.index('Cores (Total)'), 90)
-        view.setColumnWidth(model.HEADERS.index('Cores (Idle)'), 90)
+        view.setColumnWidth(headers.index('Locked'), 55)
+        view.setColumnWidth(headers.index('State'), 75)
+        view.setColumnWidth(headers.index('Total Cores'), 90)
+        view.setColumnWidth(headers.index('Idle Cores'), 90)
+        view.setColumnWidth(headers.index('Tags'), 100)
+        view.setColumnWidth(headers.index('Ping'), 80)
+        view.setColumnWidth(headers.index('Uptime'), 80)
 
-        view.setColumnHidden(model.HEADERS.index('Ram (Total)'), True)
-        view.setColumnHidden(model.HEADERS.index('Swap (Total)'), True)
+        view.setColumnHidden(headers.index('Total Ram'), True)
+        view.setColumnHidden(headers.index('Total Swap'), True)
 
-        view.setItemDelegateForColumn(model.HEADERS.index('Ram (Free)'), 
-                                      ResourceDelegate(parent=self))
-        view.setItemDelegateForColumn(model.HEADERS.index('Swap (Free)'), 
-                                      ResourceDelegate(warn=.75, critical=.25, parent=self))
+        delegate = ResourceDelegate(dataRole=model.DataRole, parent=self)
+        view.setItemDelegateForColumn(headers.index('Free Ram'), delegate)
+
+        delegate = ResourceDelegate(warn=.75, critical=.25, dataRole=model.DataRole, parent=self)
+        view.setItemDelegateForColumn(headers.index('Free Swap'), delegate)
 
         view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
         view.customContextMenuRequested.connect(self.__showContextMenu)
         view.doubleClicked.connect(self.__itemDoubleClicked)
 
-        
-    def model(self):
-        return self.proxyModel().sourceModel()
-
-    def setModel(self, model):
-        try:
-            self.proxyModel().sourceModel().deleteLater()
-        except:
-            pass 
-        self.proxyModel().setSourceModel(model)
-
     def refresh(self):
-        self.__model.refresh()
+        if self.__refreshEnabled:
+            self.__view.setSortingEnabled(False)
+            self.__model.refresh()
+            self.__view.setSortingEnabled(True)
 
     def getSelectedNodes(self):
         rows = self.__view.selectionModel().selectedRows()
-        return [index.data(ObjectRole) for index in rows]
+        return [index.data(self.__model.ObjectRole) for index in rows]
 
     def setClusterFilters(self, clusters):
         cluster_set = set()
@@ -157,15 +151,36 @@ class NodeWidget(QtGui.QWidget):
 
     def assignClusterToSelected(self, cluster):
         nodes = self.getSelectedNodes()
-        if nodes:
-            did_set = False
-            for node in nodes:
-                if node.clusterName != cluster.name:
-                    node.set_cluster(cluster)
-                    did_set = True
+        if not nodes:
+            return
 
-            if did_set:
-                EventManager.emit("GLOBAL_REFRESH")
+        size = len(nodes)
+        progress = QtGui.QProgressDialog("Setting cluster to %s..." % cluster.name, 
+                                         "Cancel", 0, size, self)
+
+        progress.setMinimumDuration(3)
+        completed = True
+        did_set = False
+
+        for i, node in enumerate(nodes):
+            progress.setValue(i)
+
+            if progress.wasCanceled():
+                completed = False
+                break
+
+            if node.clusterName != cluster.name:
+                node.set_cluster(cluster)
+                did_set = True
+
+            if i % 10 == 0:
+                QtGui.qApp.processEvents()
+
+        progress.setValue(size)
+        QtGui.qApp.processEvents()
+
+        if did_set:
+            EventManager.GlobalRefresh.emit()
 
     def lockSelected(self, locked):
         nodes = self.getSelectedNodes()
@@ -177,40 +192,42 @@ class NodeWidget(QtGui.QWidget):
                     did_lock = True
 
             if did_lock:
-                EventManager.emit("GLOBAL_REFRESH")
+                EventManager.GlobalRefresh.emit()
 
     def __itemDoubleClicked(self, index):
-        uid = index.data(ObjectRole).id
-        EventManager.emit("NODE_OF_INTEREST", uid)
+        uid = index.data(self.__model.ObjectRole).id
+        EventManager.NodeOfInterest.emit(uid)
 
     def __showContextMenu(self, pos):
-        menu = QtGui.QMenu()
-        menu.addAction(QtGui.QIcon(":/images/locked.png"), 
-                        "Lock Nodes", partial(self.lockSelected, True))
-        menu.addAction(QtGui.QIcon(":/images/unlocked.png"), 
-                        "Unlock Nodes", partial(self.lockSelected, False))
+        menu = QtGui.QMenu(self)
 
         cluster_menu = menu.addMenu("Set Cluster")
         for name, cluster in sorted(self.__clusters.iteritems()):
             action = cluster_menu.addAction(name)
             action.triggered.connect(partial(self.assignClusterToSelected, cluster))
 
-        menu.exec_(self.mapToGlobal(pos))
+        menu.addAction(QtGui.QIcon(":/images/locked.png"), 
+                        "Lock Nodes", partial(self.lockSelected, True))
+        menu.addAction(QtGui.QIcon(":/images/unlocked.png"), 
+                        "Unlock Nodes", partial(self.lockSelected, False))
 
+        self.__refreshEnabled = False
+        menu.exec_(self.mapToGlobal(pos))
+        self.__refreshEnabled = True
 
 #########################
 # NodeModel
 #########################
-class NodeModel(QtCore.QAbstractTableModel):
+class NodeModel(models.PlowTableModel):
 
     HEADERS = [
                 "Name", "Cluster", 
-                "State", "Locked", "Cores (Total)", "Cores (Idle)",
-                "Ram (Total)", "Ram (Free)", "Swap (Total)",
-                "Swap (Free)", "Ping", "Uptime"
+                "State", "Locked", "Total Cores", "Idle Cores",
+                "Total Ram", "Free Ram", "Total Swap",
+                "Free Swap", "Ping", "Uptime", "Tags",
                ]
 
-    HEADER_CALLBACKS = {
+    DISPLAY_CALLBACKS = {
         0 : lambda n: n.name,
         1 : lambda n: n.clusterName,
         2 : lambda n: NODE_STATES.get(n.state, ''),
@@ -223,95 +240,39 @@ class NodeModel(QtCore.QAbstractTableModel):
         9 : lambda n: n.system.freeSwapMb,
         10: lambda n: formatDuration(n.updatedTime), 
         11: lambda n: formatDuration(n.bootTime), 
+        12: lambda n: ', '.join(n.tags), 
     }
 
     def __init__(self, parent=None):
         super(NodeModel, self).__init__(parent)
-        self.__items = []
-        self.__index = {}
-        self.__clusters = {}
 
-    def hasChildren(self, parent):
-        return False
+    def fetchObjects(self):
+        return plow.client.get_nodes()
 
     def reload(self):
         nodes = plow.client.get_nodes()
-        self.setNodeList(nodes)
+        self.setItemList(nodes)
 
     def refresh(self):
-        if not self.__items:
+        if not self._items:
             self.reload()
             return 
 
-        rows = self.__index
-        colCount = self.columnCount()
-        parent = QtCore.QModelIndex()
+        super(NodeModel, self).refresh()
 
-        nodes = plow.client.get_nodes()
-        nodes_ids = set()
-        to_add = set()
-
-        # Update
-        for node in nodes:
-            nodes_ids.add(node.id)
-            if node.id in self.__index:
-                row = rows[node.id]
-                self.__items[row] = node
-                start = self.index(row, 0)
-                end = self.index(row, colCount-1)
-                self.dataChanged.emit(start, end)
-                LOGGER.debug("updating %s %s", node.id, node.name)
-            else:
-                to_add.add(node)
-        
-        # Add new
-        if to_add:
-            size = len(to_add)
-            start = len(self.__items)
-            end = start + size - 1
-            self.beginInsertRows(parent, start, end)
-            self.__items.extend(to_add)
-            self.endInsertRows()
-            LOGGER.debug("adding %d new nodes", size)
-
-        # Remove
-        to_remove = set(self.__index.iterkeys()).difference(nodes_ids)
-        for row, old_id in sorted(((rows[old_id], old_id) for old_id in to_remove), reverse=True):
-            self.beginRemoveRows(parent, row, row)
-            node = self.__items.pop(row)
-            self.endRemoveRows()
-            LOGGER.debug("removing %s %s", old_id, node.name)
-
-        self.__index = dict((n.id, row) for row, n in enumerate(self.__items))
-
-    def rowCount(self, parent):
-        return len(self.__items)
-
-    def columnCount(self, parent=None):
-        return len(self.HEADERS)
 
     def data(self, index, role):
-        if not index.isValid():
-            return
-
         row = index.row()
         col = index.column()
-        node = self.__items[row]
+        node = self._items[row]
 
-        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.ToolTipRole:
-            return self.HEADER_CALLBACKS[col](node)
-
-        elif role == QtCore.Qt.UserRole:
+        if role == self.DataRole:
             if col == 7:
                 return node.system.freeRamMb / float(node.system.totalRamMb)
             elif col == 9:
                 return node.system.freeSwapMb / float(node.system.totalSwapMb)
             else:
-                return self.HEADER_CALLBACKS[col](node) 
-
-        elif role == QtCore.Qt.TextAlignmentRole:
-            if col != 0:
-                return QtCore.Qt.AlignCenter
+                return self.DISPLAY_CALLBACKS[col](node) 
 
         elif role == QtCore.Qt.BackgroundRole:
             if node.state == plow.client.NodeState.DOWN:
@@ -320,38 +281,7 @@ class NodeModel(QtCore.QAbstractTableModel):
             if node.locked:
                 return constants.BLUE
 
-            return None
-
-        elif role == ObjectRole:
-            return node
-
-    def headerData(self, section, orientation, role):
-        if role == QtCore.Qt.TextAlignmentRole:
-            if section == 0:
-                return QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter 
-            else:
-                return QtCore.Qt.AlignCenter
-
-        if role != QtCore.Qt.DisplayRole:
-            return None 
-
-        if orientation == QtCore.Qt.Vertical:
-            return section 
-
-        return self.HEADERS[section]
-
-    def nodeFromIndex(self, idx):
-        if not idx.isValid():
-            return None 
-
-        node = self.__items[idx.row()]
-        return node
-
-    def setNodeList(self, nodeList):
-        self.beginResetModel()
-        self.__items = nodeList
-        self.__index = dict((n.id, row) for row, n in enumerate(nodeList))
-        self.endResetModel()
+        return super(NodeModel, self).data(index, role)
 
 
 #########################
@@ -383,7 +313,7 @@ class NodeFilterProxyModel(models.AlnumSortProxyModel):
         if not idx.isValid():
             return False
 
-        node = model.data(idx, ObjectRole)
+        node = model.data(idx, NodeModel.ObjectRole)
         if not node:
             return False
 

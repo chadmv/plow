@@ -1,0 +1,63 @@
+body {
+	padding-top: 60px;
+	padding-bottom: 40px;
+}
+.sidebar-nav {
+	padding: 9px 0;
+}
+
+@media (max-width: 980px) {
+	/* Enable use of floated navbar text */
+	.navbar-text.pull-right {
+		float: none;
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+	
+	.hero-unit {
+		display:none;
+	}
+	
+}
+
+footer {
+	position:fixed;
+	bottom:0px;
+	background:#f7f7f7;
+	width:100%;
+	right:0px;
+	left:0px;
+	color:white;
+	padding: 2px;
+	padding-top:8px;
+	border-top: 1px solid #D5D5D5;
+	color: #333;
+	padding-left: 25px;
+}
+
+table.groups {
+	font-size: 11px
+}
+
+.main-row {
+	margin-top:11px;
+}
+
+.progress {
+	height:15px !important;
+}
+.progress:last-child {
+	margin-bottom:0px;
+}
+
+blockquote.prog {
+	padding: 0 0 0 15px !important
+}
+
+
+.progress-success .bar, .progress .bar-success {
+	background: #5EB95E;
+}
+.progress-danger .bar, .progress .bar-danger {
+	background: #DD514C;
+}

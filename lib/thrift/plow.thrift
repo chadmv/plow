@@ -223,10 +223,11 @@ struct ProcFilterT {
 struct JobStatsT {
     1:i32 highRam,
     2:double highCores,
-    3:i32 highCoreTime,
+    3:i64 highCoreTime,
     4:i64 totalCoreTime,
     5:i64 totalSuccessCoreTime,
-    6:i64 totalFailCoreTime
+    6:i64 totalFailCoreTime,
+    7:i64 highClockTime
 }
 
 struct JobT {
@@ -240,11 +241,12 @@ struct JobT {
     8:i32 minCores,
     9:i32 maxCores,
     10:i32 runCores,
-    11:common.Timestamp startTime,
-    12:common.Timestamp stopTime,
-    13:TaskTotalsT totals,
-    14:JobStatsT stats,
-    15:Attrs attrs
+    11:i32 runProcs,
+    12:common.Timestamp startTime,
+    13:common.Timestamp stopTime,
+    14:TaskTotalsT totals,
+    15:JobStatsT stats,
+    16:Attrs attrs
 }
 
 struct LayerStatsT {
@@ -254,13 +256,20 @@ struct LayerStatsT {
     4:double highCores,
     5:double avgCores,
     6:double stdDevCores,
-    7:i32 highCoreTime,
-    8:i32 avgCoreTime,
-    9:i32 lowCoreTime,
+    7:i64 highCoreTime,
+    8:i64 avgCoreTime,
+    9:i64 lowCoreTime,
     10:double stdDevCoreTime,
     11:i64 totalCoreTime,
     12:i64 totalSuccessCoreTime,
-    13:i64 totalFailCoreTime
+    13:i64 totalFailCoreTime,
+    14:i64 highClockTime,
+    15:i64 avgClockTime,
+    16:i64 lowClockTime,
+    17:double stdDevClockTime,
+    18:i64 totalClockTime,
+    19:i64 totalSuccessClockTime,
+    20:i64 totalFailClockTime
 }
 
 struct ServiceT {
@@ -290,8 +299,9 @@ struct LayerT {
     12:i32 maxRam,
     13:i32 runCores,
     14:i32 maxRetries,
-    15:TaskTotalsT totals,
-    16:LayerStatsT stats
+    15:i32 runProcs,
+    16:TaskTotalsT totals,
+    17:LayerStatsT stats
 }
 
 struct TaskStatsT {
@@ -332,9 +342,10 @@ struct FolderT {
     3:i32 minCores,
     4:i32 maxCores,
     5:i32 runCores,
-    6:i32 order,
-    7:TaskTotalsT totals,
-    8:optional list<JobT> jobs
+    6:i32 runProcs,
+    7:i32 order,
+    8:TaskTotalsT totals,
+    9:optional list<JobT> jobs
 }
 
 enum MatcherType {

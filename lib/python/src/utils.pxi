@@ -24,7 +24,7 @@ def reconnecting(object func):
                 
             LOGGER.exception("Error running %r", func)
 
-            if str(e) in EX_CONNECTION:
+            if str(e).strip() in EX_CONNECTION:
                 # print "reconnecting!"
                 LOGGER.debug("Connection lost. Retrying call")
                 reconnect()
@@ -45,3 +45,13 @@ def reconnecting(object func):
 
     return wrapper
 
+
+cdef Attrs dict_to_attrs(dict d):
+    """
+    Convert a python dictionary to an Attrs object
+    """
+    cdef Attrs attrs
+    for key, val in d.iteritems():
+        attrs[str(key)] = str(val)
+
+    return attrs

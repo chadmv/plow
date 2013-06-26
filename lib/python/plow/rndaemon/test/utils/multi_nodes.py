@@ -4,6 +4,8 @@ import os
 import sys
 import time 
 import logging
+import socket
+
 from multiprocessing import Process, current_process
 
 from plow.rndaemon.main import RndFormatter
@@ -30,10 +32,14 @@ class RndProcessHandler(object):
         logger.info("Server asked node to reboot (now = %r)", now)
 
 
-def start(port):
+def start(port, host=None):
 
     from plow.rndaemon import profile
     from plow.rndaemon.profile import test
+
+    if host:
+        test.HOST_NAME = host
+
     profile.SystemProfiler = test.SystemProfiler
 
     from plow.rndaemon.server import get_server
@@ -73,6 +79,9 @@ if __name__ == "__main__":
     parser.add_argument("-refresh", type=int, default=30,
         help="How often, in seconds, to ping in updated data for each node")
 
+    parser.add_argument("-random", action='store_true', default=False,
+        help="Randomize the host names, instead of using sequential numbers")
+
     args = parser.parse_args()  
 
     daemons = []
@@ -82,9 +91,17 @@ if __name__ == "__main__":
 
     logger.info("Starting %d rndaemon processes...", num)
 
+    host_base = socket.getfqdn()
+
     for i in xrange(num):
         name = 'rndaemon-instance-{0}'.format(i)
-        p = Process(target=start, args=(conf.NETWORK_PORT + i,), name=name)
+        
+        if not args.random:
+            host = "{0}.TEST.{1}".format(host_base, i)
+        else:
+            host = None 
+
+        p = Process(target=start, args=(conf.NETWORK_PORT + i, host), name=name)
         p.daemon = True
         p.start()
         daemons.append(p)

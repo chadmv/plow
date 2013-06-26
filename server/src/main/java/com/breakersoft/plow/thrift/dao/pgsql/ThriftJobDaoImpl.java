@@ -40,10 +40,11 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             final JobStatsT stats = new JobStatsT();
             stats.highRam = rs.getInt("int_ram_high");
             stats.highCores = rs.getDouble("flt_cores_high");
-            stats.highCoreTime = rs.getInt("int_core_time_high");
+            stats.highCoreTime = rs.getLong("int_core_time_high");
             stats.totalSuccessCoreTime = rs.getLong("int_total_core_time_success");
             stats.totalFailCoreTime = rs.getLong("int_total_core_time_fail");
             stats.totalCoreTime = stats.totalSuccessCoreTime + stats.totalFailCoreTime;
+            stats.highClockTime = rs.getLong("int_clock_time_high");
 
             final JobT job = new JobT();
             job.id = rs.getString("pk_job");
@@ -53,6 +54,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             job.setUsername(rs.getString("str_username"));
             job.setPaused(rs.getBoolean("bool_paused"));
             job.setRunCores(rs.getInt("int_cores_run"));
+            job.setRunProcs(rs.getInt("int_procs_run"));
             job.setMaxCores(rs.getInt("int_cores_max"));
             job.setMinCores(rs.getInt("int_cores_min"));
             job.setStartTime(rs.getLong("time_started"));
@@ -82,6 +84,7 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             "job_dsp.int_cores_max,"+
             "job_dsp.int_cores_min,"+
             "job_dsp.int_cores_run, " +
+            "job_dsp.int_procs_run, "+
             "job_count.int_total, "+
             "job_count.int_succeeded,"+
             "job_count.int_running,"+
@@ -93,7 +96,8 @@ public class ThriftJobDaoImpl extends AbstractDao implements ThriftJobDao {
             "job_stat.flt_cores_high, "+
             "job_stat.int_core_time_high, "+
             "job_stat.int_total_core_time_success, "+
-            "job_stat.int_total_core_time_fail "+
+            "job_stat.int_total_core_time_fail, "+
+            "job_stat.int_clock_time_high "+
         "FROM " +
             "job " +
         "INNER JOIN " +
