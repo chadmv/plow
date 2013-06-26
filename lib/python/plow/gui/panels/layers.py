@@ -6,7 +6,7 @@ import plow.gui.constants as constants
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.event import EventManager
-from plow.gui.common import models
+from plow.gui.common import models, actions
 from plow.gui.common.widgets import TableWidget
 from plow.gui.common.job import JobProgressDelegate
                                     
@@ -97,14 +97,33 @@ class LayerWidget(QtGui.QWidget):
             for i, w in enumerate(self.WIDTH):
                 table.setColumnWidth(i, w)
 
+    def __selectedCount(self):
+        s_model = self.__view.selectionModel()
+        return len(s_model.selectedRows())
+
     def __itemDoubleClicked(self, index):
         uid = index.data(self.__model.ObjectRole).id
         EventManager.LayerOfInterest.emit(uid)
 
     def __showContextMenu(self, pos):
-        print "__showContextMenu", pos
-        # menu = QtGui.QMenu()
-        # menu.exec_(self.mapToGlobal(pos))
+        menu = QtGui.QMenu()
+
+        total = self.__selectedCount()
+        if 1 <= total <= 2:
+            icon = QtGui.QIcon(":/images/depend.png")
+            depend = menu.addAction(icon, "Add Dependencies", self.__addDepends)
+
+        menu.addAction(QtGui.QIcon(":/images/depend.png"), "Drop Depends", self.__dropDepends)
+
+        menu.exec_(self.mapToGlobal(pos))
+
+    def __addDepends(self):
+        layers = self.getSelectedLayers()
+        actions.launchDependsWizard(layers, parent=self)
+
+    def __dropDepends(self):
+        layers = self.getSelectedLayers()
+        actions.dropDepends(layers, ask=True, parent=self)
 
 
 class LayerModel(models.PlowTableModel):

@@ -2,16 +2,15 @@
 import os
 
 import plow.client
-
 from plow.client import TaskState 
+
+from plow.gui import constants 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
 from plow.gui.util import formatDuration
 from plow.gui.event import EventManager
-from plow.gui import constants 
 from plow.gui.common.widgets import CheckableComboBox, TableWidget
-from plow.gui.common import models
-from plow.gui.dialogs.depends import DependencyWizard
+from plow.gui.common import models, actions
 
 
 class TaskPanel(Panel):
@@ -167,8 +166,10 @@ class TaskWidget(QtGui.QWidget):
 
         total = self.__selectedCount()
         if 1 <= total <= 2:
-            depend = menu.addAction(QtGui.QIcon(":/images/depend.png"), "Add Dependencies")
-            depend.triggered.connect(self.__addDepends)
+            icon = QtGui.QIcon(":/images/depend.png")
+            depend = menu.addAction(icon, "Add Dependencies", self.__addDepends)
+
+        menu.addAction(QtGui.QIcon(":/images/depend.png"), "Drop Depends", self.__dropDepends)
 
         menu.exec_(self.mapToGlobal(pos))
         
@@ -231,18 +232,11 @@ class TaskWidget(QtGui.QWidget):
 
     def __addDepends(self):
         tasks = self.getSelectedTasks()
-        if tasks:
-            aTask = tasks[0]
-            aJobSpec = plow.client.get_job_spec(aTask.jobId)
+        actions.launchDependsWizard(tasks, parent=self)
 
-            wizard = DependencyWizard(self.parent(), project=aJobSpec.project)
-            wizard.resize(wizard.width(), 600)
-            wizard.setSourceObject(aTask)
-
-            if len(tasks) > 1:
-                wizard.setDestObject(tasks[1])
-
-            wizard.show()
+    def __dropDepends(self):
+        tasks = self.getSelectedTasks()
+        actions.dropDepends(tasks, ask=True, parent=self)
 
     def getSelectedTaskIds(self):
         ids = []
