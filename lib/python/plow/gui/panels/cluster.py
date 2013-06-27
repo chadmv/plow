@@ -7,7 +7,7 @@ import plow.gui.constants as constants
 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
-from plow.gui.util import formatPercentage
+from plow.gui.util import formatPercentage, copyToClipboard
 from plow.gui.event import EventManager
 from plow.gui.common import models
 from plow.gui.common.widgets import CheckableComboBox, SimplePercentageBarDelegate, \
@@ -101,6 +101,7 @@ class ClusterWidget(QtGui.QWidget):
         self.layout().addWidget(self.__tree)
 
         # connections
+        tree.clicked.connect(self.__itemClicked)
         tree.doubleClicked.connect(self.__itemDoubleClicked)
 
     def getSelectedClusters(self):
@@ -111,6 +112,9 @@ class ClusterWidget(QtGui.QWidget):
         self.__tree.setSortingEnabled(False)
         self.__model.refresh()
         self.__tree.setSortingEnabled(True)
+
+    def __itemClicked(self, index):
+        copyToClipboard(index.data(self.__model.ObjectRole).name)
 
     def __itemDoubleClicked(self, index):
         uid = index.data(self.__model.IdRole)

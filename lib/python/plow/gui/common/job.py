@@ -5,12 +5,14 @@ from functools import partial
 from itertools import chain
 
 import plow.client
-import plow.gui.constants as constants
 
+from plow.gui import constants
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.form import FormWidget, FormWidgetFactory
-from plow.gui.util import ask
-from plow.gui.common.widgets import FilterableListBox
+from plow.gui.dialogs.util import ask
+
+from .widgets import FilterableListBox
+import actions
 
 
 class JobProgressFormWidget(FormWidget):
@@ -431,7 +433,9 @@ class JobContextMenu(QtGui.QMenu):
 
         if 1 <= total <= 2:
             depend = self.addAction(QtGui.QIcon(":/images/depend.png"), "Add Dependencies")
-            depend.triggered.connect(partial(self._depend, jobs))
+            depend.triggered.connect(partial(actions.launchDependsWizard, jobs, parent))
+
+        drop = self.addAction(QtGui.QIcon(":/images/depend.png"), "Drop Depends")
 
         self.addSeparator()
 
@@ -453,8 +457,11 @@ class JobContextMenu(QtGui.QMenu):
 
         pause.triggered.connect(partial(self._pause, jobs, not isPaused))
         kill.triggered.connect(partial(self._kill, jobs))
+        drop.triggered.connect(partial(actions.dropDepends, jobs, ask=True, parent=parent))
 
     def _action_on_tasks(self, fn, job_list, dead=False):
+        """ Wrapper that applies a task action to a list of jobs """
+
         if dead:
             states = [plow.client.TaskState.DEAD]
         else:
@@ -476,6 +483,8 @@ class JobContextMenu(QtGui.QMenu):
                 self.__callback()  
 
     def _pause(self, job_list, pause):
+        """ Handler to change pause state of a list of jobs """
+
         for j in job_list:
             j.pause(pause)
 
@@ -483,6 +492,8 @@ class JobContextMenu(QtGui.QMenu):
             self.__callback()  
 
     def _kill(self, job_list):
+        """ Handler to kill a list of jobs """
+
         if not ask("Kill %d job(s) ?" %  len(job_list), parent=self.parent()):
             return
 
@@ -495,19 +506,6 @@ class JobContextMenu(QtGui.QMenu):
         if self.__callback:
             self.__callback()  
 
-    def _depend(self, jobs):
-        from plow.gui.dialogs.depends import DependencyWizard
 
-        aJob = jobs[0]
-        aJobSpec = plow.client.get_job_spec(aJob.id)
-
-        wizard = DependencyWizard(self.parent(), project=aJobSpec.project)
-        wizard.resize(wizard.width(), 600)
-        wizard.setSourceObject(aJob)
-
-        if len(jobs) > 1:
-            wizard.setDestObject(jobs[1])
-
-        wizard.show()
 
 
