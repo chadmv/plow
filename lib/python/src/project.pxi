@@ -84,6 +84,16 @@ cdef class Project(PlowBase):
         """
         return get_procs(projectIds=[self.id])
 
+    def get_filters(self):
+        """
+        Get all of the filters for this project
+
+        :returns: list[:class:`.Filter`]
+        """
+        cdef list ret 
+        ret = get_filters(self)
+        return ret
+
 
 @reconnecting
 def get_project(Guid& guid):
