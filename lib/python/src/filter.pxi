@@ -322,8 +322,6 @@ cdef class Filter(PlowBase):
     :var name: str
     :var order: int 
     :var enabled: bool
-    :var matchers: list[:class:`.Matcher`]
-    :var actions: list[:class:`.Action`]
 
     """
     cdef:
@@ -336,16 +334,11 @@ cdef class Filter(PlowBase):
         self._filter.order = kwargs.get('order', 0)
         self._filter.enabled = kwargs.get('enabled', False)
 
-        self._actions = []
-        self._matchers = []
-
     def __repr__(self):
         return "<Filter: %s>" % self.name
         
     cdef setFilter(self, FilterT& a):
         self._filter = a
-        self._actions = []
-        self._matchers = []
 
     property id:
         def __get__(self): return self._filter.id
@@ -358,20 +351,6 @@ cdef class Filter(PlowBase):
 
     property enabled:
         def __get__(self): return self._filter.enabled
-
-    property matchers:
-        def __get__(self): 
-            cdef MatcherT m
-            if not self._matchers:
-                self._matchers = [initMatcher(m) for m in self._filter.matchers]
-            return self._matchers
-
-    property actions:
-        def __get__(self): 
-            cdef ActionT a 
-            if not self._actions:
-                self._actions = [initAction(a) for a in self._filter.actions]
-            return self._actions
 
     @reconnecting
     def refresh(self):
@@ -415,6 +394,66 @@ cdef class Filter(PlowBase):
         """ Decrease the order """
         decrease_filter_order(self)
         self.refresh()
+
+    def get_matchers(self):
+        """ 
+        Get the matchers set on this filter
+
+        :returns: list[:class:`.Matcher`]
+        """
+        cdef list ret
+        ret = get_matchers(self)
+        return ret
+
+    def get_actions(self):
+        """ 
+        Get the actions set on this filter
+
+        :returns: list[:class:`.Action`]
+        """
+        cdef list ret
+        ret = get_actions(self)
+        return ret
+
+    def create_field_matcher(self, int field, int typ, str value):
+        """
+        Create a field Matcher on this filter
+
+        :param field: :data:`.MatcherField` value
+        :param typ: :data:`.MatcherType` value 
+        :param value: str value for the matcher
+        :returns: :class:`.Matcher`
+        """
+        cdef Matcher matcher
+        matcher = create_field_matcher(self, field, typ, value)
+        return matcher
+
+    def create_attr_matcher(self, int typ, str attr, str value):
+        """
+        Create an attribute Matcher on this filter
+
+        :param filter: :class:`.Filter`
+        :param typ: :data:`.MatcherType` value 
+        :param attr: str attr for the matcher
+        :param value: str value for the matcher
+        :returns: :class:`.Matcher`
+        """
+        cdef Matcher matcher
+        matcher = create_attr_matcher(self, typ, attr, value)
+        return matcher
+
+    def create_action(self, int typ, str value):
+        """
+        Create an action on this filter
+
+        :param typ: :data:`.ActionType` value
+        :param value: str 
+        :returns: :class:`.Action`
+        """
+        cdef Action action
+        action = create_action(self, typ, value)
+        return action
+
 
 def create_filter(Project project, string& name):
     """
