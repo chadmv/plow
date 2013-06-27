@@ -9,7 +9,7 @@ import plow.client
 from plow.gui import constants
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.form import FormWidget, FormWidgetFactory
-from plow.gui.util import ask
+from plow.gui.dialogs.util import ask
 
 from .widgets import FilterableListBox
 import actions

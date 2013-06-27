@@ -4,6 +4,7 @@ from datetime import datetime
 from functools import partial 
 
 import plow.client
+from plow.client import PlowError 
 
 from plow.gui import constants
 from plow.gui.manifest import QtCore, QtGui
@@ -12,6 +13,7 @@ from plow.gui.event import EventManager
 from plow.gui.common import models
 from plow.gui.common.widgets import TableWidget, ResourceDelegate, CheckableComboBox
 from plow.gui.util import formatDuration, copyToClipboard
+from plow.gui.dialogs.util import showErrorList
 
 NODE_STATES = {}
 for a in dir(plow.client.NodeState):
@@ -163,22 +165,35 @@ class NodeWidget(QtGui.QWidget):
         completed = True
         did_set = False
 
-        for i, node in enumerate(nodes):
-            progress.setValue(i)
+        failed = []
 
-            if progress.wasCanceled():
-                completed = False
-                break
+        try:
+            for i, node in enumerate(nodes):
+                progress.setValue(i)
 
-            if node.clusterName != cluster.name:
-                node.set_cluster(cluster)
-                did_set = True
+                if progress.wasCanceled():
+                    completed = False
+                    break
 
-            if i % 10 == 0:
-                QtGui.qApp.processEvents()
+                if node.clusterName != cluster.name:
+                    try:
+                        node.set_cluster(cluster)
+                    except PlowError, e:
+                        failed.append("%s: %s" % (node.name, e.args[0]))
+                    else:
+                        did_set = True
 
-        progress.setValue(size)
-        QtGui.qApp.processEvents()
+                if i % 10 == 0:
+                    QtGui.qApp.processEvents()
+
+        finally:
+            progress.setValue(size)
+            QtGui.qApp.processEvents()
+
+        if failed:
+            title = "Error setting cluster"
+            msg = "One or more nodes could not switch clusters for the following reasons"
+            showErrorList(failed, msg, title, self)
 
         if did_set:
             EventManager.GlobalRefresh.emit()

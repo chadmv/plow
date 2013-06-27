@@ -5,6 +5,7 @@ from datetime import datetime
 
 from manifest import QtCore, QtGui
 from plow.tools.util import *
+from plow.gui.dialogs.util import ask
 
 
 def loadTheme():
@@ -20,14 +21,6 @@ def getSettings(name, scope=QtCore.QSettings.UserScope, parent=None):
                                 name, 
                                 parent)
     return settings
-
-
-def ask(msg, title='Confirm?', parent=None):
-    ret = QtGui.QMessageBox.question(parent, title, msg,
-                                     QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-                                     QtGui.QMessageBox.Cancel )
-   
-    return ret == QtGui.QMessageBox.Ok
 
 
 def copyToClipboard(item):
