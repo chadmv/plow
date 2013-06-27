@@ -7,7 +7,7 @@ from plow.client import TaskState
 from plow.gui import constants 
 from plow.gui.manifest import QtCore, QtGui
 from plow.gui.panels import Panel
-from plow.gui.util import formatDuration, copyToClipboard
+from plow.gui.util import formatDuration, formatMaxValue, copyToClipboard
 from plow.gui.event import EventManager
 from plow.gui.common.widgets import CheckableComboBox, TableWidget
 from plow.gui.common import models, actions
@@ -76,7 +76,7 @@ class TaskPanel(Panel):
 
 class TaskWidget(QtGui.QWidget):
 
-    WIDTH = [250, 90, 125, 100, 100, 65, 140]
+    WIDTH = [250, 90, 125, 100, 110, 100, 65, 140]
     REFRESH = 1500
 
     def __init__(self, attrs, parent=None):
@@ -264,30 +264,26 @@ class TaskWidget(QtGui.QWidget):
 
 class TaskModel(models.PlowTableModel):
 
-    HEADERS = ["Name", "State", "Node", "Resources", "Duration", "Retries", "Log"]
+    HEADERS = ["Name", "State", "Node", "Resources", "Max Resources", "Duration", "Retries", "Log"]
 
     DISPLAY_CALLBACKS = {
         0: lambda t: t.name,
         1: lambda t: constants.TASK_STATES[t.state],
         2: lambda t: t.stats.lastNode,
         3: lambda t: "%s/%02dMB" % (t.stats.cores, t.stats.ram),
-        4: lambda t: formatDuration(t.stats.startTime, t.stats.stopTime),
-        5: lambda t: t.stats.retryNum,
-        6: lambda t: t.stats.lastLogLine,
+        4: lambda t: "%s/%02dMB" % (t.stats.highCores, t.stats.highRam),
+        5: lambda t: formatDuration(t.stats.startTime, t.stats.stopTime),
+        6: lambda t: formatMaxValue(t.stats.retryNum),
+        7: lambda t: t.stats.lastLogLine,
     }
 
-    SORT_CALLBACKS = {
-        0: DISPLAY_CALLBACKS[0],
-        1: DISPLAY_CALLBACKS[1],
-        2: DISPLAY_CALLBACKS[2],
-        3: lambda t: (t.stats.cores, t.stats.ram),
-        4: lambda t: t.stats.stopTime - t.stats.startTime,
-        5: DISPLAY_CALLBACKS[5],
-        6: DISPLAY_CALLBACKS[6],
-    }
+    SORT_CALLBACKS = DISPLAY_CALLBACKS.copy()
+    SORT_CALLBACKS[3] = lambda t: (t.stats.cores, t.stats.ram)
+    SORT_CALLBACKS[4] = lambda t: (t.stats.highCores, t.stats.highRam)
+    SORT_CALLBACKS[5] = lambda t: t.stats.stopTime - t.stats.startTime
+    SORT_CALLBACKS[6] = lambda t: t.stats.retryNum
 
     SortRole = models.PlowTableModel.DataRole
-
 
     def __init__(self, parent=None):
         super(TaskModel, self).__init__(parent)
@@ -377,6 +373,15 @@ class TaskModel(models.PlowTableModel):
                           stats.ram, stats.usedRam, stats.highRam)
 
         return super(TaskModel, self).data(index, role)
+
+    def headerData(self, section, orientation, role):
+        if role == QtCore.Qt.ToolTipRole:
+            if section == 3:
+                return "The Cores/Ram that were allocated to the task"
+            elif section == 4:
+                return "The maximum Cores/Ram that this task has used"
+
+        return super(TaskModel, self).headerData(section, orientation, role)
 
     def __durationRefreshTimer(self):
         RUNNING = plow.client.TaskState.RUNNING
