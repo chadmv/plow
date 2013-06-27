@@ -41,8 +41,8 @@ class LayerPanel(Panel):
 # LayerWidget
 #########################
 class LayerWidget(QtGui.QWidget):
-    
-    WIDTH = [220, 90, 90, 90, 60, 60, 60, 60, 60, 60]
+
+    WIDTH = [220, 90, 90, 90, 60, 60, 60, 60, 60, 65]
 
     def __init__(self, attrs, parent=None):
         super(LayerWidget, self).__init__(parent)
@@ -133,8 +133,8 @@ class LayerWidget(QtGui.QWidget):
 class LayerModel(models.PlowTableModel):
 
     HEADERS = [
-        "Name", "Range", "Service", "Tags", "Pend", "Run", 
-        "Cores", "Total", "Dead", "AvgTime", "Progress"
+        "Name", "Range", "Service", "Tags", "Total", "Pend", "Run", 
+        "Dead", "Cores", "AvgTime", "Progress"
     ]
 
     DISPLAY_CALLBACKS = {
@@ -142,11 +142,11 @@ class LayerModel(models.PlowTableModel):
         1: lambda l: "%s (%d)" % (l.range, l.chunk) if l.range else "-",
         2: lambda l: l.service,
         3: lambda l: ', '.join(l.tags),
-        4: lambda l: l.totals.waiting + l.totals.depend,
-        5: lambda l: l.totals.running,
-        6: lambda l: l.runCores,
-        7: lambda l: l.totals.total,
-        8: lambda l: l.totals.dead,
+        4: lambda l: l.totals.total,
+        5: lambda l: l.totals.waiting + l.totals.depend,
+        6: lambda l: l.totals.running,
+        7: lambda l: l.totals.dead,
+        8: lambda l: l.runCores,
         9: lambda l: "{0:.1f}".format(l.stats.avgClockTime / 3600000.0), # msec => hour
     }
 
@@ -187,7 +187,7 @@ class LayerModel(models.PlowTableModel):
         col = index.column()
         layer = self._items[row]
 
-        if col == 8 and role == QtCore.Qt.BackgroundRole:
+        if col == 7 and role == QtCore.Qt.BackgroundRole:
             if layer.totals.dead:
                 dead = plow.client.TaskState.DEAD
                 return constants.COLOR_TASK_STATE[dead]
