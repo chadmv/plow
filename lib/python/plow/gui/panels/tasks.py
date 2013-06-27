@@ -271,7 +271,7 @@ class TaskModel(models.PlowTableModel):
         1: lambda t: constants.TASK_STATES[t.state],
         2: lambda t: t.stats.lastNode,
         3: lambda t: "%s/%02dMB" % (t.stats.cores, t.stats.ram),
-        4: lambda t: "%s/%02dMB" % (t.stats.highCores, t.stats.highRam),
+        4: lambda t: "%0.2f/%02dMB" % (t.stats.highCores, t.stats.highRam),
         5: lambda t: formatDuration(t.stats.startTime, t.stats.stopTime),
         6: lambda t: formatMaxValue(t.stats.retryNum),
         7: lambda t: t.stats.lastLogLine,
