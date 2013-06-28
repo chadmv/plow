@@ -177,7 +177,7 @@ def delete_matcher(Matcher matcher):
     :param matcher: :class:`.Matcher`
     """
     conn().proxy().deleteMatcher(matcher.id)
-
+    matcher.matcher.id = ''
 
  #######################
 # ActionType
@@ -303,7 +303,7 @@ def delete_action(Action action):
     :param action: :class:`.Action`
     """
     conn().proxy().deleteAction(action.id)
-
+    action.action.id = ''
 
 #######################
 # Filter
@@ -324,9 +324,7 @@ cdef class Filter(PlowBase):
     :var enabled: bool
 
     """
-    cdef:
-        FilterT _filter
-        list _matchers, _actions
+    cdef FilterT _filter
 
     def __init__(self, **kwargs):
         self._filter.id = kwargs.get('id', '')
@@ -374,7 +372,6 @@ cdef class Filter(PlowBase):
         :param name: str 
         """
         set_filter_name(self, name)
-        self._action.name = name
 
     def set_order(self, int order):
         """
@@ -383,17 +380,14 @@ cdef class Filter(PlowBase):
         :param order: int 
         """
         set_filter_order(self, order)
-        self._action.order = order
 
     def increase_order(self):
         """ Increase the order """
         increase_filter_order(self)
-        self.refresh()
 
     def decrease_filter_order(self):
         """ Decrease the order """
         decrease_filter_order(self)
-        self.refresh()
 
     def get_matchers(self):
         """ 
@@ -512,6 +506,7 @@ def delete_filter(Filter filt):
     :param filt: :class:`.Filter`
     """
     conn().proxy().deleteFilter(filt.id)
+    filt._filter.id = ''
 
 @reconnecting
 def set_filter_name(Filter filt, string& name):
@@ -522,7 +517,7 @@ def set_filter_name(Filter filt, string& name):
     :param name: str 
     """    
     conn().proxy().setFilterName(filt.id, name)
-    filt.name = name
+    filt._filter.name = name
 
 @reconnecting
 def set_filter_order(Filter filt, int order):
@@ -533,6 +528,7 @@ def set_filter_order(Filter filt, int order):
     :param order: int
     """    
     conn().proxy().setFilterOrder(filt.id, order)
+    filt._filter.order = order
 
 def increase_filter_order(Filter filt):
     """
@@ -541,6 +537,7 @@ def increase_filter_order(Filter filt):
     :param filt: :class:`.Filter`
     """    
     conn().proxy().increaseFilterOrder(filt.id)
+    filt.refresh()
 
 def decrease_filter_order(Filter filt):
     """
@@ -549,4 +546,5 @@ def decrease_filter_order(Filter filt):
     :param filt: :class:`.Filter`
     """    
     conn().proxy().decreaseFilterOrder(filt.id) 
+    filt.refresh()
 
