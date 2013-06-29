@@ -110,17 +110,30 @@ class AbstractProfiler(object):
 
             for name in ('logicalCpus', 'physicalCpus', 'totalRamMb'):
                 val = conf.getint('profile', name)
-                if val is not None and val > 0:
+                if val is not None:# and val > 0:
 
                     # Limit the total ram value, and also
                     # adjust the free ram to cap out as well.
                     if name == 'totalRamMb':
-                        if val >= self.totalRamMb:
-                            continue
-                        self.freeRamMb = min(val, self.freeRamMb)
 
-                    setattr(self, name, val)
+                        if val >= self.totalRamMb:
+                            logger.warn("Config setting totalRamMb override " \
+                                        "value higher than system total of %d - Ignoring", 
+                                        self.totalRamMb)
+                            continue
+
+                        self.data['totalRamMb'] = val
+                        self.data['freeRamMb'] = min(val, self.data['freeRamMb'])
+
+                    else:
+                        self.data[name] = val
+                    
                     logger.debug("Using profile override: %s = %s" % (name, val))
+
+            # Make sure that no matter what, is should be impossible
+            # for cpu counts to be zero
+            self.data['physicalCpus'] = max(self.data['physicalCpus'], 1)
+            self.data['logicalCpus'] = max(self.data['logicalCpus'], 1)
 
     def reboot(self):
         """
