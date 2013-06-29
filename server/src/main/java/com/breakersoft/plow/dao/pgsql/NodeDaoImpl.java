@@ -103,8 +103,9 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
             }
         });
 
-        final int memMb =
-                getBookableMemory(ping.hw.totalRamMb);
+        final int memMb = ping.hw.totalRamMb
+                - PlowUtils.getReservedRam(ping.hw.totalRamMb);
+
         jdbc.update(INSERT[2], id,
                 ping.hw.physicalCpus,
                 ping.hw.physicalCpus,
@@ -212,10 +213,6 @@ public class NodeDaoImpl extends AbstractDao implements NodeDao {
     @Override
     public List<Node> getUnresponsiveNodes() {
         return jdbc.query(GET_UNRESPONSIVE, MAPPER, NodeState.UP.ordinal(), Defaults.NODE_UNRESPONSIVE_MS);
-    }
-
-    private int getBookableMemory(int memory) {
-        return memory = memory - Defaults.NODE_RESERVE_MEMORY;
     }
 
     private static final String ALLOCATE_RESOURCES =

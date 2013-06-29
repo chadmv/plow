@@ -21,6 +21,7 @@ import com.breakersoft.plow.test.AbstractTest;
 import com.breakersoft.plow.thrift.NodeState;
 import com.breakersoft.plow.thrift.SlotMode;
 import com.breakersoft.plow.util.JdbcUtils;
+import com.breakersoft.plow.util.PlowUtils;
 import com.google.common.collect.Sets;
 
 public class NodeDaoTests extends AbstractTest {
@@ -139,6 +140,12 @@ public class NodeDaoTests extends AbstractTest {
         Ping ping = getTestNodePing();
         Cluster cluster = clusterDao.create("test", TAGS);
         Node node = nodeDao.create(cluster, ping);
+        int reserved = PlowUtils.getReservedRam(ping.hw.totalRamMb);
+
+        assertEquals(ping.hw.totalRamMb - reserved,
+                simpleJdbcTemplate.queryForInt("SELECT int_free_ram FROM node_dsp WHERE pk_node=?",
+                        node.getNodeId()));
+
         nodeDao.allocate(node, 1, 1024);
 
         // Check to ensure the procs/memory were subtracted from the host.
@@ -146,7 +153,7 @@ public class NodeDaoTests extends AbstractTest {
                 simpleJdbcTemplate.queryForInt("SELECT int_idle_cores FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
 
-        assertEquals(ping.hw.totalRamMb - 1024 - Defaults.NODE_RESERVE_MEMORY,
+        assertEquals(ping.hw.totalRamMb - 1024 - reserved,
                 simpleJdbcTemplate.queryForInt("SELECT int_free_ram FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
 
@@ -171,7 +178,7 @@ public class NodeDaoTests extends AbstractTest {
                 simpleJdbcTemplate.queryForInt("SELECT int_idle_cores FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
 
-        assertEquals(ping.hw.totalRamMb - Defaults.NODE_RESERVE_MEMORY,
+        assertEquals(ping.hw.totalRamMb - PlowUtils.getReservedRam(ping.hw.totalRamMb),
                 simpleJdbcTemplate.queryForInt("SELECT int_free_ram FROM node_dsp WHERE pk_node=?",
                         node.getNodeId()));
     }
