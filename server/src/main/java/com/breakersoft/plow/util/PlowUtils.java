@@ -7,10 +7,16 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 
+import com.breakersoft.plow.Defaults;
+
 public final class PlowUtils {
 
     private static final Logger logger =
             org.slf4j.LoggerFactory.getLogger(PlowUtils.class);
+
+    public static int getReservedRam(int totalRam) {
+        return Math.min((int) (totalRam * Defaults.NODE_RESERVE_MEMORY_PERCENT), Defaults.NODE_RESERVE_MEMORY_MAX);
+    }
 
     public static boolean isUuid(String s) {
         try {

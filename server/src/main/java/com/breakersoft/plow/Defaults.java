@@ -20,11 +20,17 @@ public final class Defaults {
     public static final int JDBC_DEFAULT_BATCH_SIZE = 5000;
 
     /*
-     * The amount of memory reserved on a node for operating
+     * The maximum amount of memory reserved on a node for operating
      * system processes. This is subtracted from the total
-     * memory when a node is created.
+     * memory when a node is created.  This value is in MB.
      */
-    public static int NODE_RESERVE_MEMORY = 512;
+    public static int NODE_RESERVE_MEMORY_MAX = 384;
+
+    /*
+     * The percentage of system memory reserved for the operating
+     * system and not scheduled by plow.
+     */
+    public static float NODE_RESERVE_MEMORY_PERCENT = 0.05f;
 
     public static String FOLDER_DEFAULT_NAME = "jobs";
 

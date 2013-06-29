@@ -88,7 +88,7 @@ public class DispatchServiceTests extends AbstractTest {
         proc = dispatchService.allocateProc(node, tasks.get(1));
 
         assertEquals(1, proc.getCores());
-        assertEquals(3584, proc.getRam());
+        assertEquals(3712, proc.getRam());
     }
 
     @Test
@@ -101,6 +101,6 @@ public class DispatchServiceTests extends AbstractTest {
         DispatchProc proc = dispatchService.allocateProc(node, tasks.get(0));
 
         assertEquals(2, proc.getCores());
-        assertEquals(8096 - Defaults.NODE_RESERVE_MEMORY, proc.getRam());
+        assertEquals(8096 - Defaults.NODE_RESERVE_MEMORY_MAX, proc.getRam());
     }
 }

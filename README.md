@@ -71,7 +71,13 @@ Now you can actually build the server.
 
 This will create a file named target/plow.war.  Replace the plow.war file in the executable server package you
 downloaded and your now on the latest version.  You can also copy (or symlink) plow.war into dist/webapps and run
-start it using dist/start-plow.sh.
+start it using dist/start-plow.sh:
+
+    $ cp target/plow.war dist/webapps/
+
+OR
+
+    $ ln -s target/plow.war dist/webapps/
 
 If the thrift files change at all, you have to re-generate + install the thrift bindings and recompile
 the server.
