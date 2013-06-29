@@ -30,13 +30,11 @@ from distutils.sysconfig import get_config_vars
 from distutils.command.build_ext import build_ext
 from distutils import log
 
-import doc.conf
+from plow import __version__
 
 #-----------------------------------------------------------------------------
 # Setup variables and pre-checks
 #-----------------------------------------------------------------------------
-__version__ = doc.conf.release
-
 TEMP_BUILD_DIR = '__dist__'
 ETC_SRC_DIR = os.path.abspath('../../etc')
 ETC_DST_DIR = os.path.join(TEMP_BUILD_DIR, 'etc')

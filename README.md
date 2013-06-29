@@ -4,10 +4,8 @@ Plow
 Plow is render farm management software specifically designed for VFX workloads.
 
 There are currently no official releases of Plow, so the following instructions will get
-you started with a source checkout of Plow.  Please report any issues on
-our Google code page.
-
-Google Project home: http://code.google.com/p/plow/
+you started with a source checkout of Plow.  Please report any issues either directly on github, or in the Plow Users Google forums:
+http://groups.google.com/group/plow-render
 
 Developent Environment Requirements
 ===================================
@@ -40,12 +38,9 @@ The plow server acts as the central brain for your render farm.  It contains the
 dispatcher and exposes a thrift API for interacting with jobs.
 
 The plow server code compiles to a Web Application Archive file, or WAR file.  This file
-must be hosted by within a Java application server. For convinience an executable 
-binary distribution with a current WAR can be found here:
+must be hosted by within a Java application server. 
 
-http://code.google.com/p/plow/downloads 
-
-If your developing Plow, you will also need to compile your own WAR file at times.
+While developing Plow, you will also need to compile your own WAR file at times.
 
 Steps for Compiling the Server
 ------------------------------

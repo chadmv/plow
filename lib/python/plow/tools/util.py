@@ -2,6 +2,7 @@
 import os
 import time
 from datetime import datetime
+from itertools import tee, izip
 
 import constants
 
@@ -60,3 +61,9 @@ def formatCoreTime(core_time_ms):
     Format core time in millis to core hours.
     """
     return "%0.2f" % (core_time_ms / 1000 / 3600.0)
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return izip(a, b)

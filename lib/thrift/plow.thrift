@@ -390,8 +390,6 @@ struct FilterT {
     2:string name,
     3:i32 order,
     4:bool enabled,
-    5:optional list<MatcherT> matchers,
-    6:optional list<ActionT> actions
 }
 
 /**

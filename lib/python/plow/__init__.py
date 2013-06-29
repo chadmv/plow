@@ -1,1 +1,2 @@
-from client import JobState, TaskState, NodeState
+
+__version__ = "0.4.5"

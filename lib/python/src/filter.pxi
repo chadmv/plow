@@ -177,7 +177,7 @@ def delete_matcher(Matcher matcher):
     :param matcher: :class:`.Matcher`
     """
     conn().proxy().deleteMatcher(matcher.id)
-
+    matcher.matcher.id = ''
 
  #######################
 # ActionType
@@ -303,7 +303,7 @@ def delete_action(Action action):
     :param action: :class:`.Action`
     """
     conn().proxy().deleteAction(action.id)
-
+    action.action.id = ''
 
 #######################
 # Filter
@@ -322,13 +322,9 @@ cdef class Filter(PlowBase):
     :var name: str
     :var order: int 
     :var enabled: bool
-    :var matchers: list[:class:`.Matcher`]
-    :var actions: list[:class:`.Action`]
 
     """
-    cdef:
-        FilterT _filter
-        list _matchers, _actions
+    cdef FilterT _filter
 
     def __init__(self, **kwargs):
         self._filter.id = kwargs.get('id', '')
@@ -336,16 +332,11 @@ cdef class Filter(PlowBase):
         self._filter.order = kwargs.get('order', 0)
         self._filter.enabled = kwargs.get('enabled', False)
 
-        self._actions = []
-        self._matchers = []
-
     def __repr__(self):
         return "<Filter: %s>" % self.name
         
     cdef setFilter(self, FilterT& a):
         self._filter = a
-        self._actions = []
-        self._matchers = []
 
     property id:
         def __get__(self): return self._filter.id
@@ -358,20 +349,6 @@ cdef class Filter(PlowBase):
 
     property enabled:
         def __get__(self): return self._filter.enabled
-
-    property matchers:
-        def __get__(self): 
-            cdef MatcherT m
-            if not self._matchers:
-                self._matchers = [initMatcher(m) for m in self._filter.matchers]
-            return self._matchers
-
-    property actions:
-        def __get__(self): 
-            cdef ActionT a 
-            if not self._actions:
-                self._actions = [initAction(a) for a in self._filter.actions]
-            return self._actions
 
     @reconnecting
     def refresh(self):
@@ -395,7 +372,6 @@ cdef class Filter(PlowBase):
         :param name: str 
         """
         set_filter_name(self, name)
-        self._action.name = name
 
     def set_order(self, int order):
         """
@@ -404,17 +380,74 @@ cdef class Filter(PlowBase):
         :param order: int 
         """
         set_filter_order(self, order)
-        self._action.order = order
 
     def increase_order(self):
         """ Increase the order """
         increase_filter_order(self)
-        self.refresh()
 
     def decrease_filter_order(self):
         """ Decrease the order """
         decrease_filter_order(self)
-        self.refresh()
+
+    def get_matchers(self):
+        """ 
+        Get the matchers set on this filter
+
+        :returns: list[:class:`.Matcher`]
+        """
+        cdef list ret
+        ret = get_matchers(self)
+        return ret
+
+    def get_actions(self):
+        """ 
+        Get the actions set on this filter
+
+        :returns: list[:class:`.Action`]
+        """
+        cdef list ret
+        ret = get_actions(self)
+        return ret
+
+    def create_field_matcher(self, int field, int typ, str value):
+        """
+        Create a field Matcher on this filter
+
+        :param field: :data:`.MatcherField` value
+        :param typ: :data:`.MatcherType` value 
+        :param value: str value for the matcher
+        :returns: :class:`.Matcher`
+        """
+        cdef Matcher matcher
+        matcher = create_field_matcher(self, field, typ, value)
+        return matcher
+
+    def create_attr_matcher(self, int typ, str attr, str value):
+        """
+        Create an attribute Matcher on this filter
+
+        :param filter: :class:`.Filter`
+        :param typ: :data:`.MatcherType` value 
+        :param attr: str attr for the matcher
+        :param value: str value for the matcher
+        :returns: :class:`.Matcher`
+        """
+        cdef Matcher matcher
+        matcher = create_attr_matcher(self, typ, attr, value)
+        return matcher
+
+    def create_action(self, int typ, str value):
+        """
+        Create an action on this filter
+
+        :param typ: :data:`.ActionType` value
+        :param value: str 
+        :returns: :class:`.Action`
+        """
+        cdef Action action
+        action = create_action(self, typ, value)
+        return action
+
 
 def create_filter(Project project, string& name):
     """
@@ -473,6 +506,7 @@ def delete_filter(Filter filt):
     :param filt: :class:`.Filter`
     """
     conn().proxy().deleteFilter(filt.id)
+    filt._filter.id = ''
 
 @reconnecting
 def set_filter_name(Filter filt, string& name):
@@ -483,7 +517,7 @@ def set_filter_name(Filter filt, string& name):
     :param name: str 
     """    
     conn().proxy().setFilterName(filt.id, name)
-    filt.name = name
+    filt._filter.name = name
 
 @reconnecting
 def set_filter_order(Filter filt, int order):
@@ -494,6 +528,7 @@ def set_filter_order(Filter filt, int order):
     :param order: int
     """    
     conn().proxy().setFilterOrder(filt.id, order)
+    filt._filter.order = order
 
 def increase_filter_order(Filter filt):
     """
@@ -502,6 +537,7 @@ def increase_filter_order(Filter filt):
     :param filt: :class:`.Filter`
     """    
     conn().proxy().increaseFilterOrder(filt.id)
+    filt.refresh()
 
 def decrease_filter_order(Filter filt):
     """
@@ -510,4 +546,5 @@ def decrease_filter_order(Filter filt):
     :param filt: :class:`.Filter`
     """    
     conn().proxy().decreaseFilterOrder(filt.id) 
+    filt.refresh()
 
