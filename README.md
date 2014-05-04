@@ -67,7 +67,7 @@ Steps for Compiling the Server
 
 ### Install the Thrift Bindings
 
-Next step, must build the Plow thrift bindings for Java and install those in your local Maven repo.
+First, you must build the Plow thrift bindings for Java and install those in your local Maven repo.
 
     $ cd lib/thrift
     $ ./generate-sources.sh
