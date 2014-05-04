@@ -35,9 +35,15 @@ Installing the requirements
 
 ```
 # Ubuntu/Mint
-sudo apt-get install postgresql libpq-dev python2.7-dev default-jdk maven
+sudo apt-get install libpq-dev libpq5 python2.7-dev default-jdk maven
 sudo apt-get install qt4-dev-tools libqt4-dev libqt4-core libqt4-gui
-sudo apt-get install libboost-dev libboost-test-dev libboost-program-options-dev libevent-dev automake libtool flex bison pkg-config g++ libssl-dev
+sudo apt-get install libboost-dev libboost-test-dev libboost-program-options-dev libboost-thread-dev libevent-dev automake libtool flex bison pkg-config g++ libssl-dev
+# Postgres 9.2 is not available on Ubuntu/Mint yet so need to do the following to get 9.2
+sudo su
+echo 'deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main' >> /etc/apt/sources.list.d/pgdg.list
+wget --quiet -O - http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
+sudo apt-get update
+sudo apt-get install postgresql-9.2 postgresql-contrib-9.2 pgadmin3
 # Download thrift
 tar -xvzf thrift-0.9.1.tar.gz
 cd thrift-0.9.1
@@ -48,6 +54,7 @@ sudo make install
 mkvirtualenv plow
 pip install pyside
 pip install Cython
+pip install psutil
 ```
 
 
@@ -102,6 +109,14 @@ Install Postgresql 9.2.
 Create a database called 'plow' for user 'plow'.
 set password: plow
 (This is configurable in the plow-server-bin/resources/plow.properties )
+
+```
+sudo su - postgres
+psql
+CREATE USER plow SUPERUSER PASSWORD 'plow';
+CREATE DATABASE plow OWNER plow;
+\q
+```
 
 Execute the sql file:
 
