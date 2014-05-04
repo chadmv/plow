@@ -30,6 +30,26 @@ Plow has an API for job submission, but the Blueprint library makes this much ea
 
 * [Blueprint](https://github.com/sqlboy/blueprint)
 
+Installing the requirements
+---------------------------
+
+```
+# Ubuntu/Mint
+sudo apt-get install postgresql libpq-dev python2.7-dev default-jdk maven
+sudo apt-get install qt4-dev-tools libqt4-dev libqt4-core libqt4-gui
+sudo apt-get install libboost-dev libboost-test-dev libboost-program-options-dev libevent-dev automake libtool flex bison pkg-config g++ libssl-dev
+# Download thrift
+tar -xvzf thrift-0.9.1.tar.gz
+cd thrift-0.9.1
+./configure
+make
+sudo make install
+# Setup the python virtualenv
+mkvirtualenv plow
+pip install pyside
+pip install Cython
+```
+
 
 Installing the Server
 =====================
