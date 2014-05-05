@@ -57,6 +57,22 @@ pip install Cython
 pip install psutil
 ```
 
+### Windows
+Install [Chocolatey](https://chocolatey.org)
+Install [Qt 4.8](http://download.qt-project.org/official_releases/qt/4.8/4.8.6/qt-opensource-windows-x86-vs2010-4.8.6.exe)
+```
+cinst java.jdk
+cinst postgresql
+cinst winflexbison
+cinst thrift
+cinst maven
+# With VS 2012 installed
+SET VS90COMNTOOLS=%VS110COMNTOOLS%
+pip install PySide
+pip install Cython
+pip install psutil
+```
+
 
 Installing the Server
 =====================
