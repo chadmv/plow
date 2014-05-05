@@ -33,8 +33,9 @@ Plow has an API for job submission, but the Blueprint library makes this much ea
 Installing the requirements
 ---------------------------
 
+### Ubuntu/Mint
+
 ```
-# Ubuntu/Mint
 sudo apt-get install libpq-dev libpq5 python2.7-dev default-jdk maven
 sudo apt-get install qt4-dev-tools libqt4-dev libqt4-core libqt4-gui
 sudo apt-get install libboost-dev libboost-test-dev libboost-program-options-dev libboost-thread-dev libevent-dev automake libtool flex bison pkg-config g++ libssl-dev
@@ -58,8 +59,9 @@ pip install psutil
 ```
 
 ### Windows
-Install [Chocolatey](https://chocolatey.org)
-Install [Qt 4.8](http://download.qt-project.org/official_releases/qt/4.8/4.8.6/qt-opensource-windows-x86-vs2010-4.8.6.exe)
+1. Install [Chocolatey](https://chocolatey.org)
+2. Install [Boost binaries](http://sourceforge.net/projects/boost/files/boost-binaries/)
+
 ```
 cinst java.jdk
 cinst postgresql
