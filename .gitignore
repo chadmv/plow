@@ -32,3 +32,4 @@ lib/python/src/core/rpc/RpcService.cpp
 lib/python/src/core/rpc/RpcService.h
 lib/python/src/core/rpc
 MANIFEST
+.idea
