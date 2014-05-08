@@ -59,11 +59,17 @@ pip install psutil
 
 ### OSX
 
+1. Install [JDK7](http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
+
 ```
+# Add to .bashrc
+export JAVA_HOME=`/usr/libexec/java_home -v 1.7`
+
 brew install postgresql
 sudo ln -sfv /usr/local/opt/postgresql/*.plist /Library/LaunchDaemons
 brew install qt
 brew install thrift
+brew install maven
 pip install pyside
 pip install Cython
 pip install psutil
@@ -121,7 +127,7 @@ Now you can actually build the server.
     $ mvn package
 
 This will create a file named target/plow.war.  Replace the plow.war file in the executable server package you
-downloaded and your now on the latest version.  You can also copy (or symlink) plow.war into dist/webapps and run
+downloaded and your now on the latest version.  You can also copy (or symlink) plow.war into dist/webapps and
 start it using dist/start-plow.sh:
 
     $ cp target/plow.war dist/webapps/
