@@ -66,13 +66,14 @@ pip install psutil
 export JAVA_HOME=`/usr/libexec/java_home -v 1.7`
 
 brew install postgresql
-sudo ln -sfv /usr/local/opt/postgresql/*.plist /Library/LaunchDaemons
+cp /usr/local/opt/postgresql/*.plist ~/Library/LaunchAgents/
 brew install qt
 brew install thrift
 brew install maven
 pip install pyside
 pip install Cython
 pip install psutil
+pip install thrift
 ```
 
 ### Windows
