@@ -313,7 +313,7 @@ class JobSelectionWidget(FilterableListBox):
         self.setLabel("Job:")
 
         if not kwargs:
-            kwargs = {"states": [plow.JobState.RUNNING]}
+            kwargs = {"states": [plow.client.JobState.RUNNING]}
 
         kwargs['matchingOnly'] = True
         self.__opts = kwargs
