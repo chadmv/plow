@@ -105,7 +105,11 @@ public class StateManager {
         else {
             // The trigger trig_before_update_set_depend handles not allowing
             // depend frames to go waiting.
-            jobService.setTaskState(task, TaskState.WAITING);
+            Job job = jobService.getJob(task.getJobId());
+            // Only set the state to waiting if the job is not done.
+            if (!jobService.isJobFinished(job)) {
+                jobService.setTaskState(task, TaskState.WAITING);
+            }
         }
     }
 
