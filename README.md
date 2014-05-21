@@ -33,6 +33,35 @@ Plow has an API for job submission, but the Blueprint library makes this much ea
 Installing the requirements
 ---------------------------
 
+### Centos
+
+Follow instructions [here](https://wiki.postgresql.org/wiki/YUM_Installation) to install Postgresql
+
+```
+sudo yum groupinstall -y 'development tools'
+sudo yum install java-1.7.0-openjdk-devel.x86_64 postgresql93-contrib
+
+# Install Maven
+wget http://download.nextag.com/apache/maven/maven-3/3.2.1/binaries/apache-maven-3.2.1-bin.tar.gz
+tar xvf apache-maven-3.2.1-bin.tar.gz
+sudo mv apache-maven-3.2.1 /usr/local/apache-maven
+```
+
+Add to /etc/profile.d/maven.sh
+
+```
+export M2_HOME=/usr/local/apache-maven
+export PATH=${M2_HOME}/bin:${PATH}
+```
+
+Install Thrift using these [instructions](https://thrift.apache.org/docs/install/centos)
+
+```
+pip install pyside
+pip install Cython
+pip install psutil
+```
+
 ### Ubuntu/Mint
 
 ```
