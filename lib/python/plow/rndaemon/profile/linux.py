@@ -20,12 +20,8 @@ class SystemProfiler(PosixSystemProfiler):
 
     def __init__(self):
         super(SystemProfiler, self).__init__()
+        self.data['bootTime'] = int(psutil.boot_time())
 
-        self.data['bootTime'] = int(psutil.BOOT_TIME)
-
-        self.cpuprofile = None
-
-        self._init_cpu_info()
 
     def __repr__(self):
         return "<%s: Linux>" % self.__class__.__name__
@@ -46,12 +42,13 @@ class SystemProfiler(PosixSystemProfiler):
         self.data.update({
             'cpuModel': model,
             'physicalCpus': cpuinfo.num_phys_cpus,
-            'logicalCpus': psutil.NUM_CPUS,
+            'logicalCpus': psutil.cpu_count(),
         })
 
         self.cpuprofile = cpuinfo
 
     def _update(self):
+        self._init_cpu_info()
         memstats = psutil.virtual_memory()
         swapstats = psutil.swap_memory()
 
