@@ -20,7 +20,7 @@ class SystemProfiler(PosixSystemProfiler):
 
     def __init__(self):
         super(SystemProfiler, self).__init__()
-        self.data['bootTime'] = int(psutil.boot_time())
+        #self.data['bootTime'] = int(psutil.boot_time())
 
 
     def __repr__(self):
@@ -47,18 +47,6 @@ class SystemProfiler(PosixSystemProfiler):
 
         self.cpuprofile = cpuinfo
 
-    def _update(self):
-        self._init_cpu_info()
-        memstats = psutil.virtual_memory()
-        swapstats = psutil.swap_memory()
-
-        b_to_mb = 1024 ** 2
-        self.data.update({
-            'freeRamMb': memstats.available / b_to_mb,
-            'totalRamMb': memstats.total / b_to_mb,
-            'freeSwapMb': swapstats.free / b_to_mb,
-            'totalSwapMb': swapstats.total / b_to_mb,
-        })
 
     def getSubprocessOpts(self, cmd, **kwargs):
         """
@@ -112,7 +100,7 @@ class SystemProfiler(PosixSystemProfiler):
 
             if logical_ids:
                 p = psutil.Process(os.getpid())
-                p.set_cpu_affinity(logical_ids)
+                p.cpu_affinity(list(logical_ids))
 
 
 class CpuProfile(object):

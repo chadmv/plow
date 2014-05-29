@@ -2,6 +2,7 @@ import os
 import platform
 import socket
 import logging
+import psutil
 
 from threading import RLock 
 
@@ -18,8 +19,11 @@ class AbstractProfiler(object):
 
         self.data = {
             "platform": platform.platform(),
-            "load": (-1.0, -1.0, -1.0)
+            "load": (-1.0, -1.0, -1.0),
+            "bootTime": int(psutil.boot_time()),
         }
+
+        self._init_cpu_info()
 
         self.__updateLock = RLock()
         self.update()
@@ -29,8 +33,16 @@ class AbstractProfiler(object):
         ht_factor = logCpu // physCpu
         self.hyperthread_factor = max(ht_factor, 1)
 
+        logger.info("hyperthread_factor = %s" % self.hyperthread_factor)
         for key, value in self.data.iteritems():
             logger.debug("%s = %s" % (key, value))
+
+    def _init_cpu_info(self):
+        """Init CPU stats that don't change over time"""
+        self.data.update({
+            'physicalCpus': psutil.cpu_count(logical=False),
+            'logicalCpus': psutil.cpu_count(),
+        })
 
     def __getattr__(self, k):
         return self.data[k]
@@ -90,7 +102,16 @@ class AbstractProfiler(object):
         The class will call this method first, followed by post operations
         to clean the data if needed.
         """
-        pass
+        memstats = psutil.virtual_memory()
+        swapstats = psutil.swap_memory()
+
+        b_to_mb = 1024 ** 2
+        self.data.update({
+            'freeRamMb': memstats.available / b_to_mb,
+            'totalRamMb': memstats.total / b_to_mb,
+            'freeSwapMb': swapstats.free / b_to_mb,
+            'totalSwapMb': swapstats.total / b_to_mb,
+        })
 
     def update(self):
         """
