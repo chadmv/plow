@@ -530,7 +530,7 @@ class _ProcessThread(threading.Thread):
             root_pid = self.__pid
             p = psutil.Process(root_pid)
 
-            for proc in chain([p], p.get_children(True)):
+            for proc in chain([p], p.children(True)):
 
                 this_pid = proc.pid
 
@@ -538,18 +538,18 @@ class _ProcessThread(threading.Thread):
                     continue
 
                 try:
-                    rss_bytes += proc.get_memory_info().rss
+                    rss_bytes += proc.memory_info().rss
                 except psutil.Error, e:
                     logger.debug("Error while getting memory data for pid %r: %s", this_pid, e)
 
                 try:
-                    cpu_perc += proc.get_cpu_percent(None) 
+                    cpu_perc += proc.cpu_percent(None)
                 except psutil.Error, e:
                     logger.debug("Error while getting cpu data for pid %r: %s", this_pid, e)
 
                 if do_disk_io:
                     try:
-                        counters = proc.get_io_counters()
+                        counters = proc.io_counters()
                     except psutil.Error, e:
                         logger.debug("Error while getting disk io data for pid %r: %s", this_pid, e)
 

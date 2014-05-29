@@ -34,16 +34,21 @@ class SystemProfiler(PosixSystemProfiler):
     def __init__(self):
         super(SystemProfiler, self).__init__()
 
-        self.hyperthread_factor = max(self.logicalCpus // self.physicalCpus, 1)
+        #self.data.update(dict([(field[0],
+        #        getattr(f, field[0])) for field in sysinfo_t._fields_]))
+        #self.hyperthread_factor = max(self.logicalCpus // self.physicalCpus, 1)
 
     def __repr__(self):
         return "<%s: OSX>" % self.__class__.__name__
 
-    def _update(self):
+
+    def _init_cpu_info(self):
+        """Init CPU stats that don't change over time"""
+        super(SystemProfiler, self)._init_cpu_info()
         f = sysinfo_t()
         memstat.foo(ctypes.byref(f))
-        self.data.update(dict([(field[0], 
-            getattr(f, field[0])) for field in sysinfo_t._fields_]))
+        self.data['cpuModel'] = getattr(f, 'cpuModel')
+
 
     def getSubprocessOpts(self, cmd, **kwargs):
         """
