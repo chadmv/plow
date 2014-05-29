@@ -552,9 +552,9 @@ class _ProcessThread(threading.Thread):
                         counters = proc.io_counters()
                     except psutil.Error, e:
                         logger.debug("Error while getting disk io data for pid %r: %s", this_pid, e)
-
-                    for i, val in enumerate(counters):
-                        disk_io[i] += val
+                    else:
+                        for i, val in enumerate(counters):
+                            disk_io[i] += val
 
         except psutil.NoSuchProcess, e:
             return
